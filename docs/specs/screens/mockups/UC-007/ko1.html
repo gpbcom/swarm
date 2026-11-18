@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <title>UC-007 KO1: Payload or Battery refused</title>
+  <link rel="stylesheet" href="../visual-identity.css">
+  <link rel="stylesheet" href="../components.css">
+</head>
+<body>
+<div class="window">
+  <header class="titlebar"><span class="app">⚙️ Swarm</span><span class="screen-title">Back office · Aerowing Services</span><span class="spacer"></span><span class="badge persona">👤 Noah Weber · Fleet maintainer</span></header>
+  <div class="layout">
+    <nav class="sidebar">
+      <span class="nav-item active">🛸 Fleet</span>
+      <span class="nav-item">📜 Authorisations</span>
+      <span class="nav-item">📦 Deliverables</span>
+      <span class="nav-item">🔏 Evidence</span>
+      <span class="nav-item">👥 People</span>
+      <span class="nav-item">🔧 Settings</span>
+    </nav>
+    <main class="content">
+      <div class="tabs"><span class="tab">1 · Drone</span><span class="tab active">2 · Payloads and Batteries</span><span class="tab">3 · Readiness</span></div>
+      <div class="banner failure">❌ 2 items refused: a Payload that does not fit Matrice 4TD and a Battery below the health threshold.</div>
+      <div class="row"><h1>🛸 Foxtrot · AW-006</h1><span class="badge entity">🗃️ Matrice 4TD (DJI)</span></div>
+
+      <div class="grid-2">
+        <section class="card stack">
+          <h2>🗃️ Payloads of Foxtrot</h2>
+          <table class="table">
+            <tr><th>Payload</th><th>Fits Drone models</th><th>Check</th></tr>
+            <tr><td>Thermal camera TC-02</td><td>Matrice 4TD</td><td><span class="badge success">✅ Fits</span></td></tr>
+            <tr><td>Zoom camera ZC-01</td><td>Matrice 4TD</td><td><span class="badge success">✅ Fits</span></td></tr>
+            <tr><td>Sprayer tank ST-04<div class="error">Fits X500 only: choose another Payload.</div></td><td>X500</td><td><span class="badge failure">❌ Does not fit</span></td></tr>
+          </table>
+          <div class="row"><span class="button secondary">➕ Add a Payload</span></div>
+        </section>
+        <section class="card stack">
+          <h2>🗃️ Batteries of Foxtrot</h2>
+          <table class="table">
+            <tr><th>Battery</th><th>Health</th><th>Cycles</th><th>Check</th></tr>
+            <tr><td class="mono">BAT-031</td><td>96 %</td><td>12</td><td><span class="badge success">✅ Above threshold</span></td></tr>
+            <tr><td class="mono">BAT-032</td><td>94 %</td><td>15</td><td><span class="badge success">✅ Above threshold</span></td></tr>
+            <tr><td><span class="mono">BAT-044</span><div class="error">Choose another Battery.</div></td><td>61 %</td><td>412</td><td><span class="badge failure">❌ Below threshold</span></td></tr>
+          </table>
+          <span class="hint">Health threshold: set by the Drone model Matrice 4TD.</span>
+          <div class="row"><span class="button secondary">➕ Add a Battery</span></div>
+        </section>
+      </div>
+      <div class="row"><span class="spacer"></span><span class="button secondary">◀️ Back</span><span class="button primary">Save the Drone</span></div>
+    </main>
+  </div>
+  <footer class="statusbar"><span>🗃️ Aerowing Services</span><span>Cloud</span></footer>
+</div>
+
+</body>
+</html>

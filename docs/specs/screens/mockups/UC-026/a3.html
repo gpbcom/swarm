@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <title>UC-026 A3: Change the Alert threshold</title>
+  <link rel="stylesheet" href="../visual-identity.css">
+  <link rel="stylesheet" href="../components.css">
+</head>
+<body>
+<div class="window">
+  <header class="titlebar"><span class="app">⚙️ Swarm</span><span class="screen-title">Ground control · M-2026-0412 Inspection of Les Vignes</span><span class="badge success">🔄 Mission: Flying</span><span class="spacer"></span><span class="button secondary">✋ Hold the Squad</span><span class="button danger">🛑 Abort</span></header>
+  <div class="layout">
+    <nav class="sidebar">
+      <span class="nav-item active">🛰️ Flight</span>
+      <span class="nav-item">📋 Pre-flight</span>
+      <span class="nav-item">🛸 Squad</span>
+      <span class="nav-item">🎥 Video</span>
+      <span class="nav-item">📼 Debrief</span>
+      <span class="nav-item">🔧 Settings</span>
+    </nav>
+    <main class="content">
+      <div class="banner decision">⚠️ Alert: Charlie's battery is at 30&nbsp;%, your low battery warning.</div>
+      <div class="split">
+        <div class="map">
+          <div class="zone geofence c1 r1 w12 h8"></div>
+          <div class="zone done c2 r2 w5 h3"></div>
+          <div class="zone c7 r2 w5 h3"></div>
+          <div class="zone c2 r5 w5 h3"></div>
+          <div class="zone c7 r5 w5 h3"></div>
+          <span class="marker entity c4 r3">🛸 Alpha</span>
+          <span class="marker entity c9 r3">🛸 Bravo</span>
+          <span class="marker decision c3 r6 w3">⚠️ Charlie 30&nbsp;%</span>
+          <span class="marker entity c9 r6">🛸 Delta</span>
+          <span class="marker persona c1 r8">👤 Pilot</span>
+        </div>
+        <aside class="panel">
+        <section class="card">
+          <h2>⚠️ Alert · 💬 Co-pilot</h2>
+          <div class="conversation">
+            <div class="message agent">💬 Charlie's Battery drains faster than planned: with 30&nbsp;% left and 3 rows to fly, it will not last until the end of its area. I propose: Return home now, then a Re-plan so that Alpha, Bravo and Delta share its 3 rows. Or Hold Charlie.</div>
+          </div>
+          <div class="row"><span class="button primary">Return home Charlie</span><span class="button secondary">✋ Hold Charlie</span><span class="button secondary">Change the threshold</span></div>
+        </section>
+        </aside>
+      </div>
+      <div class="grid-2">
+        <section class="card">
+          <div class="row">🎥 Live thermal video · Charlie</div>
+          <span class="hint">Thermal camera · Matrice 4TD AW-003</span>
+        </section>
+        <section class="card">
+          <h2>📈 Progress against the plan</h2>
+          <div class="row"><span>Area covered</span><span class="spacer"></span><span class="mono">50&nbsp;%</span></div>
+          <div class="progress success"><span class="p50"></span></div>
+          <span class="muted">Charlie: 3 rows of its area left</span>
+        </section>
+      </div>
+      <div class="overlay"></div>
+      <div class="dialog">
+        <h2>Change the Alert threshold</h2>
+        <div class="row"><span class="badge entity">🗃️ Operator: Aerowing Services</span><span class="muted">sets the limits of every Alert threshold</span></div>
+        <div class="field"><label>Low battery warning, now 30&nbsp;%</label><div class="input">35&nbsp;%</div><span class="hint">Aerowing Services allows 25&nbsp;% to 40&nbsp;%, default 30&nbsp;%. The change is recorded in the Flight log.</span></div>
+        <span class="hint">A threshold can never be less safe than the limits of the Drone models in use: X500 and Matrice 4TD.</span>
+        <div class="row"><span class="spacer"></span><span class="button secondary">Cancel</span><span class="button primary">Save</span></div>
+      </div>
+    </main>
+  </div>
+  <footer class="statusbar"><span>📡 Links: 4 radio, quality Good</span><span>EU (EASA)</span><span>👤 Sam Carter</span><span class="badge persona">🔄 Pilot: Supervising</span><span class="spacer"></span><span class="mono">2026-12-03 10:36</span></footer>
+</div>
+</body>
+</html>

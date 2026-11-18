@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <title>UC-008 A2: Warn before the end date</title>
+  <link rel="stylesheet" href="../visual-identity.css">
+  <link rel="stylesheet" href="../components.css">
+</head>
+<body>
+<div class="window">
+  <header class="titlebar"><span class="app">⚙️ Swarm</span><span class="screen-title">Back office · Aerowing Services</span><span class="spacer"></span><span class="badge persona">👤 Léa Martin · Mission planner</span></header>
+  <div class="layout">
+    <nav class="sidebar">
+      <span class="nav-item">🛸 Fleet</span>
+      <span class="nav-item active">📜 Authorisations</span>
+      <span class="nav-item">📦 Deliverables</span>
+      <span class="nav-item">🔏 Evidence</span>
+      <span class="nav-item">👥 People</span>
+      <span class="nav-item">🔧 Settings</span>
+    </nav>
+    <main class="content">
+      <div class="banner decision">⚠️ AW-EU-2025-11 (Agriculture) ends on 2026-11-30, in 7 days. Second warning, after the one 30 days before. Record its renewal to keep its Missions flying.</div>
+      <h1>📜 Authorisations</h1>
+      <section class="card">
+        <table class="table">
+          <tr><th>Reference</th><th>Jurisdiction</th><th>Activities</th><th>Altitude ceiling</th><th>Pilot ratio</th><th>BVLOS</th><th>Valid to</th><th>State</th></tr>
+          <tr><td class="mono">AW-EU-2026-02</td><td>EU (EASA)</td><td>Inspection, Patrol, Light show</td><td>120 m</td><td>5</td><td>Yes</td><td class="mono">2027-03-31</td><td><span class="badge success">🔄 Authorisation: Valid</span></td></tr>
+          <tr><td class="mono">AW-EU-2025-11</td><td>EU (EASA)</td><td>Agriculture</td><td>120 m</td><td>3</td><td>No</td><td><span class="mono">2026-11-30</span><div class="error">Ends in 7 days</div></td><td><span class="badge success">🔄 Authorisation: Valid</span></td></tr>
+        </table>
+      </section>
+      <section class="card stack">
+        <h2>🗃️ Missions under AW-EU-2025-11 after its end date</h2>
+        <div class="list">
+          <div class="list-item">M-2026-0413 Spraying of North field<span class="muted">2026-12-03 · Agriculture</span><span class="spacer"></span><span class="badge decision">⚠️ Needs a renewal</span></div>
+        </div>
+        <div class="row"><span class="button primary">➕ Record the renewal</span><span class="button secondary">Remind me later</span></div>
+      </section>
+    </main>
+  </div>
+  <footer class="statusbar"><span>🗃️ Aerowing Services</span><span>Cloud</span></footer>
+</div>
+
+</body>
+</html>

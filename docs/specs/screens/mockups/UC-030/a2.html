@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <title>UC-030 A2: Queue the next event</title>
+  <link rel="stylesheet" href="../visual-identity.css">
+  <link rel="stylesheet" href="../components.css">
+</head>
+<body>
+<div class="window">
+  <header class="titlebar"><span class="app">⚙️ Swarm</span><span class="screen-title">Ground control · M-2026-0412 Inspection of Les Vignes</span><span class="badge success">🔄 Mission: Flying</span><span class="spacer"></span><span class="button secondary">✋ Hold the Squad</span><span class="button danger">🛑 Abort</span></header>
+  <div class="layout">
+    <nav class="sidebar">
+      <span class="nav-item active">🛰️ Flight</span>
+      <span class="nav-item">📋 Pre-flight</span>
+      <span class="nav-item">🛸 Squad</span>
+      <span class="nav-item">🎥 Video</span>
+      <span class="nav-item">📼 Debrief</span>
+      <span class="nav-item">🔧 Settings</span>
+    </nav>
+    <main class="content">
+      <div class="split">
+        <section class="card">
+          <div class="row"><h2>🎥 Focus view · Charlie</h2><span class="spacer"></span><span class="badge decision">🔔 1 queued: Bravo, person</span><span class="button secondary">Back to the Flight view</span></div>
+          <div class="empty">🎥 Thermal video of Charlie, full size<span class="badge decision">⚠️ Hot spot, severity Warning</span><span class="hint">Matrice 4TD AW-003 · 64&nbsp;% · Link Good · 40 m · Thermal camera</span></div>
+        </section>
+        <div class="map">
+          <div class="zone geofence c1 r1 w12 h8"></div>
+          <div class="zone done c2 r2 w5 h3"></div>
+          <div class="zone c7 r2 w5 h3"></div>
+          <div class="zone c2 r5 w5 h3"></div>
+          <div class="zone c7 r5 w5 h3"></div>
+          <span class="marker entity c2 r3 w4">🛸 Alpha</span>
+          <span class="marker entity c7 r3 w4">🛸 Bravo</span>
+          <span class="marker persona c2 r6 w4">🛸 Charlie</span>
+          <span class="marker entity c7 r6 w4">🛸 Delta</span>
+        </div>
+      </div>
+      <div class="grid-2">
+        <section class="card">
+          <table class="table">
+            <tr><th>Drone</th><th>State</th><th>Battery · Link · altitude · Payload</th></tr>
+            <tr><td>🛸 Alpha</td><td><span class="badge success">🔄 Drone: Airborne</span></td><td class="hint">72&nbsp;% · Link Good · 40 m · RGB</td></tr>
+            <tr><td>🛸 Bravo</td><td><span class="badge success">🔄 Drone: Airborne</span></td><td class="hint">70&nbsp;% · Link Good · 40 m · RGB</td></tr>
+            <tr><td>🛸 Charlie</td><td><span class="badge success">🔄 Drone: Airborne</span></td><td class="hint">64&nbsp;% · Link Good · 40 m · Thermal</td></tr>
+            <tr><td>🛸 Delta</td><td><span class="badge success">🔄 Drone: Airborne</span></td><td class="hint">66&nbsp;% · Link Good · 40 m · Thermal</td></tr>
+          </table>
+        </section>
+        <section class="card">
+          <h2>⚠️ Alerts and 💬 Co-pilot</h2>
+          <div class="list">
+            <div class="list-item"><span class="badge decision">⚠️</span>Charlie: hot spot, severity Warning</div>
+            <div class="list-item"><span class="badge failure">🔔</span>Bravo: person, severity Critical, queued</div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <footer class="statusbar"><span>📡 Links: 4 radio, quality Good</span><span>EU (EASA)</span><span>👤 Sam Carter</span><span class="badge persona">🔄 Pilot: Supervising</span><span class="spacer"></span><span class="mono">2026-12-03 10:32</span></footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <title>UC-013 KO: Command to a real Drone refused</title>
+  <link rel="stylesheet" href="../visual-identity.css">
+  <link rel="stylesheet" href="../components.css">
+</head>
+<body>
+<div class="window">
+  <header class="titlebar"><span class="app">⚙️ Swarm</span><span class="screen-title">Ground control · M-2026-0412 Inspection of Les Vignes</span><span class="badge success">✅ Mission: Flying</span><span class="badge system">🕹️ Simulator</span><span class="badge persona">👤 Instructor connected</span><span class="spacer"></span><span class="button secondary">✋ Hold the Squad</span><span class="button danger">🛑 Abort</span></header>
+  <div class="layout">
+    <nav class="sidebar">
+      <span class="nav-item active">🛰️ Flight</span>
+      <span class="nav-item">📋 Pre-flight</span>
+      <span class="nav-item">🛸 Squad</span>
+      <span class="nav-item">🎥 Video</span>
+      <span class="nav-item">📼 Debrief</span>
+      <span class="nav-item">🔧 Settings</span>
+    </nav>
+    <main class="content">
+      <div class="banner system">🕹️ Simulator: no real Drone receives commands</div>
+      <div class="banner failure">❌ Refused: a command of this session was addressed to the real Drone Alpha (AW-001). No real Drone received it.</div>
+      <div class="split">
+        <div class="map">
+          <div class="zone geofence c1 r1 w12 h8"></div>
+          <div class="zone done c2 r2 w4 h3"></div>
+          <div class="zone c6 r2 w5 h3"></div>
+          <div class="zone c2 r5 w4 h3"></div>
+          <div class="zone c6 r5 w5 h3"></div>
+          <span class="marker persona c1 r8">👤 Pilot</span>
+          <span class="marker entity c4 r3">🛸 Alpha</span>
+          <span class="marker entity c8 r3">🛸 Bravo</span>
+          <span class="marker entity c4 r6">🛸 Charlie</span>
+          <span class="marker entity c9 r6">🛸 Delta</span>
+        </div>
+        <aside class="panel card">
+          <h2>🗃️ Flight log</h2>
+          <span class="badge system">🕹️ Simulated</span>
+          <div class="list">
+            <div class="list-item"><span class="mono">10:05</span>Return home: Alpha<span class="spacer"></span><span class="badge failure">❌ Refused</span></div>
+            <div class="list-item"><span class="muted">Addressed to the real Drone AW-001 of the Fleet, not to the simulated Alpha.</span></div>
+            <div class="list-item"><span class="mono">10:05</span>Recorded by Swarm<span class="spacer"></span><span class="badge success">✅ Logged</span></div>
+          </div>
+          <span class="badge persona">🔄 Pilot: Supervising</span>
+          <span class="muted">The session goes on. The real Alpha stays on the ground.</span>
+        </aside>
+      </div>
+    </main>
+  </div>
+  <footer class="statusbar"><span>📡 Links: 4 simulated</span><span>EU (EASA)</span><span>👤 Sam Carter</span><span class="spacer"></span><span class="mono">2026-12-03 10:05</span></footer>
+</div>
+</body>
+</html>

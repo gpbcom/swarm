@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <title>UC-002 KO: Conflict found, Mission sent back to Draft</title>
+  <link rel="stylesheet" href="../visual-identity.css">
+  <link rel="stylesheet" href="../components.css">
+</head>
+<body>
+<div class="window">
+  <header class="titlebar"><span class="app">⚙️ Swarm</span><span class="screen-title">Mission studio · M-2026-0412 Inspection of Les Vignes</span><span class="badge action">🔄 Mission: Draft</span><span class="spacer"></span><span class="badge persona">👤 Léa Martin</span></header>
+  <div class="layout">
+    <nav class="sidebar">
+      <span class="nav-item">🗺️ Missions</span>
+      <span class="nav-item">🖊️ Design</span>
+      <span class="nav-item active">🕹️ Simulate</span>
+      <span class="nav-item">💬 Assistant</span>
+    </nav>
+    <main class="content">
+      <div class="banner failure">❌ Conflict at 10:14:20: Alpha and Bravo 2.1 m apart, under the Separation distance of 3 m (📏 BR-002). The Mission is back to Draft.</div>
+      <div class="split">
+        <div class="map">
+          <div class="zone geofence c2 r2 w10 h6"></div>
+          <div class="zone c3 r3 w4 h4"></div>
+          <div class="zone c8 r3 w3 h4"></div>
+          <div class="zone risk c6 r3 w3 h3"></div>
+          <span class="marker failure c6 r4">❌ 🛸 Alpha</span>
+          <span class="marker failure c8 r4">❌ 🛸 Bravo</span>
+          <span class="marker entity c11 r7">🛸 Charlie</span>
+        </div>
+        <aside class="panel card">
+          <h2>Conflicts</h2>
+          <table class="table">
+            <tr><th>Time</th><th>Drones</th><th>Distance</th></tr>
+            <tr><td class="mono">10:14:20</td><td>🛸 Alpha, 🛸 Bravo</td><td class="mono">2.1 m</td></tr>
+          </table>
+          <div class="checklist">
+            <span class="check ok">✅ Coverage 100 %</span>
+            <span class="check ok">✅ Lowest battery at landing 31 %</span>
+            <span class="check fail">❌ Separation distance of 3 m not kept</span>
+          </div>
+          <div class="row"><span class="button primary">🖊️ Change the routes in Design</span></div>
+        </aside>
+      </div>
+    </main>
+  </div>
+  <footer class="statusbar"><span>❌ 1 conflict</span><span>📜 Authorisation EU (EASA), Inspection and BVLOS, Valid to 2027-06-30</span><span>Saved 10:49</span></footer>
+  <div class="toast failure">❌ Sent back to Draft by Léa Martin.</div>
+</div>
+</body>
+</html>

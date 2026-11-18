@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <title>UC-023 KO2: Fixed input refused</title>
+  <link rel="stylesheet" href="../visual-identity.css">
+  <link rel="stylesheet" href="../components.css">
+</head>
+<body>
+<div class="window">
+  <header class="titlebar"><span class="app">⚙️ Swarm</span><span class="screen-title">Ground control · M-2026-0412 Inspection of Les Vignes</span><span class="badge action">🔄 Mission: Planned</span><span class="spacer"></span><span class="button secondary">✋ Hold the Squad</span><span class="button danger">🛑 Abort</span></header>
+  <div class="layout">
+    <nav class="sidebar">
+      <span class="nav-item">🛰️ Flight</span>
+      <span class="nav-item">📋 Pre-flight</span>
+      <span class="nav-item">🛸 Squad</span>
+      <span class="nav-item">🎥 Video</span>
+      <span class="nav-item">📼 Debrief</span>
+      <span class="nav-item active">🔧 Settings</span>
+    </nav>
+    <main class="content">
+      <h1>🔧 Settings of Sam Carter</h1>
+      <div class="tabs"><span class="tab">Workspace</span><span class="tab">Alert thresholds</span><span class="tab">Units, language and mode</span><span class="tab active">🎮 Control mapping</span></div>
+      <div class="banner failure">❌ Refused: Back + Start is the fixed input of Abort. It cannot be given to another command.</div>
+      <section class="card stack">
+        <div class="row"><span class="muted">Device</span><span class="button primary">Gamepad (XInput)</span><span class="button secondary">Joystick (USB)</span><span class="button secondary">Keyboard</span><span class="button secondary">On-screen commands</span></div>
+        <table class="table">
+          <tr><th>Command</th><th>Gamepad</th><th>Keyboard</th><th>Change</th></tr>
+          <tr><td>✋ Hold the Squad</td><td>🔒 Both bumpers, held 1 s</td><td class="mono">🔒 H, held 1 s</td><td><span class="badge decision">🔒 Fixed</span></td></tr>
+          <tr><td>🛑 Abort</td><td><span class="input invalid">Back + Start → 🎥 Show video?</span></td><td class="mono">🔒 Ctrl+Shift+A, held 1 s</td><td><span class="badge failure">❌ Refused</span></td></tr>
+          <tr><td>🎮 Take manual control</td><td>Button Y</td><td class="mono">M</td><td><span class="badge action">Change</span></td></tr>
+          <tr><td>✅ Approve the Re-plan</td><td>Button A</td><td class="mono">Enter</td><td><span class="badge action">Change</span></td></tr>
+          <tr><td>🛸 Next Drone</td><td>Right bumper</td><td class="mono">Tab</td><td><span class="badge action">Change</span></td></tr>
+          <tr><td>🎥 Show video</td><td>Button X</td><td class="mono">V</td><td><span class="badge action">Change</span></td></tr>
+        </table>
+        <span class="hint">Hold the Squad and Abort keep their fixed inputs on every platform and with every device, and act when held for 1 second.</span>
+      </section>
+    </main>
+  </div>
+  <footer class="statusbar"><span>📡 Links: no Drone connected</span><span>EU (EASA)</span><span>👤 Sam Carter</span><span class="spacer"></span><span class="mono">2026-12-03 09:13</span></footer>
+</div>
+</body>
+</html>

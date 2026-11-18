@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <title>Visual identity: component sheet</title>
+  <link rel="stylesheet" href="../visual-identity.css">
+  <link rel="stylesheet" href="../components.css">
+</head>
+<body>
+<div class="window">
+  <header class="titlebar"><span class="app">⚙️ Swarm</span><span class="screen-title">Component sheet</span></header>
+  <div class="layout">
+    <nav class="sidebar">
+      <span class="nav-item active">🧩 Components</span>
+      <span class="nav-item">🌈 Colours</span>
+      <span class="nav-item">🔠 Typography</span>
+    </nav>
+    <main class="content">
+      <h1>🎨 Visual identity</h1>
+      <div class="grid-2">
+        <section class="card stack">
+          <h2>Buttons</h2>
+          <div class="row">
+            <span class="button primary">▶️ Primary action</span>
+            <span class="button secondary">Secondary</span>
+            <span class="button danger">🛑 Destructive</span>
+          </div>
+          <h2>Badges</h2>
+          <div class="row">
+            <span class="badge persona">👤 Persona</span>
+            <span class="badge entity">🗃️ Entity</span>
+            <span class="badge system">⚙️ System</span>
+          </div>
+          <div class="row">
+            <span class="badge action">⏳ In progress</span>
+            <span class="badge decision">⚠️ Warning</span>
+            <span class="badge success">✅ Done</span>
+            <span class="badge failure">❌ Failed</span>
+          </div>
+        </section>
+        <section class="card stack">
+          <h2>Fields</h2>
+          <div class="field">
+            <label>Name</label>
+            <span class="input">Alpha</span>
+            <span class="hint">Between 3 and 30 characters.</span>
+          </div>
+          <div class="field">
+            <label>Altitude</label>
+            <span class="input invalid mono">9000 m</span>
+            <span class="error">❌ Must be at most 120 m.</span>
+          </div>
+        </section>
+      </div>
+      <section class="card">
+        <h2>Table</h2>
+        <table class="table">
+          <tr><th>Name</th><th>Kind</th><th>State</th></tr>
+          <tr><td>Alpha</td><td><span class="badge entity">🗃️ Entity</span></td><td><span class="badge success">✅ Done</span></td></tr>
+          <tr><td>Bravo</td><td><span class="badge entity">🗃️ Entity</span></td><td><span class="badge action">⏳ In progress</span></td></tr>
+        </table>
+      </section>
+    </main>
+  </div>
+  <footer class="statusbar"><span>✅ Ready</span><span class="spacer"></span><span class="mono">1280 x 800</span></footer>
+  <div class="toast success">✅ Saved.</div>
+</div>
+</body>
+</html>

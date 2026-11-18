@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <title>%GROUP% %TITLE%</title>
+  <link rel="stylesheet" href="../visual-identity.css">
+  <link rel="stylesheet" href="../components.css">
+</head>
+<body>
+<!-- Mock-up of %GROUP%, state %TITLE%.
+     Draw what the persona sees in this state with the classes of components.css only (no style attribute).
+     Use glossary names and the same fictional sample data as the other screens of %GROUP%.
+     Then run: python3 .claude/skills/write-specs/scripts/specs.py render %GROUP% -->
+<div class="window">
+  <header class="titlebar"><span class="app">⚙️ Swarm</span><span class="screen-title">{{Screen title}}</span></header>
+  <div class="layout">
+    <nav class="sidebar">
+      <span class="nav-item active">{{Current section}}</span>
+    </nav>
+    <main class="content">
+      <h1>{{Screen title}}</h1>
+      <section class="card">
+        <p>{{What the persona sees in this state.}}</p>
+      </section>
+    </main>
+  </div>
+  <footer class="statusbar"><span>{{Status}}</span></footer>
+</div>
+</body>
+</html>

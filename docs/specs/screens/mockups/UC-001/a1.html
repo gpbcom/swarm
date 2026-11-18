@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <title>UC-001 A1: Draw the Geofence and pick the Activity</title>
+  <link rel="stylesheet" href="../visual-identity.css">
+  <link rel="stylesheet" href="../components.css">
+</head>
+<body>
+<div class="window">
+  <header class="titlebar"><span class="app">⚙️ Swarm</span><span class="screen-title">Mission studio · M-2026-0412 Inspection of Les Vignes</span><span class="badge action">🔄 Mission: Draft</span><span class="spacer"></span><span class="badge persona">👤 Léa Martin</span></header>
+  <div class="layout">
+    <nav class="sidebar">
+      <span class="nav-item">🗺️ Missions</span>
+      <span class="nav-item active">🖊️ Design</span>
+      <span class="nav-item">🕹️ Simulate</span>
+      <span class="nav-item">💬 Assistant</span>
+    </nav>
+    <main class="content">
+      <div class="split">
+        <div class="map">
+          <div class="zone geofence c2 r2 w10 h6"></div>
+          <div class="zone c3 r3 w4 h4"></div>
+          <div class="zone c8 r3 w3 h4"></div>
+          <span class="marker entity c2 r2">🗃️ Geofence</span>
+          <span class="marker action c4 r4">Panel rows West</span>
+          <span class="marker action c9 r4">Panel rows East</span>
+          <span class="marker action c11 r7">Inverters</span>
+          <span class="marker action c4 r8 w6">Map: OpenStreetMap, cached for use without network</span>
+        </div>
+        <aside class="panel card">
+          <h2>🗃️ Geofence</h2>
+          <div class="field"><label>Site</label><span class="input">Les Vignes solar farm</span></div>
+          <div class="field"><label>Area</label><span class="input">6 points, inside the Authorisation</span></div>
+          <div class="field"><label>Altitude ceiling</label><span class="input mono">120 m</span><span class="hint">Set by the Authorisation.</span></div>
+          <span class="badge success">🔄 Authorisation: Valid</span>
+          <h2>🔤 Activity</h2>
+          <div class="field"><label>Activity</label><span class="input">Inspection</span><span class="hint">Light show, Agriculture, Patrol or Inspection.</span></div>
+          <div class="field"><label>Autonomy level</label><span class="input">Supervised autonomy</span><span class="hint">Set by the Activity (📏 BR-005).</span></div>
+          <div class="row"><span class="button primary">Next: build the Squad</span></div>
+        </aside>
+      </div>
+    </main>
+  </div>
+  <footer class="statusbar"><span>⏳ Rules not checked yet</span><span>📜 Authorisation EU (EASA), Inspection and BVLOS, Valid to 2027-06-30</span><span>Saved 10:02</span></footer>
+</div>
+</body>
+</html>

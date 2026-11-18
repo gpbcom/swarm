@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <title>UC-023 KO1: Alert threshold refused</title>
+  <link rel="stylesheet" href="../visual-identity.css">
+  <link rel="stylesheet" href="../components.css">
+</head>
+<body>
+<div class="window">
+  <header class="titlebar"><span class="app">⚙️ Swarm</span><span class="screen-title">Ground control · M-2026-0412 Inspection of Les Vignes</span><span class="badge action">🔄 Mission: Planned</span><span class="spacer"></span><span class="button secondary">✋ Hold the Squad</span><span class="button danger">🛑 Abort</span></header>
+  <div class="layout">
+    <nav class="sidebar">
+      <span class="nav-item">🛰️ Flight</span>
+      <span class="nav-item">📋 Pre-flight</span>
+      <span class="nav-item">🛸 Squad</span>
+      <span class="nav-item">🎥 Video</span>
+      <span class="nav-item">📼 Debrief</span>
+      <span class="nav-item active">🔧 Settings</span>
+    </nav>
+    <main class="content">
+      <h1>🔧 Settings of Sam Carter</h1>
+      <div class="tabs"><span class="tab">Workspace</span><span class="tab active">Alert thresholds</span><span class="tab">Units, language and mode</span><span class="tab">🎮 Control mapping</span></div>
+      <section class="card stack">
+        <h2>⚠️ Alert thresholds</h2>
+        <div class="grid-2">
+          <div class="field"><label>Low battery</label><span class="input invalid mono">15 %</span><span class="error">❌ Refused: below the Operator limit. Choose between 25 % and 40 %.</span></div>
+          <div class="field"><label>Link quality</label><span class="input mono">50 %</span><span class="hint">Operator limits: 30 % to 70 % · default 50 %</span></div>
+          <div class="field"><label>Wind</label><span class="input mono">80 % of the Drone model limit</span><span class="hint">Operator limits: 60 % to 90 % · default 80 %</span></div>
+          <div class="field"><label>Limits set by</label><span class="input">🗃️ Operator: Aerowing Services</span><span class="hint">An Alert threshold never goes beyond the limits of the Drone models in use.</span></div>
+        </div>
+      </section>
+      <div class="row"><span class="button primary">Save the Workspace</span><span class="button secondary">Cancel</span></div>
+    </main>
+  </div>
+  <footer class="statusbar"><span>📡 Links: no Drone connected</span><span>EU (EASA)</span><span>👤 Sam Carter</span><span class="spacer"></span><span class="mono">2026-12-03 09:11</span></footer>
+  <div class="toast failure">❌ Alert threshold refused: 15 % is below the Operator limit of 25 %.</div>
+</div>
+</body>
+</html>

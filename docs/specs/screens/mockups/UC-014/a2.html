@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <title>UC-014 A2: Run the test in the Simulator</title>
+  <link rel="stylesheet" href="../visual-identity.css">
+  <link rel="stylesheet" href="../components.css">
+</head>
+<body>
+<div class="window">
+  <header class="titlebar"><span class="app">⚙️ Swarm</span><span class="screen-title">Back office · Aerowing Services</span><span class="spacer"></span><span class="badge persona">👤 Noah Weber · Fleet maintainer</span></header>
+  <div class="layout">
+    <nav class="sidebar">
+      <span class="nav-item active">🛸 Fleet</span>
+      <span class="nav-item">📜 Authorisations</span>
+      <span class="nav-item">📦 Deliverables</span>
+      <span class="nav-item">🔏 Evidence</span>
+      <span class="nav-item">👥 People</span>
+      <span class="nav-item">🔧 Settings</span>
+    </nav>
+    <main class="content">
+      <div class="tabs"><span class="tab">🛸 Drones</span><span class="tab active">Drone models</span><span class="tab">Payloads</span><span class="tab">Batteries</span></div>
+      <div class="banner system">⚙️ Simulator: a virtual ANAFI USA flies with its real flight software, and the Parrot Drone adapter checks each command.</div>
+      <div class="row"><h1>Compatibility test · ANAFI USA</h1><span class="badge failure">🔄 Drone model: Not approved</span></div>
+      <div class="split">
+        <div class="map">
+          <div class="zone geofence c2 r1 w10 h8"></div>
+          <div class="zone done c3 r2 w6 h2"></div>
+          <span class="marker system c7 r3">⚙️ Virtual ANAFI USA</span>
+          <span class="marker action c3 r7">Take-off point</span>
+        </div>
+        <aside class="panel card">
+          <h2>Stages</h2>
+          <div class="list">
+            <div class="list-item">1 · ⚙️ Simulator<span class="spacer"></span><span class="badge action">⏳ Running</span></div>
+            <div class="list-item">2 · Real flight, test area<span class="spacer"></span><span class="badge action">⏳ Waiting</span></div>
+          </div>
+          <h2>Steps in the Simulator</h2>
+          <div class="checklist">
+            <div class="check ok">✅ Take off</div>
+            <div class="check ok">✅ Follow a route</div>
+            <div class="check ok">✅ Hold</div>
+            <div class="check pending">⏳ Return home</div>
+            <div class="check pending">⏳ Land</div>
+            <div class="check pending">⏳ Stay inside the Geofence</div>
+            <div class="check pending">⏳ Payload control</div>
+          </div>
+          <div class="progress"><span class="p40"></span></div>
+        </aside>
+      </div>
+    </main>
+  </div>
+  <footer class="statusbar"><span>🗃️ Aerowing Services</span><span>Cloud</span></footer>
+</div>
+
+</body>
+</html>

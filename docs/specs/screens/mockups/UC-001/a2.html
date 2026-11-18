@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <title>UC-001 A2: Build the Squad, a Payload and a task per Drone</title>
+  <link rel="stylesheet" href="../visual-identity.css">
+  <link rel="stylesheet" href="../components.css">
+</head>
+<body>
+<div class="window">
+  <header class="titlebar"><span class="app">⚙️ Swarm</span><span class="screen-title">Mission studio · M-2026-0412 Inspection of Les Vignes</span><span class="badge action">🔄 Mission: Draft</span><span class="spacer"></span><span class="badge persona">👤 Léa Martin</span></header>
+  <div class="layout">
+    <nav class="sidebar">
+      <span class="nav-item">🗺️ Missions</span>
+      <span class="nav-item active">🖊️ Design</span>
+      <span class="nav-item">🕹️ Simulate</span>
+      <span class="nav-item">💬 Assistant</span>
+    </nav>
+    <main class="content">
+      <h1>Build the Squad</h1>
+      <div class="kpis">
+        <div class="kpi"><div class="label">Drones in the Squad</div><div class="value">3</div></div>
+        <div class="kpi"><div class="label">Drone models</div><div class="value">3</div></div>
+        <div class="kpi"><div class="label">Tasks covered</div><div class="value">3 / 3</div></div>
+        <div class="kpi"><div class="label">Assignments refused</div><div class="value">0</div></div>
+      </div>
+      <div class="split">
+        <section class="card stack">
+          <h2>🗃️ Squad: a Drone model, a Payload and a task per Drone</h2>
+          <table class="table">
+            <tr><th>Drone</th><th>Drone model</th><th>Payload</th><th>Task</th><th>Check</th></tr>
+            <tr><td>🛸 Alpha</td><td>Matrice 4TD</td><td>Thermal camera</td><td>Thermal inspection of the panels</td><td><span class="badge success">✅ Fits</span></td></tr>
+            <tr><td>🛸 Bravo</td><td>X500</td><td>RGB camera</td><td>Orthomosaic of the Site</td><td><span class="badge success">✅ Fits</span></td></tr>
+            <tr><td>🛸 Charlie</td><td>ANAFI USA</td><td>Zoom camera</td><td>Close-ups of the inverters</td><td><span class="badge success">✅ Fits</span></td></tr>
+          </table>
+          <span class="hint">Each Payload is checked against its task, its Drone model and the weight limit (📏 BR-022).</span>
+        </section>
+        <aside class="panel card">
+          <h2>🛸 Drones of the Fleet</h2>
+          <div class="list">
+            <div class="list-item">🛸 Delta<span class="spacer"></span><span class="badge success">🔄 Drone: Ready</span></div>
+            <div class="list-item">🛸 Echo<span class="spacer"></span><span class="badge success">🔄 Drone: Ready</span></div>
+            <div class="list-item">🛸 Foxtrot<span class="spacer"></span><span class="badge failure">🔄 Drone: Grounded</span></div>
+          </div>
+          <span class="hint">Only Ready Drones can join the Squad.</span>
+          <div class="row"><span class="button primary">Next: plan the routes</span></div>
+        </aside>
+      </div>
+    </main>
+  </div>
+  <footer class="statusbar"><span>✅ No assignment refused</span><span>📜 Authorisation EU (EASA), Inspection and BVLOS, Valid to 2027-06-30</span><span>Saved 10:09</span></footer>
+</div>
+</body>
+</html>

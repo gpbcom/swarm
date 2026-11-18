@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <title>UC-018 A1: Receive the Alarm</title>
+  <link rel="stylesheet" href="../visual-identity.css">
+  <link rel="stylesheet" href="../components.css">
+</head>
+<body>
+<div class="window">
+  <header class="titlebar"><span class="app">⚙️ Swarm</span><span class="screen-title">Ground control · M-2026-0414 Night patrol of Northgate</span><span class="badge success">🔄 Mission: Flying</span><span class="spacer"></span><span class="button secondary">✋ Hold the Squad</span><span class="button danger">🛑 Abort</span></header>
+  <div class="layout">
+    <nav class="sidebar">
+      <span class="nav-item active">🛰️ Flight</span>
+      <span class="nav-item">📋 Pre-flight</span>
+      <span class="nav-item">🛸 Squad</span>
+      <span class="nav-item">🎥 Video</span>
+      <span class="nav-item">📼 Debrief</span>
+      <span class="nav-item">🔧 Settings</span>
+    </nav>
+    <main class="content">
+<div class="banner failure">🔔 Alarm: intrusion at gate 3, raised by the Site security system at 22:41.</div>
+      <div class="split">
+        <div class="map">
+          <div class="zone geofence c1 r1 w12 h8"></div>
+          <div class="zone c4 r3 w5 h3"></div>
+          <span class="marker entity c6 r4">🗃️ Northgate warehouse</span>
+          <span class="marker failure c11 r6">🔔 Gate 3</span>
+          <span class="marker entity c9 r8">🗃️ Dock 1</span>
+          <span class="marker entity c12 r8">🗃️ Dock 2</span>
+          <span class="marker entity c2 r2">🛸 Charlie</span>
+        </div>
+        <aside class="panel card">
+          <div class="row"><h2>🔔 Alarm at gate 3</h2><span class="spacer"></span><span class="badge failure">🔄 Alarm: Raised</span></div>
+          <span class="muted">Intrusion · raised at 22:41 · Northgate warehouse</span>
+          <h2>Nearest Drones in a Dock</h2>
+          <div class="list">
+            <div class="list-item">🛸 Delta · Dock 1<span class="spacer"></span><span class="badge success">🔄 Drone: Ready</span></div>
+            <div class="list-item">🛸 Echo · Dock 2<span class="spacer"></span><span class="badge success">🔄 Drone: Ready</span></div>
+            <div class="list-item muted">🛸 Charlie · Patrol route<span class="spacer"></span><span class="badge success">✅ Airborne</span></div>
+          </div>
+          <div class="row"><span class="badge system">⚙️ Launch on Alarm: on for Northgate warehouse</span></div>
+          <span class="muted">A Pilot is on duty: Delta and Echo take off by themselves towards gate 3.</span>
+        </aside>
+      </div>
+      <div class="kpis">
+        <div class="kpi"><div class="label">Drones airborne</div><div class="value">1 / 3</div></div>
+        <div class="kpi"><div class="label">Alarms raised</div><div class="value">1</div></div>
+        <div class="kpi"><div class="label">Patrol route</div><div class="value">Round 3</div></div>
+        <div class="kpi"><div class="label">Link quality</div><div class="value">Good</div></div>
+      </div>
+    </main>
+  </div>
+  <footer class="statusbar"><span>📡 Links: 1 radio</span><span>EU (EASA)</span><span>👤 Sam Carter</span><span class="spacer"></span><span class="mono">2026-12-03 22:41</span></footer>
+</div>
+</body>
+</html>

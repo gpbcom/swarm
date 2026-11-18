@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <title>UC-007 A3: Count flight hours and maintenance</title>
+  <link rel="stylesheet" href="../visual-identity.css">
+  <link rel="stylesheet" href="../components.css">
+</head>
+<body>
+<div class="window">
+  <header class="titlebar"><span class="app">⚙️ Swarm</span><span class="screen-title">Back office · Aerowing Services</span><span class="spacer"></span><span class="badge persona">👤 Noah Weber · Fleet maintainer</span></header>
+  <div class="layout">
+    <nav class="sidebar">
+      <span class="nav-item active">🛸 Fleet</span>
+      <span class="nav-item">📜 Authorisations</span>
+      <span class="nav-item">📦 Deliverables</span>
+      <span class="nav-item">🔏 Evidence</span>
+      <span class="nav-item">👥 People</span>
+      <span class="nav-item">🔧 Settings</span>
+    </nav>
+    <main class="content">
+      <h1>🛸 Fleet</h1>
+      <div class="banner system">⚙️ Flight hours and Battery cycles counted from the Flight logs. Last Flight log: M-2026-0412 Inspection of Les Vignes.</div>
+      <div class="kpis">
+        <div class="kpi"><div class="label">Drones</div><div class="value">6</div></div>
+        <div class="kpi"><div class="label">Ready</div><div class="value">3</div></div>
+        <div class="kpi"><div class="label">Grounded</div><div class="value">2</div></div>
+        <div class="kpi"><div class="label">Checking</div><div class="value">1</div></div>
+      </div>
+      <section class="card">
+        <table class="table">
+          <tr><th>Drone</th><th>Registration</th><th>Drone model</th><th>Flight hours</th><th>Next maintenance</th><th>Readiness</th></tr>
+          <tr><td>🛸 Alpha</td><td class="mono">AW-001</td><td>X500 (PX4)</td><td>182 h</td><td>In 12 flight hours</td><td><span class="badge success">🔄 Drone: Ready</span></td></tr>
+          <tr><td>🛸 Bravo</td><td class="mono">AW-002</td><td>X500 (PX4)</td><td>176 h</td><td>In 18 flight hours</td><td><span class="badge success">🔄 Drone: Ready</span></td></tr>
+          <tr><td>🛸 Charlie</td><td class="mono">AW-003</td><td>Matrice 4TD (DJI)</td><td>241 h</td><td class="error">Overdue by 2 flight hours</td><td><span class="badge failure">🔄 Drone: Grounded</span></td></tr>
+          <tr><td>🛸 Delta</td><td class="mono">AW-004</td><td>X10 (Skydio)</td><td>98 h</td><td>In 31 flight hours</td><td><span class="badge success">🔄 Drone: Ready</span></td></tr>
+          <tr><td>🛸 Echo</td><td class="mono">AW-005</td><td>ANAFI USA (Parrot)</td><td>0 h</td><td class="error">Drone model: Not approved</td><td><span class="badge failure">🔄 Drone: Grounded</span></td></tr>
+          <tr><td>🛸 Foxtrot</td><td class="mono">AW-006</td><td>Matrice 4TD (DJI)</td><td>0 h</td><td>⏳ Checking</td><td><span class="badge action">⏳ Checking</span></td></tr>
+        </table>
+      </section>
+    </main>
+  </div>
+  <footer class="statusbar"><span>🗃️ Aerowing Services</span><span>Cloud</span></footer>
+</div>
+
+</body>
+</html>

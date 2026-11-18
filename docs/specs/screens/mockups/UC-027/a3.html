@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <title>UC-027 A3: Review the Quality checks</title>
+  <link rel="stylesheet" href="../visual-identity.css">
+  <link rel="stylesheet" href="../components.css">
+</head>
+<body>
+<div class="window">
+  <header class="titlebar"><span class="app">⚙️ Swarm</span><span class="screen-title">Ground control · M-2026-0412 Inspection of Les Vignes</span><span class="badge success">✅ Mission: Completed</span><span class="spacer"></span><span class="button secondary">✋ Hold the Squad</span><span class="button danger">🛑 Abort</span></header>
+  <div class="layout">
+    <nav class="sidebar">
+      <span class="nav-item">🛰️ Flight</span>
+      <span class="nav-item">📋 Pre-flight</span>
+      <span class="nav-item">🛸 Squad</span>
+      <span class="nav-item">🎥 Video</span>
+      <span class="nav-item active">📼 Debrief</span>
+      <span class="nav-item">🔧 Settings</span>
+    </nav>
+    <main class="content">
+      <div class="row"><h1>📼 Debrief of M-2026-0412</h1><span class="spacer"></span><span class="badge success">🔏 Evidence record: Verified</span></div>
+      <div class="tabs"><span class="tab">📼 Replay</span><span class="tab">📊 Plan against actual</span><span class="tab active">🔬 Quality checks</span></div>
+      <section class="card stack">
+        <table class="table">
+          <tr><th>Quality check</th><th>Pass level</th><th>Result</th><th>Detail</th></tr>
+          <tr><td>Image overlap</td><td>75 %, request of Helio Energy</td><td><span class="badge success">✅ Passed</span></td><td>78 %</td></tr>
+          <tr><td>Sharpness</td><td>Swarm default, Inspection</td><td><span class="badge success">✅ Passed</span></td><td>2 412 of 2 418 images sharp</td></tr>
+          <tr><td>Thermal calibration</td><td>Swarm default, Inspection</td><td><span class="badge success">✅ Passed</span></td><td>Alpha and Charlie calibrated before and after the flight</td></tr>
+          <tr><td>Gaps</td><td>None, request of Helio Energy</td><td><span class="badge failure">❌ Failed</span></td><td>Rows 14 and 15 not imaged after Delta was lost</td></tr>
+        </table>
+      </section>
+      <div class="banner decision">⚠️ 1 Quality check failed. The Mission planner decides on a re-fly of the gaps.</div>
+      <div class="row"><span class="button primary">✅ Close the Debrief</span><span class="button secondary">📼 Back to the Replay</span></div>
+    </main>
+  </div>
+  <footer class="statusbar"><span>📡 Links: all Drones on the ground</span><span>EU (EASA)</span><span>👤 Sam Carter</span><span class="spacer"></span><span class="mono">2026-12-03 11:03</span></footer>
+</div>
+</body>
+</html>

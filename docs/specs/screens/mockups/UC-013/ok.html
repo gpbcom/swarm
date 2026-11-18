@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <title>UC-013 OK: Training session completed</title>
+  <link rel="stylesheet" href="../visual-identity.css">
+  <link rel="stylesheet" href="../components.css">
+</head>
+<body>
+<div class="window">
+  <header class="titlebar"><span class="app">⚙️ Swarm</span><span class="screen-title">Ground control · M-2026-0412 Inspection of Les Vignes</span><span class="badge success">✅ Mission: Completed</span><span class="badge system">🕹️ Simulator</span><span class="badge persona">👤 Instructor connected</span><span class="spacer"></span><span class="button secondary">✋ Hold the Squad</span><span class="button danger">🛑 Abort</span></header>
+  <div class="layout">
+    <nav class="sidebar">
+      <span class="nav-item">🛰️ Flight</span>
+      <span class="nav-item">📋 Pre-flight</span>
+      <span class="nav-item">🛸 Squad</span>
+      <span class="nav-item">🎥 Video</span>
+      <span class="nav-item active">📼 Debrief</span>
+      <span class="nav-item">🔧 Settings</span>
+    </nav>
+    <main class="content">
+      <div class="banner system">🕹️ Simulator: no real Drone receives commands</div>
+      <div class="banner success">✅ Training session completed. The Flight log is marked simulated.</div>
+      <div class="kpis">
+        <div class="kpi"><div class="label">Area covered</div><div class="value">100 %</div></div>
+        <div class="kpi"><div class="label">Flight time</div><div class="value">48 min</div></div>
+        <div class="kpi"><div class="label">Failures injected</div><div class="value">1</div></div>
+        <div class="kpi"><div class="label">Commands to real Drones</div><div class="value">0</div></div>
+      </div>
+      <section class="card stack">
+        <h2>📼 Training session of Sam Carter</h2>
+        <table class="table">
+          <tr><th>Time</th><th>Event</th><th>Pilot decision</th></tr>
+          <tr><td class="mono">09:49</td><td>Launch of the simulated Squad</td><td>Pre-flight check signed</td></tr>
+          <tr><td class="mono">10:11</td><td><span class="badge failure">❌ Link to Delta lost (Instructor)</span></td><td>✋ Hold the Squad after 3 s</td></tr>
+          <tr><td class="mono">10:13</td><td>Re-plan: Delta's area shared</td><td>▶️ Resumed</td></tr>
+          <tr><td class="mono">10:37</td><td>Simulated Squad landed</td><td>➖</td></tr>
+        </table>
+        <div class="row"><span class="badge system">🕹️ Flight log: Simulated</span><span class="spacer"></span><span class="button primary">📼 Open the Replay</span><span class="button secondary">🕹️ New training session</span></div>
+      </section>
+    </main>
+  </div>
+  <footer class="statusbar"><span>📡 Links: 4 simulated</span><span>EU (EASA)</span><span>👤 Sam Carter</span><span class="spacer"></span><span class="mono">2026-12-03 10:38</span></footer>
+</div>
+</body>
+</html>

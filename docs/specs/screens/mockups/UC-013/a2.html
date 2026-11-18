@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <title>UC-013 A2: Supervise the simulated Squad</title>
+  <link rel="stylesheet" href="../visual-identity.css">
+  <link rel="stylesheet" href="../components.css">
+</head>
+<body>
+<div class="window">
+  <header class="titlebar"><span class="app">⚙️ Swarm</span><span class="screen-title">Ground control · M-2026-0412 Inspection of Les Vignes</span><span class="badge success">✅ Mission: Flying</span><span class="badge system">🕹️ Simulator</span><span class="badge persona">👤 Instructor connected</span><span class="spacer"></span><span class="button secondary">✋ Hold the Squad</span><span class="button danger">🛑 Abort</span></header>
+  <div class="layout">
+    <nav class="sidebar">
+      <span class="nav-item active">🛰️ Flight</span>
+      <span class="nav-item">📋 Pre-flight</span>
+      <span class="nav-item">🛸 Squad</span>
+      <span class="nav-item">🎥 Video</span>
+      <span class="nav-item">📼 Debrief</span>
+      <span class="nav-item">🔧 Settings</span>
+    </nav>
+    <main class="content">
+      <div class="banner system">🕹️ Simulator: no real Drone receives commands</div>
+      <div class="split">
+        <div class="map">
+          <div class="zone geofence c1 r1 w12 h8"></div>
+          <div class="zone done c2 r2 w4 h3"></div>
+          <div class="zone c6 r2 w5 h3"></div>
+          <div class="zone c2 r5 w4 h3"></div>
+          <div class="zone c6 r5 w5 h3"></div>
+          <span class="marker persona c1 r8">👤 Pilot</span>
+          <span class="marker entity c3 r3">🛸 Alpha</span>
+          <span class="marker entity c8 r3">🛸 Bravo</span>
+          <span class="marker entity c4 r6">🛸 Charlie</span>
+          <span class="marker entity c9 r6">🛸 Delta</span>
+        </div>
+        <aside class="panel card">
+          <h2>🗃️ Squad <span class="badge system">🕹️ Simulated</span></h2>
+          <div class="list">
+            <div class="list-item">🛸 Alpha<span class="spacer"></span><span class="badge success">✅ Airborne</span></div>
+            <div class="list-item">🛸 Bravo<span class="spacer"></span><span class="badge success">✅ Airborne</span></div>
+            <div class="list-item">🛸 Charlie<span class="spacer"></span><span class="badge success">✅ Airborne</span></div>
+            <div class="list-item">🛸 Delta<span class="spacer"></span><span class="badge success">✅ Airborne</span></div>
+          </div>
+          <span class="badge persona">🔄 Pilot: Supervising</span>
+          <span class="muted">Area covered</span>
+          <div class="progress success"><span class="p30"></span></div>
+          <div class="row"><span class="button primary">🎮 Take manual control</span></div>
+        </aside>
+      </div>
+      <div class="kpis">
+        <div class="kpi"><div class="label">Drones airborne</div><div class="value">4 / 4</div></div>
+        <div class="kpi"><div class="label">Area covered</div><div class="value">30 %</div></div>
+        <div class="kpi"><div class="label">Flight time</div><div class="value">9 min</div></div>
+        <div class="kpi"><div class="label">Commands to real Drones</div><div class="value">0</div></div>
+      </div>
+    </main>
+  </div>
+  <footer class="statusbar"><span>📡 Links: 4 simulated</span><span>EU (EASA)</span><span>👤 Sam Carter</span><span class="spacer"></span><span class="mono">2026-12-03 09:58</span></footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <title>UC-024 KO: Payload refused</title>
+  <link rel="stylesheet" href="../visual-identity.css">
+  <link rel="stylesheet" href="../components.css">
+</head>
+<body>
+<div class="window">
+  <header class="titlebar"><span class="app">⚙️ Swarm</span><span class="screen-title">Ground control · M-2026-0412 Inspection of Les Vignes</span><span class="badge success">✅ Mission: Verified</span><span class="spacer"></span><span class="button secondary">✋ Hold the Squad</span><span class="button danger">🛑 Abort</span></header>
+  <div class="layout">
+    <nav class="sidebar">
+      <span class="nav-item">🛰️ Flight</span>
+      <span class="nav-item">📋 Pre-flight</span>
+      <span class="nav-item active">🛸 Squad</span>
+      <span class="nav-item">🎥 Video</span>
+      <span class="nav-item">📼 Debrief</span>
+      <span class="nav-item">🔧 Settings</span>
+    </nav>
+    <main class="content">
+      <h1>🛸 Squad of M-2026-0412 on Les Vignes solar farm</h1>
+      <div class="banner failure">❌ Payload refused: the LiDAR does not fit the Drone model ANAFI USA of Delta. Delta keeps its zoom camera.</div>
+      <div class="grid-2">
+        <section class="card stack">
+          <h2>🛸 Delta · ANAFI USA</h2>
+          <div class="field"><label>Payload</label><span class="input invalid">LiDAR</span><span class="error">❌ Does not fit the ANAFI USA.</span></div>
+          <div class="field"><label>Task</label><span class="input">Close-ups of Defects</span><span class="hint">Needs a zoom camera or a thermal camera.</span></div>
+          <div class="row"><span class="badge success">✅ Kept: zoom camera</span><span class="badge success">✅ Drone: Ready</span></div>
+        </section>
+        <section class="card stack">
+          <h2>🗃️ Payloads that fit the ANAFI USA</h2>
+          <div class="list">
+            <div class="list-item">Zoom camera<span class="spacer"></span><span class="badge success">✅ Mounted</span></div>
+            <div class="list-item">Thermal camera<span class="spacer"></span><span class="badge entity">In the Field kit</span></div>
+            <div class="list-item">LiDAR<span class="spacer"></span><span class="badge failure">❌ Does not fit</span></div>
+          </div>
+        </section>
+      </div>
+      <div class="row"><span class="button primary">Choose another Payload</span><span class="button secondary">Cancel</span></div>
+    </main>
+  </div>
+  <footer class="statusbar"><span>📡 Links: 5 radio, on the ground</span><span>EU (EASA)</span><span>👤 Sam Carter</span><span class="spacer"></span><span class="mono">2026-12-03 09:35</span></footer>
+</div>
+</body>
+</html>

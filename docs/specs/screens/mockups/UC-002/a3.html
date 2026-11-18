@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <title>UC-002 A3: Review coverage, timing, battery and conflicts</title>
+  <link rel="stylesheet" href="../visual-identity.css">
+  <link rel="stylesheet" href="../components.css">
+</head>
+<body>
+<div class="window">
+  <header class="titlebar"><span class="app">⚙️ Swarm</span><span class="screen-title">Mission studio · M-2026-0412 Inspection of Les Vignes</span><span class="badge success">🔄 Mission: Planned</span><span class="spacer"></span><span class="badge persona">👤 Léa Martin</span></header>
+  <div class="layout">
+    <nav class="sidebar">
+      <span class="nav-item">🗺️ Missions</span>
+      <span class="nav-item">🖊️ Design</span>
+      <span class="nav-item active">🕹️ Simulate</span>
+      <span class="nav-item">💬 Assistant</span>
+    </nav>
+    <main class="content">
+      <h1>Simulation result</h1>
+      <div class="kpis">
+        <div class="kpi"><div class="label">Coverage</div><div class="value">100 %</div></div>
+        <div class="kpi"><div class="label">Duration</div><div class="value">38 min</div></div>
+        <div class="kpi"><div class="label">Lowest battery at landing</div><div class="value">31 %</div></div>
+        <div class="kpi"><div class="label">Conflicts</div><div class="value">0</div></div>
+      </div>
+      <div class="grid-2">
+        <section class="card stack">
+          <h2>Battery use per Drone</h2>
+          <table class="table">
+            <tr><th>Drone</th><th>Drone model</th><th>Flight time</th><th>Battery used</th><th>Battery at landing</th></tr>
+            <tr><td>🛸 Alpha</td><td>Matrice 4TD</td><td>36 min</td><td>62 %</td><td>38 %</td></tr>
+            <tr><td>🛸 Bravo</td><td>X500</td><td>38 min</td><td>69 %</td><td>31 %</td></tr>
+            <tr><td>🛸 Charlie</td><td>ANAFI USA</td><td>22 min</td><td>48 %</td><td>52 %</td></tr>
+          </table>
+        </section>
+        <section class="card stack">
+          <h2>Checks</h2>
+          <div class="checklist">
+            <span class="check ok">✅ The whole area is covered</span>
+            <span class="check ok">✅ The Mission ends at 10:38, inside its time slot</span>
+            <span class="check ok">✅ No two Drones closer than the Separation distance of 3 m (📏 BR-002)</span>
+            <span class="check ok">✅ No command sent to a real Drone, Flight log marked Simulated (📏 BR-014)</span>
+          </div>
+        </section>
+      </div>
+      <div class="row"><span class="button primary">✅ Accept the result</span><span class="button secondary">Send back to Draft</span></div>
+    </main>
+  </div>
+  <footer class="statusbar"><span>✅ No conflict</span><span>📜 Authorisation EU (EASA), Inspection and BVLOS, Valid to 2027-06-30</span><span>Saved 10:31</span></footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <title>UC-016 KO1: Frame refused, two Drones too close</title>
+  <link rel="stylesheet" href="../visual-identity.css">
+  <link rel="stylesheet" href="../components.css">
+</head>
+<body>
+<div class="window">
+  <header class="titlebar"><span class="app">⚙️ Swarm</span><span class="screen-title">Mission studio · M-2026-0415 Riverside Festival show</span><span class="badge action">🔄 Mission: Draft</span><span class="spacer"></span><span class="badge persona">👤 Léa Martin</span></header>
+  <div class="layout">
+    <nav class="sidebar">
+      <span class="nav-item">🗺️ Missions</span>
+      <span class="nav-item active">🖊️ Design</span>
+      <span class="nav-item">🕹️ Simulate</span>
+      <span class="nav-item">💬 Assistant</span>
+    </nav>
+    <main class="content">
+      <div class="banner failure">❌ Choreography refused: at 02:14, AW-147 and AW-148 are 1.5 m apart, under the Separation distance of 3 m (📏 BR-002).</div>
+      <div class="split">
+        <div class="map">
+          <div class="zone geofence c2 r1 w10 h6"></div>
+          <div class="zone c4 r2 w6 h4"></div>
+          <div class="zone risk c2 r7 w10 h2"></div>
+          <div class="zone risk c6 r2 w3 h2"></div>
+          <span class="marker decision c6 r8">Audience</span>
+          <span class="marker failure c6 r2">❌ 🛸 AW-147</span>
+          <span class="marker failure c8 r3">❌ 🛸 AW-148</span>
+          <span class="marker entity c5 r5">🛸 198 other Drones</span>
+          <span class="marker action c11 r1">Frame 02:14</span>
+        </div>
+        <aside class="panel card">
+          <h2>Check result</h2>
+          <div class="checklist">
+            <span class="check fail">❌ Separation distance: 1 frame refused</span>
+            <span class="check ok">✅ Speed within the limits of the Drone model</span>
+            <span class="check ok">✅ Battery to the end of the show</span>
+          </div>
+          <table class="table">
+            <tr><th>Frame</th><th>Drones</th><th>Distance</th></tr>
+            <tr><td class="mono">02:14</td><td>AW-147, AW-148</td><td class="mono">1.5 m</td></tr>
+          </table>
+          <span class="hint">Correct the show in Blender or Skybrush Studio, then import it again.</span>
+          <div class="row"><span class="button primary">Import a corrected Choreography</span></div>
+        </aside>
+      </div>
+    </main>
+  </div>
+  <footer class="statusbar"><span>❌ 1 rule broken</span><span>📜 Authorisation EU (EASA), Light show, Valid to 2027-06-30</span><span>Not saved</span></footer>
+</div>
+</body>
+</html>

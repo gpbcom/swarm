@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <title>UC-027 A1: Replay the Mission</title>
+  <link rel="stylesheet" href="../visual-identity.css">
+  <link rel="stylesheet" href="../components.css">
+</head>
+<body>
+<div class="window">
+  <header class="titlebar"><span class="app">⚙️ Swarm</span><span class="screen-title">Ground control · M-2026-0412 Inspection of Les Vignes</span><span class="badge success">✅ Mission: Completed</span><span class="spacer"></span><span class="button secondary">✋ Hold the Squad</span><span class="button danger">🛑 Abort</span></header>
+  <div class="layout">
+    <nav class="sidebar">
+      <span class="nav-item">🛰️ Flight</span>
+      <span class="nav-item">📋 Pre-flight</span>
+      <span class="nav-item">🛸 Squad</span>
+      <span class="nav-item">🎥 Video</span>
+      <span class="nav-item active">📼 Debrief</span>
+      <span class="nav-item">🔧 Settings</span>
+    </nav>
+    <main class="content">
+      <div class="row"><h1>📼 Debrief of M-2026-0412</h1><span class="spacer"></span><span class="badge success">🔏 Evidence record: Verified</span></div>
+      <div class="tabs"><span class="tab active">📼 Replay</span><span class="tab">📊 Plan against actual</span><span class="tab">🔬 Quality checks</span></div>
+      <div class="split">
+        <div class="map">
+          <div class="zone geofence c1 r1 w12 h8"></div>
+          <div class="zone done c2 r2 w4 h3"></div>
+          <div class="zone done c6 r2 w5 h3"></div>
+          <div class="zone done c2 r5 w4 h3"></div>
+          <div class="zone done c6 r5 w5 h2"></div>
+          <div class="zone risk c6 r7 w5 h1"></div>
+          <span class="marker entity c3 r3">🛸 Alpha</span>
+          <span class="marker entity c8 r3">🛸 Bravo</span>
+          <span class="marker entity c3 r6">🛸 Charlie</span>
+          <span class="marker failure c9 r6">🛸 Delta ❌</span>
+        </div>
+        <aside class="panel card">
+          <h2>Timeline</h2>
+          <div class="list">
+            <div class="list-item"><span class="mono">10:00</span>Launch<span class="spacer"></span><span class="badge success">✅ 4 Airborne</span></div>
+            <div class="list-item"><span class="mono">10:31</span>Link to Delta lost<span class="spacer"></span><span class="badge failure">❌ Drone: Lost</span></div>
+            <div class="list-item"><span class="mono">10:31</span>Sam Carter: Hold the Squad<span class="spacer"></span><span class="badge decision">✋ Hold</span></div>
+            <div class="list-item"><span class="mono">10:33</span>Sam Carter approves the Re-plan<span class="spacer"></span><span class="badge success">✅ Applied</span></div>
+            <div class="list-item"><span class="mono">10:52</span>Squad landed<span class="spacer"></span><span class="badge success">✅ Completed</span></div>
+          </div>
+          <div class="progress"><span class="p60"></span></div>
+          <div class="row"><span class="button primary">▶️ Play</span><span class="mono">10:31 / 10:52</span></div>
+        </aside>
+      </div>
+    </main>
+  </div>
+  <footer class="statusbar"><span>📡 Links: all Drones on the ground</span><span>EU (EASA)</span><span>👤 Sam Carter</span><span class="spacer"></span><span class="mono">2026-12-03 10:58</span></footer>
+</div>
+</body>
+</html>

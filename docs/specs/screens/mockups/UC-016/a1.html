@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <title>UC-016 A1: Import the Choreography</title>
+  <link rel="stylesheet" href="../visual-identity.css">
+  <link rel="stylesheet" href="../components.css">
+</head>
+<body>
+<div class="window">
+  <header class="titlebar"><span class="app">⚙️ Swarm</span><span class="screen-title">Mission studio · M-2026-0415 Riverside Festival show</span><span class="badge action">🔄 Mission: Draft</span><span class="spacer"></span><span class="badge persona">👤 Léa Martin</span></header>
+  <div class="layout">
+    <nav class="sidebar">
+      <span class="nav-item">🗺️ Missions</span>
+      <span class="nav-item active">🖊️ Design</span>
+      <span class="nav-item">🕹️ Simulate</span>
+      <span class="nav-item">💬 Assistant</span>
+    </nav>
+    <main class="content">
+      <div class="split">
+        <div class="map">
+          <div class="zone geofence c2 r1 w10 h6"></div>
+          <div class="zone c4 r2 w6 h4"></div>
+          <div class="zone risk c2 r7 w10 h2"></div>
+          <span class="marker decision c6 r8">Audience</span>
+          <span class="marker entity c6 r3">Show volume</span>
+        </div>
+        <aside class="panel card">
+          <h2>🗃️ Choreography</h2>
+          <div class="empty">No Choreography yet.</div>
+        </aside>
+      </div>
+    </main>
+  </div>
+  <footer class="statusbar"><span>⏳ Rules not checked yet</span><span>📜 Authorisation EU (EASA), Light show, Valid to 2027-06-30</span><span>Saved 15:10</span></footer>
+  <div class="overlay"></div>
+  <div class="dialog">
+    <h2>Import a Choreography</h2>
+    <div class="tabs"><span class="tab">Blender</span><span class="tab active">Skybrush Studio</span></div>
+    <div class="field"><label>File</label><span class="input mono">riverside-festival-show</span></div>
+    <table class="table">
+      <tr><td class="muted">Drones</td><td>200, each with a show light</td></tr>
+      <tr><td class="muted">Duration</td><td class="mono">08:00</td></tr>
+      <tr><td class="muted">Music time code</td><td>Included</td></tr>
+      <tr><td class="muted">Separation distance of the Mission</td><td class="mono">3 m</td></tr>
+    </table>
+    <span class="hint">Swarm checks every frame before it accepts the Choreography: Separation distance, speed and battery.</span>
+    <div class="row"><span class="spacer"></span><span class="button secondary">Cancel</span><span class="button primary">Import and check</span></div>
+  </div>
+</div>
+</body>
+</html>

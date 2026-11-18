@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <title>UC-006 A1: Select a Drone or the Squad</title>
+  <link rel="stylesheet" href="../visual-identity.css">
+  <link rel="stylesheet" href="../components.css">
+</head>
+<body>
+<div class="window">
+  <header class="titlebar"><span class="app">⚙️ Swarm</span><span class="screen-title">Ground control · M-2026-0412 Inspection of Les Vignes</span><span class="badge success">🔄 Mission: Flying</span><span class="spacer"></span><span class="button secondary">✋ Hold the Squad</span><span class="button danger">🛑 Abort</span></header>
+  <div class="layout">
+    <nav class="sidebar">
+      <span class="nav-item active">🛰️ Flight</span>
+      <span class="nav-item">📋 Pre-flight</span>
+      <span class="nav-item">🛸 Squad</span>
+      <span class="nav-item">🎥 Video</span>
+      <span class="nav-item">📼 Debrief</span>
+      <span class="nav-item">🔧 Settings</span>
+    </nav>
+    <main class="content">
+      <div class="split">
+        <div class="map">
+          <div class="zone geofence c1 r1 w12 h8"></div>
+          <div class="zone done c2 r2 w5 h3"></div>
+          <div class="zone c7 r2 w5 h3"></div>
+          <div class="zone c2 r5 w5 h3"></div>
+          <div class="zone c7 r5 w5 h3"></div>
+          <span class="marker entity c4 r3">🛸 Alpha</span>
+          <span class="marker persona c8 r3 w3">🛸 Bravo, selected</span>
+          <span class="marker entity c4 r6">🛸 Charlie</span>
+          <span class="marker entity c9 r6">🛸 Delta</span>
+          <span class="marker persona c1 r8">👤 Pilot</span>
+        </div>
+        <aside class="panel">
+        <section class="card">
+          <h2>🛸 Bravo</h2>
+          <div class="row"><span class="badge success">🔄 Drone: Airborne</span><span class="muted">X500 · AW-002 · RGB</span></div>
+          <table class="table">
+            <tr><td>Altitude</td><td class="mono">45 m</td><td>Speed</td><td class="mono">6 m/s</td></tr>
+            <tr><td>Battery</td><td class="mono">71&nbsp;%</td><td>Link</td><td class="mono">Good</td></tr>
+          </table>
+          <div class="row"><span class="button secondary">✋ Hold</span><span class="button primary">🎮 Take manual control</span><span class="button secondary">Return home</span><span class="button secondary">Land</span></div>
+        </section>
+        <section class="card">
+          <div class="row">🎥 Live RGB video · Bravo</div>
+          <span class="hint">RGB camera · X500 AW-002</span>
+        </section>
+        </aside>
+      </div>
+      <div class="grid-2">
+        <section class="card">
+          <h2>⚠️ Alerts and 💬 Co-pilot</h2>
+          <div class="list">
+            <div class="list-item"><span class="badge system">💬</span>Co-pilot: every Drone is on its plan</div>
+          </div>
+        </section>
+        <section class="card">
+          <h2>📈 Progress against the plan</h2>
+          <div class="row"><span>Area covered</span><span class="spacer"></span><span class="mono">50&nbsp;%</span></div>
+          <div class="progress success"><span class="p50"></span></div>
+          <span class="muted">Flight time 34 min of 48 planned</span>
+        </section>
+      </div>
+    </main>
+  </div>
+  <footer class="statusbar"><span>📡 Links: 4 radio, quality Good</span><span>EU (EASA)</span><span>👤 Sam Carter</span><span class="badge persona">🔄 Pilot: Supervising</span><span class="spacer"></span><span class="mono">2026-12-03 10:48</span></footer>
+</div>
+</body>
+</html>

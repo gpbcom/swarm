@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <title>UC-014 A1: Add the Drone model and its Drone adapter</title>
+  <link rel="stylesheet" href="../visual-identity.css">
+  <link rel="stylesheet" href="../components.css">
+</head>
+<body>
+<div class="window">
+  <header class="titlebar"><span class="app">⚙️ Swarm</span><span class="screen-title">Back office · Aerowing Services</span><span class="spacer"></span><span class="badge persona">👤 Noah Weber · Fleet maintainer</span></header>
+  <div class="layout">
+    <nav class="sidebar">
+      <span class="nav-item active">🛸 Fleet</span>
+      <span class="nav-item">📜 Authorisations</span>
+      <span class="nav-item">📦 Deliverables</span>
+      <span class="nav-item">🔏 Evidence</span>
+      <span class="nav-item">👥 People</span>
+      <span class="nav-item">🔧 Settings</span>
+    </nav>
+    <main class="content">
+      <div class="tabs"><span class="tab">🛸 Drones</span><span class="tab active">Drone models</span><span class="tab">Payloads</span><span class="tab">Batteries</span></div>
+      <h1>Add a Drone model</h1>
+      <div class="grid-2">
+        <section class="card stack">
+          <div class="grid-2">
+            <div class="field"><label>Maker</label><span class="input">Parrot</span></div>
+            <div class="field"><label>Model</label><span class="input">ANAFI USA</span></div>
+          </div>
+          <div class="field"><label>Limits</label><span class="input muted">Weight, speed, wind, range, payload</span><span class="hint">From the data sheet of the maker.</span></div>
+          <div class="field"><label>Payloads that fit</label><span class="input">Thermal camera, zoom camera</span></div>
+          <div class="field"><label>Link</label><span class="input">The vendor's own link</span></div>
+        </section>
+        <section class="card stack">
+          <h2>⚙️ Drone adapter</h2>
+          <div class="list">
+            <div class="list-item">MAVLink (PX4, ArduPilot)<span class="spacer"></span><span class="badge action">Available</span></div>
+            <div class="list-item">Parrot<span class="spacer"></span><span class="badge system">✅ Chosen</span></div>
+            <div class="list-item">DJI<span class="spacer"></span><span class="badge action">Available</span></div>
+            <div class="list-item">Skydio<span class="spacer"></span><span class="badge action">Available</span></div>
+          </div>
+          <div class="row"><span class="hint">Once saved, ANAFI USA is</span><span class="badge failure">🔄 Drone model: Not approved</span></div>
+          <span class="hint">Its Drones stay Grounded until it passes the compatibility test.</span>
+        </section>
+      </div>
+        <section class="card stack">
+          <h2>🛸 Drones of this model</h2>
+          <div class="list">
+            <div class="list-item"><span>🛸 Echo · AW-005</span><span class="spacer"></span><span class="badge failure">🔄 Drone: Grounded</span></div>
+          </div>
+
+        </section>
+      <div class="row"><span class="spacer"></span><span class="button secondary">Cancel</span><span class="button primary">Save and run the compatibility test</span></div>
+    </main>
+  </div>
+  <footer class="statusbar"><span>🗃️ Aerowing Services</span><span>Cloud</span></footer>
+</div>
+
+</body>
+</html>

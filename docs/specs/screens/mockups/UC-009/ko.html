@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <title>UC-009 KO: Data not good enough</title>
+  <link rel="stylesheet" href="../visual-identity.css">
+  <link rel="stylesheet" href="../components.css">
+</head>
+<body>
+<div class="window">
+  <header class="titlebar"><span class="app">⚙️ Swarm</span><span class="screen-title">Back office · Aerowing Services</span><span class="spacer"></span><span class="badge persona">👤 Léa Martin · Mission planner</span></header>
+  <div class="layout">
+    <nav class="sidebar">
+      <span class="nav-item">🛸 Fleet</span>
+      <span class="nav-item">📜 Authorisations</span>
+      <span class="nav-item active">📦 Deliverables</span>
+      <span class="nav-item">🔏 Evidence</span>
+      <span class="nav-item">👥 People</span>
+      <span class="nav-item">🔧 Settings</span>
+    </nav>
+    <main class="content">
+      <div class="banner failure">❌ Quality check failed: image overlap too low over rows 14 to 16 (Charlie). The orthomosaic and the 3D model cannot be built.</div>      <div class="row"><h1>📦 M-2026-0412 Inspection of Les Vignes</h1><span class="badge entity">🔄 Mission: Completed</span></div>
+      <div class="split">
+        <div class="map">
+          <div class="zone done c1 r1 w12 h4"></div>
+          <div class="zone risk c3 r5 w6 h3"></div>
+          <div class="zone done c9 r5 w4 h3"></div>
+          <span class="marker failure c5 r6">❌ Rows 14 to 16</span>
+          <span class="marker entity c6 r7">🛸 Charlie</span>
+        </div>
+        <aside class="panel card">
+          <h2>🔬 Quality checks</h2>
+          <div class="checklist">
+            <div class="check ok">✅ Sharpness</div>
+            <div class="check ok">✅ Thermal calibration</div>
+            <div class="check fail">❌ Image overlap: too low over rows 14 to 16</div>
+            <div class="check ok">✅ No gap in coverage</div>
+          </div>
+          <span class="muted">Deliverables waiting for this data</span>
+          <div class="list">
+            <div class="list-item">Orthomosaic<span class="spacer"></span><span class="badge failure">❌ Not built</span></div>
+            <div class="list-item">3D model<span class="spacer"></span><span class="badge failure">❌ Not built</span></div>
+          </div>
+          <div class="row"><span class="button primary">Plan a re-fly</span><span class="button secondary">Explain to the Client</span></div>
+        </aside>
+      </div>
+    </main>
+  </div>
+  <footer class="statusbar"><span>🗃️ Aerowing Services</span><span>Cloud</span></footer>
+</div>
+
+</body>
+</html>

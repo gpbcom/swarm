@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <title>UC-004 A1: Supervise the Squad</title>
+  <link rel="stylesheet" href="../visual-identity.css">
+  <link rel="stylesheet" href="../components.css">
+</head>
+<body>
+<div class="window">
+  <header class="titlebar"><span class="app">⚙️ Swarm</span><span class="screen-title">Ground control · M-2026-0412 Inspection of Les Vignes</span><span class="badge success">🔄 Mission: Flying</span><span class="spacer"></span><span class="button secondary">✋ Hold the Squad</span><span class="button danger">🛑 Abort</span></header>
+  <div class="layout">
+    <nav class="sidebar">
+      <span class="nav-item active">🛰️ Flight</span>
+      <span class="nav-item">📋 Pre-flight</span>
+      <span class="nav-item">🛸 Squad</span>
+      <span class="nav-item">🎥 Video</span>
+      <span class="nav-item">📼 Debrief</span>
+      <span class="nav-item">🔧 Settings</span>
+    </nav>
+    <main class="content">
+      <div class="split">
+        <div class="map">
+          <div class="zone geofence c1 r1 w12 h8"></div>
+          <div class="zone done c2 r2 w5 h3"></div>
+          <div class="zone c7 r2 w5 h3"></div>
+          <div class="zone c2 r5 w5 h3"></div>
+          <div class="zone c7 r5 w5 h3"></div>
+          <span class="marker entity c4 r3">🛸 Alpha</span>
+          <span class="marker entity c9 r3">🛸 Bravo</span>
+          <span class="marker entity c4 r6">🛸 Charlie</span>
+          <span class="marker entity c9 r6">🛸 Delta</span>
+          <span class="marker persona c1 r8">👤 Pilot</span>
+        </div>
+        <aside class="panel">
+        <section class="card">
+          <div class="list">
+            <div class="list-item"><div class="row spacer">🛸 Alpha<span class="spacer"></span><span class="badge success">🔄 Drone: Airborne</span><span class="hint">RGB · 72&nbsp;% · Link Good · 40 m</span></div></div>
+            <div class="list-item"><div class="row spacer">🛸 Bravo<span class="spacer"></span><span class="badge success">🔄 Drone: Airborne</span><span class="hint">RGB · 70&nbsp;% · Link Good · 40 m</span></div></div>
+            <div class="list-item"><div class="row spacer">🛸 Charlie<span class="spacer"></span><span class="badge success">🔄 Drone: Airborne</span><span class="hint">Thermal · 41&nbsp;% · Link Good · 40 m</span></div></div>
+            <div class="list-item"><div class="row spacer">🛸 Delta<span class="spacer"></span><span class="badge success">🔄 Drone: Airborne</span><span class="hint">Thermal · 66&nbsp;% · Link Good · 40 m</span></div></div>
+          </div>
+        </section>
+        <section class="card">
+          <div class="row">🎥 Live thermal video · Charlie</div>
+          <span class="hint">Thermal camera · Matrice 4TD AW-003</span>
+        </section>
+        </aside>
+      </div>
+      <div class="grid-2">
+        <section class="card">
+          <h2>⚠️ Alerts and 💬 Co-pilot</h2>
+          <div class="list">
+            <div class="list-item"><span class="badge system">💬</span>Co-pilot: every Drone is on its plan</div>
+            <div class="list-item"><span class="badge success">✅</span>No open Alert</div>
+          </div>
+        </section>
+        <section class="card">
+          <h2>📈 Progress against the plan</h2>
+          <div class="row"><span>Area covered</span><span class="spacer"></span><span class="mono">40&nbsp;%</span></div>
+          <div class="progress success"><span class="p40"></span></div>
+          <span class="muted">Flight time 24 min of 48 planned</span>
+        </section>
+      </div>
+    </main>
+  </div>
+  <footer class="statusbar"><span>📡 Links: 4 radio, quality Good</span><span>EU (EASA)</span><span>👤 Sam Carter</span><span class="badge persona">🔄 Pilot: Supervising</span><span class="spacer"></span><span class="mono">2026-12-03 10:30</span></footer>
+</div>
+</body>
+</html>

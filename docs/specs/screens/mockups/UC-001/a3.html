@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <title>UC-001 A3: Plan the routes and save</title>
+  <link rel="stylesheet" href="../visual-identity.css">
+  <link rel="stylesheet" href="../components.css">
+</head>
+<body>
+<div class="window">
+  <header class="titlebar"><span class="app">⚙️ Swarm</span><span class="screen-title">Mission studio · M-2026-0412 Inspection of Les Vignes</span><span class="badge action">🔄 Mission: Draft</span><span class="spacer"></span><span class="badge persona">👤 Léa Martin</span></header>
+  <div class="layout">
+    <nav class="sidebar">
+      <span class="nav-item">🗺️ Missions</span>
+      <span class="nav-item active">🖊️ Design</span>
+      <span class="nav-item">🕹️ Simulate</span>
+      <span class="nav-item">💬 Assistant</span>
+    </nav>
+    <main class="content">
+      <div class="split">
+        <div class="map">
+          <div class="zone geofence c2 r2 w10 h6"></div>
+          <div class="zone c3 r3 w4 h4"></div>
+          <div class="zone c8 r3 w3 h4"></div>
+          <span class="marker entity c4 r5">🛸 Alpha, 40 m</span>
+          <span class="marker entity c7 r2">🛸 Bravo, 80 m</span>
+          <span class="marker entity c10 r7">🛸 Charlie, 30 m</span>
+          <span class="marker action c9 r2">Leg 3</span>
+        </div>
+        <aside class="panel card">
+          <h2>Routes</h2>
+          <div class="tabs"><span class="tab">🛸 Alpha</span><span class="tab active">🛸 Bravo</span><span class="tab">🛸 Charlie</span></div>
+          <table class="table">
+            <tr><th>Leg</th><th>From</th><th>To</th><th>Altitude</th></tr>
+            <tr><td>1</td><td>Take-off</td><td>North-west corner</td><td class="mono">80 m</td></tr>
+            <tr><td>2</td><td>North-west corner</td><td>North-east corner</td><td class="mono">80 m</td></tr>
+            <tr><td>3</td><td>North-east corner</td><td>Line 2 east</td><td class="mono">80 m</td></tr>
+            <tr><td>4</td><td>Line 2 east</td><td>Line 2 west</td><td class="mono">80 m</td></tr>
+          </table>
+          <span class="hint">Altitude ceiling of the Geofence: 120 m.</span>
+          <div class="row"><span class="button primary">Save and check the rules</span></div>
+        </aside>
+      </div>
+      <div class="kpis">
+        <div class="kpi"><div class="label">Legs</div><div class="value">14</div></div>
+        <div class="kpi"><div class="label">Highest leg</div><div class="value">80 m</div></div>
+        <div class="kpi"><div class="label">Altitude ceiling</div><div class="value">120 m</div></div>
+        <div class="kpi"><div class="label">Time slot</div><div class="value">10:00 to 11:00</div></div>
+      </div>
+    </main>
+  </div>
+  <footer class="statusbar"><span>⏳ Rules not checked yet</span><span>📜 Authorisation EU (EASA), Inspection and BVLOS, Valid to 2027-06-30</span><span>Not saved</span></footer>
+</div>
+</body>
+</html>

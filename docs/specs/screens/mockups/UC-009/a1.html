@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <title>UC-009 A1: Collect and tag the data of each Drone</title>
+  <link rel="stylesheet" href="../visual-identity.css">
+  <link rel="stylesheet" href="../components.css">
+</head>
+<body>
+<div class="window">
+  <header class="titlebar"><span class="app">⚙️ Swarm</span><span class="screen-title">Back office · Aerowing Services</span><span class="spacer"></span><span class="badge persona">👤 Léa Martin · Mission planner</span></header>
+  <div class="layout">
+    <nav class="sidebar">
+      <span class="nav-item">🛸 Fleet</span>
+      <span class="nav-item">📜 Authorisations</span>
+      <span class="nav-item active">📦 Deliverables</span>
+      <span class="nav-item">🔏 Evidence</span>
+      <span class="nav-item">👥 People</span>
+      <span class="nav-item">🔧 Settings</span>
+    </nav>
+    <main class="content">
+      <div class="row"><h1>📦 M-2026-0412 Inspection of Les Vignes</h1><span class="badge entity">🔄 Mission: Completed</span></div>
+      <div class="banner system">⚙️ Collecting the data of 3 Drones in the cloud and tagging each file with its Drone, Payload, position and time.</div>
+      <section class="card">
+        <table class="table">
+          <tr><th>Drone</th><th>Payload</th><th>Files</th><th>Tagged</th><th>Progress</th></tr>
+          <tr><td>🛸 Alpha</td><td>Thermal camera TC-01</td><td>1 240 images</td><td><span class="badge success">✅ Drone, Payload, position, time</span></td><td><div class="progress success"><span class="p100"></span></div></td></tr>
+          <tr><td>🛸 Bravo</td><td>RGB camera RC-02</td><td>1 860 images</td><td><span class="badge action">⏳ 1 302 of 1 860</span></td><td><div class="progress"><span class="p70"></span></div></td></tr>
+          <tr><td>🛸 Charlie</td><td>Zoom camera ZC-03</td><td>320 images, 2 videos</td><td><span class="badge action">⏳ Waiting</span></td><td><div class="progress"><span class="p10"></span></div></td></tr>
+        </table>
+      </section>
+      <div class="grid-2">
+        <section class="card stack">
+          <h2>🗃️ Flight log</h2>
+          <div class="list">
+            <div class="list-item">M-2026-0412 · 2026-12-03 10:00 to 10:52<span class="spacer"></span><span class="badge success">✅ Received</span></div>
+            <div class="list-item">Positions and times used to tag the files<span class="spacer"></span><span class="badge success">✅ Matched</span></div>
+          </div>
+        </section>
+        <section class="card stack">
+          <h2>Last file tagged</h2>
+          <div class="list">
+            <div class="list-item">File<span class="spacer"></span><span class="mono">alpha-tc01-0815.jpg</span></div>
+            <div class="list-item">Drone and Payload<span class="spacer"></span><span>Alpha · Thermal camera TC-01</span></div>
+            <div class="list-item">Position and time<span class="spacer"></span><span>Row 14, panel 08 · 10:24:31</span></div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <footer class="statusbar"><span>🗃️ Aerowing Services</span><span>Cloud</span></footer>
+</div>
+
+</body>
+</html>
