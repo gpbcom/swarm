@@ -29,7 +29,6 @@ import sys
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
 
 PROJECTS = Path.home() / ".claude" / "projects"
 RUNNING_TYPES = {"launched", "started", "result"}
@@ -42,14 +41,14 @@ def project_dir() -> Path:
     return PROJECTS / re.sub(r"[^A-Za-z0-9]", "-", str(Path(__file__).resolve().parents[2]))
 
 
-def find_run(run_id: Optional[str]) -> Optional[Path]:
+def find_run(run_id: str | None) -> Path | None:
     journals = list(project_dir().glob("*/subagents/workflows/*/journal.jsonl"))
     if run_id:
         journals = [j for j in journals if j.parent.name == run_id]
     return max(journals, key=lambda j: j.stat().st_mtime).parent if journals else None
 
 
-def workflow_meta(run: Path) -> Tuple[str, List[str]]:
+def workflow_meta(run: Path) -> tuple[str, list[str]]:
     scripts = list(run.parents[2].glob(f"workflows/scripts/*-{run.name}.js"))
     if not scripts:
         return "workflow", []
@@ -59,8 +58,8 @@ def workflow_meta(run: Path) -> Tuple[str, List[str]]:
     return name, phases
 
 
-def read_jsonl(path: Path) -> List[Dict[str, object]]:
-    rows: List[Dict[str, object]] = []
+def read_jsonl(path: Path) -> list[dict[str, object]]:
+    rows: list[dict[str, object]] = []
     for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
         try:
             rows.append(json.loads(line))
@@ -69,7 +68,7 @@ def read_jsonl(path: Path) -> List[Dict[str, object]]:
     return rows
 
 
-def agent_stats(run: Path, agent_id: str) -> Tuple[str, int, Optional[float]]:
+def agent_stats(run: Path, agent_id: str) -> tuple[str, int, float | None]:
     meta_file = run / f"agent-{agent_id}.meta.json"
     model = json.loads(meta_file.read_text(encoding="utf-8")).get("model", "") if meta_file.exists() else ""
     transcript = run / f"agent-{agent_id}.jsonl"
@@ -79,7 +78,7 @@ def agent_stats(run: Path, agent_id: str) -> Tuple[str, int, Optional[float]]:
             stamp = row.get("timestamp")
             if isinstance(stamp, str):
                 try:
-                    moment = datetime.fromisoformat(stamp.replace("Z", "+00:00")).timestamp()
+                    moment = datetime.fromisoformat(stamp).timestamp()
                     first = moment if first is None else min(first, moment)
                     last = moment if last is None else max(last, moment)
                 except ValueError:
@@ -96,7 +95,7 @@ def model_icon(model: str) -> str:
     return next((icon for key, icon in MODEL_ICONS if key in model), f"⚪ {model or 'model?'}")
 
 
-def short(seconds: Optional[float]) -> str:
+def short(seconds: float | None) -> str:
     if seconds is None:
         return "?"
     minutes, secs = divmod(int(seconds), 60)
@@ -106,7 +105,7 @@ def short(seconds: Optional[float]) -> str:
 def summarise(result: object) -> str:
     if not isinstance(result, dict):
         return (str(result)[:80] + "…") if result and len(str(result)) > 80 else str(result or "")
-    parts: List[str] = []
+    parts: list[str] = []
     for key, value in result.items():
         if isinstance(value, list):
             parts.append(f"{key}: {len(value)}")
@@ -117,18 +116,23 @@ def summarise(result: object) -> str:
     return ", ".join(parts)
 
 
-def report(run: Path, started_at: float) -> Tuple[str, bool]:
+def report(run: Path, started_at: float) -> tuple[str, bool]:
     name, phases = workflow_meta(run)
     events = read_jsonl(run / "journal.jsonl")
-    agents: Dict[str, Dict[str, object]] = {}
-    order: List[str] = []
+    agents: dict[str, dict[str, object]] = {}
+    order: list[str] = []
     ended = None
     for event in events:
         kind = str(event.get("type", ""))
         key = str(event.get("key", ""))
         if kind == "started":
-            agents[key] = {"label": event.get("label", "agent"), "phase": event.get("phase", ""),
-                           "id": event.get("agentId", ""), "done": False, "result": None}
+            agents[key] = {
+                "label": event.get("label", "agent"),
+                "phase": event.get("phase", ""),
+                "id": event.get("agentId", ""),
+                "done": False,
+                "result": None,
+            }
             order.append(key)
         elif kind == "result" and key in agents:
             agents[key]["done"] = True
@@ -140,8 +144,8 @@ def report(run: Path, started_at: float) -> Tuple[str, bool]:
         ended = "completed"
     tickets = sorted(set(re.findall(r"T\d\.\d\d", " ".join(str(a["label"]) for a in agents.values()))))
     total_tokens = 0
-    by_model: Dict[str, int] = {}
-    rows: List[str] = []
+    by_model: dict[str, int] = {}
+    rows: list[str] = []
     for key in order:
         agent = agents[key]
         model, used, duration = agent_stats(run, str(agent["id"]))
@@ -164,34 +168,41 @@ def report(run: Path, started_at: float) -> Tuple[str, bool]:
         else:
             bar.append(f"⬜ {phase}")
     done_count = sum(1 for a in agents.values() if a["done"])
-    head = "🏁" if ended and not any(w in ended for w in ("fail", "error", "abort", "kill")) else ("❌" if ended else "⏳")
+    head = (
+        "🏁" if ended and not any(w in ended for w in ("fail", "error", "abort", "kill")) else ("❌" if ended else "⏳")
+    )
     lines = [
         f"{head} {name} {' '.join(tickets)} · 🕒 {time.strftime('%H:%M')} · ⏱️ {int((time.time() - started_at) // 60)} min · 🪙 {total_tokens // 1000}k tokens"
         + (f" · ended: {ended}" if ended else ""),
         "📍 Phases: " + " ▸ ".join(bar),
         f"👥 Agents: ✅ {done_count} done · 🔄 {len(agents) - done_count} running · run {run.name}",
         *rows,
-        "💰 Tokens by model: " + (" · ".join(f"{icon} {used // 1000}k" for icon, used in by_model.items()) or "none yet"),
+        "💰 Tokens by model: "
+        + (" · ".join(f"{icon} {used // 1000}k" for icon, used in by_model.items()) or "none yet"),
     ]
     return "\n".join(lines), bool(ended)
 
 
-TOKEN_KINDS = (("input_tokens", "in"), ("output_tokens", "out"), ("cache_creation_input_tokens", "cache_write"),
-               ("cache_read_input_tokens", "cache_read"))
+TOKEN_KINDS = (
+    ("input_tokens", "in"),
+    ("output_tokens", "out"),
+    ("cache_creation_input_tokens", "cache_write"),
+    ("cache_read_input_tokens", "cache_read"),
+)
 
 
-def agent_window(run: Path, agent_id: str) -> Tuple[Optional[float], Optional[float], Dict[str, int], str]:
+def agent_window(run: Path, agent_id: str) -> tuple[float | None, float | None, dict[str, int], str]:
     meta_file = run / f"agent-{agent_id}.meta.json"
     model = json.loads(meta_file.read_text(encoding="utf-8")).get("model", "") if meta_file.exists() else ""
-    first: Optional[float] = None
-    last: Optional[float] = None
+    first: float | None = None
+    last: float | None = None
     used = {short_name: 0 for _, short_name in TOKEN_KINDS}
     transcript = run / f"agent-{agent_id}.jsonl"
     for row in read_jsonl(transcript) if transcript.exists() else []:
         stamp = row.get("timestamp")
         if isinstance(stamp, str):
             try:
-                moment = datetime.fromisoformat(stamp.replace("Z", "+00:00")).timestamp()
+                moment = datetime.fromisoformat(stamp).timestamp()
             except ValueError:
                 continue
             first = moment if first is None else min(first, moment)
@@ -204,11 +215,11 @@ def agent_window(run: Path, agent_id: str) -> Tuple[Optional[float], Optional[fl
     return first, last, used, model
 
 
-def clock(moment: Optional[float]) -> str:
+def clock(moment: float | None) -> str:
     return datetime.fromtimestamp(moment).strftime("%Y-%m-%d %H:%M:%S") if moment else "?"
 
 
-def span(seconds: Optional[float]) -> str:
+def span(seconds: float | None) -> str:
     if seconds is None:
         return "?"
     hours, rest = divmod(int(seconds), 3600)
@@ -216,7 +227,7 @@ def span(seconds: Optional[float]) -> str:
     return f"{hours}h{minutes:02d}m{secs:02d}s" if hours else f"{minutes}m{secs:02d}s"
 
 
-def ticket_runs(ticket: str) -> List[Path]:
+def ticket_runs(ticket: str) -> list[Path]:
     runs = []
     for journal in project_dir().glob("*/subagents/workflows/*/journal.jsonl"):
         if any(ticket in str(e.get("label", "")) for e in read_jsonl(journal) if e.get("type") == "started"):
@@ -229,7 +240,7 @@ def timings(ticket: str) -> str:
     for run in ticket_runs(ticket):
         name, phases = workflow_meta(run)
         steps = []
-        results: Dict[str, object] = {}
+        results: dict[str, object] = {}
         for event in read_jsonl(run / "journal.jsonl"):
             if event.get("type") == "result":
                 results[str(event.get("key"))] = event.get("result")
@@ -240,30 +251,48 @@ def timings(ticket: str) -> str:
             result = results.get(str(event.get("key")))
             status = result.get("status") if isinstance(result, dict) else None
             icon = "🔄" if result is None else ("❌" if status in ("failed", "blocked") else "✅")
-            steps.append({"label": str(event.get("label", "agent")), "phase": str(event.get("phase", "")),
-                          "first": first, "last": last, "tokens": used, "model": model_icon(model), "icon": icon})
+            steps.append(
+                {
+                    "label": str(event.get("label", "agent")),
+                    "phase": str(event.get("phase", "")),
+                    "first": first,
+                    "last": last,
+                    "tokens": used,
+                    "model": model_icon(model),
+                    "icon": icon,
+                }
+            )
         starts = [s["first"] for s in steps if s["first"]]
         ends = [s["last"] for s in steps if s["last"]]
         if starts:
-            runs.append({"run": run.name, "name": name, "phases": phases, "steps": steps,
-                         "start": min(starts), "end": max(ends)})
+            runs.append(
+                {
+                    "run": run.name,
+                    "name": name,
+                    "phases": phases,
+                    "steps": steps,
+                    "start": min(starts),
+                    "end": max(ends),
+                }
+            )
     if not runs:
         return f"No workflow run found for {ticket}."
     runs.sort(key=lambda r: r["start"])
     start, end = runs[0]["start"], max(r["end"] for r in runs)
     active = sum(r["end"] - r["start"] for r in runs)
-    def add(total: Dict[str, int], used: Dict[str, int]) -> None:
-        for name in used:
-            total[name] = total.get(name, 0) + used[name]
+
+    def add(total: dict[str, int], used: dict[str, int]) -> None:
+        for name, amount in used.items():
+            total[name] = total.get(name, 0) + amount
 
     def k(value: int) -> str:
         return f"{value / 1_000_000:.2f}M" if value >= 1_000_000 else f"{value // 1000}k"
 
-    def cells(used: Dict[str, int]) -> str:
+    def cells(used: dict[str, int]) -> str:
         return " | ".join(k(used.get(name, 0)) for _, name in TOKEN_KINDS) + f" | **{k(sum(used.values()))}**"
 
-    ticket_tokens: Dict[str, int] = {}
-    by_model: Dict[str, Dict[str, int]] = {}
+    ticket_tokens: dict[str, int] = {}
+    by_model: dict[str, dict[str, int]] = {}
     for r in runs:
         for s in r["steps"]:
             add(ticket_tokens, s["tokens"])
@@ -291,25 +320,38 @@ def timings(ticket: str) -> str:
         f"| **All models** | {cells(ticket_tokens)} |",
     ]
     for number, run in enumerate(runs, 1):
-        lines += ["", f"### {number}. {run['name']} · {clock(run['start'])} to {clock(run['end'])[11:]} · ⏱️ {span(run['end'] - run['start'])}", "",
-                  "| Phase | Start | End | Elapsed | Steps |", "| --- | --- | --- | --- | --- |"]
+        lines += [
+            "",
+            f"### {number}. {run['name']} · {clock(run['start'])} to {clock(run['end'])[11:]} · ⏱️ {span(run['end'] - run['start'])}",
+            "",
+            "| Phase | Start | End | Elapsed | Steps |",
+            "| --- | --- | --- | --- | --- |",
+        ]
         for phase in run["phases"] or sorted({s["phase"] for s in run["steps"]}):
             members = [s for s in run["steps"] if s["phase"] == phase and s["first"]]
             if members:
                 p_start, p_end = min(s["first"] for s in members), max(s["last"] for s in members)
-                lines.append(f"| {phase} | {clock(p_start)[11:]} | {clock(p_end)[11:]} | {span(p_end - p_start)} | {len(members)} |")
+                lines.append(
+                    f"| {phase} | {clock(p_start)[11:]} | {clock(p_end)[11:]} | {span(p_end - p_start)} | {len(members)} |"
+                )
             else:
                 lines.append(f"| {phase} | | | not run | 0 |")
-        run_tokens: Dict[str, int] = {}
+        run_tokens: dict[str, int] = {}
         for s in run["steps"]:
             add(run_tokens, s["tokens"])
-        lines += ["", f"Tokens of this run: {cells(run_tokens).replace(' | ', ' · ')} (input · output · cache write · cache read · total)",
-                  "", "| Step | Model | Start | End | Elapsed | Input | Output | Cache write | Cache read | Total |",
-                  "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |"]
+        lines += [
+            "",
+            f"Tokens of this run: {cells(run_tokens).replace(' | ', ' · ')} (input · output · cache write · cache read · total)",
+            "",
+            "| Step | Model | Start | End | Elapsed | Input | Output | Cache write | Cache read | Total |",
+            "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+        ]
         for step in sorted(run["steps"], key=lambda s: s["first"] or 0):
             elapsed = (step["last"] - step["first"]) if step["first"] and step["last"] else None
-            lines.append(f"| {step['icon']} {step['label']} | {step['model']} | {clock(step['first'])[11:]} | "
-                         f"{clock(step['last'])[11:]} | {span(elapsed)} | {cells(step['tokens'])} |")
+            lines.append(
+                f"| {step['icon']} {step['label']} | {step['model']} | {clock(step['first'])[11:]} | "
+                f"{clock(step['last'])[11:]} | {span(elapsed)} | {cells(step['tokens'])} |"
+            )
     return "\n".join(lines)
 
 
@@ -318,7 +360,7 @@ def write_timings(ticket: str, text: str) -> Path:
     current = path.read_text(encoding="utf-8") if path.exists() else f"# {ticket}: Progress\n"
     block = f"<!-- timings -->\n{text}\n<!-- /timings -->"
     if "<!-- timings -->" in current:
-        current = re.sub(r"<!-- timings -->.*?<!-- /timings -->", lambda _: block, current, flags=re.S)
+        current = re.sub(r"<!-- timings -->.*?<!-- /timings -->", lambda _: block, current, flags=re.DOTALL)
     else:
         title, _, rest = current.partition("\n")
         current = f"{title}\n\n{block}\n{rest}"
@@ -360,7 +402,10 @@ def main() -> int:
         if size != last_size:
             last_size, last_change = size, time.time()
         elif time.time() - last_change > STALL_S:
-            print(f"⚠️ No progress for {STALL_S // 60} min: the workflow may be stalled or waiting for an approval.", flush=True)
+            print(
+                f"⚠️ No progress for {STALL_S // 60} min: the workflow may be stalled or waiting for an approval.",
+                flush=True,
+            )
             return 1
         time.sleep(every)
 
