@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import tomllib
 
-from helpers import repo_root
+from tests.conventions.mono_repo.helpers import repo_root
 
 
 class TestRustWorkspace:

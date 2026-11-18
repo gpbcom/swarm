@@ -2,13 +2,15 @@ from __future__ import annotations
 
 import re
 import subprocess
+from typing import List
 
 import pytest
-from helpers import repo_root
+
+from tests.conventions.mono_repo.helpers import repo_root
 
 
 class TestTerraformLayout:
-    def tracked_files(self) -> list[str]:
+    def tracked_files(self) -> List[str]:
         result = subprocess.run(
             ["git", "ls-files", "deploy/terraform"],
             cwd=repo_root(),

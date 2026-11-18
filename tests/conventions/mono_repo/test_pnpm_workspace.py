@@ -1,21 +1,23 @@
 from __future__ import annotations
 
 import json
+from typing import Dict, List
 
 import pytest
-from helpers import repo_root
+
+from tests.conventions.mono_repo.helpers import repo_root
 
 
 class TestPnpmWorkspace:
-    def load_json(self, name: str) -> dict:
+    def load_json(self, name: str) -> Dict[str, object]:
         path = repo_root() / name
         assert path.is_file(), f"{name} is missing."
         return json.loads(path.read_text(encoding="utf-8"))
 
-    def workspace_entries(self) -> list[str]:
+    def workspace_entries(self) -> List[str]:
         path = repo_root() / "pnpm-workspace.yaml"
         assert path.is_file(), "pnpm-workspace.yaml is missing."
-        entries: list[str] = []
+        entries: List[str] = []
         for line in path.read_text(encoding="utf-8").splitlines():
             stripped = line.strip()
             if stripped.startswith("- "):
