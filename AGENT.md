@@ -14,8 +14,9 @@ uv run mypy services/<service>/src
 uv run pytest services/<service>/tests/<layer>/<package> -n 2
 ```
 
-- `.github/workflows/ci.yml` runs `ruff check`, `ruff format --check`, `mypy src` and `pytest` on every push and pull
-  request. All of them must pass.
+- The per-language CI does not exist yet: it arrives in T0.04. When it does, it runs `ruff check`,
+  `ruff format --check`, `mypy services/<service>/src` and `pytest` for each service on every push and pull request.
+  All of them must pass. Until then, `.github/workflows/terraform.yml` is the only workflow.
 - Run tests one file or one folder at a time.
 - Format only the files you edited, never a whole folder.
 
@@ -43,14 +44,15 @@ in `service`.
 
 Swarm is meant to become a mono-repo of backend and front-end micro-services, each with its own Docker image. The root
 `src/` has moved to `services/gateway` (ticket T0.01), so the `services/<service>/src/<service>/` reading of `src/`
-applies everywhere. No test enforces this section yet.
+applies everywhere. The tests in `tests/conventions/mono_repo/` enforce part of this section: the uv workspace, the
+Cargo and pnpm workspaces, and the Terraform layout. The Docker, front-end and CI/CD rules are not tested yet.
 
 | Path | Holds |
 | --- | --- |
 | `pyproject.toml` | The uv workspace root, with one `uv.lock` for the whole repository |
 | `services/<service>/` | One backend service: its `Dockerfile`, `pyproject.toml`, `conf/`, `src/<service>/`, `tests/` |
 | `frontends/<frontend>/` | One front end: its `Dockerfile`, `src/`, and its Playwright tests in `e2e/` |
-| `packages/` | Shared code: `python/` (lifecycle base classes, logging, models), `rust/` (Cargo workspace of PyO3 crates of the hot path), `ts/` (pnpm workspace of front-end packages) |
+| `packages/` | Shared code: `python/` (Python packages), `rust/` (Cargo workspace), `ts/` (pnpm workspace) |
 | `deploy/terraform/` | The Terraform modules per provider and building block, and one root per cell |
 | `tests/conventions/` | The [rules a test enforces](#rules-a-test-enforces), run against every service |
 | `compose.e2e.yaml` | Starts the real images for Playwright |
