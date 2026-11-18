@@ -8,10 +8,10 @@ When you edit a file, follow these rules even where a neighbouring file does not
 
 ```bash
 uv sync
-uv run ruff check src tests
+uv run ruff check services packages tests
 uv run ruff format <the files you edited>
-uv run mypy src
-uv run pytest tests/<layer>/<package> -n 2
+uv run mypy services/<service>/src
+uv run pytest services/<service>/tests/<layer>/<package> -n 2
 ```
 
 - `.github/workflows/ci.yml` runs `ruff check`, `ruff format --check`, `mypy src` and `pytest` on every push and pull
@@ -41,16 +41,17 @@ in `service`.
 
 ## Mono-repo
 
-Swarm is meant to become a mono-repo of backend and front-end micro-services, each with its own Docker image. The repository has
-not moved to this layout yet: until a service has moved, the root `src/` layout and the commands above still apply. No
-test enforces this section yet.
+Swarm is meant to become a mono-repo of backend and front-end micro-services, each with its own Docker image. The root
+`src/` has moved to `services/gateway` (ticket T0.01), so the `services/<service>/src/<service>/` reading of `src/`
+applies everywhere. No test enforces this section yet.
 
 | Path | Holds |
 | --- | --- |
 | `pyproject.toml` | The uv workspace root, with one `uv.lock` for the whole repository |
 | `services/<service>/` | One backend service: its `Dockerfile`, `pyproject.toml`, `conf/`, `src/<service>/`, `tests/` |
 | `frontends/<frontend>/` | One front end: its `Dockerfile`, `src/`, and its Playwright tests in `e2e/` |
-| `packages/` | Shared code: `python/` (lifecycle base classes, logging, models), `rust/` (PyO3 crates of the hot path), `ts/` (front-end packages) |
+| `packages/` | Shared code: `python/` (lifecycle base classes, logging, models), `rust/` (Cargo workspace of PyO3 crates of the hot path), `ts/` (pnpm workspace of front-end packages) |
+| `deploy/terraform/` | The Terraform modules per provider and building block, and one root per cell |
 | `tests/conventions/` | The [rules a test enforces](#rules-a-test-enforces), run against every service |
 | `compose.e2e.yaml` | Starts the real images for Playwright |
 | `.github/workflows/` | The CI/CD pipeline |
