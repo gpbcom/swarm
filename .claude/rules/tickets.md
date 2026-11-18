@@ -96,8 +96,9 @@ ticket runs in parallel, the more tickets each sprint can close.
 
 **Rule:** a ticket is done when:
 
-1. the **verifier** reports every check passing: the CI steps of `AGENT.md` for the changed parts (ruff, mypy,
-   pytest, cargo, eslint, tsc, Vitest) and `specs.py check`;
+1. the **verifier** reports every applicable check passing, as decided and run by `.claude/scripts/checks.py`
+   (deterministic, not a model's judgement): the AGENT.md tools on changed project code (ruff, mypy, pytest, cargo,
+   pnpm, Terraform) and `specs.py check`; a check whose target does not exist yet is not applicable, never failed;
 2. the **reviewer** approves the diff against `TICKET.md`, the specifications and the rules (AGENT.md, SPEC, TKT);
 3. `EXPLAIN.md` and `PROGRESS.md` are written, with the evidence in `tests-evidences/`.
 
