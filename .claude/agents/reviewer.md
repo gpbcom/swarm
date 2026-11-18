@@ -21,5 +21,23 @@ Review `git diff develop...ticket/<ID>` for:
   isolation; no secret in code or logs.
 - **Assumptions:** each one reported by the agents is acceptable under the specifications, or rejected.
 
-Return only the structured result: verdict (approve or changes), findings (file, line, rule, what to change, which
-agent owns the file), and the assumptions accepted.
+**Severity (TKT-12).** Classify every finding:
+
+- **blocking**: wrong behaviour, a security or safety problem (secrets, Operator isolation, Fail-safes), an unmet
+  acceptance criterion of `TICKET.md`, a rule violation that breaks or would break the checks, a budget missed on a hot
+  path. Only these are fixed before the merge.
+- **follow-up**: everything else: wording, documentation polish, a clearer name, a better test structure, an
+  improvement the ticket did not ask for. Follow-ups are recorded and never hold the merge.
+
+When in doubt, a finding is a follow-up.
+
+**Modes.** The prompt says which:
+
+- **full review** (round 1): the whole diff, as above.
+- **confirm fixes** (later rounds): check only that each previous blocking finding is resolved, and look only at the
+  diff you are given for blocking defects it introduced. Report anything else you notice as a follow-up; do not
+  start a new full review.
+
+Return only the structured result: verdict (approve when no finding is blocking, otherwise changes), findings (file,
+line, rule, what to change, the owning task id such as K13, severity), resolved (previous findings now fixed), and the
+assumptions accepted.
