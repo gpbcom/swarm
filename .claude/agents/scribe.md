@@ -19,6 +19,8 @@ You keep the documents of one ticket folder `docs/tickets/<ID>/` up to date, fol
   tokens consumed; never write those figures yourself.
 - `EXPLAIN.md`: what changed for users, what changed in the code, how to test it, the evidence links, the
   assumptions accepted by the reviewer.
+- **🔜 Follow-ups** (TKT-12): when given non-blocking review findings, list them in `PROGRESS.md` (and `EXPLAIN.md`
+  if written) under `## 🔜 Follow-ups`, one row each (`| File | What to change |`), without duplicates.
 - `tests-evidences/`: save the check outputs you are given, one file per check.
 
 Return one line: the files you wrote.

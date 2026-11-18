@@ -21,6 +21,7 @@ These rules apply to every ticket of the roadmap (`docs/specs/roadmap/`), worked
 | [TKT-9](#tkt-9) | The person gets a progress update every 2 minutes while a ticket workflow runs |
 | [TKT-10](#tkt-10) | `PROGRESS.md` records the elapsed time of every step and of the whole ticket, and the tokens consumed |
 | [TKT-11](#tkt-11) | Running a ticket again continues where it stopped |
+| [TKT-12](#tkt-12) | The review converges: only blocking findings are fixed, later rounds only confirm the fixes |
 
 ## <a id="tkt-1"></a>TKT-1: Roadmap tickets, one folder each
 
@@ -194,4 +195,23 @@ and recorded in 📝 Events before the re-run.
 **Why:** a stop in wave 3 must not pay again for waves 1 and 2.
 
 **Check:** the re-run's timings show no step for the skipped tasks.
+
+## <a id="tkt-12"></a>TKT-12: The review converges
+
+**Rule:**
+
+- The reviewer classifies every finding as **blocking** (wrong behaviour, security or safety, an unmet acceptance
+  criterion, a rule violation that breaks the checks, a budget missed) or **follow-up** (everything else). When in
+  doubt, it is a follow-up.
+- Only blocking findings go to the fixers. Follow-ups are listed in `PROGRESS.md` (and `EXPLAIN.md`) under
+  **🔜 Follow-ups** and never hold the merge; the person may turn them into tickets.
+- Round 1 is a **full review**. Every later round only **confirms the fixes**: it checks that each previous blocking
+  finding is resolved and looks only at the diff of the fixes for blocking defects they introduced.
+- The ticket is approved when no blocking finding is left. If blocking findings remain after the fix rounds of TKT-6,
+  the run stops and the person decides; there is never a new full review in the same run.
+
+**Why:** a fresh full review finds new things every time; without severity and a confirm-only mode, a ticket never
+converges and every round costs an opus review.
+
+**Check:** `PROGRESS.md` shows at most one full review per run, and the merge happens with follow-ups open.
 
