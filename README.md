@@ -23,10 +23,10 @@ instructions, rules, skills, scripts and settings, versioned with the code. This
 Swarm is imagined as an application in which a pilot plans missions and flies several drones as one swarm. The
 functional specification is the first deliverable, and the playground for the harness.
 
-The dependencies in [services/gateway/pyproject.toml](services/gateway/pyproject.toml) sketch the direction: an API
-(FastAPI), and agents (LangChain, LangGraph); the technical specification settles the rest. The root
-[pyproject.toml](pyproject.toml) is the uv workspace that holds them together, with one `uv.lock` for the repository.
-No product code is written yet.
+The gateway service declares its dependencies in [services/gateway/pyproject.toml](services/gateway/pyproject.toml):
+FastAPI and Pydantic for now. The agents dependencies (LangChain, LangGraph) come back with the agents service. The
+technical specification settles the rest. The root [pyproject.toml](pyproject.toml) is the uv workspace that holds the
+Python projects together, with one `uv.lock` for the repository. No product code is written yet.
 
 The functional specification came out of an interview with the product owner, after a survey of what exists:
 
