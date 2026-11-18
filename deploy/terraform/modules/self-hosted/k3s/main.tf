@@ -3,6 +3,7 @@ locals {
   tls_san_args = join(" ", [for san in var.tls_san : "--tls-san ${san}"])
   install      = "curl -sfL https://get.k3s.io"
   join_url     = "https://${local.first_server.address}:6443"
+  token_file   = "/etc/rancher/k3s/token"
   ssh_options  = "-i ${var.ssh_private_key_path} -o StrictHostKeyChecking=accept-new -o BatchMode=yes"
 }
 
@@ -21,9 +22,19 @@ resource "terraform_data" "first_server" {
     private_key = file(var.ssh_private_key_path)
   }
 
+  # The token travels on the standard input of ssh and is read from the environment of the local process.
+  # It never sits in the remote-exec script, which Terraform leaves world-readable, nor in a process argument list.
+  provisioner "local-exec" {
+    command     = "ssh ${local.ssh_options} ${var.ssh_user}@${local.first_server.address} \"sudo sh -c 'umask 077 && mkdir -p $(dirname ${local.token_file}) && cat > ${local.token_file}'\" <<< \"$K3S_JOIN_TOKEN\""
+    interpreter = ["/bin/bash", "-c"]
+    environment = {
+      K3S_JOIN_TOKEN = random_password.token.result
+    }
+  }
+
   provisioner "remote-exec" {
     inline = [
-      "${local.install} | sudo INSTALL_K3S_VERSION='${var.k3s_version}' K3S_TOKEN='${random_password.token.result}' sh -s - server --cluster-init --cluster-cidr ${var.cluster_cidr} --service-cidr ${var.service_cidr} ${local.tls_san_args}",
+      "${local.install} | sudo INSTALL_K3S_VERSION='${var.k3s_version}' K3S_TOKEN_FILE=${local.token_file} sh -s - server --cluster-init --cluster-cidr ${var.cluster_cidr} --service-cidr ${var.service_cidr} ${local.tls_san_args}",
     ]
   }
 }
@@ -40,9 +51,19 @@ resource "terraform_data" "server" {
     private_key = file(var.ssh_private_key_path)
   }
 
+  # The token travels on the standard input of ssh and is read from the environment of the local process.
+  # It never sits in the remote-exec script, which Terraform leaves world-readable, nor in a process argument list.
+  provisioner "local-exec" {
+    command     = "ssh ${local.ssh_options} ${var.ssh_user}@${var.servers[count.index + 1].address} \"sudo sh -c 'umask 077 && mkdir -p $(dirname ${local.token_file}) && cat > ${local.token_file}'\" <<< \"$K3S_JOIN_TOKEN\""
+    interpreter = ["/bin/bash", "-c"]
+    environment = {
+      K3S_JOIN_TOKEN = random_password.token.result
+    }
+  }
+
   provisioner "remote-exec" {
     inline = [
-      "${local.install} | sudo INSTALL_K3S_VERSION='${var.k3s_version}' K3S_TOKEN='${random_password.token.result}' K3S_URL='${local.join_url}' sh -s - server --cluster-cidr ${var.cluster_cidr} --service-cidr ${var.service_cidr} ${local.tls_san_args}",
+      "${local.install} | sudo INSTALL_K3S_VERSION='${var.k3s_version}' K3S_TOKEN_FILE=${local.token_file} K3S_URL='${local.join_url}' sh -s - server --cluster-cidr ${var.cluster_cidr} --service-cidr ${var.service_cidr} ${local.tls_san_args}",
     ]
   }
 
@@ -61,9 +82,19 @@ resource "terraform_data" "agent" {
     private_key = file(var.ssh_private_key_path)
   }
 
+  # The token travels on the standard input of ssh and is read from the environment of the local process.
+  # It never sits in the remote-exec script, which Terraform leaves world-readable, nor in a process argument list.
+  provisioner "local-exec" {
+    command     = "ssh ${local.ssh_options} ${var.ssh_user}@${var.agents[count.index].address} \"sudo sh -c 'umask 077 && mkdir -p $(dirname ${local.token_file}) && cat > ${local.token_file}'\" <<< \"$K3S_JOIN_TOKEN\""
+    interpreter = ["/bin/bash", "-c"]
+    environment = {
+      K3S_JOIN_TOKEN = random_password.token.result
+    }
+  }
+
   provisioner "remote-exec" {
     inline = [
-      "${local.install} | sudo INSTALL_K3S_VERSION='${var.k3s_version}' K3S_TOKEN='${random_password.token.result}' K3S_URL='${local.join_url}' sh -s - agent",
+      "${local.install} | sudo INSTALL_K3S_VERSION='${var.k3s_version}' K3S_TOKEN_FILE=${local.token_file} K3S_URL='${local.join_url}' sh -s - agent",
     ]
   }
 
