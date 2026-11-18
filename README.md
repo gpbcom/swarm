@@ -23,8 +23,10 @@ instructions, rules, skills, scripts and settings, versioned with the code. This
 Swarm is imagined as an application in which a pilot plans missions and flies several drones as one swarm. The
 functional specification is the first deliverable, and the playground for the harness.
 
-The dependencies in [pyproject.toml](pyproject.toml) sketch the direction: an API
-(FastAPI), and agents (LangChain, LangGraph); the technical specification settles the rest. No product code is written yet.
+The dependencies in [services/gateway/pyproject.toml](services/gateway/pyproject.toml) sketch the direction: an API
+(FastAPI), and agents (LangChain, LangGraph); the technical specification settles the rest. The root
+[pyproject.toml](pyproject.toml) is the uv workspace that holds them together, with one `uv.lock` for the repository.
+No product code is written yet.
 
 The functional specification came out of an interview with the product owner, after a survey of what exists:
 
@@ -52,7 +54,11 @@ blockchain.
 | [.claude/skills/specs-rules/](.claude/skills/specs-rules/SKILL.md) | The skill that loads those rules |
 | [.claude/skills/write-specs/](.claude/skills/write-specs/SKILL.md) | The skill that writes specifications: procedure, templates and the `specs.py` script |
 | [docs/specs/](docs/specs/README.md) | The specifications themselves |
-| [src/swarm/](src/swarm/__init__.py) | The application, still empty |
+| [services/](services/) | The backend services, one folder each. The gateway service ([services/gateway/](services/gateway/)) moved here from the root `src/` |
+| [packages/](packages/) | The code several services share: `python/` (uv), `rust/` (Cargo, with maturin) and `ts/` (pnpm) |
+| [frontends/](frontends/) | The front ends, one folder each, not started yet |
+| [deploy/terraform/](deploy/terraform/README.md) | Terraform: one module per building block, and the root of the dev cell |
+| [tests/](tests/) | The convention tests, which run against every service |
 
 ## 📚 The specifications
 
@@ -77,10 +83,39 @@ python3 .claude/skills/write-specs/scripts/specs.py check                       
 
 Rendering screens needs Chrome or Chromium (or `SPECS_BROWSER` set to one).
 
-## 🛠️ Development
+## 🚀 How to start
+
+### Prerequisites
+
+- [uv](https://docs.astral.sh/uv/), which installs Python 3.12 for the project.
+- A stable Rust toolchain. [packages/rust/rust-toolchain.toml](packages/rust/rust-toolchain.toml) selects it.
+- Node LTS, with [corepack](https://nodejs.org/api/corepack.html) to provide pnpm.
+- [Terraform](https://developer.hashicorp.com/terraform) 1.10 or later, only for
+  [deploy/terraform](deploy/terraform/README.md).
+
+### Install the workspaces
+
+From a clean clone, run these commands in order:
 
 ```bash
 uv sync
+cargo fetch --manifest-path packages/rust/Cargo.toml
+corepack enable && pnpm install
 ```
 
-Python 3.12 or later, managed with [uv](https://docs.astral.sh/uv/).
+Each command installs one workspace: uv for Python (one `uv.lock`), Cargo for Rust, and pnpm for TypeScript.
+
+### Run the checks
+
+```bash
+uv run ruff check services packages tests
+uv run mypy services/gateway/src
+uv run pytest services/gateway/tests -n 2
+uv run pytest tests/conventions
+pnpm turbo run build
+```
+
+### Provision the dev cell
+
+Terraform creates the dev cell's machines, network and k3s cluster. Follow
+[deploy/terraform/README.md](deploy/terraform/README.md).
