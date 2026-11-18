@@ -182,20 +182,49 @@ for (let w = 1; w <= waveCount; w++) {
   }
 }
 
-// Fix loop: send failures or findings to the task that owns the file -------------------------------------------
-function ownerOf(file) {
-  return tasks.find(t => t.files.some(f => file.endsWith(f) || f.endsWith(file))) ||
-    { id: 'FIX', title: `Fix ${file}`, agent: 'implementer', files: [file], brief: '', done_when: 'the verifier passes' }
+// Fix loop: send each failure or finding to the task that owns it, each fixer only its own problems --------------
+const ROOTS = ['services/', 'packages/', 'frontends/', 'tests/', 'deploy/', 'docs/', '.claude/', '.github/']
+function normalise(file) {
+  let f = String(file || '').trim().replace(/:\d+(-\d+)?$/, '')
+  for (const r of ROOTS) {
+    const i = f.indexOf('/' + r)
+    if (i >= 0) { f = f.slice(i + 1); break }
+  }
+  if (f.startsWith('/')) f = f.split('/').pop()
+  return f
+}
+function agentFor(f) {
+  if (f.startsWith('packages/rust/') || f.endsWith('.rs')) return 'rust-implementer'
+  if (f.startsWith('frontends/') || f.startsWith('packages/ts/') || /\.(ts|tsx)$/.test(f)) return 'frontend-implementer'
+  if (f.startsWith('tests/')) return 'test-writer'
+  if (f.startsWith('docs/') || /\.md$/.test(f)) return 'doc-writer'
+  return 'implementer'
+}
+function ownerOf(item) {
+  const hinted = String(item.detail || '').match(/\bK\d{2}\b/g) || []
+  const byHint = hinted.map(id => tasks.find(t => t.id === id)).find(Boolean)
+  if (byHint) return byHint
+  const files = String(item.file || '').split(',').map(normalise).filter(Boolean)
+  for (const f of files) {
+    const dir = f.replace(/\/$/, '') + '/'
+    const owner = tasks.find(t => t.files.some(x => x === f || x.endsWith('/' + f) || f.endsWith('/' + x) || x.startsWith(dir)))
+    if (owner) return owner
+  }
+  const f = files[0] || 'unknown'
+  return { id: `FIX-${f}`, title: `Fix ${f}`, agent: agentFor(f), files, brief: '', done_when: 'the verifier passes' }
 }
 async function fixRound(items, label) {
   const groups = {}
   for (const it of items) {
-    const owner = ownerOf(it.file)
+    const owner = ownerOf(it)
     groups[owner.id] = groups[owner.id] || { task: owner, items: [] }
     groups[owner.id].items.push(it)
   }
-  const results = await runTasks(Object.values(groups).map(g => g.task), label,
-    `Fix only these problems, within your files: ${JSON.stringify(Object.values(groups).flatMap(g => g.items))}`)
+  log(`${label}: ${items.length} problem(s) sent to ${Object.keys(groups).length} fixer(s): ${Object.keys(groups).join(', ')}`)
+  const results = await limited(Object.values(groups), MAX_PARALLEL, g =>
+    agent(workerPrompt(g.task, `Fix only these problems, within your files: ${JSON.stringify(g.items)}`), {
+      agentType: g.task.agent, isolation: 'worktree', schema: RESULT, phase: label, label: `${g.task.id} ${g.task.agent} (fix)`,
+    }).then(r => ({ task: g.task, result: r })))
   await integrate(results, label)
 }
 
