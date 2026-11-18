@@ -117,6 +117,11 @@ The result is the empty k3s cluster: one server per `server` machine, joined to 
 The outputs `api_endpoint`, `kubeconfig_path`, `server_names` and `agent_names` show what was built. Check the cluster
 with `KUBECONFIG=<kubeconfig_path> kubectl get nodes`.
 
+> [!NOTE]
+> The network module lets the API port, 6443/tcp, through only from the cell machines and from `api_allowed_cidrs`,
+> which is empty by default. From a workstation outside the cell, `kubectl` times out unless its address is in
+> `api_allowed_cidrs` before the first apply. Otherwise, run `kubectl` on the first server instead.
+
 ## Object storage and DNS
 
 Both are off by default, so a first apply creates neither.
