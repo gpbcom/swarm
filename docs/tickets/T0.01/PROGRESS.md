@@ -1,4 +1,16 @@
 # T0.01: Progress
+
+**Status:** 🔵 In progress · **Ticket:** [TICKET.md](TICKET.md) · **Plan:** [PLAN.md](PLAN.md)
+
+## 📝 Events
+
+| Time | Event | By | Result |
+| --- | --- | --- | --- |
+| 2026-11-18 18:43 | Plan written: 20 tasks, 4 waves | scribe | ⏳ Awaiting approval |
+| 2026-11-18 18:45 | Plan approved; first commit of the repository | the person | ✅ Approved |
+| 2026-11-18 18:47 | Toolchain installed user-local: Terraform 1.17.2, Rust 1.100, pnpm 12.21 | main session | ✅ Done |
+| 2026-11-18 18:51 | Run stopped in wave 2: K09's check (`cargo metadata` on an empty workspace) cannot pass before a crate exists (T0.07); waves 1 and 2 otherwise merged (15 tasks) | ticket-run | ❌ Stopped |
+| 2026-11-18 18:53 | K09's check changed to `cargo metadata --no-deps` (approved by the person); Rust tools linked into ~/.local/bin | the person, main session | ✅ Done |
 | 2026-11-18 19:00 | Re-run: 16 tasks skipped (TKT-11); waves 3 and 4 (K17 to K20) done and merged | ticket-run | ✅ 4 of 4 tasks done |
 | 2026-11-18 19:01 | Verification: 9 failures in round 1, 3 left in round 2, all checks with no target yet (empty Cargo workspace, no TypeScript package) or harness code | verifier | ❌ Not a defect of the ticket |
 | 2026-11-18 19:02 | Run stopped by the main session to save a useless fix round; verifier taught to report checks with no target as not applicable and to check project code only | main session | ✅ Done |
@@ -111,15 +123,3 @@ Tokens of this run: 0k · 178k · 867k · 5.20M · **6.25M** (input · output ·
 | ❌ K09 rust-implementer | 🔵 sonnet | 19:01:04 | 19:01:21 | 0m16s | 0k | 3k | 30k | 137k | **171k** |
 | 🔄 verifier round 3 | 🟢 haiku | 19:01:21 | 19:01:28 | 0m07s | 0k | 0k | 44k | 29k | **74k** |
 <!-- /timings -->
-
-**Status:** 🔵 In progress · **Ticket:** [TICKET.md](TICKET.md) · **Plan:** [PLAN.md](PLAN.md)
-
-## 📝 Events
-
-| Time | Event | By | Result |
-| --- | --- | --- | --- |
-| 2026-11-18 18:43 | Plan written: 20 tasks, 4 waves | scribe | ⏳ Awaiting approval |
-| 2026-11-18 18:45 | Plan approved; first commit of the repository | the person | ✅ Approved |
-| 2026-11-18 18:47 | Toolchain installed user-local: Terraform 1.17.2, Rust 1.100, pnpm 12.21 | main session | ✅ Done |
-| 2026-11-18 18:51 | Run stopped in wave 2: K09's check (`cargo metadata` on an empty workspace) cannot pass before a crate exists (T0.07); waves 1 and 2 otherwise merged (15 tasks) | ticket-run | ❌ Stopped |
-| 2026-11-18 18:53 | K09's check changed to `cargo metadata --no-deps` (approved by the person); Rust tools linked into ~/.local/bin | the person, main session | ✅ Done |

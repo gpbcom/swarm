@@ -15,7 +15,7 @@ after 20 minutes without any change (stalled). Arm it with the Monitor tool: eac
 ``timings`` measures a ticket from the transcripts of every workflow run that worked on it (ticket-plan, ticket-run,
 re-runs): the overall time, the time agents worked, the time waiting between runs, and per run, per phase and per step
 the start, end and elapsed time (rule TKT-10). ``--write`` puts the result into ``docs/tickets/<ID>/PROGRESS.md``
-between the ``<!-- timings -->`` markers (added under the title if missing); without it, the Markdown is printed.
+between the ``<!-- timings -->`` markers (appended at the end if missing); without it, the Markdown is printed.
 
 Legend: 🏁 ended · ⏳ running · ❌ failed · ⚠️ stalled | phases ✅ done 🔄 running ⬜ waiting |
 models 🟣 opus 🔵 sonnet 🟢 haiku 🟠 fable ⚪ other | 🪙 tokens (input + output, cache reads excluded).
@@ -362,8 +362,7 @@ def write_timings(ticket: str, text: str) -> Path:
     if "<!-- timings -->" in current:
         current = re.sub(r"<!-- timings -->.*?<!-- /timings -->", lambda _: block, current, flags=re.DOTALL)
     else:
-        title, _, rest = current.partition("\n")
-        current = f"{title}\n\n{block}\n{rest}"
+        current = f"{current.rstrip()}\n\n{block}\n"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(current.rstrip("\n") + "\n", encoding="utf-8")
     return path
