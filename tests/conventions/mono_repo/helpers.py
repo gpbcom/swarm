@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import List
 
-SERVICE_LAYERS: list[str] = ["api", "service", "storage", "models"]
+SERVICE_LAYERS: List[str] = ["api", "service", "storage", "clients", "models"]
 
 
 def repo_root() -> Path:

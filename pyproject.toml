@@ -19,6 +19,7 @@ quote-style = "double"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+pythonpath = ["."]
 testpaths = ["tests", "services/gateway/tests"]
 
 [tool.mypy]

@@ -1,13 +1,15 @@
 from __future__ import annotations
 
 import tomllib
+from typing import Dict, List
 
 import pytest
-from helpers import SERVICE_LAYERS, repo_root
+
+from tests.conventions.mono_repo.helpers import SERVICE_LAYERS, repo_root
 
 
 class TestPythonWorkspace:
-    def load_root(self) -> dict[str, object]:
+    def load_root(self) -> Dict[str, object]:
         path = repo_root() / "pyproject.toml"
         assert path.is_file(), "The root pyproject.toml is missing."
         return tomllib.loads(path.read_text(encoding="utf-8"))
@@ -19,7 +21,7 @@ class TestPythonWorkspace:
     def test_the_uv_workspace_lists_its_members(self, member: str) -> None:
         tool = self.load_root().get("tool", {})
         assert isinstance(tool, dict)
-        members: list[str] = tool.get("uv", {}).get("workspace", {}).get("members", [])
+        members: List[str] = tool.get("uv", {}).get("workspace", {}).get("members", [])
         assert member in members
 
     @pytest.mark.parametrize("tool_name", ["ruff", "mypy", "pytest", "pytest-xdist", "pytest-asyncio", "maturin"])
