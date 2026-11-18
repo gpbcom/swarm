@@ -67,6 +67,7 @@ const VERDICT = {
         required: ['check', 'file', 'detail'],
       },
     },
+    not_applicable: { type: 'array', items: { type: 'string' } },
   },
   required: ['passed', 'failures'],
 }
@@ -202,7 +203,7 @@ phase('Verify')
 let verdict = null
 for (let round = 0; round <= MAX_FIX_ROUNDS; round++) {
   verdict = await agent(`Verify ticket ${ID} on ticket/${ID}.`, { agentType: 'verifier', schema: VERDICT, phase: 'Verify', label: `verifier round ${round + 1}` })
-  note(`Verify ${round + 1}`, 'verifier', verdict && verdict.passed ? '✅ passed' : `❌ ${verdict ? verdict.failures.length : '?'} failures`)
+  note(`Verify ${round + 1}${verdict && verdict.not_applicable && verdict.not_applicable.length ? ` (${verdict.not_applicable.length} not applicable)` : ''}`, 'verifier', verdict && verdict.passed ? '✅ passed' : `❌ ${verdict ? verdict.failures.length : '?'} failures`)
   if (!verdict || verdict.passed || round === MAX_FIX_ROUNDS) break
   await fixRound(verdict.failures, 'Verify')
 }

@@ -1,0 +1,3 @@
+# cargo test (packages/rust)
+error: manifest path `/home/guillaume/Documents/Projects/PoC/swarm/packages/rust` contains no package: The manifest is virtual, and the workspace has no members.
+exit=101

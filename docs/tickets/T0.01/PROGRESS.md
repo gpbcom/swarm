@@ -1,4 +1,7 @@
 # T0.01: Progress
+| 2026-11-18 19:00 | Re-run: 16 tasks skipped (TKT-11); waves 3 and 4 (K17 to K20) done and merged | ticket-run | ✅ 4 of 4 tasks done |
+| 2026-11-18 19:01 | Verification: 9 failures in round 1, 3 left in round 2, all checks with no target yet (empty Cargo workspace, no TypeScript package) or harness code | verifier | ❌ Not a defect of the ticket |
+| 2026-11-18 19:02 | Run stopped by the main session to save a useless fix round; verifier taught to report checks with no target as not applicable and to check project code only | main session | ✅ Done |
 
 <!-- timings -->
 ## ⏱️ Timings
@@ -8,21 +11,21 @@ Measured from the agents' transcripts by `python3 .claude/scripts/progress.py ti
 | Measure | Value |
 | --- | --- |
 | 🕒 Ticket started | 2026-11-18 18:34:42 |
-| 🕒 Last activity | 2026-11-18 18:51:01 |
-| ⏱️ **Overall ticket time** (first start to last activity) | **16m18s** |
-| 🤖 Time with agents working (sum of runs) | 12m38s |
-| ⏸️ Time between runs (approvals, fixes) | 3m39s |
-| 🔁 Workflow runs | 2 |
-| 🪙 **Tokens consumed** (input, output, cache write, cache read) | **10.43M** |
+| 🕒 Last activity | 2026-11-18 19:01:28 |
+| ⏱️ **Overall ticket time** (first start to last activity) | **26m45s** |
+| 🤖 Time with agents working (sum of runs) | 19m07s |
+| ⏸️ Time between runs (approvals, fixes) | 7m37s |
+| 🔁 Workflow runs | 3 |
+| 🪙 **Tokens consumed** (input, output, cache write, cache read) | **16.68M** |
 
 #### 🪙 Tokens by model
 
 | Model | Input | Output | Cache write | Cache read | Total |
 | --- | --- | --- | --- | --- | --- |
-| 🔵 sonnet | 0k | 160k | 881k | 6.81M | **7.86M** |
+| 🔵 sonnet | 0k | 208k | 1.18M | 8.65M | **10.04M** |
 | 🟣 opus | 0k | 122k | 224k | 1.57M | **1.92M** |
-| 🟢 haiku | 0k | 89k | 229k | 335k | **654k** |
-| **All models** | 0k | 372k | 1.34M | 8.72M | **10.43M** |
+| 🟢 haiku | 0k | 220k | 795k | 3.70M | **4.72M** |
+| **All models** | 0k | 551k | 2.20M | 13.92M | **16.68M** |
 
 ### 1. ticket-plan · 2026-11-18 18:34:42 to 18:43:56 · ⏱️ 9m13s
 
@@ -76,6 +79,37 @@ Tokens of this run: 0k · 166k · 820k · 6.43M · **7.42M** (input · output ·
 | ❌ K09 rust-implementer | 🔵 sonnet | 18:50:21 | 18:50:37 | 0m16s | 0k | 4k | 31k | 282k | **318k** |
 | ✅ integrator Waves | 🔵 sonnet | 18:50:39 | 18:50:50 | 0m10s | 0k | 2k | 26k | 166k | **195k** |
 | ✅ scribe T0.01 | 🟢 haiku | 18:50:51 | 18:51:01 | 0m09s | 0k | 3k | 55k | 73k | **133k** |
+
+### 3. ticket-run · 2026-11-18 18:54:59 to 19:01:28 · ⏱️ 6m28s
+
+| Phase | Start | End | Elapsed | Steps |
+| --- | --- | --- | --- | --- |
+| Gate | 18:54:59 | 18:55:50 | 0m50s | 2 |
+| Waves | 18:55:50 | 18:58:54 | 3m03s | 6 |
+| Verify | 18:58:56 | 19:01:28 | 2m32s | 8 |
+| Review | | | not run | 0 |
+| Finish | | | not run | 0 |
+
+Tokens of this run: 0k · 178k · 867k · 5.20M · **6.25M** (input · output · cache write · cache read · total)
+
+| Step | Model | Start | End | Elapsed | Input | Output | Cache write | Cache read | Total |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| ✅ gate T0.01 | 🟢 haiku | 18:54:59 | 18:55:47 | 0m47s | 0k | 32k | 97k | 45k | **174k** |
+| ✅ integrator prepare T0.01 | 🔵 sonnet | 18:55:47 | 18:55:50 | 0m03s | 0k | 0k | 21k | 25k | **47k** |
+| ✅ K17 implementer | 🔵 sonnet | 18:55:50 | 18:57:14 | 1m23s | 0k | 32k | 67k | 716k | **815k** |
+| ✅ K18 doc-writer | 🟢 haiku | 18:55:50 | 18:56:19 | 0m28s | 0k | 10k | 64k | 361k | **436k** |
+| ✅ integrator Waves | 🔵 sonnet | 18:57:14 | 18:57:31 | 0m16s | 0k | 1k | 24k | 105k | **130k** |
+| ✅ K19 doc-writer | 🟢 haiku | 18:57:32 | 18:58:45 | 1m13s | 0k | 27k | 105k | 989k | **1.12M** |
+| ✅ K20 doc-writer | 🟢 haiku | 18:57:32 | 18:58:11 | 0m39s | 0k | 18k | 71k | 490k | **581k** |
+| ✅ integrator Waves | 🔵 sonnet | 18:58:45 | 18:58:54 | 0m08s | 0k | 1k | 22k | 102k | **126k** |
+| ✅ verifier round 1 | 🟢 haiku | 18:58:56 | 18:59:50 | 0m53s | 0k | 17k | 89k | 768k | **875k** |
+| ✅ FIX implementer | 🔵 sonnet | 18:59:50 | 19:00:03 | 0m13s | 0k | 2k | 32k | 200k | **236k** |
+| ✅ K09 rust-implementer | 🔵 sonnet | 18:59:50 | 19:00:02 | 0m11s | 0k | 2k | 31k | 139k | **172k** |
+| ✅ K10 frontend-implementer | 🔵 sonnet | 18:59:50 | 19:00:05 | 0m14s | 0k | 3k | 43k | 249k | **296k** |
+| ✅ integrator Verify | 🔵 sonnet | 19:00:05 | 19:00:14 | 0m08s | 0k | 1k | 29k | 157k | **189k** |
+| ✅ verifier round 2 | 🟢 haiku | 19:00:16 | 19:01:04 | 0m48s | 0k | 22k | 92k | 685k | **800k** |
+| ❌ K09 rust-implementer | 🔵 sonnet | 19:01:04 | 19:01:21 | 0m16s | 0k | 3k | 30k | 137k | **171k** |
+| 🔄 verifier round 3 | 🟢 haiku | 19:01:21 | 19:01:28 | 0m07s | 0k | 0k | 44k | 29k | **74k** |
 <!-- /timings -->
 
 **Status:** 🔵 In progress · **Ticket:** [TICKET.md](TICKET.md) · **Plan:** [PLAN.md](PLAN.md)
