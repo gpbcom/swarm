@@ -1,0 +1,4 @@
+$ cargo metadata --no-deps --format-version 1 --locked --manifest-path /home/guillaume/Documents/Projects/PoC/swarm/packages/rust/Cargo.toml
+(cwd .)
+
+{"packages":[],"workspace_members":[],"workspace_default_members":[],"resolve":null,"target_directory":"/home/guillaume/Documents/Projects/PoC/swarm/packages/rust/target","build_directory":"/home/guillaume/Documents/Projects/PoC/swarm/packages/rust/target","version":1,"workspace_root":"/home/guillaume/Documents/Projects/PoC/swarm/packages/rust","metadata":null}

@@ -14,6 +14,11 @@ dev = [
 [tool.ruff]
 line-length = 120
 
+[tool.ruff.lint]
+# AGENT.md (Typing) requires Optional, List, Dict, Tuple, Set and Union from typing: the pyupgrade rules that
+# rewrite them are ignored so that the linter follows the project's rule.
+ignore = ["UP006", "UP007", "UP035", "UP045"]
+
 [tool.ruff.format]
 quote-style = "double"
 

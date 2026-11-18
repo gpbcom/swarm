@@ -1,0 +1,12 @@
+$ terraform test
+(cwd deploy/terraform/modules/self-hosted/k3s)
+
+tests/k3s.tftest.hcl... [37min progress[0m
+[0m  run "a_single_server_with_two_agents_plans_the_expected_cluster"... [32mpass[0m[0m
+  run "an_empty_server_list_is_refused"... [32mpass[0m[0m
+  run "an_empty_k3s_version_is_refused"... [32mpass[0m[0m
+  run "the_latest_k3s_version_is_refused"... [32mpass[0m[0m
+tests/k3s.tftest.hcl... [37mtearing down[0m
+[0mtests/k3s.tftest.hcl... [32mpass[0m[0m
+
+[32mSuccess![0m[0m 4 passed, 0 failed.

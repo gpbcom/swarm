@@ -14,6 +14,10 @@
 | 2026-11-18 19:00 | Re-run: 16 tasks skipped (TKT-11); waves 3 and 4 (K17 to K20) done and merged | ticket-run | ✅ 4 of 4 tasks done |
 | 2026-11-18 19:01 | Verification: 9 failures in round 1, 3 left in round 2, all checks with no target yet (empty Cargo workspace, no TypeScript package) or harness code | verifier | ❌ Not a defect of the ticket |
 | 2026-11-18 19:02 | Run stopped by the main session to save a useless fix round; verifier taught to report checks with no target as not applicable and to check project code only | main session | ✅ Done |
+| 2026-11-18 19:09 | Verify 1 | verifier | ✅ passed |
+| 2026-11-18 19:09 | Review 1 | reviewer | ⚠️ changes, 5 findings |
+| 2026-11-18 19:09 | Merge (Review) | integrator | ✅ 4 merged, 2 blocked |
+| 2026-11-18 19:09 | Stopped: checks failing | ticket-run | ❌ 7 open failures: ruff check (13 UP035/UP006 deprecated typing imports in tests/conventions/mono_repo/helpers.py, test_pnpm_workspace.py, test_python_workspace.py and test_terraform_layout.py); cargo fmt --check, cargo clippy and cargo test (packages/rust has no member crate, virtual manifest); pnpm eslint (no eslint config on the branch); pnpm tsc (TypeScript not declared, no tsconfig); pnpm vitest (Vitest not declared, no test files). Outputs in tests-evidences/. |
 
 <!-- timings -->
 ## ⏱️ Timings
@@ -23,21 +27,21 @@ Measured from the agents' transcripts by `python3 .claude/scripts/progress.py ti
 | Measure | Value |
 | --- | --- |
 | 🕒 Ticket started | 2026-11-18 18:34:42 |
-| 🕒 Last activity | 2026-11-18 19:01:28 |
-| ⏱️ **Overall ticket time** (first start to last activity) | **26m45s** |
-| 🤖 Time with agents working (sum of runs) | 19m07s |
-| ⏸️ Time between runs (approvals, fixes) | 7m37s |
-| 🔁 Workflow runs | 3 |
-| 🪙 **Tokens consumed** (input, output, cache write, cache read) | **16.68M** |
+| 🕒 Last activity | 2026-11-18 19:09:13 |
+| ⏱️ **Overall ticket time** (first start to last activity) | **34m30s** |
+| 🤖 Time with agents working (sum of runs) | 26m00s |
+| ⏸️ Time between runs (approvals, fixes) | 8m30s |
+| 🔁 Workflow runs | 4 |
+| 🪙 **Tokens consumed** (input, output, cache write, cache read) | **23.32M** |
 
 #### 🪙 Tokens by model
 
 | Model | Input | Output | Cache write | Cache read | Total |
 | --- | --- | --- | --- | --- | --- |
-| 🔵 sonnet | 0k | 208k | 1.18M | 8.65M | **10.04M** |
-| 🟣 opus | 0k | 122k | 224k | 1.57M | **1.92M** |
-| 🟢 haiku | 0k | 220k | 795k | 3.70M | **4.72M** |
-| **All models** | 0k | 551k | 2.20M | 13.92M | **16.68M** |
+| 🔵 sonnet | 0k | 226k | 1.36M | 9.83M | **11.41M** |
+| 🟣 opus | 0k | 152k | 442k | 3.13M | **3.72M** |
+| 🟢 haiku | 0k | 320k | 1.30M | 6.56M | **8.18M** |
+| **All models** | 1k | 699k | 3.10M | 19.51M | **23.32M** |
 
 ### 1. ticket-plan · 2026-11-18 18:34:42 to 18:43:56 · ⏱️ 9m13s
 
@@ -122,4 +126,30 @@ Tokens of this run: 0k · 178k · 867k · 5.20M · **6.25M** (input · output ·
 | ✅ verifier round 2 | 🟢 haiku | 19:00:16 | 19:01:04 | 0m48s | 0k | 22k | 92k | 685k | **800k** |
 | ❌ K09 rust-implementer | 🔵 sonnet | 19:01:04 | 19:01:21 | 0m16s | 0k | 3k | 30k | 137k | **171k** |
 | 🔄 verifier round 3 | 🟢 haiku | 19:01:21 | 19:01:28 | 0m07s | 0k | 0k | 44k | 29k | **74k** |
+
+### 4. ticket-run · 2026-11-18 19:02:20 to 19:09:13 · ⏱️ 6m52s
+
+| Phase | Start | End | Elapsed | Steps |
+| --- | --- | --- | --- | --- |
+| Gate | 19:02:20 | 19:03:12 | 0m52s | 2 |
+| Waves | | | not run | 0 |
+| Verify | 19:03:12 | 19:04:12 | 0m59s | 1 |
+| Review | 19:04:12 | 19:09:07 | 4m54s | 7 |
+| Finish | 19:09:07 | 19:09:13 | 0m06s | 1 |
+
+Tokens of this run: 0k · 148k · 898k · 5.59M · **6.64M** (input · output · cache write · cache read · total)
+
+| Step | Model | Start | End | Elapsed | Input | Output | Cache write | Cache read | Total |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| ✅ gate T0.01 | 🟢 haiku | 19:02:20 | 19:03:08 | 0m47s | 0k | 32k | 97k | 44k | **175k** |
+| ✅ integrator prepare T0.01 | 🔵 sonnet | 19:03:08 | 19:03:12 | 0m04s | 0k | 0k | 25k | 72k | **98k** |
+| ✅ verifier round 1 | 🟢 haiku | 19:03:12 | 19:04:12 | 0m59s | 0k | 16k | 102k | 856k | **975k** |
+| ✅ reviewer round 1 | 🟣 opus | 19:04:12 | 19:06:43 | 2m30s | 0k | 29k | 217k | 1.56M | **1.81M** |
+| ✅ K13 implementer | 🔵 sonnet | 19:06:43 | 19:07:10 | 0m27s | 0k | 6k | 68k | 141k | **216k** |
+| ✅ FIX implementer | 🔵 sonnet | 19:06:43 | 19:07:00 | 0m17s | 0k | 4k | 39k | 240k | **284k** |
+| ✅ K19 doc-writer | 🟢 haiku | 19:06:43 | 19:07:26 | 0m42s | 0k | 17k | 104k | 721k | **842k** |
+| ✅ K18 doc-writer | 🟢 haiku | 19:06:43 | 19:07:16 | 0m33s | 0k | 14k | 66k | 552k | **632k** |
+| ✅ integrator Review | 🔵 sonnet | 19:07:26 | 19:08:05 | 0m39s | 0k | 6k | 39k | 723k | **770k** |
+| ✅ verifier after review 1 | 🟢 haiku | 19:08:06 | 19:09:07 | 1m01s | 0k | 18k | 88k | 677k | **785k** |
+| 🔄 scribe T0.01 | 🟢 haiku | 19:09:07 | 19:09:13 | 0m06s | 0k | 0k | 48k | 0k | **48k** |
 <!-- /timings -->

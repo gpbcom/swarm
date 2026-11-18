@@ -1,3 +1,4 @@
-# uv run mypy services/gateway/src (src/ moved to services/gateway by T0.01)
+$ uv run mypy services/gateway/src
+(cwd .)
+
 Success: no issues found in 8 source files
-exit=0

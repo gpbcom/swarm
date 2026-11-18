@@ -1,4 +1,4 @@
-# cargo fmt --check (packages/rust)
+$ cargo fmt --all --check --manifest-path packages/rust/Cargo.toml
 Failed to find targets
 This utility formats all bin and lib files of the current crate using rustfmt.
 
@@ -27,4 +27,4 @@ Options:
   -h, --help
           Print help
 
-exit=1
+[exit 1]

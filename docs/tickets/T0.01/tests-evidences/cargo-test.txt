@@ -1,3 +1,3 @@
-# cargo test (packages/rust)
+$ cargo test --workspace --manifest-path packages/rust/Cargo.toml
 error: manifest path `/home/guillaume/Documents/Projects/PoC/swarm/packages/rust` contains no package: The manifest is virtual, and the workspace has no members.
-exit=101
+[exit 101]

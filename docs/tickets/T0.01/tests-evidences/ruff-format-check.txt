@@ -1,3 +1,3 @@
-# uv run ruff format --check .claude/scripts/progress.py services/gateway/src/gateway/__init__.py services/gateway/src/gateway/api/__init__.py services/gateway/src/gateway/api/cli/__init__.py services/gateway/src/gateway/api/cli/main.py services/gateway/src/gateway/clients/__init__.py services/gateway/src/gateway/models/__init__.py services/gateway/src/gateway/service/__init__.py services/gateway/src/gateway/storage/__init__.py services/gateway/tests/api/cli/test_main.py tests/conventions/mono_repo/helpers.py tests/conventions/mono_repo/test_pnpm_workspace.py tests/conventions/mono_repo/test_python_workspace.py tests/conventions/mono_repo/test_rust_workspace.py tests/conventions/mono_repo/test_terraform_layout.py 
-15 files already formatted
-exit=0
+$ uv run ruff format --check services/gateway tests
+14 files already formatted
+[exit 0]

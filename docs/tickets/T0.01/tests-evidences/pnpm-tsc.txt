@@ -1,5 +1,6 @@
+$ pnpm exec tsc --noEmit
 Error: ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL
 
   × Command "tsc" not found
 
-exit=1
+[exit 1]

@@ -1,0 +1,30 @@
+== deploy/terraform/cells/dev
+init exit 0
+Success! The configuration is valid.
+
+[exit 0]
+== deploy/terraform/modules/self-hosted/dns
+init exit 0
+Success! The configuration is valid.
+
+[exit 0]
+== deploy/terraform/modules/self-hosted/k3s
+init exit 0
+Success! The configuration is valid.
+
+[exit 0]
+== deploy/terraform/modules/self-hosted/machines
+init exit 0
+Success! The configuration is valid.
+
+[exit 0]
+== deploy/terraform/modules/self-hosted/network
+init exit 0
+Success! The configuration is valid.
+
+[exit 0]
+== deploy/terraform/modules/self-hosted/object-storage
+init exit 0
+Success! The configuration is valid.
+
+[exit 0]
