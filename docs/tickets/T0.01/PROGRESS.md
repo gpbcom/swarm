@@ -1,6 +1,6 @@
 # T0.01: Progress
 
-**Status:** 🔵 In progress · **Ticket:** [TICKET.md](TICKET.md) · **Plan:** [PLAN.md](PLAN.md)
+**Status:** ⏸️ Paused, resume with `/ticket-run T0.01` · **Ticket:** [TICKET.md](TICKET.md) · **Plan:** [PLAN.md](PLAN.md)
 
 ## 📝 Events
 
@@ -25,6 +25,10 @@
 | 2026-11-18 19:28 | Merge (Review) | integrator | ✅ 3 merged, 0 blocked |
 | 2026-11-18 19:28 | Review 3 | reviewer | ⚠️ changes, 1 findings |
 | 2026-11-18 19:28 | Stopped: review not approved | ticket-run | ❌ 1 open finding: `.github/workflows/terraform.yml` line 60 sets `TF_VAR_api_allowed_cidrs` to an empty string when the repository variable is unset, so the plan job fails with `Missing expression` (TKT-6, delivery: the dev cell state is checked by terraform plan in CI). Fix: fall back to an empty list, and update the `TF_VAR_API_ALLOWED_CIDRS` row of `deploy/terraform/README.md` to say the variable is optional and defaults to `[]`. Owner: implementer (K16), doc-writer (K19). |
+| 2026-11-18 19:18 | Harness moved to its own branch `harness/ticket-run-v2`, merged into develop and into the ticket branch; fixes routed to their owning task | main session | ✅ Done |
+| 2026-11-18 19:28 | Run ended: checks pass, but each full review found new things (7, 3, 3, 1 findings); nothing merged | ticket-run | ⚠️ Not converging |
+| 2026-11-18 19:29 | Converging review (TKT-12): blocking findings only, later rounds confirm fixes, follow-ups never hold the merge | main session | ✅ Done |
+| 2026-11-18 19:30 | Stopped by the person. All 20 tasks merged on ticket/T0.01, checks pass; left: review (TKT-12), then merge into develop. Superseded branches kept: worktree-wf_759b2c8d-a25-12 (K09 first try), worktree-wf_2343c2fd-c11-5 (blocked K20 fix) | the person | ⏸️ Paused |
 
 <!-- timings -->
 ## ⏱️ Timings
@@ -34,21 +38,21 @@ Measured from the agents' transcripts by `python3 .claude/scripts/progress.py ti
 | Measure | Value |
 | --- | --- |
 | 🕒 Ticket started | 2026-11-18 18:34:42 |
-| 🕒 Last activity | 2026-11-18 19:28:34 |
-| ⏱️ **Overall ticket time** (first start to last activity) | **53m51s** |
-| 🤖 Time with agents working (sum of runs) | 40m53s |
-| ⏸️ Time between runs (approvals, fixes) | 12m58s |
-| 🔁 Workflow runs | 6 |
-| 🪙 **Tokens consumed** (input, output, cache write, cache read) | **37.00M** |
+| 🕒 Last activity | 2026-11-18 19:29:58 |
+| ⏱️ **Overall ticket time** (first start to last activity) | **55m15s** |
+| 🤖 Time with agents working (sum of runs) | 41m49s |
+| ⏸️ Time between runs (approvals, fixes) | 13m26s |
+| 🔁 Workflow runs | 7 |
+| 🪙 **Tokens consumed** (input, output, cache write, cache read) | **37.30M** |
 
 #### 🪙 Tokens by model
 
 | Model | Input | Output | Cache write | Cache read | Total |
 | --- | --- | --- | --- | --- | --- |
-| 🔵 sonnet | 0k | 239k | 1.60M | 10.88M | **12.72M** |
+| 🔵 sonnet | 0k | 239k | 1.62M | 10.93M | **12.79M** |
 | 🟣 opus | 0k | 260k | 1.39M | 10.04M | **11.69M** |
-| 🟢 haiku | 0k | 457k | 2.23M | 9.90M | **12.59M** |
-| **All models** | 1k | 957k | 5.22M | 30.82M | **37.00M** |
+| 🟢 haiku | 0k | 490k | 2.35M | 9.98M | **12.82M** |
+| **All models** | 1k | 990k | 5.36M | 30.95M | **37.30M** |
 
 ### 1. ticket-plan · 2026-11-18 18:34:42 to 18:43:56 · ⏱️ 9m13s
 
@@ -183,7 +187,7 @@ Tokens of this run: 0k · 73k · 698k · 2.86M · **3.63M** (input · output · 
 | ✅ verifier after review 1 | 🟢 haiku | 19:16:40 | 19:17:00 | 0m20s | 0k | 5k | 72k | 264k | **341k** |
 | 🔄 reviewer round 2 | 🟣 opus | 19:17:01 | 19:17:17 | 0m16s | 0k | 2k | 126k | 373k | **502k** |
 
-### 6. ticket-run · 2026-11-18 19:18:10 to 19:28:34 · ⏱️ 10m24s
+### 6. ticket-run · 2026-11-18 19:18:10 to 19:28:35 · ⏱️ 10m24s
 
 | Phase | Start | End | Elapsed | Steps |
 | --- | --- | --- | --- | --- |
@@ -191,7 +195,7 @@ Tokens of this run: 0k · 73k · 698k · 2.86M · **3.63M** (input · output · 
 | Waves | | | not run | 0 |
 | Verify | 19:19:04 | 19:19:13 | 0m09s | 1 |
 | Review | 19:19:13 | 19:28:24 | 9m10s | 13 |
-| Finish | 19:28:24 | 19:28:34 | 0m10s | 1 |
+| Finish | 19:28:24 | 19:28:35 | 0m10s | 1 |
 
 Tokens of this run: 0k · 180k · 1.39M · 8.37M · **9.95M** (input · output · cache write · cache read · total)
 
@@ -213,5 +217,23 @@ Tokens of this run: 0k · 180k · 1.39M · 8.37M · **9.95M** (input · output �
 | ✅ integrator Review | 🔵 sonnet | 19:25:02 | 19:25:18 | 0m16s | 0k | 1k | 31k | 158k | **190k** |
 | ✅ verifier after review 2 | 🟢 haiku | 19:25:19 | 19:25:28 | 0m09s | 0k | 0k | 22k | 49k | **72k** |
 | ✅ reviewer round 3 | 🟣 opus | 19:25:29 | 19:28:24 | 2m54s | 0k | 33k | 214k | 1.83M | **2.08M** |
-| 🔄 scribe T0.01 | 🟢 haiku | 19:28:24 | 19:28:34 | 0m10s | 0k | 6k | 81k | 69k | **157k** |
+| ✅ scribe T0.01 | 🟢 haiku | 19:28:24 | 19:28:35 | 0m10s | 0k | 6k | 81k | 69k | **157k** |
+
+### 7. ticket-run · 2026-11-18 19:29:02 to 19:29:58 · ⏱️ 0m55s
+
+| Phase | Start | End | Elapsed | Steps |
+| --- | --- | --- | --- | --- |
+| Gate | 19:29:02 | 19:29:54 | 0m51s | 2 |
+| Waves | | | not run | 0 |
+| Verify | 19:29:54 | 19:29:58 | 0m04s | 1 |
+| Review | | | not run | 0 |
+| Finish | | | not run | 0 |
+
+Tokens of this run: 0k · 33k · 144k · 123k · **301k** (input · output · cache write · cache read · total)
+
+| Step | Model | Start | End | Elapsed | Input | Output | Cache write | Cache read | Total |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| ✅ gate T0.01 | 🟢 haiku | 19:29:02 | 19:29:50 | 0m47s | 0k | 32k | 100k | 46k | **179k** |
+| ✅ integrator prepare T0.01 | 🔵 sonnet | 19:29:50 | 19:29:54 | 0m04s | 0k | 0k | 22k | 52k | **74k** |
+| 🔄 verifier round 1 | 🟢 haiku | 19:29:54 | 19:29:58 | 0m04s | 0k | 0k | 21k | 25k | **47k** |
 <!-- /timings -->

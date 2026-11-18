@@ -2,3 +2,7 @@ $ uv run ruff check services/gateway/src/gateway/__init__.py services/gateway/sr
 (cwd .)
 
 All checks passed!
+   Building swarm-gateway @ file:///home/guillaume/Documents/Projects/PoC/swarm/services/gateway
+      Built swarm-gateway @ file:///home/guillaume/Documents/Projects/PoC/swarm/services/gateway
+Uninstalled 1 package in 0.37ms
+Installed 1 package in 1ms
