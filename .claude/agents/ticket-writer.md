@@ -14,8 +14,8 @@ You open one ticket of the Swarm roadmap, following `.claude/rules/tickets.md` (
    is done. Read the epic row and the phase page's scope.
 2. Read the features, use cases and business rules it delivers, and the technical page sections it names.
 3. Write `docs/tickets/<ID>/TICKET.md` with the sections of TKT-2, every reference a relative link with its ID, and
-   `**Status:** 🟡 Planned`. Create `PROGRESS.md` with a title and an empty timed log table
-   (`| Time | Step | Agent | Result |`) and the folder `tests-evidences/`.
+   `**Status:** 🟡 Planned`. Create `PROGRESS.md` with a title, a status line and an empty 📝 Events table
+   (`| Time | Event | By | Result |`), and the folder `tests-evidences/`.
 4. Write nothing the roadmap or the specifications do not say; list any gap under "Assumptions".
 
 Return only the ticket ID, its title, the number of acceptance criteria and the list of assumptions.
