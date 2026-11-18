@@ -72,15 +72,16 @@ store. The file sets these keys, and you give them values:
 
 Run these commands from `deploy/terraform/cells/dev`.
 
-1. Copy the example to `terraform.tfvars`, and edit it:
+1. Copy the example to a file outside the repository, such as `~/.config/swarm/dev.tfvars`, and edit it:
 
    ```bash
-   cp terraform.tfvars.example terraform.tfvars
+   mkdir -p ~/.config/swarm
+   cp terraform.tfvars.example ~/.config/swarm/dev.tfvars
    ```
 
-   The `*.tfvars` pattern is git-ignored, so the copy is not committed. The same goes for the backend configuration
-   file, if you name it `*.tfbackend`. Keep the paths it holds (the SSH key and the
-   kubeconfig) pointing outside the repository. Its variables are:
+   The variables file stays outside the repository, and it is passed to each command with `-var-file`. The backend
+   configuration file stays outside the repository too. Keep the paths it holds (the SSH key and the kubeconfig)
+   pointing outside the repository. Its variables are:
 
    | Variable | Meaning |
    | --- | --- |
@@ -99,16 +100,16 @@ Run these commands from `deploy/terraform/cells/dev`.
    terraform init -backend-config=<path to the backend configuration file>
    ```
 
-3. Review the plan. Terraform reads `terraform.tfvars` from `cells/dev` on its own:
+3. Review the plan, with the variables file you made in step 1:
 
    ```bash
-   terraform plan
+   terraform plan -var-file=<path to the variables file>
    ```
 
-4. After review, apply by hand. Terraform never applies from continuous integration:
+4. After review, apply by hand, with the same variables file. Terraform never applies from continuous integration:
 
    ```bash
-   terraform apply
+   terraform apply -var-file=<path to the variables file>
    ```
 
 The result is the empty k3s cluster: one server per `server` machine, joined to the first server, and one agent per
