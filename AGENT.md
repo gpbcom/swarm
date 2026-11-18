@@ -52,11 +52,13 @@ Cargo and pnpm workspaces, and the Terraform layout. The Docker, front-end and C
 | `pyproject.toml` | The uv workspace root, with one `uv.lock` for the whole repository |
 | `services/<service>/` | One backend service: its `Dockerfile`, `pyproject.toml`, `conf/`, `src/<service>/`, `tests/` |
 | `frontends/<frontend>/` | One front end: its `Dockerfile`, `src/`, and its Playwright tests in `e2e/` |
-| `packages/` | Shared code: `python/` (Python packages), `rust/` (Cargo workspace), `ts/` (pnpm workspace) |
+| `packages/` | Shared code: `python/` (lifecycle base classes, logging, models), `rust/` (PyO3 crates of the hot path), `ts/` (front-end packages) |
 | `deploy/terraform/` | The Terraform modules per provider and building block, and one root per cell |
 | `tests/conventions/` | The [rules a test enforces](#rules-a-test-enforces), run against every service |
 | `compose.e2e.yaml` | Starts the real images for Playwright |
 | `.github/workflows/` | The CI/CD pipeline |
+
+`packages/rust/` is a Cargo workspace and `packages/ts/` a pnpm workspace.
 
 The Python rules in this file apply to `services/` and `packages/python/`. The front ends use React and TypeScript
 with a Tauri desktop shell, images go to GHCR, and Argo CD deploys them; see `docs/specs/technical/`.
