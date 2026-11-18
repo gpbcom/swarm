@@ -102,15 +102,17 @@ resource "terraform_data" "agent" {
 }
 
 resource "terraform_data" "kubeconfig" {
-  triggers_replace = [local.first_server.address, var.kubeconfig_path]
+  triggers_replace = [local.first_server.address]
 
   provisioner "local-exec" {
-    command = <<-EOT
-      set -eu
+    interpreter = ["/bin/bash", "-c"]
+    command     = <<-EOT
+      set -euo pipefail
       umask 077
       mkdir -p "$(dirname '${var.kubeconfig_path}')"
       ssh ${local.ssh_options} ${var.ssh_user}@${local.first_server.address} sudo cat /etc/rancher/k3s/k3s.yaml \
         | sed 's#127.0.0.1#${local.first_server.address}#' > '${var.kubeconfig_path}'
+      test -s '${var.kubeconfig_path}'
       chmod 0600 '${var.kubeconfig_path}'
     EOT
   }
