@@ -11,3 +11,23 @@ wheels/
 
 # Claude Code worktrees of the ticket harness
 .claude/worktrees/
+
+# Terraform state, variables and plans stay outside the repository
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfvars
+!*.tfvars.example
+crash.log
+crash.*.log
+*.tfbackend
+# Only cell roots commit their provider lock
+deploy/terraform/modules/**/.terraform.lock.hcl
+
+# Rust build output
+packages/rust/target/
+
+# Node
+node_modules/
+.turbo/
