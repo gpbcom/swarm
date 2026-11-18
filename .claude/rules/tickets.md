@@ -19,6 +19,8 @@ These rules apply to every ticket of the roadmap (`docs/specs/roadmap/`), worked
 | [TKT-7](#tkt-7) | Each agent has a fixed model and effort, chosen for cost and quality |
 | [TKT-8](#tkt-8) | Agents never invent facts; assumptions are recorded and reviewed |
 | [TKT-9](#tkt-9) | The person gets a progress update every 2 minutes while a ticket workflow runs |
+| [TKT-10](#tkt-10) | `PROGRESS.md` records the elapsed time of every step and of the whole ticket, and the tokens consumed |
+| [TKT-11](#tkt-11) | Running a ticket again continues where it stopped |
 
 ## <a id="tkt-1"></a>TKT-1: Roadmap tickets, one folder each
 
@@ -28,7 +30,7 @@ These rules apply to every ticket of the roadmap (`docs/specs/roadmap/`), worked
 | --- | --- | --- |
 | `TICKET.md` | What to deliver, links, acceptance criteria | ticket-writer |
 | `PLAN.md` | The task graph, its waves, the approval status | planner (content), scribe (file) |
-| `PROGRESS.md` | A timed log of every step, wave, agent and result, with status icons | scribe |
+| `PROGRESS.md` | 📝 Events (decisions, merges, verdicts, stops) with their time, and ⏱️ Timings with the tokens consumed (TKT-10) | scribe, progress script |
 | `EXPLAIN.md` | What changed, why, and how to test it | scribe |
 | `tests-evidences/` | Outputs of the checks, test reports, screenshots | verifier, scribe |
 
@@ -159,4 +161,36 @@ stalls (⚠️ no change for 20 minutes). The same script with `once` gives the 
 **Why:** a ticket run takes from minutes to hours in the background; the person must see it moving without asking.
 
 **Check:** the conversation shows an update at least every 2 minutes for the whole run.
+
+## <a id="tkt-10"></a>TKT-10: Elapsed time and tokens in PROGRESS.md
+
+**Rule:** at the end of every ticket workflow (plan, run, re-run), whether it finishes or stops, the scribe runs
+
+```bash
+python3 .claude/scripts/progress.py timings --ticket <ID> --write
+```
+
+which writes, between the `<!-- timings -->` markers of `PROGRESS.md`, measured from the agents' transcripts:
+
+- the **overall ticket time** (first start to last activity), the time with agents working, the time between runs
+  (approvals, fixes) and the number of runs;
+- the **tokens consumed**: input, output, cache write and cache read, in total and **by model**;
+- per run: per phase and **per step**, the start, end, elapsed time and tokens.
+
+The 📝 Events table above it holds what the timings cannot measure: approvals, decisions, merges, verdicts, stops,
+each with its time.
+
+**Why:** the person decides the cost tier (TKT-7) and the pace of the roadmap from real durations and consumption.
+
+**Check:** `PROGRESS.md` of every ticket has the timings block, updated after its last run.
+
+## <a id="tkt-11"></a>TKT-11: Re-running continues
+
+**Rule:** `/ticket-run <ID>` skips every task whose commit (`<ID> <task id>:`) is already on `ticket/<ID>`, and starts
+from the first wave with work left. A change to an approved plan (a task's brief or check) is approved by the person
+and recorded in 📝 Events before the re-run.
+
+**Why:** a stop in wave 3 must not pay again for waves 1 and 2.
+
+**Check:** the re-run's timings show no step for the skipped tasks.
 

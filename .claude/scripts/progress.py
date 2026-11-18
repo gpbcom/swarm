@@ -10,6 +10,13 @@ event, or every agent returned and the journal quiet for 90 seconds), or
 after 20 minutes without any change (stalled). Arm it with the Monitor tool: each report is one notification.
 ``once`` prints a single report. Without ``--run``, the most recently changed workflow of this project is used.
 
+    python3 .claude/scripts/progress.py timings --ticket <ID> [--write]
+
+``timings`` measures a ticket from the transcripts of every workflow run that worked on it (ticket-plan, ticket-run,
+re-runs): the overall time, the time agents worked, the time waiting between runs, and per run, per phase and per step
+the start, end and elapsed time (rule TKT-10). ``--write`` puts the result into ``docs/tickets/<ID>/PROGRESS.md``
+between the ``<!-- timings -->`` markers (added under the title if missing); without it, the Markdown is printed.
+
 Legend: 🏁 ended · ⏳ running · ❌ failed · ⚠️ stalled | phases ✅ done 🔄 running ⬜ waiting |
 models 🟣 opus 🔵 sonnet 🟢 haiku 🟠 fable ⚪ other | 🪙 tokens (input + output, cache reads excluded).
 """
@@ -169,8 +176,167 @@ def report(run: Path, started_at: float) -> Tuple[str, bool]:
     return "\n".join(lines), bool(ended)
 
 
+TOKEN_KINDS = (("input_tokens", "in"), ("output_tokens", "out"), ("cache_creation_input_tokens", "cache_write"),
+               ("cache_read_input_tokens", "cache_read"))
+
+
+def agent_window(run: Path, agent_id: str) -> Tuple[Optional[float], Optional[float], Dict[str, int], str]:
+    meta_file = run / f"agent-{agent_id}.meta.json"
+    model = json.loads(meta_file.read_text(encoding="utf-8")).get("model", "") if meta_file.exists() else ""
+    first: Optional[float] = None
+    last: Optional[float] = None
+    used = {short_name: 0 for _, short_name in TOKEN_KINDS}
+    transcript = run / f"agent-{agent_id}.jsonl"
+    for row in read_jsonl(transcript) if transcript.exists() else []:
+        stamp = row.get("timestamp")
+        if isinstance(stamp, str):
+            try:
+                moment = datetime.fromisoformat(stamp.replace("Z", "+00:00")).timestamp()
+            except ValueError:
+                continue
+            first = moment if first is None else min(first, moment)
+            last = moment if last is None else max(last, moment)
+        message = row.get("message")
+        usage = message.get("usage", {}) if isinstance(message, dict) else {}
+        if isinstance(usage, dict):
+            for key, short_name in TOKEN_KINDS:
+                used[short_name] += int(usage.get(key, 0) or 0)
+    return first, last, used, model
+
+
+def clock(moment: Optional[float]) -> str:
+    return datetime.fromtimestamp(moment).strftime("%Y-%m-%d %H:%M:%S") if moment else "?"
+
+
+def span(seconds: Optional[float]) -> str:
+    if seconds is None:
+        return "?"
+    hours, rest = divmod(int(seconds), 3600)
+    minutes, secs = divmod(rest, 60)
+    return f"{hours}h{minutes:02d}m{secs:02d}s" if hours else f"{minutes}m{secs:02d}s"
+
+
+def ticket_runs(ticket: str) -> List[Path]:
+    runs = []
+    for journal in project_dir().glob("*/subagents/workflows/*/journal.jsonl"):
+        if any(ticket in str(e.get("label", "")) for e in read_jsonl(journal) if e.get("type") == "started"):
+            runs.append(journal.parent)
+    return runs
+
+
+def timings(ticket: str) -> str:
+    runs = []
+    for run in ticket_runs(ticket):
+        name, phases = workflow_meta(run)
+        steps = []
+        results: Dict[str, object] = {}
+        for event in read_jsonl(run / "journal.jsonl"):
+            if event.get("type") == "result":
+                results[str(event.get("key"))] = event.get("result")
+        for event in read_jsonl(run / "journal.jsonl"):
+            if event.get("type") != "started":
+                continue
+            first, last, used, model = agent_window(run, str(event.get("agentId", "")))
+            result = results.get(str(event.get("key")))
+            status = result.get("status") if isinstance(result, dict) else None
+            icon = "🔄" if result is None else ("❌" if status in ("failed", "blocked") else "✅")
+            steps.append({"label": str(event.get("label", "agent")), "phase": str(event.get("phase", "")),
+                          "first": first, "last": last, "tokens": used, "model": model_icon(model), "icon": icon})
+        starts = [s["first"] for s in steps if s["first"]]
+        ends = [s["last"] for s in steps if s["last"]]
+        if starts:
+            runs.append({"run": run.name, "name": name, "phases": phases, "steps": steps,
+                         "start": min(starts), "end": max(ends)})
+    if not runs:
+        return f"No workflow run found for {ticket}."
+    runs.sort(key=lambda r: r["start"])
+    start, end = runs[0]["start"], max(r["end"] for r in runs)
+    active = sum(r["end"] - r["start"] for r in runs)
+    def add(total: Dict[str, int], used: Dict[str, int]) -> None:
+        for name in used:
+            total[name] = total.get(name, 0) + used[name]
+
+    def k(value: int) -> str:
+        return f"{value / 1_000_000:.2f}M" if value >= 1_000_000 else f"{value // 1000}k"
+
+    def cells(used: Dict[str, int]) -> str:
+        return " | ".join(k(used.get(name, 0)) for _, name in TOKEN_KINDS) + f" | **{k(sum(used.values()))}**"
+
+    ticket_tokens: Dict[str, int] = {}
+    by_model: Dict[str, Dict[str, int]] = {}
+    for r in runs:
+        for s in r["steps"]:
+            add(ticket_tokens, s["tokens"])
+            add(by_model.setdefault(s["model"], {}), s["tokens"])
+    lines = [
+        "## ⏱️ Timings",
+        "",
+        f"Measured from the agents' transcripts by `python3 .claude/scripts/progress.py timings --ticket {ticket}` (TKT-10).",
+        "",
+        "| Measure | Value |",
+        "| --- | --- |",
+        f"| 🕒 Ticket started | {clock(start)} |",
+        f"| 🕒 Last activity | {clock(end)} |",
+        f"| ⏱️ **Overall ticket time** (first start to last activity) | **{span(end - start)}** |",
+        f"| 🤖 Time with agents working (sum of runs) | {span(active)} |",
+        f"| ⏸️ Time between runs (approvals, fixes) | {span((end - start) - active)} |",
+        f"| 🔁 Workflow runs | {len(runs)} |",
+        f"| 🪙 **Tokens consumed** (input, output, cache write, cache read) | **{k(sum(ticket_tokens.values()))}** |",
+        "",
+        "#### 🪙 Tokens by model",
+        "",
+        "| Model | Input | Output | Cache write | Cache read | Total |",
+        "| --- | --- | --- | --- | --- | --- |",
+        *[f"| {model} | {cells(used)} |" for model, used in by_model.items()],
+        f"| **All models** | {cells(ticket_tokens)} |",
+    ]
+    for number, run in enumerate(runs, 1):
+        lines += ["", f"### {number}. {run['name']} · {clock(run['start'])} to {clock(run['end'])[11:]} · ⏱️ {span(run['end'] - run['start'])}", "",
+                  "| Phase | Start | End | Elapsed | Steps |", "| --- | --- | --- | --- | --- |"]
+        for phase in run["phases"] or sorted({s["phase"] for s in run["steps"]}):
+            members = [s for s in run["steps"] if s["phase"] == phase and s["first"]]
+            if members:
+                p_start, p_end = min(s["first"] for s in members), max(s["last"] for s in members)
+                lines.append(f"| {phase} | {clock(p_start)[11:]} | {clock(p_end)[11:]} | {span(p_end - p_start)} | {len(members)} |")
+            else:
+                lines.append(f"| {phase} | | | not run | 0 |")
+        run_tokens: Dict[str, int] = {}
+        for s in run["steps"]:
+            add(run_tokens, s["tokens"])
+        lines += ["", f"Tokens of this run: {cells(run_tokens).replace(' | ', ' · ')} (input · output · cache write · cache read · total)",
+                  "", "| Step | Model | Start | End | Elapsed | Input | Output | Cache write | Cache read | Total |",
+                  "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |"]
+        for step in sorted(run["steps"], key=lambda s: s["first"] or 0):
+            elapsed = (step["last"] - step["first"]) if step["first"] and step["last"] else None
+            lines.append(f"| {step['icon']} {step['label']} | {step['model']} | {clock(step['first'])[11:]} | "
+                         f"{clock(step['last'])[11:]} | {span(elapsed)} | {cells(step['tokens'])} |")
+    return "\n".join(lines)
+
+
+def write_timings(ticket: str, text: str) -> Path:
+    path = Path(__file__).resolve().parents[2] / "docs" / "tickets" / ticket / "PROGRESS.md"
+    current = path.read_text(encoding="utf-8") if path.exists() else f"# {ticket}: Progress\n"
+    block = f"<!-- timings -->\n{text}\n<!-- /timings -->"
+    if "<!-- timings -->" in current:
+        current = re.sub(r"<!-- timings -->.*?<!-- /timings -->", lambda _: block, current, flags=re.S)
+    else:
+        title, _, rest = current.partition("\n")
+        current = f"{title}\n\n{block}\n{rest}"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(current.rstrip("\n") + "\n", encoding="utf-8")
+    return path
+
+
 def main() -> int:
     args = sys.argv[1:]
+    if args and args[0] == "timings":
+        ticket = args[args.index("--ticket") + 1] if "--ticket" in args else ""
+        if not re.fullmatch(r"T\d\.\d\d", ticket):
+            print("usage: progress.py timings --ticket T0.01 [--write]", file=sys.stderr)
+            return 2
+        text = timings(ticket)
+        print(f"wrote {write_timings(ticket, text)}" if "--write" in args else text)
+        return 0
     if not args or args[0] not in ("watch", "once"):
         print(__doc__, file=sys.stderr)
         return 2

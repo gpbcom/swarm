@@ -27,8 +27,11 @@ const TASK = {
 }
 const GATE = {
   type: 'object',
-  properties: { approved: { type: 'boolean' }, status: { type: 'string' }, tasks: { type: 'array', items: TASK } },
-  required: ['approved', 'status', 'tasks'],
+  properties: {
+    approved: { type: 'boolean' }, status: { type: 'string' }, tasks: { type: 'array', items: TASK },
+    done_tasks: { type: 'array', items: { type: 'string' } },
+  },
+  required: ['approved', 'status', 'tasks', 'done_tasks'],
 }
 const RESULT = {
   type: 'object',
@@ -99,7 +102,7 @@ async function limited(items, n, fn) {
 }
 
 const progress = []
-function note(step, agentName, result) { progress.push(`| ${step} | ${agentName} | ${result} |`) }
+function note(event, by, result) { progress.push(`| ${event} | ${by} | ${result} |`) }
 
 function workerPrompt(t, extra) {
   return `Ticket ${ID}, task ${t.id}: ${t.title}.\nYour worktree branches from ticket/${ID} as it is now.\n` +
@@ -131,14 +134,17 @@ async function integrate(results, label) {
 phase('Gate')
 const gate = await agent(
   `Read docs/tickets/${ID}/PLAN.md. approved is true only if its status line is exactly "**Plan:** 🟢 Approved". ` +
-  `Return the status line and the task graph of its json block exactly, without changing anything.`,
+  `Return the status line and the task graph of its json block exactly, without changing anything. ` +
+  `If the branch ticket/${ID} exists, return in done_tasks the task ids that already have a commit on it whose message starts with "${ID} <task id>:" ` +
+  `(git log ticket/${ID} --format=%s); otherwise an empty list.`,
   { agentType: 'scribe', schema: GATE, label: `gate ${ID}` },
 )
 if (!gate || !gate.approved) {
   return { ticket: ID, stopped: `Plan not approved (${gate ? gate.status : 'PLAN.md unreadable'}). Approve it in docs/tickets/${ID}/PLAN.md first.` }
 }
 const tasks = gate.tasks
-const byId = Object.fromEntries(tasks.map(t => [t.id, t]))
+const alreadyDone = new Set(gate.done_tasks || [])
+if (alreadyDone.size) log(`Re-run: ${alreadyDone.size} task(s) already on ticket/${ID} are skipped (TKT-11): ${[...alreadyDone].join(', ')}`)
 const waveCount = Math.max(...tasks.map(t => t.wave))
 await agent(
   `Ticket ${ID}: prepare the branch ticket/${ID} from develop (create develop from the current branch if it does not exist) and leave the main checkout on it.`,
@@ -149,7 +155,8 @@ await agent(
 phase('Waves')
 const assumptions = []
 for (let w = 1; w <= waveCount; w++) {
-  const waveTasks = tasks.filter(t => t.wave === w)
+  const waveTasks = tasks.filter(t => t.wave === w && !alreadyDone.has(t.id))
+  if (!waveTasks.length) { log(`Wave ${w}/${waveCount}: nothing left`); continue }
   log(`Wave ${w}/${waveCount}: ${waveTasks.length} tasks`)
   let results = await runTasks(waveTasks, 'Waves')
   const retry = results.filter(r => !r.result || r.result.status !== 'done')
@@ -160,13 +167,15 @@ for (let w = 1; w <= waveCount; w++) {
     results = results.filter(r => r.result && r.result.status === 'done').concat(again)
   }
   results.forEach(r => {
-    note(`Wave ${w}: ${r.task.id}`, r.task.agent, r.result ? `${r.result.status === 'done' ? '✅' : '❌'} ${r.result.status}` : '❌ no result')
     if (r.result) assumptions.push(...r.result.assumptions.map(a => `${r.task.id}: ${a}`))
   })
+  const okCount = results.filter(r => r.result && r.result.status === 'done').length
+  note(`Wave ${w}: ${okCount} of ${results.length} tasks done`, 'workers', okCount === results.length ? '✅' : '❌')
   const failed = results.filter(r => !r.result || r.result.status !== 'done')
   await integrate(results, 'Waves')
   if (failed.length) {
-    await agent(`Append these rows to the timed log of docs/tickets/${ID}/PROGRESS.md: ${progress.join(' ')} and a row "Stopped in wave ${w}: ${failed.map(f => f.task.id).join(', ')} not done" (❌).`,
+    await agent(`Append to the Events table of docs/tickets/${ID}/PROGRESS.md these events (Event | By | Result): ${progress.join(' ')} and "Stopped in wave ${w}: ${failed.map(f => f.task.id).join(', ')} not done" (❌). ` +
+      `Then run python3 .claude/scripts/progress.py timings --ticket ${ID} --write.`,
       { agentType: 'scribe', label: `scribe ${ID}` })
     return { ticket: ID, stopped: `Wave ${w}: ${failed.map(f => f.task.id).join(', ')} not done after one retry`, assumptions }
   }
@@ -223,7 +232,8 @@ if (done) {
   note('Merge into develop', 'integrator', '✅ merged locally, not pushed')
 }
 await agent(
-  `Ticket ${ID}: append to the timed log of docs/tickets/${ID}/PROGRESS.md these rows: ${progress.join(' ')}. ` +
+  `Ticket ${ID}: append to the Events table of docs/tickets/${ID}/PROGRESS.md these events (Event | By | Result): ${progress.join(' ')}. ` +
+  `Finally run python3 .claude/scripts/progress.py timings --ticket ${ID} --write. ` +
   (done
     ? `Write docs/tickets/${ID}/EXPLAIN.md from TICKET.md, the diff develop~1...develop and these accepted assumptions: ${JSON.stringify(review.assumptions_accepted)}; set TICKET.md status to "✅ Done".`
     : `Add a row "Stopped: ${verdict && !verdict.passed ? 'checks failing' : 'review not approved'}" (❌) with the open failures or findings: ${JSON.stringify(verdict && !verdict.passed ? verdict.failures : (review ? review.findings : []))}.`),
