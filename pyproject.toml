@@ -1,20 +1,27 @@
-[project]
-name = "swarm"
-version = "0.1.0"
-description = "Add your description here"
-readme = "README.md"
-requires-python = ">=3.12"
-dependencies = [
-    "babel>=2.18.0",
-    "fastapi>=0.164.0",
-    "langchain>=1.5.0",
-    "langgraph>=1.2.22",
-    "pydantic>=2.14.3",
+[tool.uv.workspace]
+members = ["services/*", "packages/python/*"]
+
+[dependency-groups]
+dev = [
+    "maturin>=1.7",
+    "mypy>=1.10",
+    "pytest>=8.0",
+    "pytest-asyncio>=0.24",
+    "pytest-xdist>=3.5",
+    "ruff>=0.6",
 ]
 
-[project.scripts]
-swarm = "swarm:main"
+[tool.ruff]
+line-length = 120
 
-[build-system]
-requires = ["uv_build>=0.12.21,<0.13.0"]
-build-backend = "uv_build"
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests", "services/gateway/tests"]
+
+[tool.mypy]
+files = ["services/gateway/src"]
+mypy_path = ["services/gateway/src"]
+explicit_package_bases = true
