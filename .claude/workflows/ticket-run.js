@@ -79,10 +79,14 @@ const REVIEW = {
       type: 'array',
       items: {
         type: 'object',
-        properties: { file: { type: 'string' }, rule: { type: 'string' }, change: { type: 'string' } },
-        required: ['file', 'rule', 'change'],
+        properties: {
+          file: { type: 'string' }, rule: { type: 'string' }, change: { type: 'string' },
+          severity: { type: 'string', enum: ['blocking', 'follow-up'] },
+        },
+        required: ['file', 'rule', 'change', 'severity'],
       },
     },
+    resolved: { type: 'array', items: { type: 'string' } },
     assumptions_accepted: { type: 'array', items: { type: 'string' } },
   },
   required: ['verdict', 'findings', 'assumptions_accepted'],
@@ -103,6 +107,7 @@ async function limited(items, n, fn) {
 }
 
 const progress = []
+let currentHead = 'develop'
 function note(event, by, result) { progress.push(`| ${event} | ${by} | ${result} |`) }
 
 function workerPrompt(t, extra) {
@@ -128,6 +133,7 @@ async function integrate(results, label) {
     { agentType: 'integrator', schema: MERGE, phase: label, label: `integrator ${label}` },
   )
   note(`Merge (${label})`, 'integrator', merge ? `✅ ${merge.merged.length} merged, ${merge.blocked.length} blocked` : '❌ failed')
+  if (merge && /^[0-9a-f]{7,40}$/.test(merge.head)) currentHead = merge.head
   return merge
 }
 
@@ -147,10 +153,11 @@ const tasks = gate.tasks
 const alreadyDone = new Set(gate.done_tasks || [])
 if (alreadyDone.size) log(`Re-run: ${alreadyDone.size} task(s) already on ticket/${ID} are skipped (TKT-11): ${[...alreadyDone].join(', ')}`)
 const waveCount = Math.max(...tasks.map(t => t.wave))
-await agent(
+const prepared = await agent(
   `Ticket ${ID}: prepare the branch ticket/${ID} from develop (create develop from the current branch if it does not exist) and leave the main checkout on it.`,
   { agentType: 'integrator', schema: MERGE, label: `integrator prepare ${ID}` },
 )
+if (prepared && /^[0-9a-f]{7,40}$/.test(prepared.head)) currentHead = prepared.head
 
 // Waves --------------------------------------------------------------------------------------------------------
 phase('Waves')
@@ -238,24 +245,43 @@ for (let round = 0; round <= MAX_FIX_ROUNDS; round++) {
 }
 
 phase('Review')
+// TKT-12: round 1 reviews the whole ticket; later rounds only confirm the fixes. Only blocking findings are fixed;
+// follow-ups are recorded and never hold the merge.
 let review = null
+let blocking = []
+const followUps = []
+function keep(findings) {
+  for (const f of findings.filter(x => x.severity !== 'blocking')) {
+    if (!followUps.some(x => x.file === f.file && x.change === f.change)) followUps.push(f)
+  }
+  return findings.filter(x => x.severity === 'blocking')
+}
 if (verdict && verdict.passed) {
+  let reviewedHead = null
   for (let round = 0; round <= MAX_FIX_ROUNDS; round++) {
-    review = await agent(
-      `Review ticket ${ID}: the diff develop...ticket/${ID} against docs/tickets/${ID}/TICKET.md. Assumptions reported by the agents: ${JSON.stringify(assumptions)}`,
-      { agentType: 'reviewer', schema: REVIEW, phase: 'Review', label: `reviewer round ${round + 1}` },
-    )
-    note(`Review ${round + 1}`, 'reviewer', review ? `${review.verdict === 'approve' ? '✅' : '⚠️'} ${review.verdict}, ${review.findings.length} findings` : '❌ no verdict')
-    if (!review || review.verdict === 'approve' || round === MAX_FIX_ROUNDS) break
-    await fixRound(review.findings.map(f => ({ file: f.file, check: f.rule, detail: f.change })), 'Review')
+    const prompt = round === 0
+      ? `Review ticket ${ID} (mode: full review): the diff develop...ticket/${ID} against docs/tickets/${ID}/TICKET.md. ` +
+        `Assumptions reported by the agents: ${JSON.stringify(assumptions)}`
+      : `Review ticket ${ID} (mode: confirm fixes, round ${round + 1}). Previous blocking findings: ${JSON.stringify(blocking)}. ` +
+        `The fixes are in git diff ${reviewedHead}..ticket/${ID}. Report, as blocking, only (a) a previous blocking finding that is not resolved, ` +
+        `and (b) a blocking defect introduced by that diff. Anything else is a follow-up. List in resolved the previous findings now fixed.`
+    review = await agent(prompt, { agentType: 'reviewer', schema: REVIEW, phase: 'Review', label: `reviewer round ${round + 1}` })
+    if (!review) break
+    blocking = keep(review.findings)
+    note(`Review ${round + 1} (${round === 0 ? 'full' : 'confirm fixes'})`, 'reviewer',
+      `${blocking.length ? '⚠️' : '✅'} ${blocking.length} blocking, ${review.findings.length - blocking.length} follow-ups`)
+    if (!blocking.length || round === MAX_FIX_ROUNDS) break
+    reviewedHead = currentHead
+    await fixRound(blocking.map(f => ({ file: f.file, check: f.rule, detail: f.change })), 'Review')
     verdict = await agent(`Verify ticket ${ID} on ticket/${ID}.`, { agentType: 'verifier', schema: VERDICT, phase: 'Review', label: `verifier after review ${round + 1}` })
     if (!verdict || !verdict.passed) break
   }
 }
+if (followUps.length) log(`${followUps.length} follow-up(s) recorded, not blocking (TKT-12)`)
 
 // Finish -------------------------------------------------------------------------------------------------------
 phase('Finish')
-const done = Boolean(verdict && verdict.passed && review && review.verdict === 'approve')
+const done = Boolean(verdict && verdict.passed && review && blocking.length === 0)
 if (done) {
   await agent(`Ticket ${ID}: merge ticket/${ID} into develop with --no-ff, remove the merged worktrees, never push.`,
     { agentType: 'integrator', schema: MERGE, label: `integrator finish ${ID}` })
@@ -266,7 +292,8 @@ await agent(
   `Finally run python3 .claude/scripts/progress.py timings --ticket ${ID} --write. ` +
   (done
     ? `Write docs/tickets/${ID}/EXPLAIN.md from TICKET.md, the diff develop~1...develop and these accepted assumptions: ${JSON.stringify(review.assumptions_accepted)}; set TICKET.md status to "✅ Done".`
-    : `Add a row "Stopped: ${verdict && !verdict.passed ? 'checks failing' : 'review not approved'}" (❌) with the open failures or findings: ${JSON.stringify(verdict && !verdict.passed ? verdict.failures : (review ? review.findings : []))}.`),
+    : `Add a row "Stopped: ${verdict && !verdict.passed ? 'checks failing' : 'blocking review findings left after the fix rounds; the person decides'}" (❌) with the open failures or findings: ${JSON.stringify(verdict && !verdict.passed ? verdict.failures : blocking)}.`) +
+  (followUps.length ? ` Add a section "## 🔜 Follow-ups" to PROGRESS.md (and to EXPLAIN.md if written) listing these non-blocking findings, one row each (file, what to change): ${JSON.stringify(followUps.map(f => ({ file: f.file, change: f.change })))}.` : ''),
   { agentType: 'scribe', label: `scribe ${ID}` },
 )
 
@@ -276,7 +303,8 @@ return {
   tasks: tasks.length,
   waves: waveCount,
   checks: verdict ? (verdict.passed ? 'passed' : `${verdict.failures.length} failing`) : 'not run',
-  review: review ? review.verdict : 'not run',
+  review: review ? (blocking.length ? `${blocking.length} blocking left` : 'approved') : 'not run',
+  followUps: followUps.length,
   assumptions,
   next: done ? `Merged into develop locally. Push yourself when you want: the harness never pushes.` : `See docs/tickets/${ID}/PROGRESS.md`,
 }
