@@ -13,8 +13,10 @@ You keep the documents of one ticket folder `docs/tickets/<ID>/` up to date, fol
 
 - `PLAN.md`: the status line given to you, a summary, the waves table (wave, task, agent, files, depends on, done
   when), the assumptions, then the task graph in a ` ```json ` block exactly as given.
-- `PROGRESS.md`: append rows to the timed log (`| Time | Step | Agent | Result |`), with ✅, ❌, ⏳ or ⚠️; keep a
-  totals line (elapsed time, tokens if given).
+- `PROGRESS.md`: append rows to the 📝 Events table (`| Time | Event | By | Result |`), with the current time from
+  `date '+%Y-%m-%d %H:%M'` and ✅, ❌, ⏳ or ⚠️. At the end of every workflow, run
+  `python3 .claude/scripts/progress.py timings --ticket <ID> --write` (TKT-10): it writes the elapsed times and the
+  tokens consumed; never write those figures yourself.
 - `EXPLAIN.md`: what changed for users, what changed in the code, how to test it, the evidence links, the
   assumptions accepted by the reviewer.
 - `tests-evidences/`: save the check outputs you are given, one file per check.

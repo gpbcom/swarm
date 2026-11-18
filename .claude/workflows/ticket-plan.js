@@ -113,7 +113,8 @@ await agent(
   `Write docs/tickets/${ID}/PLAN.md for ticket ${ID} (${ticket.title}) with the status line "**Plan:** 🟡 Awaiting approval", ` +
   `this summary: ${JSON.stringify(plan.summary)}, the assumptions ${JSON.stringify([...ticket.assumptions, ...plan.assumptions])}, ` +
   `the waves table, and this task graph in a json block, exactly: ${JSON.stringify(graph)}. ` +
-  `Then append to docs/tickets/${ID}/PROGRESS.md: "Plan written: ${graph.length} tasks, ${waves} waves, awaiting approval" (⏳).`,
+  `Then append to the Events table of docs/tickets/${ID}/PROGRESS.md: "Plan written: ${graph.length} tasks, ${waves} waves" (⏳ Awaiting approval), ` +
+  `and run python3 .claude/scripts/progress.py timings --ticket ${ID} --write.`,
   { agentType: 'scribe', label: `scribe ${ID}` },
 )
 
