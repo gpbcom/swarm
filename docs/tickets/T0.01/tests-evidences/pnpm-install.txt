@@ -1,6 +1,6 @@
 $ pnpm install --frozen-lockfile
 (cwd .)
 
-✓ Lockfile passes supply-chain policies (verified 27m ago)
+✓ Lockfile passes supply-chain policies (verified 33s ago)
 Lockfile is up to date, resolution step is skipped
-Done in 28ms using pnpm v12.21.0
+Done in 27ms using pnpm v12.21.0

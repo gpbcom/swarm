@@ -5,9 +5,9 @@ $ terraform init -backend=false -input=false
 
 [0m[1mInitializing provider plugins...[0m
 - terraform.io/builtin/terraform is built in to Terraform
+- Reusing version 3.6.2 of hashicorp/dns from the dependency lock file
 - Reusing version 3.9.1 of hashicorp/random from the dependency lock file
 - Reusing version 3.46.4 of aminueza/minio from the dependency lock file
-- Reusing version 3.6.2 of hashicorp/dns from the dependency lock file
 - Using previously-installed hashicorp/dns v3.6.2
 - Using previously-installed hashicorp/random v3.9.1
 - Using previously-installed aminueza/minio v3.46.4
