@@ -50,13 +50,7 @@ class YamlCatalog(BaseModel):
             with path.open(encoding="utf-8") as stream:
                 data: object = yaml.safe_load(stream)
         except (OSError, yaml.YAMLError) as error:
-            raise cls.UNREADABLE(
-                f"Unreadable catalog: {path}. "
-                "Must be a YAML mapping in UTF-8."
-            ) from error
+            raise cls.UNREADABLE(f"Unreadable catalog: {path}. Must be a YAML mapping in UTF-8.") from error
         if not isinstance(data, dict):
-            raise cls.UNREADABLE(
-                f"Unreadable catalog: {path}. "
-                "Must be a YAML mapping in UTF-8."
-            )
+            raise cls.UNREADABLE(f"Unreadable catalog: {path}. Must be a YAML mapping in UTF-8.")
         return cls.model_validate(data)
