@@ -15,7 +15,7 @@ class RunnableStatus(StrEnum):
         EXECUTED (str): The work succeeded and the runnable is closed. It is the last status yielded.
     """
 
-    NOT_STARTED = "not_started"
+    NOT_STARTED = "not-started"
     INITIALISING = "initialising"
     RUNNING = "running"
     EXECUTED = "executed"
