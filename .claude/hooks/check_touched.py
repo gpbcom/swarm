@@ -5,23 +5,32 @@ Usage, with the SubagentStop JSON on stdin:
     python3 .claude/hooks/check_touched.py [--dry-run]
 
 The hook does nothing outside a linked git worktree, so the main working tree is never checked. It finds the files the
-worker changed (committed since the base, modified, added or untracked), looks up the rules of ``layer-checks.json``
+worker changed, looks up the rules of ``layer-checks.json``
 that match them and runs the resulting commands from the top of the worktree. When a check fails, the hook exits 2 so
 that the agent fixes it, at most ``max_blocks`` times (TKT-6); after that it exits 0 and leaves the failure to the
 verifier. A missing executable is a note, not a failure. ``--dry-run`` only prints the commands.
+
+The files the worker changed are those that differ from the tree recorded by ``ticket_tree.py start`` (the file
+``swarm-base-tree`` in the worktree's git directory): the work of earlier tasks copied in by ``start`` is not the
+worker's, so it is not checked again (TKT-5). Without that file, they are the files committed since the base,
+modified, added or untracked.
 """
 
 from __future__ import annotations
 
 import json
+import os
 import re
+import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 TIMEOUT_S = 600
 COUNTER_NAME = "swarm-check-touched-blocks"
+BASE_TREE_FILE = "swarm-base-tree"
 COMMIT_PATTERN = re.compile(r"^(T\d\.\d{2}) K\d{2}:")
 TESTS_PATTERN = re.compile(r"(^|/)tests/")
 TAIL_LINES = 20
@@ -65,8 +74,32 @@ def find_base(top: Path) -> Optional[str]:
     return base if code == 0 and base else None
 
 
-def changed_files(top: Path) -> List[str]:
-    """Return the sorted, existing files changed since the base or in the working tree."""
+def snapshot(top: Path) -> Optional[str]:
+    """Return the tree of every file of the worktree, tracked or not, through a temporary copy of its index."""
+    code, real = git(top, "rev-parse", "--git-path", "index")
+    if code != 0:
+        return None
+    real_index = Path(real) if Path(real).is_absolute() else top / real
+    with tempfile.TemporaryDirectory() as folder:
+        index = Path(folder) / "index"
+        if real_index.is_file():
+            shutil.copy2(real_index, index)
+        env = {**os.environ, "GIT_INDEX_FILE": str(index)}
+        added = subprocess.run(["git", "add", "-A"], cwd=top, env=env, capture_output=True, text=True, check=False)
+        tree = subprocess.run(["git", "write-tree"], cwd=top, env=env, capture_output=True, text=True, check=False)
+    if added.returncode != 0 or tree.returncode != 0:
+        return None
+    return tree.stdout.strip()
+
+
+def changed_files(top: Path, git_dir: Optional[Path] = None) -> List[str]:
+    """Return the sorted, existing files the worker changed: since its start tree, else since the base."""
+    marker = git_dir / BASE_TREE_FILE if git_dir else None
+    if marker is not None and marker.is_file():
+        tree = snapshot(top)
+        if tree:
+            names = git(top, "diff", "--name-only", marker.read_text(encoding="utf-8").strip(), tree)[1].splitlines()
+            return sorted(f for f in names if f and (top / f).exists())
     found = set()
     base = find_base(top)
     if base:
@@ -162,7 +195,7 @@ def main() -> int:
     top, git_dir = info
     catalogue = load_catalogue(top)
     rules = list(catalogue["rules"])  # type: ignore[call-overload]
-    commands = plan_commands(top, rules, changed_files(top))
+    commands = plan_commands(top, rules, changed_files(top, git_dir))
     if dry_run:
         for name, argv in commands:
             print(f"{name}: {' '.join(argv)}")

@@ -16,6 +16,7 @@ from tests.harness.check_touched.helpers import (
     git_dir,
     make_repo,
     run_hook,
+    run_ticket_tree,
 )
 
 
@@ -91,6 +92,17 @@ class TestCheckTouched:
         assert result.returncode == 0
         assert "seen: echo a.txt b.txt" in result.stdout.splitlines()
         assert "old.txt" not in result.stdout
+
+    def test_after_start_only_the_worker_s_own_changes_are_checked(self, tmp_path: Path) -> None:
+        main = make_repo(tmp_path, catalogue_text([echo_rule()]))
+        (main / "earlier.txt").write_text("integrated, not committed\n", encoding="utf-8")
+        worker = add_worktree(main, tmp_path)
+        assert run_ticket_tree(worker, "start", "--ticket", "T9.99").returncode == 0
+        assert (worker / "earlier.txt").is_file()
+        (worker / "mine.txt").write_text("mine\n", encoding="utf-8")
+        result = run_hook(worker, "--dry-run")
+        assert result.returncode == 0
+        assert "seen: echo mine.txt" in result.stdout.splitlines()
 
     def test_a_dry_run_runs_nothing(self, tmp_path: Path) -> None:
         main = make_repo(tmp_path, catalogue_text([failing_rule()]))

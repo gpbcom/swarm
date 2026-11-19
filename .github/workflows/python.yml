@@ -77,3 +77,40 @@ jobs:
         run: uv run ruff format --check tests .github/scripts
       - name: Repository tests
         run: uv run pytest tests -n 2
+
+  packages:
+    if: inputs.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          python-version: "3.12"
+      - name: Install the workspace
+        run: uv sync --locked
+      - name: Ruff check
+        run: uv run ruff check packages/python
+      - name: Ruff format check
+        run: uv run ruff format --check packages/python
+      - name: Mypy
+        run: |
+          found=0
+          for src in packages/python/*/src; do
+            if [ -d "$src" ]; then
+              found=1
+              uv run mypy "$src" || exit 1
+            fi
+          done
+          if [ "$found" = 0 ]; then
+            echo "No source folder in packages/python: mypy is not applicable."
+          fi
+      - name: Pytest
+        run: |
+          if [ -n "$(find packages/python -name 'test_*.py' -print -quit)" ]; then
+            uv run pytest packages/python -n 2
+          else
+            echo "No tests in packages/python: pytest is not applicable."
+          fi
+      - name: JSON Schema bundle is up to date
+        run: uv run swarm-models-schemas --check

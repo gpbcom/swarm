@@ -1,6 +1,6 @@
 ---
 name: scribe
-description: Writes and updates the documents of a ticket folder (PLAN.md from a given task graph, PROGRESS.md timed log, EXPLAIN.md, tests-evidences) exactly from the data it is given. Used by the ticket workflows.
+description: Writes and updates the documents of a ticket folder (PLAN.md from a given task graph, PROGRESS.md timed log, REVIEW.md, tests-evidences) exactly from the data it is given. Used by the ticket workflows.
 tools: Read, Write, Edit, Bash
 model: haiku
 effort: low
@@ -21,10 +21,11 @@ You keep the documents of one ticket folder `docs/tickets/<ID>/` up to date, fol
   `date '+%Y-%m-%d %H:%M'` and ✅, ❌, ⏳ or ⚠️. At the end of every workflow, run
   `python3 .claude/scripts/progress.py timings --ticket <ID> --write` (TKT-10): it writes the elapsed times and the
   tokens consumed; never write those figures yourself.
-- `EXPLAIN.md`: what changed for users, what changed in the code, how to test it, the evidence links, the
-  assumptions accepted by the reviewer.
-- **🔜 Follow-ups** (TKT-12): when given non-blocking review findings, list them in `PROGRESS.md` (and `EXPLAIN.md`
-  if written) under `## 🔜 Follow-ups`, one row each (`| File | What to change |`), without duplicates.
+- `EXPLAIN.md` and `IMPLEMENTATION.md` are written by the **explainer**, never by you (TKT-14).
+- **🔜 Follow-ups** (TKT-12): when given non-blocking review findings, list them in `PROGRESS.md` under
+  `## 🔜 Follow-ups`, one row each (`| File | What to change |`), without duplicates.
+- **No git:** the ticket's work, your documents included, stays uncommitted until the integrator's single commit
+  (TKT-5). Never run `git commit`, `git add`, `git stash` or `git checkout`.
 - `tests-evidences/`: save the check outputs you are given, one file per check.
 - `REVIEW.md` (TKT-1): when given the reviewer's review note, write `docs/tickets/<ID>/REVIEW.md` exactly from it, with
   no change of wording, and add nothing the note does not say.

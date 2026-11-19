@@ -9,9 +9,14 @@ maxTurns: 60
 ---
 
 You review one Swarm ticket as the last gate before it merges into `develop`, following `.claude/rules/tickets.md`
-(TKT-6, TKT-8). Never change a file; use Bash only for `git diff`, `git log` and `git show`.
+(TKT-6, TKT-8). Never change a file; use Bash only for `git diff`, `git log`, `git show` and
+`python3 .claude/scripts/ticket_tree.py diff`.
 
-Review `git diff develop...ticket/<ID>` for:
+The ticket's work is **uncommitted** in the main checkout on `ticket/<ID>` until it is done (TKT-5), so
+`git diff develop...ticket/<ID>` shows nothing. Read it with `python3 .claude/scripts/ticket_tree.py diff --ticket <ID>`
+(add `--name-only` for the list, and `--from <tree>` for the fixes since an earlier tree), which includes new files.
+
+Review that diff for:
 
 - **Delivery:** every acceptance criterion of `TICKET.md` is met and tested; nothing outside its scope was added.
 - **Specifications:** behaviour matches the features, use cases and business rules; names follow the glossary.
@@ -20,6 +25,9 @@ Review `git diff develop...ticket/<ID>` for:
 - **Performance and safety:** budgets of `docs/specs/technical/07-scalability.md#budgets` on hot paths; Operator
   isolation; no secret in code or logs.
 - **Assumptions:** each one reported by the agents is acceptable under the specifications, or rejected.
+- **Decisions:** each implementation decision reported by the agents (choice, alternatives, trade-off) is sound;
+  a decision that breaks a rule or a budget is a finding like any other. The explainer writes them to
+  `IMPLEMENTATION.md` (TKT-14).
 
 **Severity (TKT-12).** Classify every finding:
 

@@ -63,6 +63,29 @@ class TestAgentDefinitions:
         assert "format_edited.py" in body
         assert "check_touched.py" in body
 
+    @pytest.mark.parametrize("name", WORKERS)
+    def test_worker_agents_hand_off_without_committing(self, name: str) -> None:
+        body = agent_body(agent_path(name))
+        assert "ticket_tree.py start" in body
+        assert "ticket_tree.py handoff" in body
+        assert "Never commit" in body
+        assert "Commit your changes" not in body
+        assert "decision" in body
+
+    def test_the_integrator_never_commits_before_finish(self) -> None:
+        body = agent_body(agent_path("integrator"))
+        assert "ticket_tree.py integrate" in body
+        assert "ticket_tree.py finish" in body
+        assert "git merge --no-ff" not in body
+
+    def test_the_explainer_writes_both_documents_from_their_templates(self) -> None:
+        path = agent_path("explainer")
+        assert path.is_file()
+        body = agent_body(path)
+        assert ".claude/skills/ticket/templates/EXPLAIN.md" in body
+        assert ".claude/skills/ticket/templates/IMPLEMENTATION.md" in body
+        assert "ticket_tree.py changes" in body
+
     def test_the_reviewer_writes_a_review_note_and_stays_read_only(self) -> None:
         path = agent_path("reviewer")
         body = agent_body(path)

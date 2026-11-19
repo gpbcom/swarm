@@ -1,0 +1,7 @@
+$ pnpm install --frozen-lockfile
+(cwd .)
+
+Scope: all 3 workspace projects
+✓ Lockfile passes supply-chain policies (verified 19m ago)
+Lockfile is up to date, resolution step is skipped
+Done in 20ms using pnpm v12.21.0

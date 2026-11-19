@@ -42,8 +42,14 @@ def run(command: List[str], cwd: Path = ROOT) -> Tuple[int, str]:
 
 
 def changed_files(base: str) -> List[str]:
-    code, out = run(["git", "diff", "--name-only", f"{base}...HEAD"])
-    return [line for line in out.splitlines() if line] if code == 0 else []
+    # The ticket's work stays uncommitted until the ticket is done (TKT-5): compare the working tree, untracked files
+    # included, with the point where the branch left the base.
+    code, merge_base = run(["git", "merge-base", base, "HEAD"])
+    if code != 0:
+        return []
+    _, tracked = run(["git", "diff", "--name-only", merge_base.strip()])
+    _, untracked = run(["git", "ls-files", "--others", "--exclude-standard"])
+    return sorted({line for line in f"{tracked}\n{untracked}".splitlines() if line})
 
 
 class Checks:

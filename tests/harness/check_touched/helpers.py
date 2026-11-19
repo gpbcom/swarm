@@ -92,3 +92,19 @@ def run_hook(cwd: Path, *args: str) -> subprocess.CompletedProcess[str]:
         encoding="utf-8",
         timeout=120,
     )
+
+
+def ticket_tree_path() -> Path:
+    return repo_root() / ".claude" / "scripts" / "ticket_tree.py"
+
+
+def run_ticket_tree(cwd: Path, *args: str) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [sys.executable, str(ticket_tree_path()), *args],
+        cwd=cwd,
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        timeout=120,
+    )

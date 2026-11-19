@@ -1,0 +1,5 @@
+$ pnpm -r --if-present lint
+(cwd .)
+
+$ eslint .
+$ eslint .
