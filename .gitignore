@@ -31,3 +31,6 @@ packages/rust/target/
 # Node
 node_modules/
 .turbo/
+
+# Log files written by the logging configuration stay out of the repository
+logs/

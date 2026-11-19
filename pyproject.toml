@@ -11,6 +11,7 @@ dev = [
     "pytest-xdist>=3.5",
     "pyyaml>=6.0",
     "ruff>=0.6",
+    "types-pyyaml>=6.0.12.20261113",
 ]
 
 [tool.ruff]
@@ -23,8 +24,9 @@ ignore = ["UP006", "UP007", "UP035", "UP045"]
 
 [tool.ruff.lint.isort]
 # Tests are written before the code they import (TKT-4): pinning ``tests`` as first-party keeps the import order the
-# same whether or not the imported module exists yet.
-known-first-party = ["tests"]
+# same whether or not the imported module exists yet. The code of the repository is first-party, so that the AGENT.md
+# import groups match ruff.
+known-first-party = ["tests", "gateway", "swarm_catalog", "swarm_lifecycle", "swarm_logging"]
 
 [tool.ruff.format]
 quote-style = "double"
@@ -32,9 +34,25 @@ quote-style = "double"
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 pythonpath = ["."]
-testpaths = ["tests", "services/gateway/tests"]
+testpaths = [
+    "tests",
+    "services/gateway/tests",
+    "packages/python/swarm-lifecycle/tests",
+    "packages/python/swarm-catalog/tests",
+    "packages/python/swarm-logging/tests",
+]
 
 [tool.mypy]
-files = ["services/gateway/src"]
-mypy_path = ["services/gateway/src"]
+files = [
+    "services/gateway/src",
+    "packages/python/swarm-lifecycle/src",
+    "packages/python/swarm-catalog/src",
+    "packages/python/swarm-logging/src",
+]
+mypy_path = [
+    "services/gateway/src",
+    "packages/python/swarm-lifecycle/src",
+    "packages/python/swarm-catalog/src",
+    "packages/python/swarm-logging/src",
+]
 explicit_package_bases = true
