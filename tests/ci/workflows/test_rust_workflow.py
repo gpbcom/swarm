@@ -1,0 +1,90 @@
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Dict, List, Optional
+
+import pytest
+import yaml
+
+
+class TestRustWorkflow:
+    def workflow(self) -> Dict[object, object]:
+        root = Path(__file__).resolve().parents[3]
+        path = root / ".github" / "workflows" / "rust.yml"
+        data = yaml.safe_load(path.read_text(encoding="utf-8"))
+        assert isinstance(data, dict)
+        return data
+
+    def job(self) -> Dict[str, object]:
+        jobs = self.workflow()["jobs"]
+        assert isinstance(jobs, dict)
+        return jobs["check"]
+
+    def steps(self) -> List[Dict[str, object]]:
+        return list(self.job()["steps"])
+
+    def runs(self) -> List[str]:
+        return [str(step["run"]) for step in self.steps() if "run" in step]
+
+    def index_of(self, needle: str) -> Optional[int]:
+        for index, step in enumerate(self.steps()):
+            if needle in str(step.get("run", "")):
+                return index
+        return None
+
+    def test_it_is_a_reusable_workflow(self) -> None:
+        data = self.workflow()
+        trigger = data.get("on", data.get(True))
+        assert isinstance(trigger, dict)
+        assert "workflow_call" in trigger
+
+    def test_it_only_reads_the_repository(self) -> None:
+        assert self.workflow()["permissions"] == {"contents": "read"}
+
+    def test_it_has_one_check_job_on_ubuntu(self) -> None:
+        jobs = self.workflow()["jobs"]
+        assert isinstance(jobs, dict)
+        assert list(jobs) == ["check"]
+        assert self.job()["runs-on"] == "ubuntu-latest"
+
+    def test_it_runs_in_the_rust_workspace(self) -> None:
+        assert self.job()["defaults"]["run"]["working-directory"] == "packages/rust"
+
+    def test_it_checks_out_the_repository(self) -> None:
+        uses = [str(step.get("uses", "")) for step in self.steps()]
+        assert any(value.startswith("actions/checkout@") for value in uses)
+
+    def test_the_toolchain_is_installed_before_the_first_cargo_command(self) -> None:
+        first_cargo = self.index_of("cargo ")
+        assert first_cargo is not None
+        installs = [
+            index
+            for index, step in enumerate(self.steps())
+            if "rust-toolchain" in str(step.get("uses", "")) or "rustup" in str(step.get("run", ""))
+        ]
+        assert installs
+        assert min(installs) < first_cargo
+
+    @pytest.mark.parametrize(
+        "command",
+        [
+            "cargo fmt --all --check",
+            "cargo clippy --workspace --all-targets --locked -- -D warnings",
+            "cargo test --workspace --locked",
+        ],
+    )
+    def test_it_runs_each_cargo_command(self, command: str) -> None:
+        assert any(command in run for run in self.runs())
+
+    def test_the_cargo_commands_run_in_order(self) -> None:
+        positions = [
+            self.index_of("cargo fmt --all --check"),
+            self.index_of("cargo clippy --workspace --all-targets --locked -- -D warnings"),
+            self.index_of("cargo test --workspace --locked"),
+        ]
+        found = [position for position in positions if position is not None]
+        assert len(found) == len(positions)
+        assert found == sorted(found)
+
+    def test_no_run_step_uses_an_expression(self) -> None:
+        assert all("${{" not in run for run in self.runs())
