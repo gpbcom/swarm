@@ -2,11 +2,24 @@
 
 from __future__ import annotations
 
+# First-party imports
+from gateway.api.factories.greeting.greeting_command_factory import GreetingCommandFactory
+from swarm_logging.configurators.logging_configurator import LoggingConfigurator
+from swarm_logging.models.logging_config import LoggingConfig
+
 
 def main() -> None:
-    """Print the greeting of the gateway.
+    """Configure logging, then run the greeting command.
+
+    Raises:
+        SystemExit: When the command exit code is not 0.
 
     Notes:
-        Only ``api/cli/`` prints, because this output is for the person at the terminal.
+        - Logging is configured once, here at the entry point.
+        - Only ``api/cli/`` prints, because this output is for the person at the terminal.
     """
-    print("Hello from swarm!")
+    LoggingConfigurator(LoggingConfig()).configure()
+    command = GreetingCommandFactory().create()
+    command.execute()
+    if command.exit_code != 0:
+        raise SystemExit(command.exit_code)
