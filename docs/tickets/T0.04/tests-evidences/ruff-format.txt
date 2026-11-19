@@ -1,0 +1,4 @@
+$ uv run ruff format --check tests/ci/detect_changes/helpers.py tests/ci/detect_changes/test_detect_changes.py tests/ci/detect_changes/test_shared_changes.py tests/ci/workflows/test_ci_workflow.py tests/ci/workflows/test_python_workflow.py tests/ci/workflows/test_rust_workflow.py tests/ci/workflows/test_specs_workflow.py tests/ci/workflows/test_typescript_workflow.py
+(cwd .)
+
+8 files already formatted

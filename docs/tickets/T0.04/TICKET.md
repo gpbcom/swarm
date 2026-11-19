@@ -1,6 +1,6 @@
 # T0.04: CI checks for every language
 
-**Status:** 🟡 Planned
+**Status:** ✅ Done
 
 ## Roadmap
 
