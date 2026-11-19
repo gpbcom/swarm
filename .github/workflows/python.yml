@@ -1,0 +1,79 @@
+name: python
+
+on:
+  workflow_call:
+    inputs:
+      services:
+        description: "Compact JSON array of the services to check, as printed by detect_changes.py."
+        type: string
+        required: true
+      repository:
+        description: "Whether to run the repository tests and lint the CI scripts."
+        type: boolean
+        required: false
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  services:
+    if: inputs.services != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service: ${{ fromJSON(inputs.services) }}
+    env:
+      SERVICE: ${{ matrix.service }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          python-version: "3.12"
+      - name: Install the workspace
+        run: uv sync --locked
+      - name: Ruff check
+        run: uv run ruff check "services/$SERVICE"
+      - name: Ruff format check
+        run: uv run ruff format --check "services/$SERVICE"
+      - name: Mypy
+        run: |
+          if [ -d "services/$SERVICE/src" ]; then
+            uv run mypy "services/$SERVICE/src"
+          else
+            echo "No source folder for $SERVICE: mypy is not applicable."
+          fi
+      - name: Pytest
+        run: |
+          if [ -d "services/$SERVICE/tests" ] && [ -n "$(find "services/$SERVICE/tests" -name 'test_*.py' -print -quit)" ]; then
+            uv run pytest "services/$SERVICE/tests" -n 2
+          else
+            echo "No tests for $SERVICE: pytest is not applicable."
+          fi
+      - name: Convention tests of the service
+        run: |
+          if [ -f tests/conventions/services/test_service_conventions.py ]; then
+            uv run pytest tests/conventions/services/test_service_conventions.py -k "$SERVICE-" -n 2
+          else
+            echo "No convention tests: not applicable."
+          fi
+
+  repository:
+    if: inputs.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          python-version: "3.12"
+      - name: Install the workspace
+        run: uv sync --locked
+      - name: Ruff check
+        run: uv run ruff check tests .github/scripts
+      - name: Ruff format check
+        run: uv run ruff format --check tests .github/scripts
+      - name: Repository tests
+        run: uv run pytest tests -n 2
