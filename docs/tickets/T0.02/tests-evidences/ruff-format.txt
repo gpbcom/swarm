@@ -1,0 +1,4 @@
+$ uv run ruff format --check tests/harness/check_plan/helpers.py tests/harness/check_plan/test_check_plan.py tests/harness/check_ticket/helpers.py tests/harness/check_ticket/test_check_ticket.py tests/harness/check_touched/helpers.py tests/harness/check_touched/test_check_touched.py tests/harness/format_edited/helpers.py tests/harness/format_edited/test_format_edited.py tests/harness/wiring/helpers.py tests/harness/wiring/test_agent_definitions.py tests/harness/wiring/test_harness_settings.py tests/harness/wiring/test_ticket_workflows.py
+(cwd .)
+
+12 files already formatted

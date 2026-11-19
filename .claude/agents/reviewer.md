@@ -1,6 +1,6 @@
 ---
 name: reviewer
-description: Reviews the full diff of a Swarm ticket against TICKET.md, the specifications and the rules (AGENT.md, SPEC, TKT), checks every assumption, and returns approve or changes with precise findings. Read-only. Used by /ticket-run.
+description: Reviews the full diff of a Swarm ticket against TICKET.md, the specifications and the rules (AGENT.md, SPEC, TKT), checks every assumption, and returns approve or changes with precise findings and a short review note for the person. Read-only. Used by /ticket-run.
 tools: Read, Grep, Glob, Bash
 model: opus
 effort: high
@@ -38,6 +38,8 @@ When in doubt, a finding is a follow-up.
   diff you are given for blocking defects it introduced. Report anything else you notice as a follow-up; do not
   start a new full review.
 
+**Review note.** Besides the verdict and the findings, write in the structured field `note` a review note in Markdown, following `.claude/skills/ticket/templates/REVIEW.md`. The review note is for the person, who must be able to review the ticket in under an hour. It holds: the verdict; what changed, in at most five bullets, each a behaviour or a decision and never a file list; each acceptance criterion of `TICKET.md`, in order, with its evidence (a file of `tests-evidences/` or a test name) and its result; what to look at first, the design and behaviour points with their files, read line by line for identity, Operator isolation and Simulator isolation; the assumptions accepted, with the reason; and the follow-ups. Never restate the diff.
+
 Return only the structured result: verdict (approve when no finding is blocking, otherwise changes), findings (file,
-line, rule, what to change, the owning task id such as K13, severity), resolved (previous findings now fixed), and the
-assumptions accepted.
+line, rule, what to change, the owning task id such as K13, severity), resolved (previous findings now fixed), the
+assumptions accepted, and note (the review note).

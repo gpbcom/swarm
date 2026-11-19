@@ -21,9 +21,9 @@ const TASK = {
   properties: {
     id: { type: 'string' }, title: { type: 'string' }, agent: { type: 'string' },
     depends_on: { type: 'array', items: { type: 'string' } }, files: { type: 'array', items: { type: 'string' } },
-    brief: { type: 'string' }, done_when: { type: 'string' }, wave: { type: 'integer' },
+    wave: { type: 'integer' },
   },
-  required: ['id', 'title', 'agent', 'depends_on', 'files', 'brief', 'done_when', 'wave'],
+  required: ['id', 'title', 'agent', 'depends_on', 'files', 'wave'],
 }
 const GATE = {
   type: 'object',
@@ -71,6 +71,11 @@ const VERDICT = {
   },
   required: ['passed', 'failures'],
 }
+const CHECK = {
+  type: 'object',
+  properties: { passed: { type: 'boolean' }, problems: { type: 'array', items: { type: 'string' } } },
+  required: ['passed', 'problems'],
+}
 const REVIEW = {
   type: 'object',
   properties: {
@@ -88,8 +93,9 @@ const REVIEW = {
     },
     resolved: { type: 'array', items: { type: 'string' } },
     assumptions_accepted: { type: 'array', items: { type: 'string' } },
+    note: { type: 'string' },
   },
-  required: ['verdict', 'findings', 'assumptions_accepted'],
+  required: ['verdict', 'findings', 'assumptions_accepted', 'note'],
 }
 
 // Run fn over items with at most n agents at once (TKT-4).
@@ -112,7 +118,11 @@ function note(event, by, result) { progress.push(`| ${event} | ${by} | ${result}
 
 function workerPrompt(t, extra) {
   return `Ticket ${ID}, task ${t.id}: ${t.title}.\nYour worktree branches from ticket/${ID} as it is now.\n` +
-    `Files you may change: ${t.files.join(', ')}.\nBrief: ${t.brief}\nDone when: ${t.done_when}\n` +
+    `Files you may change: ${t.files.join(', ')}.\n` +
+    (t.brief
+      ? `Brief: ${t.brief}\nDone when: ${t.done_when}\n`
+      : `First read your brief and done-when exactly as approved: run python3 .claude/scripts/plan.py task --ticket ${ID} --id ${t.id} ` +
+        `at the root of your worktree. Follow them as your brief.\n`) +
     (extra ? `\n${extra}\n` : '') +
     `Commit with the message "${ID} ${t.id}: <summary>". Never push, never merge.`
 }
@@ -141,13 +151,21 @@ async function integrate(results, label) {
 phase('Gate')
 const gate = await agent(
   `Read docs/tickets/${ID}/PLAN.md. approved is true only if its status line is exactly "**Plan:** 🟢 Approved". ` +
-  `Return the status line and the task graph of its json block exactly, without changing anything. ` +
+  `Return the status line, and in tasks the JSON array printed by python3 .claude/scripts/plan.py outline --ticket ${ID}, exactly, without changing anything ` +
+  `(the briefs are not part of it: each worker reads its own from the plan). ` +
   `If the branch ticket/${ID} exists, return in done_tasks the task ids that already have a commit on it whose message starts with "${ID} <task id>:" ` +
   `(git log ticket/${ID} --format=%s); otherwise an empty list.`,
   { agentType: 'scribe', schema: GATE, label: `gate ${ID}` },
 )
 if (!gate || !gate.approved) {
   return { ticket: ID, stopped: `Plan not approved (${gate ? gate.status : 'PLAN.md unreadable'}). Approve it in docs/tickets/${ID}/PLAN.md first.` }
+}
+const planCheck = await agent(
+  `Run exactly python3 .claude/skills/ticket/scripts/check_plan.py ${ID} and report. passed is true only if it exits 0 and prints nothing; problems lists its output lines.`,
+  { agentType: 'verifier', schema: CHECK, label: `plan check ${ID}` },
+)
+if (!planCheck || !planCheck.passed) {
+  return { ticket: ID, stopped: 'PLAN.md fails check_plan.py', problems: planCheck ? planCheck.problems : ['check_plan.py did not report'] }
 }
 const tasks = gate.tasks
 const alreadyDone = new Set(gate.done_tasks || [])
@@ -267,10 +285,12 @@ if (verdict && verdict.passed) {
   for (let round = 0; round <= MAX_FIX_ROUNDS; round++) {
     const prompt = round === 0
       ? `Review ticket ${ID} (mode: full review): the diff develop...ticket/${ID} against docs/tickets/${ID}/TICKET.md. ` +
-        `Assumptions reported by the agents: ${JSON.stringify(assumptions)}`
+        `Assumptions reported by the agents: ${JSON.stringify(assumptions)}. ` +
+        `Return in note the short review note, following .claude/skills/ticket/templates/REVIEW.md.`
       : `Review ticket ${ID} (mode: confirm fixes, round ${round + 1}). Previous blocking findings: ${JSON.stringify(blocking)}. ` +
         `The fixes are in git diff ${reviewedHead}..ticket/${ID}. Report, as blocking, only (a) a previous blocking finding that is not resolved, ` +
-        `and (b) a blocking defect introduced by that diff. Anything else is a follow-up. List in resolved the previous findings now fixed.`
+        `and (b) a blocking defect introduced by that diff. Anything else is a follow-up. List in resolved the previous findings now fixed. ` +
+        `Return in note the short review note, following .claude/skills/ticket/templates/REVIEW.md.`
     review = await agent(prompt, { agentType: 'reviewer', schema: REVIEW, phase: 'Review', label: `reviewer round ${round + 1}` })
     if (!review) break
     blocking = keep(review.findings)
@@ -299,6 +319,7 @@ await agent(
   (done
     ? `Write docs/tickets/${ID}/EXPLAIN.md from TICKET.md, the diff develop~1...develop and these accepted assumptions: ${JSON.stringify(review.assumptions_accepted)}; set TICKET.md status to "✅ Done".`
     : `Add a row "Stopped: ${environmentFailure ? 'environment problem (missing tool or module), the person fixes the environment and re-runs' : verdict && !verdict.passed ? 'checks failing' :'blocking review findings left after the fix rounds; the person decides'}" (❌) with the open failures or findings: ${JSON.stringify(verdict && !verdict.passed ? verdict.failures : blocking)}.`) +
+  (review ? ` Write docs/tickets/${ID}/REVIEW.md exactly from the note of the last review: ${JSON.stringify(review.note)}.` : '') +
   (followUps.length ? ` Add a section "## 🔜 Follow-ups" to PROGRESS.md (and to EXPLAIN.md if written) listing these non-blocking findings, one row each (file, what to change): ${JSON.stringify(followUps.map(f => ({ file: f.file, change: f.change })))}.` : ''),
   { agentType: 'scribe', label: `scribe ${ID}` },
 )
@@ -311,6 +332,7 @@ return {
   checks: verdict ? (verdict.passed ? 'passed' : `${verdict.failures.length} failing`) : 'not run',
   review: review ? (blocking.length ? `${blocking.length} blocking left` : 'approved') : 'not run',
   followUps: followUps.length,
+  reviewNote: review ? `docs/tickets/${ID}/REVIEW.md` : 'not written',
   assumptions,
   next: done ? `Merged into develop locally. Push yourself when you want: the harness never pushes.`
     : environmentFailure ? `Fix the environment (see the failing checks in docs/tickets/${ID}/PROGRESS.md), then run /ticket-run ${ID} again`

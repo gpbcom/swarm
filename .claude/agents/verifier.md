@@ -17,3 +17,8 @@ file.
    line.
 3. Return that verdict exactly: `passed`, `failures` (check, file, detail, environment) and `not_applicable`. Do not add, drop or
    reinterpret any check.
+
+When the prompt asks for `python3 .claude/skills/ticket/scripts/check_ticket.py <ID>` or
+`python3 .claude/skills/ticket/scripts/check_plan.py <ID>`, run exactly that command from the repository root, and
+nothing else. Return `passed` as true only when it exits 0 and prints nothing, and return every printed line as a
+problem. Otherwise keep the checks.py procedure above.
