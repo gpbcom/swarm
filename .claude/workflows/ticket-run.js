@@ -365,6 +365,22 @@ if (done) {
       { agentType: 'explainer', phase: 'Finish', label: `explainer ${ID}` },
     ),
   ])
+  // TKT-14: every file and line of EXPLAIN.md and IMPLEMENTATION.md is a working clickable link. ticket_tree.py docs
+  // checks it deterministically; the explainer fixes what it reports once, and finish refuses to commit otherwise.
+  for (let round = 0; round <= 1; round++) {
+    const docsCheck = await agent(
+      `Run exactly python3 .claude/scripts/ticket_tree.py docs --ticket ${ID} and report. passed is true only if it exits 0 and prints nothing; problems lists its output lines.`,
+      { agentType: 'verifier', schema: CHECK, phase: 'Finish', label: `docs check ${ID} ${round + 1}` },
+    )
+    log(`Documents check ${round + 1}: ${docsCheck && docsCheck.passed ? 'passed' : `${docsCheck ? docsCheck.problems.length : '?'} problem(s)`}`)
+    if (!docsCheck || docsCheck.passed || round === 1) break
+    await agent(
+      `Ticket ${ID}: fix only these problems of docs/tickets/${ID}/EXPLAIN.md and IMPLEMENTATION.md, so that every file and line ` +
+      `they mention is a clickable link that opens it (TKT-14), then run python3 .claude/scripts/ticket_tree.py docs --ticket ${ID} until it prints nothing: ` +
+      `${JSON.stringify(docsCheck.problems)}`,
+      { agentType: 'explainer', phase: 'Finish', label: `explainer ${ID} (fix links)` },
+    )
+  }
   finished = await agent(
     `Ticket ${ID} is done. First run python3 .claude/scripts/progress.py timings --ticket ${ID} --write, ` +
     `then python3 .claude/scripts/ticket_tree.py finish --ticket ${ID}: the ticket's single commit, merged into develop with --no-ff. ` +

@@ -288,6 +288,10 @@ the heading.
 - **`IMPLEMENTATION.md`: why this way.** The constraints any solution had to respect, then one section per decision:
   the option chosen, its real alternatives, what speaks for and against each in this repository (a rule, a budget, an
   acceptance criterion, the existing code), the trade-off accepted and when to revisit it.
+- **Every file and every line they mention is a clickable link**, relative to `docs/tickets/<ID>/`:
+  `[`path/file.py:42`](../../../path/file.py#L42)` for a line, `#L42-L50` for a range, no fragment for a whole file.
+  A path in plain text or in backticks alone is refused; paths in fenced command blocks are commands and stay as they
+  are. A deleted file, which has no line left to open, is the one exception.
 - The decisions come from the workers, who report each choice where a reasonable alternative existed (choice,
   alternatives, trade-off, file and line), from `PLAN.md`, and from the explainer's reading of the diff. The reviewer
   checks them with the assumptions. Nothing is invented: an unknown reason is written as an open point (TKT-8).
@@ -296,6 +300,8 @@ the heading.
 developer, person or agent, inherits the code: one needs to know where things are and how they work, the other why
 they are this way and what changing them would cost.
 
-**Check:** `python3 .claude/scripts/ticket_tree.py changes --ticket <ID> --check` prints nothing before the commit,
-both files have every section of their template, and `grep -n 'tkt-14' .claude/rules/tickets.md` finds the summary row
+**Check:** `python3 .claude/scripts/ticket_tree.py docs --ticket <ID>` prints nothing before the commit (the changes
+table is up to date, no placeholder is left, every file and line is a link, and every link opens an existing file at a
+line inside it); `ticket_tree.py finish` refuses to commit otherwise, and the workflow sends its problems back to the
+explainer once. Both files have every section of their template, and `grep -n 'tkt-14' .claude/rules/tickets.md` finds the summary row
 and the heading.

@@ -79,8 +79,31 @@ def make_repo(base: Path) -> Path:
     folder = main / TICKET_FOLDER
     folder.mkdir(parents=True)
     (folder / "TICKET.md").write_text(f"# {TICKET_TITLE}\n", encoding="utf-8")
-    (folder / "EXPLAIN.md").write_text(f"# Explain\n\n{CHANGES_MARKERS}", encoding="utf-8")
+    write_documents(main, "", "")
     return main
+
+
+def write_documents(main: Path, explain: str, implementation: str) -> None:
+    """Write ``EXPLAIN.md`` (around the empty changes markers) and ``IMPLEMENTATION.md`` of the ticket."""
+    folder = main / TICKET_FOLDER
+    (folder / "EXPLAIN.md").write_text(f"# Explain\n\n{explain}\n\n{CHANGES_MARKERS}", encoding="utf-8")
+    (folder / "IMPLEMENTATION.md").write_text(f"# Implementation\n\n{implementation}\n", encoding="utf-8")
+
+
+def integrated_repo(base: Path) -> Path:
+    """Create a repository whose ticket integrated one task changing ``a.txt`` (lines 2 and 4 of 4)."""
+    main = make_repo(base)
+    assert run(main, "prepare").returncode == 0
+    worker_writes(main, "w1", "K01", {"a.txt": "a\nB\nc\nd\n"})
+    assert run(main, "integrate", "--task", "K01").returncode == 0
+    return main
+
+
+def documents_problems(main: Path, explain: str, implementation: str) -> str:
+    """Write the documents, generate their changes table, and return what ``docs`` prints."""
+    write_documents(main, explain, implementation)
+    assert run(main, "changes", "--write").returncode == 0
+    return run(main, "docs").stdout
 
 
 def add_worktree(main: Path, name: str) -> Path:

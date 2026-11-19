@@ -1,6 +1,9 @@
 <!-- Explanation template (TKT-14). Written by the explainer when the ticket is done, before its single commit. -->
 <!-- For a developer who did not follow the ticket: how the delivered work works, and where it is, file by file and -->
 <!-- line by line. Every claim points at a file and its lines. Never invent a behaviour the diff does not show. -->
+<!-- EVERY file and line is a clickable relative link, never a bare path (TKT-14): -->
+<!-- [`path/file.py:42`](../../../path/file.py#L42), [`path/file.py:42-50`](../../../path/file.py#L42-L50), -->
+<!-- [`path/file.py`](../../../path/file.py). Check: python3 .claude/scripts/ticket_tree.py docs --ticket {{ID}} -->
 
 # {{ID}}: {{Title}}
 
@@ -34,7 +37,7 @@
 <!-- Then one bullet per file or group of files, in the order of the table: what changed in it and why, with the -->
 <!-- line ranges that matter. -->
 
-- [`{{path}}`](../../../{{path}}), lines {{a-b}}: {{what changed and why}}.
+- [`{{path}}`](../../../{{path}}), lines [`{{a}}-{{b}}`](../../../{{path}}#L{{a}}-L{{b}}): {{what changed and why}}.
 
 ## 🧪 How to test it
 

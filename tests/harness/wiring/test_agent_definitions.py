@@ -85,6 +85,11 @@ class TestAgentDefinitions:
         assert ".claude/skills/ticket/templates/EXPLAIN.md" in body
         assert ".claude/skills/ticket/templates/IMPLEMENTATION.md" in body
         assert "ticket_tree.py changes" in body
+        assert "ticket_tree.py docs" in body
+        assert "clickable" in body
+
+    def test_the_verifier_may_run_the_documents_check(self) -> None:
+        assert "ticket_tree.py docs" in agent_body(agent_path("verifier"))
 
     def test_the_reviewer_writes_a_review_note_and_stays_read_only(self) -> None:
         path = agent_path("reviewer")

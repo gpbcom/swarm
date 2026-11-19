@@ -9,6 +9,7 @@ Usage:
     python3 .claude/scripts/ticket_tree.py integrate --ticket T0.07 --task K01 [--task K02 ...] [--resolved]
     python3 .claude/scripts/ticket_tree.py diff      --ticket T0.07 [--from TREE] [--name-only]
     python3 .claude/scripts/ticket_tree.py changes   --ticket T0.07 [--write | --check]
+    python3 .claude/scripts/ticket_tree.py docs      --ticket T0.07                 (prints nothing when all is well)
     python3 .claude/scripts/ticket_tree.py finish    --ticket T0.07                 (main checkout)
 
 Nothing is committed before ``finish``. The work of the ticket lives, uncommitted, in the main checkout on
@@ -25,7 +26,11 @@ appear in the history:
   ``.rej`` files to resolve by hand, then ``--resolved``), removes the integrated worktrees, and records the task ids
   (TKT-11). It prints the tree of the integrated work, which ``diff --from`` compares with later.
 - ``changes`` writes the table of changed files and line ranges between ``<!-- changes -->`` markers of
-  ``EXPLAIN.md`` (TKT-14), leaving out the ticket's own folder.
+  ``EXPLAIN.md`` (TKT-14), leaving out the ticket's own folder. Every file and every line range in it is a link.
+- ``docs`` checks ``EXPLAIN.md`` and ``IMPLEMENTATION.md`` (TKT-14): the changes table is up to date, no placeholder
+  is left, every file and line mentioned is a clickable relative link, and every link resolves (the file exists, the
+  line ``#L<n>`` or range ``#L<a>-L<b>`` is inside it, and a ``path:42`` link text matches its ``#L42``). It prints one
+  problem per line, and nothing when all is well. ``finish`` refuses to commit while it finds a problem.
 - ``finish`` makes the one commit on ``ticket/<ID>``, merges it into ``develop`` with ``--no-ff``, and removes the
   state. Nothing is pushed.
 
@@ -61,6 +66,14 @@ WORKTREE_BRANCH_PREFIX = "worktree-"
 CHANGES_START = "<!-- changes -->"
 CHANGES_END = "<!-- /changes -->"
 REPO_FROM_TICKET_FOLDER = "../../../"
+DOCUMENTS = ("EXPLAIN.md", "IMPLEMENTATION.md")
+LINK_PATTERN = re.compile(r"\[((?:[^\[\]]|\[[^\]]*\])*)\]\(([^)\s]+)\)")
+CODE_SPAN_PATTERN = re.compile(r"`([^`\n]+)`")
+LINE_FRAGMENT_PATTERN = re.compile(r"^L(\d+)(?:-L?(\d+))?$")
+PATH_AND_LINE_PATTERN = re.compile(r"^(?P<path>[\w.@/-]+?)(?::(?P<first>\d+)(?:-(?P<last>\d+))?)?$")
+PLAIN_PATH_PATTERN = re.compile(r"(?<![\w/.:@-])(?P<path>[\w.@-]+(?:/[\w.@-]+)*\.\w+)(?::(?P<first>\d+))?")
+TEXT_LINE_PATTERN = re.compile(r":(\d+)(?:-(\d+))?`?$")
+SCHEME_PATTERN = re.compile(r"^[a-z][a-z0-9+.-]*:", re.IGNORECASE)
 STATUS_NAMES = {"A": "Added", "M": "Modified", "D": "Deleted", "R": "Renamed", "C": "Copied", "T": "Type changed"}
 
 
@@ -448,7 +461,10 @@ def changes_table(top: Path, ticket: str) -> str:
                 f"[{a}]({link}#L{a})" if a == b else f"[{a}-{b}]({link}#L{a})"
                 for a, b in line_ranges(ranges.get(path, []))
             ]
-            spans += [f"removed after {n}" for n in removed_only.get(path, [])]
+            spans += [
+                f"[removed after {n}]({link}#L{n})" if n else f"[removed at the top]({link}#L1)"
+                for n in removed_only.get(path, [])
+            ]
             lines = ", ".join(spans) or "➖"
         rows.append(f"| {file_cell} | {statuses[path]} | {lines} | +{added} | −{removed} |")
     rows.append(f"| **{len(statuses)} files** | | | **+{total_added}** | **−{total_removed}** |")
@@ -485,6 +501,87 @@ def changes(top: Path, ticket: str, mode: str) -> Tuple[str, int]:
     return "", 0
 
 
+def strip_non_prose(text: str) -> str:
+    """Return the text without HTML comments and fenced code blocks, where paths are commands, not references."""
+    text = re.sub(r"<!--.*?-->", " ", text, flags=re.DOTALL)
+    return re.sub(r"^```.*?^```", " ", text, flags=re.DOTALL | re.MULTILINE)
+
+
+def line_count(path: Path) -> int:
+    """Return the number of lines of a text file."""
+    return len(path.read_text(encoding="utf-8", errors="replace").splitlines())
+
+
+def link_problems(top: Path, folder: Path, name: str, text: str, target: str) -> List[str]:
+    """Return what is wrong with one link of a ticket document: a missing file, a line outside it, a wrong line."""
+    if SCHEME_PATTERN.match(target) or target.startswith("#"):
+        return []
+    file_part, _, fragment = target.partition("#")
+    resolved = (folder / file_part).resolve()
+    if not resolved.exists():
+        return [f"{name}: the link ({target}) points at a file that does not exist."]
+    if not fragment or resolved.suffix == ".md" or resolved.is_dir():
+        return []
+    found = LINE_FRAGMENT_PATTERN.match(fragment)
+    if found is None:
+        return [f"{name}: the link ({target}) must point at a line, as #L42 or #L42-L50."]
+    first = int(found.group(1))
+    last = int(found.group(2) or first)
+    count = max(line_count(resolved), 1)
+    if not 1 <= first <= last <= count:
+        return [f"{name}: the link ({target}) points outside {file_part.split('/')[-1]}, which has {count} lines."]
+    named = TEXT_LINE_PATTERN.search(text.strip())
+    if named and int(named.group(1)) != first:
+        return [f"{name}: the link text {text} names line {named.group(1)} but the link opens line {first}."]
+    return []
+
+
+def is_known_file(top: Path, folder: Path, candidate: str) -> bool:
+    """Tell whether ``candidate`` names a file of the repository or of the ticket's folder."""
+    return bool(candidate) and ((top / candidate).is_file() or (folder / candidate).is_file())
+
+
+def document_problems(top: Path, ticket: str) -> List[str]:
+    """Return every problem of ``EXPLAIN.md`` and ``IMPLEMENTATION.md``, one sentence each (TKT-14)."""
+    folder = top / ticket_folder(ticket)
+    problems: List[str] = []
+    try:
+        message, code = changes(top, ticket, "check")
+        if code:
+            problems.append(message)
+    except TicketTreeError as error:
+        problems.append(f"EXPLAIN.md: {error}")
+    for name in DOCUMENTS:
+        path = folder / name
+        if not path.is_file():
+            problems.append(f"{name}: missing.")
+            continue
+        prose = strip_non_prose(path.read_text(encoding="utf-8"))
+        if "{{" in prose:
+            problems.append(f"{name}: a {{{{...}}}} placeholder of the template is left.")
+        for found in LINK_PATTERN.finditer(prose):
+            problems.extend(link_problems(top, folder, name, found.group(1), found.group(2)))
+        outside_links = LINK_PATTERN.sub(" ", prose)
+        for span in CODE_SPAN_PATTERN.finditer(outside_links):
+            found = PATH_AND_LINE_PATTERN.match(span.group(1).strip())
+            if found and is_known_file(top, folder, found.group("path")):
+                problems.append(
+                    f"{name}: `{span.group(1)}` is not clickable. Write it as a link, such as "
+                    f"[`{span.group(1)}`]({REPO_FROM_TICKET_FOLDER}{found.group('path')}"
+                    f"{'#L' + found.group('first') if found.group('first') else ''})."
+                )
+        for found in PLAIN_PATH_PATTERN.finditer(CODE_SPAN_PATTERN.sub(" ", outside_links)):
+            if is_known_file(top, folder, found.group("path")) and ("/" in found.group("path") or found.group("first")):
+                problems.append(f"{name}: {found.group(0)} is not clickable. Write it as a link to the file and line.")
+    return problems
+
+
+def documents(top: Path, ticket: str) -> Tuple[str, int]:
+    """Check the ticket's documents, returning the problems one per line and 1 when there is any."""
+    problems = document_problems(top, ticket)
+    return "\n".join(problems), 1 if problems else 0
+
+
 def finish(top: Path, ticket: str) -> Dict[str, JsonData]:
     """Make the ticket's single commit, merge it into ``develop`` with ``--no-ff``, and clear the state."""
     require_main_on_ticket(top, ticket)
@@ -493,6 +590,9 @@ def finish(top: Path, ticket: str) -> Dict[str, JsonData]:
         raise TicketTreeError(f"Resolve and delete these .rej files first: {', '.join(left)}.")
     if snapshot(top) == git(top, "rev-parse", "HEAD^{tree}")[1]:
         raise TicketTreeError("There is nothing to commit for this ticket.")
+    problems = document_problems(top, ticket)
+    if problems:
+        raise TicketTreeError("Fix the ticket's documents before its commit (TKT-14):\n" + "\n".join(problems))
     state = load_state(top, ticket)
     ticket_md = top / ticket_folder(ticket) / "TICKET.md"
     title = ticket
@@ -533,7 +633,7 @@ def parser() -> argparse.ArgumentParser:
     """Return the command line parser."""
     root = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     commands = root.add_subparsers(dest="command", required=True)
-    for name in ("prepare", "status", "start", "handoff", "integrate", "diff", "changes", "finish"):
+    for name in ("prepare", "status", "start", "handoff", "integrate", "diff", "changes", "docs", "finish"):
         command = commands.add_parser(name)
         command.add_argument("--ticket", required=True)
         if name in ("handoff", "integrate"):
@@ -574,6 +674,8 @@ def main() -> int:
             output = diff(top, args.ticket, args.from_tree, args.name_only)
         elif args.command == "changes":
             output, code = changes(top, args.ticket, "write" if args.write else "check" if args.check else "print")
+        elif args.command == "docs":
+            output, code = documents(top, args.ticket)
         else:
             output = finish(top, args.ticket)
     except TicketTreeError as error:
@@ -581,7 +683,7 @@ def main() -> int:
         return 1
     text = output if isinstance(output, str) else json.dumps(output)
     if text:
-        print(text, file=sys.stderr if code and isinstance(output, str) else sys.stdout)
+        print(text)
     return code
 
 

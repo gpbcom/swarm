@@ -41,7 +41,7 @@ class TestTicketWorkflows:
         text = read_text(self.RUN)
         assert "Commit with the message" not in text
         assert "merge ticket/" not in text
-        for command in ("start", "handoff", "integrate", "status", "prepare", "finish", "diff"):
+        for command in ("start", "handoff", "integrate", "status", "prepare", "finish", "diff", "docs"):
             assert f"ticket_tree.py {command}" in text, command
 
     def test_ticket_run_workers_report_decisions_for_implementation_md(self) -> None:

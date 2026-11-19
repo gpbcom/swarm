@@ -67,7 +67,7 @@ approved brief or check is approved again and recorded in 📝 Events before the
 | `scripts/check_ticket.py` | `python3 .claude/skills/ticket/scripts/check_ticket.py <ID>` | `TICKET.md` against the template and `docs/specs/`: IDs, links, sections |
 | `scripts/check_plan.py` | `python3 .claude/skills/ticket/scripts/check_plan.py <ID> [--min-parallel N]` | The task graph of `PLAN.md`: ids, agents, dependencies, files, waves |
 | `.claude/scripts/checks.py` | `python3 .claude/scripts/checks.py --ticket <ID> [--base develop]` | Every applicable check of the code and the specifications, with the verdict in JSON |
-| `.claude/scripts/ticket_tree.py` | `python3 .claude/scripts/ticket_tree.py <command> --ticket <ID>` | The uncommitted work: `prepare`, `status`, `start`, `handoff`, `integrate`, `diff`, `changes` (the files and lines table of `EXPLAIN.md`), `finish` (the single commit) |
+| `.claude/scripts/ticket_tree.py` | `python3 .claude/scripts/ticket_tree.py <command> --ticket <ID>` | The uncommitted work: `prepare`, `status`, `start`, `handoff`, `integrate`, `diff`, `changes` (the files and lines table of `EXPLAIN.md`), `docs` (every file and line of `EXPLAIN.md` and `IMPLEMENTATION.md` is a working clickable link), `finish` (the single commit, refused while `docs` finds a problem) |
 | `.claude/scripts/progress.py` | `python3 .claude/scripts/progress.py watch --every 120 --run <run id>` | The progress report of a run, every 2 minutes (TKT-9) |
 | `.claude/scripts/progress.py` | `python3 .claude/scripts/progress.py timings --ticket <ID> --write` | Elapsed time and tokens in `PROGRESS.md` (TKT-10) |
 

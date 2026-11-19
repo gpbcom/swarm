@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from tests.harness.ticket_tree.helpers import (
     COMMIT_KEY,
     CONFLICTS_KEY,
@@ -15,7 +17,9 @@ from tests.harness.ticket_tree.helpers import (
     TREE_KEY,
     add_worktree,
     commit_count,
+    documents_problems,
     git,
+    integrated_repo,
     make_repo,
     run,
     run_json,
@@ -121,16 +125,65 @@ class TestTicketTree:
         run_json(main, "integrate", "--task", "K01")
         table = run(main, "changes").stdout
         assert "| [`a.txt`](../../../a.txt) | Modified | [2](../../../a.txt#L2), [4](../../../a.txt#L4) |" in table
+
         assert TICKET_FOLDER not in table
         assert run(main, "changes", "--check").returncode == 1
         assert run(main, "changes", "--write").returncode == 0
         assert run(main, "changes", "--check").returncode == 0
+
+    def test_removed_lines_are_clickable_in_the_changes_table(self, tmp_path: Path) -> None:
+        main = make_repo(tmp_path)
+        run_json(main, "prepare")
+        worker_writes(main, "w1", "K01", {"a.txt": "a\nc\n"})
+        run_json(main, "integrate", "--task", "K01")
+        assert "[removed after 1](../../../a.txt#L1)" in run(main, "changes").stdout
+
+    def test_clickable_documents_pass_the_docs_check(self, tmp_path: Path) -> None:
+        main = integrated_repo(tmp_path)
+        explain = "1. **Step:** in [`a.txt:2`](../../../a.txt#L2), see [`a.txt`](../../../a.txt) lines 2-4."
+        implementation = "**Where:** [`a.txt:4`](../../../a.txt#L4) · [TICKET.md](TICKET.md)"
+        assert documents_problems(main, explain, implementation) == ""
+        assert run(main, "docs").returncode == 0
+
+    @pytest.mark.parametrize(
+        "explain, problem",
+        [
+            ("Read `a.txt:2` first.", "`a.txt:2` is not clickable"),
+            ("Read `a.txt` first.", "`a.txt` is not clickable"),
+            ("Read a.txt:2 first.", "a.txt:2 is not clickable"),
+            ("See [`b.txt:1`](../../../b.txt#L1).", "does not exist"),
+            ("See [`a.txt:9`](../../../a.txt#L9).", "which has 4 lines"),
+            ("See [`a.txt:2`](../../../a.txt#L3).", "names line 2 but the link opens line 3"),
+            ("See [`a.txt`](../../../a.txt#top).", "must point at a line"),
+            ("Left: {{path}}.", "placeholder"),
+        ],
+    )
+    def test_a_file_or_line_that_is_not_a_working_link_is_reported(
+        self, tmp_path: Path, explain: str, problem: str
+    ) -> None:
+        main = integrated_repo(tmp_path)
+        assert problem in documents_problems(main, explain, "")
+        assert run(main, "docs").returncode == 1
+
+    def test_paths_in_code_blocks_and_comments_are_commands_not_references(self, tmp_path: Path) -> None:
+        main = integrated_repo(tmp_path)
+        explain = "<!-- `a.txt:2` -->\n\n```bash\ncat a.txt\n```"
+        assert documents_problems(main, explain, "") == ""
+
+    def test_finish_refuses_documents_with_a_link_that_does_not_work(self, tmp_path: Path) -> None:
+        main = integrated_repo(tmp_path)
+        documents_problems(main, "Read `a.txt:2`.", "")
+        result = run(main, "finish")
+        assert result.returncode == 1
+        assert "not clickable" in result.stderr
+        assert commit_count(main, TICKET_BRANCH) == 1
 
     def test_finish_makes_one_commit_and_merges_it_into_develop(self, tmp_path: Path) -> None:
         main = make_repo(tmp_path)
         run_json(main, "prepare")
         worker_writes(main, "w1", "K01", {"src/new.py": "x = 1\n"})
         run_json(main, "integrate", "--task", "K01")
+        assert documents_problems(main, "In [`src/new.py:1`](../../../src/new.py#L1).", "") == ""
         result = run_json(main, "finish")
         assert git(main, "log", "-1", "--format=%s", str(result[COMMIT_KEY])) == TICKET_TITLE
         assert commit_count(main, TICKET_BRANCH) == 2
