@@ -34,22 +34,38 @@ approved brief or check is approved again and recorded in 📝 Events before the
 
 ### Run
 
-- **Gate:** `check_plan.py` runs again. The run stops if the plan is not sound.
-- **No intermediate commit (TKT-5):** the ticket's work stays uncommitted in the main checkout on `ticket/<ID>` until
-  the ticket is done. `ticket_tree.py prepare` refuses a checkout with changes outside `docs/tickets/<ID>/`.
-- **Waves:** each task runs in its own git worktree, branched from `ticket/<ID>`. It starts with `ticket_tree.py start`
-  (copies the uncommitted work in) and ends with `ticket_tree.py handoff` (saves its own changes as a patch). At most 8
-  agents run at once (TKT-4).
-- **Integrator:** after each wave, applies the wave's hand-offs to the main checkout in task order with
-  `ticket_tree.py integrate`.
-- **Verifier:** runs `checks.py` for the ticket. A failure goes back to the agent that owns the files, at most twice.
-  A failure flagged `environment` goes to nobody: the run stops and the person fixes the environment (TKT-6).
+- **Gate:** `check_plan.py` runs again, then the start rule `tickets.py check` (TKT-16): every prerequisite merged on
+  `origin/develop`, no open ticket on the same areas, no field ticket before its campaign. `/ticket-run <ID> --force`
+  starts anyway on the person's decision.
+- **Its own worktree (TKT-16):** `ticket_tree.py prepare` gives the ticket its home `<repository>-tickets/<ID>/` on
+  `feature/<ID>`, from `origin/develop`, and moves `docs/tickets/<ID>/` into it. The main checkout stays on `develop`,
+  so several tickets run at once. The card moves to 🔄 Running (TKT-17).
+- **No intermediate commit (TKT-5):** the ticket's work stays uncommitted in its home until the ticket is done.
+- **Waves:** each task runs in its own git worktree. It starts with `ticket_tree.py start` (moves to the ticket's
+  commit and copies the uncommitted work in) and ends with `ticket_tree.py handoff` (saves its own changes as a patch).
+  At most 8 agents run at once per ticket (TKT-4).
+- **Integrator:** after each wave, applies the wave's hand-offs to the home in task order with `ticket_tree.py
+  integrate`.
+- **Verifier:** runs `checks.py` for the ticket, in its home. A failure goes back to the agent that owns the files, at
+  most twice. A failure flagged `environment` goes to nobody: the run stops and the person fixes the environment
+  (TKT-6).
 - **Reviewer:** reviews the diff against `TICKET.md`, the specifications and the rules. Only blocking findings go back to
   the fixers (TKT-12). The note is written to `REVIEW.md`.
 - **Explainer:** writes `EXPLAIN.md` (how it works, files and lines changed) and `IMPLEMENTATION.md` (each choice
   against its alternatives, with the trade-off) from the workers' decisions and the diff (TKT-14), beside the scribe.
-- **Commit and merge:** the integrator runs `ticket_tree.py finish`: one commit on `ticket/<ID>`, merged into
-  `develop` locally with `--no-ff`. Nothing is pushed.
+- **Commit and pull request (TKT-15):** the integrator runs `ticket_tree.py finish`: one commit on `feature/<ID>`,
+  rebased on `origin/develop` if it moved, pushed, with its pull request to `develop` (`Closes #<issue>`, label
+  `automerge`). The card moves to 👀 In review. GitHub merges it once CI passes, the issue closes and the card moves
+  to 🏁 Done. `python3 .claude/scripts/tickets.py prune` then removes the home.
+
+### Several tickets at once
+
+| Command | Does |
+| --- | --- |
+| `python3 .claude/scripts/tickets.py list [--remote]` | Every open ticket: state, tasks integrated, areas, worktree, pull request |
+| `python3 .claude/scripts/tickets.py workspace` | `swarm.code-workspace`: `develop` and every open ticket side by side in VS Code |
+| `python3 .claude/scripts/tickets.py prune` | Removes the worktrees of merged tickets, fast-forwards `develop` |
+| `python3 .claude/scripts/board.py show` or `/board` | The Kanban board in the terminal (TKT-17) |
 
 ## Templates
 

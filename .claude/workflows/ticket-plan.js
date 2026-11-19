@@ -169,6 +169,8 @@ const written = await agent(
   `the dependency graph and one section per task for the person; it must print nothing. Then append to the Events table of docs/tickets/${ID}/PROGRESS.md: "Plan written: ${graph.length} tasks, ${waves} waves" (⏳ Awaiting approval), ` +
   `Then run python3 .claude/scripts/ticket_refs.py sync --ticket ${ID}, which copies the specification references of TICKET.md into PLAN.md and PROGRESS.md, ` +
   `and python3 .claude/scripts/progress.py timings --ticket ${ID} --write. ` +
+  `Then run python3 .claude/scripts/board.py move --ticket ${ID} --status planned, which moves its card to 📝 Planned on the GitHub board (TKT-17); ` +
+  `if it fails because gh is missing or offline, go on. ` +
   `Last, run python3 .claude/scripts/ticket_refs.py check --ticket ${ID} and python3 .claude/scripts/plan.py check --ticket ${ID}, ` +
   `and return in problems every line they print (none when all is well).`,
   { agentType: 'scribe', schema: WRITE_SCHEMA, label: `scribe ${ID}` },
@@ -202,5 +204,5 @@ return {
   planCheck,
   checks: problems.length ? problems : 'passed',
   assumptions: [...ticket.assumptions, ...plan.assumptions],
-  next: `Review docs/tickets/${ID}/PLAN.md, change its status to "**Plan:** 🟢 Approved", then run /ticket-run ${ID}`,
+  next: `Review docs/tickets/${ID}/PLAN.md, change its status to "**Plan:** 🟢 Approved", then run /ticket-run ${ID}: it gives the ticket its own worktree on feature/${ID}, so other tickets can run at the same time (TKT-16)`,
 }

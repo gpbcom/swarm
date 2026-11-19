@@ -41,6 +41,7 @@ class TestTicketWorkflows:
         text = read_text(self.RUN)
         assert "Commit with the message" not in text
         assert "merge ticket/" not in text
+        assert "merge feature/" not in text
         for command in ("start", "handoff", "integrate", "status", "prepare", "finish", "diff", "docs"):
             assert f"ticket_tree.py {command}" in text, command
 
@@ -65,3 +66,29 @@ class TestTicketWorkflows:
         text = read_text(".claude/rules/tickets.md")
         assert "[TKT-14](#tkt-14)" in text
         assert '<a id="tkt-14"></a>' in text
+
+    def test_ticket_run_applies_the_start_rule_at_the_gate(self) -> None:
+        text = read_text(self.RUN)
+        assert "python3 .claude/scripts/tickets.py check --ticket" in text
+        assert "--force" in text
+
+    def test_ticket_run_works_in_the_ticket_s_own_worktree(self) -> None:
+        text = read_text(self.RUN)
+        assert "home:" in text
+        assert "inHome(" in text
+        assert text.count("inHome(") >= 8
+
+    def test_ticket_run_moves_the_ticket_on_the_board_and_publishes_it(self) -> None:
+        text = read_text(self.RUN)
+        assert "board.py move --ticket ${ID} --status running" in text
+        assert "pull_request" in text
+        assert "feature/${ID}" in text
+
+    def test_ticket_plan_moves_the_ticket_to_planned(self) -> None:
+        assert "board.py move --ticket ${ID} --status planned" in read_text(self.PLAN)
+
+    @pytest.mark.parametrize("rule", ["tkt-15", "tkt-16", "tkt-17"])
+    def test_the_rules_hold_gitflow_parallel_tickets_and_the_board(self, rule: str) -> None:
+        text = read_text(".claude/rules/tickets.md")
+        assert f"[{rule.upper()}](#{rule})" in text
+        assert f'<a id="{rule}"></a>' in text

@@ -47,3 +47,18 @@ class TestHarnessSettings:
         ]
         assert commands
         assert all(isinstance(hook.get("timeout"), int) for hook in commands)
+
+    def test_pre_tool_use_guards_the_git_commands_of_bash(self) -> None:
+        commands = [
+            hook
+            for hook in self.hook_commands("PreToolUse", "Bash")
+            if hook.get("type") == "command" and ".claude/hooks/guard_git.py" in str(hook.get("command"))
+        ]
+        assert commands
+        assert all(isinstance(hook.get("timeout"), int) for hook in commands)
+
+    def test_the_status_line_shows_the_branch_and_the_board(self) -> None:
+        settings = read_json(".claude/settings.json")
+        status_line = settings["statusLine"]  # type: ignore[index]
+        assert status_line["type"] == "command"  # type: ignore[index]
+        assert ".claude/scripts/statusline.py" in str(status_line["command"])  # type: ignore[index]

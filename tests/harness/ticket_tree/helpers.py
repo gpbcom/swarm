@@ -10,7 +10,8 @@ from typing import Dict, List
 from pydantic import JsonValue
 
 TICKET = "T9.01"
-TICKET_BRANCH = f"ticket/{TICKET}"
+TICKET_BRANCH = f"feature/{TICKET}"
+LEGACY_BRANCH = f"ticket/{TICKET}"
 TICKET_FOLDER = f"docs/tickets/{TICKET}"
 TICKET_TITLE = f"{TICKET}: Smoke ticket"
 CHANGES_MARKERS = "<!-- changes -->\n<!-- /changes -->\n"
@@ -27,6 +28,8 @@ TREE_KEY = "tree"
 FILES_KEY = "files"
 COMMIT_KEY = "commit"
 MERGE_KEY = "merge"
+HOME_KEY = "home"
+PUSHED_KEY = "pushed"
 
 
 def repo_root() -> Path:
@@ -48,9 +51,9 @@ def git(cwd: Path, *args: str) -> str:
     return result.stdout.strip()
 
 
-def run(cwd: Path, *args: str) -> subprocess.CompletedProcess[str]:
+def run(cwd: Path, *args: str, ticket: str = TICKET) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        [sys.executable, str(script_path()), *args, "--ticket", TICKET],
+        [sys.executable, str(script_path()), *args, "--ticket", ticket],
         cwd=cwd,
         check=False,
         capture_output=True,
@@ -68,6 +71,11 @@ def run_json(cwd: Path, *args: str) -> Dict[str, JsonValue]:
     return loaded
 
 
+def home(main: Path) -> Path:
+    """Return the worktree that holds the ticket's work, beside the main checkout (TKT-16)."""
+    return main.parent / f"{main.name}-tickets" / TICKET
+
+
 def make_repo(base: Path) -> Path:
     """Create a repository on ``develop`` with one commit and an uncommitted ticket folder, and return its path."""
     main = base / "main"
@@ -83,9 +91,9 @@ def make_repo(base: Path) -> Path:
     return main
 
 
-def write_documents(main: Path, explain: str, implementation: str) -> None:
+def write_documents(checkout: Path, explain: str, implementation: str) -> None:
     """Write ``EXPLAIN.md`` (around the empty changes markers) and ``IMPLEMENTATION.md`` of the ticket."""
-    folder = main / TICKET_FOLDER
+    folder = checkout / TICKET_FOLDER
     (folder / "EXPLAIN.md").write_text(f"# Explain\n\n{explain}\n\n{CHANGES_MARKERS}", encoding="utf-8")
     (folder / "IMPLEMENTATION.md").write_text(f"# Implementation\n\n{implementation}\n", encoding="utf-8")
 
@@ -100,15 +108,16 @@ def integrated_repo(base: Path) -> Path:
 
 
 def documents_problems(main: Path, explain: str, implementation: str) -> str:
-    """Write the documents, generate their changes table, and return what ``docs`` prints."""
-    write_documents(main, explain, implementation)
+    """Write the documents in the ticket's home, generate their changes table, and return what ``docs`` prints."""
+    write_documents(home(main), explain, implementation)
     assert run(main, "changes", "--write").returncode == 0
     return run(main, "docs").stdout
 
 
-def add_worktree(main: Path, name: str) -> Path:
+def add_worktree(main: Path, name: str, start: str = "HEAD") -> Path:
+    """Add a worker worktree from the main checkout, as Claude Code does for an agent of the workflow."""
     path = main.parent / name
-    git(main, "worktree", "add", "-b", f"worktree-{name}", str(path), "HEAD")
+    git(main, "worktree", "add", "-b", f"worktree-{name}", str(path), start)
     return path
 
 
