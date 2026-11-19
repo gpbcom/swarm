@@ -11,6 +11,7 @@ from pydantic import JsonValue
 
 
 class TestCiWorkflow:
+    READ_ONLY_PERMISSIONS: ClassVar[Dict[str, str]] = {"contents": "read"}
     ROOT: ClassVar[Path] = Path(__file__).resolve().parents[3]
     OUTPUT_KEYS: ClassVar[Set[str]] = {"services", "typescript", "rust", "repository", "specs"}
     JOBS: ClassVar[Set[str]] = {"changes", "python", "rust", "typescript", "specs"}
@@ -46,7 +47,7 @@ class TestCiWorkflow:
         assert {"push", "pull_request"} <= set(triggers)
 
     def test_the_token_is_read_only(self) -> None:
-        assert self.load()["permissions"] == {"contents": "read"}
+        assert self.load()["permissions"] == self.READ_ONLY_PERMISSIONS
 
     def test_it_has_exactly_the_expected_jobs(self) -> None:
         assert set(self.jobs()) == self.JOBS

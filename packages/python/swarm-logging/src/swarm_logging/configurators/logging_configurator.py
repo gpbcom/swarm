@@ -25,6 +25,7 @@ class LoggingConfigurator:
     Attributes:
         REFERENCE_PATH (Path): The reference configuration shipped with the package.
         JSON_FORMATTER (str): The dotted path of the JSON formatter.
+        JSON_FORMATTER_ENTRY (Dict[str, str]): The ``dictConfig`` entry of a formatter built by the JSON formatter.
         config (LoggingConfig): Where the configuration file is and how records are written.
         logger (Logger): Logger instance.
 
@@ -36,6 +37,7 @@ class LoggingConfigurator:
 
     REFERENCE_PATH: ClassVar[Path] = Path(__file__).resolve().parents[1] / "conf" / "logger.yaml"
     JSON_FORMATTER: ClassVar[str] = "swarm_logging.formatters.json_formatter.JsonFormatter"
+    JSON_FORMATTER_ENTRY: ClassVar[Dict[str, str]] = {"()": JSON_FORMATTER}
 
     def __init__(self, config: LoggingConfig, logger: Optional[Logger] = None) -> None:
         """Initialise the configurator.
@@ -89,7 +91,7 @@ class LoggingConfigurator:
                 formatters = content.get("formatters")
                 if isinstance(formatters, dict):
                     for name in list(formatters):
-                        formatters[name] = {"()": self.JSON_FORMATTER}
+                        formatters[name] = dict(self.JSON_FORMATTER_ENTRY)
                     self.logger.debug("Replaced %d formatters with the JSON one.", len(formatters))
             case LogFormat.COLOURED:
                 self.logger.debug("Kept the formatters of the file.")

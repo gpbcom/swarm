@@ -14,6 +14,14 @@ TICKET_ID = "T9.99"
 APPROVED = "**Plan:** 🟢 Approved"
 AWAITING = "**Plan:** 🟡 Awaiting approval"
 REJECTED = "**Plan:** 🔴 Rejected"
+ID_KEY = "id"
+TITLE_KEY = "title"
+AGENT_KEY = "agent"
+DEPENDS_ON_KEY = "depends_on"
+FILES_KEY = "files"
+BRIEF_KEY = "brief"
+DONE_WHEN_KEY = "done_when"
+WAVE_KEY = "wave"
 
 
 def repo_root() -> Path:
@@ -32,14 +40,14 @@ def a_task(
     files: Optional[List[str]] = None,
 ) -> Dict[str, JsonValue]:
     return {
-        "id": task_id,
-        "title": f"Task {task_id}",
-        "agent": agent,
-        "depends_on": depends_on if depends_on is not None else [],
-        "files": files if files is not None else [f"src/{task_id.lower()}.py"],
-        "brief": f"Do {task_id}.",
-        "done_when": f"{task_id} is done.",
-        "wave": wave,
+        ID_KEY: task_id,
+        TITLE_KEY: f"Task {task_id}",
+        AGENT_KEY: agent,
+        DEPENDS_ON_KEY: depends_on if depends_on is not None else [],
+        FILES_KEY: files if files is not None else [f"src/{task_id.lower()}.py"],
+        BRIEF_KEY: f"Do {task_id}.",
+        DONE_WHEN_KEY: f"{task_id} is done.",
+        WAVE_KEY: wave,
     }
 
 

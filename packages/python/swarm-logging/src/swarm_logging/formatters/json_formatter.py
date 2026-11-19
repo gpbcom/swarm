@@ -4,17 +4,30 @@ from __future__ import annotations
 import json
 import logging
 from datetime import UTC, datetime
-from typing import Dict
+from typing import ClassVar, Dict
 
 
 class JsonFormatter(logging.Formatter):
     """Format a log record as one line of JSON.
+
+    Attributes:
+        TIME_KEY (str): The key of the record's time, ISO 8601 in UTC with milliseconds.
+        LEVEL_KEY (str): The key of the level name.
+        LOGGER_KEY (str): The key of the logger name.
+        MESSAGE_KEY (str): The key of the message.
+        EXCEPTION_KEY (str): The key of the formatted exception, present only with ``exc_info``.
 
     Notes:
         - JSON is used in production because Loki stores one event per line and reads its fields.
         - ``json.dumps`` escapes newlines, so a multi-line message or traceback stays on one line.
         - **No colour code is written**, because a JSON consumer would read it as part of the text.
     """
+
+    TIME_KEY: ClassVar[str] = "time"
+    LEVEL_KEY: ClassVar[str] = "level"
+    LOGGER_KEY: ClassVar[str] = "logger"
+    MESSAGE_KEY: ClassVar[str] = "message"
+    EXCEPTION_KEY: ClassVar[str] = "exception"
 
     ############################
     # Publicly Exposed Methods #
@@ -30,11 +43,11 @@ class JsonFormatter(logging.Formatter):
             str: A JSON line with ``time``, ``level``, ``logger``, ``message`` and, with ``exc_info``, ``exception``.
         """
         data: Dict[str, str] = {
-            "time": datetime.fromtimestamp(record.created, tz=UTC).isoformat(timespec="milliseconds"),
-            "level": record.levelname,
-            "logger": record.name,
-            "message": record.getMessage(),
+            self.TIME_KEY: datetime.fromtimestamp(record.created, tz=UTC).isoformat(timespec="milliseconds"),
+            self.LEVEL_KEY: record.levelname,
+            self.LOGGER_KEY: record.name,
+            self.MESSAGE_KEY: record.getMessage(),
         }
         if record.exc_info:
-            data["exception"] = self.formatException(record.exc_info)
+            data[self.EXCEPTION_KEY] = self.formatException(record.exc_info)
         return json.dumps(data, ensure_ascii=False)

@@ -8,6 +8,11 @@ from typing import Dict, List, Optional
 
 from pydantic import JsonValue
 
+FORMATTERS_KEY = "formatters"
+TOOL_NAME_KEY = "tool_name"
+TOOL_INPUT_KEY = "tool_input"
+FILE_PATH_KEY = "file_path"
+CWD_KEY = "cwd"
 HOOK_RELATIVE = ".claude/hooks/format_edited.py"
 CATALOGUE_RELATIVE = ".claude/hooks/formatters.json"
 
@@ -45,7 +50,7 @@ def make_repo(folder: Path) -> Path:
     git(folder, "init")
     catalogue = folder / CATALOGUE_RELATIVE
     catalogue.parent.mkdir(parents=True, exist_ok=True)
-    catalogue.write_text(json.dumps({"formatters": TEMP_FORMATTERS}), encoding="utf-8")
+    catalogue.write_text(json.dumps({FORMATTERS_KEY: TEMP_FORMATTERS}), encoding="utf-8")
     git(folder, "add", ".")
     git(folder, "commit", "-m", "init")
     return folder
@@ -65,7 +70,7 @@ def run_hook(payload: Dict[str, JsonValue], cwd: Optional[Path] = None) -> subpr
 
 def payload_for(path: Path, tool_name: str = "Write", cwd: Optional[Path] = None) -> Dict[str, JsonValue]:
     return {
-        "tool_name": tool_name,
-        "tool_input": {"file_path": str(path)},
-        "cwd": str(cwd if cwd else path.parent),
+        TOOL_NAME_KEY: tool_name,
+        TOOL_INPUT_KEY: {FILE_PATH_KEY: str(path)},
+        CWD_KEY: str(cwd if cwd else path.parent),
     }

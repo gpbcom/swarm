@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import ClassVar, Dict, List, Union
 
 import pytest
 import yaml
@@ -9,6 +9,8 @@ from pydantic import JsonValue
 
 
 class TestTypescriptWorkflow:
+    READ_ONLY_PERMISSIONS: ClassVar[Dict[str, str]] = {"contents": "read"}
+
     def workflow(self) -> Dict[Union[str, bool], JsonValue]:
         root = Path(__file__).resolve().parents[3]
         text = (root / ".github" / "workflows" / "typescript.yml").read_text(encoding="utf-8")
@@ -48,7 +50,7 @@ class TestTypescriptWorkflow:
         assert projects["required"] is True
 
     def test_permissions_are_read_only(self) -> None:
-        assert self.workflow()["permissions"] == {"contents": "read"}
+        assert self.workflow()["permissions"] == self.READ_ONLY_PERMISSIONS
 
     def test_the_only_job_is_check_on_ubuntu(self) -> None:
         jobs = self.workflow()["jobs"]

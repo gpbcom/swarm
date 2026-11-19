@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Dict
+from typing import ClassVar, Dict
 
 import pytest
 
@@ -17,6 +17,9 @@ class TestAgentDefinitions:
         "doc-writer",
     )
 
+    MODEL_KEY: ClassVar[str] = "model"
+    EFFORT_KEY: ClassVar[str] = "effort"
+
     def tkt7_table(self) -> Dict[str, Dict[str, str]]:
         text = read_text(".claude/rules/tickets.md")
         section = text.split('<a id="tkt-7"></a>', 1)[1].split("\n## ", 1)[0]
@@ -28,7 +31,7 @@ class TestAgentDefinitions:
             if len(cells) < 3 or cells[0] in ("Agent", "---"):
                 continue
             for name in cells[0].split(","):
-                table[name.strip()] = {"model": cells[1], "effort": cells[2]}
+                table[name.strip()] = {self.MODEL_KEY: cells[1], self.EFFORT_KEY: cells[2]}
         return table
 
     def test_every_agent_names_its_file(self) -> None:
@@ -45,8 +48,8 @@ class TestAgentDefinitions:
         assert table
         for name, expected in table.items():
             fields = agent_frontmatter(agent_path(name))
-            assert fields.get("model") == expected["model"], name
-            assert fields.get("effort") == expected["effort"], name
+            assert fields.get("model") == expected[self.MODEL_KEY], name
+            assert fields.get("effort") == expected[self.EFFORT_KEY], name
 
     def test_every_kind_of_task_has_an_agent(self) -> None:
         for name in (*self.WORKERS, "reviewer"):

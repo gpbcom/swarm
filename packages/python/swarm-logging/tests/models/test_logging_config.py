@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Dict, Optional
+from typing import ClassVar, Dict, Optional
 
 import pytest
 from pydantic import JsonValue, ValidationError
@@ -15,6 +15,9 @@ from swarm_logging.models.logging_config import LoggingConfig
 
 
 class TestLoggingConfig:
+    UNKNOWN_KEY_CONFIGURATION: ClassVar[Dict[str, JsonValue]] = {"colour": "red"}
+    JSON_FORMAT_CONFIGURATION: ClassVar[Dict[str, JsonValue]] = {"format": "json"}
+
     def test_defaults(self) -> None:
         config = LoggingConfig()
         assert config.path is None
@@ -52,13 +55,13 @@ class TestLoggingConfig:
 
     def test_rejects_unknown_keys(self) -> None:
         with pytest.raises(ValidationError):
-            LoggingConfig.model_validate({"colour": "red"})
+            LoggingConfig.model_validate(self.UNKNOWN_KEY_CONFIGURATION)
 
     def test_a_path_with_surrounding_spaces_is_stripped(self) -> None:
         assert LoggingConfig(path="  conf/logger.yaml  ").path == "conf/logger.yaml"
 
     def test_the_json_string_gives_the_json_format(self) -> None:
-        assert LoggingConfig.model_validate({"format": "json"}).format is LogFormat.JSON
+        assert LoggingConfig.model_validate(self.JSON_FORMAT_CONFIGURATION).format is LogFormat.JSON
 
     def test_round_trip(self) -> None:
         config = LoggingConfig(path="conf/logger.yaml", format=LogFormat.JSON)

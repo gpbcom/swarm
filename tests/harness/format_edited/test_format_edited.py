@@ -3,13 +3,14 @@ from __future__ import annotations
 import json
 import re
 from pathlib import Path
-from typing import Dict, List
+from typing import ClassVar, Dict, List
 
 import pytest
 from pydantic import JsonValue
 
 from tests.harness.format_edited.helpers import (
     CATALOGUE_RELATIVE,
+    CWD_KEY,
     make_repo,
     payload_for,
     repo_root,
@@ -18,6 +19,8 @@ from tests.harness.format_edited.helpers import (
 
 
 class TestFormatEdited:
+    RELATIVE_PAYLOAD: ClassVar[Dict[str, JsonValue]] = {"tool_name": "Edit", "tool_input": {"file_path": "a.txt"}}
+
     def test_the_edited_file_is_formatted_and_its_sibling_is_not(self, tmp_path: Path) -> None:
         repo = make_repo(tmp_path / "repo")
         edited = repo / "docs" / "a.txt"
@@ -96,11 +99,7 @@ class TestFormatEdited:
         edited = repo / "sub" / "a.txt"
         edited.parent.mkdir()
         edited.write_text("hello", encoding="utf-8")
-        payload: Dict[str, JsonValue] = {
-            "tool_name": "Edit",
-            "tool_input": {"file_path": "a.txt"},
-            "cwd": str(edited.parent),
-        }
+        payload: Dict[str, JsonValue] = {**self.RELATIVE_PAYLOAD, CWD_KEY: str(edited.parent)}
         result = run_hook(payload)
         assert result.returncode == 0
         assert edited.read_text(encoding="utf-8") == "HELLO"

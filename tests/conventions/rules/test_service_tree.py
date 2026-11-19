@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional
+from typing import ClassVar, Dict, Optional
 
 import pytest
 
@@ -10,16 +10,35 @@ from tests.conventions.rules.service_tree import ServiceTree
 
 
 class TestServiceTree:
+    THREE_SERVICES: ClassVar[Dict[str, str]] = {
+        "zeta/src/zeta/a.py": "",
+        "alpha/src/alpha/a.py": "",
+        "mid/src/mid/a.py": "",
+    }
+    HIDDEN_AND_PRIVATE: ClassVar[Dict[str, str]] = {".hidden/a.py": "", "_private/a.py": "", "real/src/real/a.py": ""}
+    WITH_A_FILE: ClassVar[Dict[str, str]] = {"README.md": "", "real/src/real/a.py": ""}
+    SOURCES_AND_TESTS: ClassVar[Dict[str, str]] = {
+        "svc/src/svc/b.py": "",
+        "svc/src/svc/a.py": "",
+        "svc/tests/test_a.py": "",
+        "svc/src/svc/notes.txt": "",
+    }
+    WITH_CACHE_AND_HIDDEN: ClassVar[Dict[str, str]] = {
+        "svc/src/svc/__pycache__/a.py": "",
+        "svc/src/svc/.hidden/a.py": "",
+        "svc/src/svc/a.py": "",
+    }
+
     def test_discovery_is_sorted_by_name(self, tmp_path: Path) -> None:
-        write_files(tmp_path, {"zeta/src/zeta/a.py": "", "alpha/src/alpha/a.py": "", "mid/src/mid/a.py": ""})
+        write_files(tmp_path, self.THREE_SERVICES)
         assert [tree.name for tree in ServiceTree.discover(tmp_path)] == ["alpha", "mid", "zeta"]
 
     def test_discovery_skips_hidden_and_underscore_folders(self, tmp_path: Path) -> None:
-        write_files(tmp_path, {".hidden/a.py": "", "_private/a.py": "", "real/src/real/a.py": ""})
+        write_files(tmp_path, self.HIDDEN_AND_PRIVATE)
         assert [tree.name for tree in ServiceTree.discover(tmp_path)] == ["real"]
 
     def test_discovery_ignores_files(self, tmp_path: Path) -> None:
-        write_files(tmp_path, {"README.md": "", "real/src/real/a.py": ""})
+        write_files(tmp_path, self.WITH_A_FILE)
         assert [tree.name for tree in ServiceTree.discover(tmp_path)] == ["real"]
 
     def test_discovery_of_a_missing_root_is_empty(self, tmp_path: Path) -> None:
@@ -35,15 +54,7 @@ class TestServiceTree:
         assert ServiceTree.LAYERS == ("api", "service", "storage", "clients", "models")
 
     def test_python_files_cover_src_and_tests_sorted(self, tmp_path: Path) -> None:
-        write_files(
-            tmp_path,
-            {
-                "svc/src/svc/b.py": "",
-                "svc/src/svc/a.py": "",
-                "svc/tests/test_a.py": "",
-                "svc/src/svc/notes.txt": "",
-            },
-        )
+        write_files(tmp_path, self.SOURCES_AND_TESTS)
         tree = ServiceTree(tmp_path / "svc")
         assert [tree.relative(path) for path in tree.python_files()] == [
             "src/svc/a.py",
@@ -52,10 +63,7 @@ class TestServiceTree:
         ]
 
     def test_python_files_skip_pycache_and_hidden_folders(self, tmp_path: Path) -> None:
-        write_files(
-            tmp_path,
-            {"svc/src/svc/__pycache__/a.py": "", "svc/src/svc/.hidden/a.py": "", "svc/src/svc/a.py": ""},
-        )
+        write_files(tmp_path, self.WITH_CACHE_AND_HIDDEN)
         tree = ServiceTree(tmp_path / "svc")
         assert [tree.relative(path) for path in tree.python_files()] == ["src/svc/a.py"]
 

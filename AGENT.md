@@ -176,6 +176,12 @@ Nothing else sits at module level, so there are no module constants, helper func
 exceptions are a `main()` for a console script and `__all__`. Constants become `ClassVar` attributes in `UPPER_CASE`,
 above the constructor.
 
+**NEVER declare a dict with hard-coded keys inside a method or function,** in `src/` and in `tests/`, whether a literal
+(`{"level": ...}`) or a `dict(level=...)` call. A dict whose keys and values are fixed is an `UPPER_CASE` `ClassVar`
+(`JSON_FORMATTER_ENTRY: ClassVar[Dict[str, str]] = {...}`), copied before a method changes it. When the values are
+computed at run time, the keys are `UPPER_CASE` `ClassVar[str]` constants (`TIME_KEY: ClassVar[str] = "time"`) and the
+method builds `{self.TIME_KEY: ...}`. In a test `helpers.py` made of functions, the constants sit at module level.
+
 Inside a class, the order is: constants and fields, `__init__`, validators, then these two banners. Leave out a banner
 whose section would be empty.
 
@@ -208,6 +214,7 @@ Every runnable class except the nodes subclasses `Runnable` or `AsyncRunnable`, 
 | `initialize()` | Acquires what the work needs. A service is already serving when it returns |
 | `run()` | Does the work. A service blocks here until it is closed, and a job returns when it is done |
 | `close()` | Releases everything, and must be safe after a failed or partial `initialize` |
+| `status()` | `AsyncRunnable` only: returns one line saying what it is doing and how far it got |
 
 - `execute()` on the base class calls all three, and closes whatever happens. Use it unless something runs alongside.
 - They take no arguments. Inputs go to the constructor, and results are read from attributes afterwards, such as
@@ -216,10 +223,17 @@ Every runnable class except the nodes subclasses `Runnable` or `AsyncRunnable`, 
   sub-folders: `ServiceFactory` in `service/factories/`, and `CommandFactory` in `api/factories/`. Do not call a
   runnable's constructor in `src/` outside a factory.
 - The base classes are `swarm_lifecycle.runnables.runnable.Runnable` and `swarm_lifecycle.runnables.async_runnable.AsyncRunnable`.
-  A subclass passes its logger to `super().__init__(logger)`.
+  A subclass passes its logger to `super().__init__(logger)`, and an `AsyncRunnable` subclass passes its status
+  interval first: `super().__init__(config.status_interval_s, logger)`.
 - An abstract factory of a layer subclasses `swarm_lifecycle.factories.runnable_factory.RunnableFactory[...]` or
   `swarm_lifecycle.factories.async_runnable_factory.AsyncRunnableFactory[...]`. A concrete factory implements `_build()`,
   and callers call `create()`.
+- **A long-running async task ALWAYS yields its status.** All async work that can last runs in an `AsyncRunnable`,
+  never in a bare coroutine or task, and the base class makes the reports: every subclass implements `status()`, and
+  `execute()` logs it at `INFO` every `status_interval_s` while `initialize` and `run` work, then logs a last status
+  when the work stops, failed or not. `status_interval_s` is a required constructor argument taken from the
+  runnable's configuration (with its default written out in `conf/app.yaml`), and a value that is not a positive
+  number raises `SEAsyncRunnableInvalidStatusIntervalError`. A task silent for longer than its interval is stalled.
 
 ## Imports
 

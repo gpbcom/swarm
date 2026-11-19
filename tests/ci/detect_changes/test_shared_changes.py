@@ -6,7 +6,7 @@ from typing import ClassVar, Dict, List
 
 import pytest
 
-from tests.ci.detect_changes.helpers import ALL_SERVICES, ALL_TYPESCRIPT, outputs, run_detector, write_repo
+from tests.ci.detect_changes.helpers import ALL_SERVICES, ALL_TYPESCRIPT, RUST_KEY, outputs, run_detector, write_repo
 
 
 class TestSharedChanges:
@@ -54,7 +54,7 @@ class TestSharedChanges:
     def test_an_empty_rust_workspace_is_not_applicable(self, tmp_path: Path) -> None:
         write_repo(tmp_path, rust_members=False)
         result = run_detector(tmp_path, ["packages/rust/Cargo.toml"])
-        assert outputs(result) == {**self.EVERYTHING, "rust": "false"}
+        assert outputs(result) == {**self.EVERYTHING, RUST_KEY: "false"}
 
     def test_a_shared_path_with_a_service_path_lists_each_service_once(self, tmp_path: Path) -> None:
         write_repo(tmp_path)

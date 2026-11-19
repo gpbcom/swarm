@@ -5,6 +5,42 @@ from typing import Dict
 
 from tests.conventions.helpers import write_files
 
+PACKAGE = "src/broken"
+BROKEN_FILES: Dict[str, str] = {
+    "pyproject.toml": '[project]\nname = "broken"\nversion = "0.1.0"\n',
+    f"{PACKAGE}/__init__.py": "",
+    f"{PACKAGE}/api/__init__.py": "",
+    f"{PACKAGE}/service/__init__.py": "",
+    f"{PACKAGE}/storage/__init__.py": "",
+    f"{PACKAGE}/clients/__init__.py": "",
+    f"{PACKAGE}/models/__init__.py": "",
+    f"{PACKAGE}/api/routes.py": (
+        "from __future__ import annotations\n\n"
+        "from broken.storage.store import Store\n\n\n"
+        "def read() -> Store:\n    return Store()\n"
+    ),
+    f"{PACKAGE}/storage/store.py": "from __future__ import annotations\n\n\nclass Store:\n    pass\n",
+    f"{PACKAGE}/service/two_classes.py": (
+        "from __future__ import annotations\n\n\nclass First:\n    pass\n\n\nclass Second:\n    pass\n"
+    ),
+    f"{PACKAGE}/service/typed.py": (
+        "from __future__ import annotations\n\nfrom typing import Any\n\n\n"
+        "def echo(value: Any) -> None:\n    return None\n"
+    ),
+    f"{PACKAGE}/service/nested.py": (
+        "from __future__ import annotations\n\n\n"
+        "def outer() -> None:\n    def inner() -> None:\n        return None\n\n    inner()\n"
+    ),
+    f"{PACKAGE}/service/job.py": (
+        "from __future__ import annotations\n\n\nclass Job:\n    def run(self) -> None:\n        return None\n"
+    ),
+    f"{PACKAGE}/service/customer.py": (
+        "from __future__ import annotations\n\nfrom pydantic import BaseModel\n\n\n"
+        "class Customer(BaseModel):\n    name: str = 'x'\n"
+    ),
+    f"{PACKAGE}/service/crowded/__init__.py": "",
+}
+
 
 def write_broken_service(services_root: Path) -> Path:
     """Write the sample service ``broken``, which breaks each convention rule exactly once.
@@ -16,43 +52,9 @@ def write_broken_service(services_root: Path) -> Path:
     Pydantic model outside ``models`` (pydantic_models_in_models).
     """
     root = services_root / "broken"
-    package = "src/broken"
-    files: Dict[str, str] = {
-        "pyproject.toml": '[project]\nname = "broken"\nversion = "0.1.0"\n',
-        f"{package}/__init__.py": "",
-        f"{package}/api/__init__.py": "",
-        f"{package}/service/__init__.py": "",
-        f"{package}/storage/__init__.py": "",
-        f"{package}/clients/__init__.py": "",
-        f"{package}/models/__init__.py": "",
-        f"{package}/api/routes.py": (
-            "from __future__ import annotations\n\n"
-            "from broken.storage.store import Store\n\n\n"
-            "def read() -> Store:\n    return Store()\n"
-        ),
-        f"{package}/storage/store.py": "from __future__ import annotations\n\n\nclass Store:\n    pass\n",
-        f"{package}/service/two_classes.py": (
-            "from __future__ import annotations\n\n\nclass First:\n    pass\n\n\nclass Second:\n    pass\n"
-        ),
-        f"{package}/service/typed.py": (
-            "from __future__ import annotations\n\nfrom typing import Any\n\n\n"
-            "def echo(value: Any) -> None:\n    return None\n"
-        ),
-        f"{package}/service/nested.py": (
-            "from __future__ import annotations\n\n\n"
-            "def outer() -> None:\n    def inner() -> None:\n        return None\n\n    inner()\n"
-        ),
-        f"{package}/service/job.py": (
-            "from __future__ import annotations\n\n\nclass Job:\n    def run(self) -> None:\n        return None\n"
-        ),
-        f"{package}/service/customer.py": (
-            "from __future__ import annotations\n\nfrom pydantic import BaseModel\n\n\n"
-            "class Customer(BaseModel):\n    name: str = 'x'\n"
-        ),
-        f"{package}/service/crowded/__init__.py": "",
-    }
+    files = dict(BROKEN_FILES)
     for index in range(1, 7):
-        files[f"{package}/service/crowded/module_{index}.py"] = (
+        files[f"{PACKAGE}/service/crowded/module_{index}.py"] = (
             f"from __future__ import annotations\n\n\ndef work_{index}() -> None:\n    return None\n"
         )
     write_files(root, files)

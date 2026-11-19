@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import ClassVar, Dict
 
 import pytest
+from pydantic import JsonValue
 
 from tests.harness.check_touched.helpers import (
     COUNTER_NAME,
@@ -18,6 +20,12 @@ from tests.harness.check_touched.helpers import (
 
 
 class TestCheckTouched:
+    GHOST_RULE: ClassVar[Dict[str, JsonValue]] = {
+        "name": "ghost",
+        "match": r"\.txt$",
+        "run": ["swarm-no-such-executable-xyz", "{files}"],
+    }
+
     def test_the_main_working_tree_is_not_checked(self, tmp_path: Path) -> None:
         main = make_repo(tmp_path, catalogue_text([failing_rule()]))
         (main / "bad.txt").write_text("FAIL\n", encoding="utf-8")
@@ -64,8 +72,7 @@ class TestCheckTouched:
         assert not (git_dir(worker) / COUNTER_NAME).exists()
 
     def test_a_missing_executable_is_not_a_failure(self, tmp_path: Path) -> None:
-        rule = {"name": "ghost", "match": r"\.txt$", "run": ["swarm-no-such-executable-xyz", "{files}"]}
-        main = make_repo(tmp_path, catalogue_text([rule]))
+        main = make_repo(tmp_path, catalogue_text([self.GHOST_RULE]))
         worker = add_worktree(main, tmp_path)
         (worker / "a.txt").write_text("a\n", encoding="utf-8")
         result = run_hook(worker)

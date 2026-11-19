@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import logging
 from logging import Logger, getLogger
 from typing import Awaitable, Callable, Dict
@@ -7,6 +8,7 @@ from typing import Awaitable, Callable, Dict
 import pytest
 from lifecycle_recording_async_runnable import RecordingAsyncRunnable
 
+from swarm_lifecycle.models.exceptions import SEAsyncRunnableInvalidStatusIntervalError
 from swarm_lifecycle.runnables.async_runnable import AsyncRunnable
 
 
@@ -70,3 +72,37 @@ class TestAsyncRunnable:
 
     def test_the_default_logger_is_a_logger(self) -> None:
         assert isinstance(RecordingAsyncRunnable().logger, Logger)
+
+    async def test_a_long_run_reports_its_status_at_each_interval(self, caplog: pytest.LogCaptureFixture) -> None:
+        runnable = RecordingAsyncRunnable(run_for_s=0.25, status_interval_s=0.05)
+        with caplog.at_level(logging.INFO):
+            await runnable.execute()
+        reports = [record for record in caplog.records if record.getMessage().startswith("Status of ")]
+        assert len(reports) >= 3
+        assert all(record.levelno == logging.INFO for record in reports)
+        assert all("RecordingAsyncRunnable" in record.getMessage() for record in reports)
+
+    async def test_the_last_status_is_logged_before_close(self, caplog: pytest.LogCaptureFixture) -> None:
+        with caplog.at_level(logging.INFO):
+            await RecordingAsyncRunnable().execute()
+        last = [record.getMessage() for record in caplog.records if record.getMessage().startswith("Last status of ")]
+        assert last == ["Last status of RecordingAsyncRunnable: 2 lifecycle calls so far."]
+
+    @pytest.mark.parametrize("fail_in", ["initialize", "run"])
+    async def test_a_failing_task_still_logs_its_last_status(
+        self, fail_in: str, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        with caplog.at_level(logging.INFO), pytest.raises(RuntimeError):
+            await RecordingAsyncRunnable(fail_in=fail_in).execute()
+        assert any(record.getMessage().startswith("Last status of ") for record in caplog.records)
+
+    async def test_no_status_report_is_left_running_after_execute(self) -> None:
+        await RecordingAsyncRunnable(status_interval_s=0.01).execute()
+        await asyncio.sleep(0.03)
+        running = [task for task in asyncio.all_tasks() if task is not asyncio.current_task()]
+        assert running == []
+
+    @pytest.mark.parametrize("value", [0, -1.0, True, "60"])
+    def test_a_status_interval_that_is_not_a_positive_number_is_refused(self, value: float) -> None:
+        with pytest.raises(SEAsyncRunnableInvalidStatusIntervalError):
+            RecordingAsyncRunnable(status_interval_s=value)

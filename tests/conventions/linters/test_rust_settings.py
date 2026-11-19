@@ -10,6 +10,8 @@ from tests.conventions.helpers import repo_root
 
 
 class TestRustSettings:
+    LEVEL_KEY: ClassVar[str] = "level"
+    PRIORITY_KEY: ClassVar[str] = "priority"
     NIGHTLY_OPTIONS: ClassVar[List[str]] = [
         "unstable_features",
         "imports_granularity",
@@ -65,7 +67,7 @@ class TestRustSettings:
 
     @pytest.mark.parametrize("name, level", [("all", "deny"), ("pedantic", "warn")])
     def test_the_clippy_levels_and_priorities(self, name: str, level: str) -> None:
-        assert self.lints("clippy").get(name) == {"level": level, "priority": -1}
+        assert self.lints("clippy").get(name) == {self.LEVEL_KEY: level, self.PRIORITY_KEY: -1}
 
     def test_missing_docs_is_a_warning(self) -> None:
         assert self.lints("rust").get("missing_docs") == "warn"

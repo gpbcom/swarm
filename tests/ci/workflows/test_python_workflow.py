@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import ClassVar, Dict, List, Union
 
 import pytest
 import yaml
@@ -9,6 +9,8 @@ from pydantic import JsonValue
 
 
 class TestPythonWorkflow:
+    READ_ONLY_PERMISSIONS: ClassVar[Dict[str, str]] = {"contents": "read"}
+
     def root(self) -> Path:
         return Path(__file__).resolve().parents[3]
 
@@ -68,7 +70,7 @@ class TestPythonWorkflow:
         assert repository["default"] is False
 
     def test_permissions_are_read_only(self) -> None:
-        assert self.load().get("permissions") == {"contents": "read"}
+        assert self.load().get("permissions") == self.READ_ONLY_PERMISSIONS
 
     def test_there_are_exactly_two_jobs(self) -> None:
         assert sorted(self.jobs()) == ["repository", "services"]

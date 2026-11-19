@@ -4,13 +4,18 @@
 
 ## Code rules never to break
 
-Two rules of [AGENT.md](AGENT.md) hold for people and agents alike, in `src/` and `tests/`:
+Four rules of [AGENT.md](AGENT.md) hold for people and agents alike, in `src/` and `tests/`:
 
 - **No `Any` and no `object` as a type.** Both are too generic. Write the real type: `JsonValue` for parsed JSON, YAML
   or TOML, a `Union` for several known types, a `Callable[...]` with its signature, a generic with its real parameter
   (AGENT.md, Typing).
 - **Every `try` has an `except`, even if only to log.** A `try` with only a `finally` is forbidden: the `except` logs at
   `ERROR` and raises again with a bare `raise` when it cannot handle the error (AGENT.md, Exceptions).
+- **No dict with hard-coded keys inside a method or function.** A fixed dict is an `UPPER_CASE` `ClassVar`; when its
+  values are computed, its keys are `UPPER_CASE` `ClassVar[str]` constants (AGENT.md, File shape).
+- **A long-running async task ALWAYS yields its status.** Async work that can last runs in an `AsyncRunnable`, which
+  implements `status()`; `execute()` logs it at `INFO` every `status_interval_s` (required, from its configuration),
+  then a last status when the work stops (AGENT.md, Lifecycle and factories).
 
 ## The harness
 

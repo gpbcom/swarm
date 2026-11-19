@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from itertools import product
 from pathlib import Path
+from typing import ClassVar, Dict
 
 import pytest
 
@@ -12,6 +13,8 @@ from tests.conventions.rules.service_tree import ServiceTree
 
 
 class TestPackageConventions:
+    FILES: ClassVar[Dict[str, str]] = {"logging/src/logging_pkg/a.py": ""}
+
     @pytest.mark.parametrize(
         ("package", "rule"),
         list(product(ServiceTree.discover(packages_root()), ConventionRules.all())),
@@ -25,5 +28,5 @@ class TestPackageConventions:
         assert violations == [], "\n".join(violations)
 
     def test_a_package_written_under_a_temporary_root_is_discovered(self, tmp_path: Path) -> None:
-        write_files(tmp_path, {"logging/src/logging_pkg/a.py": ""})
+        write_files(tmp_path, self.FILES)
         assert [tree.name for tree in ServiceTree.discover(tmp_path)] == ["logging"]

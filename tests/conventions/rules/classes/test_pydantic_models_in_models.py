@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Dict, List
+from typing import ClassVar, Dict, List
 
 import pytest
 
@@ -11,6 +11,12 @@ from tests.conventions.rules.service_tree import ServiceTree
 
 
 class TestPydanticModelsInModels:
+    CUSTOMER_PATH: ClassVar[str] = "src/sample/service/customer.py"
+    VIP_SUBCLASS: ClassVar[Dict[str, str]] = {
+        "src/sample/models/customer.py": "class Customer(BaseModel):\n    pass\n",
+        "src/sample/service/vip.py": "class Vip(Customer):\n    pass\n",
+    }
+
     def violations(self, tmp_path: Path, files: Dict[str, str]) -> List[str]:
         root = tmp_path / "services" / "sample"
         write_files(root, files)
@@ -34,11 +40,7 @@ class TestPydanticModelsInModels:
         assert found[0].startswith(f"sample/{path}:")
 
     def test_a_subclass_of_a_models_layer_model_in_service_gives_one_violation(self, tmp_path: Path) -> None:
-        files = {
-            "src/sample/models/customer.py": "class Customer(BaseModel):\n    pass\n",
-            "src/sample/service/vip.py": "class Vip(Customer):\n    pass\n",
-        }
-        found = self.violations(tmp_path, files)
+        found = self.violations(tmp_path, self.VIP_SUBCLASS)
         assert len(found) == 1
         assert "service/vip.py" in found[0]
 
@@ -50,4 +52,4 @@ class TestPydanticModelsInModels:
         assert self.violations(tmp_path, {path: "class Customer(BaseModel):\n    pass\n"}) == []
 
     def test_a_plain_class_gives_no_violation(self, tmp_path: Path) -> None:
-        assert self.violations(tmp_path, {"src/sample/service/customer.py": "class Customer:\n    pass\n"}) == []
+        assert self.violations(tmp_path, {self.CUSTOMER_PATH: "class Customer:\n    pass\n"}) == []

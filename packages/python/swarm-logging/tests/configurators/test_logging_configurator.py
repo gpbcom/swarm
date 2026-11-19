@@ -4,7 +4,7 @@ import json
 import logging
 import logging.handlers
 from pathlib import Path
-from typing import Dict, Iterator, Optional
+from typing import ClassVar, Dict, Iterator, Optional
 
 import pytest
 import yaml
@@ -23,6 +23,18 @@ from swarm_logging.models.logging_config import LoggingConfig
 
 
 class TestLoggingConfigurator:
+    CUSTOM_PATH_CONFIGURATION: ClassVar[Dict[str, JsonValue]] = {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "handlers": {"file": {"class": "logging.FileHandler", "filename": "out/custom.log", "encoding": "utf-8"}},
+        "root": {"level": "INFO", "handlers": ["file"]},
+    }
+    UNKNOWN_CLASS_CONFIGURATION: ClassVar[Dict[str, JsonValue]] = {
+        "version": 1,
+        "handlers": {"bad": {"class": "no.such.module.Handler"}},
+        "root": {"level": "INFO", "handlers": ["bad"]},
+    }
+
     @pytest.fixture(autouse=True)
     def restore_root_logger(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
         monkeypatch.chdir(tmp_path)
@@ -105,13 +117,7 @@ class TestLoggingConfigurator:
         assert "a json line" in [str(value) for value in document.values()]
 
     def test_a_custom_path_creates_its_folder_and_is_used(self, tmp_path: Path) -> None:
-        configuration: Dict[str, JsonValue] = {
-            "version": 1,
-            "disable_existing_loggers": False,
-            "handlers": {"file": {"class": "logging.FileHandler", "filename": "out/custom.log", "encoding": "utf-8"}},
-            "root": {"level": "INFO", "handlers": ["file"]},
-        }
-        path = self.write_config(tmp_path, yaml.safe_dump(configuration))
+        path = self.write_config(tmp_path, yaml.safe_dump(self.CUSTOM_PATH_CONFIGURATION))
         LoggingConfigurator(LoggingConfig(path=str(path))).configure()
         logging.getLogger("tests.logging_configurator").info("a custom line")
         self.flush_root()
@@ -131,12 +137,7 @@ class TestLoggingConfigurator:
         assert isinstance(raised.value, SELoggingError)
 
     def test_a_handler_with_an_unknown_class_is_refused_with_its_cause(self, tmp_path: Path) -> None:
-        configuration: Dict[str, JsonValue] = {
-            "version": 1,
-            "handlers": {"bad": {"class": "no.such.module.Handler"}},
-            "root": {"level": "INFO", "handlers": ["bad"]},
-        }
-        path = self.write_config(tmp_path, yaml.safe_dump(configuration))
+        path = self.write_config(tmp_path, yaml.safe_dump(self.UNKNOWN_CLASS_CONFIGURATION))
         with pytest.raises(SELoggingConfigurationRefusedError) as raised:
             LoggingConfigurator(LoggingConfig(path=str(path))).configure()
         assert isinstance(raised.value, SELoggingError)

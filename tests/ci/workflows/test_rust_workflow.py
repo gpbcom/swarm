@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Dict, List, Optional, Union
+from typing import ClassVar, Dict, List, Optional, Union
 
 import pytest
 import yaml
@@ -9,6 +9,8 @@ from pydantic import JsonValue
 
 
 class TestRustWorkflow:
+    READ_ONLY_PERMISSIONS: ClassVar[Dict[str, str]] = {"contents": "read"}
+
     def workflow(self) -> Dict[Union[str, bool], JsonValue]:
         root = Path(__file__).resolve().parents[3]
         path = root / ".github" / "workflows" / "rust.yml"
@@ -40,7 +42,7 @@ class TestRustWorkflow:
         assert "workflow_call" in trigger
 
     def test_it_only_reads_the_repository(self) -> None:
-        assert self.workflow()["permissions"] == {"contents": "read"}
+        assert self.workflow()["permissions"] == self.READ_ONLY_PERMISSIONS
 
     def test_it_has_one_check_job_on_ubuntu(self) -> None:
         jobs = self.workflow()["jobs"]

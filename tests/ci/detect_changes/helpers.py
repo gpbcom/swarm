@@ -7,6 +7,24 @@ from typing import Dict, List
 
 ALL_SERVICES = '["alpha","beta"]'
 ALL_TYPESCRIPT = '["frontends/ground-control","packages/ts/config"]'
+SERVICES_KEY = "services"
+TYPESCRIPT_KEY = "typescript"
+RUST_KEY = "rust"
+REPOSITORY_KEY = "repository"
+SPECS_KEY = "specs"
+RUST_WORKSPACE_PATH = "packages/rust/Cargo.toml"
+RUST_CORE_PATH = "packages/rust/core/Cargo.toml"
+REPO_FILES: Dict[str, str] = {
+    "services/alpha/pyproject.toml": "[project]\nname = 'alpha'\n",
+    "services/beta/pyproject.toml": "[project]\nname = 'beta'\n",
+    "services/_template/pyproject.toml": "[project]\nname = 'template'\n",
+    "services/.hidden/pyproject.toml": "[project]\nname = 'hidden'\n",
+    "services/README.md": "Services.\n",
+    "frontends/ground-control/package.json": "{}\n",
+    "frontends/notes/README.md": "Notes.\n",
+    "packages/ts/config/package.json": "{}\n",
+    "packages/python/.gitkeep": "",
+}
 
 
 def repo_root() -> Path:
@@ -19,21 +37,13 @@ def script_path() -> Path:
 
 def write_repo(root: Path, rust_members: bool = True) -> None:
     files = {
-        "services/alpha/pyproject.toml": "[project]\nname = 'alpha'\n",
-        "services/beta/pyproject.toml": "[project]\nname = 'beta'\n",
-        "services/_template/pyproject.toml": "[project]\nname = 'template'\n",
-        "services/.hidden/pyproject.toml": "[project]\nname = 'hidden'\n",
-        "services/README.md": "Services.\n",
-        "frontends/ground-control/package.json": "{}\n",
-        "frontends/notes/README.md": "Notes.\n",
-        "packages/ts/config/package.json": "{}\n",
-        "packages/python/.gitkeep": "",
-        "packages/rust/Cargo.toml": (
+        **REPO_FILES,
+        RUST_WORKSPACE_PATH: (
             '[workspace]\nresolver = "2"\n' + ('members = ["core"]\n' if rust_members else "members = []\n")
         ),
     }
     if rust_members:
-        files["packages/rust/core/Cargo.toml"] = "[package]\nname = 'core'\n"
+        files[RUST_CORE_PATH] = "[package]\nname = 'core'\n"
     for relative, content in files.items():
         path = root / relative
         path.parent.mkdir(parents=True, exist_ok=True)
