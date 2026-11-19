@@ -23,6 +23,17 @@ def services_root() -> Path:
     return repo_root() / "services"
 
 
+def packages_root() -> Path:
+    """Return the folder holding the shared Python packages to check.
+
+    The variable ``SWARM_CONVENTIONS_PACKAGES_ROOT`` overrides the default ``packages/python/`` folder.
+    """
+    override = os.environ.get("SWARM_CONVENTIONS_PACKAGES_ROOT")
+    if override:
+        return Path(override)
+    return repo_root() / "packages" / "python"
+
+
 def write_files(root: Path, files: Dict[str, str]) -> None:
     """Write each relative POSIX path of ``files`` under ``root`` with its content."""
     for relative, content in files.items():
