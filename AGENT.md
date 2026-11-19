@@ -12,6 +12,8 @@ uv run ruff check services packages tests
 uv run ruff format <the files you edited>
 uv run mypy services/<service>/src
 uv run pytest services/<service>/tests/<layer>/<package> -n 2
+uv run mypy packages/python/<package>/src
+uv run pytest packages/python/<package>/tests -n 2
 ```
 
 For Rust (`packages/rust`, a Cargo workspace whose crates opt in to the workspace lints with `[lints] workspace = true`)
@@ -85,6 +87,11 @@ Cargo and pnpm workspaces, and the Terraform layout. The CI/CD change detection 
 
 `packages/rust/` is a Cargo workspace and `packages/ts/` a pnpm workspace.
 
+The packages of `packages/python/` are `swarm-lifecycle` (`swarm_lifecycle`), with Runnable, AsyncRunnable and the
+abstract factories; `swarm-logging` (`swarm_logging`), with the logging configuration; and `swarm-catalog`
+(`swarm_catalog`), with YamlCatalog. Inside a package, Pydantic models, enums and exceptions sit in `src/<module>/models/`,
+as in a service.
+
 The Python rules in this file apply to `services/` and `packages/python/`. The front ends use React and TypeScript
 with a Tauri desktop shell, images go to GHCR, and Argo CD deploys them; see `docs/specs/technical/`.
 
@@ -132,7 +139,9 @@ folder; a nested function; `Any`; an import that Layout does not allow, checked 
 (`start` or `stop`, or `run` without a lifecycle base class); and a Pydantic model outside `src/models/`. `@staticmethod`,
 attributes starting with an underscore and the node rules are not tested yet. Each rule is one class in
 `tests/conventions/rules/`. The environment variable `SWARM_CONVENTIONS_SERVICES_ROOT` runs the tests against another
-folder of services.
+folder of services. `tests/conventions/packages/test_package_conventions.py` runs the same rules against every package of
+`packages/python/`, and `SWARM_CONVENTIONS_PACKAGES_ROOT` points it at another folder. The lifecycle rule accepts the
+definitions of `Runnable` and `AsyncRunnable` themselves.
 
 - More than one top-level class in a file, whatever the kind of class.
 - More than five Python files in a folder, not counting `__init__.py` and `conftest.py`.
@@ -206,6 +215,11 @@ Every runnable class except the nodes subclasses `Runnable` or `AsyncRunnable`, 
 - Runnables are created by an abstract factory in their layer's `factories/` package, with concrete ones in its
   sub-folders: `ServiceFactory` in `service/factories/`, and `CommandFactory` in `api/factories/`. Do not call a
   runnable's constructor in `src/` outside a factory.
+- The base classes are `swarm_lifecycle.runnables.runnable.Runnable` and `swarm_lifecycle.runnables.async_runnable.AsyncRunnable`.
+  A subclass passes its logger to `super().__init__(logger)`.
+- An abstract factory of a layer subclasses `swarm_lifecycle.factories.runnable_factory.RunnableFactory[...]` or
+  `swarm_lifecycle.factories.async_runnable_factory.AsyncRunnableFactory[...]`. A concrete factory implements `_build()`,
+  and callers call `create()`.
 
 ## Imports
 
@@ -335,6 +349,11 @@ def __init__(self, config: DatabaseConfig, logger: Optional[Logger] = None) -> N
 - `models` never logs. It raises.
 - Only `api/cli/` uses `print`, because that output is for the person at the terminal.
 
+A service configures logging once, at its entry point, with `swarm_logging.configurators.logging_configurator.LoggingConfigurator(LoggingConfig(...)).configure()`.
+`LoggingConfig.path` names the service's `conf/logger.yaml`, and None uses the reference `logger.yaml` shipped in
+swarm_logging. `LoggingConfig.format` is `coloured` by default and `json` in production, which writes one JSON object
+per line on every handler.
+
 ## Pydantic models
 
 Every field has a `Field(description=...)` and a `@field_validator` that raises its own exception. Fields with the same
@@ -368,7 +387,8 @@ class DatabaseConfig(BaseModel):
 ## Data and enums
 
 - Do not hard-code data in Python. It goes in `conf/catalogs/*.yaml`, loaded by a model that subclasses `YamlCatalog`,
-  which provides `load(path)` and raises the model's `UNREADABLE` exception.
+  which provides `load(path)` and raises the model's `UNREADABLE` exception. YamlCatalog is
+  `swarm_catalog.models.yaml_catalog.YamlCatalog`, and a subclass sets `UNREADABLE` to its own exception.
 - A string that selects behaviour is a `StrEnum` with `@unique`, in its own file named after it, with its members
   listed under `Attributes:`.
 - Use `match`/`case` to branch on an enum.
