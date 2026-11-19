@@ -57,7 +57,7 @@ jobs:
       TF_VAR_machines: ${{ vars.DEV_CELL_MACHINES }}
       TF_VAR_ssh_user: ${{ vars.TF_VAR_SSH_USER }}
       TF_VAR_k3s_version: ${{ vars.TF_VAR_K3S_VERSION }}
-      TF_VAR_api_allowed_cidrs: ${{ vars.TF_VAR_API_ALLOWED_CIDRS }}
+      TF_VAR_api_allowed_cidrs: ${{ vars.TF_VAR_API_ALLOWED_CIDRS || '[]' }}
     steps:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
