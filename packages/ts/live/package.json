@@ -1,0 +1,23 @@
+{
+  "name": "@swarm/live",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "node --experimental-strip-types --test test/*.test.ts",
+    "generate": "node --experimental-strip-types scripts/generate.ts"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@swarm/config": "workspace:*",
+    "@types/node": "22.20.5",
+    "eslint": "10.15.0",
+    "json-schema-to-typescript": "16.0.0",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.73.0"
+  }
+}
