@@ -34,3 +34,6 @@ node_modules/
 
 # Log files written by the logging configuration stay out of the repository
 logs/
+
+# Editor settings stay local to each person.
+.vscode/
