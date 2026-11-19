@@ -1,13 +1,13 @@
 export const meta = {
   name: 'ticket-run',
-  description: 'Run an approved ticket plan: parallel worktree waves, integration, verification, review, then a local merge into develop (never pushed)',
+  description: 'Run an approved ticket plan: parallel worktree waves handed off uncommitted, integration, verification, review, EXPLAIN.md and IMPLEMENTATION.md, then one commit merged into develop locally (never pushed)',
   whenToUse: 'After the person approved docs/tickets/<ID>/PLAN.md, for example /ticket-run T1.07 (TKT rules in .claude/rules/tickets.md)',
   phases: [
     { title: 'Gate', detail: 'refuse unless PLAN.md is approved' },
-    { title: 'Waves', detail: 'workers in their own worktrees, at most 8 at once; integrator merges after each wave' },
+    { title: 'Waves', detail: 'workers in their own worktrees, at most 8 at once, hand off uncommitted; integrator applies each wave' },
     { title: 'Verify', detail: 'verifier runs every check; owners fix failures, at most twice' },
     { title: 'Review', detail: 'reviewer gates the diff; owners fix findings, at most twice' },
-    { title: 'Finish', detail: 'merge into develop locally, EXPLAIN.md and PROGRESS.md' },
+    { title: 'Finish', detail: 'EXPLAIN.md, IMPLEMENTATION.md, REVIEW.md, PROGRESS.md, then the single commit merged into develop' },
   ],
 }
 
@@ -33,27 +33,38 @@ const GATE = {
   },
   required: ['approved', 'status', 'tasks', 'done_tasks'],
 }
+// TKT-14: an implementation choice where a reasonable alternative existed, for IMPLEMENTATION.md.
+const DECISION = {
+  type: 'object',
+  properties: {
+    choice: { type: 'string' }, alternatives: { type: 'array', items: { type: 'string' } },
+    trade_off: { type: 'string' }, where: { type: 'string' },
+  },
+  required: ['choice', 'alternatives', 'trade_off', 'where'],
+}
+// TKT-5: workers never commit; they hand their changes off with ticket_tree.py handoff.
 const RESULT = {
   type: 'object',
   properties: {
     status: { type: 'string', enum: ['done', 'blocked', 'failed'] },
-    branch: { type: 'string' }, commit: { type: 'string' },
+    worktree: { type: 'string' },
     files_changed: { type: 'array', items: { type: 'string' } },
     checks: { type: 'array', items: { type: 'string' } },
     assumptions: { type: 'array', items: { type: 'string' } },
+    decisions: { type: 'array', items: DECISION },
     note: { type: 'string' },
   },
-  required: ['status', 'branch', 'files_changed', 'checks', 'assumptions'],
+  required: ['status', 'worktree', 'files_changed', 'checks', 'assumptions', 'decisions'],
 }
 const MERGE = {
   type: 'object',
   properties: {
-    merged: { type: 'array', items: { type: 'string' } },
+    integrated: { type: 'array', items: { type: 'string' } },
     conflicts_resolved: { type: 'array', items: { type: 'string' } },
     blocked: { type: 'array', items: { type: 'string' } },
-    head: { type: 'string' },
+    tree: { type: 'string' },
   },
-  required: ['merged', 'blocked', 'head'],
+  required: ['integrated', 'blocked', 'tree'],
 }
 const VERDICT = {
   type: 'object',
@@ -113,18 +124,21 @@ async function limited(items, n, fn) {
 }
 
 const progress = []
-let currentHead = 'develop'
+// The tree of the integrated, uncommitted work after the last integration (TKT-5): the confirm-fixes review diffs from it.
+let currentTree = ''
 function note(event, by, result) { progress.push(`| ${event} | ${by} | ${result} |`) }
 
 function workerPrompt(t, extra) {
-  return `Ticket ${ID}, task ${t.id}: ${t.title}.\nYour worktree branches from ticket/${ID} as it is now.\n` +
+  return `Ticket ${ID}, task ${t.id}: ${t.title}.\nYour worktree branches from ticket/${ID}, whose work is uncommitted (TKT-5). ` +
+    `First run python3 .claude/scripts/ticket_tree.py start --ticket ${ID} at the root of your worktree: it copies that work in.\n` +
     `Files you may change: ${t.files.join(', ')}.\n` +
     (!/^K\d{2}$/.test(t.id)
       ? `Brief: ${t.brief}\nDone when: ${t.done_when}\n`
       : `First read your brief and done-when exactly as approved: run python3 .claude/scripts/plan.py task --ticket ${ID} --id ${t.id} ` +
         `at the root of your worktree. Follow them as your brief.\n`) +
     (extra ? `\n${extra}\n` : '') +
-    `Commit with the message "${ID} ${t.id}: <summary>". Never push, never merge.`
+    `Never commit, push or merge. Last, run python3 .claude/scripts/ticket_tree.py handoff --ticket ${ID} --task ${t.id} ` +
+    `(again after any later change), and report your decisions (choice, alternatives, trade-off, file:line) for IMPLEMENTATION.md.`
 }
 
 async function runTasks(tasks, phaseName, extra) {
@@ -135,15 +149,16 @@ async function runTasks(tasks, phaseName, extra) {
 }
 
 async function integrate(results, label) {
-  const branches = results.filter(r => r.result && r.result.status === 'done').map(r => r.result.branch)
-  if (!branches.length) return null
+  const ids = results.filter(r => r.result && r.result.status === 'done').map(r => r.task.id)
+  if (!ids.length) return null
   const merge = await agent(
-    `Ticket ${ID}: merge these branches into ticket/${ID} in this order: ${branches.join(', ')}. ` +
-    `Then run the quick checks for what they changed (ruff check, cargo check or tsc as relevant) and leave the main checkout on ticket/${ID}.`,
+    `Ticket ${ID}: integrate the hand-offs of these tasks into the main checkout, in this order: ` +
+    `python3 .claude/scripts/ticket_tree.py integrate --ticket ${ID} ${ids.map(id => `--task ${JSON.stringify(id)}`).join(' ')}. ` +
+    `Then run the quick checks for what they changed (ruff check, cargo check or tsc as relevant). Commit nothing (TKT-5).`,
     { agentType: 'integrator', schema: MERGE, phase: label, label: `integrator ${label}` },
   )
-  note(`Merge (${label})`, 'integrator', merge ? `✅ ${merge.merged.length} merged, ${merge.blocked.length} blocked` : '❌ failed')
-  if (merge && /^[0-9a-f]{7,40}$/.test(merge.head)) currentHead = merge.head
+  note(`Integrate (${label})`, 'integrator', merge ? `✅ ${merge.integrated.length} integrated, ${merge.blocked.length} blocked, not committed` : '❌ failed')
+  if (merge && /^[0-9a-f]{7,40}$/.test(merge.tree)) currentTree = merge.tree
   return merge
 }
 
@@ -153,8 +168,8 @@ const gate = await agent(
   `Read docs/tickets/${ID}/PLAN.md. approved is true only if its status line is exactly "**Plan:** 🟢 Approved". ` +
   `Return the status line, and in tasks the JSON array printed by python3 .claude/scripts/plan.py outline --ticket ${ID}, exactly, without changing anything ` +
   `(the briefs are not part of it: each worker reads its own from the plan). ` +
-  `If the branch ticket/${ID} exists, return in done_tasks the task ids that already have a commit on it whose message starts with "${ID} <task id>:" ` +
-  `(git log ticket/${ID} --format=%s); otherwise an empty list.`,
+  `Return in done_tasks the list "integrated" printed by python3 .claude/scripts/ticket_tree.py status --ticket ${ID} ` +
+  `(the tasks already integrated, uncommitted, by an earlier run, TKT-11).`,
   { agentType: 'scribe', schema: GATE, label: `gate ${ID}` },
 )
 if (!gate || !gate.approved) {
@@ -169,17 +184,29 @@ if (!planCheck || !planCheck.passed) {
 }
 const tasks = gate.tasks
 const alreadyDone = new Set(gate.done_tasks || [])
-if (alreadyDone.size) log(`Re-run: ${alreadyDone.size} task(s) already on ticket/${ID} are skipped (TKT-11): ${[...alreadyDone].join(', ')}`)
+if (alreadyDone.size) log(`Re-run: ${alreadyDone.size} task(s) already integrated on ticket/${ID} are skipped (TKT-11): ${[...alreadyDone].join(', ')}`)
 const waveCount = Math.max(...tasks.map(t => t.wave))
 const prepared = await agent(
-  `Ticket ${ID}: prepare the branch ticket/${ID} from develop (create develop from the current branch if it does not exist) and leave the main checkout on it.`,
+  `Ticket ${ID}: run python3 .claude/scripts/ticket_tree.py prepare --ticket ${ID} in the main checkout. ` +
+  `If it refuses, put each file it names in blocked and change nothing.`,
   { agentType: 'integrator', schema: MERGE, label: `integrator prepare ${ID}` },
 )
-if (prepared && /^[0-9a-f]{7,40}$/.test(prepared.head)) currentHead = prepared.head
+if (!prepared || prepared.blocked.length) {
+  return { ticket: ID, stopped: `The main checkout cannot hold the ticket's uncommitted work (TKT-5)`, problems: prepared ? prepared.blocked : ['prepare did not report'] }
+}
+if (/^[0-9a-f]{7,40}$/.test(prepared.tree)) currentTree = prepared.tree
 
 // Waves --------------------------------------------------------------------------------------------------------
 phase('Waves')
 const assumptions = []
+const decisions = []
+function collect(results) {
+  results.forEach(r => {
+    if (!r.result) return
+    assumptions.push(...r.result.assumptions.map(a => `${r.task.id}: ${a}`))
+    decisions.push(...(r.result.decisions || []).map(d => ({ task: r.task.id, ...d })))
+  })
+}
 for (let w = 1; w <= waveCount; w++) {
   const waveTasks = tasks.filter(t => t.wave === w && !alreadyDone.has(t.id))
   if (!waveTasks.length) { log(`Wave ${w}/${waveCount}: nothing left`); continue }
@@ -192,9 +219,7 @@ for (let w = 1; w <= waveCount; w++) {
       `A first attempt did not finish: ${retry.map(r => (r.result && r.result.note) || 'no result').join(' | ')}`)
     results = results.filter(r => r.result && r.result.status === 'done').concat(again)
   }
-  results.forEach(r => {
-    if (r.result) assumptions.push(...r.result.assumptions.map(a => `${r.task.id}: ${a}`))
-  })
+  collect(results)
   const okCount = results.filter(r => r.result && r.result.status === 'done').length
   note(`Wave ${w}: ${okCount} of ${results.length} tasks done`, 'workers', okCount === results.length ? '✅' : '❌')
   const failed = results.filter(r => !r.result || r.result.status !== 'done')
@@ -203,7 +228,8 @@ for (let w = 1; w <= waveCount; w++) {
     await agent(`Append to the Events table of docs/tickets/${ID}/PROGRESS.md these events (Event | By | Result): ${progress.join(' ')} and "Stopped in wave ${w}: ${failed.map(f => f.task.id).join(', ')} not done" (❌). ` +
       `Then run python3 .claude/scripts/progress.py timings --ticket ${ID} --write.`,
       { agentType: 'scribe', label: `scribe ${ID}` })
-    return { ticket: ID, stopped: `Wave ${w}: ${failed.map(f => f.task.id).join(', ')} not done after one retry`, assumptions }
+    return { ticket: ID, stopped: `Wave ${w}: ${failed.map(f => f.task.id).join(', ')} not done after one retry`, assumptions,
+      next: `The integrated work stays uncommitted on ticket/${ID}; /ticket-run ${ID} continues from wave ${w} (TKT-11).` }
   }
 }
 
@@ -250,6 +276,7 @@ async function fixRound(items, label) {
     agent(workerPrompt(g.task, `Fix only these problems, within your files: ${JSON.stringify(g.items)}`), {
       agentType: g.task.agent, isolation: 'worktree', schema: RESULT, phase: label, label: `${g.task.id} ${g.task.agent} (fix)`,
     }).then(r => ({ task: g.task, result: r })))
+  collect(results)
   await integrate(results, label)
 }
 
@@ -281,14 +308,15 @@ function keep(findings) {
   return findings.filter(x => x.severity === 'blocking')
 }
 if (verdict && verdict.passed) {
-  let reviewedHead = null
+  let reviewedTree = null
   for (let round = 0; round <= MAX_FIX_ROUNDS; round++) {
     const prompt = round === 0
-      ? `Review ticket ${ID} (mode: full review): the diff develop...ticket/${ID} against docs/tickets/${ID}/TICKET.md. ` +
+      ? `Review ticket ${ID} (mode: full review): its uncommitted work, python3 .claude/scripts/ticket_tree.py diff --ticket ${ID}, against docs/tickets/${ID}/TICKET.md. ` +
         `Assumptions reported by the agents: ${JSON.stringify(assumptions)}. ` +
+        `Decisions reported by the agents: ${JSON.stringify(decisions)}. ` +
         `Return in note the short review note, following .claude/skills/ticket/templates/REVIEW.md.`
       : `Review ticket ${ID} (mode: confirm fixes, round ${round + 1}). Previous blocking findings: ${JSON.stringify(blocking)}. ` +
-        `The fixes are in git diff ${reviewedHead}..ticket/${ID}. Report, as blocking, only (a) a previous blocking finding that is not resolved, ` +
+        `The fixes are in python3 .claude/scripts/ticket_tree.py diff --ticket ${ID} --from ${reviewedTree}. Report, as blocking, only (a) a previous blocking finding that is not resolved, ` +
         `and (b) a blocking defect introduced by that diff. Anything else is a follow-up. List in resolved the previous findings now fixed. ` +
         `Return in note the short review note, following .claude/skills/ticket/templates/REVIEW.md.`
     review = await agent(prompt, { agentType: 'reviewer', schema: REVIEW, phase: 'Review', label: `reviewer round ${round + 1}` })
@@ -297,7 +325,7 @@ if (verdict && verdict.passed) {
     note(`Review ${round + 1} (${round === 0 ? 'full' : 'confirm fixes'})`, 'reviewer',
       `${blocking.length ? '⚠️' : '✅'} ${blocking.length} blocking, ${review.findings.length - blocking.length} follow-ups`)
     if (!blocking.length || round === MAX_FIX_ROUNDS) break
-    reviewedHead = currentHead
+    reviewedTree = currentTree
     await fixRound(blocking.map(f => ({ file: f.file, check: f.rule, detail: f.change })), 'Review')
     verdict = await agent(`Verify ticket ${ID} on ticket/${ID}.`, { agentType: 'verifier', schema: VERDICT, phase: 'Review', label: `verifier after review ${round + 1}` })
     if (!verdict || !verdict.passed) break
@@ -306,35 +334,63 @@ if (verdict && verdict.passed) {
 if (followUps.length) log(`${followUps.length} follow-up(s) recorded, not blocking (TKT-12)`)
 
 // Finish -------------------------------------------------------------------------------------------------------
+// TKT-5: nothing is committed before this point. The documents are written first, so that the ticket's single commit
+// holds them with the work; the commit and the merge into develop are the last writes of the run.
 phase('Finish')
 const done = Boolean(verdict && verdict.passed && review && blocking.length === 0)
-if (done) {
-  await agent(`Ticket ${ID}: merge ticket/${ID} into develop with --no-ff, remove the merged worktrees, never push.`,
-    { agentType: 'integrator', schema: MERGE, label: `integrator finish ${ID}` })
-  note('Merge into develop', 'integrator', '✅ merged locally, not pushed')
-}
-await agent(
+const followUpRows = followUps.map(f => ({ file: f.file, change: f.change }))
+const scribeWork = agent(
   `Ticket ${ID}: append to the Events table of docs/tickets/${ID}/PROGRESS.md these events (Event | By | Result): ${progress.join(' ')}. ` +
-  `Finally run python3 .claude/scripts/progress.py timings --ticket ${ID} --write. ` +
   (done
-    ? `Write docs/tickets/${ID}/EXPLAIN.md from TICKET.md, the diff develop~1...develop and these accepted assumptions: ${JSON.stringify(review.assumptions_accepted)}; set TICKET.md status to "✅ Done".`
-    : `Add a row "Stopped: ${environmentFailure ? 'environment problem (missing tool or module), the person fixes the environment and re-runs' : verdict && !verdict.passed ? 'checks failing' :'blocking review findings left after the fix rounds; the person decides'}" (❌) with the open failures or findings: ${JSON.stringify(verdict && !verdict.passed ? verdict.failures : blocking)}.`) +
+    ? `Set TICKET.md status to "✅ Done".`
+    : `Add a row "Stopped: ${environmentFailure ? 'environment problem (missing tool or module), the person fixes the environment and re-runs' : verdict && !verdict.passed ? 'checks failing' : 'blocking review findings left after the fix rounds; the person decides'}" (❌) with the open failures or findings: ${JSON.stringify(verdict && !verdict.passed ? verdict.failures : blocking)}. ` +
+      `Add a row "Work left uncommitted on ticket/${ID}; /ticket-run ${ID} continues it" (⚠️).`) +
   (review ? ` Write docs/tickets/${ID}/REVIEW.md exactly from the note of the last review: ${JSON.stringify(review.note)}.` : '') +
-  (followUps.length ? ` Add a section "## 🔜 Follow-ups" to PROGRESS.md (and to EXPLAIN.md if written) listing these non-blocking findings, one row each (file, what to change): ${JSON.stringify(followUps.map(f => ({ file: f.file, change: f.change })))}.` : ''),
-  { agentType: 'scribe', label: `scribe ${ID}` },
+  (followUps.length ? ` Add a section "## 🔜 Follow-ups" to PROGRESS.md listing these non-blocking findings, one row each (file, what to change): ${JSON.stringify(followUpRows)}.` : '') +
+  (done ? '' : ` Finally run python3 .claude/scripts/progress.py timings --ticket ${ID} --write.`),
+  { agentType: 'scribe', phase: 'Finish', label: `scribe ${ID}` },
 )
+let finished = null
+if (done) {
+  // TKT-14: EXPLAIN.md and IMPLEMENTATION.md are written beside the scribe's documents (different files).
+  await Promise.all([
+    scribeWork,
+    agent(
+      `Ticket ${ID} is done; its work is uncommitted in the main checkout on ticket/${ID}. Write docs/tickets/${ID}/EXPLAIN.md and ` +
+      `docs/tickets/${ID}/IMPLEMENTATION.md following your instructions and the templates of .claude/skills/ticket/templates/. ` +
+      `Decisions reported by the agents: ${JSON.stringify(decisions)}. ` +
+      `Assumptions accepted by the reviewer: ${JSON.stringify(review.assumptions_accepted)}. ` +
+      `Review note: ${JSON.stringify(review.note)}. ` +
+      `Follow-ups (for EXPLAIN.md): ${JSON.stringify(followUpRows)}.`,
+      { agentType: 'explainer', phase: 'Finish', label: `explainer ${ID}` },
+    ),
+  ])
+  finished = await agent(
+    `Ticket ${ID} is done. First run python3 .claude/scripts/progress.py timings --ticket ${ID} --write, ` +
+    `then python3 .claude/scripts/ticket_tree.py finish --ticket ${ID}: the ticket's single commit, merged into develop with --no-ff. ` +
+    `Never push. Put anything that stops it in blocked, and the merge commit in tree.`,
+    { agentType: 'integrator', schema: MERGE, phase: 'Finish', label: `integrator finish ${ID}` },
+  )
+} else {
+  await scribeWork
+}
+const merged = Boolean(finished && !finished.blocked.length)
 
 return {
   ticket: ID,
   done,
+  merged,
   tasks: tasks.length,
   waves: waveCount,
   checks: verdict ? (verdict.passed ? 'passed' : `${verdict.failures.length} failing`) : 'not run',
   review: review ? (blocking.length ? `${blocking.length} blocking left` : 'approved') : 'not run',
   followUps: followUps.length,
   reviewNote: review ? `docs/tickets/${ID}/REVIEW.md` : 'not written',
+  documents: done ? [`docs/tickets/${ID}/EXPLAIN.md`, `docs/tickets/${ID}/IMPLEMENTATION.md`] : [],
   assumptions,
-  next: done ? `Merged into develop locally. Push yourself when you want: the harness never pushes.`
-    : environmentFailure ? `Fix the environment (see the failing checks in docs/tickets/${ID}/PROGRESS.md), then run /ticket-run ${ID} again`
-    : `See docs/tickets/${ID}/PROGRESS.md`,
+  decisions: decisions.length,
+  next: merged ? `One commit on ticket/${ID}, merged into develop locally. Push yourself when you want: the harness never pushes.`
+    : done ? `The documents are written but the commit or the merge stopped: ${finished ? finished.blocked.join('; ') : 'the integrator did not report'}`
+    : environmentFailure ? `Fix the environment (see the failing checks in docs/tickets/${ID}/PROGRESS.md), then run /ticket-run ${ID} again. The work stays uncommitted on ticket/${ID}.`
+    : `See docs/tickets/${ID}/PROGRESS.md. The work stays uncommitted on ticket/${ID}.`,
 }

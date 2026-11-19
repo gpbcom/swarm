@@ -48,11 +48,13 @@ This repository is a proof of concept for mastering the Claude Code harness; dro
 - **Tickets:** the tickets of the roadmap (`docs/specs/roadmap/`) are worked by an agent graph, under the TKT rules
   (`.claude/rules/tickets.md`). `/ticket-plan <ID>` writes `docs/tickets/<ID>/TICKET.md` and a task graph in
   `PLAN.md`, then stops; the person approves the plan (`**Plan:** 🟢 Approved`); `/ticket-run <ID>` runs the waves in
-  parallel worktrees, integrates, verifies, reviews and merges into `develop` locally.
+  parallel worktrees, integrates, verifies, reviews, writes `EXPLAIN.md` and `IMPLEMENTATION.md` (TKT-14), then commits
+  once and merges into `develop` locally.
 - **Agents:** `.claude/agents/` (planner and reviewer on opus, workers on sonnet, mechanical work on haiku, TKT-7);
   workflows in `.claude/workflows/`.
 - **Progress every 2 minutes** (TKT-9): when a ticket workflow starts, arm the Monitor tool with
   `python3 .claude/scripts/progress.py watch --every 120 --run <run id>` and relay each exhaustive report to the
   person in full, with its colour icons (phases, every agent with model, duration, tokens and result, tokens by model).
-- **Commits:** the ticket harness commits on worktree and ticket branches and merges into `develop` locally. Nothing
-  is ever pushed, and no commit is made outside the harness unless the person asks.
+- **Commits:** no intermediate commit (TKT-5). A ticket's work stays uncommitted on `ticket/<ID>` while it runs, carried
+  between worktrees by `.claude/scripts/ticket_tree.py`, and is committed once, when the ticket is done, then merged
+  into `develop` locally. Nothing is ever pushed, and no commit is made outside the harness unless the person asks.

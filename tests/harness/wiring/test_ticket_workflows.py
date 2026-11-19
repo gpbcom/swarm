@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import re
 
+import pytest
+
 from tests.harness.wiring.helpers import phase_titles, read_text
 
 
@@ -34,3 +36,32 @@ class TestTicketWorkflows:
         assert "'note'" in lists[-1]
         assert "REVIEW.md" in text
         assert ".claude/skills/ticket/templates/REVIEW.md" in text
+
+    def test_ticket_run_makes_no_intermediate_commit(self) -> None:
+        text = read_text(self.RUN)
+        assert "Commit with the message" not in text
+        assert "merge ticket/" not in text
+        for command in ("start", "handoff", "integrate", "status", "prepare", "finish", "diff"):
+            assert f"ticket_tree.py {command}" in text, command
+
+    def test_ticket_run_workers_report_decisions_for_implementation_md(self) -> None:
+        text = read_text(self.RUN)
+        match = re.search(r"const RESULT =.*?(?=^const )", text, re.DOTALL | re.MULTILINE)
+        assert match
+        assert "'decisions'" in match.group(0)
+        assert "agentType: 'explainer'" in text
+        assert "IMPLEMENTATION.md" in text
+
+    @pytest.mark.parametrize("name", ["EXPLAIN.md", "IMPLEMENTATION.md", "REVIEW.md", "TICKET.md"])
+    def test_every_ticket_document_has_a_template(self, name: str) -> None:
+        assert read_text(f".claude/skills/ticket/templates/{name}")
+
+    def test_the_explain_template_holds_the_generated_changes_table(self) -> None:
+        text = read_text(".claude/skills/ticket/templates/EXPLAIN.md")
+        assert "<!-- changes -->" in text
+        assert "<!-- /changes -->" in text
+
+    def test_the_rules_hold_tkt_14(self) -> None:
+        text = read_text(".claude/rules/tickets.md")
+        assert "[TKT-14](#tkt-14)" in text
+        assert '<a id="tkt-14"></a>' in text
