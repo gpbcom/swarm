@@ -46,6 +46,13 @@ class TestGitflowWorkflows:
         assert permissions["contents"] == "write"
         assert permissions["pull-requests"] == "write"
 
+    def test_a_pull_request_that_changes_ci_is_left_to_a_person(self) -> None:
+        script = self.run_of("automerge.yml", "merge")
+        assert "repos/$REPO/pulls/$pr/files" in script
+        assert ".github/workflows/" in script
+        assert "needs-person" in script
+        assert script.index("needs-person") < script.index("gh pr merge")
+
     def test_automerge_keeps_the_gitflow_merge_commit(self) -> None:
         script = self.run_of("automerge.yml", "merge")
         assert "--merge" in script
