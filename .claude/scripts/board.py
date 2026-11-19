@@ -58,6 +58,10 @@ BRANCH = "develop"
 BLOB = f"https://github.com/{REPO}/blob/{BRANCH}/docs/specs/roadmap/"
 PROJECT_TITLE = "Swarm roadmap"
 PAUSE_S = 1.0
+ALREADY_LINKED = re.compile(
+    r"already been taken|already exists|already a sub-issue|duplicate sub-issue|closed by another request",
+    re.IGNORECASE,
+)
 STATUSES = [
     ("backlog", "📥 Backlog", "GRAY", "Waits for a prerequisite ticket"),
     ("ready", "✅ Ready", "BLUE", "Every prerequisite merged: can start"),
@@ -99,8 +103,12 @@ def git_ahead(home: Path) -> bool:
 ################
 
 
-def gh(args: List[str], payload: Optional[Json] = None) -> Json:
-    """Run ``gh`` and return its JSON output, waiting and retrying when GitHub throttles."""
+def gh(args: List[str], payload: Optional[Json] = None, tolerate_existing: bool = False) -> Json:
+    """Run ``gh`` and return its JSON output, waiting and retrying when GitHub throttles.
+
+    With ``tolerate_existing``, a link GitHub already holds (made just before a stop, not yet recorded) counts as made:
+    ``None`` is returned instead of stopping, so that a resumed bootstrap goes on.
+    """
     for attempt in range(12):
         result = subprocess.run(
             ["gh", *args],
@@ -112,6 +120,8 @@ def gh(args: List[str], payload: Optional[Json] = None) -> Json:
         if result.returncode == 0:
             return json.loads(result.stdout) if result.stdout.strip() else None
         error = result.stderr + result.stdout
+        if tolerate_existing and ALREADY_LINKED.search(error):
+            return None
         if re.search(
             r"rate limit|abuse|was submitted too quickly|HTTP 403|HTTP 429|HTTP 502|timeout", error, re.IGNORECASE
         ):
@@ -123,18 +133,19 @@ def gh(args: List[str], payload: Optional[Json] = None) -> Json:
     raise SystemExit("GitHub kept throttling: run the same command again later, it resumes.")
 
 
-def gql(query: str, **variables: Json) -> Dict[str, Json]:
-    data = gh(["api", "graphql", "--input", "-"], {"query": query, "variables": variables})
+def gql(query: str, *, tolerate_existing: bool = False, **variables: Json) -> Dict[str, Json]:
+    data = gh(["api", "graphql", "--input", "-"], {"query": query, "variables": variables}, tolerate_existing)
+    if data is None and tolerate_existing:
+        return {}
     assert isinstance(data, dict)
     if data.get("errors"):
         raise SystemExit(f"GraphQL error: {data['errors']}")
     return data["data"]  # type: ignore[return-value]
 
 
-def rest(method: str, path: str, payload: Optional[Json] = None) -> Json:
-    return gh(
-        ["api", "-X", method, path, "--input", "-"] if payload is not None else ["api", "-X", method, path], payload
-    )
+def rest(method: str, path: str, payload: Optional[Json] = None, tolerate_existing: bool = False) -> Json:
+    args = ["api", "-X", method, path, "--input", "-"] if payload is not None else ["api", "-X", method, path]
+    return gh(args, payload, tolerate_existing)
 
 
 #########
@@ -416,6 +427,9 @@ class Board:
         wanted = dict(LABELS)
         for number, _ in enumerate(PHASE_PAGES):
             wanted[f"phase:P{number}"] = (PHASE_COLOURS[number], f"Phase P{number} of the roadmap")
+        if self.dry_run:
+            print(f"🏷️  {len(wanted)} labels")
+            return
         existing = {label["name"] for label in gh(["label", "list", "-R", REPO, "--limit", "200", "--json", "name"])}
         for name, (colour, description) in wanted.items():
             if name not in existing and not self.dry_run:
@@ -548,6 +562,7 @@ class Board:
                 continue
             gql(
                 "mutation($i:ID!,$s:ID!){ addSubIssue(input:{issueId:$i,subIssueId:$s}){ clientMutationId } }",
+                tolerate_existing=True,
                 i=self.state["issues"][parent]["node"],
                 s=self.state["issues"][child]["node"],
             )
@@ -559,6 +574,7 @@ class Board:
                     continue
                 gql(
                     "mutation($i:ID!,$b:ID!){ addBlockedBy(input:{issueId:$i,blockingIssueId:$b}){ clientMutationId } }",
+                    tolerate_existing=True,
                     i=self.state["issues"][ticket["id"]]["node"],
                     b=self.state["issues"][dep]["node"],
                 )
@@ -594,6 +610,7 @@ class Board:
                 "PATCH",
                 f"repos/{REPO}/issues/{self.state['issues'][ident]['number']}",
                 {"state": "closed", "state_reason": "completed"},
+                tolerate_existing=True,
             )
             self.state["closed"].append(ident)
             self.step(f"🏁 closed {ident}")
