@@ -12,6 +12,7 @@ members = [
     "swarm-gateway",
     "swarm-lifecycle",
     "swarm-logging",
+    "swarm-models",
 ]
 
 [manifest.dependency-groups]
@@ -788,6 +789,17 @@ requires-dist = [
     { name = "pydantic", specifier = ">=2.14.3" },
     { name = "pyyaml", specifier = ">=6.0.3" },
 ]
+
+[[package]]
+name = "swarm-models"
+version = "0.1.0"
+source = { editable = "packages/python/swarm-models" }
+dependencies = [
+    { name = "pydantic" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "pydantic", specifier = ">=2.14.3" }]
 
 [[package]]
 name = "types-pyyaml"

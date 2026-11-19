@@ -26,7 +26,7 @@ ignore = ["UP006", "UP007", "UP035", "UP045"]
 # Tests are written before the code they import (TKT-4): pinning ``tests`` as first-party keeps the import order the
 # same whether or not the imported module exists yet. The code of the repository is first-party, so that the AGENT.md
 # import groups match ruff.
-known-first-party = ["tests", "gateway", "swarm_catalog", "swarm_lifecycle", "swarm_logging"]
+known-first-party = ["tests", "gateway", "swarm_catalog", "swarm_lifecycle", "swarm_logging", "swarm_models"]
 
 [tool.ruff.format]
 quote-style = "double"
@@ -40,6 +40,7 @@ testpaths = [
     "packages/python/swarm-lifecycle/tests",
     "packages/python/swarm-catalog/tests",
     "packages/python/swarm-logging/tests",
+    "packages/python/swarm-models/tests",
 ]
 
 [tool.mypy]
@@ -48,11 +49,13 @@ files = [
     "packages/python/swarm-lifecycle/src",
     "packages/python/swarm-catalog/src",
     "packages/python/swarm-logging/src",
+    "packages/python/swarm-models/src",
 ]
 mypy_path = [
     "services/gateway/src",
     "packages/python/swarm-lifecycle/src",
     "packages/python/swarm-catalog/src",
     "packages/python/swarm-logging/src",
+    "packages/python/swarm-models/src",
 ]
 explicit_package_bases = true
