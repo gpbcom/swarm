@@ -95,6 +95,11 @@ class TestDevCellWorkflow:
     def test_the_deletion_of_a_tag_is_ignored(self) -> None:
         assert "github.event.ref_type == 'branch'" in str(self.job().get("if", ""))
 
+    def test_a_deleted_branch_waits_until_the_dev_cell_is_configured(self) -> None:
+        condition = str(self.job().get("if", ""))
+        assert "github.event.ref_type == 'branch' && vars.DEV_CELL_MACHINES != ''" in condition
+        assert "github.event_name == 'workflow_dispatch'" in condition
+
     def test_a_deleted_branch_destroys_its_cell(self) -> None:
         env = self.env()
         assert "delete" in env["ACTION"]
