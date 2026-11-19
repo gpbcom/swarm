@@ -33,6 +33,24 @@ The technical pages, features, use cases and business rules of [TICKET.md](TICKE
 | 2026-11-19 10:41 | K17 blocked by K02's sample runnables: their `__init__` did not call `super().__init__()`, so `self.logger` (set by the Runnable base, K12 brief) was missing | main session | ⚠️ Found |
 | 2026-11-19 10:41 | K18 blocked by K06's tests: they passed a `Path` to `LoggingConfig(path=...)`, which the K04 and K14 briefs define as `Optional[str]` | main session | ⚠️ Found |
 | 2026-11-19 10:41 | Both test defects fixed against the approved contracts (`super().__init__()` in the two stand-ins, `str(path)` in the configurator tests); with K17's and K18's commits the lifecycle and logging suites give 88 passed, ruff passes | main session | ✅ Fixed |
+| 2026-11-19 10:45 | Wave 4: 2 of 2 tasks done | workers | ✅ |
+| 2026-11-19 10:45 | Merge (Waves) | integrator | ✅ 2 merged, 0 blocked |
+| 2026-11-19 10:45 | Wave 5: 1 of 1 tasks done | workers | ✅ |
+| 2026-11-19 10:45 | Merge (Waves) | integrator | ✅ 1 merged, 0 blocked |
+| 2026-11-19 10:45 | Verify 1 | verifier | ✅ passed |
+| 2026-11-19 10:45 | Review 1 (full) | reviewer | ✅ 0 blocking, 6 follow-ups |
+| 2026-11-19 10:45 | Merge into develop | integrator | ✅ merged locally, not pushed |
+
+## 🔜 Follow-ups
+
+| File | What to change |
+| --- | --- |
+| `services/gateway/src/gateway/api/cli/main.py` | `main()` hard-codes `LoggingConfig()`, so the gateway always logs in coloured format and has no way to switch to JSON in production. When T0.12 adds the gateway's `conf/app.yaml`, read `LoggingConfig` (path and format) from it. Until then, record this gap in EXPLAIN.md. |
+| `packages/python/swarm-logging/src/swarm_logging/configurators/logging_configurator.py` | In JSON mode, a configuration file with no formatters section keeps the default text formatter, so production logs from that file would not be JSON. Add the JSON formatter and assign it to every handler instead of leaving the file as it is. |
+| `packages/python/swarm-logging/src/swarm_logging/configurators/logging_configurator.py` | The messages `Invalid logging configuration {path!r}. Must be a mapping.` (`_read`) and `Unreadable catalog: {path}. Must be a YAML mapping in UTF-8.` (`swarm_catalog/models/yaml_catalog.py` `load`) put two sentences on one source line. Split them into one sentence per line. Also settle the conflict between AGENT.md's `# noqa: E501` instruction and ruff's RUF100: either enable E501 or change the rule in AGENT.md. |
+| `packages/python/swarm-catalog/src/swarm_catalog/models/yaml_catalog.py` | When the YAML content does not match the model, `load()` raises pydantic's `ValidationError`, not `UNREADABLE` (the test `test_an_unknown_key_is_refused` covers this). Decide whether a schema mismatch should also raise `UNREADABLE`, and write the decision in the docstring. |
+| `tests/conventions/rules/classes/lifecycle_base_classes.py` | The exemption applies to any class named `Runnable` or `AsyncRunnable` in any service or package, not only to `swarm_lifecycle`. Limit it to the `swarm_lifecycle` package. Also update the stale Note "The lifecycle classes arrive in a later ticket, so they are recognised by name". |
+| `packages/python/swarm-lifecycle/tests/factories/runnable/lifecycle_sample_runnable_factory.py` | The test stand-in files (`lifecycle_sample_*.py` and `lifecycle_recording_*.py`) carry `# First-party imports` comments, with the bare-module import placed above that group. Remove the group comments to follow the test-file style. |
 
 <!-- timings -->
 ## ⏱️ Timings
@@ -42,21 +60,21 @@ Measured from the agents' transcripts by `python3 .claude/scripts/progress.py ti
 | Measure | Value |
 | --- | --- |
 | 🕒 Ticket started | 2026-11-19 10:18:19 |
-| 🕒 Last activity | 2026-11-19 10:40:52 |
-| ⏱️ **Overall ticket time** (first start to last activity) | **22m33s** |
-| 🤖 Time with agents working (sum of runs) | 20m01s |
-| ⏸️ Time between runs (approvals, fixes) | 2m31s |
-| 🔁 Workflow runs | 2 |
-| 🪙 **Tokens consumed** (input, output, cache write, cache read) | **17.20M** |
+| 🕒 Last activity | 2026-11-19 10:46:16 |
+| ⏱️ **Overall ticket time** (first start to last activity) | **27m57s** |
+| 🤖 Time with agents working (sum of runs) | 24m32s |
+| ⏸️ Time between runs (approvals, fixes) | 3m24s |
+| 🔁 Workflow runs | 3 |
+| 🪙 **Tokens consumed** (input, output, cache write, cache read) | **21.01M** |
 
 #### 🪙 Tokens by model
 
 | Model | Input | Output | Cache write | Cache read | Total |
 | --- | --- | --- | --- | --- | --- |
-| 🔵 sonnet | 0k | 212k | 1.27M | 10.19M | **11.68M** |
-| 🟢 haiku | 0k | 113k | 523k | 1.52M | **2.16M** |
-| 🟣 opus | 0k | 209k | 327k | 2.83M | **3.36M** |
-| **All models** | 0k | 535k | 2.12M | 14.54M | **17.20M** |
+| 🔵 sonnet | 0k | 238k | 1.53M | 11.67M | **13.44M** |
+| 🟢 haiku | 0k | 147k | 759k | 2.26M | **3.16M** |
+| 🟣 opus | 0k | 226k | 558k | 3.62M | **4.41M** |
+| **All models** | 0k | 611k | 2.85M | 17.55M | **21.01M** |
 
 ### 1. ticket-plan · 2026-11-19 10:18:19 to 10:32:38 · ⏱️ 14m19s
 
@@ -78,17 +96,17 @@ Tokens of this run: 0k · 292k · 768k · 4.50M · **5.56M** (input · output ·
 | ✅ check PLAN.md T0.05 | 🟢 haiku | 10:32:26 | 10:32:29 | 0m03s | 0k | 0k | 36k | 59k | **96k** |
 | ✅ scribe plan check T0.05 | 🟢 haiku | 10:32:29 | 10:32:38 | 0m08s | 0k | 1k | 34k | 134k | **171k** |
 
-### 2. ticket-run · 2026-11-19 10:35:09 to 10:40:52 · ⏱️ 5m42s
+### 2. ticket-run · 2026-11-19 10:35:09 to 10:40:56 · ⏱️ 5m47s
 
 | Phase | Start | End | Elapsed | Steps |
 | --- | --- | --- | --- | --- |
 | Gate | 10:35:09 | 10:35:36 | 0m26s | 3 |
-| Waves | 10:35:37 | 10:40:52 | 5m15s | 26 |
+| Waves | 10:35:37 | 10:40:56 | 5m19s | 26 |
 | Verify | | | not run | 0 |
 | Review | | | not run | 0 |
 | Finish | | | not run | 0 |
 
-Tokens of this run: 0k · 242k · 1.35M · 10.04M · **11.63M** (input · output · cache write · cache read · total)
+Tokens of this run: 0k · 243k · 1.37M · 10.19M · **11.80M** (input · output · cache write · cache read · total)
 
 | Step | Model | Start | End | Elapsed | Input | Output | Cache write | Cache read | Total |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -120,5 +138,32 @@ Tokens of this run: 0k · 242k · 1.35M · 10.04M · **11.63M** (input · output
 | ❌ K17 implementer | 🔵 sonnet | 10:40:15 | 10:40:34 | 0m19s | 0k | 2k | 39k | 240k | **282k** |
 | ❌ K18 implementer | 🔵 sonnet | 10:40:15 | 10:40:33 | 0m18s | 0k | 2k | 42k | 281k | **326k** |
 | ✅ integrator Waves | 🔵 sonnet | 10:40:35 | 10:40:44 | 0m08s | 0k | 0k | 29k | 99k | **129k** |
-| 🔄 scribe T0.05 | 🟢 haiku | 10:40:45 | 10:40:52 | 0m06s | 0k | 2k | 76k | 90k | **169k** |
+| ✅ scribe T0.05 | 🟢 haiku | 10:40:45 | 10:40:56 | 0m11s | 0k | 3k | 88k | 242k | **334k** |
+
+### 3. ticket-run · 2026-11-19 10:41:50 to 10:46:16 · ⏱️ 4m25s
+
+| Phase | Start | End | Elapsed | Steps |
+| --- | --- | --- | --- | --- |
+| Gate | 10:41:50 | 10:42:16 | 0m26s | 3 |
+| Waves | 10:42:17 | 10:43:59 | 1m42s | 5 |
+| Verify | 10:44:00 | 10:44:13 | 0m13s | 1 |
+| Review | 10:44:14 | 10:45:27 | 1m12s | 1 |
+| Finish | 10:45:27 | 10:46:16 | 0m48s | 2 |
+
+Tokens of this run: 0k · 75k · 713k · 2.86M · **3.65M** (input · output · cache write · cache read · total)
+
+| Step | Model | Start | End | Elapsed | Input | Output | Cache write | Cache read | Total |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| ✅ gate T0.05 | 🟢 haiku | 10:41:50 | 10:42:06 | 0m15s | 0k | 9k | 58k | 59k | **126k** |
+| ✅ plan check T0.05 | 🟢 haiku | 10:42:06 | 10:42:09 | 0m03s | 0k | 0k | 35k | 56k | **92k** |
+| ✅ integrator prepare T0.05 | 🔵 sonnet | 10:42:10 | 10:42:16 | 0m06s | 0k | 0k | 28k | 32k | **61k** |
+| ✅ K17 implementer | 🔵 sonnet | 10:42:17 | 10:42:37 | 0m20s | 0k | 2k | 34k | 180k | **217k** |
+| ✅ K18 implementer | 🔵 sonnet | 10:42:17 | 10:43:07 | 0m50s | 0k | 18k | 60k | 710k | **788k** |
+| ✅ integrator Waves | 🔵 sonnet | 10:43:08 | 10:43:20 | 0m11s | 0k | 0k | 31k | 98k | **131k** |
+| ✅ K20 implementer | 🔵 sonnet | 10:43:21 | 10:43:47 | 0m25s | 0k | 2k | 37k | 230k | **270k** |
+| ✅ integrator Waves | 🔵 sonnet | 10:43:49 | 10:43:59 | 0m09s | 0k | 0k | 30k | 97k | **129k** |
+| ✅ verifier round 1 | 🟢 haiku | 10:44:00 | 10:44:13 | 0m13s | 0k | 0k | 32k | 60k | **92k** |
+| ✅ reviewer round 1 | 🟣 opus | 10:44:14 | 10:45:27 | 1m12s | 0k | 16k | 230k | 797k | **1.05M** |
+| ✅ integrator finish T0.05 | 🔵 sonnet | 10:45:27 | 10:45:37 | 0m09s | 0k | 1k | 35k | 128k | **165k** |
+| 🔄 scribe T0.05 | 🟢 haiku | 10:45:37 | 10:46:16 | 0m38s | 0k | 22k | 98k | 409k | **530k** |
 <!-- /timings -->

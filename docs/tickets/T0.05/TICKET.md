@@ -1,6 +1,6 @@
 # T0.05: Lifecycle and logging packages
 
-**Status:** 🟡 Planned
+**Status:** ✅ Done
 
 ## Roadmap
 
