@@ -1,4 +1,11 @@
 $ python3 .claude/skills/write-specs/scripts/specs.py check
 (cwd .)
 
-
+Traceback (most recent call last):
+  File "/home/guillaume/Documents/Projects/PoC/swarm/.claude/skills/write-specs/scripts/specs.py", line 30, in <module>
+    from spec_check import Checker
+  File "/home/guillaume/Documents/Projects/PoC/swarm/.claude/skills/write-specs/scripts/spec_check.py", line 16, in <module>
+    from spec_screens import (PALETTE_TYPE, SOURCE_KEY, mockup_for, mockups, mode_of, png_colour_type, png_for, png_info,
+  File "/home/guillaume/Documents/Projects/PoC/swarm/.claude/skills/write-specs/scripts/spec_screens.py", line 15, in <module>
+    from PIL import Image
+ModuleNotFoundError: No module named 'PIL'
