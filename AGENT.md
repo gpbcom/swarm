@@ -22,8 +22,16 @@ and TypeScript (`packages/ts`, a pnpm workspace), run these from their workspace
 ```bash
 cargo fmt --all --check
 cargo clippy --workspace --all-targets -- -D warnings
+cargo test --workspace
 pnpm -r --if-present lint
 pnpm -r --if-present typecheck
+```
+
+Run `cargo bench --workspace --bench '*'` from `packages/rust` to run the criterion benchmarks, and build the
+`swarm_core` wheel with:
+
+```bash
+uv run maturin build --release --manifest-path packages/rust/swarm-core/python/Cargo.toml --out dist
 ```
 
 TypeScript packages and front ends extend `@swarm/config` (`packages/ts/config`), which holds the strict
@@ -51,6 +59,9 @@ pnpm --filter ./packages/ts/live run generate
   - the `packages` job of `python.yml` runs ruff, mypy and pytest on `packages/python`;
   - the tests under `tests/`;
   - for Rust: `cargo fmt`, `clippy` and `cargo test`;
+    - `rust.yml` has a `bench` job that runs only on pull requests, after `check`. It saves criterion benchmarks of the
+      base commit as the baseline `pr-base`, runs them on the pull request, and `.github/scripts/bench_gate.py` fails
+      the build when a benchmark's mean is more than 5 % slower;
   - for each TypeScript project: its `lint`, `typecheck` and `test` scripts;
   - `specs.py check`.
 - All of them must pass.
@@ -100,6 +111,12 @@ Cargo and pnpm workspaces, and the Terraform layout. The CI/CD change detection 
 
 `packages/rust/` is a Cargo workspace and `packages/ts/` a pnpm workspace.
 
+The Rust core is `packages/rust/swarm-core/`. It holds the crates `safety`, `planner` and `mavlink` (`swarm-core-safety`,
+`swarm-core-planner`, `swarm-core-mavlink`), each with its criterion benchmark in `benches/`. It also holds the PyO3
+bindings `swarm-core/python` (Python module `swarm_core`, which releases the GIL), built as a wheel by maturin. The
+bindings are not a uv workspace member, so `uv sync` never builds Rust. `tests/rust/swarm_core/` checks the layout and
+imports the functions from a wheel it builds.
+
 The packages of `packages/python/` are `swarm-lifecycle` (`swarm_lifecycle`), with Runnable, AsyncRunnable and the
 abstract factories; `swarm-logging` (`swarm_logging`), with the logging configuration; and `swarm-catalog`
 (`swarm_catalog`), with YamlCatalog. Inside a package, Pydantic models, enums and exceptions sit in `src/<module>/models/`,
@@ -148,7 +165,8 @@ Each step must pass before the next one starts:
    lock file (`uv.lock`, `Cargo.lock`, `pnpm-lock.yaml`), in a root workspace file or in the pipeline itself runs all of
    them.
 2. Run `ruff check`, `ruff format --check`, `mypy` and `pytest` for each changed service; `cargo fmt`, `clippy` and
-   `cargo test` for Rust; eslint, `tsc` and Vitest for TypeScript; and `specs.py check`.
+   `cargo test` for Rust, and `cargo bench` with the 5 % gate on pull requests; eslint, `tsc` and Vitest for
+   TypeScript; and `specs.py check`.
 3. Build each changed image.
 4. Run Playwright against those images, and upload the HTML report if a test fails.
 5. Publish the images tagged with the commit SHA, from `develop` or `master` only.

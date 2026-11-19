@@ -1,0 +1,48 @@
+warning: `VIRTUAL_ENV=/home/guillaume/Documents/Projects/PoC/swarm/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead
+Using CPython 3.12.14
+Creating virtual environment at: .venv
+   Building swarm-catalog @ file:///home/guillaume/Documents/Projects/PoC/swarm/.claude/worktrees/wf_f1142aee-115-25/packages/python/swarm-catalog
+   Building swarm-gateway @ file:///home/guillaume/Documents/Projects/PoC/swarm/.claude/worktrees/wf_f1142aee-115-25/services/gateway
+   Building swarm-lifecycle @ file:///home/guillaume/Documents/Projects/PoC/swarm/.claude/worktrees/wf_f1142aee-115-25/packages/python/swarm-lifecycle
+   Building swarm-logging @ file:///home/guillaume/Documents/Projects/PoC/swarm/.claude/worktrees/wf_f1142aee-115-25/packages/python/swarm-logging
+   Building swarm-models @ file:///home/guillaume/Documents/Projects/PoC/swarm/.claude/worktrees/wf_f1142aee-115-25/packages/python/swarm-models
+      Built swarm-catalog @ file:///home/guillaume/Documents/Projects/PoC/swarm/.claude/worktrees/wf_f1142aee-115-25/packages/python/swarm-catalog
+      Built swarm-models @ file:///home/guillaume/Documents/Projects/PoC/swarm/.claude/worktrees/wf_f1142aee-115-25/packages/python/swarm-models
+      Built swarm-lifecycle @ file:///home/guillaume/Documents/Projects/PoC/swarm/.claude/worktrees/wf_f1142aee-115-25/packages/python/swarm-lifecycle
+      Built swarm-gateway @ file:///home/guillaume/Documents/Projects/PoC/swarm/.claude/worktrees/wf_f1142aee-115-25/services/gateway
+      Built swarm-logging @ file:///home/guillaume/Documents/Projects/PoC/swarm/.claude/worktrees/wf_f1142aee-115-25/packages/python/swarm-logging
+Installed 34 packages in 13ms
+/home/guillaume/Documents/Projects/PoC/swarm/.claude/worktrees/wf_f1142aee-115-25/.venv/lib/python3.12/site-packages/pytest_asyncio/plugin.py:306: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to "function" scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session". Set it to "fixture-scope" to keep the current behavior.
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+/home/guillaume/Documents/Projects/PoC/swarm/.claude/worktrees/wf_f1142aee-115-25/.venv/lib/python3.12/site-packages/pytest_asyncio/plugin.py:306: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to "function" scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session". Set it to "fixture-scope" to keep the current behavior.
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+/home/guillaume/Documents/Projects/PoC/swarm/.claude/worktrees/wf_f1142aee-115-25/.venv/lib/python3.12/site-packages/pytest_asyncio/plugin.py:306: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to "function" scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session". Set it to "fixture-scope" to keep the current behavior.
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.2.0, pluggy-1.7.0
+rootdir: /home/guillaume/Documents/Projects/PoC/swarm/.claude/worktrees/wf_f1142aee-115-25
+configfile: pyproject.toml
+plugins: anyio-4.16.0, asyncio-1.5.0, xdist-3.8.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+created: 2/2 workers
+2 workers [39 items]
+
+.......................................                                  [100%]
+=============================== warnings summary ===============================
+tests/rust/swarm_core/test_swarm_core_wheel.py::TestSwarmCoreWheel::test_maturin_builds_exactly_one_wheel_named_after_the_module
+tests/rust/swarm_core/test_swarm_core_wheel.py::TestSwarmCoreWheel::test_the_wheel_holds_a_type_stub_for_the_module
+  /home/guillaume/Documents/Projects/PoC/swarm/.claude/worktrees/wf_f1142aee-115-25/.venv/lib/python3.12/site-packages/_pytest/fixtures.py:1392: PytestRemovedIn10Warning: Class-scoped fixtures defined as instance methods are deprecated.
+  Instance attributes set in the 'built' fixture will NOT be visible to test methods,
+  as each test gets a new instance while the fixture runs only once per class.
+  Use a @classmethod decorator below @pytest.fixture and set attributes on cls instead.
+  See https://docs.pytest.org/en/stable/deprecations.html#class-scoped-fixture-as-instance-method
+    fixturefunc = resolve_fixture_function(fixturedef, request)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 39 passed, 2 warnings in 6.92s ========================

@@ -1,0 +1,14 @@
+[build-system]
+requires = ["maturin>=1.7,<2"]
+build-backend = "maturin"
+
+[project]
+name = "swarm-core"
+requires-python = ">=3.12"
+dynamic = ["version"]
+
+# `pyo3/extension-module` is enabled here only, so that `cargo clippy` and `cargo test` on the workspace do not need it.
+[tool.maturin]
+module-name = "swarm_core"
+features = ["pyo3/extension-module"]
+skip-auditwheel = true

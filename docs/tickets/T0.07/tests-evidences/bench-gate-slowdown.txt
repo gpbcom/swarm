@@ -1,0 +1,59 @@
+T0.07 K13: the criterion gate fails on a deliberately slowed safety tick and passes without it
+Date: 2026-11-19
+rustc: rustc 1.100.0 (0ef1bc386 2026-11-09)
+criterion: 0.8.2 (packages/rust/Cargo.lock)
+Working directory: packages/rust. CARGO_TARGET_DIR=<scratch>/target (outside the repository).
+These are the commands of the rust.yml `bench` job, run locally (the harness pushes nothing, so no pull request runs).
+
+== Step 1: baseline ==
+$ cargo bench --workspace --locked --bench '*' -- --save-baseline pr-base
+exit code: 0
+safety_tick             time:   [90.860 ns 100.00 ns 108.77 ns]   (24 % outliers: a noisy first run)
+
+== Step 2: unchanged code ==
+$ cargo bench --workspace --locked --bench '*' -- --baseline-lenient pr-base
+$ python3 ../../.github/scripts/bench_gate.py --criterion-dir "$CARGO_TARGET_DIR/criterion"
+
+-- Attempt 1 (noise alone failed the gate, recorded as it happened) --
+mavlink_encode: +12.15 % regression
+planner_plan: -17.82 % ok
+safety_tick: -18.46 % ok
+Benchmark gate failed: 1 regression(s) of more than 5.00 %.
+gate exit code: 1
+Note: the code is identical to the baseline. mavlink_encode moved by +12 % on a shared machine, which is noise.
+
+-- Attempt 2 (same commands, same code) --
+mavlink_encode: +1.84 % ok
+planner_plan: -4.83 % ok
+safety_tick: -17.92 % ok
+Benchmark gate passed: 3 benchmark(s) compared.
+gate exit code: 0
+
+== Step 3: slowed code ==
+Change, never committed: `tick` in packages/rust/swarm-core/safety/src/lib.rs folds the slice twice through
+std::hint::black_box and returns the sum of the first fold, so the work at least doubles:
+    let first: u64 = std::hint::black_box(values).iter().fold(0, |sum, value| sum.wrapping_add(std::hint::black_box(*value)));
+    let second: u64 = std::hint::black_box(values).iter().fold(0, |sum, value| sum.wrapping_add(std::hint::black_box(*value)));
+    std::hint::black_box(second);
+    first
+
+$ cargo bench --workspace --locked --bench '*' -- --baseline-lenient pr-base
+exit code: 0
+safety_tick             time:   [538.15 ns 539.07 ns 540.04 ns]
+                        change: [+502.70% +545.62% +591.38%] (p = 0.00 < 0.05)
+$ python3 ../../.github/scripts/bench_gate.py --criterion-dir "$CARGO_TARGET_DIR/criterion"
+mavlink_encode: -9.74 % ok
+planner_plan: -19.65 % ok
+safety_tick: +545.62 % regression
+Benchmark gate failed: 1 regression(s) of more than 5.00 %.
+gate exit code: 1
+
+== Step 4: revert ==
+Checking out packages/rust/swarm-core/safety/src/lib.rs from the index could not restore the file: in this worktree
+the whole swarm-core crate is still uncommitted ticket work (untracked), so there is no committed copy. The file was
+restored byte for byte from a copy taken before the slowdown (`diff` prints nothing). The slowdown is not in the
+delivered work.
+
+== Result ==
+Unchanged code: gate exit 0 (after one noisy failure on mavlink_encode, recorded above).
+Slowed code: gate exit 1, with the line `safety_tick: +545.62 % regression`.

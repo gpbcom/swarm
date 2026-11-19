@@ -1,0 +1,4 @@
+$ uv run ruff format --check tests/ci/bench_gate/helpers.py tests/ci/bench_gate/test_bench_gate.py tests/ci/workflows/test_rust_workflow.py tests/rust/swarm_core/helpers.py tests/rust/swarm_core/test_swarm_core_layout.py tests/rust/swarm_core/test_swarm_core_wheel.py
+(cwd .)
+
+6 files already formatted
