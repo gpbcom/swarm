@@ -21,6 +21,8 @@ class LifecycleBaseClasses(ConventionRule):
         - The lifecycle classes arrive in a later ticket, so they are recognised by name.
         - A base class is followed through the classes of the same service, so a subclass of a class that is
           itself runnable is accepted.
+        - ``swarm_lifecycle`` defines ``Runnable`` and ``AsyncRunnable``, so a class named like one of ``BASES``
+          is the lifecycle base itself and may define ``run``. ``start`` and ``stop`` stay refused for every class.
         - **The visited names are tracked**, so that a cycle of base classes ends instead of looping.
     """
 
@@ -74,8 +76,10 @@ class LifecycleBaseClasses(ConventionRule):
             classes (Dict[str, Set[str]]): The base names of every class of the service.
 
         Returns:
-            bool: True when a base resolves, through the service classes, to a name in ``BASES``.
+            bool: True when the class is itself a base in ``BASES``, or a base resolves, through the service classes, to a name in ``BASES``.
         """
+        if name in self.BASES:
+            return True
         seen: Set[str] = set()
         pending = [name]
         while pending:

@@ -1,0 +1,17 @@
+[project]
+name = "swarm-catalog"
+version = "0.1.0"
+description = "The YamlCatalog base of the data catalogues."
+readme = "../../../README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pydantic>=2.14.3",
+    "pyyaml>=6.0.3",
+]
+
+[tool.uv.build-backend]
+module-name = "swarm_catalog"
+
+[build-system]
+requires = ["uv_build>=0.12.21,<0.13.0"]
+build-backend = "uv_build"
