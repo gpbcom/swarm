@@ -1,6 +1,6 @@
 # T0.03: Convention tests and linters
 
-**Status:** 🟡 Planned
+**Status:** ✅ Done
 
 ## Roadmap
 
