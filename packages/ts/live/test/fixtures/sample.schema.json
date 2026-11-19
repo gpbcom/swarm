@@ -1,0 +1,21 @@
+{
+  "title": "Sample models",
+  "$defs": {
+    "Sample": {
+      "title": "Sample",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "format": "uuid" },
+        "count": { "type": "integer" },
+        "state": { "$ref": "#/$defs/SampleState" }
+      },
+      "required": ["id", "count", "state"]
+    },
+    "SampleState": {
+      "title": "SampleState",
+      "type": "string",
+      "enum": ["on", "off"]
+    }
+  }
+}
