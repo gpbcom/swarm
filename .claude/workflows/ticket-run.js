@@ -119,7 +119,7 @@ function note(event, by, result) { progress.push(`| ${event} | ${by} | ${result}
 function workerPrompt(t, extra) {
   return `Ticket ${ID}, task ${t.id}: ${t.title}.\nYour worktree branches from ticket/${ID} as it is now.\n` +
     `Files you may change: ${t.files.join(', ')}.\n` +
-    (t.brief
+    (!/^K\d{2}$/.test(t.id)
       ? `Brief: ${t.brief}\nDone when: ${t.done_when}\n`
       : `First read your brief and done-when exactly as approved: run python3 .claude/scripts/plan.py task --ticket ${ID} --id ${t.id} ` +
         `at the root of your worktree. Follow them as your brief.\n`) +

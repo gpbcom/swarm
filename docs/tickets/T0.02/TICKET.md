@@ -1,6 +1,6 @@
 # T0.02: Claude Code ticket harness
 
-**Status:** 🟡 Planned
+**Status:** ✅ Done
 
 ## Roadmap
 
