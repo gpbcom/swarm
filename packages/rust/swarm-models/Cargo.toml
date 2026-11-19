@@ -1,0 +1,19 @@
+[package]
+name = "swarm-models"
+version = "0.1.0"
+edition.workspace = true
+publish = false
+description = "The Swarm models as Rust structs, generated from the JSON Schema bundle of the Pydantic models."
+
+[lints]
+workspace = true
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+uuid = { version = "1", features = ["serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+
+[dev-dependencies]
+swarm-models-codegen = { path = "../swarm-models-codegen" }
+serde_json = "1"
