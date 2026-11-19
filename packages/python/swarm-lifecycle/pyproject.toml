@@ -1,0 +1,14 @@
+[project]
+name = "swarm-lifecycle"
+version = "0.1.0"
+description = "The Runnable and AsyncRunnable base classes and their abstract factories."
+readme = "../../../README.md"
+requires-python = ">=3.12"
+dependencies = []
+
+[tool.uv.build-backend]
+module-name = "swarm_lifecycle"
+
+[build-system]
+requires = ["uv_build>=0.12.21,<0.13.0"]
+build-backend = "uv_build"

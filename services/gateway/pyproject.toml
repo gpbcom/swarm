@@ -7,6 +7,8 @@ requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.164.0",
     "pydantic>=2.14.3",
+    "swarm-lifecycle",
+    "swarm-logging",
 ]
 
 [project.scripts]
@@ -14,6 +16,10 @@ swarm-gateway = "gateway.api.cli.main:main"
 
 [tool.uv.build-backend]
 module-name = "gateway"
+
+[tool.uv.sources]
+swarm-lifecycle = { workspace = true }
+swarm-logging = { workspace = true }
 
 [build-system]
 requires = ["uv_build>=0.12.21,<0.13.0"]
