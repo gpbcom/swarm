@@ -1,7 +1,7 @@
 # 🎬 UC-024: Configure each Drone of the Squad on the Site
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ UC-023: Configure the Workspace of Ground control](UC-023-configure-the-workspace-of-ground-control.md) · 📄 **Page 50 / 108** · [UC-025: Monitor a Mission in Ground control ▶️](UC-025-monitor-a-mission-in-ground-control.md)
+> [🏠 Index](../../README.md) · [◀️ UC-023: Configure the Workspace of Ground control](UC-023-configure-the-workspace-of-ground-control.md) · 📄 **Page 50 / 109** · [UC-025: Monitor a Mission in Ground control ▶️](UC-025-monitor-a-mission-in-ground-control.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -148,5 +148,5 @@ One row per state of the flow chart: every action, success and failure node. Cli
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ UC-023: Configure the Workspace of Ground control](UC-023-configure-the-workspace-of-ground-control.md) · 📄 **Page 50 / 108** · [UC-025: Monitor a Mission in Ground control ▶️](UC-025-monitor-a-mission-in-ground-control.md)
+> [🏠 Index](../../README.md) · [◀️ UC-023: Configure the Workspace of Ground control](UC-023-configure-the-workspace-of-ground-control.md) · 📄 **Page 50 / 109** · [UC-025: Monitor a Mission in Ground control ▶️](UC-025-monitor-a-mission-in-ground-control.md)
 <!-- /spec:nav-bottom -->

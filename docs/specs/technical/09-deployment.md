@@ -1,7 +1,7 @@
 # 🚢 Deployment
 
 <!-- spec:nav-top -->
-> [🏠 Index](../README.md) · [◀️ Observability](08-observability.md) · 📄 **Page 93 / 108** · [GUI and WebUI ▶️](10-frontends.md)
+> [🏠 Index](../README.md) · [◀️ Observability](08-observability.md) · 📄 **Page 93 / 109** · [GUI and WebUI ▶️](10-frontends.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -89,5 +89,5 @@ GitHub Actions, following the steps of AGENT.md, each step passing before the ne
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../README.md) · [◀️ Observability](08-observability.md) · 📄 **Page 93 / 108** · [GUI and WebUI ▶️](10-frontends.md)
+> [🏠 Index](../README.md) · [◀️ Observability](08-observability.md) · 📄 **Page 93 / 109** · [GUI and WebUI ▶️](10-frontends.md)
 <!-- /spec:nav-bottom -->

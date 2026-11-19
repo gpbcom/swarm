@@ -1,7 +1,7 @@
 # 📖 Glossary
 
 <!-- spec:nav-top -->
-> [🏠 Index](README.md) · [◀️ Swarm specifications](README.md) · 📄 **Page 2 / 108** · [Visual identity ▶️](visual-identity.md)
+> [🏠 Index](README.md) · [◀️ Swarm specifications](README.md) · 📄 **Page 2 / 109** · [Visual identity ▶️](visual-identity.md)
 <!-- /spec:nav-top -->
 
 > [!IMPORTANT]
@@ -176,5 +176,5 @@ The states a persona or an entity can be in, named `<Persona or entity>: <State>
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](README.md) · [◀️ Swarm specifications](README.md) · 📄 **Page 2 / 108** · [Visual identity ▶️](visual-identity.md)
+> [🏠 Index](README.md) · [◀️ Swarm specifications](README.md) · 📄 **Page 2 / 109** · [Visual identity ▶️](visual-identity.md)
 <!-- /spec:nav-bottom -->

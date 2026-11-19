@@ -1,7 +1,7 @@
 # 🛣️ Roadmap
 
 <!-- spec:nav-top -->
-> [🏠 Index](../README.md) · [◀️ GUI and WebUI](../technical/10-frontends.md) · 📄 **Page 95 / 108** · [P0: Foundations ▶️](01-p0-foundations.md)
+> [🏠 Index](../README.md) · [◀️ GUI and WebUI](../technical/10-frontends.md) · 📄 **Page 95 / 109** · [P0: Foundations ▶️](01-p0-foundations.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -104,9 +104,10 @@ gantt
 | [🤝 Hardware and partners](11-hardware-and-partners.md) | Drone models, Payloads, Docks, design partners, hosting providers, with dates |
 | [🎲 Risks](12-risks.md) | The risks register with owners, signals and responses |
 | [🧬 Traceability](13-traceability.md) | Every feature, use case and business rule, with the phase and sprint that delivers it |
+| [⛓️ Parallel plan](14-parallel-plan.md) | Which tickets can run at the same time, their Gantt charts per scenario, and the field dates that do not move |
 
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../README.md) · [◀️ GUI and WebUI](../technical/10-frontends.md) · 📄 **Page 95 / 108** · [P0: Foundations ▶️](01-p0-foundations.md)
+> [🏠 Index](../README.md) · [◀️ GUI and WebUI](../technical/10-frontends.md) · 📄 **Page 95 / 109** · [P0: Foundations ▶️](01-p0-foundations.md)
 <!-- /spec:nav-bottom -->

@@ -1,7 +1,7 @@
 # 📘 FS-022: Debrief and assessment
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ FS-021: Ground control monitoring](FS-021-ground-control-monitoring.md) · 📄 **Page 26 / 108** · [UC-001: Design a Mission ▶️](../use-cases/UC-001-design-a-mission.md)
+> [🏠 Index](../../README.md) · [◀️ FS-021: Ground control monitoring](FS-021-ground-control-monitoring.md) · 📄 **Page 26 / 109** · [UC-001: Design a Mission ▶️](../use-cases/UC-001-design-a-mission.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -101,5 +101,5 @@ Settled with the product owner ([interview](../../../research/interview.md)).
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ FS-021: Ground control monitoring](FS-021-ground-control-monitoring.md) · 📄 **Page 26 / 108** · [UC-001: Design a Mission ▶️](../use-cases/UC-001-design-a-mission.md)
+> [🏠 Index](../../README.md) · [◀️ FS-021: Ground control monitoring](FS-021-ground-control-monitoring.md) · 📄 **Page 26 / 109** · [UC-001: Design a Mission ▶️](../use-cases/UC-001-design-a-mission.md)
 <!-- /spec:nav-bottom -->

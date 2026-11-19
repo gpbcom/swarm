@@ -1,7 +1,7 @@
 # 🎬 UC-016: Import and fly a Light show
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ UC-015: Invite a Client to the Client portal](UC-015-invite-a-client-to-the-client-portal.md) · 📄 **Page 42 / 108** · [UC-017: Spray a Field with refills ▶️](UC-017-spray-a-field-with-refills.md)
+> [🏠 Index](../../README.md) · [◀️ UC-015: Invite a Client to the Client portal](UC-015-invite-a-client-to-the-client-portal.md) · 📄 **Page 42 / 109** · [UC-017: Spray a Field with refills ▶️](UC-017-spray-a-field-with-refills.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -150,5 +150,5 @@ One row per state of the flow chart: every action, success and failure node. Cli
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ UC-015: Invite a Client to the Client portal](UC-015-invite-a-client-to-the-client-portal.md) · 📄 **Page 42 / 108** · [UC-017: Spray a Field with refills ▶️](UC-017-spray-a-field-with-refills.md)
+> [🏠 Index](../../README.md) · [◀️ UC-015: Invite a Client to the Client portal](UC-015-invite-a-client-to-the-client-portal.md) · 📄 **Page 42 / 109** · [UC-017: Spray a Field with refills ▶️](UC-017-spray-a-field-with-refills.md)
 <!-- /spec:nav-bottom -->

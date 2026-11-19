@@ -1,7 +1,7 @@
 # 🎬 UC-014: Connect a new Drone model
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ UC-013: Train on the Simulator](UC-013-train-on-the-simulator.md) · 📄 **Page 40 / 108** · [UC-015: Invite a Client to the Client portal ▶️](UC-015-invite-a-client-to-the-client-portal.md)
+> [🏠 Index](../../README.md) · [◀️ UC-013: Train on the Simulator](UC-013-train-on-the-simulator.md) · 📄 **Page 40 / 109** · [UC-015: Invite a Client to the Client portal ▶️](UC-015-invite-a-client-to-the-client-portal.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -149,5 +149,5 @@ One row per state of the flow chart: every action, success and failure node. Cli
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ UC-013: Train on the Simulator](UC-013-train-on-the-simulator.md) · 📄 **Page 40 / 108** · [UC-015: Invite a Client to the Client portal ▶️](UC-015-invite-a-client-to-the-client-portal.md)
+> [🏠 Index](../../README.md) · [◀️ UC-013: Train on the Simulator](UC-013-train-on-the-simulator.md) · 📄 **Page 40 / 109** · [UC-015: Invite a Client to the Client portal ▶️](UC-015-invite-a-client-to-the-client-portal.md)
 <!-- /spec:nav-bottom -->

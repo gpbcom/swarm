@@ -1,7 +1,7 @@
 # 📏 BR-016: Clients see only their own Missions
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ BR-015: Approved Drone models only](BR-015-approved-drone-models-only.md) · 📄 **Page 72 / 108** · [BR-017: Every screen in four languages ▶️](BR-017-every-screen-in-four-languages.md)
+> [🏠 Index](../../README.md) · [◀️ BR-015: Approved Drone models only](BR-015-approved-drone-models-only.md) · 📄 **Page 72 / 109** · [BR-017: Every screen in four languages ▶️](BR-017-every-screen-in-four-languages.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Type:** Authorisation · **Updated:** 2026-11-18
@@ -49,5 +49,5 @@ Several Clients of one Operator use the same Client portal. Sites and Defects ar
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ BR-015: Approved Drone models only](BR-015-approved-drone-models-only.md) · 📄 **Page 72 / 108** · [BR-017: Every screen in four languages ▶️](BR-017-every-screen-in-four-languages.md)
+> [🏠 Index](../../README.md) · [◀️ BR-015: Approved Drone models only](BR-015-approved-drone-models-only.md) · 📄 **Page 72 / 109** · [BR-017: Every screen in four languages ▶️](BR-017-every-screen-in-four-languages.md)
 <!-- /spec:nav-bottom -->

@@ -1,7 +1,7 @@
 # 🛣️ P6: Light shows
 
 <!-- spec:nav-top -->
-> [🏠 Index](../README.md) · [◀️ P5: AI agents, MCP and A2A](06-p5-ai-agents.md) · 📄 **Page 102 / 108** · [P7: Scale and reach ▶️](08-p7-scale-and-reach.md)
+> [🏠 Index](../README.md) · [◀️ P5: AI agents, MCP and A2A](06-p5-ai-agents.md) · 📄 **Page 102 / 109** · [P7: Scale and reach ▶️](08-p7-scale-and-reach.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Sprints:** S41 to S48 · **Dates:** 17 Jul to 3 Nov 2028 · **Tickets:** about 25
@@ -237,5 +237,5 @@ If the event authorisation of [🏛️ G-08](09-regulatory-track.md#g-08) is ref
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../README.md) · [◀️ P5: AI agents, MCP and A2A](06-p5-ai-agents.md) · 📄 **Page 102 / 108** · [P7: Scale and reach ▶️](08-p7-scale-and-reach.md)
+> [🏠 Index](../README.md) · [◀️ P5: AI agents, MCP and A2A](06-p5-ai-agents.md) · 📄 **Page 102 / 109** · [P7: Scale and reach ▶️](08-p7-scale-and-reach.md)
 <!-- /spec:nav-bottom -->

@@ -1,7 +1,7 @@
 # 🤝 Hardware and partners
 
 <!-- spec:nav-top -->
-> [🏠 Index](../README.md) · [◀️ Flight test campaigns](10-flight-test-campaigns.md) · 📄 **Page 106 / 108** · [Risks ▶️](12-risks.md)
+> [🏠 Index](../README.md) · [◀️ Flight test campaigns](10-flight-test-campaigns.md) · 📄 **Page 106 / 109** · [Risks ▶️](12-risks.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Sprints:** S01 to S52 · **Dates:** 4 Jan 2027 to 29 Dec 2028
@@ -55,5 +55,5 @@
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../README.md) · [◀️ Flight test campaigns](10-flight-test-campaigns.md) · 📄 **Page 106 / 108** · [Risks ▶️](12-risks.md)
+> [🏠 Index](../README.md) · [◀️ Flight test campaigns](10-flight-test-campaigns.md) · 📄 **Page 106 / 109** · [Risks ▶️](12-risks.md)
 <!-- /spec:nav-bottom -->

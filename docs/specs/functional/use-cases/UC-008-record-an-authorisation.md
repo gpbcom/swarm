@@ -1,7 +1,7 @@
 # 🎬 UC-008: Record an Authorisation
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ UC-007: Register a Drone and track its readiness](UC-007-register-a-drone-and-track-its-readiness.md) · 📄 **Page 34 / 108** · [UC-009: Process flight data into Deliverables ▶️](UC-009-process-flight-data-into-deliverables.md)
+> [🏠 Index](../../README.md) · [◀️ UC-007: Register a Drone and track its readiness](UC-007-register-a-drone-and-track-its-readiness.md) · 📄 **Page 34 / 109** · [UC-009: Process flight data into Deliverables ▶️](UC-009-process-flight-data-into-deliverables.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -137,5 +137,5 @@ One row per state of the flow chart: every action, success and failure node. Cli
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ UC-007: Register a Drone and track its readiness](UC-007-register-a-drone-and-track-its-readiness.md) · 📄 **Page 34 / 108** · [UC-009: Process flight data into Deliverables ▶️](UC-009-process-flight-data-into-deliverables.md)
+> [🏠 Index](../../README.md) · [◀️ UC-007: Register a Drone and track its readiness](UC-007-register-a-drone-and-track-its-readiness.md) · 📄 **Page 34 / 109** · [UC-009: Process flight data into Deliverables ▶️](UC-009-process-flight-data-into-deliverables.md)
 <!-- /spec:nav-bottom -->

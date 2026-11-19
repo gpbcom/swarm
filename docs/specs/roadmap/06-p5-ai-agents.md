@@ -1,7 +1,7 @@
 # 🛣️ P5: AI agents, MCP and A2A
 
 <!-- spec:nav-top -->
-> [🏠 Index](../README.md) · [◀️ P4: Agriculture](05-p4-agriculture.md) · 📄 **Page 101 / 108** · [P6: Light shows ▶️](07-p6-light-shows.md)
+> [🏠 Index](../README.md) · [◀️ P4: Agriculture](05-p4-agriculture.md) · 📄 **Page 101 / 109** · [P6: Light shows ▶️](07-p6-light-shows.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Sprints:** S36 to S43 · **Dates:** 8 May 2028 to 25 Aug 2028 · **Tickets:** about 30, plus one slot reserved for the Patrol beta
@@ -230,5 +230,5 @@ P5 closes at milestone M5 when every box below is ticked.
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../README.md) · [◀️ P4: Agriculture](05-p4-agriculture.md) · 📄 **Page 101 / 108** · [P6: Light shows ▶️](07-p6-light-shows.md)
+> [🏠 Index](../README.md) · [◀️ P4: Agriculture](05-p4-agriculture.md) · 📄 **Page 101 / 109** · [P6: Light shows ▶️](07-p6-light-shows.md)
 <!-- /spec:nav-bottom -->

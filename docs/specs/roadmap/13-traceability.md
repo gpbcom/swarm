@@ -1,7 +1,7 @@
 # 🧬 Traceability
 
 <!-- spec:nav-top -->
-> [🏠 Index](../README.md) · [◀️ Risks](12-risks.md) · 📄 **Page 108 / 108**
+> [🏠 Index](../README.md) · [◀️ Risks](12-risks.md) · 📄 **Page 108 / 109** · [Parallel plan ▶️](14-parallel-plan.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Sprints:** S01 to S52 · **Dates:** 4 Jan 2027 to 29 Dec 2028
@@ -121,5 +121,5 @@
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../README.md) · [◀️ Risks](12-risks.md) · 📄 **Page 108 / 108**
+> [🏠 Index](../README.md) · [◀️ Risks](12-risks.md) · 📄 **Page 108 / 109** · [Parallel plan ▶️](14-parallel-plan.md)
 <!-- /spec:nav-bottom -->

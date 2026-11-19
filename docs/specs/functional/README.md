@@ -1,7 +1,7 @@
 # 🧭 Functional specifications
 
 <!-- spec:nav-top -->
-> [🏠 Index](../README.md) · [◀️ Visual identity](../visual-identity.md) · 📄 **Page 4 / 108** · [FS-001: Mission design ▶️](features/FS-001-mission-design.md)
+> [🏠 Index](../README.md) · [◀️ Visual identity](../visual-identity.md) · 📄 **Page 4 / 109** · [FS-001: Mission design ▶️](features/FS-001-mission-design.md)
 <!-- /spec:nav-top -->
 
 <!-- spec:summary -->
@@ -365,5 +365,5 @@ flowchart LR
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../README.md) · [◀️ Visual identity](../visual-identity.md) · 📄 **Page 4 / 108** · [FS-001: Mission design ▶️](features/FS-001-mission-design.md)
+> [🏠 Index](../README.md) · [◀️ Visual identity](../visual-identity.md) · 📄 **Page 4 / 109** · [FS-001: Mission design ▶️](features/FS-001-mission-design.md)
 <!-- /spec:nav-bottom -->

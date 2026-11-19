@@ -1,7 +1,7 @@
 # 🔌 API layer
 
 <!-- spec:nav-top -->
-> [🏠 Index](../README.md) · [◀️ Engine and services](04-engine.md) · 📄 **Page 89 / 108** · [Security ▶️](06-security.md)
+> [🏠 Index](../README.md) · [◀️ Engine and services](04-engine.md) · 📄 **Page 89 / 109** · [Security ▶️](06-security.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -92,5 +92,5 @@ server → SquadFrame | Alert | ReplanProposed | AlarmRaised | Notification   (M
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../README.md) · [◀️ Engine and services](04-engine.md) · 📄 **Page 89 / 108** · [Security ▶️](06-security.md)
+> [🏠 Index](../README.md) · [◀️ Engine and services](04-engine.md) · 📄 **Page 89 / 109** · [Security ▶️](06-security.md)
 <!-- /spec:nav-bottom -->

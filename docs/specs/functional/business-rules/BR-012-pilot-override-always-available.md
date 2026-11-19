@@ -1,7 +1,7 @@
 # 📏 BR-012: Pilot override always available
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ BR-011: Drone readiness](BR-011-drone-readiness.md) · 📄 **Page 68 / 108** · [BR-013: Re-plan approval ▶️](BR-013-re-plan-approval.md)
+> [🏠 Index](../../README.md) · [◀️ BR-011: Drone readiness](BR-011-drone-readiness.md) · 📄 **Page 68 / 109** · [BR-013: Re-plan approval ▶️](BR-013-re-plan-approval.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Type:** Constraint · **Updated:** 2026-11-18
@@ -52,5 +52,5 @@ The Pilot is the remote pilot in command in both Jurisdictions. Autonomy helps t
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ BR-011: Drone readiness](BR-011-drone-readiness.md) · 📄 **Page 68 / 108** · [BR-013: Re-plan approval ▶️](BR-013-re-plan-approval.md)
+> [🏠 Index](../../README.md) · [◀️ BR-011: Drone readiness](BR-011-drone-readiness.md) · 📄 **Page 68 / 109** · [BR-013: Re-plan approval ▶️](BR-013-re-plan-approval.md)
 <!-- /spec:nav-bottom -->

@@ -1,7 +1,7 @@
 # 📏 BR-003: Weather limits
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ BR-002: Separation distance](BR-002-separation-distance.md) · 📄 **Page 59 / 108** · [BR-004: Pilot ratio ▶️](BR-004-pilot-ratio.md)
+> [🏠 Index](../../README.md) · [◀️ BR-002: Separation distance](BR-002-separation-distance.md) · 📄 **Page 59 / 109** · [BR-004: Pilot ratio ▶️](BR-004-pilot-ratio.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Type:** Constraint · **Updated:** 2026-11-18
@@ -48,5 +48,5 @@ Each Drone model is built for a weather envelope. The weakest Drone of the Squad
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ BR-002: Separation distance](BR-002-separation-distance.md) · 📄 **Page 59 / 108** · [BR-004: Pilot ratio ▶️](BR-004-pilot-ratio.md)
+> [🏠 Index](../../README.md) · [◀️ BR-002: Separation distance](BR-002-separation-distance.md) · 📄 **Page 59 / 109** · [BR-004: Pilot ratio ▶️](BR-004-pilot-ratio.md)
 <!-- /spec:nav-bottom -->

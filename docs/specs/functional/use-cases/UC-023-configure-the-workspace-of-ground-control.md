@@ -1,7 +1,7 @@
 # 🎬 UC-023: Configure the Workspace of Ground control
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ UC-022: Receive the Mission report](UC-022-receive-the-mission-report.md) · 📄 **Page 49 / 108** · [UC-024: Configure each Drone of the Squad on the Site ▶️](UC-024-configure-each-drone-of-the-squad-on-the-site.md)
+> [🏠 Index](../../README.md) · [◀️ UC-022: Receive the Mission report](UC-022-receive-the-mission-report.md) · 📄 **Page 49 / 109** · [UC-024: Configure each Drone of the Squad on the Site ▶️](UC-024-configure-each-drone-of-the-squad-on-the-site.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -140,5 +140,5 @@ One row per state of the flow chart: every action, success and failure node. Cli
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ UC-022: Receive the Mission report](UC-022-receive-the-mission-report.md) · 📄 **Page 49 / 108** · [UC-024: Configure each Drone of the Squad on the Site ▶️](UC-024-configure-each-drone-of-the-squad-on-the-site.md)
+> [🏠 Index](../../README.md) · [◀️ UC-022: Receive the Mission report](UC-022-receive-the-mission-report.md) · 📄 **Page 49 / 109** · [UC-024: Configure each Drone of the Squad on the Site ▶️](UC-024-configure-each-drone-of-the-squad-on-the-site.md)
 <!-- /spec:nav-bottom -->

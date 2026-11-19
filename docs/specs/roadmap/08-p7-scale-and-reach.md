@@ -1,7 +1,7 @@
 # 🛣️ P7: Scale and reach
 
 <!-- spec:nav-top -->
-> [🏠 Index](../README.md) · [◀️ P6: Light shows](07-p6-light-shows.md) · 📄 **Page 103 / 108** · [Regulatory track ▶️](09-regulatory-track.md)
+> [🏠 Index](../README.md) · [◀️ P6: Light shows](07-p6-light-shows.md) · 📄 **Page 103 / 109** · [Regulatory track ▶️](09-regulatory-track.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Sprints:** S45 to S52 · **Dates:** 11 Sep to 29 Dec 2028 · **Tickets:** about 30
@@ -264,5 +264,5 @@ The M7 demonstration, on 29 December 2028, uses the sample cast of the [🎨 Vis
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../README.md) · [◀️ P6: Light shows](07-p6-light-shows.md) · 📄 **Page 103 / 108** · [Regulatory track ▶️](09-regulatory-track.md)
+> [🏠 Index](../README.md) · [◀️ P6: Light shows](07-p6-light-shows.md) · 📄 **Page 103 / 109** · [Regulatory track ▶️](09-regulatory-track.md)
 <!-- /spec:nav-bottom -->

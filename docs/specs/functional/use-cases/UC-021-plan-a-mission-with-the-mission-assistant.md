@@ -1,7 +1,7 @@
 # 🎬 UC-021: Plan a Mission with the Mission assistant
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ UC-020: Review the Defects of an Inspection](UC-020-review-the-defects-of-an-inspection.md) · 📄 **Page 47 / 108** · [UC-022: Receive the Mission report ▶️](UC-022-receive-the-mission-report.md)
+> [🏠 Index](../../README.md) · [◀️ UC-020: Review the Defects of an Inspection](UC-020-review-the-defects-of-an-inspection.md) · 📄 **Page 47 / 109** · [UC-022: Receive the Mission report ▶️](UC-022-receive-the-mission-report.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -135,5 +135,5 @@ One row per state of the flow chart: every action, success and failure node. Cli
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ UC-020: Review the Defects of an Inspection](UC-020-review-the-defects-of-an-inspection.md) · 📄 **Page 47 / 108** · [UC-022: Receive the Mission report ▶️](UC-022-receive-the-mission-report.md)
+> [🏠 Index](../../README.md) · [◀️ UC-020: Review the Defects of an Inspection](UC-020-review-the-defects-of-an-inspection.md) · 📄 **Page 47 / 109** · [UC-022: Receive the Mission report ▶️](UC-022-receive-the-mission-report.md)
 <!-- /spec:nav-bottom -->

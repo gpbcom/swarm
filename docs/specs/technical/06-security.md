@@ -1,7 +1,7 @@
 # 🔐 Security
 
 <!-- spec:nav-top -->
-> [🏠 Index](../README.md) · [◀️ API layer](05-api.md) · 📄 **Page 90 / 108** · [Scalability and performance ▶️](07-scalability.md)
+> [🏠 Index](../README.md) · [◀️ API layer](05-api.md) · 📄 **Page 90 / 109** · [Scalability and performance ▶️](07-scalability.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -93,5 +93,5 @@ The gate is enforced in the gateway and the missions service, never trusted to t
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../README.md) · [◀️ API layer](05-api.md) · 📄 **Page 90 / 108** · [Scalability and performance ▶️](07-scalability.md)
+> [🏠 Index](../README.md) · [◀️ API layer](05-api.md) · 📄 **Page 90 / 109** · [Scalability and performance ▶️](07-scalability.md)
 <!-- /spec:nav-bottom -->

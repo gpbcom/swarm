@@ -1,7 +1,7 @@
 # 🎬 UC-026: Handle an Alert
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ UC-025: Monitor a Mission in Ground control](UC-025-monitor-a-mission-in-ground-control.md) · 📄 **Page 52 / 108** · [UC-027: Debrief a Mission ▶️](UC-027-debrief-a-mission.md)
+> [🏠 Index](../../README.md) · [◀️ UC-025: Monitor a Mission in Ground control](UC-025-monitor-a-mission-in-ground-control.md) · 📄 **Page 52 / 109** · [UC-027: Debrief a Mission ▶️](UC-027-debrief-a-mission.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -145,5 +145,5 @@ One row per state of the flow chart: every action, success and failure node. Eac
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ UC-025: Monitor a Mission in Ground control](UC-025-monitor-a-mission-in-ground-control.md) · 📄 **Page 52 / 108** · [UC-027: Debrief a Mission ▶️](UC-027-debrief-a-mission.md)
+> [🏠 Index](../../README.md) · [◀️ UC-025: Monitor a Mission in Ground control](UC-025-monitor-a-mission-in-ground-control.md) · 📄 **Page 52 / 109** · [UC-027: Debrief a Mission ▶️](UC-027-debrief-a-mission.md)
 <!-- /spec:nav-bottom -->

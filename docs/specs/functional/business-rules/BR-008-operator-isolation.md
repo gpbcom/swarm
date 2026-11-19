@@ -1,7 +1,7 @@
 # 📏 BR-008: Operator isolation
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ BR-007: Launch only after a passed Pre-flight check](BR-007-launch-only-after-a-passed-pre-flight-check.md) · 📄 **Page 64 / 108** · [BR-009: Evidence integrity ▶️](BR-009-evidence-integrity.md)
+> [🏠 Index](../../README.md) · [◀️ BR-007: Launch only after a passed Pre-flight check](BR-007-launch-only-after-a-passed-pre-flight-check.md) · 📄 **Page 64 / 109** · [BR-009: Evidence integrity ▶️](BR-009-evidence-integrity.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Type:** Authorisation · **Updated:** 2026-11-18
@@ -52,5 +52,5 @@ Operators are competitors sharing one cloud service, and their Clients' Sites ca
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ BR-007: Launch only after a passed Pre-flight check](BR-007-launch-only-after-a-passed-pre-flight-check.md) · 📄 **Page 64 / 108** · [BR-009: Evidence integrity ▶️](BR-009-evidence-integrity.md)
+> [🏠 Index](../../README.md) · [◀️ BR-007: Launch only after a passed Pre-flight check](BR-007-launch-only-after-a-passed-pre-flight-check.md) · 📄 **Page 64 / 109** · [BR-009: Evidence integrity ▶️](BR-009-evidence-integrity.md)
 <!-- /spec:nav-bottom -->

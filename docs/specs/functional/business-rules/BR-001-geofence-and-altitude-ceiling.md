@@ -1,7 +1,7 @@
 # 📏 BR-001: Geofence and Altitude ceiling
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ UC-030: Focus on a Drone](../use-cases/UC-030-focus-on-a-drone.md) · 📄 **Page 57 / 108** · [BR-002: Separation distance ▶️](BR-002-separation-distance.md)
+> [🏠 Index](../../README.md) · [◀️ UC-030: Focus on a Drone](../use-cases/UC-030-focus-on-a-drone.md) · 📄 **Page 57 / 109** · [BR-002: Separation distance ▶️](BR-002-separation-distance.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Type:** Constraint · **Updated:** 2026-11-18
@@ -51,5 +51,5 @@ The [🗃️ Authorisation](../../glossary.md#ent-authorisation) covers only tha
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ UC-030: Focus on a Drone](../use-cases/UC-030-focus-on-a-drone.md) · 📄 **Page 57 / 108** · [BR-002: Separation distance ▶️](BR-002-separation-distance.md)
+> [🏠 Index](../../README.md) · [◀️ UC-030: Focus on a Drone](../use-cases/UC-030-focus-on-a-drone.md) · 📄 **Page 57 / 109** · [BR-002: Separation distance ▶️](BR-002-separation-distance.md)
 <!-- /spec:nav-bottom -->

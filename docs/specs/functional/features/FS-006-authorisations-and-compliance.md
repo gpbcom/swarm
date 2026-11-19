@@ -1,7 +1,7 @@
 # 📘 FS-006: Authorisations and compliance
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ FS-005: Fleet and readiness](FS-005-fleet-and-readiness.md) · 📄 **Page 10 / 108** · [FS-007: Data processing and Deliverables ▶️](FS-007-data-processing-and-deliverables.md)
+> [🏠 Index](../../README.md) · [◀️ FS-005: Fleet and readiness](FS-005-fleet-and-readiness.md) · 📄 **Page 10 / 109** · [FS-007: Data processing and Deliverables ▶️](FS-007-data-processing-and-deliverables.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -86,5 +86,5 @@ Settled with the product owner ([interview](../../../research/interview.md)).
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ FS-005: Fleet and readiness](FS-005-fleet-and-readiness.md) · 📄 **Page 10 / 108** · [FS-007: Data processing and Deliverables ▶️](FS-007-data-processing-and-deliverables.md)
+> [🏠 Index](../../README.md) · [◀️ FS-005: Fleet and readiness](FS-005-fleet-and-readiness.md) · 📄 **Page 10 / 109** · [FS-007: Data processing and Deliverables ▶️](FS-007-data-processing-and-deliverables.md)
 <!-- /spec:nav-bottom -->

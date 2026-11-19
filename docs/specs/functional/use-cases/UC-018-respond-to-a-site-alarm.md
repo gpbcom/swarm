@@ -1,7 +1,7 @@
 # 🎬 UC-018: Respond to a Site Alarm
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ UC-017: Spray a Field with refills](UC-017-spray-a-field-with-refills.md) · 📄 **Page 44 / 108** · [UC-019: Request a Patrol on demand ▶️](UC-019-request-a-patrol-on-demand.md)
+> [🏠 Index](../../README.md) · [◀️ UC-017: Spray a Field with refills](UC-017-spray-a-field-with-refills.md) · 📄 **Page 44 / 109** · [UC-019: Request a Patrol on demand ▶️](UC-019-request-a-patrol-on-demand.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -153,5 +153,5 @@ One row per state of the flow chart: every action, success and failure node. Cli
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ UC-017: Spray a Field with refills](UC-017-spray-a-field-with-refills.md) · 📄 **Page 44 / 108** · [UC-019: Request a Patrol on demand ▶️](UC-019-request-a-patrol-on-demand.md)
+> [🏠 Index](../../README.md) · [◀️ UC-017: Spray a Field with refills](UC-017-spray-a-field-with-refills.md) · 📄 **Page 44 / 109** · [UC-019: Request a Patrol on demand ▶️](UC-019-request-a-patrol-on-demand.md)
 <!-- /spec:nav-bottom -->

@@ -1,7 +1,7 @@
 # 📏 BR-023: Fixed safety controls
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ BR-022: Payload compatibility](BR-022-payload-compatibility.md) · 📄 **Page 79 / 108** · [BR-024: Alert thresholds within the Operator limits ▶️](BR-024-alert-thresholds-within-the-operator-limits.md)
+> [🏠 Index](../../README.md) · [◀️ BR-022: Payload compatibility](BR-022-payload-compatibility.md) · 📄 **Page 79 / 109** · [BR-024: Alert thresholds within the Operator limits ▶️](BR-024-alert-thresholds-within-the-operator-limits.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Type:** Constraint · **Updated:** 2026-11-18
@@ -51,5 +51,5 @@ In an emergency the Pilot acts by reflex. Those two commands must be where the h
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ BR-022: Payload compatibility](BR-022-payload-compatibility.md) · 📄 **Page 79 / 108** · [BR-024: Alert thresholds within the Operator limits ▶️](BR-024-alert-thresholds-within-the-operator-limits.md)
+> [🏠 Index](../../README.md) · [◀️ BR-022: Payload compatibility](BR-022-payload-compatibility.md) · 📄 **Page 79 / 109** · [BR-024: Alert thresholds within the Operator limits ▶️](BR-024-alert-thresholds-within-the-operator-limits.md)
 <!-- /spec:nav-bottom -->

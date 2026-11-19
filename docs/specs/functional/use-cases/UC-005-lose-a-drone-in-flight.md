@@ -1,7 +1,7 @@
 # 🎬 UC-005: Lose a Drone in flight
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ UC-004: Supervise a Squad and approve a Re-plan](UC-004-supervise-a-squad-and-approve-a-re-plan.md) · 📄 **Page 31 / 108** · [UC-006: Take manual control or abort ▶️](UC-006-take-manual-control-or-abort.md)
+> [🏠 Index](../../README.md) · [◀️ UC-004: Supervise a Squad and approve a Re-plan](UC-004-supervise-a-squad-and-approve-a-re-plan.md) · 📄 **Page 31 / 109** · [UC-006: Take manual control or abort ▶️](UC-006-take-manual-control-or-abort.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -135,5 +135,5 @@ One row per state of the flow chart: every action, success and failure node. Eac
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ UC-004: Supervise a Squad and approve a Re-plan](UC-004-supervise-a-squad-and-approve-a-re-plan.md) · 📄 **Page 31 / 108** · [UC-006: Take manual control or abort ▶️](UC-006-take-manual-control-or-abort.md)
+> [🏠 Index](../../README.md) · [◀️ UC-004: Supervise a Squad and approve a Re-plan](UC-004-supervise-a-squad-and-approve-a-re-plan.md) · 📄 **Page 31 / 109** · [UC-006: Take manual control or abort ▶️](UC-006-take-manual-control-or-abort.md)
 <!-- /spec:nav-bottom -->

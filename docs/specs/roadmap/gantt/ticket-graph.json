@@ -1,0 +1,2995 @@
+{
+ "about": "Ticket graph of the roadmap, read by .claude/scripts/roadmap_gantt.py. deps: the tickets whose merged output a ticket needs before it can be built and tested. external: the items its acceptance needs (G regulatory, H hardware, P partners, C campaigns). field: a ticket whose work only exists once that campaign or milestone has happened. size: S, M or L. Read from the ticket rows of the phase pages on 19 Nov 2026: an estimate, to correct when a ticket is planned.",
+ "hours": {
+  "agent": {
+   "S": 0.4,
+   "M": 0.8,
+   "L": 1.6
+  },
+  "human": {
+   "S": 0.3,
+   "M": 0.5,
+   "L": 1.0
+  },
+  "per_day": 6.0
+ },
+ "lanes": [
+  [
+   "serial",
+   1,
+   1.0
+  ],
+  [
+   "k2",
+   2,
+   1.0
+  ],
+  [
+   "k3",
+   3,
+   1.0
+  ],
+  [
+   "k4",
+   4,
+   1.0
+  ],
+  [
+   "k4_light",
+   4,
+   0.5
+  ],
+  [
+   "k6_light",
+   6,
+   0.5
+  ]
+ ],
+ "external_items": {
+  "regulatory": [
+   [
+    "G-01",
+    "2027-01-29",
+    "Operator registration",
+    "09-regulatory-track.md#g-01"
+   ],
+   [
+    "G-02",
+    "2027-03-26",
+    "A2 certificate",
+    "09-regulatory-track.md#g-02"
+   ],
+   [
+    "G-04",
+    "2027-05-07",
+    "SORA 2.5 submitted",
+    "09-regulatory-track.md#g-04"
+   ],
+   [
+    "G-03",
+    "2027-05-21",
+    "STS training",
+    "09-regulatory-track.md#g-03"
+   ],
+   [
+    "G-05",
+    "2027-10-08",
+    "Specific category Authorisation",
+    "09-regulatory-track.md#g-05"
+   ],
+   [
+    "G-07",
+    "2028-02-25",
+    "Agriculture rules and licence",
+    "09-regulatory-track.md#g-07"
+   ],
+   [
+    "G-08",
+    "2028-09-08",
+    "Light show event authorisation",
+    "09-regulatory-track.md#g-08"
+   ],
+   [
+    "G-09",
+    "2028-10-20",
+    "US rules study",
+    "09-regulatory-track.md#g-09"
+   ]
+  ],
+  "hardware": [
+   [
+    "H-01",
+    "2027-03-26",
+    "4 X500 Drones",
+    "11-hardware-and-partners.md#h-01"
+   ],
+   [
+    "H-02",
+    "2027-04-23",
+    "Thermal and RGB Payloads",
+    "11-hardware-and-partners.md#h-02"
+   ],
+   [
+    "H-03",
+    "2027-06-18",
+    "Edge box and field laptop",
+    "11-hardware-and-partners.md#h-03"
+   ],
+   [
+    "H-04",
+    "2027-12-03",
+    "2 Parrot ANAFI USA",
+    "11-hardware-and-partners.md#h-04"
+   ],
+   [
+    "H-05",
+    "2027-12-31",
+    "Dock",
+    "11-hardware-and-partners.md#h-05"
+   ],
+   [
+    "H-06",
+    "2028-04-21",
+    "Spray Drones, rented",
+    "11-hardware-and-partners.md#h-06"
+   ],
+   [
+    "H-07",
+    "2028-09-22",
+    "About 50 show Drones",
+    "11-hardware-and-partners.md#h-07"
+   ],
+   [
+    "H-08",
+    "2028-10-06",
+    "GPU server",
+    "11-hardware-and-partners.md#h-08"
+   ],
+   [
+    "H-09",
+    "2028-10-20",
+    "DJI Drone",
+    "11-hardware-and-partners.md#h-09"
+   ],
+   [
+    "H-10",
+    "2028-10-20",
+    "Skydio Drone",
+    "11-hardware-and-partners.md#h-10"
+   ]
+  ],
+  "partners": [
+   [
+    "P-06",
+    "2027-01-04",
+    "Hosting providers",
+    "11-hardware-and-partners.md#p-06"
+   ],
+   [
+    "P-01",
+    "2027-06-18",
+    "Design-partner Operator",
+    "11-hardware-and-partners.md#p-01"
+   ],
+   [
+    "P-02",
+    "2027-09-10",
+    "Solar farm Client",
+    "11-hardware-and-partners.md#p-02"
+   ],
+   [
+    "P-07",
+    "2027-10-08",
+    "Timestamping authority",
+    "11-hardware-and-partners.md#p-07"
+   ],
+   [
+    "P-03",
+    "2028-01-28",
+    "Dock site",
+    "11-hardware-and-partners.md#p-03"
+   ],
+   [
+    "P-04",
+    "2028-02-25",
+    "Partner farm",
+    "11-hardware-and-partners.md#p-04"
+   ],
+   [
+    "P-08",
+    "2028-05-19",
+    "LLM provider accounts",
+    "11-hardware-and-partners.md#p-08"
+   ],
+   [
+    "P-05",
+    "2028-09-08",
+    "Show event",
+    "11-hardware-and-partners.md#p-05"
+   ],
+   [
+    "P-09",
+    "2028-10-20",
+    "Blockchain aggregator",
+    "11-hardware-and-partners.md#p-09"
+   ]
+  ],
+  "campaigns": [
+   [
+    "C-01",
+    "2027-05-10",
+    "Inspection of a test area",
+    "10-flight-test-campaigns.md#c-01",
+    "2027-06-18"
+   ],
+   [
+    "C-02",
+    "2027-09-27",
+    "Inspection of a solar farm",
+    "10-flight-test-campaigns.md#c-02",
+    "2027-12-03"
+   ],
+   [
+    "C-03",
+    "2028-02-14",
+    "Patrol of a warehouse",
+    "10-flight-test-campaigns.md#c-03",
+    "2028-04-07"
+   ],
+   [
+    "C-04",
+    "2028-04-10",
+    "Agriculture, spring spraying",
+    "10-flight-test-campaigns.md#c-04",
+    "2028-06-16"
+   ],
+   [
+    "C-05",
+    "2028-08-28",
+    "Agriculture, autumn seeding",
+    "10-flight-test-campaigns.md#c-05",
+    "2028-10-06"
+   ],
+   [
+    "C-06",
+    "2028-09-25",
+    "Light show",
+    "10-flight-test-campaigns.md#c-06",
+    "2028-11-03"
+   ],
+   [
+    "C-07",
+    "2028-11-20",
+    "Every Activity",
+    "10-flight-test-campaigns.md#c-07",
+    "2028-12-29"
+   ]
+  ],
+  "milestones": [
+   [
+    "M3",
+    "2028-06-30",
+    "Patrol beta",
+    "README.md#milestones"
+   ]
+  ]
+ },
+ "tickets": {
+  "T0.01": {
+   "deps": [],
+   "external": [
+    "P-06"
+   ],
+   "area": "repo root, deploy/terraform",
+   "size": "L"
+  },
+  "T0.02": {
+   "deps": [],
+   "external": [],
+   "area": ".claude/",
+   "size": "M"
+  },
+  "T0.03": {
+   "deps": [
+    "T0.01"
+   ],
+   "external": [],
+   "area": "tests/conventions, packages/rust, packages/ts",
+   "size": "M"
+  },
+  "T0.04": {
+   "deps": [
+    "T0.01"
+   ],
+   "external": [],
+   "area": ".github/workflows",
+   "size": "M"
+  },
+  "T0.05": {
+   "deps": [
+    "T0.01"
+   ],
+   "external": [],
+   "area": "packages/python (lifecycle, logging, catalog)",
+   "size": "M"
+  },
+  "T0.06": {
+   "deps": [
+    "T0.05"
+   ],
+   "external": [],
+   "area": "packages/python/swarm-models, packages/rust, packages/ts/live",
+   "size": "M"
+  },
+  "T0.07": {
+   "deps": [
+    "T0.01"
+   ],
+   "external": [],
+   "area": "packages/rust/swarm-core",
+   "size": "S"
+  },
+  "T0.08": {
+   "deps": [
+    "T0.01"
+   ],
+   "external": [
+    "P-06"
+   ],
+   "area": "deploy/terraform, deploy/charts, deploy/environments",
+   "size": "L"
+  },
+  "T0.09": {
+   "deps": [
+    "T0.05",
+    "T0.08"
+   ],
+   "external": [],
+   "area": "deploy/charts, packages/python (NATS client)",
+   "size": "M"
+  },
+  "T0.10": {
+   "deps": [
+    "T0.04",
+    "T0.08"
+   ],
+   "external": [],
+   "area": ".github/workflows, compose.e2e.yaml, Dockerfiles",
+   "size": "M",
+   "note": "Unsigned image refused by the dev cell needs T0.08."
+  },
+  "T0.11": {
+   "deps": [
+    "T0.08",
+    "T0.12"
+   ],
+   "external": [],
+   "area": "Keycloak, services/gateway",
+   "size": "M",
+   "note": "Gateway checks roles, so it extends the gateway skeleton of T0.12; sprint order only."
+  },
+  "T0.12": {
+   "deps": [
+    "T0.06",
+    "T0.08"
+   ],
+   "external": [],
+   "area": "services/gateway, missions, fleet, packages/ts/api-client",
+   "size": "L",
+   "note": "T0.06 brings T0.05."
+  },
+  "T0.13": {
+   "deps": [
+    "T0.06",
+    "T0.07",
+    "T0.09"
+   ],
+   "external": [],
+   "area": "services/simulator, packages/rust",
+   "size": "L"
+  },
+  "T0.14": {
+   "deps": [
+    "T0.01"
+   ],
+   "external": [],
+   "area": "packages/ts/tokens, ui, frontends/*, Tauri shell",
+   "size": "L",
+   "note": "Could also need T0.03 ts settings (tooling only)."
+  },
+  "T0.15": {
+   "deps": [
+    "T0.12",
+    "T0.14"
+   ],
+   "external": [],
+   "area": "packages/ts/i18n, packages/python, .github/workflows",
+   "size": "M",
+   "note": "Language stored with the person needs T0.12."
+  },
+  "T0.16": {
+   "deps": [
+    "T0.11",
+    "T0.14",
+    "T0.15"
+   ],
+   "external": [],
+   "area": "frontends/back-office, services/gateway, Keycloak",
+   "size": "L",
+   "note": "T0.15 because BR-017 four languages; could drop."
+  },
+  "T0.17": {
+   "deps": [
+    "T0.09",
+    "T0.19"
+   ],
+   "external": [],
+   "area": "packages/*, deploy/charts (observability)",
+   "size": "L",
+   "note": "SDKs and stack need only T0.09/T0.08; done-when trace to browser needs T0.19."
+  },
+  "T0.18": {
+   "deps": [
+    "T0.12",
+    "T0.13"
+   ],
+   "external": [],
+   "area": "services/flight-engine, services/gateway, packages/rust",
+   "size": "L",
+   "note": "Brings T0.07, T0.09 through T0.13."
+  },
+  "T0.19": {
+   "deps": [
+    "T0.14",
+    "T0.18"
+   ],
+   "external": [],
+   "area": "frontends/ground-control, packages/ts/live, packages/ts/maps",
+   "size": "L"
+  },
+  "T0.20": {
+   "deps": [
+    "T0.10",
+    "T0.16"
+   ],
+   "external": [],
+   "area": "frontends/back-office, tests/, docs/specs/screens",
+   "size": "M"
+  },
+  "T1.01": {
+   "deps": [
+    "T0.07"
+   ],
+   "external": [],
+   "area": "packages/rust (safety)",
+   "size": "M"
+  },
+  "T1.02": {
+   "deps": [
+    "T0.18"
+   ],
+   "external": [],
+   "area": "packages/rust (mavlink), services/flight-engine",
+   "size": "L",
+   "note": "PX4 SITL from T0.13 comes through T0.18."
+  },
+  "T1.03": {
+   "deps": [
+    "T1.02"
+   ],
+   "external": [],
+   "area": "services/flight-engine",
+   "size": "L",
+   "note": "Brings T0.18."
+  },
+  "T1.04": {
+   "deps": [
+    "T0.18"
+   ],
+   "external": [],
+   "area": "services/flight-engine (SQLCipher edge store)",
+   "size": "M",
+   "note": "Leaf node from T0.09 comes through T0.18. Done-when SITL flight; T1.03 not strictly needed."
+  },
+  "T1.05": {
+   "deps": [
+    "T0.09",
+    "T0.12"
+   ],
+   "external": [],
+   "area": "services/fleet, swarm-models",
+   "size": "M"
+  },
+  "T1.06": {
+   "deps": [
+    "T0.16",
+    "T1.05"
+   ],
+   "external": [
+    "H-01"
+   ],
+   "area": "frontends/back-office",
+   "size": "M",
+   "note": "H-01 only for the real X500 in staging data."
+  },
+  "T1.07": {
+   "deps": [
+    "T0.16"
+   ],
+   "external": [],
+   "area": "services/missions, frontends/back-office",
+   "size": "M",
+   "note": "Brings T0.12, T0.11."
+  },
+  "T1.08": {
+   "deps": [
+    "T0.15",
+    "T0.19"
+   ],
+   "external": [],
+   "area": "frontends/mission-studio, services/missions, packages/ts/maps",
+   "size": "L",
+   "note": "Maps package is created in T0.19."
+  },
+  "T1.09": {
+   "deps": [
+    "T0.07",
+    "T0.09"
+   ],
+   "external": [],
+   "area": "packages/rust (planner), services/planner",
+   "size": "M"
+  },
+  "T1.10": {
+   "deps": [
+    "T0.19"
+   ],
+   "external": [],
+   "area": "frontends/ground-control, packages/ts/live",
+   "size": "M",
+   "note": "Edge health buffered messages would soft-depend on T1.04."
+  },
+  "T1.11": {
+   "deps": [
+    "T1.05",
+    "T1.07",
+    "T1.08",
+    "T1.09"
+   ],
+   "external": [],
+   "area": "frontends/mission-studio, services/missions",
+   "size": "L"
+  },
+  "T1.12": {
+   "deps": [
+    "T1.02",
+    "T1.06"
+   ],
+   "external": [],
+   "area": "services/fleet, simulator, flight-engine, back-office",
+   "size": "L",
+   "note": "Could also need T1.15 for the Geofence step."
+  },
+  "T1.13": {
+   "deps": [
+    "T1.03",
+    "T1.10",
+    "T1.11"
+   ],
+   "external": [],
+   "area": "services/flight-engine, services/missions, frontends/ground-control",
+   "size": "L"
+  },
+  "T1.14": {
+   "deps": [
+    "T1.02",
+    "T1.13"
+   ],
+   "external": [],
+   "area": "services/flight-engine, frontends/ground-control, Keycloak",
+   "size": "L"
+  },
+  "T1.15": {
+   "deps": [
+    "T1.01",
+    "T1.03"
+   ],
+   "external": [],
+   "area": "services/flight-engine, packages/rust",
+   "size": "M"
+  },
+  "T1.16": {
+   "deps": [
+    "T1.14",
+    "T1.15"
+   ],
+   "external": [],
+   "area": "services/flight-engine, frontends/ground-control",
+   "size": "M",
+   "note": "Link timers from T1.01 via T1.15; Mission: Held needs flying Mission from T1.14."
+  },
+  "T1.17": {
+   "deps": [
+    "T1.09",
+    "T1.16"
+   ],
+   "external": [],
+   "area": "services/flight-engine, packages/rust, frontends/ground-control",
+   "size": "L"
+  },
+  "T1.18": {
+   "deps": [
+    "T1.14"
+   ],
+   "external": [],
+   "area": "services/flight-engine, frontends/ground-control, frontends/desktop",
+   "size": "M",
+   "note": "Uncertain: Mission: Held state also comes from T1.16; resume part may need it."
+  },
+  "T1.19": {
+   "deps": [
+    "T1.17"
+   ],
+   "external": [],
+   "area": "frontends/ground-control, frontends/desktop (SDL2), services/flight-engine",
+   "size": "L",
+   "note": "Re-plan proposal alt flow needs T1.17 (brings T1.14..T1.16); core manual control only needs T1.14."
+  },
+  "T1.20": {
+   "deps": [
+    "T1.14"
+   ],
+   "external": [],
+   "area": "frontends/ground-control",
+   "size": "M"
+  },
+  "T1.21": {
+   "deps": [
+    "T1.14",
+    "T1.15"
+   ],
+   "external": [],
+   "area": "frontends/ground-control, services/flight-engine",
+   "size": "M"
+  },
+  "T1.22": {
+   "deps": [
+    "T1.10"
+   ],
+   "external": [
+    "H-02"
+   ],
+   "area": "services/video-relay, frontends/ground-control, packages/ts/live",
+   "size": "L",
+   "note": "H-02 cameras for the latency done-when only."
+  },
+  "T1.23": {
+   "deps": [
+    "T1.20",
+    "T1.22"
+   ],
+   "external": [],
+   "area": "frontends/ground-control",
+   "size": "M"
+  },
+  "T1.24": {
+   "deps": [
+    "T1.19",
+    "T1.20",
+    "T1.21"
+   ],
+   "external": [],
+   "area": "frontends/ground-control, desktop, services/missions",
+   "size": "M"
+  },
+  "T1.25": {
+   "deps": [
+    "T1.03",
+    "T1.11"
+   ],
+   "external": [],
+   "area": "frontends/mission-studio, services/simulator, services/planner",
+   "size": "M"
+  },
+  "T1.26": {
+   "deps": [
+    "T1.14"
+   ],
+   "external": [],
+   "area": "frontends/ground-control, flight-engine, missions",
+   "size": "M",
+   "note": "Brings T1.13, T1.11."
+  },
+  "T1.27": {
+   "deps": [
+    "T0.10",
+    "T0.17",
+    "T1.04",
+    "T1.14",
+    "T1.22"
+   ],
+   "external": [],
+   "area": "frontends/desktop, deploy/, services/flight-engine",
+   "size": "L"
+  },
+  "T1.28": {
+   "deps": [
+    "T1.12",
+    "T1.14",
+    "T1.15"
+   ],
+   "external": [
+    "C-01",
+    "H-01",
+    "G-02"
+   ],
+   "area": "services/fleet, flight-engine, frontends/back-office",
+   "size": "M",
+   "note": "Uncertain: real flight may need T1.27 field edge."
+  },
+  "T1.29": {
+   "deps": [
+    "T0.08",
+    "T0.18",
+    "T1.01"
+   ],
+   "external": [
+    "P-06"
+   ],
+   "area": "deploy/terraform, deploy/environments, tests/load",
+   "size": "L",
+   "note": "T0.18 brings simulator for 20 Missions."
+  },
+  "T1.30": {
+   "deps": [
+    "T1.04",
+    "T1.15",
+    "T1.29"
+   ],
+   "external": [],
+   "area": "tests/chaos, services/flight-engine",
+   "size": "M"
+  },
+  "T1.31": {
+   "deps": [
+    "T1.14"
+   ],
+   "external": [],
+   "area": "services/simulator, frontends/ground-control",
+   "size": "M",
+   "note": "Uncertain: failure injection may need T1.16 for Link loss effects."
+  },
+  "T1.32": {
+   "deps": [
+    "T1.04"
+   ],
+   "external": [
+    "C-01"
+   ],
+   "area": "services/missions, services/flight-engine",
+   "size": "M",
+   "note": "Real C-01 data in done-when; T0.12 and T0.09 come through T1.04."
+  },
+  "T1.33": {
+   "deps": [
+    "T1.28"
+   ],
+   "external": [
+    "C-01"
+   ],
+   "area": "any service or app",
+   "size": "M",
+   "field": {
+    "after": "C-01",
+    "start": "2027-05-10",
+    "end": "2027-06-18"
+   }
+  },
+  "T1.34": {
+   "deps": [
+    "T1.18",
+    "T1.24"
+   ],
+   "external": [],
+   "area": "frontends/ground-control",
+   "size": "M"
+  },
+  "T1.35": {
+   "deps": [
+    "T1.12",
+    "T1.23",
+    "T1.25",
+    "T1.26",
+    "T1.31",
+    "T1.34"
+   ],
+   "external": [
+    "C-01"
+   ],
+   "area": "packages/ts/i18n, every P1 app",
+   "size": "M",
+   "note": "Outdoors contrast check needs field days."
+  },
+  "T1.36": {
+   "deps": [
+    "T1.18",
+    "T1.19",
+    "T1.28"
+   ],
+   "external": [
+    "C-01",
+    "H-01",
+    "G-02"
+   ],
+   "area": "tests/flight-procedures, services/flight-engine",
+   "size": "L"
+  },
+  "T1.37": {
+   "deps": [
+    "T1.27"
+   ],
+   "external": [
+    "C-01",
+    "H-03"
+   ],
+   "area": "deploy/ edge appliance",
+   "size": "M"
+  },
+  "T1.38": {
+   "deps": [
+    "T1.25",
+    "T1.29"
+   ],
+   "external": [
+    "P-01",
+    "P-06"
+   ],
+   "area": "deploy/environments, services/simulator",
+   "size": "M"
+  },
+  "T1.39": {
+   "deps": [
+    "T1.36"
+   ],
+   "external": [
+    "C-01"
+   ],
+   "area": "any service or app",
+   "size": "M",
+   "field": {
+    "after": "C-01",
+    "start": "2027-06-01",
+    "end": "2027-06-18"
+   }
+  },
+  "T1.40": {
+   "deps": [
+    "T0.10",
+    "T1.11",
+    "T1.23"
+   ],
+   "external": [],
+   "area": "frontends/ground-control, mission-studio, tests/",
+   "size": "M"
+  },
+  "T1.41": {
+   "deps": [
+    "T0.20",
+    "T1.28",
+    "T1.35"
+   ],
+   "external": [],
+   "area": "tests/, docs/specs/screens",
+   "size": "L"
+  },
+  "T1.42": {
+   "deps": [
+    "T1.28",
+    "T1.35",
+    "T1.38"
+   ],
+   "external": [],
+   "area": "tests/, every service tests/",
+   "size": "L",
+   "note": "Needs every feature done; leaves picked."
+  },
+  "T1.43": {
+   "deps": [
+    "T1.14",
+    "T1.27"
+   ],
+   "external": [],
+   "area": "services/gateway, flight-engine, back-office, deploy/",
+   "size": "M"
+  },
+  "T1.44": {
+   "deps": [
+    "T1.38"
+   ],
+   "external": [
+    "P-01"
+   ],
+   "area": "any P1 app",
+   "size": "S"
+  },
+  "T1.45": {
+   "deps": [
+    "T1.27",
+    "T1.29",
+    "T1.32"
+   ],
+   "external": [],
+   "area": "docs/, deploy/",
+   "size": "M"
+  },
+  "T2.01": {
+   "deps": [
+    "T1.32"
+   ],
+   "external": [],
+   "area": "services/flight-engine, storage MinIO",
+   "size": "M",
+   "note": "Extends the Flight log upload of T1.32 with media and multipart."
+  },
+  "T2.02": {
+   "deps": [
+    "T2.01"
+   ],
+   "external": [],
+   "area": "services/flight-engine",
+   "size": "S"
+  },
+  "T2.03": {
+   "deps": [
+    "T0.09",
+    "T0.12"
+   ],
+   "external": [],
+   "area": "services/processing, deploy/charts (KEDA)",
+   "size": "M",
+   "note": "New service on skeleton and NATS; GPU node can be simulated."
+  },
+  "T2.04": {
+   "deps": [
+    "T0.12"
+   ],
+   "external": [],
+   "area": "services/evidence",
+   "size": "M",
+   "note": "Needs vault transit; T0.11 not needed."
+  },
+  "T2.05": {
+   "deps": [
+    "T0.06",
+    "T0.12"
+   ],
+   "external": [],
+   "area": "services/missions, packages/python/swarm-models",
+   "size": "S"
+  },
+  "T2.06": {
+   "deps": [
+    "T2.03"
+   ],
+   "external": [
+    "C-01"
+   ],
+   "area": "services/processing workers",
+   "size": "M",
+   "note": "C-01 data set needed for done-when only; code can be tested on synthetic images."
+  },
+  "T2.07": {
+   "deps": [
+    "T2.02",
+    "T2.03"
+   ],
+   "external": [],
+   "area": "services/processing",
+   "size": "M"
+  },
+  "T2.08": {
+   "deps": [
+    "T1.04",
+    "T2.01",
+    "T2.04"
+   ],
+   "external": [],
+   "area": "services/evidence, edge",
+   "size": "M",
+   "note": "Edge offline replay uses edge store."
+  },
+  "T2.09": {
+   "deps": [
+    "T0.11",
+    "T0.14",
+    "T0.15"
+   ],
+   "external": [],
+   "area": "frontends/client-portal",
+   "size": "L"
+  },
+  "T2.10": {
+   "deps": [
+    "T0.14",
+    "T2.05"
+   ],
+   "external": [],
+   "area": "frontends/back-office",
+   "size": "M",
+   "note": "T1.24 is only a weak guess for the back office frame; real dep is the back office shell T0.14."
+  },
+  "T2.11": {
+   "deps": [
+    "T2.06"
+   ],
+   "external": [],
+   "area": "services/processing, storage MinIO",
+   "size": "M"
+  },
+  "T2.12": {
+   "deps": [
+    "T2.06"
+   ],
+   "external": [],
+   "area": "services/processing",
+   "size": "M"
+  },
+  "T2.13": {
+   "deps": [
+    "T2.04"
+   ],
+   "external": [],
+   "area": "services/evidence",
+   "size": "M",
+   "note": "Test authority until P-07, so P-07 is not blocking."
+  },
+  "T2.14": {
+   "deps": [
+    "T0.11",
+    "T0.14"
+   ],
+   "external": [],
+   "area": "frontends/back-office, Keycloak",
+   "size": "M",
+   "note": "Back office People screen; shell is T0.14 via T2.10 only loosely."
+  },
+  "T2.15": {
+   "deps": [
+    "T0.11",
+    "T0.12"
+   ],
+   "external": [],
+   "area": "services/gateway, row-level security",
+   "size": "M",
+   "note": "Needs the Site/Client roles; tested with T2.14 flow but does not need its UI."
+  },
+  "T2.16": {
+   "deps": [
+    "T2.03"
+   ],
+   "external": [
+    "P-01",
+    "C-01"
+   ],
+   "area": "services/processing (ML training), model registry",
+   "size": "L",
+   "note": "Needs design partner labelled data (P-01) in practice; GPU pool from T2.03."
+  },
+  "T2.17": {
+   "deps": [
+    "T2.05",
+    "T2.06",
+    "T2.16"
+   ],
+   "external": [],
+   "area": "services/processing workers",
+   "size": "M",
+   "note": "Places Defects on the orthomosaic: needs tiling/geo output."
+  },
+  "T2.18": {
+   "deps": [
+    "T2.10",
+    "T2.17"
+   ],
+   "external": [],
+   "area": "frontends/back-office",
+   "size": "M",
+   "note": "Defect pictures side by side; map viewer not strictly needed, dropped."
+  },
+  "T2.19": {
+   "deps": [
+    "T2.18"
+   ],
+   "external": [],
+   "area": "frontends/back-office",
+   "size": "S"
+  },
+  "T2.20": {
+   "deps": [
+    "T1.11",
+    "T2.09",
+    "T2.15"
+   ],
+   "external": [],
+   "area": "frontends/client-portal, services/missions",
+   "size": "M",
+   "note": "Creates Requested Mission that appears in the studio."
+  },
+  "T2.21": {
+   "deps": [
+    "T2.04",
+    "T2.19"
+   ],
+   "external": [],
+   "area": "services/missions, services/evidence",
+   "size": "M"
+  },
+  "T2.22": {
+   "deps": [
+    "T0.18",
+    "T2.09",
+    "T2.15"
+   ],
+   "external": [],
+   "area": "frontends/client-portal, services/gateway",
+   "size": "M",
+   "note": "Live positions at 2 Hz from the live WebSocket."
+  },
+  "T2.23": {
+   "deps": [
+    "T2.09",
+    "T2.11",
+    "T2.15",
+    "T2.21"
+   ],
+   "external": [],
+   "area": "frontends/client-portal",
+   "size": "M"
+  },
+  "T2.24": {
+   "deps": [
+    "T1.08",
+    "T2.05",
+    "T2.11"
+   ],
+   "external": [],
+   "area": "packages/ts/maps",
+   "size": "M",
+   "note": "Reuses the MapLibre setup of the studio."
+  },
+  "T2.25": {
+   "deps": [
+    "T2.08",
+    "T2.10"
+   ],
+   "external": [],
+   "area": "services/evidence, frontends/back-office",
+   "size": "M"
+  },
+  "T2.26": {
+   "deps": [
+    "T2.09",
+    "T2.25"
+   ],
+   "external": [],
+   "area": "frontends/client-portal",
+   "size": "M"
+  },
+  "T2.27": {
+   "deps": [
+    "T1.10",
+    "T1.32",
+    "T2.25"
+   ],
+   "external": [],
+   "area": "frontends/ground-control",
+   "size": "L",
+   "note": "Replay from full-rate table, checked against record on opening."
+  },
+  "T2.28": {
+   "deps": [
+    "T1.09",
+    "T2.27"
+   ],
+   "external": [],
+   "area": "packages/rust (camera footprints), ground-control",
+   "size": "M"
+  },
+  "T2.29": {
+   "deps": [
+    "T2.07",
+    "T2.27"
+   ],
+   "external": [],
+   "area": "frontends/ground-control",
+   "size": "M"
+  },
+  "T2.30": {
+   "deps": [
+    "T1.29"
+   ],
+   "external": [],
+   "area": "deploy/terraform, deploy/charts, deploy/environments",
+   "size": "L",
+   "note": "Reuses staging charts; C-02 runs on it but the cell is software."
+  },
+  "T2.31": {
+   "deps": [
+    "T2.07",
+    "T2.28"
+   ],
+   "external": [],
+   "area": "services/missions",
+   "size": "M"
+  },
+  "T2.32": {
+   "deps": [
+    "T2.31"
+   ],
+   "external": [],
+   "area": "frontends/back-office (Mission studio)",
+   "size": "M"
+  },
+  "T2.33": {
+   "deps": [
+    "T1.11",
+    "T2.32"
+   ],
+   "external": [],
+   "area": "services/missions, studio",
+   "size": "M"
+  },
+  "T2.34": {
+   "deps": [
+    "T2.13"
+   ],
+   "external": [
+    "P-07"
+   ],
+   "area": "services/evidence",
+   "size": "S"
+  },
+  "T2.35": {
+   "deps": [
+    "T2.25",
+    "T2.27",
+    "T2.31"
+   ],
+   "external": [],
+   "area": "ground-control, services/missions",
+   "size": "S"
+  },
+  "T2.36": {
+   "deps": [
+    "T2.09",
+    "T2.15",
+    "T2.32"
+   ],
+   "external": [],
+   "area": "frontends/client-portal",
+   "size": "M"
+  },
+  "T2.37": {
+   "deps": [
+    "T2.21",
+    "T2.31"
+   ],
+   "external": [],
+   "area": "services/processing or missions (PDF report), i18n",
+   "size": "L",
+   "note": "Report holds Scorecard and Confirmed Defects; Debrief not needed, dropped."
+  },
+  "T2.38": {
+   "deps": [
+    "T2.23",
+    "T2.37"
+   ],
+   "external": [],
+   "area": "services/missions, back-office, client-portal",
+   "size": "M"
+  },
+  "T2.39": {
+   "deps": [
+    "T2.12"
+   ],
+   "external": [
+    "C-02"
+   ],
+   "area": "services/processing",
+   "size": "M",
+   "note": "Needs C-02 data."
+  },
+  "T2.40": {
+   "deps": [
+    "T2.01",
+    "T2.04"
+   ],
+   "external": [],
+   "area": "services/evidence, storage MinIO",
+   "size": "M"
+  },
+  "T2.41": {
+   "deps": [
+    "T1.37",
+    "T2.01"
+   ],
+   "external": [
+    "C-02"
+   ],
+   "area": "services/flight-engine, edge box",
+   "size": "M"
+  },
+  "T2.42": {
+   "deps": [
+    "T0.17",
+    "T2.03",
+    "T2.13"
+   ],
+   "external": [],
+   "area": "deploy/charts observability",
+   "size": "M"
+  },
+  "T2.43": {
+   "deps": [
+    "T1.41",
+    "T2.19",
+    "T2.21"
+   ],
+   "external": [],
+   "area": "tests/e2e, docs/specs/screens",
+   "size": "M"
+  },
+  "T2.44": {
+   "deps": [
+    "T2.14",
+    "T2.20",
+    "T2.22",
+    "T2.23",
+    "T2.26",
+    "T2.43"
+   ],
+   "external": [],
+   "area": "tests/e2e, docs/specs/screens",
+   "size": "M"
+  },
+  "T2.45": {
+   "deps": [
+    "T2.29",
+    "T2.33",
+    "T2.35",
+    "T2.43"
+   ],
+   "external": [],
+   "area": "tests/e2e, docs/specs/screens",
+   "size": "M"
+  },
+  "T2.46": {
+   "deps": [
+    "T1.29",
+    "T2.22",
+    "T2.23",
+    "T2.36"
+   ],
+   "external": [],
+   "area": "tests/load (k6)",
+   "size": "M"
+  },
+  "T2.47": {
+   "deps": [
+    "T2.22",
+    "T2.26",
+    "T2.36",
+    "T2.38"
+   ],
+   "external": [],
+   "area": "external pen test, fixes across services",
+   "size": "L",
+   "note": "Needs all Inspection features in place; fixes touch many files."
+  },
+  "T2.48": {
+   "deps": [
+    "T2.15"
+   ],
+   "external": [],
+   "area": "tests/isolation, CI",
+   "size": "M"
+  },
+  "T2.49": {
+   "deps": [
+    "T2.30"
+   ],
+   "external": [
+    "C-02",
+    "P-06"
+   ],
+   "area": "deploy/terraform OVHcloud, deploy/environments",
+   "size": "L",
+   "note": "Cell is software; C-02 data and design partner needed to migrate."
+  },
+  "T2.50": {
+   "deps": [
+    "T2.34",
+    "T2.38",
+    "T2.39",
+    "T2.40",
+    "T2.41",
+    "T2.42",
+    "T2.44",
+    "T2.45",
+    "T2.46",
+    "T2.47",
+    "T2.48",
+    "T2.49"
+   ],
+   "external": [
+    "C-02",
+    "G-05"
+   ],
+   "area": "docs/specs, fixes",
+   "size": "M",
+   "note": "Exit check gathers everything.",
+   "field": {
+    "after": "C-02",
+    "start": "2027-11-22",
+    "end": "2027-12-03"
+   }
+  },
+  "T3.01": {
+   "deps": [
+    "T0.09",
+    "T0.12"
+   ],
+   "external": [],
+   "area": "services/notifier",
+   "size": "M"
+  },
+  "T3.02": {
+   "deps": [
+    "T0.15",
+    "T3.01"
+   ],
+   "external": [],
+   "area": "services/notifier, apps",
+   "size": "M"
+  },
+  "T3.03": {
+   "deps": [
+    "T0.11",
+    "T0.12"
+   ],
+   "external": [],
+   "area": "services/missions or sites, gateway",
+   "size": "M"
+  },
+  "T3.04": {
+   "deps": [
+    "T1.11",
+    "T3.05"
+   ],
+   "external": [],
+   "area": "frontends/back-office (Mission studio)",
+   "size": "M",
+   "note": "Needs Docks of the Site as take-off points: T3.05 for the model."
+  },
+  "T3.05": {
+   "deps": [
+    "T1.05"
+   ],
+   "external": [],
+   "area": "services/fleet, frontends/back-office",
+   "size": "M",
+   "note": "Dock state in Drone readiness feeds Pre-flight check logic."
+  },
+  "T3.06": {
+   "deps": [
+    "T0.13",
+    "T0.18"
+   ],
+   "external": [],
+   "area": "services/flight-engine, simulator",
+   "size": "M"
+  },
+  "T3.07": {
+   "deps": [
+    "T0.18",
+    "T1.02"
+   ],
+   "external": [
+    "H-04"
+   ],
+   "area": "services/flight-engine adapters (Parrot sidecar)",
+   "size": "L",
+   "note": "Adapter contract and compat test live in P1 (T1.02/T1.12); bench with H-04."
+  },
+  "T3.08": {
+   "deps": [
+    "T1.03",
+    "T3.07"
+   ],
+   "external": [
+    "H-04"
+   ],
+   "area": "adapter Parrot",
+   "size": "M"
+  },
+  "T3.09": {
+   "deps": [
+    "T1.22",
+    "T3.07"
+   ],
+   "external": [
+    "H-04"
+   ],
+   "area": "services/video-relay, adapter Parrot",
+   "size": "M"
+  },
+  "T3.10": {
+   "deps": [
+    "T1.10",
+    "T3.03",
+    "T3.05",
+    "T3.06"
+   ],
+   "external": [],
+   "area": "frontends/ground-control",
+   "size": "M"
+  },
+  "T3.11": {
+   "deps": [
+    "T2.09",
+    "T3.01"
+   ],
+   "external": [],
+   "area": "frontends (web push), Valkey",
+   "size": "M",
+   "note": "Client portal and apps are installable PWAs."
+  },
+  "T3.12": {
+   "deps": [
+    "T3.06",
+    "T3.08"
+   ],
+   "external": [
+    "H-05",
+    "H-04"
+   ],
+   "area": "services/flight-engine Dock driver, edge WireGuard",
+   "size": "L"
+  },
+  "T3.13": {
+   "deps": [
+    "T1.18",
+    "T3.05",
+    "T3.06"
+   ],
+   "external": [
+    "H-05"
+   ],
+   "area": "flight-engine, planner",
+   "size": "M",
+   "note": "Real flight end also needs T3.12 and H-05 but the Simulator part is first."
+  },
+  "T3.14": {
+   "deps": [
+    "T1.17",
+    "T3.10",
+    "T3.13"
+   ],
+   "external": [],
+   "area": "flight-engine, services/missions, ground-control",
+   "size": "M"
+  },
+  "T3.15": {
+   "deps": [
+    "T2.08",
+    "T3.10",
+    "T3.13"
+   ],
+   "external": [],
+   "area": "ground-control, services/evidence",
+   "size": "M"
+  },
+  "T3.16": {
+   "deps": [
+    "T1.12",
+    "T3.08"
+   ],
+   "external": [
+    "H-04",
+    "C-03"
+   ],
+   "area": "services/fleet compatibility, adapter",
+   "size": "M"
+  },
+  "T3.17": {
+   "deps": [
+    "T1.14",
+    "T3.04"
+   ],
+   "external": [],
+   "area": "services/missions scheduler",
+   "size": "M"
+  },
+  "T3.18": {
+   "deps": [
+    "T2.09",
+    "T2.15",
+    "T3.03"
+   ],
+   "external": [],
+   "area": "frontends/client-portal",
+   "size": "M"
+  },
+  "T3.19": {
+   "deps": [
+    "T2.09",
+    "T2.15",
+    "T3.01",
+    "T3.04"
+   ],
+   "external": [],
+   "area": "client-portal, services/missions",
+   "size": "M"
+  },
+  "T3.20": {
+   "deps": [
+    "T3.10",
+    "T3.19"
+   ],
+   "external": [],
+   "area": "ground-control",
+   "size": "M"
+  },
+  "T3.21": {
+   "deps": [
+    "T2.48",
+    "T3.19"
+   ],
+   "external": [],
+   "area": "tests/isolation, gateway",
+   "size": "S"
+  },
+  "T3.22": {
+   "deps": [
+    "T1.22",
+    "T1.37"
+   ],
+   "external": [],
+   "area": "deploy/charts livekit, services/video-relay",
+   "size": "L"
+  },
+  "T3.23": {
+   "deps": [
+    "T2.08",
+    "T3.22"
+   ],
+   "external": [],
+   "area": "services/video-relay, evidence",
+   "size": "M"
+  },
+  "T3.24": {
+   "deps": [
+    "T3.03"
+   ],
+   "external": [],
+   "area": "services/gateway or alarms receiver",
+   "size": "M"
+  },
+  "T3.25": {
+   "deps": [
+    "T1.27",
+    "T3.06"
+   ],
+   "external": [],
+   "area": "services/flight-engine edge, update system",
+   "size": "L"
+  },
+  "T3.26": {
+   "deps": [
+    "T2.22",
+    "T3.22"
+   ],
+   "external": [],
+   "area": "services/video-relay, client-portal, CDN",
+   "size": "M"
+  },
+  "T3.27": {
+   "deps": [
+    "T2.03",
+    "T3.23"
+   ],
+   "external": [],
+   "area": "services/processing video worker",
+   "size": "M"
+  },
+  "T3.28": {
+   "deps": [
+    "T2.21",
+    "T3.01",
+    "T3.15"
+   ],
+   "external": [],
+   "area": "services/notifier, back-office",
+   "size": "M"
+  },
+  "T3.29": {
+   "deps": [
+    "T2.27",
+    "T2.31",
+    "T3.15",
+    "T3.17"
+   ],
+   "external": [],
+   "area": "services/missions Scorecard, ground-control Debrief",
+   "size": "M"
+  },
+  "T3.30": {
+   "deps": [
+    "T3.16"
+   ],
+   "external": [],
+   "area": "services/fleet",
+   "size": "S"
+  },
+  "T3.31": {
+   "deps": [
+    "T2.46",
+    "T3.14",
+    "T3.22"
+   ],
+   "external": [],
+   "area": "tests/load",
+   "size": "M"
+  },
+  "T3.32": {
+   "deps": [
+    "T3.12",
+    "T3.25"
+   ],
+   "external": [
+    "C-03"
+   ],
+   "area": "flight-engine, edge, Dock",
+   "size": "M",
+   "note": "Needs field findings of C-03.",
+   "field": {
+    "after": "C-03",
+    "start": "2028-03-27",
+    "end": "2028-04-07"
+   }
+  },
+  "T3.33": {
+   "deps": [
+    "T2.43",
+    "T3.15",
+    "T3.16",
+    "T3.18",
+    "T3.20"
+   ],
+   "external": [],
+   "area": "tests/e2e, docs/specs/screens",
+   "size": "M"
+  },
+  "T3.34": {
+   "deps": [
+    "T3.11",
+    "T3.12",
+    "T3.21",
+    "T3.24",
+    "T3.28"
+   ],
+   "external": [],
+   "area": "external pen test, fixes",
+   "size": "L"
+  },
+  "T3.35": {
+   "deps": [
+    "T2.49",
+    "T3.25",
+    "T3.32"
+   ],
+   "external": [
+    "P-03"
+   ],
+   "area": "deploy OVHcloud cell, docs/runbook",
+   "size": "M"
+  },
+  "T4.01": {
+   "deps": [
+    "T0.06",
+    "T0.12"
+   ],
+   "external": [],
+   "area": "services/missions, packages/python/swarm-models",
+   "size": "M"
+  },
+  "T4.02": {
+   "deps": [
+    "T0.07"
+   ],
+   "external": [
+    "G-07",
+    "P-04"
+   ],
+   "area": "packages/rust/swarm-core planner, PyO3",
+   "size": "M",
+   "note": "Needs partner farm sample files and agreed formats"
+  },
+  "T4.03": {
+   "deps": [
+    "T4.02"
+   ],
+   "external": [
+    "G-07"
+   ],
+   "area": "packages/rust/swarm-core planner",
+   "size": "M"
+  },
+  "T4.04": {
+   "deps": [
+    "T1.09",
+    "T4.01"
+   ],
+   "external": [],
+   "area": "packages/rust planner, services/planner",
+   "size": "L",
+   "note": "Swath comes from Payload kinds (T4.09) but tests can use fixed swaths; left out"
+  },
+  "T4.05": {
+   "deps": [
+    "T0.13"
+   ],
+   "external": [],
+   "area": "services/simulator, packages/rust synthetic drones",
+   "size": "M"
+  },
+  "T4.06": {
+   "deps": [
+    "T1.11",
+    "T4.04",
+    "T4.09"
+   ],
+   "external": [],
+   "area": "frontends/ground-control or studio, Mission studio",
+   "size": "L",
+   "note": "Needs routes (T4.04) and Payload choice (T4.09) to finish UC-001"
+  },
+  "T4.07": {
+   "deps": [
+    "T1.08",
+    "T4.01"
+   ],
+   "external": [],
+   "area": "services/missions, Mission studio",
+   "size": "S"
+  },
+  "T4.08": {
+   "deps": [
+    "T4.04"
+   ],
+   "external": [],
+   "area": "packages/rust planner",
+   "size": "M"
+  },
+  "T4.09": {
+   "deps": [
+    "T1.05"
+   ],
+   "external": [],
+   "area": "services/fleet",
+   "size": "S"
+  },
+  "T4.10": {
+   "deps": [
+    "T1.02",
+    "T4.05"
+   ],
+   "external": [
+    "H-06"
+   ],
+   "area": "packages/rust mavlink, services/flight-engine",
+   "size": "M",
+   "note": "Real step is one rented Drone on the ground"
+  },
+  "T4.11": {
+   "deps": [
+    "T1.01",
+    "T4.07",
+    "T4.10"
+   ],
+   "external": [
+    "H-06",
+    "C-04"
+   ],
+   "area": "packages/rust safety, flight-engine",
+   "size": "M",
+   "note": "In flight part needs C-04; simulation part is software"
+  },
+  "T4.12": {
+   "deps": [
+    "T1.12",
+    "T4.09",
+    "T4.10"
+   ],
+   "external": [
+    "H-06"
+   ],
+   "area": "services/fleet, simulator, real flight",
+   "size": "M"
+  },
+  "T4.13": {
+   "deps": [
+    "T0.14",
+    "T1.01",
+    "T4.05"
+   ],
+   "external": [],
+   "area": "Back office, packages/rust safety, services/fleet",
+   "size": "M",
+   "note": "Back office frame assumed from T0.14; settings screen owner unclear"
+  },
+  "T4.14": {
+   "deps": [
+    "T1.17",
+    "T4.04",
+    "T4.13"
+   ],
+   "external": [],
+   "area": "packages/rust planner, flight-engine",
+   "size": "L"
+  },
+  "T4.15": {
+   "deps": [
+    "T1.07",
+    "T1.13"
+   ],
+   "external": [],
+   "area": "Back office, services/fleet or missions",
+   "size": "M",
+   "note": "Pilot entity assumed to exist via fleet/Authorisations"
+  },
+  "T4.16": {
+   "deps": [
+    "T4.14"
+   ],
+   "external": [],
+   "area": "flight-engine, planner",
+   "size": "M",
+   "note": "Re-plan proposal flow from T1.17 comes via T4.14"
+  },
+  "T4.17": {
+   "deps": [
+    "T1.20",
+    "T4.08",
+    "T4.14"
+   ],
+   "external": [],
+   "area": "frontends/ground-control",
+   "size": "M"
+  },
+  "T4.18": {
+   "deps": [
+    "T1.10",
+    "T4.11",
+    "T4.16"
+   ],
+   "external": [],
+   "area": "frontends/ground-control, web worker, deck.gl",
+   "size": "L",
+   "note": "Front-end budgets of T1.40 are in the done-when but not a build prerequisite"
+  },
+  "T4.19": {
+   "deps": [
+    "T4.06",
+    "T4.14"
+   ],
+   "external": [],
+   "area": "planner, Mission studio",
+   "size": "M"
+  },
+  "T4.20": {
+   "deps": [
+    "T1.32",
+    "T4.01",
+    "T4.10"
+   ],
+   "external": [],
+   "area": "services/missions, TimescaleDB",
+   "size": "M",
+   "note": "Real-flight clause has no named campaign; treated as simulation-testable"
+  },
+  "T4.21": {
+   "deps": [
+    "T2.03",
+    "T2.11",
+    "T2.21",
+    "T3.01",
+    "T4.20"
+   ],
+   "external": [],
+   "area": "services/processing, evidence, Client portal",
+   "size": "L"
+  },
+  "T4.22": {
+   "deps": [
+    "T2.28",
+    "T2.31",
+    "T4.16",
+    "T4.20"
+   ],
+   "external": [],
+   "area": "services/missions, Ground control Debrief",
+   "size": "M"
+  },
+  "T4.23": {
+   "deps": [
+    "T0.15",
+    "T4.17",
+    "T4.18"
+   ],
+   "external": [],
+   "area": "frontends, docs/specs/screens",
+   "size": "M"
+  },
+  "T4.24": {
+   "deps": [
+    "T1.29",
+    "T4.14",
+    "T4.20"
+   ],
+   "external": [],
+   "area": "tests/load, staging nightly",
+   "size": "L"
+  },
+  "T4.25": {
+   "deps": [
+    "T4.08",
+    "T4.09",
+    "T4.10"
+   ],
+   "external": [],
+   "area": "mavlink adapter, simulator, planner",
+   "size": "M",
+   "note": "Ready for C-05 only; no real flight needed"
+  },
+  "T4.26": {
+   "deps": [
+    "T3.35"
+   ],
+   "external": [],
+   "area": "Patrol beta fixes (reserved slot)",
+   "size": "S",
+   "note": "Slot; depends on the Patrol beta existing",
+   "field": {
+    "after": "M3",
+    "start": "2028-06-19",
+    "end": "2028-06-30"
+   }
+  },
+  "T5.01": {
+   "deps": [
+    "T0.08",
+    "T0.12"
+   ],
+   "external": [],
+   "area": "services/agents",
+   "size": "M"
+  },
+  "T5.02": {
+   "deps": [
+    "T5.01"
+   ],
+   "external": [
+    "P-08"
+   ],
+   "area": "services/agents, Back office settings",
+   "size": "M"
+  },
+  "T5.03": {
+   "deps": [
+    "T0.06",
+    "T0.12",
+    "T1.11"
+   ],
+   "external": [],
+   "area": "services/missions, packages/python/swarm-models",
+   "size": "M"
+  },
+  "T5.04": {
+   "deps": [
+    "T0.09",
+    "T5.01",
+    "T5.03"
+   ],
+   "external": [],
+   "area": "services/agents",
+   "size": "M"
+  },
+  "T5.05": {
+   "deps": [
+    "T0.17",
+    "T5.02"
+   ],
+   "external": [],
+   "area": "services/agents, CI, Grafana",
+   "size": "M"
+  },
+  "T5.06": {
+   "deps": [
+    "T1.09",
+    "T5.02",
+    "T5.04"
+   ],
+   "external": [],
+   "area": "services/agents",
+   "size": "L"
+  },
+  "T5.07": {
+   "deps": [
+    "T5.06"
+   ],
+   "external": [],
+   "area": "services/agents, services/missions",
+   "size": "M"
+  },
+  "T5.08": {
+   "deps": [
+    "T0.14",
+    "T5.07"
+   ],
+   "external": [],
+   "area": "frontends Mission studio",
+   "size": "L"
+  },
+  "T5.09": {
+   "deps": [
+    "T5.05",
+    "T5.07"
+   ],
+   "external": [],
+   "area": "services/agents eval sets",
+   "size": "M",
+   "note": "Needs Agriculture Payloads (T4.09) and Patrol routes (T3.04) in expected results, both already earlier; left out"
+  },
+  "T5.10": {
+   "deps": [
+    "T0.09",
+    "T1.29",
+    "T2.03",
+    "T5.01"
+   ],
+   "external": [
+    "P-06"
+   ],
+   "area": "services/agents, deploy/charts KEDA",
+   "size": "M"
+  },
+  "T5.11": {
+   "deps": [
+    "T2.37",
+    "T3.29",
+    "T4.22",
+    "T5.02",
+    "T5.04"
+   ],
+   "external": [],
+   "area": "services/agents",
+   "size": "L",
+   "note": "Per Activity sections need Debrief/Scorecard data of P3 and P4"
+  },
+  "T5.12": {
+   "deps": [
+    "T2.38",
+    "T5.11"
+   ],
+   "external": [],
+   "area": "Back office Deliverables",
+   "size": "M"
+  },
+  "T5.13": {
+   "deps": [
+    "T5.12"
+   ],
+   "external": [],
+   "area": "services/missions, Back office, Client portal",
+   "size": "M"
+  },
+  "T5.14": {
+   "deps": [
+    "T5.05",
+    "T5.11"
+   ],
+   "external": [],
+   "area": "services/agents eval sets",
+   "size": "S"
+  },
+  "T5.15": {
+   "deps": [
+    "T1.21",
+    "T1.32",
+    "T5.02",
+    "T5.04"
+   ],
+   "external": [],
+   "area": "services/agents",
+   "size": "M"
+  },
+  "T5.16": {
+   "deps": [
+    "T1.17",
+    "T5.15"
+   ],
+   "external": [],
+   "area": "services/agents, planner",
+   "size": "M"
+  },
+  "T5.17": {
+   "deps": [
+    "T5.16"
+   ],
+   "external": [],
+   "area": "frontends/ground-control Alerts area",
+   "size": "M"
+  },
+  "T5.18": {
+   "deps": [
+    "T0.15",
+    "T1.21"
+   ],
+   "external": [],
+   "area": "frontends/ground-control",
+   "size": "M",
+   "note": "Independent of any agent; core-out critical path runs at the edge"
+  },
+  "T5.19": {
+   "deps": [
+    "T2.27",
+    "T5.05",
+    "T5.16"
+   ],
+   "external": [
+    "C-01",
+    "C-02",
+    "C-03",
+    "C-04"
+   ],
+   "area": "services/agents eval, Replays",
+   "size": "M",
+   "note": "Needs real Flight logs of C-01 to C-04"
+  },
+  "T5.20": {
+   "deps": [
+    "T0.11",
+    "T5.01",
+    "T5.03"
+   ],
+   "external": [],
+   "area": "services/agents (MCP), gateway",
+   "size": "L"
+  },
+  "T5.21": {
+   "deps": [
+    "T5.20"
+   ],
+   "external": [],
+   "area": "services/agents, Keycloak, gateway",
+   "size": "M"
+  },
+  "T5.22": {
+   "deps": [
+    "T1.29",
+    "T5.20"
+   ],
+   "external": [
+    "P-06"
+   ],
+   "area": "deploy/charts, KEDA, gateway",
+   "size": "M"
+  },
+  "T5.23": {
+   "deps": [
+    "T1.14",
+    "T1.17",
+    "T5.21"
+   ],
+   "external": [],
+   "area": "gateway, services/missions",
+   "size": "M"
+  },
+  "T5.24": {
+   "deps": [
+    "T3.11",
+    "T5.23"
+   ],
+   "external": [],
+   "area": "gateway, notifier",
+   "size": "M"
+  },
+  "T5.25": {
+   "deps": [
+    "T5.07",
+    "T5.10",
+    "T5.11",
+    "T5.16",
+    "T5.21"
+   ],
+   "external": [],
+   "area": "services/agents (A2A)",
+   "size": "L"
+  },
+  "T5.26": {
+   "deps": [
+    "T5.25"
+   ],
+   "external": [
+    "P-06"
+   ],
+   "area": "deploy/charts, KEDA, gateway",
+   "size": "M"
+  },
+  "T5.27": {
+   "deps": [
+    "T2.04",
+    "T5.25"
+   ],
+   "external": [],
+   "area": "gateway, evidence",
+   "size": "M"
+  },
+  "T5.28": {
+   "deps": [
+    "T5.23",
+    "T5.25"
+   ],
+   "external": [],
+   "area": "services/agents, Back office",
+   "size": "M"
+  },
+  "T5.29": {
+   "deps": [
+    "T5.24",
+    "T5.25"
+   ],
+   "external": [],
+   "area": "tests/security, CI",
+   "size": "M"
+  },
+  "T5.30": {
+   "deps": [
+    "T2.49",
+    "T5.09",
+    "T5.14",
+    "T5.19",
+    "T5.22",
+    "T5.26",
+    "T5.27",
+    "T5.28",
+    "T5.29"
+   ],
+   "external": [
+    "P-06",
+    "P-01"
+   ],
+   "area": "tests/load k6, dashboards, OVHcloud cell",
+   "size": "L",
+   "note": "Exit gate for M5: gathers the whole phase"
+  },
+  "T5.31": {
+   "deps": [
+    "T3.35"
+   ],
+   "external": [],
+   "area": "Patrol beta fixes (reserved slot)",
+   "size": "S",
+   "note": "Slot",
+   "field": {
+    "after": "M3",
+    "start": "2028-06-19",
+    "end": "2028-06-30"
+   }
+  },
+  "T6.01": {
+   "deps": [
+    "T0.06",
+    "T0.12"
+   ],
+   "external": [],
+   "area": "services/missions, services/planner, packages/python/swarm-models",
+   "size": "M",
+   "note": "Skybrush import plus object storage reference"
+  },
+  "T6.02": {
+   "deps": [
+    "T6.01"
+   ],
+   "external": [],
+   "area": "services/planner",
+   "size": "S"
+  },
+  "T6.03": {
+   "deps": [
+    "T0.07"
+   ],
+   "external": [],
+   "area": "packages/rust/swarm-core planner",
+   "size": "M",
+   "note": "Works on frames; the Choreography model (T6.01) only feeds it, so not a hard dep"
+  },
+  "T6.04": {
+   "deps": [
+    "T1.05",
+    "T1.08",
+    "T6.01"
+   ],
+   "external": [],
+   "area": "services/planner, services/missions",
+   "size": "M",
+   "note": "Site, Geofence from T1.08, Drone model limits from T1.05"
+  },
+  "T6.05": {
+   "deps": [
+    "T1.05",
+    "T6.01"
+   ],
+   "external": [],
+   "area": "services/planner",
+   "size": "S"
+  },
+  "T6.06": {
+   "deps": [
+    "T1.08",
+    "T6.01",
+    "T6.03",
+    "T6.04"
+   ],
+   "external": [],
+   "area": "frontends/mission-studio, docs/specs/screens",
+   "size": "L",
+   "note": "Refusal panel shows results of the checks"
+  },
+  "T6.07": {
+   "deps": [
+    "T6.03",
+    "T6.04",
+    "T6.05"
+   ],
+   "external": [],
+   "area": "packages/rust/swarm-core benches",
+   "size": "S"
+  },
+  "T6.08": {
+   "deps": [
+    "T1.08",
+    "T6.01",
+    "T6.03",
+    "T6.04",
+    "T6.05"
+   ],
+   "external": [],
+   "area": "frontends/mission-studio",
+   "size": "L"
+  },
+  "T6.09": {
+   "deps": [
+    "T1.08",
+    "T6.01",
+    "T6.03"
+   ],
+   "external": [],
+   "area": "frontends/mission-studio",
+   "size": "M",
+   "note": "deck.gl 3D preview highlights Drones at fault"
+  },
+  "T6.10": {
+   "deps": [
+    "T1.03",
+    "T1.04",
+    "T1.13",
+    "T6.01"
+   ],
+   "external": [],
+   "area": "services/flight-engine",
+   "size": "L"
+  },
+  "T6.11": {
+   "deps": [
+    "T1.18",
+    "T6.10"
+   ],
+   "external": [],
+   "area": "services/flight-engine",
+   "size": "M",
+   "note": "200-Drone Simulator run uses base synthetic Drones of T0.13, transitively available; T6.18 not required"
+  },
+  "T6.12": {
+   "deps": [
+    "T6.10"
+   ],
+   "external": [],
+   "area": "services/flight-engine, ground control",
+   "size": "M"
+  },
+  "T6.13": {
+   "deps": [
+    "T1.10",
+    "T6.10",
+    "T6.11"
+   ],
+   "external": [],
+   "area": "frontends/ground-control, docs/specs/screens",
+   "size": "L"
+  },
+  "T6.14": {
+   "deps": [
+    "T6.01"
+   ],
+   "external": [],
+   "area": "services/planner",
+   "size": "M"
+  },
+  "T6.15": {
+   "deps": [
+    "T6.03",
+    "T6.10",
+    "T6.14"
+   ],
+   "external": [],
+   "area": "services/flight-engine",
+   "size": "L"
+  },
+  "T6.16": {
+   "deps": [
+    "T6.11",
+    "T6.15"
+   ],
+   "external": [],
+   "area": "services/flight-engine (edge)",
+   "size": "L",
+   "note": "Several edges per cell come from P3 (T3.25), not required"
+  },
+  "T6.17": {
+   "deps": [
+    "T1.32",
+    "T6.15"
+   ],
+   "external": [],
+   "area": "services/flight-engine, services/gateway, telemetry ingest",
+   "size": "M"
+  },
+  "T6.18": {
+   "deps": [
+    "T0.13",
+    "T1.02",
+    "T6.10"
+   ],
+   "external": [],
+   "area": "services/simulator, packages/rust",
+   "size": "L"
+  },
+  "T6.19": {
+   "deps": [
+    "T3.31",
+    "T6.16",
+    "T6.17",
+    "T6.18"
+   ],
+   "external": [],
+   "area": "tests/load, deploy staging",
+   "size": "L",
+   "note": "Extends the nightly load run"
+  },
+  "T6.20": {
+   "deps": [
+    "T1.30",
+    "T6.19"
+   ],
+   "external": [],
+   "area": "tests/chaos",
+   "size": "L"
+  },
+  "T6.21": {
+   "deps": [
+    "T1.02",
+    "T1.12"
+   ],
+   "external": [
+    "H-07",
+    "G-08"
+   ],
+   "area": "services/fleet, drone adapter",
+   "size": "M",
+   "note": "Done-when needs one real flight of the show Drone"
+  },
+  "T6.22": {
+   "deps": [
+    "T1.14",
+    "T6.01"
+   ],
+   "external": [],
+   "area": "services/missions, flight-engine pre-flight, frontends/ground-control",
+   "size": "M",
+   "note": "Checklist and grid; may need Drones of T6.21 only for real use"
+  },
+  "T6.23": {
+   "deps": [
+    "T6.06",
+    "T6.13"
+   ],
+   "external": [],
+   "area": "docs/specs/screens, frontends e2e",
+   "size": "M"
+  },
+  "T6.24": {
+   "deps": [
+    "T2.08",
+    "T2.27",
+    "T6.21",
+    "T6.22"
+   ],
+   "external": [
+    "C-06",
+    "H-07",
+    "G-08",
+    "P-05"
+   ],
+   "area": "services/flight-engine, evidence, ground control debrief",
+   "size": "M",
+   "note": "Rehearsal fixes need real rehearsals",
+   "field": {
+    "after": "C-06",
+    "start": "2028-10-23",
+    "end": "2028-11-03"
+   }
+  },
+  "T6.25": {
+   "deps": [
+    "T6.19",
+    "T6.20",
+    "T6.23",
+    "T6.24"
+   ],
+   "external": [
+    "C-06",
+    "G-08",
+    "H-07",
+    "P-05"
+   ],
+   "area": "docs/specs/technical, docs/specs/roadmap",
+   "size": "S",
+   "note": "Exit criteria include the real show",
+   "field": {
+    "after": "C-06",
+    "start": "2028-10-23",
+    "end": "2028-11-03"
+   }
+  },
+  "T7.01": {
+   "deps": [
+    "T3.31"
+   ],
+   "external": [],
+   "area": "deploy staging, tests/load",
+   "size": "L",
+   "note": "200 Missions of synthetic Drones and PX4 SITL; extends nightly load of T3.31"
+  },
+  "T7.02": {
+   "deps": [
+    "T0.16",
+    "T2.48"
+   ],
+   "external": [],
+   "area": "tests/isolation, services/gateway",
+   "size": "L",
+   "note": "Across-cells probes may need T7.03/T7.05 later"
+  },
+  "T7.03": {
+   "deps": [
+    "T2.49",
+    "T5.10"
+   ],
+   "external": [
+    "P-06"
+   ],
+   "area": "deploy/terraform, deploy/charts, deploy/environments",
+   "size": "L",
+   "note": "KEDA via umbrella chart comes with T5.10"
+  },
+  "T7.04": {
+   "deps": [
+    "T0.11",
+    "T7.03"
+   ],
+   "external": [
+    "P-06"
+   ],
+   "area": "deploy/terraform, services/gateway, Keycloak",
+   "size": "L"
+  },
+  "T7.05": {
+   "deps": [
+    "T7.03"
+   ],
+   "external": [
+    "P-06"
+   ],
+   "area": "deploy/terraform, deploy/environments",
+   "size": "M"
+  },
+  "T7.06": {
+   "deps": [
+    "T2.42",
+    "T7.03",
+    "T7.05"
+   ],
+   "external": [],
+   "area": "deploy/environments, Argo CD, CI",
+   "size": "M",
+   "note": "SLO burn signal from T2.42"
+  },
+  "T7.07": {
+   "deps": [
+    "T2.25",
+    "T7.04",
+    "T7.05"
+   ],
+   "external": [],
+   "area": "services/gateway, storage, edge re-pointing, evidence",
+   "size": "L"
+  },
+  "T7.08": {
+   "deps": [
+    "T1.02",
+    "T3.07"
+   ],
+   "external": [],
+   "area": "services/flight-engine sidecar (dji)",
+   "size": "M"
+  },
+  "T7.09": {
+   "deps": [
+    "T1.02",
+    "T3.07"
+   ],
+   "external": [],
+   "area": "services/flight-engine sidecar (skydio)",
+   "size": "M"
+  },
+  "T7.10": {
+   "deps": [
+    "T1.12",
+    "T3.30",
+    "T7.08",
+    "T7.09"
+   ],
+   "external": [],
+   "area": "services/fleet, tests compatibility",
+   "size": "M"
+  },
+  "T7.11": {
+   "deps": [
+    "T2.30"
+   ],
+   "external": [
+    "P-06"
+   ],
+   "area": "deploy/terraform, deploy/environments",
+   "size": "M",
+   "note": "Servers need a hosting provider"
+  },
+  "T7.12": {
+   "deps": [
+    "T2.13",
+    "T7.04",
+    "T7.11"
+   ],
+   "external": [],
+   "area": "services/gateway, services/missions, evidence anchoring",
+   "size": "M",
+   "note": "Does not hard-need T7.13: Jurisdiction concept exists since P1"
+  },
+  "T7.13": {
+   "deps": [
+    "T1.07",
+    "T1.13"
+   ],
+   "external": [
+    "G-09"
+   ],
+   "area": "services/missions, services/fleet, catalogs",
+   "size": "S"
+  },
+  "T7.14": {
+   "deps": [
+    "T1.37",
+    "T3.25"
+   ],
+   "external": [],
+   "area": "edge appliance updater, deploy",
+   "size": "M"
+  },
+  "T7.15": {
+   "deps": [
+    "T0.10",
+    "T2.16",
+    "T5.02"
+   ],
+   "external": [],
+   "area": "deploy/images, packaging scripts",
+   "size": "L"
+  },
+  "T7.16": {
+   "deps": [
+    "T7.11",
+    "T7.15"
+   ],
+   "external": [],
+   "area": "deploy/installer, docs",
+   "size": "L"
+  },
+  "T7.17": {
+   "deps": [
+    "T2.06",
+    "T7.16"
+   ],
+   "external": [
+    "H-08"
+   ],
+   "area": "deploy on-prem test, tests",
+   "size": "M",
+   "note": "Real GPU server needed"
+  },
+  "T7.18": {
+   "deps": [
+    "T2.13"
+   ],
+   "external": [
+    "P-09"
+   ],
+   "area": "services/evidence",
+   "size": "M"
+  },
+  "T7.19": {
+   "deps": [
+    "T2.25",
+    "T2.34",
+    "T2.35",
+    "T7.18"
+   ],
+   "external": [],
+   "area": "frontends/back-office, services/evidence",
+   "size": "M"
+  },
+  "T7.20": {
+   "deps": [
+    "T7.01",
+    "T7.03"
+   ],
+   "external": [],
+   "area": "deploy, tests/drills",
+   "size": "M"
+  },
+  "T7.21": {
+   "deps": [
+    "T1.30",
+    "T7.01"
+   ],
+   "external": [],
+   "area": "tests/chaos",
+   "size": "L"
+  },
+  "T7.22": {
+   "deps": [
+    "T0.15",
+    "T1.35",
+    "T3.01"
+   ],
+   "external": [],
+   "area": "all frontends, services/notifier, CI",
+   "size": "M",
+   "note": "Audit really needs every screen of earlier phases"
+  },
+  "T7.23": {
+   "deps": [
+    "T0.16",
+    "T2.14",
+    "T7.07"
+   ],
+   "external": [],
+   "area": "docs runbook",
+   "size": "S",
+   "note": "P-01 is a gate in the roadmap but the done-when does not need it"
+  },
+  "T7.24": {
+   "deps": [
+    "T2.42",
+    "T7.05"
+   ],
+   "external": [],
+   "area": "deploy observability, Mimir",
+   "size": "M"
+  },
+  "T7.25": {
+   "deps": [
+    "T7.10"
+   ],
+   "external": [
+    "H-09",
+    "H-10",
+    "G-05",
+    "G-06"
+   ],
+   "area": "flight tests",
+   "size": "M"
+  },
+  "T7.26": {
+   "deps": [],
+   "external": [
+    "C-07",
+    "G-05",
+    "G-06",
+    "H-01",
+    "H-04",
+    "H-05"
+   ],
+   "area": "various",
+   "size": "M",
+   "note": "Fixes from real campaign, no software prerequisite fixed in advance",
+   "field": {
+    "after": "C-07",
+    "start": "2028-12-11",
+    "end": "2028-12-29"
+   }
+  },
+  "T7.27": {
+   "deps": [],
+   "external": [
+    "C-07",
+    "G-05",
+    "G-06",
+    "H-06",
+    "H-07"
+   ],
+   "area": "various",
+   "size": "M",
+   "note": "Could dep T6.25 in practice",
+   "field": {
+    "after": "C-07",
+    "start": "2028-12-11",
+    "end": "2028-12-29"
+   }
+  },
+  "T7.28": {
+   "deps": [
+    "T0.10",
+    "T7.14",
+    "T7.15"
+   ],
+   "external": [],
+   "area": "CI, deploy",
+   "size": "M"
+  },
+  "T7.29": {
+   "deps": [
+    "T7.06",
+    "T7.11",
+    "T7.28"
+   ],
+   "external": [
+    "P-06"
+   ],
+   "area": "deploy/environments",
+   "size": "M"
+  },
+  "T7.30": {
+   "deps": [
+    "T6.23",
+    "T7.26",
+    "T7.27"
+   ],
+   "external": [],
+   "area": "docs/specs",
+   "size": "S",
+   "note": "Last cleanup, after fixes"
+  }
+ }
+}

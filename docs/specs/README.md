@@ -1,7 +1,7 @@
 # 🏠 Swarm specifications
 
 <!-- spec:nav-top -->
-> 📄 **Page 1 / 108** · [Glossary ▶️](glossary.md)
+> 📄 **Page 1 / 109** · [Glossary ▶️](glossary.md)
 <!-- /spec:nav-top -->
 
 > [!NOTE]
@@ -127,6 +127,7 @@
 | 106 | [🤝 Hardware and partners](roadmap/11-hardware-and-partners.md) | 🛣️ Roadmap | 🟢 Approved |
 | 107 | [🎲 Risks](roadmap/12-risks.md) | 🛣️ Roadmap | 🟢 Approved |
 | 108 | [🧬 Traceability](roadmap/13-traceability.md) | 🛣️ Roadmap | 🟢 Approved |
+| 109 | [⛓️ Parallel plan](roadmap/14-parallel-plan.md) | 🛣️ Roadmap | 🟡 Draft |
 <!-- /spec:pages -->
 
 ## <a id="legend"></a>🗺️ Legend
@@ -185,5 +186,5 @@ flowchart LR
 <!-- spec:nav-bottom -->
 ---
 
-> 📄 **Page 1 / 108** · [Glossary ▶️](glossary.md)
+> 📄 **Page 1 / 109** · [Glossary ▶️](glossary.md)
 <!-- /spec:nav-bottom -->

@@ -1,7 +1,7 @@
 # 🎬 UC-011: Follow a Mission and download its Deliverables
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ UC-010: Order a Mission in the Client portal](UC-010-order-a-mission-in-the-client-portal.md) · 📄 **Page 37 / 108** · [UC-012: Verify the Evidence record of a flight ▶️](UC-012-verify-the-evidence-record-of-a-flight.md)
+> [🏠 Index](../../README.md) · [◀️ UC-010: Order a Mission in the Client portal](UC-010-order-a-mission-in-the-client-portal.md) · 📄 **Page 37 / 109** · [UC-012: Verify the Evidence record of a flight ▶️](UC-012-verify-the-evidence-record-of-a-flight.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -138,5 +138,5 @@ One row per state of the flow chart: every action, success and failure node. Cli
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ UC-010: Order a Mission in the Client portal](UC-010-order-a-mission-in-the-client-portal.md) · 📄 **Page 37 / 108** · [UC-012: Verify the Evidence record of a flight ▶️](UC-012-verify-the-evidence-record-of-a-flight.md)
+> [🏠 Index](../../README.md) · [◀️ UC-010: Order a Mission in the Client portal](UC-010-order-a-mission-in-the-client-portal.md) · 📄 **Page 37 / 109** · [UC-012: Verify the Evidence record of a flight ▶️](UC-012-verify-the-evidence-record-of-a-flight.md)
 <!-- /spec:nav-bottom -->

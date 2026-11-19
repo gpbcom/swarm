@@ -1,7 +1,7 @@
 # 🎬 UC-030: Focus on a Drone
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ UC-029: Create an Operator](UC-029-create-an-operator.md) · 📄 **Page 56 / 108** · [BR-001: Geofence and Altitude ceiling ▶️](../business-rules/BR-001-geofence-and-altitude-ceiling.md)
+> [🏠 Index](../../README.md) · [◀️ UC-029: Create an Operator](UC-029-create-an-operator.md) · 📄 **Page 56 / 109** · [BR-001: Geofence and Altitude ceiling ▶️](../business-rules/BR-001-geofence-and-altitude-ceiling.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -130,5 +130,5 @@ One row per state of the flow chart: every action, success and failure node. Eac
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ UC-029: Create an Operator](UC-029-create-an-operator.md) · 📄 **Page 56 / 108** · [BR-001: Geofence and Altitude ceiling ▶️](../business-rules/BR-001-geofence-and-altitude-ceiling.md)
+> [🏠 Index](../../README.md) · [◀️ UC-029: Create an Operator](UC-029-create-an-operator.md) · 📄 **Page 56 / 109** · [BR-001: Geofence and Altitude ceiling ▶️](../business-rules/BR-001-geofence-and-altitude-ceiling.md)
 <!-- /spec:nav-bottom -->

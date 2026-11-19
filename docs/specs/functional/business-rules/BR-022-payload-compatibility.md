@@ -1,7 +1,7 @@
 # 📏 BR-022: Payload compatibility
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ BR-021: AI agents propose, people decide](BR-021-ai-agents-propose-people-decide.md) · 📄 **Page 78 / 108** · [BR-023: Fixed safety controls ▶️](BR-023-fixed-safety-controls.md)
+> [🏠 Index](../../README.md) · [◀️ BR-021: AI agents propose, people decide](BR-021-ai-agents-propose-people-decide.md) · 📄 **Page 78 / 109** · [BR-023: Fixed safety controls ▶️](BR-023-fixed-safety-controls.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Type:** Validation · **Updated:** 2026-11-18
@@ -51,5 +51,5 @@ Mixed Squads are the strength of a swarm: in an Inspection, a thermal camera and
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ BR-021: AI agents propose, people decide](BR-021-ai-agents-propose-people-decide.md) · 📄 **Page 78 / 108** · [BR-023: Fixed safety controls ▶️](BR-023-fixed-safety-controls.md)
+> [🏠 Index](../../README.md) · [◀️ BR-021: AI agents propose, people decide](BR-021-ai-agents-propose-people-decide.md) · 📄 **Page 78 / 109** · [BR-023: Fixed safety controls ▶️](BR-023-fixed-safety-controls.md)
 <!-- /spec:nav-bottom -->

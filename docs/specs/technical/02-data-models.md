@@ -1,7 +1,7 @@
 # 🧱 Data models
 
 <!-- spec:nav-top -->
-> [🏠 Index](../README.md) · [◀️ Architecture](01-architecture.md) · 📄 **Page 86 / 108** · [Storage ▶️](03-storage.md)
+> [🏠 Index](../README.md) · [◀️ Architecture](01-architecture.md) · 📄 **Page 86 / 109** · [Storage ▶️](03-storage.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -118,5 +118,5 @@ All features; in particular [📘 FS-001](../functional/features/FS-001-mission-
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../README.md) · [◀️ Architecture](01-architecture.md) · 📄 **Page 86 / 108** · [Storage ▶️](03-storage.md)
+> [🏠 Index](../README.md) · [◀️ Architecture](01-architecture.md) · 📄 **Page 86 / 109** · [Storage ▶️](03-storage.md)
 <!-- /spec:nav-bottom -->

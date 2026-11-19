@@ -1,7 +1,7 @@
 # 📘 FS-008: Client portal
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ FS-007: Data processing and Deliverables](FS-007-data-processing-and-deliverables.md) · 📄 **Page 12 / 108** · [FS-009: Evidence ledger and Anchoring ▶️](FS-009-evidence-ledger-and-anchoring.md)
+> [🏠 Index](../../README.md) · [◀️ FS-007: Data processing and Deliverables](FS-007-data-processing-and-deliverables.md) · 📄 **Page 12 / 109** · [FS-009: Evidence ledger and Anchoring ▶️](FS-009-evidence-ledger-and-anchoring.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -86,5 +86,5 @@ Settled with the product owner ([interview](../../../research/interview.md)).
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ FS-007: Data processing and Deliverables](FS-007-data-processing-and-deliverables.md) · 📄 **Page 12 / 108** · [FS-009: Evidence ledger and Anchoring ▶️](FS-009-evidence-ledger-and-anchoring.md)
+> [🏠 Index](../../README.md) · [◀️ FS-007: Data processing and Deliverables](FS-007-data-processing-and-deliverables.md) · 📄 **Page 12 / 109** · [FS-009: Evidence ledger and Anchoring ▶️](FS-009-evidence-ledger-and-anchoring.md)
 <!-- /spec:nav-bottom -->

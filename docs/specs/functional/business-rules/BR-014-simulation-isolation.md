@@ -1,7 +1,7 @@
 # 📏 BR-014: Simulation isolation
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ BR-013: Re-plan approval](BR-013-re-plan-approval.md) · 📄 **Page 70 / 108** · [BR-015: Approved Drone models only ▶️](BR-015-approved-drone-models-only.md)
+> [🏠 Index](../../README.md) · [◀️ BR-013: Re-plan approval](BR-013-re-plan-approval.md) · 📄 **Page 70 / 109** · [BR-015: Approved Drone models only ▶️](BR-015-approved-drone-models-only.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Type:** Constraint · **Updated:** 2026-11-18
@@ -48,5 +48,5 @@ The same Ground control flies real and simulated Squads, for training and testin
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ BR-013: Re-plan approval](BR-013-re-plan-approval.md) · 📄 **Page 70 / 108** · [BR-015: Approved Drone models only ▶️](BR-015-approved-drone-models-only.md)
+> [🏠 Index](../../README.md) · [◀️ BR-013: Re-plan approval](BR-013-re-plan-approval.md) · 📄 **Page 70 / 109** · [BR-015: Approved Drone models only ▶️](BR-015-approved-drone-models-only.md)
 <!-- /spec:nav-bottom -->

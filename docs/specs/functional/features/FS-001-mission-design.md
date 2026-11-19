@@ -1,7 +1,7 @@
 # 📘 FS-001: Mission design
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ Functional specifications](../README.md) · 📄 **Page 5 / 108** · [FS-002: Pre-flight check and launch ▶️](FS-002-pre-flight-check-and-launch.md)
+> [🏠 Index](../../README.md) · [◀️ Functional specifications](../README.md) · 📄 **Page 5 / 109** · [FS-002: Pre-flight check and launch ▶️](FS-002-pre-flight-check-and-launch.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -92,5 +92,5 @@ Settled with the product owner ([interview](../../../research/interview.md)).
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ Functional specifications](../README.md) · 📄 **Page 5 / 108** · [FS-002: Pre-flight check and launch ▶️](FS-002-pre-flight-check-and-launch.md)
+> [🏠 Index](../../README.md) · [◀️ Functional specifications](../README.md) · 📄 **Page 5 / 109** · [FS-002: Pre-flight check and launch ▶️](FS-002-pre-flight-check-and-launch.md)
 <!-- /spec:nav-bottom -->

@@ -1,7 +1,7 @@
 # 🎬 UC-004: Supervise a Squad and approve a Re-plan
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ UC-003: Run the Pre-flight check and launch](UC-003-run-the-pre-flight-check-and-launch.md) · 📄 **Page 30 / 108** · [UC-005: Lose a Drone in flight ▶️](UC-005-lose-a-drone-in-flight.md)
+> [🏠 Index](../../README.md) · [◀️ UC-003: Run the Pre-flight check and launch](UC-003-run-the-pre-flight-check-and-launch.md) · 📄 **Page 30 / 109** · [UC-005: Lose a Drone in flight ▶️](UC-005-lose-a-drone-in-flight.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -136,5 +136,5 @@ One row per state of the flow chart: every action, success and failure node. Eac
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ UC-003: Run the Pre-flight check and launch](UC-003-run-the-pre-flight-check-and-launch.md) · 📄 **Page 30 / 108** · [UC-005: Lose a Drone in flight ▶️](UC-005-lose-a-drone-in-flight.md)
+> [🏠 Index](../../README.md) · [◀️ UC-003: Run the Pre-flight check and launch](UC-003-run-the-pre-flight-check-and-launch.md) · 📄 **Page 30 / 109** · [UC-005: Lose a Drone in flight ▶️](UC-005-lose-a-drone-in-flight.md)
 <!-- /spec:nav-bottom -->

@@ -1,7 +1,7 @@
 # 🚀 Scalability and performance
 
 <!-- spec:nav-top -->
-> [🏠 Index](../README.md) · [◀️ Security](06-security.md) · 📄 **Page 91 / 108** · [Observability ▶️](08-observability.md)
+> [🏠 Index](../README.md) · [◀️ Security](06-security.md) · 📄 **Page 91 / 109** · [Observability ▶️](08-observability.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -96,5 +96,5 @@
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../README.md) · [◀️ Security](06-security.md) · 📄 **Page 91 / 108** · [Observability ▶️](08-observability.md)
+> [🏠 Index](../README.md) · [◀️ Security](06-security.md) · 📄 **Page 91 / 109** · [Observability ▶️](08-observability.md)
 <!-- /spec:nav-bottom -->

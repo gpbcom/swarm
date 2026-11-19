@@ -1,7 +1,7 @@
 # 🎬 UC-022: Receive the Mission report
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ UC-021: Plan a Mission with the Mission assistant](UC-021-plan-a-mission-with-the-mission-assistant.md) · 📄 **Page 48 / 108** · [UC-023: Configure the Workspace of Ground control ▶️](UC-023-configure-the-workspace-of-ground-control.md)
+> [🏠 Index](../../README.md) · [◀️ UC-021: Plan a Mission with the Mission assistant](UC-021-plan-a-mission-with-the-mission-assistant.md) · 📄 **Page 48 / 109** · [UC-023: Configure the Workspace of Ground control ▶️](UC-023-configure-the-workspace-of-ground-control.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -139,5 +139,5 @@ One row per state of the flow chart: every action, success and failure node. Cli
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ UC-021: Plan a Mission with the Mission assistant](UC-021-plan-a-mission-with-the-mission-assistant.md) · 📄 **Page 48 / 108** · [UC-023: Configure the Workspace of Ground control ▶️](UC-023-configure-the-workspace-of-ground-control.md)
+> [🏠 Index](../../README.md) · [◀️ UC-021: Plan a Mission with the Mission assistant](UC-021-plan-a-mission-with-the-mission-assistant.md) · 📄 **Page 48 / 109** · [UC-023: Configure the Workspace of Ground control ▶️](UC-023-configure-the-workspace-of-ground-control.md)
 <!-- /spec:nav-bottom -->

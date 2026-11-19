@@ -1,7 +1,7 @@
 # 🏛️ Regulatory track
 
 <!-- spec:nav-top -->
-> [🏠 Index](../README.md) · [◀️ P7: Scale and reach](08-p7-scale-and-reach.md) · 📄 **Page 104 / 108** · [Flight test campaigns ▶️](10-flight-test-campaigns.md)
+> [🏠 Index](../README.md) · [◀️ P7: Scale and reach](08-p7-scale-and-reach.md) · 📄 **Page 104 / 109** · [Flight test campaigns ▶️](10-flight-test-campaigns.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Sprints:** S02 to S52 · **Dates:** 18 Jan 2027 to 29 Dec 2028
@@ -54,5 +54,5 @@ Swarm itself records every step below in the Back office ([📘 FS-006](../funct
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../README.md) · [◀️ P7: Scale and reach](08-p7-scale-and-reach.md) · 📄 **Page 104 / 108** · [Flight test campaigns ▶️](10-flight-test-campaigns.md)
+> [🏠 Index](../README.md) · [◀️ P7: Scale and reach](08-p7-scale-and-reach.md) · 📄 **Page 104 / 109** · [Flight test campaigns ▶️](10-flight-test-campaigns.md)
 <!-- /spec:nav-bottom -->

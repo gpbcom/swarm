@@ -1,7 +1,7 @@
 # 📏 BR-021: AI agents propose, people decide
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ BR-020: Defects confirmed by a person](BR-020-defects-confirmed-by-a-person.md) · 📄 **Page 77 / 108** · [BR-022: Payload compatibility ▶️](BR-022-payload-compatibility.md)
+> [🏠 Index](../../README.md) · [◀️ BR-020: Defects confirmed by a person](BR-020-defects-confirmed-by-a-person.md) · 📄 **Page 77 / 109** · [BR-022: Payload compatibility ▶️](BR-022-payload-compatibility.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Type:** Authorisation · **Updated:** 2026-11-18
@@ -54,5 +54,5 @@ The Pilot and the Operator are accountable to the authorities and to the Client.
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ BR-020: Defects confirmed by a person](BR-020-defects-confirmed-by-a-person.md) · 📄 **Page 77 / 108** · [BR-022: Payload compatibility ▶️](BR-022-payload-compatibility.md)
+> [🏠 Index](../../README.md) · [◀️ BR-020: Defects confirmed by a person](BR-020-defects-confirmed-by-a-person.md) · 📄 **Page 77 / 109** · [BR-022: Payload compatibility ▶️](BR-022-payload-compatibility.md)
 <!-- /spec:nav-bottom -->

@@ -1,7 +1,7 @@
 # 🖥️ GUI and WebUI
 
 <!-- spec:nav-top -->
-> [🏠 Index](../README.md) · [◀️ Deployment](09-deployment.md) · 📄 **Page 94 / 108** · [Roadmap ▶️](../roadmap/README.md)
+> [🏠 Index](../README.md) · [◀️ Deployment](09-deployment.md) · 📄 **Page 94 / 109** · [Roadmap ▶️](../roadmap/README.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -99,5 +99,5 @@ Routes and heavy libraries (3D, video) are split and loaded on demand; the apps 
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../README.md) · [◀️ Deployment](09-deployment.md) · 📄 **Page 94 / 108** · [Roadmap ▶️](../roadmap/README.md)
+> [🏠 Index](../README.md) · [◀️ Deployment](09-deployment.md) · 📄 **Page 94 / 109** · [Roadmap ▶️](../roadmap/README.md)
 <!-- /spec:nav-bottom -->

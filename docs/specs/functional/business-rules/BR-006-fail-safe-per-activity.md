@@ -1,7 +1,7 @@
 # 📏 BR-006: Fail-safe per Activity
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ BR-005: Autonomy level per Activity](BR-005-autonomy-level-per-activity.md) · 📄 **Page 62 / 108** · [BR-007: Launch only after a passed Pre-flight check ▶️](BR-007-launch-only-after-a-passed-pre-flight-check.md)
+> [🏠 Index](../../README.md) · [◀️ BR-005: Autonomy level per Activity](BR-005-autonomy-level-per-activity.md) · 📄 **Page 62 / 109** · [BR-007: Launch only after a passed Pre-flight check ▶️](BR-007-launch-only-after-a-passed-pre-flight-check.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Type:** Constraint · **Updated:** 2026-11-18
@@ -50,5 +50,5 @@ Above an audience, any surprise is a danger: stopping everything is the safe ans
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ BR-005: Autonomy level per Activity](BR-005-autonomy-level-per-activity.md) · 📄 **Page 62 / 108** · [BR-007: Launch only after a passed Pre-flight check ▶️](BR-007-launch-only-after-a-passed-pre-flight-check.md)
+> [🏠 Index](../../README.md) · [◀️ BR-005: Autonomy level per Activity](BR-005-autonomy-level-per-activity.md) · 📄 **Page 62 / 109** · [BR-007: Launch only after a passed Pre-flight check ▶️](BR-007-launch-only-after-a-passed-pre-flight-check.md)
 <!-- /spec:nav-bottom -->
