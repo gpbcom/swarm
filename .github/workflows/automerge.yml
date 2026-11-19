@@ -38,12 +38,12 @@ jobs:
             echo "No open pull request to develop labelled automerge at $HEAD_SHA."
             exit 0
           fi
-          states=$(gh pr view "$pr" -R "$REPO" --json statusCheckRollup \
-            --jq '[.statusCheckRollup[] | select(.name != "merge") | (.conclusion // .state // "PENDING")] | unique | join(" ")')
+          states=$(gh api "repos/$REPO/commits/$HEAD_SHA/check-runs?per_page=100" \
+            --jq '[.check_runs[] | select(.name != "merge") | (.conclusion // .status)] | unique | join(" ")')
           echo "Checks of #$pr: $states"
           for state in $states; do
             case "$state" in
-              SUCCESS|SKIPPED|NEUTRAL) ;;
+              success|skipped|neutral) ;;
               *) echo "#$pr waits: a check is $state."; exit 0 ;;
             esac
           done

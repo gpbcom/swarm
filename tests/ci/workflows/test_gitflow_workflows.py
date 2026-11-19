@@ -31,8 +31,13 @@ class TestGitflowWorkflows:
         script = self.run_of("automerge.yml", "merge")
         assert '.name == "automerge"' in script
         assert '.baseRefName == "develop"' in script
-        assert "SUCCESS|SKIPPED|NEUTRAL" in script
+        assert "success|skipped|neutral" in script
         assert "--match-head-commit" in script
+
+    def test_automerge_reads_the_check_runs_of_the_head_commit_through_rest(self) -> None:
+        script = self.run_of("automerge.yml", "merge")
+        assert "repos/$REPO/commits/$HEAD_SHA/check-runs" in script
+        assert "statusCheckRollup" not in script
 
     def test_automerge_may_read_the_checks_and_merge(self) -> None:
         permissions = cast(Dict[str, str], self.load("automerge.yml")["permissions"])
