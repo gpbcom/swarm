@@ -1,6 +1,6 @@
 # T0.07: Rust core and benchmark gate
 
-**Status:** 🟡 Planned
+**Status:** ✅ Done
 
 ## Roadmap
 

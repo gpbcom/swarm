@@ -1,0 +1,4 @@
+$ uv run mypy packages/python/swarm-catalog/src packages/python/swarm-lifecycle/src packages/python/swarm-logging/src packages/python/swarm-models/src services/gateway/src
+(cwd .)
+
+Success: no issues found in 172 source files
