@@ -5,6 +5,8 @@ import re
 from pathlib import Path
 from typing import Dict, List
 
+from pydantic import JsonValue
+
 
 def repo_root() -> Path:
     return Path(__file__).resolve().parents[3]
@@ -14,7 +16,7 @@ def read_text(relative: str) -> str:
     return (repo_root() / relative).read_text(encoding="utf-8")
 
 
-def read_json(relative: str) -> Dict[str, object]:
+def read_json(relative: str) -> Dict[str, JsonValue]:
     return json.loads(read_text(relative))
 
 

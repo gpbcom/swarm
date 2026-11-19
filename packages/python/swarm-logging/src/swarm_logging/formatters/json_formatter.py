@@ -29,7 +29,7 @@ class JsonFormatter(logging.Formatter):
         Returns:
             str: A JSON line with ``time``, ``level``, ``logger``, ``message`` and, with ``exc_info``, ``exception``.
         """
-        data: Dict[str, object] = {
+        data: Dict[str, str] = {
             "time": datetime.fromtimestamp(record.created, tz=UTC).isoformat(timespec="milliseconds"),
             "level": record.levelname,
             "logger": record.name,

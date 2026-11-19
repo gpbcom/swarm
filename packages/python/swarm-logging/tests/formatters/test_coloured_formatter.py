@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import sys
-from typing import Tuple
+from typing import Tuple, Union
 
 import pytest
 
@@ -10,7 +10,9 @@ from swarm_logging.formatters.coloured_formatter import ColouredFormatter
 
 
 class TestColouredFormatter:
-    def make_record(self, level: int, message: str = "hello", args: Tuple[object, ...] = ()) -> logging.LogRecord:
+    def make_record(
+        self, level: int, message: str = "hello", args: Tuple[Union[str, int, float], ...] = ()
+    ) -> logging.LogRecord:
         return logging.LogRecord("swarm.test", level, __file__, 1, message, args, None)
 
     @pytest.mark.parametrize(

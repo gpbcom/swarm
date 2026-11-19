@@ -4,12 +4,13 @@ import json
 from typing import Dict, List
 
 import pytest
+from pydantic import JsonValue
 
 from tests.conventions.mono_repo.helpers import repo_root
 
 
 class TestPnpmWorkspace:
-    def load_json(self, name: str) -> Dict[str, object]:
+    def load_json(self, name: str) -> Dict[str, JsonValue]:
         path = repo_root() / name
         assert path.is_file(), f"{name} is missing."
         return json.loads(path.read_text(encoding="utf-8"))

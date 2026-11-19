@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Dict
 
 import pytest
+from pydantic import JsonValue
 
 from tests.conventions.helpers import repo_root
 
@@ -16,12 +17,12 @@ class TestTypescriptSettings:
     def path(self, name: str) -> Path:
         return repo_root() / self.PACKAGE / name
 
-    def load_json(self, name: str) -> Dict[str, object]:
+    def load_json(self, name: str) -> Dict[str, JsonValue]:
         path = self.path(name)
         assert path.is_file(), f"{self.PACKAGE}/{name} is missing."
         return json.loads(path.read_text(encoding="utf-8"))
 
-    def as_dict(self, value: object) -> Dict[str, object]:
+    def as_dict(self, value: JsonValue) -> Dict[str, JsonValue]:
         assert isinstance(value, dict)
         return value
 

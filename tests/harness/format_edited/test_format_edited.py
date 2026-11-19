@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Dict, List
 
 import pytest
+from pydantic import JsonValue
 
 from tests.harness.format_edited.helpers import (
     CATALOGUE_RELATIVE,
@@ -95,7 +96,7 @@ class TestFormatEdited:
         edited = repo / "sub" / "a.txt"
         edited.parent.mkdir()
         edited.write_text("hello", encoding="utf-8")
-        payload: Dict[str, object] = {
+        payload: Dict[str, JsonValue] = {
             "tool_name": "Edit",
             "tool_input": {"file_path": "a.txt"},
             "cwd": str(edited.parent),

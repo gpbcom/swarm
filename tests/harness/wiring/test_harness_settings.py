@@ -3,14 +3,16 @@ from __future__ import annotations
 import re
 from typing import Dict, List
 
+from pydantic import JsonValue
+
 from tests.harness.wiring.helpers import read_json
 
 
 class TestHarnessSettings:
-    def hook_commands(self, event: str, name: str = "") -> List[Dict[str, object]]:
+    def hook_commands(self, event: str, name: str = "") -> List[Dict[str, JsonValue]]:
         settings = read_json(".claude/settings.json")
         entries = settings.get("hooks", {}).get(event, [])  # type: ignore[attr-defined]
-        found: List[Dict[str, object]] = []
+        found: List[Dict[str, JsonValue]] = []
         for entry in entries:
             if name and not re.fullmatch(entry.get("matcher", ""), name):
                 continue

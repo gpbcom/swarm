@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from logging import Logger, getLogger
-from typing import Dict
+from typing import Awaitable, Callable, Dict
 
 import pytest
 from lifecycle_recording_async_runnable import RecordingAsyncRunnable
@@ -17,7 +17,7 @@ class TestAsyncRunnable:
 
     @pytest.mark.parametrize("missing", ["initialize", "run", "close"])
     def test_a_subclass_missing_a_method_cannot_be_instantiated(self, missing: str) -> None:
-        namespace: Dict[str, object] = {
+        namespace: Dict[str, Callable[[AsyncRunnable], Awaitable[None]]] = {
             name: getattr(RecordingAsyncRunnable, name) for name in ("initialize", "run", "close") if name != missing
         }
         partial = type("PartialAsyncRunnable", (AsyncRunnable,), namespace)

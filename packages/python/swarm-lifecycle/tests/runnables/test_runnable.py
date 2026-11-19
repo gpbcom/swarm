@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from logging import Logger, getLogger
-from typing import Dict
+from typing import Callable, Dict
 
 import pytest
 from lifecycle_recording_runnable import RecordingRunnable
@@ -17,7 +17,7 @@ class TestRunnable:
 
     @pytest.mark.parametrize("missing", ["initialize", "run", "close"])
     def test_a_subclass_missing_a_method_cannot_be_instantiated(self, missing: str) -> None:
-        namespace: Dict[str, object] = {
+        namespace: Dict[str, Callable[[Runnable], None]] = {
             name: getattr(RecordingRunnable, name) for name in ("initialize", "run", "close") if name != missing
         }
         partial = type("PartialRunnable", (Runnable,), namespace)

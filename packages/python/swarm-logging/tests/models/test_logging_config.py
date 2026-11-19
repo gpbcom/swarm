@@ -62,5 +62,5 @@ class TestLoggingConfig:
 
     def test_round_trip(self) -> None:
         config = LoggingConfig(path="conf/logger.yaml", format=LogFormat.JSON)
-        data: Dict[str, object] = config.model_dump()
+        data: Dict[str, JsonValue] = config.model_dump()
         assert LoggingConfig.model_validate(data) == config

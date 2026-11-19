@@ -6,6 +6,8 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Optional
 
+from pydantic import JsonValue
+
 GIT_IDENTITY = ["-c", "user.name=Test", "-c", "user.email=test@example.com"]
 COUNTER_NAME = "swarm-check-touched-blocks"
 FAIL_CODE = (
@@ -30,15 +32,15 @@ def git(cwd: Path, *args: str) -> str:
     return result.stdout.strip()
 
 
-def catalogue_text(rules: List[Dict[str, object]], max_blocks: int = 2) -> str:
+def catalogue_text(rules: List[Dict[str, JsonValue]], max_blocks: int = 2) -> str:
     return json.dumps({"max_blocks": max_blocks, "rules": rules})
 
 
-def failing_rule() -> Dict[str, object]:
+def failing_rule() -> Dict[str, JsonValue]:
     return {"name": "no-fail", "match": r"\.txt$", "run": [sys.executable, "-c", FAIL_CODE, "{files}"]}
 
 
-def echo_rule() -> Dict[str, object]:
+def echo_rule() -> Dict[str, JsonValue]:
     return {"name": "seen", "match": r"\.txt$", "run": ["echo", "{files}"]}
 
 

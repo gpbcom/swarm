@@ -1,26 +1,27 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 import pytest
 import yaml
+from pydantic import JsonValue
 
 
 class TestRustWorkflow:
-    def workflow(self) -> Dict[object, object]:
+    def workflow(self) -> Dict[Union[str, bool], JsonValue]:
         root = Path(__file__).resolve().parents[3]
         path = root / ".github" / "workflows" / "rust.yml"
         data = yaml.safe_load(path.read_text(encoding="utf-8"))
         assert isinstance(data, dict)
         return data
 
-    def job(self) -> Dict[str, object]:
+    def job(self) -> Dict[str, JsonValue]:
         jobs = self.workflow()["jobs"]
         assert isinstance(jobs, dict)
         return jobs["check"]
 
-    def steps(self) -> List[Dict[str, object]]:
+    def steps(self) -> List[Dict[str, JsonValue]]:
         return list(self.job()["steps"])
 
     def runs(self) -> List[str]:

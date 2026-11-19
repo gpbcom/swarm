@@ -1,38 +1,39 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Union
 
 import pytest
 import yaml
+from pydantic import JsonValue
 
 
 class TestPythonWorkflow:
     def root(self) -> Path:
         return Path(__file__).resolve().parents[3]
 
-    def load(self) -> Dict[object, object]:
+    def load(self) -> Dict[Union[str, bool], JsonValue]:
         path = self.root() / ".github" / "workflows" / "python.yml"
         assert path.is_file(), ".github/workflows/python.yml is missing."
         data = yaml.safe_load(path.read_text(encoding="utf-8"))
         assert isinstance(data, dict)
         return data
 
-    def trigger(self) -> Dict[str, Dict[str, Dict[str, Dict[str, object]]]]:
+    def trigger(self) -> Dict[str, Dict[str, Dict[str, Dict[str, JsonValue]]]]:
         data = self.load()
         trigger = data.get("on", data.get(True))
         assert isinstance(trigger, dict)
         return trigger
 
-    def jobs(self) -> Dict[str, Dict[str, object]]:
+    def jobs(self) -> Dict[str, Dict[str, JsonValue]]:
         jobs = self.load().get("jobs")
         assert isinstance(jobs, dict)
         return jobs
 
-    def job(self, name: str) -> Dict[str, object]:
+    def job(self, name: str) -> Dict[str, JsonValue]:
         return self.jobs()[name]
 
-    def steps(self, name: str) -> List[Dict[str, object]]:
+    def steps(self, name: str) -> List[Dict[str, JsonValue]]:
         steps = self.job(name).get("steps")
         assert isinstance(steps, list)
         return steps

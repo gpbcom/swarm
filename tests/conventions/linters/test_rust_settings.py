@@ -4,6 +4,7 @@ import tomllib
 from typing import ClassVar, Dict, List
 
 import pytest
+from pydantic import JsonValue
 
 from tests.conventions.helpers import repo_root
 
@@ -30,17 +31,17 @@ class TestRustSettings:
         "version",
     ]
 
-    def load_toml(self, name: str) -> Dict[str, object]:
+    def load_toml(self, name: str) -> Dict[str, JsonValue]:
         path = repo_root() / "packages" / "rust" / name
         assert path.is_file(), f"packages/rust/{name} is missing."
         return tomllib.loads(path.read_text(encoding="utf-8"))
 
-    def workspace(self) -> Dict[str, object]:
+    def workspace(self) -> Dict[str, JsonValue]:
         workspace = self.load_toml("Cargo.toml").get("workspace")
         assert isinstance(workspace, dict), "Cargo.toml has no workspace table."
         return workspace
 
-    def lints(self, kind: str) -> Dict[str, object]:
+    def lints(self, kind: str) -> Dict[str, JsonValue]:
         lints = self.workspace().get("lints")
         assert isinstance(lints, dict), "workspace.lints is missing."
         table = lints.get(kind)

@@ -8,11 +8,12 @@ from lifecycle_sample_runnable_factory import SampleRunnableFactory
 
 from swarm_lifecycle.factories.factory import Factory
 from swarm_lifecycle.factories.runnable_factory import RunnableFactory
+from swarm_lifecycle.runnables.runnable import Runnable
 
 
 class TestRunnableFactory:
     @pytest.mark.parametrize("factory_class", [Factory, RunnableFactory])
-    def test_an_abstract_factory_cannot_be_instantiated(self, factory_class: type[Factory[object]]) -> None:
+    def test_an_abstract_factory_cannot_be_instantiated(self, factory_class: type[Factory[Runnable]]) -> None:
         with pytest.raises(TypeError):
             factory_class()
 

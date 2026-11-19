@@ -8,6 +8,8 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Optional
 
+from pydantic import JsonValue
+
 TICKET_ID = "T9.99"
 APPROVED = "**Plan:** 🟢 Approved"
 AWAITING = "**Plan:** 🟡 Awaiting approval"
@@ -28,7 +30,7 @@ def a_task(
     wave: int,
     depends_on: Optional[List[str]] = None,
     files: Optional[List[str]] = None,
-) -> Dict[str, object]:
+) -> Dict[str, JsonValue]:
     return {
         "id": task_id,
         "title": f"Task {task_id}",
@@ -41,7 +43,7 @@ def a_task(
     }
 
 
-def sample_tasks() -> List[Dict[str, object]]:
+def sample_tasks() -> List[Dict[str, JsonValue]]:
     return [
         a_task("K01", "test-writer", 1),
         a_task("K02", "test-writer", 1),
@@ -53,25 +55,25 @@ def sample_tasks() -> List[Dict[str, object]]:
     ]
 
 
-def without_key(key: str) -> List[Dict[str, object]]:
+def without_key(key: str) -> List[Dict[str, JsonValue]]:
     tasks = sample_tasks()
     del tasks[0][key]
     return tasks
 
 
-def with_change(index: int, key: str, value: object) -> List[Dict[str, object]]:
+def with_change(index: int, key: str, value: JsonValue) -> List[Dict[str, JsonValue]]:
     tasks = sample_tasks()
     tasks[index][key] = value
     return tasks
 
 
-def with_cycle() -> List[Dict[str, object]]:
+def with_cycle() -> List[Dict[str, JsonValue]]:
     tasks = sample_tasks()
     tasks[0]["depends_on"] = ["K04"]
     return tasks
 
 
-def with_cycle_and_rising_waves() -> List[Dict[str, object]]:
+def with_cycle_and_rising_waves() -> List[Dict[str, JsonValue]]:
     tasks = sample_tasks()
     tasks[0]["depends_on"] = ["K04"]
     tasks[0]["wave"] = 3
@@ -79,25 +81,25 @@ def with_cycle_and_rising_waves() -> List[Dict[str, object]]:
     return tasks
 
 
-def with_shared_file() -> List[Dict[str, object]]:
+def with_shared_file() -> List[Dict[str, JsonValue]]:
     tasks = sample_tasks()
     tasks[1]["files"] = copy.deepcopy(tasks[0]["files"])
     return tasks
 
 
-def with_implementer_without_test_writer() -> List[Dict[str, object]]:
+def with_implementer_without_test_writer() -> List[Dict[str, JsonValue]]:
     tasks = sample_tasks()
     tasks[3]["depends_on"] = ["K07"]
     return tasks
 
 
-def with_duplicate_id() -> List[Dict[str, object]]:
+def with_duplicate_id() -> List[Dict[str, JsonValue]]:
     tasks = sample_tasks()
     tasks.append(a_task("K01", "doc-writer", 1))
     return tasks
 
 
-def json_block(tasks: object) -> str:
+def json_block(tasks: List[Dict[str, JsonValue]]) -> str:
     return "```json\n" + json.dumps(tasks, indent=2) + "\n```\n"
 
 
@@ -112,7 +114,7 @@ def write_plan_text(root: Path, text: str) -> Path:
     return path
 
 
-def write_plan(root: Path, status_line: str, tasks: List[Dict[str, object]]) -> Path:
+def write_plan(root: Path, status_line: str, tasks: List[Dict[str, JsonValue]]) -> Path:
     return write_plan_text(root, plan_text(status_line, json_block(tasks)))
 
 

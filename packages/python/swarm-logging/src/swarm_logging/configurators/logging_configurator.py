@@ -8,6 +8,7 @@ from typing import ClassVar, Dict, Optional
 
 # Third-party imports
 import yaml
+from pydantic import JsonValue
 
 # First-party imports
 from swarm_logging.models.enums import LogFormat
@@ -50,14 +51,14 @@ class LoggingConfigurator:
     # Internal Helpers Methods #
     ############################
 
-    def _read(self, path: Path) -> Dict[str, object]:
+    def _read(self, path: Path) -> Dict[str, JsonValue]:
         """Read the configuration file.
 
         Args:
             path (Path): The YAML file.
 
         Returns:
-            Dict[str, object]: The configuration.
+            Dict[str, JsonValue]: The configuration.
 
         Raises:
             SELoggingConfigurationUnreadableError: If the file cannot be read or is not a mapping.
@@ -77,11 +78,11 @@ class LoggingConfigurator:
             )
         return content
 
-    def _apply_format(self, content: Dict[str, object]) -> None:
+    def _apply_format(self, content: Dict[str, JsonValue]) -> None:
         """Replace the formatters with the JSON one when the format is JSON.
 
         Args:
-            content (Dict[str, object]): The configuration, changed in place.
+            content (Dict[str, JsonValue]): The configuration, changed in place.
         """
         match self.config.format:
             case LogFormat.JSON:
@@ -93,19 +94,20 @@ class LoggingConfigurator:
             case LogFormat.COLOURED:
                 self.logger.debug("Kept the formatters of the file.")
 
-    def _create_folders(self, content: Dict[str, object]) -> None:
+    def _create_folders(self, content: Dict[str, JsonValue]) -> None:
         """Create the parent folder of each handler file.
 
         Args:
-            content (Dict[str, object]): The configuration.
+            content (Dict[str, JsonValue]): The configuration.
         """
         handlers = content.get("handlers")
         if not isinstance(handlers, dict):
             return
         for handler in handlers.values():
-            if isinstance(handler, dict) and isinstance(handler.get("filename"), str):
-                Path(handler["filename"]).parent.mkdir(parents=True, exist_ok=True)
-                self.logger.debug("Ensured the folder of %s exists.", handler["filename"])
+            filename = handler.get("filename") if isinstance(handler, dict) else None
+            if isinstance(filename, str):
+                Path(filename).parent.mkdir(parents=True, exist_ok=True)
+                self.logger.debug("Ensured the folder of %s exists.", filename)
 
     ############################
     # Publicly Exposed Methods #

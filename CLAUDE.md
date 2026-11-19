@@ -2,6 +2,16 @@
 
 @AGENT.md
 
+## Code rules never to break
+
+Two rules of [AGENT.md](AGENT.md) hold for people and agents alike, in `src/` and `tests/`:
+
+- **No `Any` and no `object` as a type.** Both are too generic. Write the real type: `JsonValue` for parsed JSON, YAML
+  or TOML, a `Union` for several known types, a `Callable[...]` with its signature, a generic with its real parameter
+  (AGENT.md, Typing).
+- **Every `try` has an `except`, even if only to log.** A `try` with only a `finally` is forbidden: the `except` logs at
+  `ERROR` and raises again with a bare `raise` when it cannot handle the error (AGENT.md, Exceptions).
+
 ## The harness
 
 This repository is a proof of concept for mastering the Claude Code harness; drone swarm piloting is the pretext (see

@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Dict, List, Tuple
 
 import pytest
+from pydantic import JsonValue
 
 from tests.harness.check_plan.helpers import (
     APPROVED,
@@ -74,7 +75,7 @@ class TestCheckPlan:
         ],
     )
     def test_each_broken_plan_is_refused_with_a_line_naming_the_problem(
-        self, tmp_path: Path, tasks: List[Dict[str, object]], needle: str
+        self, tmp_path: Path, tasks: List[Dict[str, JsonValue]], needle: str
     ) -> None:
         write_plan(tmp_path, APPROVED, tasks)
         code, out, _ = self.run_on(tmp_path)

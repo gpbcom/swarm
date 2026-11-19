@@ -3,10 +3,11 @@ from __future__ import annotations
 import subprocess
 import sys
 from pathlib import Path
-from typing import ClassVar, Dict, List, Set, cast
+from typing import ClassVar, Dict, List, Set, Union, cast
 
 import pytest
 import yaml
+from pydantic import JsonValue
 
 
 class TestCiWorkflow:
@@ -14,17 +15,17 @@ class TestCiWorkflow:
     OUTPUT_KEYS: ClassVar[Set[str]] = {"services", "typescript", "rust", "repository", "specs"}
     JOBS: ClassVar[Set[str]] = {"changes", "python", "rust", "typescript", "specs"}
 
-    def load(self) -> Dict[object, object]:
+    def load(self) -> Dict[Union[str, bool], JsonValue]:
         path = self.ROOT / ".github" / "workflows" / "ci.yml"
-        return cast(Dict[object, object], yaml.safe_load(path.read_text(encoding="utf-8")))
+        return cast(Dict[Union[str, bool], JsonValue], yaml.safe_load(path.read_text(encoding="utf-8")))
 
-    def jobs(self) -> Dict[str, Dict[str, object]]:
-        return cast(Dict[str, Dict[str, object]], self.load()["jobs"])
+    def jobs(self) -> Dict[str, Dict[str, JsonValue]]:
+        return cast(Dict[str, Dict[str, JsonValue]], self.load()["jobs"])
 
-    def steps(self, job: str) -> List[Dict[str, object]]:
-        return cast(List[Dict[str, object]], self.jobs()[job].get("steps", []))
+    def steps(self, job: str) -> List[Dict[str, JsonValue]]:
+        return cast(List[Dict[str, JsonValue]], self.jobs()[job].get("steps", []))
 
-    def step_using(self, job: str, action: str) -> Dict[str, object]:
+    def step_using(self, job: str, action: str) -> Dict[str, JsonValue]:
         for step in self.steps(job):
             if str(step.get("uses", "")).startswith(action + "@"):
                 return step
@@ -36,12 +37,12 @@ class TestCiWorkflow:
             runs.extend(str(step["run"]) for step in self.steps(job) if "run" in step)
         return runs
 
-    def with_of(self, job: str) -> Dict[str, object]:
-        return cast(Dict[str, object], self.jobs()[job].get("with", {}))
+    def with_of(self, job: str) -> Dict[str, JsonValue]:
+        return cast(Dict[str, JsonValue], self.jobs()[job].get("with", {}))
 
     def test_it_runs_on_push_and_pull_request(self) -> None:
         data = self.load()
-        triggers = cast(Dict[str, object], data.get("on", data.get(True)))
+        triggers = cast(Dict[str, JsonValue], data.get("on", data.get(True)))
         assert {"push", "pull_request"} <= set(triggers)
 
     def test_the_token_is_read_only(self) -> None:
@@ -55,11 +56,11 @@ class TestCiWorkflow:
 
     def test_the_changes_job_checks_out_the_full_history(self) -> None:
         step = self.step_using("changes", "actions/checkout")
-        assert cast(Dict[str, object], step["with"])["fetch-depth"] == 0
+        assert cast(Dict[str, JsonValue], step["with"])["fetch-depth"] == 0
 
     def test_the_changes_job_sets_up_python_3_12(self) -> None:
         step = self.step_using("changes", "actions/setup-python")
-        assert str(cast(Dict[str, object], step["with"])["python-version"]) == "3.12"
+        assert str(cast(Dict[str, JsonValue], step["with"])["python-version"]) == "3.12"
 
     def test_the_detect_step_runs_the_detector_and_writes_the_outputs(self) -> None:
         detect = [step for step in self.steps("changes") if step.get("id") == "detect"]

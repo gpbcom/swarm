@@ -1,23 +1,24 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Union
 
 import pytest
 import yaml
+from pydantic import JsonValue
 
 
 class TestSpecsWorkflow:
     CHECK_COMMAND = "uv run python .claude/skills/write-specs/scripts/specs.py check"
 
-    def workflow(self) -> Dict[object, object]:
+    def workflow(self) -> Dict[Union[str, bool], JsonValue]:
         root = Path(__file__).resolve().parents[3]
         with open(root / ".github" / "workflows" / "specs.yml", encoding="utf-8") as handle:
             data = yaml.safe_load(handle)
         assert isinstance(data, dict)
         return data
 
-    def steps(self) -> List[Dict[str, object]]:
+    def steps(self) -> List[Dict[str, JsonValue]]:
         jobs = self.workflow()["jobs"]
         assert isinstance(jobs, dict)
         steps = jobs["check"]["steps"]

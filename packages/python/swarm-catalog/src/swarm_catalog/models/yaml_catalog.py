@@ -6,7 +6,7 @@ from typing import ClassVar, Self
 
 # Third-party imports
 import yaml
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, JsonValue
 
 # First-party imports
 from swarm_catalog.models.exceptions import SEYamlCatalogUnreadable
@@ -48,7 +48,7 @@ class YamlCatalog(BaseModel):
         """
         try:
             with path.open(encoding="utf-8") as stream:
-                data: object = yaml.safe_load(stream)
+                data: JsonValue = yaml.safe_load(stream)
         except (OSError, yaml.YAMLError) as error:
             raise cls.UNREADABLE(f"Unreadable catalog: {path}. Must be a YAML mapping in UTF-8.") from error
         if not isinstance(data, dict):

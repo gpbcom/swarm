@@ -48,19 +48,21 @@ class Runnable(ABC):
 
         Raises:
             Exception: Whatever ``initialize``, ``run`` or ``close`` raised, unchanged.
+
+        Notes:
+            The broad ``except`` only logs the failure at ``ERROR`` and raises it again unchanged: ``execute`` must report
+            any failure of the work, whatever its type, without swallowing it.
         """
         name = type(self).__name__
         started = monotonic()
-        succeeded = False
         self.logger.debug("Executing %s.", name)
         try:
             self.initialize()
             self.run()
-            succeeded = True
+        except Exception as error:
+            duration_ms = int((monotonic() - started) * 1000)
+            self.logger.error("Execution of %s stopped by %s after %d ms.", name, type(error).__name__, duration_ms)
+            raise
         finally:
             self.close()
-            duration_ms = int((monotonic() - started) * 1000)
-            if succeeded:
-                self.logger.info("Executed %s in %d ms.", name, duration_ms)
-            else:
-                self.logger.error("Execution of %s stopped by an error after %d ms.", name, duration_ms)
+        self.logger.info("Executed %s in %d ms.", name, int((monotonic() - started) * 1000))

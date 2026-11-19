@@ -4,12 +4,13 @@ import tomllib
 from typing import Dict, List
 
 import pytest
+from pydantic import JsonValue
 
 from tests.conventions.mono_repo.helpers import SERVICE_LAYERS, repo_root
 
 
 class TestPythonWorkspace:
-    def load_root(self) -> Dict[str, object]:
+    def load_root(self) -> Dict[str, JsonValue]:
         path = repo_root() / "pyproject.toml"
         assert path.is_file(), "The root pyproject.toml is missing."
         return tomllib.loads(path.read_text(encoding="utf-8"))

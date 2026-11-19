@@ -8,6 +8,7 @@ from typing import Dict, Iterator, Optional
 
 import pytest
 import yaml
+from pydantic import JsonValue
 
 from swarm_logging.configurators.logging_configurator import LoggingConfigurator
 from swarm_logging.formatters.coloured_formatter import ColouredFormatter
@@ -104,7 +105,7 @@ class TestLoggingConfigurator:
         assert "a json line" in [str(value) for value in document.values()]
 
     def test_a_custom_path_creates_its_folder_and_is_used(self, tmp_path: Path) -> None:
-        configuration: Dict[str, object] = {
+        configuration: Dict[str, JsonValue] = {
             "version": 1,
             "disable_existing_loggers": False,
             "handlers": {"file": {"class": "logging.FileHandler", "filename": "out/custom.log", "encoding": "utf-8"}},
@@ -130,7 +131,7 @@ class TestLoggingConfigurator:
         assert isinstance(raised.value, SELoggingError)
 
     def test_a_handler_with_an_unknown_class_is_refused_with_its_cause(self, tmp_path: Path) -> None:
-        configuration: Dict[str, object] = {
+        configuration: Dict[str, JsonValue] = {
             "version": 1,
             "handlers": {"bad": {"class": "no.such.module.Handler"}},
             "root": {"level": "INFO", "handlers": ["bad"]},

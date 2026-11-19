@@ -249,7 +249,10 @@ from models.customers.exceptions import SECustomerCatalogUnreadable
 - Annotate every signature, including `-> None`.
 - Use `Optional`, `List`, `Dict`, `Tuple`, `Set` and `Union` from `typing`, not `X | None` or `list[str]`.
 - Use `JsonValue` for raw input in validators.
-- Use `object` only for something truly opaque, or a parameter a third-party signature forces on you.
+- **NEVER `Any` or `object` as a type,** in a signature, a variable, a generic parameter or a `cast`: both are too
+  generic. Write the real type instead: `JsonValue` (from `pydantic`) for parsed JSON, YAML or TOML, a `Union` for a
+  value with several known types, a `Callable[...]` with its real signature, a generic with its real parameter
+  (`Factory[Runnable]`, never `Factory[object]`).
 
 ## Naming
 
@@ -301,8 +304,11 @@ Each exception has its own file, and the package's `exceptions/__init__.py` re-e
 - Each file is the class name in snake case: `se_database_config_invalid_port.py`.
 - Keep the cause: `raise SECustomerCatalogUnreadable(...) from error`.
 - Outside `models`, log at `ERROR` just before raising.
-- Catch specific types. A broad `except Exception` exists only where any failure must be reported rather than end the
-  process.
+- **Every `try` has at least one `except`,** even when it only logs: a `try` with only a `finally` is forbidden. An
+  `except` that cannot handle the error logs it at `ERROR` (with `type(error).__name__`) and raises it again with a bare
+  `raise`. `finally` may follow the `except` for the clean-up.
+- Catch specific types. A broad `except Exception` exists only where any failure must be reported: rather than end the
+  process, or logged and raised again unchanged, as `Runnable.execute` does.
 
 ## Messages
 

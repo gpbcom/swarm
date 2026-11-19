@@ -1,34 +1,35 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Union
 
 import pytest
 import yaml
+from pydantic import JsonValue
 
 
 class TestTypescriptWorkflow:
-    def workflow(self) -> Dict[object, object]:
+    def workflow(self) -> Dict[Union[str, bool], JsonValue]:
         root = Path(__file__).resolve().parents[3]
         text = (root / ".github" / "workflows" / "typescript.yml").read_text(encoding="utf-8")
         data = yaml.safe_load(text)
         assert isinstance(data, dict)
         return data
 
-    def trigger(self) -> Dict[str, object]:
+    def trigger(self) -> Dict[str, JsonValue]:
         data = self.workflow()
         trigger = data.get("on", data.get(True))
         assert isinstance(trigger, dict)
         return trigger
 
-    def check_job(self) -> Dict[str, object]:
+    def check_job(self) -> Dict[str, JsonValue]:
         jobs = self.workflow()["jobs"]
         assert isinstance(jobs, dict)
         job = jobs["check"]
         assert isinstance(job, dict)
         return job
 
-    def steps(self) -> List[Dict[str, object]]:
+    def steps(self) -> List[Dict[str, JsonValue]]:
         steps = self.check_job()["steps"]
         assert isinstance(steps, list)
         return steps

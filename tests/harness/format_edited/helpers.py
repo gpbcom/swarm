@@ -6,10 +6,12 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Optional
 
+from pydantic import JsonValue
+
 HOOK_RELATIVE = ".claude/hooks/format_edited.py"
 CATALOGUE_RELATIVE = ".claude/hooks/formatters.json"
 
-TEMP_FORMATTERS: List[Dict[str, object]] = [
+TEMP_FORMATTERS: List[Dict[str, JsonValue]] = [
     {
         "name": "upper",
         "match": r"\.txt$",
@@ -49,7 +51,7 @@ def make_repo(folder: Path) -> Path:
     return folder
 
 
-def run_hook(payload: Dict[str, object], cwd: Optional[Path] = None) -> subprocess.CompletedProcess[str]:
+def run_hook(payload: Dict[str, JsonValue], cwd: Optional[Path] = None) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         [sys.executable, str(repo_root() / HOOK_RELATIVE)],
         check=False,
@@ -61,7 +63,7 @@ def run_hook(payload: Dict[str, object], cwd: Optional[Path] = None) -> subproce
     )
 
 
-def payload_for(path: Path, tool_name: str = "Write", cwd: Optional[Path] = None) -> Dict[str, object]:
+def payload_for(path: Path, tool_name: str = "Write", cwd: Optional[Path] = None) -> Dict[str, JsonValue]:
     return {
         "tool_name": tool_name,
         "tool_input": {"file_path": str(path)},
