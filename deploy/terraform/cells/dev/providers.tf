@@ -14,3 +14,15 @@ provider "dns" {
     }
   }
 }
+
+# The kubeconfig does not exist before the first apply builds the cluster, so a disabled platform leaves the path
+# unset and neither provider reads a file.
+provider "helm" {
+  kubernetes = {
+    config_path = var.platform_enabled ? var.kubeconfig_path : null
+  }
+}
+
+provider "kubernetes" {
+  config_path = var.platform_enabled ? var.kubeconfig_path : null
+}

@@ -73,3 +73,48 @@ variable "dns_zone" {
   type        = string
   default     = ""
 }
+
+variable "platform_enabled" {
+  description = "Whether the cell installs Argo CD and the root Application platform. Enable it on a second apply, once the first one has built the cluster and written the kubeconfig."
+  type        = bool
+  default     = false
+}
+
+variable "repository_url" {
+  description = "The URL of the Git repository that Argo CD follows. Required when the platform is enabled."
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = !var.platform_enabled || trimspace(var.repository_url) != ""
+    error_message = "The repository URL cannot be empty when the platform is enabled."
+  }
+}
+
+variable "argocd_chart_version" {
+  description = "The pinned version of the argo-cd chart. Required when the platform is enabled, and never latest."
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = !var.platform_enabled || (trimspace(var.argocd_chart_version) != "" && lower(trimspace(var.argocd_chart_version)) != "latest")
+    error_message = "The argo-cd chart version must be pinned when the platform is enabled: it cannot be empty or latest."
+  }
+}
+
+variable "argocd_apps_chart_version" {
+  description = "The pinned version of the argocd-apps chart. Required when the platform is enabled, and never latest."
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = !var.platform_enabled || (trimspace(var.argocd_apps_chart_version) != "" && lower(trimspace(var.argocd_apps_chart_version)) != "latest")
+    error_message = "The argocd-apps chart version must be pinned when the platform is enabled: it cannot be empty or latest."
+  }
+}
+
+variable "platform_revision" {
+  description = "The branch, tag or commit of the repository that the platform Application follows."
+  type        = string
+  default     = "develop"
+}

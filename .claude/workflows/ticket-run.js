@@ -233,7 +233,7 @@ for (let w = 1; w <= waveCount; w++) {
   }
 }
 
-// Fix loop: send each failure or finding to the task that owns it, each fixer only its own problems --------------
+// Fix loop: send each failure or finding to every task that owns one of its files, each fixer only its own problems
 const ROOTS = ['services/', 'packages/', 'frontends/', 'tests/', 'deploy/', 'docs/', '.claude/', '.github/']
 function normalise(file) {
   let f = String(file || '').trim().replace(/:\d+(-\d+)?$/, '')
@@ -251,25 +251,37 @@ function agentFor(f) {
   if (f.startsWith('docs/') || /\.md$/.test(f)) return 'doc-writer'
   return 'implementer'
 }
-function ownerOf(item) {
-  const hinted = String(item.detail || '').match(/\bK\d{2}\b/g) || []
-  const byHint = hinted.map(id => tasks.find(t => t.id === id)).find(Boolean)
-  if (byHint) return byHint
-  const files = String(item.file || '').split(',').map(normalise).filter(Boolean)
+// The paths named in a finding's file field, which may list several: "a/b.yaml:4 (also :9) and c/d.tpl:3, e/f".
+// Bare file names ("service.yaml") are left out: they belong to the path before them, whose owner is already found.
+function pathsOf(item) {
+  return String(item.file || '').split(/[\s,;()]+/).map(normalise).filter(f => f.includes('/'))
+}
+// Every task that owns the finding: the owners of each path it names, plus the tasks the reviewer names in its rule
+// ("Owners: K21 and K22"). A finding that spans two tasks goes to both, each fixing its own files; sending it to the
+// first owner only left the other half unfixed (T0.08). The change text is read for task IDs only when nothing else
+// names an owner, because it often mentions other tasks in passing.
+function ownersOf(item) {
+  const byId = ids => ids.map(id => tasks.find(t => t.id === id)).filter(Boolean)
+  const owners = []
+  const add = t => { if (t && !owners.includes(t)) owners.push(t) }
+  const files = pathsOf(item)
   for (const f of files) {
     const dir = f.replace(/\/$/, '') + '/'
-    const owner = tasks.find(t => t.files.some(x => x === f || x.endsWith('/' + f) || f.endsWith('/' + x) || x.startsWith(dir)))
-    if (owner) return owner
+    tasks.filter(t => t.files.some(x => x === f || x.endsWith('/' + f) || f.endsWith('/' + x) || x.startsWith(dir))).forEach(add)
   }
-  const f = files[0] || 'unknown'
-  return { id: `FIX-${f}`, title: `Fix ${f}`, agent: agentFor(f), files, brief: '', done_when: 'the verifier passes' }
+  byId(String(item.check || '').match(/\bK\d{2}\b/g) || []).forEach(add)
+  if (!owners.length) byId(String(item.detail || '').match(/\bK\d{2}\b/g) || []).forEach(add)
+  if (owners.length) return owners
+  const f = files[0] || normalise(item.file) || 'unknown'
+  return [{ id: `FIX-${f}`, title: `Fix ${f}`, agent: agentFor(f), files: files.length ? files : [f], brief: '', done_when: 'the verifier passes' }]
 }
 async function fixRound(items, label) {
   const groups = {}
   for (const it of items) {
-    const owner = ownerOf(it)
-    groups[owner.id] = groups[owner.id] || { task: owner, items: [] }
-    groups[owner.id].items.push(it)
+    for (const owner of ownersOf(it)) {
+      groups[owner.id] = groups[owner.id] || { task: owner, items: [] }
+      groups[owner.id].items.push(it)
+    }
   }
   log(`${label}: ${items.length} problem(s) sent to ${Object.keys(groups).length} fixer(s): ${Object.keys(groups).join(', ')}`)
   const results = await limited(Object.values(groups), MAX_PARALLEL, g =>

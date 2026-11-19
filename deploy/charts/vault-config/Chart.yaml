@@ -1,0 +1,6 @@
+apiVersion: v2
+name: vault-config
+description: Configures the cell vault, with Kubernetes auth and dynamic database credentials for each service.
+type: application
+version: 0.1.0
+appVersion: "2.1.0"

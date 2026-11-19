@@ -1,0 +1,11 @@
+$ terraform test
+(cwd deploy/terraform/modules/self-hosted/argocd)
+
+tests/argocd.tftest.hcl... [37min progress[0m
+[0m  run "installs_argo_cd_and_the_platform_application"... [32mpass[0m[0m
+  run "refuses_a_floating_chart_version"... [32mpass[0m[0m
+  run "refuses_a_missing_repository"... [32mpass[0m[0m
+tests/argocd.tftest.hcl... [37mtearing down[0m
+[0mtests/argocd.tftest.hcl... [32mpass[0m[0m
+
+[32mSuccess![0m[0m 3 passed, 0 failed.

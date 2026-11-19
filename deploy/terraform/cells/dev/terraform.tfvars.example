@@ -17,3 +17,10 @@ object_storage_buckets  = ["dev-artifacts"]
 dns_enabled = false
 dns_server  = "192.0.2.53"
 dns_zone    = "dev.example.org."
+
+# Set platform_enabled to true on a second apply, once the first one has built the cluster and written the kubeconfig.
+platform_enabled          = false
+repository_url            = "https://git.example.org/swarm.git"
+argocd_chart_version      = "9.0.0"
+argocd_apps_chart_version = "2.0.0"
+platform_revision         = "develop"

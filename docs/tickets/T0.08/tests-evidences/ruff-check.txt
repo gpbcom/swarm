@@ -1,0 +1,4 @@
+$ uv run ruff check tests/ci/dev_cell/test_dev_cell_workflow.py tests/conventions/mono_repo/test_terraform_layout.py tests/deploy/charts/test_cell_chart.py tests/deploy/charts/test_database_chart.py tests/deploy/charts/test_object_storage_chart.py tests/deploy/charts/test_valkey_chart.py tests/deploy/charts/test_vault_config_chart.py tests/deploy/environments/test_dev_environment.py tests/deploy/images/test_postgres_image.py tests/deploy/scripts/test_dev_cell_script.py
+(cwd .)
+
+All checks passed!

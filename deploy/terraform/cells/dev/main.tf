@@ -47,3 +47,15 @@ module "dns" {
   zone    = var.dns_zone
   records = { api = module.machines.servers[0].address }
 }
+
+module "argocd" {
+  source = "../../modules/self-hosted/argocd"
+  count  = var.platform_enabled ? 1 : 0
+
+  chart_version      = var.argocd_chart_version
+  apps_chart_version = var.argocd_apps_chart_version
+  repository_url     = var.repository_url
+  target_revision    = var.platform_revision
+
+  depends_on = [module.k3s]
+}

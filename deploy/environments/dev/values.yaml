@@ -1,0 +1,22 @@
+global:
+  services:
+    - missions
+    - fleet
+    - processing
+    - evidence
+    - notifier
+
+database:
+  instances: 1
+  storage:
+    size: 1Gi
+  pooler:
+    instances: 1
+
+valkey:
+  persistence:
+    size: 256Mi
+
+objectStorage:
+  persistence:
+    size: 1Gi

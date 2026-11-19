@@ -1,0 +1,24 @@
+# The vault (OpenBao) the job configures.
+address: http://openbao:8200
+# The Secret holding the vault root token under the key "token".
+rootTokenSecret: vault-root-token
+
+database:
+  host: database-rw
+  port: 5432
+  name: swarm
+  # The Secret holding the database superuser under the keys "username" and "password".
+  superuserSecret: database-superuser
+
+# Lease durations of the dynamic database credentials.
+ttl: 1h
+maxTtl: 24h
+
+image:
+  repository: quay.io/openbao/openbao
+  tag: "2.1.0"
+  pullPolicy: IfNotPresent
+
+global:
+  # The services that get a database role, a policy and a Kubernetes login.
+  services: []

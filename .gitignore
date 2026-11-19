@@ -37,3 +37,7 @@ logs/
 
 # Editor settings stay local to each person.
 .vscode/
+
+# Helm dependencies are packaged on build and never committed
+deploy/charts/*/charts/
+.VSCodeCounter

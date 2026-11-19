@@ -25,7 +25,12 @@ jobs:
           - deploy/terraform/modules/self-hosted/k3s
           - deploy/terraform/modules/self-hosted/object-storage
           - deploy/terraform/modules/self-hosted/dns
+          - deploy/terraform/modules/self-hosted/argocd
+          - deploy/terraform/modules/self-hosted/vault
+          - deploy/terraform/modules/self-hosted/cell
+          - deploy/terraform/modules/self-hosted/cell-application
           - deploy/terraform/cells/dev
+          - deploy/terraform/cells/dev-branch
     steps:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3

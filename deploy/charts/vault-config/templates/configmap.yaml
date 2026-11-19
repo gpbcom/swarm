@@ -1,0 +1,78 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "vault-config.name" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "vault-config.labels" . | nindent 4 }}
+data:
+  configure.sh: |
+    #!/bin/sh
+    # Idempotent: it reruns on every sync. It never prints a token or a password.
+    set -eu
+
+    ATTEMPTS=30
+    DELAY_S=5
+
+    retry() {
+      n=0
+      until "$@"; do
+        n=$((n + 1))
+        if [ "$n" -ge "$ATTEMPTS" ]; then
+          echo "Giving up after $ATTEMPTS attempts."
+          return 1
+        fi
+        sleep "$DELAY_S"
+      done
+    }
+
+    echo "Waiting for the vault."
+    retry bao status > /dev/null
+
+    echo "Configuring the Kubernetes auth method."
+    if ! bao auth list | grep -q '^kubernetes/'; then
+      bao auth enable kubernetes
+    fi
+    bao write auth/kubernetes/config kubernetes_host=https://kubernetes.default.svc
+
+    echo "Enabling the database secrets engine."
+    if ! bao secrets list | grep -q '^database/'; then
+      bao secrets enable database
+    fi
+
+    echo "Configuring the database connection."
+    retry bao write database/config/swarm \
+      plugin_name=postgresql-database-plugin \
+      connection_url='postgresql://{{`{{username}}`}}:{{`{{password}}`}}@{{ .Values.database.host }}:{{ .Values.database.port }}/{{ .Values.database.name }}' \
+      username="$DATABASE_USERNAME" \
+      password="$DATABASE_PASSWORD" \
+      allowed_roles="{{ join "," .Values.global.services }}" > /dev/null
+    {{- range .Values.global.services }}
+
+    echo "Configuring the service {{ . }}."
+    CREATION=$(cat <<'SQL'
+    CREATE ROLE "{{`{{name}}`}}" WITH LOGIN PASSWORD '{{`{{password}}`}}' VALID UNTIL '{{`{{expiration}}`}}' IN ROLE "{{ . }}"; ALTER ROLE "{{`{{name}}`}}" SET role = '{{ . }}';
+    SQL
+    )
+    REVOCATION=$(cat <<'SQL'
+    REASSIGN OWNED BY "{{`{{name}}`}}" TO "{{ . }}"; DROP OWNED BY "{{`{{name}}`}}"; DROP ROLE IF EXISTS "{{`{{name}}`}}";
+    SQL
+    )
+    bao write database/roles/{{ . }} \
+      db_name=swarm \
+      default_ttl={{ $.Values.ttl }} \
+      max_ttl={{ $.Values.maxTtl }} \
+      creation_statements="$CREATION" \
+      revocation_statements="$REVOCATION" > /dev/null
+    bao policy write {{ . }} - <<'POLICY'
+    path "database/creds/{{ . }}" {
+      capabilities = ["read"]
+    }
+    POLICY
+    bao write auth/kubernetes/role/{{ . }} \
+      bound_service_account_names={{ . }} \
+      bound_service_account_namespaces={{ $.Release.Namespace }} \
+      token_policies={{ . }} > /dev/null
+    {{- end }}
+
+    echo "The vault is configured."
