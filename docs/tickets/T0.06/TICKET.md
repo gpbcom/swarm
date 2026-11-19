@@ -1,6 +1,6 @@
 # T0.06: Shared models and generated types
 
-**Status:** 🟡 Planned
+**Status:** ✅ Done
 
 ## Roadmap
 

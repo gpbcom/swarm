@@ -43,6 +43,22 @@ The technical pages, features, use cases and business rules of [TICKET.md](TICKE
 | 2026-11-19 11:30 | Stopped: checks failing | workflow | ❌ Open failures: (1) ruff format: 2 files would be reformatted, `packages/python/swarm-lifecycle/src/swarm_lifecycle/models/enums.py` (the `SEActorInvalidKind` message to reformat); (2) test: `packages/ts/live` `node --experimental-strip-types --test test/*.test.ts` fails with 1 failing test (`pnpm recursive run` failed in `packages/ts/live`); neither is an environment failure. |
 | 2026-11-19 11:34 | Fixed by the main session at the person's request: `ruff format` on `models/events/actor.py` (K21) and `api/cli/export_schemas.py` (K26), the two files the verifier meant (`checks.py` named the wrong file, so the fix went to K15) | the person | ✅ ruff format, ruff check, mypy and 508 tests pass |
 | 2026-11-19 11:34 | Environment fixed: `/usr/bin/node` v22.22.1 has no TypeScript type stripping; `~/.local/bin/node` now links to nvm Node v22.17.1, which is the nvm default | the person | ✅ `packages/ts/live` test: 8 passed |
+| 2026-11-19 11:40 | Verify 1 (1 not applicable) | verifier | ✅ passed |
+| 2026-11-19 11:40 | Review 1 (full) | reviewer | ✅ 0 blocking, 9 follow-ups |
+
+## 🔜 Follow-ups
+
+| File | What to change |
+| --- | --- |
+| packages/python/swarm-models/src/swarm_models/models/operators/operator.py:15 | K19: the Operator docstring says "A person who pilots drones", but in the glossary (ent-operator) an Operator is the organisation that uses Swarm. The text also calls it "operator" in lower case. Rewrite the docstring and field descriptions with the glossary meaning and spelling, check `cell_assignment.py` the same way, then regenerate the schema bundle, `generated.rs` and `models.ts`, which all copy the wrong text today. |
+| packages/python/swarm-models/src/swarm_models/models/commands/enums/command_kind.py:17 | K23: the MANUAL_CONTROL docstring reads "Hand the control to the Operator". Under the glossary and 06-security, the Pilot takes manual control. Fix the wording and regenerate. |
+| packages/python/swarm-models/src/swarm_models/models/base/swarm_model.py:58 | K15 and the model tasks K19 to K23: two-sentence messages sit on one source line, in every parse_* helper and most model validators. Put one sentence per line, with `# noqa: E501` on the first line. |
+| packages/python/swarm-models/src/swarm_models/models/base/swarm_model.py:166 | K15: with `maximum_exclusive=True`, parse_float's message still shows an inclusive range (`[0, 360]`, even though 360 is refused). Say that the maximum is excluded. |
+| packages/python/swarm-models/src/swarm_models/models/telemetry/telemetry_frame.py:85 | K22: the bounds (lat_e7, lon_e7, heading_deg, the *_pct fields, seq, t_us) exist only in mode='before' validators, so the JSON Schema, and with it the Rust and TypeScript types, carries none of them. Also declare them as Field(ge=..., le=..., lt=...), so the generated types hold the same limits. |
+| packages/python/swarm-models/src/swarm_models/service/schemas/schema_exporter.py:85 | K25 and K28: the whole class docstrings (Attributes and Notes sections included) end up as schema descriptions. Pydantic's field titles also make json-schema-to-typescript emit duplicate aliases (ActorKind1, Id1 to Id3, OperatorId1 to OperatorId3). Consider short schema descriptions and dropping field titles before more models are added. |
+| packages/python/swarm-models/src/swarm_models/models/commands/command.py:58 | K23 and K20: several validators raise without a `Raises:` section, in Command (id, mission_id, drone_id, issued_by) and in Person and Role (id, operator_id, name, person_id). Add one to each. |
+| packages/python/swarm-models/src/swarm_models/storage/schemas/schema_folder.py:25 | K24: DEFAULT_ROOT uses `Path(__file__).parents[4]`, which works only from the source tree or an editable install. If the package is ever installed as a wheel, pass the root explicitly or ship the bundle as package data. |
+| packages/python/swarm-models/src/swarm_models/models/telemetry/telemetry_frame.py:96 | K22: TelemetryFrame validates every field in Python before-validators, which skip pydantic-core's fast path. No budget applies yet. Measure it when frames enter the live path (T0.18, T0.19). |
 
 <!-- timings -->
 ## ⏱️ Timings
@@ -52,21 +68,21 @@ Measured from the agents' transcripts by `python3 .claude/scripts/progress.py ti
 | Measure | Value |
 | --- | --- |
 | 🕒 Ticket started | 2026-11-19 10:32:05 |
-| 🕒 Last activity | 2026-11-19 11:30:17 |
-| ⏱️ **Overall ticket time** (first start to last activity) | **58m11s** |
-| 🤖 Time with agents working (sum of runs) | 33m46s |
-| ⏸️ Time between runs (approvals, fixes) | 24m25s |
-| 🔁 Workflow runs | 3 |
-| 🪙 **Tokens consumed** (input, output, cache write, cache read) | **33.83M** |
+| 🕒 Last activity | 2026-11-19 11:41:34 |
+| ⏱️ **Overall ticket time** (first start to last activity) | **1h09m29s** |
+| 🤖 Time with agents working (sum of runs) | 38m40s |
+| ⏸️ Time between runs (approvals, fixes) | 30m48s |
+| 🔁 Workflow runs | 4 |
+| 🪙 **Tokens consumed** (input, output, cache write, cache read) | **39.68M** |
 
 #### 🪙 Tokens by model
 
 | Model | Input | Output | Cache write | Cache read | Total |
 | --- | --- | --- | --- | --- | --- |
-| 🔵 sonnet | 1k | 608k | 2.36M | 21.64M | **24.61M** |
-| 🟢 haiku | 0k | 164k | 783k | 2.41M | **3.35M** |
-| 🟣 opus | 0k | 255k | 342k | 5.27M | **5.87M** |
-| **All models** | 1k | 1.03M | 3.49M | 29.32M | **33.83M** |
+| 🔵 sonnet | 1k | 630k | 2.63M | 22.22M | **25.48M** |
+| 🟢 haiku | 0k | 196k | 1.01M | 2.78M | **3.99M** |
+| 🟣 opus | 0k | 288k | 573k | 9.34M | **10.20M** |
+| **All models** | 1k | 1.12M | 4.22M | 34.35M | **39.68M** |
 
 ### 1. ticket-plan · 2026-11-19 10:32:05 to 10:51:07 · ⏱️ 19m02s
 
@@ -134,7 +150,7 @@ Tokens of this run: 0k · 594k · 2.00M · 18.45M · **21.04M** (input · output
 | ✅ integrator Waves | 🔵 sonnet | 11:23:33 | 11:23:44 | 0m11s | 0k | 1k | 38k | 202k | **242k** |
 | ✅ scribe T0.06 | 🟢 haiku | 11:23:46 | 11:23:56 | 0m10s | 0k | 4k | 89k | 208k | **302k** |
 
-### 3. ticket-run · 2026-11-19 11:25:07 to 11:30:17 · ⏱️ 5m09s
+### 3. ticket-run · 2026-11-19 11:25:07 to 11:30:19 · ⏱️ 5m11s
 
 | Phase | Start | End | Elapsed | Steps |
 | --- | --- | --- | --- | --- |
@@ -142,9 +158,9 @@ Tokens of this run: 0k · 594k · 2.00M · 18.45M · **21.04M** (input · output
 | Waves | 11:25:51 | 11:28:23 | 2m31s | 7 |
 | Verify | 11:28:23 | 11:30:09 | 1m46s | 7 |
 | Review | | | not run | 0 |
-| Finish | 11:30:09 | 11:30:17 | 0m07s | 1 |
+| Finish | 11:30:09 | 11:30:19 | 0m09s | 1 |
 
-Tokens of this run: 0k · 62k · 685k · 4.15M · **4.90M** (input · output · cache write · cache read · total)
+Tokens of this run: 0k · 63k · 686k · 4.18M · **4.93M** (input · output · cache write · cache read · total)
 
 | Step | Model | Start | End | Elapsed | Input | Output | Cache write | Cache read | Total |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -165,5 +181,28 @@ Tokens of this run: 0k · 62k · 685k · 4.15M · **4.90M** (input · output · 
 | ❌ K15 implementer (fix) | 🔵 sonnet | 11:29:27 | 11:29:39 | 0m11s | 0k | 1k | 34k | 212k | **248k** |
 | ❌ FIX-frontends implementer (fix) | 🔵 sonnet | 11:29:27 | 11:29:43 | 0m15s | 0k | 2k | 39k | 283k | **325k** |
 | ✅ verifier round 3 | 🟢 haiku | 11:29:43 | 11:30:09 | 0m25s | 0k | 1k | 31k | 99k | **133k** |
-| 🔄 scribe T0.06 | 🟢 haiku | 11:30:09 | 11:30:17 | 0m07s | 0k | 2k | 41k | 135k | **179k** |
+| ✅ scribe T0.06 | 🟢 haiku | 11:30:09 | 11:30:19 | 0m09s | 0k | 2k | 42k | 172k | **218k** |
+
+### 4. ticket-run · 2026-11-19 11:36:42 to 11:41:34 · ⏱️ 4m52s
+
+| Phase | Start | End | Elapsed | Steps |
+| --- | --- | --- | --- | --- |
+| Gate | 11:36:42 | 11:37:18 | 0m36s | 3 |
+| Waves | | | not run | 0 |
+| Verify | 11:37:19 | 11:37:41 | 0m22s | 1 |
+| Review | 11:37:41 | 11:40:27 | 2m45s | 1 |
+| Finish | 11:40:27 | 11:41:34 | 1m06s | 3 |
+
+Tokens of this run: 0k · 86k · 730k · 4.99M · **5.81M** (input · output · cache write · cache read · total)
+
+| Step | Model | Start | End | Elapsed | Input | Output | Cache write | Cache read | Total |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| ✅ gate T0.06 | 🟢 haiku | 11:36:42 | 11:37:10 | 0m28s | 0k | 18k | 56k | 63k | **139k** |
+| ✅ plan check T0.06 | 🟢 haiku | 11:37:10 | 11:37:14 | 0m03s | 0k | 0k | 37k | 61k | **99k** |
+| ✅ integrator prepare T0.06 | 🔵 sonnet | 11:37:14 | 11:37:18 | 0m03s | 0k | 0k | 34k | 31k | **66k** |
+| ✅ verifier round 1 | 🟢 haiku | 11:37:19 | 11:37:41 | 0m22s | 0k | 0k | 34k | 98k | **133k** |
+| ✅ reviewer round 1 | 🟣 opus | 11:37:41 | 11:40:27 | 2m45s | 0k | 32k | 230k | 4.07M | **4.34M** |
+| ✅ scribe T0.06 | 🟢 haiku | 11:40:27 | 11:40:52 | 0m25s | 0k | 12k | 100k | 117k | **230k** |
+| ✅ explainer T0.06 | 🔵 sonnet | 11:40:27 | 11:41:33 | 1m05s | 0k | 21k | 208k | 540k | **770k** |
+| 🔄 integrator finish T0.06 | 🔵 sonnet | 11:41:33 | 11:41:34 | 0m01s | 0k | 0k | 27k | 4k | **31k** |
 <!-- /timings -->
