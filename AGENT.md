@@ -27,9 +27,19 @@ pnpm -r --if-present typecheck
 TypeScript packages and front ends extend `@swarm/config` (`packages/ts/config`), which holds the strict
 `tsconfig.base.json` and the eslint configuration.
 
-- The per-language CI does not exist yet: it arrives in T0.04. When it does, it runs `ruff check`,
-  `ruff format --check`, `mypy services/<service>/src` and `pytest` for each service on every push and pull request.
-  All of them must pass. Until then, `.github/workflows/terraform.yml` is the only workflow.
+- `.github/workflows/ci.yml` runs on every push and pull request.
+- Its first job runs `.github/scripts/detect_changes.py`, which selects the services, front ends and packages that
+  changed.
+- Then the reusable workflows `python.yml`, `rust.yml`, `typescript.yml` and `specs.yml` run the checks of this section
+  for what was selected:
+  - for each selected service: `ruff check`, `ruff format --check`, `mypy services/<service>/src`,
+    `pytest services/<service>/tests` and that service's convention tests;
+  - the tests under `tests/`;
+  - for Rust: `cargo fmt`, `clippy` and `cargo test`;
+  - for each TypeScript project: its `lint`, `typecheck` and `test` scripts;
+  - `specs.py check`.
+- All of them must pass.
+- `.github/workflows/terraform.yml` still checks `deploy/terraform/` on its own.
 - Run tests one file or one folder at a time.
 - Format only the files you edited, never a whole folder.
 
@@ -58,7 +68,8 @@ in `service`.
 Swarm is meant to become a mono-repo of backend and front-end micro-services, each with its own Docker image. The root
 `src/` has moved to `services/gateway` (ticket T0.01), so the `services/<service>/src/<service>/` reading of `src/`
 applies everywhere. The tests in `tests/conventions/mono_repo/` enforce part of this section: the uv workspace, the
-Cargo and pnpm workspaces, and the Terraform layout. The Docker, front-end and CI/CD rules are not tested yet.
+Cargo and pnpm workspaces, and the Terraform layout. The CI/CD change detection and check workflows are tested by
+`tests/ci/`. The Docker and front-end rules are not tested yet.
 
 | Path | Holds |
 | --- | --- |
@@ -70,6 +81,7 @@ Cargo and pnpm workspaces, and the Terraform layout. The Docker, front-end and C
 | `tests/conventions/` | The [rules a test enforces](#rules-a-test-enforces), run against every service |
 | `compose.e2e.yaml` | Starts the real images for Playwright |
 | `.github/workflows/` | The CI/CD pipeline |
+| `.github/scripts/` | The scripts the pipeline runs, such as change detection |
 
 `packages/rust/` is a Cargo workspace and `packages/ts/` a pnpm workspace.
 
@@ -101,9 +113,11 @@ with a Tauri desktop shell, images go to GHCR, and Argo CD deploys them; see `do
 
 Each step must pass before the next one starts:
 
-1. Detect what changed, and run jobs only for those services and front ends. A change in `packages/` or `uv.lock` runs
-   all of them.
-2. Run `ruff check`, `ruff format --check`, `mypy` and `pytest` for each changed service.
+1. Detect what changed, and run jobs only for those services, front ends and packages. A change in `packages/`, in a
+   lock file (`uv.lock`, `Cargo.lock`, `pnpm-lock.yaml`), in a root workspace file or in the pipeline itself runs all of
+   them.
+2. Run `ruff check`, `ruff format --check`, `mypy` and `pytest` for each changed service; `cargo fmt`, `clippy` and
+   `cargo test` for Rust; eslint, `tsc` and Vitest for TypeScript; and `specs.py check`.
 3. Build each changed image.
 4. Run Playwright against those images, and upload the HTML report if a test fails.
 5. Publish the images tagged with the commit SHA, from `develop` or `master` only.
