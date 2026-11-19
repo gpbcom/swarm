@@ -61,13 +61,9 @@ class Actor(SwarmModel):
                 return ActorKind(value)
             except ValueError as error:
                 raise SEActorInvalidKind(
-                    f"Invalid kind: {value!r}. "
-                    f"Must be one of {[member.value for member in ActorKind]}."
+                    f"Invalid kind: {value!r}. Must be one of {[member.value for member in ActorKind]}."
                 ) from error
-        raise SEActorInvalidKind(
-            f"Invalid kind: {value!r}. "
-            f"Must be one of {[member.value for member in ActorKind]}."
-        )
+        raise SEActorInvalidKind(f"Invalid kind: {value!r}. Must be one of {[member.value for member in ActorKind]}.")
 
     @field_validator("person_id", mode="before")
     def validate_person_id(cls, value: JsonValue) -> JsonValue:

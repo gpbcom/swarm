@@ -31,8 +31,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         if arguments.check:
             if exporter.is_stale():
                 print(
-                    f"{exporter.path} is out of date. "
-                    "Run swarm-models-schemas to regenerate it.",
+                    f"{exporter.path} is out of date. Run swarm-models-schemas to regenerate it.",
                     file=sys.stderr,
                 )
                 return 1
