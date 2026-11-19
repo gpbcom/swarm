@@ -1,0 +1,29 @@
+name: specs
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          python-version: "3.12"
+      - run: uv sync --locked
+      - name: Check the specifications
+        shell: bash
+        run: |
+          output="$(uv run python .claude/skills/write-specs/scripts/specs.py check)"
+          status=$?
+          if [ -n "$output" ]; then
+            printf '%s\n' "$output"
+          fi
+          if [ "$status" -ne 0 ] || [ -n "$output" ]; then
+            exit 1
+          fi
