@@ -41,8 +41,8 @@ jobs:
           - deploy/terraform/cells/dev
           - deploy/terraform/cells/dev-branch
     steps:
-      - uses: actions/checkout@v4
-      - uses: hashicorp/setup-terraform@v3
+      - uses: actions/checkout@v7
+      - uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: ">= 1.10"
           terraform_wrapper: false
@@ -74,8 +74,8 @@ jobs:
       TF_VAR_k3s_version: ${{ vars.TF_VAR_K3S_VERSION }}
       TF_VAR_api_allowed_cidrs: ${{ vars.TF_VAR_API_ALLOWED_CIDRS || '[]' }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: hashicorp/setup-terraform@v3
+      - uses: actions/checkout@v7
+      - uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: ">= 1.10"
           terraform_wrapper: false

@@ -13,7 +13,7 @@ jobs:
       run:
         working-directory: packages/rust
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install the toolchain of rust-toolchain.toml
         run: |
           rustup toolchain install
@@ -39,7 +39,7 @@ jobs:
       BASE_SHA: ${{ github.event.pull_request.base.sha }}
       CARGO_TARGET_DIR: ${{ github.workspace }}/packages/rust/target
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Install the toolchain of rust-toolchain.toml
