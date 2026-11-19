@@ -1,0 +1,19 @@
+{
+    "formatters": [
+        {
+            "name": "ruff format",
+            "match": "^(?:services|packages|tests)/.+\\.py$",
+            "run": ["uv", "run", "ruff", "format", "{file}"]
+        },
+        {
+            "name": "rustfmt",
+            "match": "^packages/rust/.+\\.rs$",
+            "run": ["rustfmt", "--edition", "2021", "{file}"]
+        },
+        {
+            "name": "terraform fmt",
+            "match": "^deploy/terraform/.+\\.(?:tf|tftest\\.hcl)$",
+            "run": ["terraform", "fmt", "{file}"]
+        }
+    ]
+}
