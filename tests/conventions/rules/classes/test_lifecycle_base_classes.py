@@ -51,6 +51,28 @@ class TestLifecycleBaseClasses:
         }
         assert self.violations(tmp_path, files) == []
 
+    @pytest.mark.parametrize(
+        "source",
+        [
+            "class Runnable(ABC):\n    def run(self) -> None: ...\n",
+            "class AsyncRunnable(ABC):\n    async def run(self) -> None: ...\n",
+        ],
+    )
+    def test_the_definition_of_a_lifecycle_base_class_gives_no_violation(self, tmp_path: Path, source: str) -> None:
+        assert self.violations(tmp_path, {"src/sample/runnables/runnable.py": source}) == []
+
+    def test_start_is_still_refused_in_the_definition_of_a_lifecycle_base_class(self, tmp_path: Path) -> None:
+        source = "class Runnable:\n    def start(self) -> None: ...\n"
+        found = self.violations(tmp_path, {"src/sample/runnables/runnable.py": source})
+        assert len(found) == 1
+
+    def test_a_subclass_beside_the_definition_of_runnable_gives_no_violation(self, tmp_path: Path) -> None:
+        files = {
+            "src/sample/runnables/runnable.py": "class Runnable(ABC):\n    def run(self) -> None: ...\n",
+            "src/sample/service/job.py": "class Job(Runnable):\n    def run(self) -> None: ...\n",
+        }
+        assert self.violations(tmp_path, files) == []
+
     def test_the_models_layer_is_not_checked(self, tmp_path: Path) -> None:
         source = "class Job:\n    def run(self) -> None: ...\n    def start(self) -> None: ...\n"
         assert self.violations(tmp_path, {"src/sample/models/job.py": source}) == []
