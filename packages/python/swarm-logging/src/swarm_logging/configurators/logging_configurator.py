@@ -1,0 +1,131 @@
+from __future__ import annotations
+
+# Standard library imports
+import logging.config
+from logging import Logger, getLogger
+from pathlib import Path
+from typing import ClassVar, Dict, Optional
+
+# Third-party imports
+import yaml
+
+# First-party imports
+from swarm_logging.models.enums import LogFormat
+from swarm_logging.models.exceptions import (
+    SELoggingConfigurationRefusedError,
+    SELoggingConfigurationUnreadableError,
+)
+from swarm_logging.models.logging_config import LoggingConfig
+
+
+class LoggingConfigurator:
+    """Configure the standard logging of a process from a ``dictConfig`` file.
+
+    Attributes:
+        REFERENCE_PATH (Path): The reference configuration shipped with the package.
+        JSON_FORMATTER (str): The dotted path of the JSON formatter.
+        config (LoggingConfig): Where the configuration file is and how records are written.
+        logger (Logger): Logger instance.
+
+    Notes:
+        - In JSON mode every formatter becomes the JSON one, so that a copied file with its own formatters still
+          writes one JSON document per line in production.
+        - The folder of each file handler is created, because a rotating file handler fails when its folder is missing.
+    """
+
+    REFERENCE_PATH: ClassVar[Path] = Path(__file__).resolve().parents[1] / "conf" / "logger.yaml"
+    JSON_FORMATTER: ClassVar[str] = "swarm_logging.formatters.json_formatter.JsonFormatter"
+
+    def __init__(self, config: LoggingConfig, logger: Optional[Logger] = None) -> None:
+        """Initialise the configurator.
+
+        Args:
+            config (LoggingConfig): Where the configuration file is and how records are written.
+            logger (Optional[Logger]): Logger instance.
+        """
+        self.config = config
+        self.logger = logger if logger else getLogger(__name__)
+
+    ############################
+    # Internal Helpers Methods #
+    ############################
+
+    def _read(self, path: Path) -> Dict[str, object]:
+        """Read the configuration file.
+
+        Args:
+            path (Path): The YAML file.
+
+        Returns:
+            Dict[str, object]: The configuration.
+
+        Raises:
+            SELoggingConfigurationUnreadableError: If the file cannot be read or is not a mapping.
+        """
+        try:
+            with path.open(encoding="utf-8") as stream:
+                content = yaml.safe_load(stream)
+        except (OSError, yaml.YAMLError) as error:
+            self.logger.error("Cannot read the logging configuration: %s.", type(error).__name__)
+            raise SELoggingConfigurationUnreadableError(
+                f"Cannot read the logging configuration {str(path)!r}."
+            ) from error
+        if not isinstance(content, dict):
+            self.logger.error("The logging configuration is not a mapping.")
+            raise SELoggingConfigurationUnreadableError(
+                f"Invalid logging configuration {str(path)!r}. Must be a mapping."
+            )
+        return content
+
+    def _apply_format(self, content: Dict[str, object]) -> None:
+        """Replace the formatters with the JSON one when the format is JSON.
+
+        Args:
+            content (Dict[str, object]): The configuration, changed in place.
+        """
+        match self.config.format:
+            case LogFormat.JSON:
+                formatters = content.get("formatters")
+                if isinstance(formatters, dict):
+                    for name in list(formatters):
+                        formatters[name] = {"()": self.JSON_FORMATTER}
+                    self.logger.debug("Replaced %d formatters with the JSON one.", len(formatters))
+            case LogFormat.COLOURED:
+                self.logger.debug("Kept the formatters of the file.")
+
+    def _create_folders(self, content: Dict[str, object]) -> None:
+        """Create the parent folder of each handler file.
+
+        Args:
+            content (Dict[str, object]): The configuration.
+        """
+        handlers = content.get("handlers")
+        if not isinstance(handlers, dict):
+            return
+        for handler in handlers.values():
+            if isinstance(handler, dict) and isinstance(handler.get("filename"), str):
+                Path(handler["filename"]).parent.mkdir(parents=True, exist_ok=True)
+                self.logger.debug("Ensured the folder of %s exists.", handler["filename"])
+
+    ############################
+    # Publicly Exposed Methods #
+    ############################
+
+    def configure(self) -> None:
+        """Configure logging.
+
+        Raises:
+            SELoggingConfigurationUnreadableError: If the file cannot be read.
+            SELoggingConfigurationRefusedError: If ``dictConfig`` refuses the configuration.
+        """
+        path = Path(self.config.path) if self.config.path else self.REFERENCE_PATH
+        self.logger.debug("Reading the logging configuration from %s.", path)
+        content = self._read(path)
+        self._apply_format(content)
+        self._create_folders(content)
+        try:
+            logging.config.dictConfig(content)
+        except (ValueError, TypeError, AttributeError, ImportError) as error:
+            self.logger.error("The logging configuration was refused: %s.", type(error).__name__)
+            raise SELoggingConfigurationRefusedError(f"The logging configuration {str(path)!r} was refused.") from error
+        self.logger.info("Configured logging from %s in %s format.", path, self.config.format.value)
