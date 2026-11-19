@@ -1,0 +1,48 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "vault-config.name" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "vault-config.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  backoffLimit: 2
+  template:
+    metadata:
+      labels:
+        {{- include "vault-config.labels" . | nindent 8 }}
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: configure
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["sh", "/scripts/configure.sh"]
+          env:
+            - name: BAO_ADDR
+              value: {{ .Values.address | quote }}
+            - name: BAO_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.rootTokenSecret }}
+                  key: token
+            - name: DATABASE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.database.superuserSecret }}
+                  key: username
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.database.superuserSecret }}
+                  key: password
+          volumeMounts:
+            - name: script
+              mountPath: /scripts
+      volumes:
+        - name: script
+          configMap:
+            name: {{ include "vault-config.name" . }}

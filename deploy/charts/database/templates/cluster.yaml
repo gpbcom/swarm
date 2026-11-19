@@ -1,0 +1,29 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: database
+  labels:
+    {{- include "database.labels" . | nindent 4 }}
+spec:
+  imageName: {{ required "imageName is required: the PostgreSQL image with PostGIS and TimescaleDB." .Values.imageName | quote }}
+  instances: {{ .Values.instances }}
+  enableSuperuserAccess: true
+  storage:
+    size: {{ .Values.storage.size | quote }}
+    {{- if .Values.storage.storageClass }}
+    storageClass: {{ .Values.storage.storageClass | quote }}
+    {{- end }}
+  postgresql:
+    shared_preload_libraries:
+      - timescaledb
+  bootstrap:
+    initdb:
+      database: swarm
+      owner: swarm
+      postInitApplicationSQL:
+        - "CREATE EXTENSION IF NOT EXISTS postgis"
+        - "CREATE EXTENSION IF NOT EXISTS timescaledb"
+        {{- range .Values.global.services }}
+        - "DO $$ BEGIN IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '{{ . }}') THEN CREATE ROLE {{ . }} NOLOGIN; END IF; END $$"
+        - "CREATE SCHEMA IF NOT EXISTS {{ . }} AUTHORIZATION {{ . }}"
+        {{- end }}

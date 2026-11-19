@@ -1,0 +1,11 @@
+# The defaults stay in the sub-charts, and the dev values in deploy/environments/dev/values.yaml.
+global:
+  services: []
+database:
+  enabled: true
+valkey:
+  enabled: true
+objectStorage:
+  enabled: true
+vaultConfig:
+  enabled: true

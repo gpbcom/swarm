@@ -1,0 +1,11 @@
+$ terraform test
+(cwd deploy/terraform/modules/self-hosted/cell-application)
+
+tests/cell_application.tftest.hcl... [37min progress[0m
+[0m  run "creates_the_argo_cd_application"... [32mpass[0m[0m
+  run "refuses_an_empty_target_revision"... [32mpass[0m[0m
+  run "refuses_the_latest_apps_chart_version"... [32mpass[0m[0m
+tests/cell_application.tftest.hcl... [37mtearing down[0m
+[0mtests/cell_application.tftest.hcl... [32mpass[0m[0m
+
+[32mSuccess![0m[0m 3 passed, 0 failed.

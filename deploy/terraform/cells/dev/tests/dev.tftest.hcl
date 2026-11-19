@@ -1,6 +1,8 @@
 mock_provider "random" {}
 mock_provider "minio" {}
 mock_provider "dns" {}
+mock_provider "helm" {}
+mock_provider "kubernetes" {}
 
 variables {
   ssh_user             = "swarm"
@@ -28,6 +30,11 @@ run "plans_an_empty_k3s_cluster_from_nothing" {
   assert {
     condition     = length(module.dns) == 0
     error_message = "DNS must not be planned by default."
+  }
+
+  assert {
+    condition     = length(module.argocd) == 0
+    error_message = "Argo CD must not be planned by default."
   }
 
   assert {
@@ -78,4 +85,63 @@ run "refuses_a_cell_without_a_server" {
   }
 
   expect_failures = [var.machines]
+}
+
+run "installs_argo_cd_when_the_platform_is_enabled" {
+  command = plan
+
+  variables {
+    machines = [
+      { name = "dev-server-1", address = "192.0.2.10", role = "server" },
+      { name = "dev-agent-1", address = "192.0.2.11", role = "agent" },
+    ]
+    platform_enabled          = true
+    repository_url            = "https://git.example.org/swarm.git"
+    argocd_chart_version      = "0.0.1"
+    argocd_apps_chart_version = "0.0.1"
+  }
+
+  assert {
+    condition     = length(module.argocd) == 1
+    error_message = "Argo CD must be planned when the platform is enabled."
+  }
+
+  assert {
+    condition     = output.argocd_namespace == "argocd"
+    error_message = "The Argo CD namespace must be argocd."
+  }
+}
+
+run "refuses_the_platform_without_a_repository" {
+  command = plan
+
+  variables {
+    machines = [
+      { name = "dev-server-1", address = "192.0.2.10", role = "server" },
+      { name = "dev-agent-1", address = "192.0.2.11", role = "agent" },
+    ]
+    platform_enabled          = true
+    repository_url            = ""
+    argocd_chart_version      = "0.0.1"
+    argocd_apps_chart_version = "0.0.1"
+  }
+
+  expect_failures = [var.repository_url]
+}
+
+run "refuses_the_platform_with_a_floating_chart_version" {
+  command = plan
+
+  variables {
+    machines = [
+      { name = "dev-server-1", address = "192.0.2.10", role = "server" },
+      { name = "dev-agent-1", address = "192.0.2.11", role = "agent" },
+    ]
+    platform_enabled          = true
+    repository_url            = "https://git.example.org/swarm.git"
+    argocd_chart_version      = "latest"
+    argocd_apps_chart_version = "0.0.1"
+  }
+
+  expect_failures = [var.argocd_chart_version]
 }

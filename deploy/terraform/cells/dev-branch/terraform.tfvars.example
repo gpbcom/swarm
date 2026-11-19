@@ -1,0 +1,8 @@
+# Copy to a file outside the repository, such as ~/.config/swarm/dev-branch.tfvars, and edit it.
+# deploy/scripts/dev-cell.sh passes branch and cell_name itself.
+kubeconfig_path           = "/path/outside/repo/dev.kubeconfig"
+repository_url            = "https://git.example.org/swarm.git"
+database_image            = "registry.example.org/swarm/database:1"
+openbao_chart_version     = "0.16.2"
+argocd_apps_chart_version = "2.0.2"
+argocd_namespace          = "argocd"

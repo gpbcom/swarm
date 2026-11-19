@@ -65,7 +65,8 @@ pnpm --filter ./packages/ts/live run generate
   - for each TypeScript project: its `lint`, `typecheck` and `test` scripts;
   - `specs.py check`.
 - All of them must pass.
-- `.github/workflows/terraform.yml` still checks `deploy/terraform/` on its own.
+- `.github/workflows/terraform.yml` still checks `deploy/terraform/` on its own. `.github/workflows/dev-cell.yml` creates
+  a branch's dev cell on demand and destroys it when the branch is deleted.
 - Run tests one file or one folder at a time.
 - Format only the files you edited, never a whole folder.
 
@@ -95,7 +96,8 @@ Swarm is meant to become a mono-repo of backend and front-end micro-services, ea
 `src/` has moved to `services/gateway` (ticket T0.01), so the `services/<service>/src/<service>/` reading of `src/`
 applies everywhere. The tests in `tests/conventions/mono_repo/` enforce part of this section: the uv workspace, the
 Cargo and pnpm workspaces, and the Terraform layout. The CI/CD change detection and check workflows are tested by
-`tests/ci/`. The Docker and front-end rules are not tested yet.
+`tests/ci/`. The Docker and front-end rules are not tested yet. `tests/deploy/` checks the charts, the dev environment, the
+PostgreSQL image and the dev-cell script, and `tests/ci/dev_cell/` checks the dev-cell workflow.
 
 | Path | Holds |
 | --- | --- |
@@ -104,6 +106,10 @@ Cargo and pnpm workspaces, and the Terraform layout. The CI/CD change detection 
 | `frontends/<frontend>/` | One front end: its `Dockerfile`, `src/`, and its Playwright tests in `e2e/` |
 | `packages/` | Shared code: `python/` (lifecycle base classes, logging, models), `rust/` (PyO3 crates of the hot path), `ts/` (front-end packages) |
 | `deploy/terraform/` | The Terraform modules per provider and building block, and one root per cell |
+| `deploy/charts/` | The Helm charts, one per building block of a cell, and the `cell` umbrella chart |
+| `deploy/environments/` | The desired state of each environment that Argo CD applies |
+| `deploy/images/` | The images that are not a service or a front end, such as the PostgreSQL image |
+| `deploy/scripts/` | The scripts that request and close a branch's dev cell |
 | `tests/conventions/` | The [rules a test enforces](#rules-a-test-enforces), run against every service |
 | `compose.e2e.yaml` | Starts the real images for Playwright |
 | `.github/workflows/` | The CI/CD pipeline |

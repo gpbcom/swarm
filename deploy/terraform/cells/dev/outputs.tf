@@ -17,3 +17,8 @@ output "agent_names" {
   description = "The names of the worker machines."
   value       = [for a in module.machines.agents : a.name]
 }
+
+output "argocd_namespace" {
+  description = "The namespace Argo CD is installed in, or null when the platform is not enabled."
+  value       = var.platform_enabled ? module.argocd[0].namespace : null
+}
