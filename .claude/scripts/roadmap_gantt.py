@@ -32,7 +32,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple, Union
 
 ROOT = Path(__file__).resolve().parents[2]
 ROADMAP = ROOT / "docs" / "specs" / "roadmap"
@@ -165,13 +165,23 @@ def git(*args: str) -> str:
     return subprocess.run(["git", *args], cwd=ROOT, check=True, capture_output=True, text=True).stdout
 
 
+def develop_ref(root: Union[str, Path] = ROOT) -> str:
+    """Return ``develop``, else ``origin/develop``, else ``HEAD`` (a CI checkout of a pull request has neither)."""
+    for ref in ("develop", "origin/develop"):
+        found = subprocess.run(
+            ["git", "-C", str(root), "rev-parse", "--verify", "--quiet", ref], capture_output=True, check=False
+        )
+        if found.returncode == 0:
+            return ref
+    return "HEAD"
+
+
 def merged() -> Tuple[Set[str], dt.date]:
     """Return the tickets merged on develop and the day of the last one."""
-    files = git("ls-tree", "-r", "--name-only", "develop", "docs/tickets").split()
+    ref = develop_ref()
+    files = git("ls-tree", "-r", "--name-only", ref, "docs/tickets").split()
     done = {path.split("/")[2] for path in files if path.endswith("/EXPLAIN.md")}
-    last = git(
-        "log", "-1", "--format=%ad", "--date=short", "develop", "--", *[f"docs/tickets/{t}/EXPLAIN.md" for t in done]
-    )
+    last = git("log", "-1", "--format=%ad", "--date=short", ref, "--", *[f"docs/tickets/{t}/EXPLAIN.md" for t in done])
     return done, dt.date.fromisoformat(last.strip())
 
 

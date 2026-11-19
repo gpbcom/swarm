@@ -58,7 +58,10 @@ BRANCH = "develop"
 BLOB = f"https://github.com/{REPO}/blob/{BRANCH}/docs/specs/roadmap/"
 PROJECT_TITLE = "Swarm roadmap"
 PAUSE_S = 1.0
-ALREADY_LINKED = re.compile(r"already been taken|already exists|already a sub-issue|duplicate sub-issue", re.IGNORECASE)
+ALREADY_LINKED = re.compile(
+    r"already been taken|already exists|already a sub-issue|duplicate sub-issue|closed by another request",
+    re.IGNORECASE,
+)
 STATUSES = [
     ("backlog", "📥 Backlog", "GRAY", "Waits for a prerequisite ticket"),
     ("ready", "✅ Ready", "BLUE", "Every prerequisite merged: can start"),
@@ -140,10 +143,9 @@ def gql(query: str, *, tolerate_existing: bool = False, **variables: Json) -> Di
     return data["data"]  # type: ignore[return-value]
 
 
-def rest(method: str, path: str, payload: Optional[Json] = None) -> Json:
-    return gh(
-        ["api", "-X", method, path, "--input", "-"] if payload is not None else ["api", "-X", method, path], payload
-    )
+def rest(method: str, path: str, payload: Optional[Json] = None, tolerate_existing: bool = False) -> Json:
+    args = ["api", "-X", method, path, "--input", "-"] if payload is not None else ["api", "-X", method, path]
+    return gh(args, payload, tolerate_existing)
 
 
 #########
@@ -605,6 +607,7 @@ class Board:
                 "PATCH",
                 f"repos/{REPO}/issues/{self.state['issues'][ident]['number']}",
                 {"state": "closed", "state_reason": "completed"},
+                tolerate_existing=True,
             )
             self.state["closed"].append(ident)
             self.step(f"🏁 closed {ident}")
