@@ -59,8 +59,9 @@ class TestBoard:
             cwd=ROOT,
             capture_output=True,
             text=True,
-            check=True,
+            check=False,
         )
+        assert result.returncode == 0, result.stderr
         assert result.stdout.splitlines()[-1] == "8 phases, 68 epics, 262 tickets, 595 blocked-by"
 
 

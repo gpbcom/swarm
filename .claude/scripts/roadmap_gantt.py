@@ -177,11 +177,16 @@ def develop_ref(root: Union[str, Path] = ROOT) -> str:
 
 
 def merged() -> Tuple[Set[str], dt.date]:
-    """Return the tickets merged on develop and the day of the last one."""
+    """Return the tickets merged on develop and the day of the last one.
+
+    A shallow checkout (CI) may not hold the commit that added the last ``EXPLAIN.md``: the day of ``ref`` is used.
+    """
     ref = develop_ref()
     files = git("ls-tree", "-r", "--name-only", ref, "docs/tickets").split()
     done = {path.split("/")[2] for path in files if path.endswith("/EXPLAIN.md")}
     last = git("log", "-1", "--format=%ad", "--date=short", ref, "--", *[f"docs/tickets/{t}/EXPLAIN.md" for t in done])
+    if not last.strip():
+        last = git("log", "-1", "--format=%ad", "--date=short", ref)
     return done, dt.date.fromisoformat(last.strip())
 
 
