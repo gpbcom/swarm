@@ -1,0 +1,478 @@
+{
+  "$defs": {
+    "Actor": {
+      "additionalProperties": false,
+      "description": "The author of an event.\n\nAttributes:\n    model_config (ConfigDict): Forbids unknown keys and freezes the actor.\n    kind (ActorKind): Whether the author is a person, a Swarm agent or an outside agent.\n    person_id (Optional[UUID]): The person, who is the author or the person the agent acts for.\n    agent_name (Optional[str]): The name of the agent, for an agent.\n\nNotes:\n    - A person has a ``person_id`` and no ``agent_name``.\n    - A Swarm agent has an ``agent_name`` and may act for a person.\n    - **An outside agent always has both**, because it never acts without the person it acts for.",
+      "properties": {
+        "agent_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The name of the agent, for an agent.",
+          "title": "Agent Name"
+        },
+        "kind": {
+          "$ref": "#/$defs/ActorKind",
+          "description": "Whether the author is a person, a Swarm agent or an outside agent."
+        },
+        "person_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The person who is the author, or the person the agent acts for.",
+          "title": "Person Id"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "title": "Actor",
+      "type": "object"
+    },
+    "ActorKind": {
+      "description": "The kind of the author of an event.\n\nAttributes:\n    PERSON (str): A person acting directly.\n    SWARM_AGENT (str): A Swarm agent, which may act for a person.\n    OUTSIDE_AGENT (str): An outside agent, which always acts for a person.",
+      "enum": [
+        "person",
+        "swarm_agent",
+        "outside_agent"
+      ],
+      "title": "ActorKind",
+      "type": "string"
+    },
+    "CellAssignment": {
+      "additionalProperties": false,
+      "description": "The cell an operator belongs to, and since when.\n\nAttributes:\n    model_config (ConfigDict): Forbids unknown keys.\n    operator_id (UUID): The version 7 identifier of the operator.\n    cell (str): The name of the cell.\n    assigned_at (datetime): The moment of the assignment, in UTC.\n\nNotes:\n    - An operator lives in exactly one cell.\n    - No field has a default, so ``None`` is refused.",
+      "properties": {
+        "assigned_at": {
+          "description": "The moment of the assignment, in UTC.",
+          "format": "date-time",
+          "title": "Assigned At",
+          "type": "string"
+        },
+        "cell": {
+          "description": "The name of the cell.",
+          "title": "Cell",
+          "type": "string"
+        },
+        "operator_id": {
+          "description": "The version 7 identifier of the operator.",
+          "format": "uuid",
+          "title": "Operator Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "operator_id",
+        "cell",
+        "assigned_at"
+      ],
+      "title": "CellAssignment",
+      "type": "object"
+    },
+    "Command": {
+      "additionalProperties": false,
+      "description": "An order given to one Drone or to the whole Squad, in a Mission.\n\nAttributes:\n    model_config (ConfigDict): Forbids unknown keys and freezes the command.\n    SAFETY_KINDS (ClassVar[FrozenSet[CommandKind]]): The kinds that travel in the safety lane.\n    id (UUID): The version 7 identifier of the command.\n    mission_id (UUID): The Mission the command belongs to.\n    drone_id (Optional[UUID]): The Drone targeted, or ``None`` for the whole Squad.\n    kind (CommandKind): What the command asks.\n    issued_by (UUID): Who issued the command.\n    lane (CommandLane): The lane the command travels in.\n\nNotes:\n    - The safety lane always jumps the queue, and the normal lane is for the rest.\n    - **A safety kind on the normal lane is refused**, so that a safety order never waits.",
+      "properties": {
+        "drone_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The Drone targeted, or none for the whole Squad.",
+          "title": "Drone Id"
+        },
+        "id": {
+          "description": "The version 7 identifier of the command.",
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "issued_by": {
+          "description": "Who issued the command.",
+          "format": "uuid",
+          "title": "Issued By",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/CommandKind",
+          "description": "What the command asks."
+        },
+        "lane": {
+          "$ref": "#/$defs/CommandLane",
+          "description": "The lane the command travels in."
+        },
+        "mission_id": {
+          "description": "The Mission the command belongs to.",
+          "format": "uuid",
+          "title": "Mission Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "mission_id",
+        "kind",
+        "issued_by",
+        "lane"
+      ],
+      "title": "Command",
+      "type": "object"
+    },
+    "CommandKind": {
+      "description": "What a command asks a Drone or a Squad to do.\n\nAttributes:\n    HOLD (str): Hold the position.\n    ABORT (str): Abort the Mission.\n    RETURN_HOME (str): Return home.\n    MANUAL_CONTROL (str): Hand the control to the Operator.",
+      "enum": [
+        "hold",
+        "abort",
+        "return_home",
+        "manual_control"
+      ],
+      "title": "CommandKind",
+      "type": "string"
+    },
+    "CommandLane": {
+      "description": "The lane a command travels in.\n\nAttributes:\n    SAFETY (str): The lane that always jumps the queue.\n    NORMAL (str): The lane of every other command.",
+      "enum": [
+        "safety",
+        "normal"
+      ],
+      "title": "CommandLane",
+      "type": "string"
+    },
+    "DroneState": {
+      "description": "The state of a Drone, with the names of the glossary.\n\nAttributes:\n    READY (str): The Drone is airworthy, charged and available for a Squad.\n    GROUNDED (str): The Drone may not fly.\n    AIRBORNE (str): The Drone is flying its part of a Mission.\n    RETURNING (str): The Drone is flying back to its take-off point or its Dock.\n    LANDED (str): The Drone is on the ground after a flight.\n    LOST (str): Ground control has no Link to the Drone, through any path.",
+      "enum": [
+        "ready",
+        "grounded",
+        "airborne",
+        "returning",
+        "landed",
+        "lost"
+      ],
+      "title": "DroneState",
+      "type": "string"
+    },
+    "Event": {
+      "additionalProperties": false,
+      "description": "The envelope of every change published by Swarm.\n\nAttributes:\n    model_config (ConfigDict): Forbids unknown keys and freezes the event.\n    TYPE_PATTERN (ClassVar[str]): The shape of a type, such as ``mission.planned``.\n    VERSION_MIN (ClassVar[int]): The smallest version of an event.\n    id (UUID): The identifier, a version 7 UUID.\n    type (str): The type, lower case words separated by dots.\n    version (int): The version of the type.\n    operator_id (UUID): The Operator the event belongs to.\n    mission_id (Optional[UUID]): The Mission the event is about, none for a fleet event.\n    occurred_at (datetime): When it happened, in UTC with microseconds.\n    actor (Actor): Who did it.\n    payload (Dict[str, JsonValue]): The model that changed.\n\nNotes:\n    - **The event is frozen**, because a published event is never edited.\n    - An ``actor`` given as a mapping becomes an ``Actor``, and the errors of the actor are raised unchanged.",
+      "properties": {
+        "actor": {
+          "$ref": "#/$defs/Actor",
+          "description": "Who did it."
+        },
+        "id": {
+          "description": "The identifier, a version 7 UUID.",
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "mission_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The Mission the event is about, none for a fleet event.",
+          "title": "Mission Id"
+        },
+        "occurred_at": {
+          "description": "When it happened, in UTC with microseconds.",
+          "format": "date-time",
+          "title": "Occurred At",
+          "type": "string"
+        },
+        "operator_id": {
+          "description": "The Operator the event belongs to.",
+          "format": "uuid",
+          "title": "Operator Id",
+          "type": "string"
+        },
+        "payload": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "description": "The model that changed.",
+          "title": "Payload",
+          "type": "object"
+        },
+        "type": {
+          "description": "The type, lower case words separated by dots.",
+          "title": "Type",
+          "type": "string"
+        },
+        "version": {
+          "default": 1,
+          "description": "The version of the type.",
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "operator_id",
+        "occurred_at",
+        "actor",
+        "payload"
+      ],
+      "title": "Event",
+      "type": "object"
+    },
+    "JsonValue": {},
+    "Operator": {
+      "additionalProperties": false,
+      "description": "A person who pilots drones, global to every cell.\n\nAttributes:\n    model_config (ConfigDict): Forbids unknown keys.\n    id (UUID): The version 7 identifier of the operator.\n    name (str): The name of the operator.\n\nNotes:\n    - An operator lives in exactly one cell, given by its ``CellAssignment``.\n    - No field has a default, so ``None`` is refused.",
+      "properties": {
+        "id": {
+          "description": "The version 7 identifier of the operator.",
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "description": "The name of the operator.",
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "title": "Operator",
+      "type": "object"
+    },
+    "Person": {
+      "additionalProperties": false,
+      "description": "A person known to Swarm.\n\nAttributes:\n    model_config (ConfigDict): Forbids unknown keys.\n    id (UUID): The version 7 identifier of the person.\n    operator_id (Optional[UUID]): The Operator the person belongs to, ``None`` for a Swarm administrator.\n    name (str): The full name of the person.\n    email (str): The email address of the person.\n    EMAIL_SEPARATOR (ClassVar[str]): The character that splits an email address into its local part and domain.\n\nNotes:\n    The email check is structural only: one separator, a local part and a domain, and no whitespace.",
+      "properties": {
+        "email": {
+          "description": "The email address of the person.",
+          "title": "Email",
+          "type": "string"
+        },
+        "id": {
+          "description": "The version 7 identifier of the person.",
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "description": "The full name of the person.",
+          "title": "Name",
+          "type": "string"
+        },
+        "operator_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The Operator the person belongs to, if any.",
+          "title": "Operator Id"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "email"
+      ],
+      "title": "Person",
+      "type": "object"
+    },
+    "Role": {
+      "additionalProperties": false,
+      "description": "A role held by a person.\n\nAttributes:\n    model_config (ConfigDict): Forbids unknown keys.\n    person_id (UUID): The version 7 identifier of the person.\n    operator_id (Optional[UUID]): The Operator the role applies to, ``None`` for a Swarm administrator.\n    name (RoleName): The role.\n\nNotes:\n    **``operator_id`` is ``None`` exactly for ``RoleName.SWARM_ADMINISTRATOR``**, because a Swarm administrator\n    has no access to the data of Operators.",
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/RoleName",
+          "description": "The role."
+        },
+        "operator_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The Operator the role applies to, if any.",
+          "title": "Operator Id"
+        },
+        "person_id": {
+          "description": "The version 7 identifier of the person.",
+          "format": "uuid",
+          "title": "Person Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "person_id",
+        "name"
+      ],
+      "title": "Role",
+      "type": "object"
+    },
+    "RoleName": {
+      "description": "The seven roles a person can hold.\n\nAttributes:\n    PILOT (str): Flies Missions.\n    MISSION_PLANNER (str): Designs Missions.\n    FLEET_MAINTAINER (str): Maintains the Drones of an Operator.\n    INSTRUCTOR (str): Instructs the people of an Operator.\n    CLIENT (str): Orders and receives Deliverables.\n    SITE_AGENT (str): Acts on a site for an Operator.\n    SWARM_ADMINISTRATOR (str): Administers Swarm, with no access to the data of Operators.\n\nNotes:\n    **Every role except ``SWARM_ADMINISTRATOR`` belongs to one Operator**, and a Swarm administrator belongs to\n    none.",
+      "enum": [
+        "pilot",
+        "mission_planner",
+        "fleet_maintainer",
+        "instructor",
+        "client",
+        "site_agent",
+        "swarm_administrator"
+      ],
+      "title": "RoleName",
+      "type": "string"
+    },
+    "SquadFrame": {
+      "additionalProperties": false,
+      "description": "The frames of every Drone of one Mission at one tick.\n\nAttributes:\n    model_config (ConfigDict): Forbids unknown keys and freezes the squad frame.\n    mission_id (UUID): The Mission of the frames.\n    t_us (int): The moment of the tick, in microseconds since the epoch.\n    frames (List[TelemetryFrame]): One frame per Drone.\n    T_US_MIN (ClassVar[int]): The smallest accepted ``t_us``.\n\nNotes:\n    - **Every frame must belong to the Mission, and each Drone appears once.**\n    - The list may be empty.",
+      "properties": {
+        "frames": {
+          "description": "One frame per Drone.",
+          "items": {
+            "$ref": "#/$defs/TelemetryFrame"
+          },
+          "title": "Frames",
+          "type": "array"
+        },
+        "mission_id": {
+          "description": "The Mission of the frames.",
+          "format": "uuid",
+          "title": "Mission Id",
+          "type": "string"
+        },
+        "t_us": {
+          "description": "The moment of the tick, in microseconds since the epoch.",
+          "title": "T Us",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "mission_id",
+        "t_us",
+        "frames"
+      ],
+      "title": "SquadFrame",
+      "type": "object"
+    },
+    "TelemetryFrame": {
+      "additionalProperties": false,
+      "description": "What one Drone reports at one tick.\n\nAttributes:\n    model_config (ConfigDict): Forbids unknown keys and freezes the frame.\n    mission_id (UUID): The Mission the frame belongs to.\n    drone_id (UUID): The Drone that sent the frame.\n    seq (int): The sequence number per Drone, which detects gaps.\n    t_us (int): The moment of the frame, in microseconds since the epoch.\n    lat_e7 (int): The latitude in degrees multiplied by 1e7.\n    lon_e7 (int): The longitude in degrees multiplied by 1e7.\n    altitude_m (float): The altitude, in metres.\n    speed_m_s (float): The speed, in metres per second.\n    heading_deg (float): The heading, in degrees from north.\n    battery_pct (float): The battery charge, in percent.\n    link_quality_pct (float): The quality of the Link, in percent.\n    state (DroneState): The state of the Drone.\n    LAT_E7_MIN (ClassVar[int]): The smallest accepted value.\n    LAT_E7_MAX (ClassVar[int]): The largest accepted value.\n    LON_E7_MIN (ClassVar[int]): The smallest accepted value.\n    LON_E7_MAX (ClassVar[int]): The largest accepted value.\n    SEQ_MIN (ClassVar[int]): The smallest accepted value.\n    T_US_MIN (ClassVar[int]): The smallest accepted value.\n    SPEED_M_S_MIN (ClassVar[int]): The smallest accepted value.\n    HEADING_DEG_MIN (ClassVar[int]): The smallest accepted value.\n    HEADING_DEG_MAX (ClassVar[int]): The largest accepted value, which is excluded.\n    BATTERY_PCT_MIN (ClassVar[int]): The smallest accepted value.\n    BATTERY_PCT_MAX (ClassVar[int]): The largest accepted value.\n    LINK_QUALITY_PCT_MIN (ClassVar[int]): The smallest accepted value.\n    LINK_QUALITY_PCT_MAX (ClassVar[int]): The largest accepted value.\n\nNotes:\n    - Latitude and longitude are integers, so that frames stay small.\n    - **Booleans are refused wherever a number is expected.**\n    - ``payload_state`` is not part of this version of the frame.",
+      "properties": {
+        "altitude_m": {
+          "description": "The altitude, in metres.",
+          "title": "Altitude M",
+          "type": "number"
+        },
+        "battery_pct": {
+          "description": "The battery charge, in percent.",
+          "title": "Battery Pct",
+          "type": "number"
+        },
+        "drone_id": {
+          "description": "The Drone that sent the frame.",
+          "format": "uuid",
+          "title": "Drone Id",
+          "type": "string"
+        },
+        "heading_deg": {
+          "description": "The heading, in degrees from north.",
+          "title": "Heading Deg",
+          "type": "number"
+        },
+        "lat_e7": {
+          "description": "The latitude in degrees multiplied by 1e7.",
+          "title": "Lat E7",
+          "type": "integer"
+        },
+        "link_quality_pct": {
+          "description": "The quality of the Link, in percent.",
+          "title": "Link Quality Pct",
+          "type": "number"
+        },
+        "lon_e7": {
+          "description": "The longitude in degrees multiplied by 1e7.",
+          "title": "Lon E7",
+          "type": "integer"
+        },
+        "mission_id": {
+          "description": "The Mission the frame belongs to.",
+          "format": "uuid",
+          "title": "Mission Id",
+          "type": "string"
+        },
+        "seq": {
+          "description": "The sequence number per Drone, which detects gaps.",
+          "title": "Seq",
+          "type": "integer"
+        },
+        "speed_m_s": {
+          "description": "The speed, in metres per second.",
+          "title": "Speed M S",
+          "type": "number"
+        },
+        "state": {
+          "$ref": "#/$defs/DroneState",
+          "description": "The state of the Drone."
+        },
+        "t_us": {
+          "description": "The moment of the frame, in microseconds since the epoch.",
+          "title": "T Us",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "mission_id",
+        "drone_id",
+        "seq",
+        "t_us",
+        "lat_e7",
+        "lon_e7",
+        "altitude_m",
+        "speed_m_s",
+        "heading_deg",
+        "battery_pct",
+        "link_quality_pct",
+        "state"
+      ],
+      "title": "TelemetryFrame",
+      "type": "object"
+    }
+  },
+  "title": "Swarm models"
+}
