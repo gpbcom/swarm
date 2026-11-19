@@ -2,10 +2,19 @@ name: terraform
 
 on:
   pull_request:
+    branches:
+      - develop
+      - master
+      - "release/**"
     paths:
       - "deploy/terraform/**"
       - ".github/workflows/terraform.yml"
   push:
+    branches:
+      - master
+      - develop
+      - "release/**"
+      - "hotfix/**"
     paths:
       - "deploy/terraform/**"
       - ".github/workflows/terraform.yml"
@@ -51,6 +60,7 @@ jobs:
 
   plan:
     needs: check
+    if: vars.DEV_CELL_MACHINES != ''
     runs-on: ubuntu-latest
     defaults:
       run:

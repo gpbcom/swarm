@@ -2,10 +2,23 @@ name: ci
 
 on:
   push:
+    branches:
+      - master
+      - develop
+      - "release/**"
+      - "hotfix/**"
   pull_request:
+    branches:
+      - develop
+      - master
+      - "release/**"
 
 permissions:
   contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   changes:
@@ -70,3 +83,18 @@ jobs:
     needs: changes
     if: needs.changes.outputs.specs == 'true'
     uses: ./.github/workflows/specs.yml
+
+  result:
+    needs: [changes, python, rust, typescript, specs]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail when a check failed or was cancelled
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: |
+          echo "$NEEDS"
+          if echo "$NEEDS" | grep -qE '"result": "(failure|cancelled)"'; then
+            echo "::error::A check failed or was cancelled."
+            exit 1
+          fi

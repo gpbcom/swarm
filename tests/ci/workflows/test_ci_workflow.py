@@ -14,7 +14,10 @@ class TestCiWorkflow:
     READ_ONLY_PERMISSIONS: ClassVar[Dict[str, str]] = {"contents": "read"}
     ROOT: ClassVar[Path] = Path(__file__).resolve().parents[3]
     OUTPUT_KEYS: ClassVar[Set[str]] = {"services", "typescript", "rust", "repository", "specs"}
-    JOBS: ClassVar[Set[str]] = {"changes", "python", "rust", "typescript", "specs"}
+    JOBS: ClassVar[Set[str]] = {"changes", "python", "rust", "typescript", "specs", "result"}
+    GITFLOW_PUSH_BRANCHES: ClassVar[List[str]] = ["master", "develop", "release/**", "hotfix/**"]
+    PULL_REQUEST_BASES: ClassVar[List[str]] = ["develop", "master", "release/**"]
+    CHECK_JOBS: ClassVar[Set[str]] = {"changes", "python", "rust", "typescript", "specs"}
 
     def load(self) -> Dict[Union[str, bool], JsonValue]:
         path = self.ROOT / ".github" / "workflows" / "ci.yml"
@@ -45,6 +48,32 @@ class TestCiWorkflow:
         data = self.load()
         triggers = cast(Dict[str, JsonValue], data.get("on", data.get(True)))
         assert {"push", "pull_request"} <= set(triggers)
+
+    def triggers(self) -> Dict[str, Dict[str, JsonValue]]:
+        data = self.load()
+        return cast(Dict[str, Dict[str, JsonValue]], data.get("on", data.get(True)))
+
+    def test_pushes_run_only_on_the_gitflow_branches(self) -> None:
+        assert self.triggers()["push"]["branches"] == self.GITFLOW_PUSH_BRANCHES
+
+    def test_pull_requests_run_against_the_gitflow_bases(self) -> None:
+        assert self.triggers()["pull_request"]["branches"] == self.PULL_REQUEST_BASES
+
+    def test_a_newer_pull_request_run_cancels_the_older_one(self) -> None:
+        concurrency = cast(Dict[str, JsonValue], self.load()["concurrency"])
+        assert "github.ref" in str(concurrency["group"])
+        assert "github.event_name == 'pull_request'" in str(concurrency["cancel-in-progress"])
+
+    def test_the_result_job_waits_for_every_check(self) -> None:
+        result = self.jobs()["result"]
+        assert set(cast(List[str], result["needs"])) == self.CHECK_JOBS
+        assert "always()" in str(result["if"])
+
+    def test_the_result_job_fails_when_a_check_failed_or_was_cancelled(self) -> None:
+        run = " ".join(str(step["run"]) for step in self.steps("result") if "run" in step)
+        assert "failure" in run
+        assert "cancelled" in run
+        assert "exit 1" in run
 
     def test_the_token_is_read_only(self) -> None:
         assert self.load()["permissions"] == self.READ_ONLY_PERMISSIONS

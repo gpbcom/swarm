@@ -114,3 +114,8 @@ class TestTerraformLayout:
         text = path.read_text(encoding="utf-8")
         assert "terraform plan" in text
         assert "deploy/terraform/**" in text
+
+    def test_the_plan_waits_until_the_dev_cell_is_configured(self) -> None:
+        path = repo_root() / ".github" / "workflows" / "terraform.yml"
+        workflow = yaml.safe_load(path.read_text(encoding="utf-8"))
+        assert "vars.DEV_CELL_MACHINES != ''" in str(workflow["jobs"]["plan"]["if"])
