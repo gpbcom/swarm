@@ -20,6 +20,7 @@ from swarm_models.models.events.exceptions import (
 class TestActor:
     PERSON_ID: ClassVar[UUID] = UUID("01943c5e-8a4b-7c2d-9e1f-0a1b2c3d4e5f")
     PERSON: ClassVar[Dict[str, JsonValue]] = {"kind": "person", "person_id": "01943c5e-8a4b-7c2d-9e1f-0a1b2c3d4e5f"}
+    SWARM_AGENT: ClassVar[Dict[str, JsonValue]] = {"kind": "swarm_agent", "agent_name": "planner"}
     OUTSIDE: ClassVar[Dict[str, JsonValue]] = {
         "kind": "outside_agent",
         "person_id": "01943c5e-8a4b-7c2d-9e1f-0a1b2c3d4e5f",
@@ -37,9 +38,9 @@ class TestActor:
         assert actor.person_id == self.PERSON_ID
         assert actor.agent_name == "planner"
 
-    @pytest.mark.parametrize("name", ["person_id", "agent_name"])
-    def test_none_becomes_the_default(self, name: str) -> None:
-        values: Dict[str, JsonValue] = {"kind": "swarm_agent", "agent_name": "planner", name: None}
+    @pytest.mark.parametrize(("name", "base"), [("person_id", SWARM_AGENT), ("agent_name", PERSON)])
+    def test_none_becomes_the_default(self, name: str, base: Dict[str, JsonValue]) -> None:
+        values: Dict[str, JsonValue] = {**base, name: None}
         actor = Actor.model_validate(values)
         assert getattr(actor, name) == Actor.model_fields[name].get_default()
 
