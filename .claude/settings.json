@@ -4,6 +4,31 @@
             "Bash(python3 .claude/skills/write-specs/scripts/specs.py:*)"
         ]
     },
+    "hooks": {
+        "PostToolUse": [
+            {
+                "matcher": "Edit|Write|MultiEdit",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/format_edited.py",
+                        "timeout": 120
+                    }
+                ]
+            }
+        ],
+        "SubagentStop": [
+            {
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/check_touched.py",
+                        "timeout": 1800
+                    }
+                ]
+            }
+        ]
+    },
     "worktree": {
         "baseRef": "head"
     }
