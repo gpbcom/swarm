@@ -47,6 +47,16 @@ jobs:
               *) echo "#$pr waits: a check is $state."; exit 0 ;;
             esac
           done
+          # GitHub never lets this token change .github/workflows/: a change to CI is merged by a person (TKT-15).
+          if gh api "repos/$REPO/pulls/$pr/files?per_page=100" --jq '.[].filename' | grep -q '^\.github/workflows/'; then
+            if ! gh api "repos/$REPO/issues/$pr/labels" --jq '.[].name' | grep -qx needs-person; then
+              gh api -X POST "repos/$REPO/issues/$pr/labels" -f "labels[]=needs-person" --silent
+              gh api -X POST "repos/$REPO/issues/$pr/comments" --silent \
+                -f body="✅ Every check passed. This pull request changes \`.github/workflows/\`, which GitHub lets only a person merge: merge it with a merge commit (TKT-15)."
+            fi
+            echo "#$pr changes CI: left to a person."
+            exit 0
+          fi
           gh pr merge "$pr" -R "$REPO" --merge --match-head-commit "$HEAD_SHA" \
             --subject "$(gh pr view "$pr" -R "$REPO" --json title --jq '.title | split(":")[0]'): merge $HEAD_BRANCH into develop (#$pr)"
           echo "Merged #$pr into develop."
