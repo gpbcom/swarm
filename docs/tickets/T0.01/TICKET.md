@@ -1,6 +1,6 @@
 # T0.01: Mono-repo layout and Terraform base
 
-**Status:** 🟡 Planned
+**Status:** ✅ Done
 
 ## Roadmap
 

@@ -1,6 +1,6 @@
 # T0.01: Progress
 
-**Status:** ⏸️ Paused, resume with `/ticket-run T0.01` · **Ticket:** [TICKET.md](TICKET.md) · **Plan:** [PLAN.md](PLAN.md)
+**Status:** ✅ Done · **Ticket:** [TICKET.md](TICKET.md) · **Plan:** [PLAN.md](PLAN.md)
 
 ## 📝 Events
 
@@ -33,6 +33,26 @@
 | 2026-11-19 08:43 | Verify 2 (6 not applicable) | verifier | ❌ 1 failures |
 | 2026-11-19 08:43 | Verify 3 (6 not applicable) | verifier | ❌ 1 failures |
 | 2026-11-19 08:43 | Stopped: checks failing | ticket-run | ❌ 1 open failure: `specs check` (docs/specs). The check did not run: `ModuleNotFoundError: No module named 'PIL'` raised from `.claude/skills/write-specs/scripts/spec_screens.py`, imported by `spec_check.py` via `specs.py`. The environment lacks Pillow. |
+| 2026-11-19 08:50 | Verify 1 | verifier | ✅ passed |
+| 2026-11-19 08:50 | Review 1 (full) | reviewer | ⚠️ 1 blocking, 8 follow-ups |
+| 2026-11-19 08:50 | Merge (Review) | integrator | ✅ 1 merged, 0 blocked |
+| 2026-11-19 08:50 | Review 2 (confirm fixes) | reviewer | ✅ 0 blocking, 0 follow-ups |
+| 2026-11-19 08:50 | Merge into develop | integrator | ✅ merged locally, not pushed |
+
+## 🔜 Follow-ups
+
+Non-blocking review findings (TKT-12). They do not hold the merge.
+
+| File | What to change |
+| --- | --- |
+| `deploy/terraform/README.md` | In the CI variables table, mark `TF_VAR_API_ALLOWED_CIDRS` as optional and say it defaults to `[]`. Also say that `DEV_CELL_MACHINES`, `TF_VAR_SSH_USER` and `TF_VAR_K3S_VERSION` are required for the plan job. |
+| `.github/workflows/terraform.yml` | The repository variable names are inconsistent: `DEV_CELL_MACHINES` sits next to `TF_VAR_SSH_USER`, `TF_VAR_K3S_VERSION` and `TF_VAR_API_ALLOWED_CIDRS`. Pick one naming scheme. `terraform fmt -check -recursive deploy/terraform` runs again in every matrix job, so move it to a single job. Pin `terraform_version` to an exact release rather than `>= 1.10`, so CI is reproducible. |
+| `deploy/terraform/cells/dev/providers.tf` | When object storage is disabled, the minio provider is still configured, with `localhost:9000` and no credentials. The plan job sets no `MINIO_*` variables. Run one real `terraform plan` with object storage disabled and no MinIO credentials to confirm that provider configuration does not fail. The tests use mock providers, so they cannot show this. |
+| `pyproject.toml` | `[tool.pytest.ini_options] testpaths` and `[tool.mypy] files/mypy_path` name `services/gateway` directly, so adding a service means editing the root configuration. Use globs, or document the per-service command only. |
+| `pyproject.toml` | The move dropped the `babel`, `langchain` and `langgraph` dependencies of the old root project, and no assumption records it. The README explains LangChain and LangGraph but not Babel. Record the decision in PROGRESS.md, or keep the dependencies. |
+| `tests/conventions/mono_repo/test_python_workspace.py` | `test_the_gateway_has_the_layer_package` repeats the layer list inline. Parametrise it with `SERVICE_LAYERS` from helpers.py. |
+| `deploy/terraform/modules/self-hosted/k3s/main.tf` | The `local-exec` command puts `$(dirname ${local.token_file})` inside outer double quotes, so it runs on the workstation, not on the machine. The result is the same, but write the directory as a literal local, for example `/etc/rancher/k3s`, so the intent is clear. The three copies of the token-push command could also share one local. |
+| `docs/tickets/T0.01/tests-evidences/specs-check.txt` | The copy committed on `ticket/T0.01` still holds the `ModuleNotFoundError: No module named 'PIL'` traceback from the stopped run. The working tree has a newer, uncommitted version of this file and of pnpm-install.txt. Commit the fresh verifier output before the merge. |
 
 <!-- timings -->
 ## ⏱️ Timings
@@ -42,21 +62,21 @@ Measured from the agents' transcripts by `python3 .claude/scripts/progress.py ti
 | Measure | Value |
 | --- | --- |
 | 🕒 Ticket started | 2026-11-18 18:34:42 |
-| 🕒 Last activity | 2026-11-19 08:43:14 |
-| ⏱️ **Overall ticket time** (first start to last activity) | **14h08m31s** |
-| 🤖 Time with agents working (sum of runs) | 43m53s |
-| ⏸️ Time between runs (approvals, fixes) | 13h24m37s |
-| 🔁 Workflow runs | 8 |
-| 🪙 **Tokens consumed** (input, output, cache write, cache read) | **38.95M** |
+| 🕒 Last activity | 2026-11-19 08:51:07 |
+| ⏱️ **Overall ticket time** (first start to last activity) | **14h16m24s** |
+| 🤖 Time with agents working (sum of runs) | 48m15s |
+| ⏸️ Time between runs (approvals, fixes) | 13h28m08s |
+| 🔁 Workflow runs | 9 |
+| 🪙 **Tokens consumed** (input, output, cache write, cache read) | **42.10M** |
 
 #### 🪙 Tokens by model
 
 | Model | Input | Output | Cache write | Cache read | Total |
 | --- | --- | --- | --- | --- | --- |
-| 🔵 sonnet | 0k | 239k | 1.65M | 10.96M | **12.85M** |
-| 🟣 opus | 0k | 260k | 1.39M | 10.04M | **11.69M** |
-| 🟢 haiku | 0k | 540k | 2.77M | 11.09M | **14.40M** |
-| **All models** | 1k | 1.04M | 5.81M | 32.09M | **38.95M** |
+| 🔵 sonnet | 0k | 246k | 1.79M | 11.80M | **13.83M** |
+| 🟣 opus | 0k | 286k | 1.60M | 11.22M | **13.10M** |
+| 🟢 haiku | 0k | 584k | 3.05M | 11.52M | **15.16M** |
+| **All models** | 2k | 1.12M | 6.44M | 34.54M | **42.10M** |
 
 ### 1. ticket-plan · 2026-11-18 18:34:42 to 18:43:56 · ⏱️ 9m13s
 
@@ -241,7 +261,7 @@ Tokens of this run: 0k · 33k · 144k · 123k · **301k** (input · output · ca
 | ✅ integrator prepare T0.01 | 🔵 sonnet | 19:29:50 | 19:29:54 | 0m04s | 0k | 0k | 22k | 52k | **74k** |
 | 🔄 verifier round 1 | 🟢 haiku | 19:29:54 | 19:29:58 | 0m04s | 0k | 0k | 21k | 25k | **47k** |
 
-### 8. ticket-run · 2026-11-19 08:41:10 to 08:43:14 · ⏱️ 2m04s
+### 8. ticket-run · 2026-11-19 08:41:10 to 08:43:17 · ⏱️ 2m07s
 
 | Phase | Start | End | Elapsed | Steps |
 | --- | --- | --- | --- | --- |
@@ -249,9 +269,9 @@ Tokens of this run: 0k · 33k · 144k · 123k · **301k** (input · output · ca
 | Waves | | | not run | 0 |
 | Verify | 08:42:02 | 08:43:03 | 1m00s | 5 |
 | Review | | | not run | 0 |
-| Finish | 08:43:03 | 08:43:14 | 0m10s | 1 |
+| Finish | 08:43:03 | 08:43:17 | 0m13s | 1 |
 
-Tokens of this run: 0k · 50k · 453k · 1.14M · **1.65M** (input · output · cache write · cache read · total)
+Tokens of this run: 0k · 51k · 455k · 1.24M · **1.74M** (input · output · cache write · cache read · total)
 
 | Step | Model | Start | End | Elapsed | Input | Output | Cache write | Cache read | Total |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -262,5 +282,30 @@ Tokens of this run: 0k · 50k · 453k · 1.14M · **1.65M** (input · output · 
 | ✅ verifier round 2 | 🟢 haiku | 08:42:28 | 08:42:36 | 0m08s | 0k | 1k | 34k | 125k | **161k** |
 | ❌ FIX-docs/specs doc-writer (fix) | 🟢 haiku | 08:42:37 | 08:42:54 | 0m17s | 0k | 4k | 64k | 245k | **313k** |
 | ✅ verifier round 3 | 🟢 haiku | 08:42:55 | 08:43:03 | 0m08s | 0k | 1k | 9k | 151k | **161k** |
-| 🔄 scribe T0.01 | 🟢 haiku | 08:43:03 | 08:43:14 | 0m10s | 0k | 4k | 90k | 237k | **332k** |
+| ✅ scribe T0.01 | 🟢 haiku | 08:43:03 | 08:43:17 | 0m13s | 0k | 5k | 93k | 328k | **426k** |
+
+### 9. ticket-run · 2026-11-19 08:46:49 to 08:51:07 · ⏱️ 4m18s
+
+| Phase | Start | End | Elapsed | Steps |
+| --- | --- | --- | --- | --- |
+| Gate | 08:46:49 | 08:47:43 | 0m54s | 2 |
+| Waves | | | not run | 0 |
+| Verify | 08:47:43 | 08:47:52 | 0m09s | 1 |
+| Review | 08:47:53 | 08:50:42 | 2m49s | 5 |
+| Finish | 08:50:42 | 08:51:07 | 0m24s | 2 |
+
+Tokens of this run: 0k · 75k · 622k · 2.36M · **3.06M** (input · output · cache write · cache read · total)
+
+| Step | Model | Start | End | Elapsed | Input | Output | Cache write | Cache read | Total |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| ✅ gate T0.01 | 🟢 haiku | 08:46:49 | 08:47:39 | 0m50s | 0k | 33k | 113k | 58k | **205k** |
+| ✅ integrator prepare T0.01 | 🔵 sonnet | 08:47:40 | 08:47:43 | 0m03s | 0k | 0k | 31k | 28k | **60k** |
+| ✅ verifier round 1 | 🟢 haiku | 08:47:43 | 08:47:52 | 0m09s | 0k | 0k | 32k | 59k | **91k** |
+| ✅ reviewer round 1 | 🟣 opus | 08:47:53 | 08:49:51 | 1m58s | 0k | 23k | 167k | 1.06M | **1.25M** |
+| ✅ K16 implementer (fix) | 🔵 sonnet | 08:49:52 | 08:50:10 | 0m18s | 0k | 3k | 40k | 524k | **568k** |
+| ✅ integrator Review | 🔵 sonnet | 08:50:10 | 08:50:20 | 0m09s | 0k | 1k | 33k | 190k | **225k** |
+| ✅ verifier after review 1 | 🟢 haiku | 08:50:21 | 08:50:29 | 0m08s | 0k | 0k | 28k | 62k | **92k** |
+| ✅ reviewer round 2 | 🟣 opus | 08:50:30 | 08:50:42 | 0m12s | 0k | 2k | 37k | 128k | **167k** |
+| ✅ integrator finish T0.01 | 🔵 sonnet | 08:50:42 | 08:50:49 | 0m06s | 0k | 0k | 32k | 92k | **126k** |
+| 🔄 scribe T0.01 | 🟢 haiku | 08:50:49 | 08:51:07 | 0m17s | 0k | 8k | 106k | 159k | **274k** |
 <!-- /timings -->
