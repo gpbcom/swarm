@@ -22,6 +22,7 @@ These rules apply to every ticket of the roadmap (`docs/specs/roadmap/`), worked
 | [TKT-10](#tkt-10) | `PROGRESS.md` records the elapsed time of every step and of the whole ticket, and the tokens consumed |
 | [TKT-11](#tkt-11) | Running a ticket again continues where it stopped |
 | [TKT-12](#tkt-12) | The review converges: only blocking findings are fixed, later rounds only confirm the fixes |
+| [TKT-13](#tkt-13) | Hooks format the edited files and check the touched layer before a task is handed back |
 
 ## <a id="tkt-1"></a>TKT-1: Roadmap tickets, one folder each
 
@@ -33,6 +34,7 @@ These rules apply to every ticket of the roadmap (`docs/specs/roadmap/`), worked
 | `PLAN.md` | The task graph, its waves, the approval status | planner (content), scribe (file) |
 | `PROGRESS.md` | 📝 Events (decisions, merges, verdicts, stops) with their time, and ⏱️ Timings with the tokens consumed (TKT-10) | scribe, progress script |
 | `EXPLAIN.md` | What changed, why, and how to test it | scribe |
+| `REVIEW.md` | The reviewer's short review note for the person (TKT-6) | scribe, from the reviewer's note |
 | `tests-evidences/` | Outputs of the checks, test reports, screenshots | verifier, scribe |
 
 **Why:** one place per ticket for the person and every agent, traceable to the roadmap.
@@ -41,10 +43,11 @@ These rules apply to every ticket of the roadmap (`docs/specs/roadmap/`), worked
 
 ## <a id="tkt-2"></a>TKT-2: TICKET.md
 
-**Rule:** `TICKET.md` has, in order: title and status; roadmap link (phase page and ticket anchor), sprint, epic;
-the features, use cases and business rules it delivers (links with IDs); the technical pages it builds on;
-acceptance criteria (the ticket's "done when" plus the features' Given/when/then criteria it closes); out of scope.
-It states nothing that the specifications or the roadmap do not state.
+**Rule:** `TICKET.md` follows the template `.claude/skills/ticket/templates/TICKET.md`. It has, in order: title and
+status; roadmap link (phase page, phase and ticket anchor), sprint, epic; the features, use cases and business rules it
+delivers (links with IDs); the technical pages it builds on; the screens it touches (`Screens touched`) and the
+budgets it touches (`Budgets touched`); acceptance criteria (the ticket's "done when" plus the features' Given/when/then
+criteria it closes); out of scope. It states nothing that the specifications or the roadmap do not state.
 
 **`TICKET.md`, `PLAN.md` and `PROGRESS.md` always refer to the specification:** `TICKET.md` links at least one
 technical page section, feature (📘 FS), use case (🎬 UC) or business rule (📏 BR), each link resolving. When the
@@ -57,7 +60,10 @@ brief links the pages it applies.
 **Why:** the plan and the review are only as good as the ticket they start from.
 
 **Check:** `python3 .claude/scripts/ticket_refs.py check --ticket <ID>` prints nothing (run by `/ticket-plan` and by
-the verifier's `checks.py`); the reviewer compares the delivered work with `TICKET.md`.
+the verifier's `checks.py`). `python3 .claude/skills/ticket/scripts/check_ticket.py <ID>` prints nothing when every FS,
+UC and BR ID and every link resolves in `docs/specs/`, and the sections are in order; `/ticket-plan` runs it. A ticket
+that fails goes back to the ticket-writer once, then the run stops. The reviewer compares the delivered work with
+`TICKET.md`.
 
 ## <a id="tkt-3"></a>TKT-3: The plan and its approval
 
@@ -71,7 +77,9 @@ other status.
 
 **Why:** the person's single gate is the plan: once approved, the graph runs to the end without supervision.
 
-**Check:** `/ticket-run` reads the status first and stops when it is not approved.
+**Check:** `/ticket-run` reads the status first and stops when it is not approved. `python3 .claude/skills/ticket/scripts/check_plan.py <ID>`
+prints nothing (graph, waves, file ownership and tests first): `/ticket-plan` runs it after writing `PLAN.md`, and
+`/ticket-run` runs it at the gate.
 
 ## <a id="tkt-4"></a>TKT-4: Parallel by design
 
@@ -111,8 +119,9 @@ ticket runs in parallel, the more tickets each sprint can close.
 1. the **verifier** reports every applicable check passing, as decided and run by `.claude/scripts/checks.py`
    (deterministic, not a model's judgement): the AGENT.md tools on changed project code (ruff, mypy, pytest, cargo,
    pnpm, Terraform) and `specs.py check`; a check whose target does not exist yet is not applicable, never failed;
-2. the **reviewer** approves the diff against `TICKET.md`, the specifications and the rules (AGENT.md, SPEC, TKT);
-3. `EXPLAIN.md` and `PROGRESS.md` are written, with the evidence in `tests-evidences/`.
+2. the **reviewer** approves the diff against `TICKET.md`, the specifications and the rules (AGENT.md, SPEC, TKT), and
+   returns a short review note, written to `REVIEW.md`;
+3. `EXPLAIN.md`, `REVIEW.md` and `PROGRESS.md` are written, with the evidence in `tests-evidences/`.
 
 A failed check or a requested change goes back to the agent that owns the files, at most twice; then the ticket
 stops and the person is told. A check that fails because of the environment (a missing tool or module, flagged
@@ -226,4 +235,22 @@ and recorded in 📝 Events before the re-run.
 converges and every round costs an opus review.
 
 **Check:** `PROGRESS.md` shows at most one full review per run, and the merge happens with follow-ups open.
+
+## <a id="tkt-13"></a>TKT-13: Hooks format and check before hand-back
+
+**Rule:**
+
+- The PostToolUse hook `.claude/hooks/format_edited.py` formats only the edited file, with the formatter of its language
+  listed in `.claude/hooks/formatters.json`.
+- The SubagentStop hook `.claude/hooks/check_touched.py` runs, in a worker's worktree only, the checks of the layers the
+  task touched (`.claude/hooks/layer-checks.json`). Failures go back to the agent at most twice; after that the verifier
+  decides.
+- Changes made only of tests do not run the tests, because the tests come first (TKT-4).
+- A missing tool is not a failure: the hook reports it and lets the task finish, as the environment check of TKT-6 does.
+
+**Why:** style never reaches the person's review ([R-01](../../docs/specs/roadmap/12-risks.md#r-01)), and a task comes
+back green.
+
+**Check:** the tests of `tests/harness/` pass, and `grep -n 'tkt-13' .claude/rules/tickets.md` finds the summary row and
+the heading.
 
