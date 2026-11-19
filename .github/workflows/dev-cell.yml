@@ -25,7 +25,9 @@ concurrency:
 
 jobs:
   cell:
-    if: github.event_name == 'workflow_dispatch' || github.event.ref_type == 'branch'
+    # A deleted branch (every merged pull request) only tears its cell down once the dev cell is configured: until
+    # then there is no cell to destroy and no secret to do it with. A manual run always goes, and names what is missing.
+    if: github.event_name == 'workflow_dispatch' || (github.event.ref_type == 'branch' && vars.DEV_CELL_MACHINES != '')
     runs-on: ${{ vars.DEV_CELL_RUNNER || 'ubuntu-latest' }}
     env:
       ACTION: ${{ github.event_name == 'delete' && 'down' || inputs.action }}
