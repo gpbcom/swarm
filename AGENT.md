@@ -14,6 +14,19 @@ uv run mypy services/<service>/src
 uv run pytest services/<service>/tests/<layer>/<package> -n 2
 ```
 
+For Rust (`packages/rust`, a Cargo workspace whose crates opt in to the workspace lints with `[lints] workspace = true`)
+and TypeScript (`packages/ts`, a pnpm workspace), run these from their workspace folder:
+
+```bash
+cargo fmt --all --check
+cargo clippy --workspace --all-targets -- -D warnings
+pnpm -r --if-present lint
+pnpm -r --if-present typecheck
+```
+
+TypeScript packages and front ends extend `@swarm/config` (`packages/ts/config`), which holds the strict
+`tsconfig.base.json` and the eslint configuration.
+
 - The per-language CI does not exist yet: it arrives in T0.04. When it does, it runs `ruff check`,
   `ruff format --check`, `mypy services/<service>/src` and `pytest` for each service on every push and pull request.
   All of them must pass. Until then, `.github/workflows/terraform.yml` is the only workflow.
@@ -98,6 +111,14 @@ Each step must pass before the next one starts:
 ## Rules a test enforces
 
 `tests/conventions/` fails on any of these, in `src/` and `tests/` unless stated:
+
+Since T0.03, `tests/conventions/services/test_service_conventions.py` runs these rules against every service it finds
+under `services/`. The rules checked are: more than one top-level class in a file; more than five Python files in a
+folder; a nested function; `Any`; an import that Layout does not allow, checked in `src/` only; the lifecycle rule
+(`start` or `stop`, or `run` without a lifecycle base class); and a Pydantic model outside `src/models/`. `@staticmethod`,
+attributes starting with an underscore and the node rules are not tested yet. Each rule is one class in
+`tests/conventions/rules/`. The environment variable `SWARM_CONVENTIONS_SERVICES_ROOT` runs the tests against another
+folder of services.
 
 - More than one top-level class in a file, whatever the kind of class.
 - More than five Python files in a folder, not counting `__init__.py` and `conftest.py`.
