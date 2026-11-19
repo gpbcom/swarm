@@ -8,7 +8,7 @@
   "scripts": {
     "lint": "eslint .",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "test": "node --experimental-strip-types --test test/*.test.ts",
+    "test": "node --experimental-strip-types --test test/*.test.ts && node --experimental-strip-types scripts/generate.ts --check",
     "generate": "node --experimental-strip-types scripts/generate.ts"
   },
   "devDependencies": {
