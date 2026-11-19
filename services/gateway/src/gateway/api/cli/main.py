@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+# Standard library imports
+from logging import getLogger
+
 # First-party imports
 from gateway.api.factories.greeting.greeting_command_factory import GreetingCommandFactory
 from swarm_logging.configurators.logging_configurator import LoggingConfigurator
@@ -22,4 +25,5 @@ def main() -> None:
     command = GreetingCommandFactory().create()
     command.execute()
     if command.exit_code != 0:
+        getLogger(__name__).error("The greeting command ended with exit code %d.", command.exit_code)
         raise SystemExit(command.exit_code)

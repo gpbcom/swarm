@@ -143,7 +143,7 @@ folder of services. `tests/conventions/packages/test_package_conventions.py` run
 `packages/python/`, and `SWARM_CONVENTIONS_PACKAGES_ROOT` points it at another folder. The lifecycle rule accepts the
 definitions of `Runnable` and `AsyncRunnable` themselves.
 
-- More than one top-level class in a file, whatever the kind of class.
+- More than one top-level class in a file, whatever the kind of class, except several enums in an `enums.py`.
 - More than five Python files in a folder, not counting `__init__.py` and `conftest.py`.
 - A nested function.
 - `@staticmethod`. Use an instance method or a `@classmethod`.
@@ -157,20 +157,21 @@ definitions of `Runnable` and `AsyncRunnable` themselves.
 
 ## File shape
 
-**NEVER more than one class in one file, whatever the kind of class.** This has no exceptions: it covers Pydantic
-models, `Enum`, `TypedDict`, exceptions, helpers and test classes, in `src/` and in `tests/`. Each class has its own
-file, named after the class: `CustomerService` in `customer_service.py`, `CustomerStatus` in `customer_status.py`.
+**NEVER more than one class in one file, whatever the kind of class.** It covers Pydantic models, `TypedDict`,
+exceptions, helpers and test classes, in `src/` and in `tests/`. Each class has its own file, named after the class:
+`CustomerService` in `customer_service.py`, `CustomerModel` in `customer_model.py`. **The one exception is the enums:**
+all the enums of a module sit together in its `enums.py` (see [Data and enums](#data-and-enums)), which holds
+nothing else.
 
 **Classes that share a method name share a base class.** `TaskNode` has `__call__`, and `YamlCatalog` has `load`. If two
 methods only happen to share a name and mean different things, rename one instead.
 
 **NEVER more than five Python files in one folder.** When a folder would go past five, create sub-folders and dispatch
-its files by entity type: `storage/customers/repositories/` for the repositories, `models/customers/enums/` for the
-enums. This applies to `src/` and `tests/`, including `exceptions/` folders. `__init__.py` and `conftest.py` do not
+its files by entity type: `storage/customers/repositories/` for the repositories, `models/customers/exceptions/` for
+the exceptions. This applies to `src/` and `tests/`, including `exceptions/` folders. `__init__.py` and `conftest.py` do not
 count towards the five.
 
-An `enums/` or `exceptions/` package's `__init__.py` re-exports everything under it, so callers keep importing from the
-package. Other code is imported by its full path: `from service.customers.customer_service import CustomerService`.
+An `exceptions/` package's `__init__.py` re-exports everything under it, so callers keep importing from the package. Other code is imported by its full path: `from service.customers.customer_service import CustomerService`.
 
 Nothing else sits at module level, so there are no module constants, helper functions or module-level loggers. The
 exceptions are a `main()` for a console script and `__all__`. Constants become `ClassVar` attributes in `UPPER_CASE`,
@@ -214,9 +215,9 @@ Every runnable class except the nodes subclasses `Runnable` or `AsyncRunnable`, 
 | `initialize()` | Acquires what the work needs. A service is already serving when it returns |
 | `run()` | Does the work. A service blocks here until it is closed, and a job returns when it is done |
 | `close()` | Releases everything, and must be safe after a failed or partial `initialize` |
-| `status()` | `AsyncRunnable` only: returns one line saying what it is doing and how far it got |
 
 - `execute()` on the base class calls all three, and closes whatever happens. Use it unless something runs alongside.
+  On an `AsyncRunnable` it is an async generator: read it with `async for status in runnable.execute()`.
 - They take no arguments. Inputs go to the constructor, and results are read from attributes afterwards, such as
   `Command.exit_code`.
 - Runnables are created by an abstract factory in their layer's `factories/` package, with concrete ones in its
@@ -229,11 +230,12 @@ Every runnable class except the nodes subclasses `Runnable` or `AsyncRunnable`, 
   `swarm_lifecycle.factories.async_runnable_factory.AsyncRunnableFactory[...]`. A concrete factory implements `_build()`,
   and callers call `create()`.
 - **A long-running async task ALWAYS yields its status.** All async work that can last runs in an `AsyncRunnable`,
-  never in a bare coroutine or task, and the base class makes the reports: every subclass implements `status()`, and
-  `execute()` logs it at `INFO` every `status_interval_s` while `initialize` and `run` work, then logs a last status
-  when the work stops, failed or not. `status_interval_s` is a required constructor argument taken from the
-  runnable's configuration (with its default written out in `conf/app.yaml`), and a value that is not a positive
-  number raises `SEAsyncRunnableInvalidStatusIntervalError`. A task silent for longer than its interval is stalled.
+  never in a bare coroutine or task, and its `execute()` is an async generator of `RunnableStatus`, a `StrEnum` of
+  `swarm_lifecycle.models.enums`: it yields `INITIALISING` or `RUNNING` every `status_interval_s` while the work goes
+  on, then `EXECUTED` when the work succeeds, and `runnable.status` holds the current one. Each status is also logged
+  at `INFO` with the time elapsed. When the caller stops reading, the work is cancelled and `close` still runs. `status_interval_s` is a required
+  constructor argument taken from the runnable's configuration (with its default written out in `conf/app.yaml`),
+  and a value that is not a positive number raises `SEAsyncRunnableInvalidStatusIntervalError`.
 
 ## Imports
 
@@ -361,8 +363,15 @@ def __init__(self, config: DatabaseConfig, logger: Optional[Logger] = None) -> N
 
 - **Every method logs, at each level that applies to it, except in `tests/` and `src/models/`.** Not every method has a
   failure to report, so do not invent one, but every failure path has its `WARNING` or `ERROR`.
-- These stay silent, because they have nothing to report: one-line getters and predicates, data holders, and code that
-  runs for every event. Log the outcome one level up instead.
+- **EVERY logical branch logs**, in `src/` outside `models/`: each `if`, `elif` and `else` body, each `case` of a
+  `match`, and each `except`. A branch that returns early, skips an item or picks a default says so at `DEBUG`, and a
+  branch that raises logs at `ERROR` first. Add the `else` when the path it covers means something (a missing section,
+  a file not written). A conditional expression that chooses what the code does (`a if c else b`) is written as an
+  `if`/`else` with a log in each branch. In code that runs for every event, the branches log at `DEBUG`.
+- Two places cannot follow it, and stay silent: the `logger if logger else getLogger(__name__)` of a constructor,
+  because no logger exists yet, and the code the logging system calls itself (formatters, handlers, filters), because
+  a log there would call it again. One-line getters, predicates and data holders have no branch, so they have nothing
+  to log either.
 - The log file holds colour codes. Read it with `tail -f` or `less -R`.
 - `DEBUG` lines are written by default, because the root level in `conf/logger.yaml` is `DEBUG`. Keep them short.
 - **Never log a secret or a typed value.** If an error might quote one, log `type(error).__name__`.
@@ -383,13 +392,16 @@ rule may share a validator.
 class DatabaseConfig(BaseModel):
     model_config = ConfigDict(extra="forbid", validate_default=True)
 
+    PORT_FIELD: ClassVar[str] = "port"
+    BEFORE: ClassVar[Literal["before"]] = "before"
+
     port: int = Field(default=5432, description="The port the database listens on.")
 
-    @field_validator("port", mode="before")
+    @field_validator(PORT_FIELD, mode=BEFORE)
     def validate_port(cls, value: JsonValue) -> JsonValue:
         """Validate ``port``. ..."""
         if value is None:
-            return cls.model_fields["port"].get_default(call_default_factory=True)
+            return cls.model_fields[cls.PORT_FIELD].get_default(call_default_factory=True)
         if isinstance(value, bool) or not isinstance(value, int):
             raise SEDatabaseConfigInvalidPort(...)
         return value
@@ -409,10 +421,21 @@ class DatabaseConfig(BaseModel):
 - Do not hard-code data in Python. It goes in `conf/catalogs/*.yaml`, loaded by a model that subclasses `YamlCatalog`,
   which provides `load(path)` and raises the model's `UNREADABLE` exception. YamlCatalog is
   `swarm_catalog.models.yaml_catalog.YamlCatalog`, and a subclass sets `UNREADABLE` to its own exception.
-- A string that selects behaviour is a `StrEnum` with `@unique`, in its own file named after it, with its members
-  listed under `Attributes:`.
+- A string that selects behaviour is a `StrEnum` with `@unique`, with its members listed under `Attributes:`.
+- **ALL the enums of a module are in ONE `enums.py`, at the root of its `models` module:**
+  `src/<module>/models/enums.py`, imported as `from swarm_lifecycle.models.enums import RunnableStatus`. There is no
+  `enums/` folder and no enum anywhere else, and `enums.py` holds only enums.
+- **NO hyphen in an enum's values.** A value is lower case words joined by underscores: `NOT_STARTED = "not_started"`,
+  never `"not-started"`.
+- **NO raw string in the code of `src/`.** A string that means something (a status, a phase, a kind, a mode, a key, a
+  field name, an encoding, an option) is a member of a `StrEnum` in `models/enums.py`, or an `UPPER_CASE` `ClassVar` of
+  its class: `self.ENCODING`, `cls.FORMAT_FIELD`, `RunnableStatus.RUNNING`. A method never compares with, returns or
+  yields a literal string. Only the text of log, exception and `print` messages, docstrings, and the values of the
+  constants themselves are literal. Where a third-party signature takes a `Literal`, the constant is typed with it:
+  `BEFORE: ClassVar[Literal["before"]] = "before"`. Tests compare with these enums and constants, never with their
+  raw values.
 - Use `match`/`case` to branch on an enum.
-- Open files with `encoding="utf-8"`.
+- Open files with the `ENCODING: ClassVar[str] = "utf-8"` of their class.
 - Secrets live in a secret store. They never appear in configuration or logs.
 
 ## Tests

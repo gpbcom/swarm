@@ -22,6 +22,18 @@ class TestOneClassPerFile:
         "tests/test_b.py": "class TestB:\n    pass\n",
     }
     TESTS_ONLY: ClassVar[Dict[str, str]] = {"tests/test_a.py": "class TestA:\n    pass\n"}
+    ENUMS_PATH: ClassVar[str] = "src/sample/models/enums.py"
+    TWO_ENUMS: ClassVar[str] = (
+        "from enum import StrEnum, unique\n\n\n"
+        '@unique\nclass Colour(StrEnum):\n    RED = "red"\n\n\n'
+        '@unique\nclass Shape(StrEnum):\n    ROUND = "round"\n'
+    )
+    ENUM_AND_MODEL: ClassVar[str] = (
+        "import enum\n\nfrom pydantic import BaseModel\n\n\n"
+        'class Colour(enum.StrEnum):\n    RED = "red"\n\n\n'
+        "class Paint(BaseModel):\n    colour: Colour\n"
+    )
+    TWO_ENUMS_ELSEWHERE_PATH: ClassVar[str] = "src/sample/models/colours.py"
 
     def violations_of(self, tmp_path: Path, files: Dict[str, str]) -> List[str]:
         root = tmp_path / "services" / "sample"
@@ -50,6 +62,18 @@ class TestOneClassPerFile:
         found = self.violations_of(tmp_path, {self.MIXED_PATH: body})
         assert len(found) == 1
         assert "mixed.py" in found[0]
+
+    def test_several_enums_in_enums_py_are_accepted(self, tmp_path: Path) -> None:
+        write_files(tmp_path, {self.ENUMS_PATH: self.TWO_ENUMS})
+        assert OneClassPerFile().violations(ServiceTree(tmp_path)) == []
+
+    def test_an_enum_and_another_class_in_enums_py_are_refused(self, tmp_path: Path) -> None:
+        write_files(tmp_path, {self.ENUMS_PATH: self.ENUM_AND_MODEL})
+        assert len(OneClassPerFile().violations(ServiceTree(tmp_path))) == 1
+
+    def test_several_enums_outside_enums_py_are_refused(self, tmp_path: Path) -> None:
+        write_files(tmp_path, {self.TWO_ENUMS_ELSEWHERE_PATH: self.TWO_ENUMS})
+        assert len(OneClassPerFile().violations(ServiceTree(tmp_path))) == 1
 
     def test_a_nested_class_is_accepted(self, tmp_path: Path) -> None:
         body = "class Outer:\n    class Inner:\n        pass\n"

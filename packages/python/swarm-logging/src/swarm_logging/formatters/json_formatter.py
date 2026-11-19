@@ -16,6 +16,7 @@ class JsonFormatter(logging.Formatter):
         LOGGER_KEY (str): The key of the logger name.
         MESSAGE_KEY (str): The key of the message.
         EXCEPTION_KEY (str): The key of the formatted exception, present only with ``exc_info``.
+        TIMESPEC (str): The precision of the time, as ``datetime.isoformat`` names it.
 
     Notes:
         - JSON is used in production because Loki stores one event per line and reads its fields.
@@ -28,6 +29,7 @@ class JsonFormatter(logging.Formatter):
     LOGGER_KEY: ClassVar[str] = "logger"
     MESSAGE_KEY: ClassVar[str] = "message"
     EXCEPTION_KEY: ClassVar[str] = "exception"
+    TIMESPEC: ClassVar[str] = "milliseconds"
 
     ############################
     # Publicly Exposed Methods #
@@ -43,7 +45,7 @@ class JsonFormatter(logging.Formatter):
             str: A JSON line with ``time``, ``level``, ``logger``, ``message`` and, with ``exc_info``, ``exception``.
         """
         data: Dict[str, str] = {
-            self.TIME_KEY: datetime.fromtimestamp(record.created, tz=UTC).isoformat(timespec="milliseconds"),
+            self.TIME_KEY: datetime.fromtimestamp(record.created, tz=UTC).isoformat(timespec=self.TIMESPEC),
             self.LEVEL_KEY: record.levelname,
             self.LOGGER_KEY: record.name,
             self.MESSAGE_KEY: record.getMessage(),

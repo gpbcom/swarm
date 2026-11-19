@@ -35,11 +35,3 @@ class SampleAsyncRunnable(AsyncRunnable):
 
     async def close(self) -> None:
         """Do nothing."""
-
-    def status(self) -> str:
-        """Return whether the work was done.
-
-        Returns:
-            str: The status.
-        """
-        return "Done." if self.executed else "Not run yet."

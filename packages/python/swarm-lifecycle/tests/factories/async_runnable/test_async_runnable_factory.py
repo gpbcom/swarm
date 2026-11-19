@@ -8,6 +8,7 @@ from lifecycle_sample_async_runnable_factory import SampleAsyncRunnableFactory
 
 from swarm_lifecycle.factories.async_runnable_factory import AsyncRunnableFactory
 from swarm_lifecycle.factories.factory import Factory
+from swarm_lifecycle.models.enums import RunnableStatus
 from swarm_lifecycle.runnables.async_runnable import AsyncRunnable
 
 
@@ -30,8 +31,9 @@ class TestAsyncRunnableFactory:
     async def test_the_created_async_runnable_executes(self) -> None:
         sample = SampleAsyncRunnableFactory().create()
         assert sample.executed is False
-        await sample.execute()
+        statuses = [status async for status in sample.execute()]
         assert sample.executed is True
+        assert statuses[-1] is RunnableStatus.EXECUTED
 
     def test_create_logs_the_product_class(self, caplog: pytest.LogCaptureFixture) -> None:
         with caplog.at_level(DEBUG):

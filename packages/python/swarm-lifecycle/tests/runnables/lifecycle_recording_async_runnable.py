@@ -17,12 +17,14 @@ class RecordingAsyncRunnable(AsyncRunnable):
     def __init__(
         self,
         fail_in: Optional[str] = None,
+        initialize_for_s: float = 0.0,
         run_for_s: float = 0.0,
         status_interval_s: float = STATUS_INTERVAL_S,
         logger: Optional[Logger] = None,
     ) -> None:
         super().__init__(status_interval_s, logger)
         self.fail_in = fail_in
+        self.initialize_for_s = initialize_for_s
         self.run_for_s = run_for_s
         self.calls: List[str] = []
 
@@ -33,6 +35,7 @@ class RecordingAsyncRunnable(AsyncRunnable):
 
     async def initialize(self) -> None:
         self.record("initialize")
+        await asyncio.sleep(self.initialize_for_s)
 
     async def run(self) -> None:
         self.record("run")
@@ -40,6 +43,3 @@ class RecordingAsyncRunnable(AsyncRunnable):
 
     async def close(self) -> None:
         self.record("close")
-
-    def status(self) -> str:
-        return f"{len(self.calls)} lifecycle calls so far."

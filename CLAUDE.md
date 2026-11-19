@@ -4,7 +4,7 @@
 
 ## Code rules never to break
 
-Four rules of [AGENT.md](AGENT.md) hold for people and agents alike, in `src/` and `tests/`:
+Seven rules of [AGENT.md](AGENT.md) hold for people and agents alike, in `src/` and `tests/`:
 
 - **No `Any` and no `object` as a type.** Both are too generic. Write the real type: `JsonValue` for parsed JSON, YAML
   or TOML, a `Union` for several known types, a `Callable[...]` with its signature, a generic with its real parameter
@@ -13,9 +13,22 @@ Four rules of [AGENT.md](AGENT.md) hold for people and agents alike, in `src/` a
   `ERROR` and raises again with a bare `raise` when it cannot handle the error (AGENT.md, Exceptions).
 - **No dict with hard-coded keys inside a method or function.** A fixed dict is an `UPPER_CASE` `ClassVar`; when its
   values are computed, its keys are `UPPER_CASE` `ClassVar[str]` constants (AGENT.md, File shape).
-- **A long-running async task ALWAYS yields its status.** Async work that can last runs in an `AsyncRunnable`, which
-  implements `status()`; `execute()` logs it at `INFO` every `status_interval_s` (required, from its configuration),
-  then a last status when the work stops (AGENT.md, Lifecycle and factories).
+- **A long-running async task ALWAYS yields its status.** Async work that can last runs in an `AsyncRunnable`, whose
+  `execute()` is an async generator of `RunnableStatus` (a `StrEnum` of `swarm_lifecycle.models.enums`): `INITIALISING`
+  or `RUNNING` every `status_interval_s` (required, from its configuration), then `EXECUTED` when the work succeeds
+  (AGENT.md, Lifecycle and factories).
+- **NO raw string in the code of `src/`.** A status, a phase, a kind, a mode, a key, a field name or an encoding is a
+  `StrEnum` member in `models/enums.py` or an `UPPER_CASE` `ClassVar`. Only log, exception and `print` messages,
+  docstrings and the constants' own values are literal, and tests compare with the enums and constants (AGENT.md,
+  Data and enums).
+- **All the enums of a module are in ONE `enums.py` at the root of its `models` module** (`src/<module>/models/enums.py`,
+  holding only enums, the one exception to one class per file), and **no enum value contains a hyphen**: values are
+  lower snake case, `"not_started"` (AGENT.md, Data and enums).
+- **EVERY logical branch logs** (`if`, `elif`, `else`, each `case`, each `except`), in `src/` outside `models/`: an early
+  return, a skip or a default at `DEBUG`, a raise at `ERROR` first. A conditional expression that chooses what the code
+  does becomes an `if`/`else`. Only the constructor's `logger if logger else getLogger(__name__)` and the code the
+  logging system calls (formatters, handlers) stay silent (AGENT.md, Logging).
+
 
 ## The harness
 

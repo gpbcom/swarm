@@ -18,6 +18,7 @@ class YamlCatalog(BaseModel):
     Attributes:
         model_config (ConfigDict): Forbids unknown keys and freezes the loaded catalog.
         UNREADABLE (type[Exception]): The exception raised when the file cannot be read.
+        ENCODING (str): The encoding of the YAML file.
 
     Notes:
         - Subclasses set ``UNREADABLE`` to their own exception, so that callers catch an error named after the
@@ -28,6 +29,7 @@ class YamlCatalog(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     UNREADABLE: ClassVar[type[Exception]] = SEYamlCatalogUnreadable
+    ENCODING: ClassVar[str] = "utf-8"
 
     ############################
     # Publicly Exposed Methods #
@@ -47,7 +49,7 @@ class YamlCatalog(BaseModel):
             Exception: ``UNREADABLE`` when the file cannot be read, is not valid YAML or is not a mapping.
         """
         try:
-            with path.open(encoding="utf-8") as stream:
+            with path.open(encoding=cls.ENCODING) as stream:
                 data: JsonValue = yaml.safe_load(stream)
         except (OSError, yaml.YAMLError) as error:
             raise cls.UNREADABLE(f"Unreadable catalog: {path}. Must be a YAML mapping in UTF-8.") from error

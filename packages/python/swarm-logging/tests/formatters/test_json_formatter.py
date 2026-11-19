@@ -25,15 +25,20 @@ class TestJsonFormatter:
     def test_the_output_is_json_with_the_four_keys_in_order(self) -> None:
         data = self.parse(JsonFormatter().format(self.make_record()))
 
-        assert list(data) == ["time", "level", "logger", "message"]
-        assert data["level"] == "INFO"
-        assert data["logger"] == "swarm.test"
-        assert data["message"] == "hello"
+        assert list(data) == [
+            JsonFormatter.TIME_KEY,
+            JsonFormatter.LEVEL_KEY,
+            JsonFormatter.LOGGER_KEY,
+            JsonFormatter.MESSAGE_KEY,
+        ]
+        assert data[JsonFormatter.LEVEL_KEY] == "INFO"
+        assert data[JsonFormatter.LOGGER_KEY] == "swarm.test"
+        assert data[JsonFormatter.MESSAGE_KEY] == "hello"
 
     def test_the_time_is_iso_8601_in_utc(self) -> None:
         data = self.parse(JsonFormatter().format(self.make_record()))
 
-        parsed = datetime.fromisoformat(data["time"])
+        parsed = datetime.fromisoformat(data[JsonFormatter.TIME_KEY])
 
         assert parsed.utcoffset() == timedelta(0)
 
@@ -41,15 +46,15 @@ class TestJsonFormatter:
         line = JsonFormatter().format(self.make_record("first\nsecond"))
 
         assert "\n" not in line
-        assert self.parse(line)["message"] == "first\nsecond"
+        assert self.parse(line)[JsonFormatter.MESSAGE_KEY] == "first\nsecond"
 
     def test_the_exception_key_is_present_only_with_exc_info(self) -> None:
         without = self.parse(JsonFormatter().format(self.make_record()))
         with_info = self.parse(JsonFormatter().format(self.make_record(exc_info=True)))
 
-        assert "exception" not in without
-        assert list(with_info)[-1] == "exception"
-        assert "ValueError" in with_info["exception"]
+        assert JsonFormatter.EXCEPTION_KEY not in without
+        assert list(with_info)[-1] == JsonFormatter.EXCEPTION_KEY
+        assert "ValueError" in with_info[JsonFormatter.EXCEPTION_KEY]
 
     def test_non_ascii_text_is_kept(self) -> None:
         line = JsonFormatter().format(self.make_record("drone prête à décoller"))

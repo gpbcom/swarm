@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 # Standard library imports
-from typing import Optional
+from typing import ClassVar, Literal, Optional
 
 # Third-party imports
 from pydantic import BaseModel, ConfigDict, Field, JsonValue, field_validator
@@ -17,14 +17,21 @@ class LoggingConfig(BaseModel):
     Attributes:
         path (Optional[str]): The logging configuration file, or ``None`` for the built-in one.
         format (LogFormat): How a log record is written.
+        PATH_FIELD (str): The name of the ``path`` field, for its validator.
+        FORMAT_FIELD (str): The name of the ``format`` field, for its validator and its default.
+        BEFORE (str): The validator mode that runs before Pydantic's own validation.
     """
+
+    PATH_FIELD: ClassVar[str] = "path"
+    FORMAT_FIELD: ClassVar[str] = "format"
+    BEFORE: ClassVar[Literal["before"]] = "before"
 
     model_config = ConfigDict(extra="forbid", validate_default=True, frozen=True)
 
     path: Optional[str] = Field(default=None, description="The logging configuration file, or none for the default.")
     format: LogFormat = Field(default=LogFormat.COLOURED, description="How a log record is written.")
 
-    @field_validator("path", mode="before")
+    @field_validator(PATH_FIELD, mode=BEFORE)
     def validate_path(cls, value: JsonValue) -> JsonValue:
         """Validate ``path``.
 
@@ -43,7 +50,7 @@ class LoggingConfig(BaseModel):
             raise SELoggingConfigInvalidPath(f"Invalid path: {value!r}. Must be a non-empty string.")
         return value.strip()
 
-    @field_validator("format", mode="before")
+    @field_validator(FORMAT_FIELD, mode=BEFORE)
     def validate_format(cls, value: JsonValue) -> JsonValue:
         """Validate ``format``.
 
@@ -57,7 +64,7 @@ class LoggingConfig(BaseModel):
             SELoggingConfigInvalidFormat: If the value is not a log format or its value.
         """
         if value is None:
-            return cls.model_fields["format"].get_default(call_default_factory=True)
+            return cls.model_fields[cls.FORMAT_FIELD].get_default(call_default_factory=True)
         if isinstance(value, LogFormat):
             return value
         if isinstance(value, str) and value in {member.value for member in LogFormat}:
