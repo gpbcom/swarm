@@ -53,13 +53,15 @@ class TestBoard:
         assert result.returncode != 0
         assert message in result.stderr
 
-    def test_the_dry_run_counts_every_phase_epic_ticket_and_link(self) -> None:
+    def test_the_dry_run_counts_everything_without_calling_github(self, tmp_path: Path) -> None:
+        offline = fake_gh(tmp_path / "bin", "To use GitHub CLI in a GitHub Actions workflow, set the GH_TOKEN")
         result = subprocess.run(
             [sys.executable, str(SCRIPT), "bootstrap", "--dry-run"],
             cwd=ROOT,
             capture_output=True,
             text=True,
             check=False,
+            env={**os.environ, "PATH": f"{offline}{os.pathsep}{os.environ['PATH']}"},
         )
         assert result.returncode == 0, result.stderr
         assert result.stdout.splitlines()[-1] == "8 phases, 68 epics, 262 tickets, 595 blocked-by"

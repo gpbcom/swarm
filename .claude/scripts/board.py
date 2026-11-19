@@ -427,6 +427,9 @@ class Board:
         wanted = dict(LABELS)
         for number, _ in enumerate(PHASE_PAGES):
             wanted[f"phase:P{number}"] = (PHASE_COLOURS[number], f"Phase P{number} of the roadmap")
+        if self.dry_run:
+            print(f"🏷️  {len(wanted)} labels")
+            return
         existing = {label["name"] for label in gh(["label", "list", "-R", REPO, "--limit", "200", "--json", "name"])}
         for name, (colour, description) in wanted.items():
             if name not in existing and not self.dry_run:
