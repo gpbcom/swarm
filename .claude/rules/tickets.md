@@ -104,7 +104,8 @@ ticket runs in parallel, the more tickets each sprint can close.
 3. `EXPLAIN.md` and `PROGRESS.md` are written, with the evidence in `tests-evidences/`.
 
 A failed check or a requested change goes back to the agent that owns the files, at most twice; then the ticket
-stops and the person is told.
+stops and the person is told. A check that fails because of the environment (a missing tool or module, flagged
+`environment` by `checks.py`) goes to no agent: the run stops at once and the person fixes the environment.
 
 **Why:** "done" must mean merged code that works and that someone else can understand.
 

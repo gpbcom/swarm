@@ -63,7 +63,7 @@ const VERDICT = {
       type: 'array',
       items: {
         type: 'object',
-        properties: { check: { type: 'string' }, file: { type: 'string' }, detail: { type: 'string' } },
+        properties: { check: { type: 'string' }, file: { type: 'string' }, detail: { type: 'string' }, environment: { type: 'boolean' } },
         required: ['check', 'file', 'detail'],
       },
     },
@@ -241,8 +241,14 @@ for (let round = 0; round <= MAX_FIX_ROUNDS; round++) {
   verdict = await agent(`Verify ticket ${ID} on ticket/${ID}.`, { agentType: 'verifier', schema: VERDICT, phase: 'Verify', label: `verifier round ${round + 1}` })
   note(`Verify ${round + 1}${verdict && verdict.not_applicable && verdict.not_applicable.length ? ` (${verdict.not_applicable.length} not applicable)` : ''}`, 'verifier', verdict && verdict.passed ? '✅ passed' : `❌ ${verdict ? verdict.failures.length : '?'} failures`)
   if (!verdict || verdict.passed || round === MAX_FIX_ROUNDS) break
+  // TKT-6: a missing tool or module is the environment's fault; fixers cannot repair it, so stop at once.
+  if (verdict.failures.some(f => f.environment)) {
+    log(`Environment failure (${verdict.failures.filter(f => f.environment).map(f => f.check).join(', ')}): no fix round, the person fixes the environment`)
+    break
+  }
   await fixRound(verdict.failures, 'Verify')
 }
+const environmentFailure = Boolean(verdict && !verdict.passed && verdict.failures.some(f => f.environment))
 
 phase('Review')
 // TKT-12: round 1 reviews the whole ticket; later rounds only confirm the fixes. Only blocking findings are fixed;
@@ -292,7 +298,7 @@ await agent(
   `Finally run python3 .claude/scripts/progress.py timings --ticket ${ID} --write. ` +
   (done
     ? `Write docs/tickets/${ID}/EXPLAIN.md from TICKET.md, the diff develop~1...develop and these accepted assumptions: ${JSON.stringify(review.assumptions_accepted)}; set TICKET.md status to "✅ Done".`
-    : `Add a row "Stopped: ${verdict && !verdict.passed ? 'checks failing' : 'blocking review findings left after the fix rounds; the person decides'}" (❌) with the open failures or findings: ${JSON.stringify(verdict && !verdict.passed ? verdict.failures : blocking)}.`) +
+    : `Add a row "Stopped: ${environmentFailure ? 'environment problem (missing tool or module), the person fixes the environment and re-runs' : verdict && !verdict.passed ? 'checks failing' :'blocking review findings left after the fix rounds; the person decides'}" (❌) with the open failures or findings: ${JSON.stringify(verdict && !verdict.passed ? verdict.failures : blocking)}.`) +
   (followUps.length ? ` Add a section "## 🔜 Follow-ups" to PROGRESS.md (and to EXPLAIN.md if written) listing these non-blocking findings, one row each (file, what to change): ${JSON.stringify(followUps.map(f => ({ file: f.file, change: f.change })))}.` : ''),
   { agentType: 'scribe', label: `scribe ${ID}` },
 )
@@ -306,5 +312,7 @@ return {
   review: review ? (blocking.length ? `${blocking.length} blocking left` : 'approved') : 'not run',
   followUps: followUps.length,
   assumptions,
-  next: done ? `Merged into develop locally. Push yourself when you want: the harness never pushes.` : `See docs/tickets/${ID}/PROGRESS.md`,
+  next: done ? `Merged into develop locally. Push yourself when you want: the harness never pushes.`
+    : environmentFailure ? `Fix the environment (see the failing checks in docs/tickets/${ID}/PROGRESS.md), then run /ticket-run ${ID} again`
+    : `See docs/tickets/${ID}/PROGRESS.md`,
 }

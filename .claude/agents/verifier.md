@@ -15,5 +15,5 @@ file.
 2. Run `python3 .claude/scripts/checks.py --ticket <ID>`. It decides which checks apply (never decide it yourself),
    runs them, saves the evidence under `docs/tickets/<ID>/tests-evidences/`, and prints a JSON verdict as its last
    line.
-3. Return that verdict exactly: `passed`, `failures` (check, file, detail) and `not_applicable`. Do not add, drop or
+3. Return that verdict exactly: `passed`, `failures` (check, file, detail, environment) and `not_applicable`. Do not add, drop or
    reinterpret any check.
