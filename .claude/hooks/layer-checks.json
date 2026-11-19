@@ -1,0 +1,242 @@
+{
+  "max_blocks": 2,
+  "rules": [
+    {
+      "name": "ruff check",
+      "match": "^(?:services|packages/python|tests)/.+\\.py$",
+      "run": [
+        "uv",
+        "run",
+        "ruff",
+        "check",
+        "{files}"
+      ]
+    },
+    {
+      "name": "ruff format",
+      "match": "^(?:services|packages/python|tests)/.+\\.py$",
+      "run": [
+        "uv",
+        "run",
+        "ruff",
+        "format",
+        "--check",
+        "{files}"
+      ]
+    },
+    {
+      "name": "mypy {1}",
+      "match": "^services/([^/]+)/src/.+\\.py$",
+      "run": [
+        "uv",
+        "run",
+        "mypy",
+        "services/{1}/src"
+      ]
+    },
+    {
+      "name": "mypy {1}",
+      "match": "^packages/python/([^/]+)/src/.+\\.py$",
+      "run": [
+        "uv",
+        "run",
+        "mypy",
+        "packages/python/{1}/src"
+      ]
+    },
+    {
+      "name": "pytest {1}/{2}",
+      "match": "^services/([^/]+)/src/[^/]+/(.+)/[^/]+\\.py$",
+      "run": [
+        "uv",
+        "run",
+        "pytest",
+        "services/{1}/tests/{2}",
+        "-n",
+        "2"
+      ],
+      "needs": "services/{1}/tests/{2}",
+      "skip_when_only_tests": true
+    },
+    {
+      "name": "pytest {1}/{2}",
+      "match": "^packages/python/([^/]+)/src/[^/]+/(.+)/[^/]+\\.py$",
+      "run": [
+        "uv",
+        "run",
+        "pytest",
+        "packages/python/{1}/tests/{2}",
+        "-n",
+        "2"
+      ],
+      "needs": "packages/python/{1}/tests/{2}",
+      "skip_when_only_tests": true
+    },
+    {
+      "name": "pytest harness {1}",
+      "match": "^\\.claude/(?:hooks|scripts|skills/[^/]+/scripts)/([^/]+)\\.py$",
+      "run": [
+        "uv",
+        "run",
+        "pytest",
+        "tests/harness/{1}",
+        "-n",
+        "2"
+      ],
+      "needs": "tests/harness/{1}",
+      "skip_when_only_tests": true
+    },
+    {
+      "name": "cargo fmt {1}",
+      "match": "^packages/rust/([^/]+)/",
+      "run": [
+        "cargo",
+        "fmt",
+        "--check",
+        "--manifest-path",
+        "packages/rust/{1}/Cargo.toml"
+      ],
+      "needs": "packages/rust/{1}/Cargo.toml",
+      "skip_when_only_tests": true
+    },
+    {
+      "name": "cargo clippy {1}",
+      "match": "^packages/rust/([^/]+)/",
+      "run": [
+        "cargo",
+        "clippy",
+        "--manifest-path",
+        "packages/rust/{1}/Cargo.toml",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "needs": "packages/rust/{1}/Cargo.toml",
+      "skip_when_only_tests": true
+    },
+    {
+      "name": "cargo test {1}",
+      "match": "^packages/rust/([^/]+)/",
+      "run": [
+        "cargo",
+        "test",
+        "--manifest-path",
+        "packages/rust/{1}/Cargo.toml"
+      ],
+      "needs": "packages/rust/{1}/Cargo.toml",
+      "skip_when_only_tests": true
+    },
+    {
+      "name": "pnpm lint {1}/{2}",
+      "match": "^(frontends|packages/ts)/([^/]+)/",
+      "run": [
+        "pnpm",
+        "--filter",
+        "./{1}/{2}",
+        "run",
+        "--if-present",
+        "lint"
+      ],
+      "needs": "{1}/{2}/package.json"
+    },
+    {
+      "name": "pnpm typecheck {1}/{2}",
+      "match": "^(frontends|packages/ts)/([^/]+)/",
+      "run": [
+        "pnpm",
+        "--filter",
+        "./{1}/{2}",
+        "run",
+        "--if-present",
+        "typecheck"
+      ],
+      "needs": "{1}/{2}/package.json"
+    },
+    {
+      "name": "pnpm test {1}/{2}",
+      "match": "^(frontends|packages/ts)/([^/]+)/",
+      "run": [
+        "pnpm",
+        "--filter",
+        "./{1}/{2}",
+        "run",
+        "--if-present",
+        "test"
+      ],
+      "needs": "{1}/{2}/package.json",
+      "skip_when_only_tests": true
+    },
+    {
+      "name": "terraform fmt {1}",
+      "match": "^(deploy/terraform/.+?)(?:/tests)?/[^/]+\\.(?:tf|tftest\\.hcl)$",
+      "run": [
+        "terraform",
+        "fmt",
+        "-check",
+        "-recursive",
+        "{1}"
+      ]
+    },
+    {
+      "name": "terraform init {1}",
+      "match": "^(deploy/terraform/.+?)(?:/tests)?/[^/]+\\.(?:tf|tftest\\.hcl)$",
+      "run": [
+        "terraform",
+        "-chdir={1}",
+        "init",
+        "-backend=false",
+        "-input=false"
+      ],
+      "skip_when_only_tests": true
+    },
+    {
+      "name": "terraform validate {1}",
+      "match": "^(deploy/terraform/.+?)(?:/tests)?/[^/]+\\.(?:tf|tftest\\.hcl)$",
+      "run": [
+        "terraform",
+        "-chdir={1}",
+        "validate"
+      ],
+      "skip_when_only_tests": true
+    },
+    {
+      "name": "terraform test {1}",
+      "match": "^(deploy/terraform/.+?)(?:/tests)?/[^/]+\\.(?:tf|tftest\\.hcl)$",
+      "run": [
+        "terraform",
+        "-chdir={1}",
+        "test"
+      ],
+      "needs": "{1}/tests",
+      "skip_when_only_tests": true
+    },
+    {
+      "name": "specs check",
+      "match": "^(?:docs/specs/|\\.claude/skills/write-specs/)",
+      "run": [
+        "python3",
+        ".claude/skills/write-specs/scripts/specs.py",
+        "check"
+      ]
+    },
+    {
+      "name": "check_ticket {1}",
+      "match": "^docs/tickets/(T\\d\\.\\d{2})/TICKET\\.md$",
+      "run": [
+        "python3",
+        ".claude/skills/ticket/scripts/check_ticket.py",
+        "{1}"
+      ]
+    },
+    {
+      "name": "check_plan {1}",
+      "match": "^docs/tickets/(T\\d\\.\\d{2})/PLAN\\.md$",
+      "run": [
+        "python3",
+        ".claude/skills/ticket/scripts/check_plan.py",
+        "{1}"
+      ]
+    }
+  ]
+}
