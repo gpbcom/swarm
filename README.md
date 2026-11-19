@@ -175,6 +175,8 @@ uv run ruff check services packages tests
 uv run mypy services/gateway/src
 uv run pytest services/gateway/tests -n 2
 uv run pytest tests/conventions
+uv run mypy packages/python/swarm-lifecycle/src packages/python/swarm-catalog/src packages/python/swarm-logging/src
+uv run pytest packages/python/swarm-lifecycle/tests packages/python/swarm-catalog/tests packages/python/swarm-logging/tests
 pnpm turbo run build
 ```
 
@@ -191,7 +193,7 @@ Terraform creates a cell's machines, network and k3s cluster. Follow
 | [packages/](packages/) | Shared code: `python/` (uv), `rust/` (Cargo and PyO3) and `ts/` (pnpm) |
 | [frontends/](frontends/) | The front ends, one folder and one image each, with their Playwright tests |
 | [deploy/terraform/](deploy/terraform/README.md) | One module per building block, one root per cell |
-| [tests/](tests/) | The convention tests, run against every service |
+| [tests/](tests/) | The convention tests, run against every service and every Python package |
 | [docs/](docs/) | The specifications, the research and the tickets |
 
 ## 🤝 How we build Swarm
