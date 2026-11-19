@@ -72,10 +72,10 @@ class TestPythonWorkflow:
     def test_permissions_are_read_only(self) -> None:
         assert self.load().get("permissions") == self.READ_ONLY_PERMISSIONS
 
-    def test_there_are_exactly_two_jobs(self) -> None:
-        assert sorted(self.jobs()) == ["repository", "services"]
+    def test_there_are_exactly_three_jobs(self) -> None:
+        assert sorted(self.jobs()) == ["packages", "repository", "services"]
 
-    @pytest.mark.parametrize("name", ["services", "repository"])
+    @pytest.mark.parametrize("name", ["services", "repository", "packages"])
     def test_each_job_runs_on_ubuntu(self, name: str) -> None:
         assert self.job(name)["runs-on"] == "ubuntu-latest"
 
@@ -148,3 +148,37 @@ class TestPythonWorkflow:
         run = self.run_with("repository", "uv run pytest")
         assert "tests" in run
         assert "-n 2" in run
+
+    def test_the_packages_job_depends_on_the_repository_input(self) -> None:
+        assert "inputs.repository" in str(self.job("packages")["if"])
+
+    def test_the_packages_job_checks_out_then_sets_up_uv_then_syncs(self) -> None:
+        uses = self.uses("packages")
+        assert uses[0].startswith("actions/checkout@")
+        assert uses[1].startswith("astral-sh/setup-uv@")
+        assert self.run_index("packages", "uv sync --locked") == 0
+
+    def test_the_packages_job_runs_its_checks_in_order(self) -> None:
+        commands = [
+            "uv run ruff check",
+            "uv run ruff format --check",
+            "uv run mypy",
+            "uv run pytest",
+            "uv run swarm-models-schemas --check",
+        ]
+        indexes = [self.run_index("packages", command) for command in commands]
+        assert indexes == sorted(indexes)
+        assert len(set(indexes)) == len(commands)
+
+    @pytest.mark.parametrize(
+        "command",
+        ["uv run ruff check", "uv run ruff format --check", "uv run mypy", "uv run pytest"],
+    )
+    def test_each_packages_tool_targets_the_python_packages(self, command: str) -> None:
+        assert "packages/python" in self.run_with("packages", command)
+
+    def test_the_packages_job_runs_the_tests_on_two_workers(self) -> None:
+        assert "-n 2" in self.run_with("packages", "uv run pytest")
+
+    def test_the_packages_job_never_expands_an_expression_inside_a_run(self) -> None:
+        assert all("${{" not in run for run in self.runs("packages"))
