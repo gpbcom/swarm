@@ -111,7 +111,7 @@ class TestLoggingConfigurator:
             "root": {"level": "INFO", "handlers": ["file"]},
         }
         path = self.write_config(tmp_path, yaml.safe_dump(configuration))
-        LoggingConfigurator(LoggingConfig(path=path)).configure()
+        LoggingConfigurator(LoggingConfig(path=str(path))).configure()
         logging.getLogger("tests.logging_configurator").info("a custom line")
         self.flush_root()
         assert (tmp_path / "out").is_dir()
@@ -126,7 +126,7 @@ class TestLoggingConfigurator:
     def test_an_unreadable_configuration_is_refused(self, tmp_path: Path, content: Optional[str]) -> None:
         path = tmp_path / "missing.yaml" if content is None else self.write_config(tmp_path, content)
         with pytest.raises(SELoggingConfigurationUnreadableError) as raised:
-            LoggingConfigurator(LoggingConfig(path=path)).configure()
+            LoggingConfigurator(LoggingConfig(path=str(path))).configure()
         assert isinstance(raised.value, SELoggingError)
 
     def test_a_handler_with_an_unknown_class_is_refused_with_its_cause(self, tmp_path: Path) -> None:
@@ -137,6 +137,6 @@ class TestLoggingConfigurator:
         }
         path = self.write_config(tmp_path, yaml.safe_dump(configuration))
         with pytest.raises(SELoggingConfigurationRefusedError) as raised:
-            LoggingConfigurator(LoggingConfig(path=path)).configure()
+            LoggingConfigurator(LoggingConfig(path=str(path))).configure()
         assert isinstance(raised.value, SELoggingError)
         assert raised.value.__cause__ is not None

@@ -13,6 +13,7 @@ class SampleRunnable(Runnable):
 
     def __init__(self) -> None:
         """Create a sample that has not run yet."""
+        super().__init__()
         self.executed = False
 
     ############################
