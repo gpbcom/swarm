@@ -58,6 +58,7 @@ BRANCH = "develop"
 BLOB = f"https://github.com/{REPO}/blob/{BRANCH}/docs/specs/roadmap/"
 PROJECT_TITLE = "Swarm roadmap"
 PAUSE_S = 1.0
+ALREADY_LINKED = re.compile(r"already been taken|already exists|already a sub-issue|duplicate sub-issue", re.IGNORECASE)
 STATUSES = [
     ("backlog", "📥 Backlog", "GRAY", "Waits for a prerequisite ticket"),
     ("ready", "✅ Ready", "BLUE", "Every prerequisite merged: can start"),
@@ -99,8 +100,12 @@ def git_ahead(home: Path) -> bool:
 ################
 
 
-def gh(args: List[str], payload: Optional[Json] = None) -> Json:
-    """Run ``gh`` and return its JSON output, waiting and retrying when GitHub throttles."""
+def gh(args: List[str], payload: Optional[Json] = None, tolerate_existing: bool = False) -> Json:
+    """Run ``gh`` and return its JSON output, waiting and retrying when GitHub throttles.
+
+    With ``tolerate_existing``, a link GitHub already holds (made just before a stop, not yet recorded) counts as made:
+    ``None`` is returned instead of stopping, so that a resumed bootstrap goes on.
+    """
     for attempt in range(12):
         result = subprocess.run(
             ["gh", *args],
@@ -112,6 +117,8 @@ def gh(args: List[str], payload: Optional[Json] = None) -> Json:
         if result.returncode == 0:
             return json.loads(result.stdout) if result.stdout.strip() else None
         error = result.stderr + result.stdout
+        if tolerate_existing and ALREADY_LINKED.search(error):
+            return None
         if re.search(
             r"rate limit|abuse|was submitted too quickly|HTTP 403|HTTP 429|HTTP 502|timeout", error, re.IGNORECASE
         ):
@@ -123,8 +130,10 @@ def gh(args: List[str], payload: Optional[Json] = None) -> Json:
     raise SystemExit("GitHub kept throttling: run the same command again later, it resumes.")
 
 
-def gql(query: str, **variables: Json) -> Dict[str, Json]:
-    data = gh(["api", "graphql", "--input", "-"], {"query": query, "variables": variables})
+def gql(query: str, *, tolerate_existing: bool = False, **variables: Json) -> Dict[str, Json]:
+    data = gh(["api", "graphql", "--input", "-"], {"query": query, "variables": variables}, tolerate_existing)
+    if data is None and tolerate_existing:
+        return {}
     assert isinstance(data, dict)
     if data.get("errors"):
         raise SystemExit(f"GraphQL error: {data['errors']}")
@@ -548,6 +557,7 @@ class Board:
                 continue
             gql(
                 "mutation($i:ID!,$s:ID!){ addSubIssue(input:{issueId:$i,subIssueId:$s}){ clientMutationId } }",
+                tolerate_existing=True,
                 i=self.state["issues"][parent]["node"],
                 s=self.state["issues"][child]["node"],
             )
@@ -559,6 +569,7 @@ class Board:
                     continue
                 gql(
                     "mutation($i:ID!,$b:ID!){ addBlockedBy(input:{issueId:$i,blockingIssueId:$b}){ clientMutationId } }",
+                    tolerate_existing=True,
                     i=self.state["issues"][ticket["id"]]["node"],
                     b=self.state["issues"][dep]["node"],
                 )
