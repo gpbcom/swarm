@@ -9,7 +9,8 @@ workspace with no member crate, no TypeScript workspace package, no Python sourc
 ``not_applicable`` with its reason. Only project code is checked with the AGENT.md tools (``services/``, ``packages/``,
 ``frontends/``, ``tests/``, ``deploy/``); ``.claude/`` and ``docs/`` are covered by ``specs.py check``, which always
 runs. Each check's output is saved to ``docs/tickets/<ID>/tests-evidences/<check>.txt``. The last line printed is
-the JSON verdict: ``{"passed": bool, "failures": [{"check", "file", "detail"}], "not_applicable": [...], "passed_checks": [...]}``.
+the JSON verdict: ``{"passed": bool, "failures": [{"check", "file", "detail", "environment"}], "not_applicable": [...], "passed_checks": [...]}``.
+A failure with ``environment: true`` comes from a missing tool or module, not from the code.
 """
 
 from __future__ import annotations
@@ -19,11 +20,14 @@ import re
 import subprocess
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple, Union
 
 ROOT = Path(__file__).resolve().parents[2]
 PROJECT_PREFIXES = ("services/", "packages/", "frontends/", "tests/", "deploy/")
 TIMEOUT_S = 900
+# A failure whose output holds one of these is caused by the environment (a missing tool or module), not by the
+# ticket's code: fixer agents cannot repair it, so the run stops and the person fixes the environment (TKT-6).
+ENVIRONMENT_MARKERS = ("ModuleNotFoundError", "No module named", "command not found")
 
 
 def run(command: List[str], cwd: Path = ROOT) -> Tuple[int, str]:
@@ -45,7 +49,7 @@ class Checks:
     def __init__(self, ticket: str) -> None:
         self.evidence = ROOT / "docs" / "tickets" / ticket / "tests-evidences"
         self.evidence.mkdir(parents=True, exist_ok=True)
-        self.failures: List[Dict[str, str]] = []
+        self.failures: List[Dict[str, Union[str, bool]]] = []
         self.not_applicable: List[str] = []
         self.passed: List[str] = []
 
@@ -57,7 +61,8 @@ class Checks:
             self.passed.append(name)
             return True
         detail = "\n".join(out.splitlines()[-12:])
-        self.failures.append({"check": name, "file": file, "detail": detail[:1500]})
+        environment = code == 127 or any(marker in out for marker in ENVIRONMENT_MARKERS)
+        self.failures.append({"check": name, "file": file, "detail": detail[:1500], "environment": environment})
         return False
 
     def skip(self, name: str, reason: str) -> None:
