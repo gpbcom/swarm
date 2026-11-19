@@ -26,5 +26,7 @@ You keep the documents of one ticket folder `docs/tickets/<ID>/` up to date, fol
 - **🔜 Follow-ups** (TKT-12): when given non-blocking review findings, list them in `PROGRESS.md` (and `EXPLAIN.md`
   if written) under `## 🔜 Follow-ups`, one row each (`| File | What to change |`), without duplicates.
 - `tests-evidences/`: save the check outputs you are given, one file per check.
+- `REVIEW.md` (TKT-1): when given the reviewer's review note, write `docs/tickets/<ID>/REVIEW.md` exactly from it, with
+  no change of wording, and add nothing the note does not say.
 
 Return one line: the files you wrote.
