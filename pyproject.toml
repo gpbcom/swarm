@@ -1,25 +1,34 @@
-[project]
-name = "swarm"
-version = "0.1.0"
-description = "Add your description here"
-readme = "README.md"
-requires-python = ">=3.12"
-dependencies = [
-    "babel>=2.18.0",
-    "fastapi>=0.164.0",
-    "langchain>=1.5.0",
-    "langgraph>=1.2.22",
-    "pydantic>=2.14.3",
-]
-
-[project.scripts]
-swarm = "swarm:main"
-
-[build-system]
-requires = ["uv_build>=0.12.21,<0.13.0"]
-build-backend = "uv_build"
+[tool.uv.workspace]
+members = ["services/*", "packages/python/*"]
 
 [dependency-groups]
 dev = [
+    "maturin>=1.7",
+    "mypy>=1.10",
     "pillow>=11.0",
+    "pytest>=8.0",
+    "pytest-asyncio>=0.24",
+    "pytest-xdist>=3.5",
+    "ruff>=0.6",
 ]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+# AGENT.md (Typing) requires Optional, List, Dict, Tuple, Set and Union from typing: the pyupgrade rules that
+# rewrite them are ignored so that the linter follows the project's rule.
+ignore = ["UP006", "UP007", "UP035", "UP045"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+pythonpath = ["."]
+testpaths = ["tests", "services/gateway/tests"]
+
+[tool.mypy]
+files = ["services/gateway/src"]
+mypy_path = ["services/gateway/src"]
+explicit_package_bases = true

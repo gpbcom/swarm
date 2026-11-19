@@ -1,0 +1,5 @@
+$ terraform validate
+(cwd deploy/terraform/modules/self-hosted/dns)
+
+[32m[1mSuccess![0m The configuration is valid.
+[0m

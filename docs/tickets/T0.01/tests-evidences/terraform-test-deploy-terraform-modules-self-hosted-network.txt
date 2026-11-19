@@ -1,0 +1,13 @@
+$ terraform test
+(cwd deploy/terraform/modules/self-hosted/network)
+
+tests/network.tftest.hcl... [37min progress[0m
+[0m  run "three_machines_give_three_firewalls"... [32mpass[0m[0m
+  run "cluster_cidr_output_is_the_default"... [32mpass[0m[0m
+  run "service_cidr_output_is_the_default"... [32mpass[0m[0m
+  run "an_invalid_api_cidr_is_refused"... [32mpass[0m[0m
+  run "an_invalid_cluster_cidr_is_refused"... [32mpass[0m[0m
+tests/network.tftest.hcl... [37mtearing down[0m
+[0mtests/network.tftest.hcl... [32mpass[0m[0m
+
+[32mSuccess![0m[0m 5 passed, 0 failed.

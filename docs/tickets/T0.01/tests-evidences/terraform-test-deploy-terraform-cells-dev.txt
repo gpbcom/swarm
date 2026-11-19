@@ -1,0 +1,11 @@
+$ terraform test
+(cwd deploy/terraform/cells/dev)
+
+tests/dev.tftest.hcl... [37min progress[0m
+[0m  run "plans_an_empty_k3s_cluster_from_nothing"... [32mpass[0m[0m
+  run "plans_buckets_and_records_when_enabled"... [32mpass[0m[0m
+  run "refuses_a_cell_without_a_server"... [32mpass[0m[0m
+tests/dev.tftest.hcl... [37mtearing down[0m
+[0mtests/dev.tftest.hcl... [32mpass[0m[0m
+
+[32mSuccess![0m[0m 3 passed, 0 failed.

@@ -1,0 +1,66 @@
+== deploy/terraform/cells/dev
+tests/dev.tftest.hcl... in progress
+  run "plans_an_empty_k3s_cluster_from_nothing"... pass
+  run "plans_buckets_and_records_when_enabled"... pass
+  run "refuses_a_cell_without_a_server"... pass
+tests/dev.tftest.hcl... tearing down
+tests/dev.tftest.hcl... pass
+
+Success! 3 passed, 0 failed.
+[exit 0]
+== deploy/terraform/modules/self-hosted/dns
+tests/dns.tftest.hcl... in progress
+  run "creates_one_record_set_per_name"... pass
+  run "refuses_a_zone_without_the_trailing_dot"... pass
+  run "refuses_an_address_that_is_not_ipv4"... pass
+tests/dns.tftest.hcl... tearing down
+tests/dns.tftest.hcl... pass
+
+Success! 3 passed, 0 failed.
+[exit 0]
+== deploy/terraform/modules/self-hosted/k3s
+tests/k3s.tftest.hcl... in progress
+  run "a_single_server_with_two_agents_plans_the_expected_cluster"... pass
+  run "an_empty_server_list_is_refused"... pass
+  run "an_empty_k3s_version_is_refused"... pass
+  run "the_latest_k3s_version_is_refused"... pass
+tests/k3s.tftest.hcl... tearing down
+tests/k3s.tftest.hcl... pass
+
+Success! 4 passed, 0 failed.
+[exit 0]
+== deploy/terraform/modules/self-hosted/machines
+tests/machines.tftest.hcl... in progress
+  run "three_machines_give_three_instances"... pass
+  run "servers_output_lists_the_server"... pass
+  run "agents_output_lists_the_agents"... pass
+  run "a_list_without_a_server_is_refused"... pass
+  run "an_unknown_role_is_refused"... pass
+  run "duplicate_names_are_refused"... pass
+tests/machines.tftest.hcl... tearing down
+tests/machines.tftest.hcl... pass
+
+Success! 6 passed, 0 failed.
+[exit 0]
+== deploy/terraform/modules/self-hosted/network
+tests/network.tftest.hcl... in progress
+  run "three_machines_give_three_firewalls"... pass
+  run "cluster_cidr_output_is_the_default"... pass
+  run "service_cidr_output_is_the_default"... pass
+  run "an_invalid_api_cidr_is_refused"... pass
+  run "an_invalid_cluster_cidr_is_refused"... pass
+tests/network.tftest.hcl... tearing down
+tests/network.tftest.hcl... pass
+
+Success! 5 passed, 0 failed.
+[exit 0]
+== deploy/terraform/modules/self-hosted/object-storage
+tests/object_storage.tftest.hcl... in progress
+  run "creates_one_bucket_per_name"... pass
+  run "refuses_upper_case_bucket_names"... pass
+  run "refuses_too_short_bucket_names"... pass
+tests/object_storage.tftest.hcl... tearing down
+tests/object_storage.tftest.hcl... pass
+
+Success! 3 passed, 0 failed.
+[exit 0]

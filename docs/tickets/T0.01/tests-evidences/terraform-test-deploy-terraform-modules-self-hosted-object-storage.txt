@@ -1,0 +1,11 @@
+$ terraform test
+(cwd deploy/terraform/modules/self-hosted/object-storage)
+
+tests/object_storage.tftest.hcl... [37min progress[0m
+[0m  run "creates_one_bucket_per_name"... [32mpass[0m[0m
+  run "refuses_upper_case_bucket_names"... [32mpass[0m[0m
+  run "refuses_too_short_bucket_names"... [32mpass[0m[0m
+tests/object_storage.tftest.hcl... [37mtearing down[0m
+[0mtests/object_storage.tftest.hcl... [32mpass[0m[0m
+
+[32mSuccess![0m[0m 3 passed, 0 failed.
