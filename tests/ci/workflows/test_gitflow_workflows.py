@@ -34,6 +34,13 @@ class TestGitflowWorkflows:
         assert "SUCCESS|SKIPPED|NEUTRAL" in script
         assert "--match-head-commit" in script
 
+    def test_automerge_may_read_the_checks_and_merge(self) -> None:
+        permissions = cast(Dict[str, str], self.load("automerge.yml")["permissions"])
+        assert permissions["checks"] == "read"
+        assert permissions["statuses"] == "read"
+        assert permissions["contents"] == "write"
+        assert permissions["pull-requests"] == "write"
+
     def test_automerge_keeps_the_gitflow_merge_commit(self) -> None:
         script = self.run_of("automerge.yml", "merge")
         assert "--merge" in script
