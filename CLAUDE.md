@@ -49,12 +49,23 @@ This repository is a proof of concept for mastering the Claude Code harness; dro
   (`.claude/rules/tickets.md`). `/ticket-plan <ID>` writes `docs/tickets/<ID>/TICKET.md` and a task graph in
   `PLAN.md`, then stops; the person approves the plan (`**Plan:** 🟢 Approved`); `/ticket-run <ID>` runs the waves in
   parallel worktrees, integrates, verifies, reviews, writes `EXPLAIN.md` and `IMPLEMENTATION.md` (TKT-14), then commits
-  once and merges into `develop` locally.
+  once and opens its pull request to `develop`, merged by GitHub once CI passes (TKT-15).
+- **Several tickets at once** (TKT-16): each ticket runs in its own worktree `<repository>-tickets/<ID>/` on
+  `feature/<ID>`; the main checkout stays on `develop`. `/ticket-run` checks the start rule first (prerequisites merged,
+  no open ticket on the same areas). `python3 .claude/scripts/tickets.py list|prune|workspace` shows the open tickets,
+  removes the merged ones and writes the VS Code workspace `swarm.code-workspace` with every ticket side by side.
 - **Agents:** `.claude/agents/` (planner and reviewer on opus, workers on sonnet, mechanical work on haiku, TKT-7);
   workflows in `.claude/workflows/`.
 - **Progress every 2 minutes** (TKT-9): when a ticket workflow starts, arm the Monitor tool with
   `python3 .claude/scripts/progress.py watch --every 120 --run <run id>` and relay each exhaustive report to the
   person in full, with its colour icons (phases, every agent with model, duration, tokens and result, tokens by model).
-- **Commits:** no intermediate commit (TKT-5). A ticket's work stays uncommitted on `ticket/<ID>` while it runs, carried
-  between worktrees by `.claude/scripts/ticket_tree.py`, and is committed once, when the ticket is done, then merged
-  into `develop` locally. Nothing is ever pushed, and no commit is made outside the harness unless the person asks.
+- **Commits and GitFlow** (TKT-5, TKT-15): the repository is `gpbcom/swarm` on GitHub. `develop` and `master` change
+  only through pull requests; work happens on `feature/`, `bugfix/`, `release/` and `hotfix/` branches. A ticket's work
+  stays uncommitted in its worktree while it runs, carried between worktrees by `.claude/scripts/ticket_tree.py`, and
+  is committed once, when the ticket is done, then pushed with its pull request. The git hooks of `.githooks/`
+  (`python3 .claude/scripts/tickets.py setup`, once per clone) and `.claude/hooks/guard_git.py` enforce it. No commit
+  or push is made outside the harness unless the person asks.
+- **Board** (TKT-17): the GitHub project **Swarm roadmap** holds one issue per phase, epic and ticket, in columns 📥
+  Backlog, ✅ Ready, 📝 Planned, 🔄 Running, 👀 In review, 🏁 Done. The workflows move the cards; `/board` or
+  `python3 .claude/scripts/board.py show` prints it, and the status line shows the branch, the open tickets and the
+  counts.

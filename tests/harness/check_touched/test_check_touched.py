@@ -95,7 +95,9 @@ class TestCheckTouched:
 
     def test_after_start_only_the_worker_s_own_changes_are_checked(self, tmp_path: Path) -> None:
         main = make_repo(tmp_path, catalogue_text([echo_rule()]))
-        (main / "earlier.txt").write_text("integrated, not committed\n", encoding="utf-8")
+        home = tmp_path / "main-tickets" / "T9.99"
+        git(main, "worktree", "add", "-b", "feature/T9.99", str(home), "develop")
+        (home / "earlier.txt").write_text("integrated, not committed\n", encoding="utf-8")
         worker = add_worktree(main, tmp_path)
         assert run_ticket_tree(worker, "start", "--ticket", "T9.99").returncode == 0
         assert (worker / "earlier.txt").is_file()

@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Carry the uncommitted work of a ticket between worktrees, and commit it once, when the ticket is done (TKT-5).
+"""Carry the uncommitted work of a ticket between worktrees, and commit it once, when the ticket is done (TKT-5, TKT-16).
 
-Usage:
-    python3 .claude/scripts/ticket_tree.py prepare   --ticket T0.07                 (main checkout)
+Usage (any command but start and handoff may run from the main checkout or from the ticket's worktree):
+    python3 .claude/scripts/ticket_tree.py prepare   --ticket T0.07
+    python3 .claude/scripts/ticket_tree.py home      --ticket T0.07
     python3 .claude/scripts/ticket_tree.py status    --ticket T0.07
     python3 .claude/scripts/ticket_tree.py start     --ticket T0.07                 (worker worktree, first step)
     python3 .claude/scripts/ticket_tree.py handoff   --ticket T0.07 --task K01      (worker worktree, last step)
@@ -10,29 +11,35 @@ Usage:
     python3 .claude/scripts/ticket_tree.py diff      --ticket T0.07 [--from TREE] [--name-only]
     python3 .claude/scripts/ticket_tree.py changes   --ticket T0.07 [--write | --check]
     python3 .claude/scripts/ticket_tree.py docs      --ticket T0.07                 (prints nothing when all is well)
-    python3 .claude/scripts/ticket_tree.py finish    --ticket T0.07                 (main checkout)
+    python3 .claude/scripts/ticket_tree.py finish    --ticket T0.07 [--no-pull-request]
 
-Nothing is committed before ``finish``. The work of the ticket lives, uncommitted, in the main checkout on
-``ticket/<ID>``. Instead of commits, the script uses git *trees* (``git write-tree`` on a temporary index), which never
-appear in the history:
+Every ticket lives in its own worktree, its *home*: ``<repository>-tickets/<ID>/`` beside the main checkout, on the
+GitFlow branch ``feature/<ID>`` (TKT-15). The main checkout stays on ``develop``, so several tickets run at once
+(TKT-16). Nothing is committed before ``finish``: the ticket's work stays uncommitted in its home. Instead of commits,
+the script uses git *trees* (``git write-tree`` on a temporary index), which never appear in the history:
 
-- ``prepare`` puts the main checkout on ``ticket/<ID>`` (from ``develop``) and refuses changes outside
-  ``docs/tickets/<ID>/``, which the single commit would otherwise take.
-- ``start`` copies the main checkout's uncommitted work into a fresh worker worktree, and records the tree it starts
-  from in the worktree's git directory (``swarm-base-tree``, also read by ``.claude/hooks/check_touched.py``).
+- ``prepare`` creates the home from ``origin/develop`` (``develop`` without a remote) and moves the ticket's folder
+  ``docs/tickets/<ID>/`` into it from the checkout it runs in. Run again, it keeps the home and its work.
+- ``home`` prints the home's path.
+- ``start`` copies the home's uncommitted work into a fresh worker worktree, and records the tree it starts from in
+  the worktree's git directory (``swarm-base-tree``, also read by ``.claude/hooks/check_touched.py``). A worker created
+  from another commit (``develop`` moved since the ticket started) is first moved to the home's commit.
 - ``handoff`` saves the worker's own changes, from that tree to its current files, as a patch in
   ``<git common dir>/swarm/<ID>/pending/``. Run it again after any later change.
-- ``integrate`` applies the hand-offs to the main checkout in the order given, stops at the first conflict (with
-  ``.rej`` files to resolve by hand, then ``--resolved``), removes the integrated worktrees, and records the task ids
-  (TKT-11). It prints the tree of the integrated work, which ``diff --from`` compares with later.
+- ``integrate`` applies the hand-offs to the home in the order given, stops at the first conflict (with ``.rej``
+  files to resolve by hand, then ``--resolved``), removes the integrated worktrees, and records the task ids (TKT-11).
+  It prints the tree of the integrated work, which ``diff --from`` compares with later.
 - ``changes`` writes the table of changed files and line ranges between ``<!-- changes -->`` markers of
   ``EXPLAIN.md`` (TKT-14), leaving out the ticket's own folder. Every file and every line range in it is a link.
 - ``docs`` checks ``EXPLAIN.md`` and ``IMPLEMENTATION.md`` (TKT-14): the changes table is up to date, no placeholder
   is left, every file and line mentioned is a clickable relative link, and every link resolves (the file exists, the
   line ``#L<n>`` or range ``#L<a>-L<b>`` is inside it, and a ``path:42`` link text matches its ``#L42``). It prints one
   problem per line, and nothing when all is well. ``finish`` refuses to commit while it finds a problem.
-- ``finish`` makes the one commit on ``ticket/<ID>``, merges it into ``develop`` with ``--no-ff``, and removes the
-  state. Nothing is pushed.
+- ``finish`` makes the one commit on ``feature/<ID>``. With a remote ``origin``, it rebases that commit on
+  ``origin/develop`` when ``develop`` moved, pushes the branch and opens its pull request to ``develop`` (``Closes #n``,
+  label ``automerge``): GitHub merges it once CI passes (TKT-15). Without a remote, it merges the branch into
+  ``develop`` in the main checkout with ``--no-ff``. Then it removes the state; the home stays until
+  ``tickets.py prune`` finds the branch merged.
 
 Each command prints JSON (or the diff or table asked for) on stdout, and a failure on stderr with exit code 1.
 """
@@ -55,6 +62,12 @@ JsonData = Union[str, int, bool, None, List["JsonData"], Dict[str, "JsonData"]]
 TICKET_PATTERN = re.compile(r"^T\d\.\d{2}$")
 HUNK_PATTERN = re.compile(r"^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@")
 DEVELOP = "develop"
+REMOTE = "origin"
+BRANCH_PREFIX = "feature/"
+LEGACY_PREFIX = "ticket/"
+TICKETS_SUFFIX = "-tickets"
+AUTOMERGE_LABEL = "automerge"
+GITHUB_STATE = ".claude/github.json"
 STATE_FOLDER = "swarm"
 STATE_FILE = "state.json"
 INTEGRATED_PATCH = "integrated.patch"
@@ -144,6 +157,59 @@ def branch_exists(top: Path, branch: str) -> bool:
     return git(top, "rev-parse", "--verify", "--quiet", f"refs/heads/{branch}", check=False)[0] == 0
 
 
+def ticket_branch(ticket: str) -> str:
+    """Return the GitFlow branch of a ticket (TKT-15)."""
+    return f"{BRANCH_PREFIX}{ticket}"
+
+
+def worktrees(top: Path) -> List[Tuple[Path, str]]:
+    """Return every checkout of the repository with its branch (empty when HEAD is detached), main checkout first."""
+    found: List[Tuple[Path, str]] = []
+    path: Optional[Path] = None
+    for line in git(top, "worktree", "list", "--porcelain")[1].splitlines() + [""]:
+        if line.startswith("worktree "):
+            path = Path(line[len("worktree ") :])
+        elif line.startswith("branch ") and path is not None:
+            found.append((path, line[len("branch refs/heads/") :]))
+            path = None
+        elif not line and path is not None:
+            found.append((path, ""))
+            path = None
+    return found
+
+
+def find_home(top: Path, ticket: str) -> Optional[Path]:
+    """Return the checkout on the ticket's branch (or its branch from before TKT-15), if there is one."""
+    for path, branch in worktrees(top):
+        if branch in (ticket_branch(ticket), f"{LEGACY_PREFIX}{ticket}"):
+            return path
+    return None
+
+
+def home_of(top: Path, ticket: str) -> Path:
+    """Return the ticket's home, the checkout where its uncommitted work lives (TKT-16)."""
+    found = find_home(top, ticket)
+    if found is None:
+        raise TicketTreeError(f"No checkout holds {ticket_branch(ticket)}: run prepare --ticket {ticket} first.")
+    return found
+
+
+def tickets_root(top: Path) -> Path:
+    """Return the folder of the tickets' homes, beside the main checkout."""
+    main = main_checkout(top)
+    return main.parent / f"{main.name}{TICKETS_SUFFIX}"
+
+
+def has_remote(top: Path) -> bool:
+    """Tell whether the repository has the remote the pull requests go to."""
+    return git(top, "remote", "get-url", REMOTE, check=False)[0] == 0
+
+
+def is_clean(top: Path) -> bool:
+    """Tell whether a checkout has no change to its tracked files."""
+    return not git(top, "status", "--porcelain", "--untracked-files=no")[1]
+
+
 def snapshot(top: Path) -> str:
     """Return the tree of every file of the checkout, tracked or not (ignored files excepted), without committing.
 
@@ -221,13 +287,44 @@ def slug(task: str) -> str:
     return re.sub(r"[^A-Za-z0-9._-]+", "_", task)
 
 
-def require_main_on_ticket(top: Path, ticket: str) -> None:
-    """Refuse to go on unless ``top`` is the main checkout on ``ticket/<ID>``."""
-    if is_linked_worktree(top):
-        raise TicketTreeError("Run this command in the main checkout, not in a worker worktree.")
-    branch = current_branch(top)
-    if branch != f"ticket/{ticket}":
-        raise TicketTreeError(f"The main checkout is on {branch or 'a detached HEAD'}, not on ticket/{ticket}.")
+def require_home(top: Path, ticket: str) -> Path:
+    """Return the ticket's home, refusing a worker worktree (whose work is handed off, never integrated in place)."""
+    if is_worker(top):
+        raise TicketTreeError(
+            "Run this command in the main checkout or the ticket's worktree, not in a worker worktree."
+        )
+    return home_of(top, ticket)
+
+
+def is_worker(top: Path) -> bool:
+    """Tell whether ``top`` is a worker worktree of the workflow (a linked worktree on a ``worktree-`` branch)."""
+    return is_linked_worktree(top) and current_branch(top).startswith(WORKTREE_BRANCH_PREFIX)
+
+
+def move_ticket_folder(source: Path, home: Path, ticket: str) -> List[str]:
+    """Move the ticket's files that git does not track from ``source`` into the home, and return their paths."""
+    folder = ticket_folder(ticket)
+    if source.resolve() == home.resolve() or not (source / folder).is_dir():
+        return []
+    untracked = git(source, "ls-files", "--others", "--exclude-standard", "--", folder)[1].splitlines()
+    modified = git(source, "ls-files", "--modified", "--", folder)[1].splitlines()
+    moved: List[str] = []
+    for name in [*untracked, *modified]:
+        target = home / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source / name, target)
+        moved.append(name)
+    for name in untracked:
+        (source / name).unlink()
+    for name in modified:
+        git(source, "checkout", "--", name)
+    leftovers = sorted((source / folder).rglob("*"), reverse=True)
+    for path in leftovers:
+        if path.is_dir() and not any(path.iterdir()):
+            path.rmdir()
+    if (source / folder).is_dir() and not any((source / folder).iterdir()):
+        (source / folder).rmdir()
+    return moved
 
 
 def remove_worktree(main: Path, meta: Dict[str, JsonData]) -> None:
@@ -248,31 +345,44 @@ def remove_worktree(main: Path, meta: Dict[str, JsonData]) -> None:
 
 
 def prepare(top: Path, ticket: str) -> Dict[str, JsonData]:
-    """Put the main checkout on ``ticket/<ID>`` and record where the ticket starts."""
-    if is_linked_worktree(top):
-        raise TicketTreeError("Run prepare in the main checkout, not in a worker worktree.")
-    branch = f"ticket/{ticket}"
-    if current_branch(top) != branch:
-        outside = [
-            name for name in changed_names(top, "HEAD", snapshot(top)) if not name.startswith(ticket_folder(ticket))
-        ]
-        if outside:
-            raise TicketTreeError(
-                f"The main checkout has changes outside {ticket_folder(ticket)}, which the ticket's single commit "
-                f"would take: {', '.join(outside[:20])}. Commit, stash or ignore them, then run again."
-            )
+    """Give the ticket its own worktree on ``feature/<ID>``, move its folder into it, and record where it starts."""
+    if is_worker(top):
+        raise TicketTreeError("Run prepare in the main checkout or the ticket's worktree, not in a worker worktree.")
+    home = find_home(top, ticket)
+    if home is None:
         if not branch_exists(top, DEVELOP):
             git(top, "branch", DEVELOP)
+        start_point = DEVELOP
+        if has_remote(top):
+            git(top, "fetch", "--quiet", REMOTE, DEVELOP, check=False)
+            remote_develop = f"{REMOTE}/{DEVELOP}"
+            if git(top, "rev-parse", "--verify", "--quiet", remote_develop, check=False)[0] == 0:
+                start_point = remote_develop
+        home = tickets_root(top) / ticket
+        if home.exists():
+            raise TicketTreeError(f"{home} exists but holds no ticket branch: move it away, then run again.")
+        home.parent.mkdir(parents=True, exist_ok=True)
+        branch = ticket_branch(ticket)
         if branch_exists(top, branch):
-            git(top, "checkout", branch)
+            git(top, "worktree", "add", str(home), branch)
         else:
-            git(top, "checkout", "-b", branch, DEVELOP)
-    state = load_state(top, ticket)
-    state["base"] = head(top)
-    state["tree"] = snapshot(top)
-    save_state(top, ticket, state)
-    write_patch(top, str(state["base"]), str(state["tree"]), state_dir(top, ticket) / INTEGRATED_PATCH)
-    return {"branch": branch, "base": state["base"], "tree": state["tree"], "integrated": integrated_ids(state)}
+            git(top, "worktree", "add", "--no-track", "-b", branch, str(home), start_point)
+    moved = move_ticket_folder(top, home, ticket)
+    state = load_state(home, ticket)
+    if not state.get("base") or not moved:
+        state["base"] = head(home)
+    state["tree"] = snapshot(home)
+    state["home"] = str(home)
+    save_state(home, ticket, state)
+    write_patch(home, str(state["base"]), str(state["tree"]), state_dir(home, ticket) / INTEGRATED_PATCH)
+    return {
+        "branch": current_branch(home),
+        "home": str(home),
+        "base": state["base"],
+        "tree": state["tree"],
+        "moved": list(moved),
+        "integrated": integrated_ids(state),
+    }
 
 
 def status(top: Path, ticket: str) -> Dict[str, JsonData]:
@@ -283,7 +393,7 @@ def status(top: Path, ticket: str) -> Dict[str, JsonData]:
     """
     state = load_state(top, ticket)
     integrated = integrated_ids(state)
-    branch = f"ticket/{ticket}"
+    branch = f"{LEGACY_PREFIX}{ticket}"
     if branch_exists(top, branch) and branch_exists(top, DEVELOP):
         subjects = git(top, "log", f"{DEVELOP}..{branch}", "--format=%s")[1].splitlines()
         pattern = re.compile(rf"^{re.escape(ticket)} (K\d{{2}}):")
@@ -293,30 +403,36 @@ def status(top: Path, ticket: str) -> Dict[str, JsonData]:
 
 
 def start(top: Path, ticket: str) -> Dict[str, JsonData]:
-    """Copy the main checkout's uncommitted work into this worker worktree and record the tree it starts from."""
-    if not is_linked_worktree(top):
-        raise TicketTreeError("Run start in a worker worktree, not in the main checkout.")
+    """Copy the home's uncommitted work into this worker worktree and record the tree it starts from."""
+    if not is_linked_worktree(top) or find_home(top, ticket) == top:
+        raise TicketTreeError("Run start in a worker worktree, not in the main checkout or the ticket's worktree.")
     folder = git_dir(top)
     marker = folder / BASE_TREE_FILE
     if marker.is_file() and (folder / TICKET_FILE).read_text(encoding="utf-8").strip() == ticket:
         return {"started": False, "base_tree": marker.read_text(encoding="utf-8").strip(), "note": "already started"}
-    main = main_checkout(top)
-    if head(top) != head(main):
-        raise TicketTreeError(f"This worktree starts at {head(top)[:9]} but the main checkout is at {head(main)[:9]}.")
+    home = home_of(top, ticket)
     if snapshot(top) != git(top, "rev-parse", "HEAD^{tree}")[1]:
         raise TicketTreeError("This worktree already has changes: run start before changing anything.")
-    main_tree = snapshot(main)
+    moved_from = ""
+    if head(top) != head(home):
+        moved_from = head(top)
+        git(top, "reset", "--hard", "--quiet", head(home))
+    home_tree = snapshot(home)
     with tempfile.TemporaryDirectory() as temporary:
         patch = Path(temporary) / "start.patch"
-        write_patch(main, head(main), main_tree, patch)
+        write_patch(home, head(home), home_tree, patch)
         if patch.stat().st_size:
             git(top, "apply", "--binary", "--whitespace=nowarn", str(patch))
     base_tree = snapshot(top)
-    if base_tree != main_tree:
-        raise TicketTreeError("The copy of the main checkout's work differs from it: check .gitignore and file modes.")
+    if base_tree != home_tree:
+        raise TicketTreeError("The copy of the ticket's work differs from it: check .gitignore and file modes.")
     marker.write_text(base_tree + "\n", encoding="utf-8")
     (folder / TICKET_FILE).write_text(ticket + "\n", encoding="utf-8")
-    return {"started": True, "base_tree": base_tree, "files": len(changed_names(top, "HEAD", base_tree))}
+    result: Dict[str, JsonData] = {"started": True, "base_tree": base_tree, "home": str(home)}
+    result["files"] = len(changed_names(top, "HEAD", base_tree))
+    if moved_from:
+        result["moved_from"] = moved_from
+    return result
 
 
 def handoff(top: Path, ticket: str, task: str) -> Dict[str, JsonData]:
@@ -342,8 +458,8 @@ def handoff(top: Path, ticket: str, task: str) -> Dict[str, JsonData]:
 
 
 def integrate(top: Path, ticket: str, tasks: List[str], resolved: bool) -> Tuple[Dict[str, JsonData], int]:
-    """Apply the hand-offs of ``tasks`` to the main checkout, in order, stopping at the first conflict."""
-    require_main_on_ticket(top, ticket)
+    """Apply the hand-offs of ``tasks`` to the ticket's home, in order, stopping at the first conflict."""
+    top = require_home(top, ticket)
     left = rejects(top)
     if left:
         raise TicketTreeError(f"Resolve and delete these .rej files first: {', '.join(left)}.")
@@ -393,6 +509,7 @@ def integrate(top: Path, ticket: str, tasks: List[str], resolved: bool) -> Tuple
 
 def diff(top: Path, ticket: str, from_tree: Optional[str], name_only: bool) -> str:
     """Return the diff of the ticket's uncommitted work, from HEAD or from an earlier integrated tree."""
+    top = require_home(top, ticket)
     base = from_tree or head(top)
     options = ["--name-status"] if name_only else ["--no-color"]
     return git(top, "diff", *options, base, snapshot(top))[1]
@@ -483,6 +600,7 @@ def statuses_key(numstat_path: str, statuses: Dict[str, str]) -> str:
 
 def changes(top: Path, ticket: str, mode: str) -> Tuple[str, int]:
     """Print, write or check the changes table of ``EXPLAIN.md``."""
+    top = require_home(top, ticket)
     table = changes_table(top, ticket)
     if mode == "print":
         return table, 0
@@ -543,6 +661,7 @@ def is_known_file(top: Path, folder: Path, candidate: str) -> bool:
 
 def document_problems(top: Path, ticket: str) -> List[str]:
     """Return every problem of ``EXPLAIN.md`` and ``IMPLEMENTATION.md``, one sentence each (TKT-14)."""
+    top = require_home(top, ticket)
     folder = top / ticket_folder(ticket)
     problems: List[str] = []
     try:
@@ -582,46 +701,174 @@ def documents(top: Path, ticket: str) -> Tuple[str, int]:
     return "\n".join(problems), 1 if problems else 0
 
 
-def finish(top: Path, ticket: str) -> Dict[str, JsonData]:
-    """Make the ticket's single commit, merge it into ``develop`` with ``--no-ff``, and clear the state."""
-    require_main_on_ticket(top, ticket)
-    left = rejects(top)
-    if left:
-        raise TicketTreeError(f"Resolve and delete these .rej files first: {', '.join(left)}.")
-    if snapshot(top) == git(top, "rev-parse", "HEAD^{tree}")[1]:
-        raise TicketTreeError("There is nothing to commit for this ticket.")
-    problems = document_problems(top, ticket)
-    if problems:
-        raise TicketTreeError("Fix the ticket's documents before its commit (TKT-14):\n" + "\n".join(problems))
-    state = load_state(top, ticket)
-    ticket_md = top / ticket_folder(ticket) / "TICKET.md"
-    title = ticket
+def ticket_title(home: Path, ticket: str) -> str:
+    """Return the title of ``TICKET.md`` (``T0.07: Rust core and benchmark gate``), or the ticket ID."""
+    ticket_md = home / ticket_folder(ticket) / "TICKET.md"
     if ticket_md.is_file():
-        heading = next(
-            (line[2:].strip() for line in ticket_md.read_text(encoding="utf-8").splitlines() if line.startswith("# ")),
+        for line in ticket_md.read_text(encoding="utf-8").splitlines():
+            if line.startswith("# "):
+                return line[2:].strip() or ticket
+    return ticket
+
+
+def issue_number(top: Path, ticket: str) -> Optional[int]:
+    """Return the GitHub issue of the ticket, from ``.claude/github.json`` (written by ``board.py bootstrap``)."""
+    for checkout in (top, main_checkout(top)):
+        path = checkout / GITHUB_STATE
+        if path.is_file():
+            issue = json.loads(path.read_text(encoding="utf-8")).get("issues", {}).get(ticket, {})
+            if isinstance(issue, dict) and isinstance(issue.get("number"), int):
+                return int(issue["number"])
+    return None
+
+
+def run_tool(cwd: Path, *args: str) -> Tuple[int, str]:
+    """Run a command other than git (``gh``, a sibling script) and return its exit code and output."""
+    try:
+        result = subprocess.run(list(args), cwd=cwd, capture_output=True, text=True, check=False)
+    except FileNotFoundError:
+        return 127, f"{args[0]} is not installed."
+    return result.returncode, (result.stdout.strip() or result.stderr.strip())
+
+
+def pull_request(home: Path, ticket: str, title: str, tasks: List[str]) -> str:
+    """Open (or find) the ticket's pull request to ``develop``, labelled for the merge once CI passes."""
+    branch = ticket_branch(ticket)
+    code, url = run_tool(home, "gh", "pr", "view", branch, "--json", "url", "--jq", ".url")
+    if code == 0 and url:
+        return url
+    issue = issue_number(home, ticket)
+    folder = ticket_folder(ticket)
+    body = "\n".join(
+        [
+            f"Closes #{issue}" if issue else f"Roadmap ticket {ticket}.",
             "",
-        )
-        title = heading or ticket
-    tasks = integrated_ids(state)
-    git(top, "add", "-A")
-    git(top, "commit", "-m", title, "-m", f"Tasks: {', '.join(tasks) or 'none recorded'}.")
-    commit = head(top)
-    git(top, "checkout", DEVELOP)
-    code, _ = git(
-        top, "merge", "--no-ff", f"ticket/{ticket}", "-m", f"{ticket}: merge ticket/{ticket} into develop", check=False
+            (
+                f"One commit for the whole ticket (TKT-5), worked by the harness in {len(tasks)} tasks: "
+                f"{', '.join(tasks) or 'none recorded'}."
+            ),
+            "",
+            f"- 📖 How it works: [{folder}EXPLAIN.md]({folder}EXPLAIN.md)",
+            f"- ⚖️ Why this way: [{folder}IMPLEMENTATION.md]({folder}IMPLEMENTATION.md)",
+            f"- 👀 Review note: [{folder}REVIEW.md]({folder}REVIEW.md)",
+            f"- ⏱️ Progress and tokens: [{folder}PROGRESS.md]({folder}PROGRESS.md)",
+            "",
+            "Merged into `develop` by the `automerge` workflow once the `ci` checks pass (TKT-15).",
+        ]
+    )
+    run_tool(
+        home,
+        "gh",
+        "label",
+        "create",
+        AUTOMERGE_LABEL,
+        "--color",
+        "0e8a16",
+        "--force",
+        "--description",
+        "Merged into develop once CI passes",
+    )
+    code, url = run_tool(
+        home,
+        "gh",
+        "pr",
+        "create",
+        "--base",
+        DEVELOP,
+        "--head",
+        branch,
+        "--title",
+        title,
+        "--body",
+        body,
+        "--label",
+        AUTOMERGE_LABEL,
     )
     if code != 0:
-        git(top, "merge", "--abort", check=False)
-        git(top, "checkout", f"ticket/{ticket}")
+        raise TicketTreeError(f"The branch is pushed but the pull request could not be opened: {url}")
+    return url.splitlines()[-1]
+
+
+def publish(home: Path, ticket: str, title: str, tasks: List[str], open_pull_request: bool) -> Dict[str, JsonData]:
+    """Rebase the ticket's commit on ``origin/develop`` when needed, push it, and open its pull request."""
+    branch = ticket_branch(ticket)
+    git(home, "fetch", "--quiet", REMOTE, DEVELOP, check=False)
+    remote_develop = f"{REMOTE}/{DEVELOP}"
+    rebased = False
+    known = git(home, "rev-parse", "--verify", "--quiet", remote_develop, check=False)[0] == 0
+    if known and git(home, "merge-base", "--is-ancestor", remote_develop, "HEAD", check=False)[0] != 0:
+        code, _ = git(home, "rebase", remote_develop, check=False)
+        if code != 0:
+            git(home, "rebase", "--abort", check=False)
+            raise TicketTreeError(
+                f"{branch} does not rebase cleanly on {remote_develop}: another ticket changed the same lines. "
+                f"The ticket is committed in {home}: rebase it by hand, then run finish again."
+            )
+        rebased = True
+    code, output = git(home, "push", "--quiet", "--set-upstream", REMOTE, branch, check=False)
+    if code != 0:
+        code, output = git(home, "push", "--quiet", "--force-with-lease", "--set-upstream", REMOTE, branch, check=False)
+    if code != 0:
+        raise TicketTreeError(f"git push {REMOTE} {branch} failed: {output}")
+    result: Dict[str, JsonData] = {"pushed": True, "rebased": rebased, "branch": branch}
+    if open_pull_request:
+        result["pull_request"] = pull_request(home, ticket, title, tasks)
+        board = home / ".claude" / "scripts" / "board.py"
+        if board.is_file():
+            run_tool(home, sys.executable, str(board), "move", "--ticket", ticket, "--status", "review")
+    return result
+
+
+def merge_locally(home: Path, ticket: str) -> str:
+    """Merge the ticket's branch into ``develop`` in the main checkout with ``--no-ff`` (no remote to open a PR on)."""
+    main = main_checkout(home)
+    if current_branch(main) != DEVELOP or not is_clean(main):
         raise TicketTreeError(
-            f"develop does not merge ticket/{ticket} cleanly: the ticket is committed, merge it by hand."
+            f"The ticket is committed on {ticket_branch(ticket)}, but the main checkout is not a clean {DEVELOP}: "
+            f"merge it by hand."
         )
-    merge = head(top)
-    folder = state_dir(top, ticket)
+    code, output = git(
+        main,
+        "merge",
+        "--no-ff",
+        ticket_branch(ticket),
+        "-m",
+        f"{ticket}: merge {ticket_branch(ticket)} into {DEVELOP}",
+        check=False,
+    )
+    if code != 0:
+        git(main, "merge", "--abort", check=False)
+        raise TicketTreeError(f"{DEVELOP} does not merge {ticket_branch(ticket)} cleanly: {output}")
+    return head(main)
+
+
+def finish(top: Path, ticket: str, open_pull_request: bool = True) -> Dict[str, JsonData]:
+    """Make the ticket's single commit on ``feature/<ID>``, then publish it (TKT-15) or merge it locally."""
+    home = require_home(top, ticket)
+    left = rejects(home)
+    if left:
+        raise TicketTreeError(f"Resolve and delete these .rej files first: {', '.join(left)}.")
+    if snapshot(home) == git(home, "rev-parse", "HEAD^{tree}")[1]:
+        raise TicketTreeError("There is nothing to commit for this ticket.")
+    problems = document_problems(home, ticket)
+    if problems:
+        raise TicketTreeError("Fix the ticket's documents before its commit (TKT-14):\n" + "\n".join(problems))
+    state = load_state(home, ticket)
+    title = ticket_title(home, ticket)
+    tasks = integrated_ids(state)
+    git(home, "add", "-A")
+    git(home, "commit", "--quiet", "-m", title, "-m", f"Tasks: {', '.join(tasks) or 'none recorded'}.")
+    result: Dict[str, JsonData] = {"commit": head(home), "home": str(home), "tasks": list(tasks)}
+    if has_remote(home):
+        result.update(publish(home, ticket, title, tasks, open_pull_request))
+        result["commit"] = head(home)
+    else:
+        result.update({"pushed": False, "merge": merge_locally(home, ticket), "branch": DEVELOP})
+    folder = state_dir(home, ticket)
     for meta_path in sorted((folder / PENDING).glob("*.json")) if (folder / PENDING).is_dir() else []:
-        remove_worktree(top, json.loads(meta_path.read_text(encoding="utf-8")))
+        remove_worktree(home, json.loads(meta_path.read_text(encoding="utf-8")))
     shutil.rmtree(folder, ignore_errors=True)
-    return {"commit": commit, "merge": merge, "branch": DEVELOP, "tasks": tasks}
+    return result
 
 
 ########
@@ -633,7 +880,7 @@ def parser() -> argparse.ArgumentParser:
     """Return the command line parser."""
     root = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     commands = root.add_subparsers(dest="command", required=True)
-    for name in ("prepare", "status", "start", "handoff", "integrate", "diff", "changes", "docs", "finish"):
+    for name in ("prepare", "home", "status", "start", "handoff", "integrate", "diff", "changes", "docs", "finish"):
         command = commands.add_parser(name)
         command.add_argument("--ticket", required=True)
         if name in ("handoff", "integrate"):
@@ -643,6 +890,8 @@ def parser() -> argparse.ArgumentParser:
         if name == "diff":
             command.add_argument("--from", dest="from_tree")
             command.add_argument("--name-only", action="store_true")
+        if name == "finish":
+            command.add_argument("--no-pull-request", action="store_true")
         if name == "changes":
             mode = command.add_mutually_exclusive_group()
             mode.add_argument("--write", action="store_true")
@@ -662,6 +911,8 @@ def main() -> int:
         output: Union[str, Dict[str, JsonData]]
         if args.command == "prepare":
             output = prepare(top, args.ticket)
+        elif args.command == "home":
+            output = {"home": str(home_of(top, args.ticket))}
         elif args.command == "status":
             output = status(top, args.ticket)
         elif args.command == "start":
@@ -677,7 +928,7 @@ def main() -> int:
         elif args.command == "docs":
             output, code = documents(top, args.ticket)
         else:
-            output = finish(top, args.ticket)
+            output = finish(top, args.ticket, not args.no_pull_request)
     except TicketTreeError as error:
         print(f"❌ {error}", file=sys.stderr)
         return 1

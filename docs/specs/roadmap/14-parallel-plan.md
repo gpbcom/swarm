@@ -201,16 +201,17 @@ gantt
 
 ## <a id="work-split"></a>🧑‍💻 Work split
 
-Proposed changes to the harness to open several tickets at once. None is built yet: each is a decision for the person, then a harness ticket.
+How the harness runs several tickets at once, under the rules [🎫 TKT-15](../../../.claude/rules/tickets.md#tkt-15),
+[🎫 TKT-16](../../../.claude/rules/tickets.md#tkt-16) and [🎫 TKT-17](../../../.claude/rules/tickets.md#tkt-17).
 
 | Change | What it does |
 | --- | --- |
-| One worktree per ticket | `prepare` creates a worktree on `ticket/<ID>` from `develop` instead of switching the main checkout; the workers branch from it, and `integrate` and `finish` run there. Still one commit per ticket, never pushed ([🎫 TKT-5](../../../.claude/rules/tickets.md#tkt-5)) |
-| Start on merged prerequisites | A ticket starts once every ticket it needs is merged into `develop`, not when its sprint comes; `/ticket-plan` refuses a ticket whose prerequisites are open |
-| Area locks | Two open tickets never change the same service, front end or package; generated files (`specs.py build`, the generated models) are rebuilt after each merge rather than merged |
-| Merge queue | `finish` merges one ticket at a time; when `develop` moved since the ticket started, its tree is applied again to `develop` and the verifier runs again before the commit |
+| One worktree per ticket | `ticket_tree.py prepare` gives each ticket its own worktree `<repository>-tickets/<ID>/` on `feature/<ID>`, from `origin/develop`; the main checkout stays on `develop`. Still one commit per ticket ([🎫 TKT-5](../../../.claude/rules/tickets.md#tkt-5)) |
+| Start on merged prerequisites | `tickets.py check` at the gate of `/ticket-run`: every prerequisite of [gantt/ticket-graph.json](gantt/ticket-graph.json) merged on `origin/develop`, no field ticket before its campaign; `--force` starts anyway, logged |
+| Area locks | The same check refuses a ticket while an open ticket changes one of the same services, front ends or packages |
+| Pull request per ticket | `ticket_tree.py finish` rebases the ticket's commit on `origin/develop` if it moved, pushes it and opens its pull request; the `automerge` workflow merges it once every check passed |
 | Lighter review | Line by line only for identity, isolation and the Simulator's isolation, on tests and screens for the rest, as [🛣️ P0](01-p0-foundations.md#work-split) already plans |
-| Global agent cap | At most 8 agents per ticket ([🎫 TKT-4](../../../.claude/rules/tickets.md#tkt-4)) gives 32 with 4 tickets open: a cap across tickets keeps the usage limits in reach |
+| Board and VS Code | The GitHub project mirrors every ticket's state; `tickets.py workspace` puts `develop` and every open ticket side by side in VS Code; the Claude Code status line shows them |
 
 ## <a id="method"></a>🧮 Method
 

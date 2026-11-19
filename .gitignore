@@ -41,3 +41,5 @@ logs/
 # Helm dependencies are packaged on build and never committed
 deploy/charts/*/charts/
 .VSCodeCounter
+# VS Code workspace of the open tickets, written by .claude/scripts/tickets.py workspace (TKT-16)
+swarm.code-workspace

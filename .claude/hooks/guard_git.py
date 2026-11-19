@@ -1,0 +1,89 @@
+#!/usr/bin/env python3
+"""PreToolUse hook: keep the agents' Bash commands inside GitFlow and TKT-5 (TKT-15).
+
+- Anywhere: ``--no-verify`` (skipping the git hooks of ``.githooks/``) is refused.
+- In a ticket's worktree (``feature/<ID>``) or a worker's (``worktree-*``): ``git commit``, ``merge``, ``rebase``,
+  ``reset``, ``stash``, ``push``, ``cherry-pick``, ``revert`` and ``gh pr merge`` are refused: only
+  ``.claude/scripts/ticket_tree.py`` commits, publishes and merges a ticket (TKT-5).
+- In any other checkout: a push to ``develop`` or ``master`` asks the person first.
+
+Reads the hook's JSON on stdin and prints a decision (``deny`` or ``ask``) as JSON, or nothing to let the command run.
+"""
+
+from __future__ import annotations
+
+import json
+import re
+import subprocess
+import sys
+from typing import Dict, List, Optional, Tuple
+
+HEREDOC = re.compile(r"<<-?\s*['\"]?(\w+)['\"]?")
+QUOTED = re.compile(r"'[^']*'|\"(?:[^\"\\]|\\.)*\"")
+TICKET_CONTEXT = re.compile(r"^(feature/T\d+\.\d{2}|ticket/T\d+\.\d{2}|worktree-.*)$")
+WRITES = re.compile(r"\bgit\s+(?:-C\s+\S+\s+|-c\s+\S+\s+)*(commit|merge|rebase|reset|stash|push|cherry-pick|revert)\b")
+PR_MERGE = re.compile(r"\bgh\s+pr\s+merge\b")
+NO_VERIFY = re.compile(r"\bgit\b[^|;&]*\s(--no-verify|commit\s+(?:[^|;&]*\s)?-n\b)")
+PUSH_PROTECTED = re.compile(r"\bgit\s+(?:-C\s+\S+\s+)*push\b[^|;&]*?(?:\s|:)(develop|master|main)\b")
+
+
+def branch_of(cwd: str) -> str:
+    result = subprocess.run(["git", "-C", cwd, "branch", "--show-current"], capture_output=True, text=True, check=False)
+    return result.stdout.strip()
+
+
+def code_of(command: str) -> str:
+    """Return the command without heredoc bodies and quoted strings: they are text (a message, a script), not options."""
+    lines: List[str] = []
+    ending = ""
+    for line in command.splitlines():
+        if ending:
+            if line.strip() == ending:
+                ending = ""
+            continue
+        heredoc = HEREDOC.search(line)
+        if heredoc:
+            ending = heredoc.group(1)
+        lines.append(line)
+    return QUOTED.sub("''", "\n".join(lines))
+
+
+def decide(command: str, cwd: str) -> Optional[Tuple[str, str]]:
+    """Return (decision, reason) for a Bash command, or None to let it run."""
+    command = code_of(command)
+    if NO_VERIFY.search(command):
+        return "deny", "Skipping the git hooks (--no-verify) is not allowed: they hold the GitFlow rules (TKT-15)."
+    context = TICKET_CONTEXT.match(branch_of(cwd))
+    write = WRITES.search(command) or PR_MERGE.search(command)
+    if context and write:
+        return "deny", (
+            f"`{write.group(0)}` is not run by hand in a ticket's or a worker's worktree (TKT-5): "
+            "workers hand off with `python3 .claude/scripts/ticket_tree.py handoff`, the integrator integrates with "
+            "`ticket_tree.py integrate`, and only `ticket_tree.py finish` commits, pushes and opens the pull request."
+        )
+    target = PUSH_PROTECTED.search(command)
+    if target:
+        return "ask", f"This pushes to {target.group(1)}, which changes through pull requests (TKT-15). Push anyway?"
+    return None
+
+
+def main() -> int:
+    payload: Dict[str, object] = json.loads(sys.stdin.read() or "{}")
+    tool_input = payload.get("tool_input")
+    command = str(tool_input.get("command", "")) if isinstance(tool_input, dict) else ""
+    found = decide(command, str(payload.get("cwd") or "."))
+    if found:
+        decision, reason = found
+        output = {
+            "hookSpecificOutput": {
+                "hookEventName": "PreToolUse",
+                "permissionDecision": decision,
+                "permissionDecisionReason": reason,
+            }
+        }
+        print(json.dumps(output))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

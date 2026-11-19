@@ -1,0 +1,3 @@
+#!/bin/sh
+# GitFlow rules of Swarm (TKT-15), turned on by: python3 .claude/scripts/tickets.py setup
+exec python3 "$(dirname "$0")/../.claude/scripts/gitflow.py" pre-commit "$@"

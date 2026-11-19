@@ -14,7 +14,7 @@ These rules apply to every ticket of the roadmap (`docs/specs/roadmap/`), worked
 | [TKT-2](#tkt-2) | `TICKET.md` states what to deliver and how it is accepted, from the specifications only |
 | [TKT-3](#tkt-3) | `PLAN.md` is a task graph, and nothing is built before the person approves it |
 | [TKT-4](#tkt-4) | Tasks are split to run in parallel as much as possible |
-| [TKT-5](#tkt-5) | Every worker runs in its own worktree and hands its changes off uncommitted; the ticket is committed once, when it is done; nothing is pushed |
+| [TKT-5](#tkt-5) | Every worker runs in its own worktree and hands its changes off uncommitted; the ticket is committed once, when it is done, and reaches `develop` through its pull request |
 | [TKT-6](#tkt-6) | A ticket is done when checks, review and documents are complete |
 | [TKT-7](#tkt-7) | Each agent has a fixed model and effort, chosen for cost and quality |
 | [TKT-8](#tkt-8) | Agents never invent facts; assumptions are recorded and reviewed |
@@ -24,6 +24,9 @@ These rules apply to every ticket of the roadmap (`docs/specs/roadmap/`), worked
 | [TKT-12](#tkt-12) | The review converges: only blocking findings are fixed, later rounds only confirm the fixes |
 | [TKT-13](#tkt-13) | Hooks format the edited files and check the touched layer before a task is handed back |
 | [TKT-14](#tkt-14) | `EXPLAIN.md` explains how the work works, file by file and line by line; `IMPLEMENTATION.md` justifies each choice against its alternatives |
+| [TKT-15](#tkt-15) | GitFlow on GitHub: `feature/<ID>` branches, a pull request per ticket merged once CI passes, hooks that refuse the rest |
+| [TKT-16](#tkt-16) | Several tickets run at once, each in its own worktree, under a start rule and area locks |
+| [TKT-17](#tkt-17) | The GitHub board mirrors the roadmap and every ticket's state, in Claude Code and VS Code too |
 
 ## <a id="tkt-1"></a>TKT-1: Roadmap tickets, one folder each
 
@@ -102,29 +105,33 @@ ticket runs in parallel, the more tickets each sprint can close.
 
 **Rule:**
 
-- The ticket branch is `ticket/<ID>`, created from `develop`. `python3 .claude/scripts/ticket_tree.py prepare` puts the
-  main checkout on it. When it has to switch branch, it refuses a checkout with changes outside `docs/tickets/<ID>/`,
-  which the single commit would otherwise take.
-- **No intermediate commit.** Until the ticket is done, its work (code, tests, documents) stays **uncommitted** in the
-  main checkout on `ticket/<ID>`. No agent runs `git commit`, `git merge`, `git stash` or `git reset`; every step goes
-  through `ticket_tree.py`, which compares git *trees* (never commits) on a temporary index.
-- Every worker runs in its own git worktree, branched from `ticket/<ID>`, and changes only its task's files:
-  - its first step, `ticket_tree.py start`, copies the ticket's uncommitted work (earlier waves, `TICKET.md`,
-    `PLAN.md`) into the worktree and records the tree it starts from;
+- The ticket's branch is `feature/<ID>` (TKT-15), created from `origin/develop`. `python3 .claude/scripts/ticket_tree.py
+  prepare` gives it its own worktree, its *home*, `<repository>-tickets/<ID>/` beside the main checkout, and moves
+  `docs/tickets/<ID>/` into it. The main checkout stays on `develop` (TKT-16).
+- **No intermediate commit.** Until the ticket is done, its work (code, tests, documents) stays **uncommitted** in its
+  home. No agent runs `git commit`, `git merge`, `git rebase`, `git stash`, `git reset` or `git push`: the PreToolUse
+  hook `.claude/hooks/guard_git.py` refuses them in a ticket's or a worker's worktree. Every step goes through
+  `ticket_tree.py`, which compares git *trees* (never commits) on a temporary index.
+- Every worker runs in its own git worktree and changes only its task's files:
+  - its first step, `ticket_tree.py start`, moves the worktree to the home's commit if `develop` moved since, copies
+    the ticket's uncommitted work (earlier waves, `TICKET.md`, `PLAN.md`) into it and records the tree it starts from;
   - its last step, `ticket_tree.py handoff --task <task id>`, saves its own changes since that tree as a patch in the
     shared git directory (`.git/swarm/<ID>/pending/`).
 - After each wave, the **integrator** runs `ticket_tree.py integrate` with the wave's task ids in task order: it applies
-  each patch to the main checkout, stops at the first conflict for the integrator to resolve, removes the integrated
-  worktrees and records the task ids (TKT-11).
+  each patch to the home, stops at the first conflict for the integrator to resolve, removes the integrated worktrees
+  and records the task ids (TKT-11).
 - When the ticket is done (TKT-6), the documents are written first, then the integrator runs `ticket_tree.py finish`:
-  **one commit** on `ticket/<ID>`, titled with the title of `TICKET.md`, merged into `develop` locally with `--no-ff`.
-  The commit and the merge are the last writes of the run, so `PROGRESS.md` does not record them: git does.
-- A ticket that stops keeps its work uncommitted on `ticket/<ID>`, and `/ticket-run` continues it (TKT-11).
-- **Nothing is ever pushed** by the harness.
+  **one commit** on `feature/<ID>`, titled with the title of `TICKET.md`, rebased on `origin/develop` if it moved,
+  pushed, and its pull request opened to `develop` (TKT-15). The commit and the push are the last writes of the run, so
+  `PROGRESS.md` does not record them: git and the pull request do. Without a remote, `finish` merges the branch into
+  `develop` locally with `--no-ff`, as before TKT-15.
+- A ticket that stops keeps its work uncommitted in its home, and `/ticket-run` continues it (TKT-11).
+- **Only `finish` pushes**, and only the ticket's own branch. Nothing is ever pushed to `develop` or `master` by hand
+  (TKT-15).
 
-**Why:** the history of `develop` gets one readable commit per ticket instead of one commit per task and one merge
-per wave, and a ticket that stops halfway leaves nothing half-finished in the history. Parallel agents still never edit
-the same checkout.
+**Why:** the history of `develop` gets one readable commit per ticket and its merge, instead of one commit per task
+and one merge per wave, and a ticket that stops halfway leaves nothing half-finished in the history. Parallel agents,
+and parallel tickets, never edit the same checkout.
 
 **Check:** `git log develop` shows one commit per ticket and its merge; `python3 .claude/scripts/ticket_tree.py status
 --ticket <ID>` lists the tasks integrated so far; the tests of `tests/harness/ticket_tree/` pass.
@@ -305,3 +312,80 @@ table is up to date, no placeholder is left, every file and line is a link, and 
 line inside it); `ticket_tree.py finish` refuses to commit otherwise, and the workflow sends its problems back to the
 explainer once. Both files have every section of their template, and `grep -n 'tkt-14' .claude/rules/tickets.md` finds the summary row
 and the heading.
+
+## <a id="tkt-15"></a>TKT-15: GitFlow on GitHub
+
+**Rule:**
+
+- The repository is `gpbcom/swarm` on GitHub, private. `master` holds the releases, `develop` the next one (the default
+  branch). Work happens on GitFlow branches only: `feature/<name>` (a roadmap ticket is `feature/<ID>`, harness work
+  `feature/harness-<name>`), `bugfix/<name>`, `release/<version>`, `hotfix/<name>`.
+- `develop` and `master` change **only through pull requests**, merged with a merge commit (squash and rebase merges
+  are turned off). A ticket's pull request goes to `develop`, its title is the title of `TICKET.md`
+  (`T0.09: NATS JetStream and Operator accounts`) and its body `Closes #<issue>`. A release goes `release/<version>` →
+  `master`, tagged `v<version>`, then `master` → `develop`; a hotfix the same way.
+- `ticket_tree.py finish` labels the ticket's pull request `automerge`: the workflow `.github/workflows/automerge.yml`
+  merges it once every check (`ci`, `gitflow`, `terraform`) has passed on its head commit, which closes its issue. A
+  failing check leaves it open for the person.
+- `.github/workflows/gitflow.yml` checks every pull request: the branch is a GitFlow branch, it targets the right base,
+  and a ticket's title starts with its ID.
+- The git hooks of `.githooks/` (`python3 .claude/scripts/tickets.py setup`, once per clone) refuse a commit on
+  `develop` or `master`, a commit by a worker, a branch outside GitFlow, a ticket commit without its ID, and a push to
+  `develop` or `master`. `SWARM_GITFLOW_BYPASS=1` lets the person step outside on purpose. The PreToolUse hook
+  `.claude/hooks/guard_git.py` refuses `--no-verify` everywhere and asks before any push to `develop` or `master`.
+- Commits carry the gpbcom identity of this repository (`git config user.email`), never another one.
+
+**Why:** pull requests give every merge its CI run, its review trail and its issue; GitFlow keeps releases apart from
+the work in progress. A private repository of a free account has no branch protection, so the hooks and the
+`automerge` and `gitflow` workflows hold the rules instead.
+
+**Check:** the tests of `tests/harness/gitflow/` and `tests/ci/workflows/test_gitflow_workflows.py` pass;
+`git log --merges develop` shows a merge of a pull request per ticket.
+
+## <a id="tkt-16"></a>TKT-16: Several tickets at once
+
+**Rule:**
+
+- Each running ticket lives in its own worktree, its home `<repository>-tickets/<ID>/` on `feature/<ID>` (TKT-5). The
+  main checkout stays on `develop`, so `/ticket-plan` and `/ticket-run` of several tickets may run at the same time.
+  Every agent of a run but the workers works in the home; `ticket_tree.py` finds it from any checkout.
+- **Start rule**, checked by `python3 .claude/scripts/tickets.py check --ticket <ID>` at the gate of `/ticket-run`:
+  - every prerequisite of the ticket in `docs/specs/roadmap/gantt/ticket-graph.json` is merged on `origin/develop` (its
+    `EXPLAIN.md` is there);
+  - no open ticket changes one of the same areas (a service, a front end, a package): **area lock**;
+  - a field ticket (the fixes of a campaign) starts once its campaign has flown.
+
+  `/ticket-run <ID> --force` starts anyway, on the person's decision, and logs the problems in `PROGRESS.md`.
+- `python3 .claude/scripts/tickets.py list` shows the open tickets, `prune` removes the worktree and branch of each
+  merged one and fast-forwards `develop`, and `workspace` writes `swarm.code-workspace`: `develop` and every open
+  ticket side by side in VS Code, whose Source Control then shows the live, uncommitted work of every ticket at once.
+- At most 8 agents run per ticket (TKT-4); the person keeps the number of tickets open to what they can review
+  ([⛓️ Parallel plan](../../docs/specs/roadmap/14-parallel-plan.md)).
+
+**Why:** most tickets do not need each other ([⛓️ Parallel plan](../../docs/specs/roadmap/14-parallel-plan.md)):
+running them one at a time leaves the agents idle while the person reviews. Area locks keep two tickets from changing
+the same code, so their pull requests merge without conflicts.
+
+**Check:** the tests of `tests/harness/tickets/` and `tests/harness/ticket_tree/` pass.
+
+## <a id="tkt-17"></a>TKT-17: The board
+
+**Rule:**
+
+- The GitHub project **Swarm roadmap** mirrors the roadmap: one issue per phase, epic and ticket, the tickets as
+  sub-issues of their epic and the epics of their phase, one milestone per phase, a **Blocked by** link per
+  prerequisite of the ticket graph. `python3 .claude/scripts/board.py bootstrap` creates them once (resumable) and
+  records them in `.claude/github.json`.
+- Every ticket sits in one column: 📥 Backlog (a prerequisite is open), ✅ Ready, 📝 Planned (`/ticket-plan`),
+  🔄 Running (`/ticket-run`), 👀 In review (pull request open), 🏁 Done (merged). The workflows move the card;
+  `board.py sync` recomputes every column from the repository.
+- The board shows in three places: the project's board view on GitHub, `python3 .claude/scripts/board.py show` (and
+  `/board`) in a terminal, and the Claude Code status line (`.claude/scripts/statusline.py`), which reads the local
+  cache `.git/swarm/board.json` and never waits for GitHub.
+
+**Why:** with several tickets running, the person needs one place that says what runs, what waits for review and what
+can start next, from GitHub, from VS Code and from the terminal alike.
+
+**Check:** the tests of `tests/harness/statusline/` pass; `board.py bootstrap --dry-run` counts every phase, epic and
+ticket of the roadmap.
+

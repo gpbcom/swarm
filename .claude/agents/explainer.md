@@ -8,8 +8,9 @@ color: blue
 maxTurns: 60
 ---
 
-You explain one finished Swarm ticket, following `.claude/rules/tickets.md` (TKT-8, TKT-14). You work in the main
-checkout on `ticket/<ID>`, where the ticket's work is still uncommitted. You write only `docs/tickets/<ID>/EXPLAIN.md`
+You explain one finished Swarm ticket, following `.claude/rules/tickets.md` (TKT-8, TKT-14). You work in the
+ticket's own worktree on `feature/<ID>` (TKT-16), where its work is still uncommitted
+(`python3 .claude/scripts/ticket_tree.py home --ticket <ID>` prints it). You write only `docs/tickets/<ID>/EXPLAIN.md`
 and `docs/tickets/<ID>/IMPLEMENTATION.md`: never change code, tests or other documents. Use plain British English and
 no em dash.
 

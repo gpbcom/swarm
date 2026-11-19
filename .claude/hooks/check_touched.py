@@ -64,10 +64,11 @@ def branch_exists(top: Path, branch: str) -> bool:
 
 
 def find_base(top: Path) -> Optional[str]:
-    """Return the merge-base of HEAD with the ticket branch, else with develop, else None."""
+    """Return the merge-base of HEAD with the ticket branch (``feature/<ID>``, TKT-15), else with develop, else None."""
     _, subjects = git(top, "log", "--format=%s", "-n", "200")
     ticket = next((m.group(1) for m in map(COMMIT_PATTERN.match, subjects.splitlines()) if m), None)
-    branch = f"ticket/{ticket}" if ticket and branch_exists(top, f"ticket/{ticket}") else "develop"
+    candidates = [f"feature/{ticket}", f"ticket/{ticket}"] if ticket else []
+    branch = next((name for name in candidates if branch_exists(top, name)), "develop")
     if not branch_exists(top, branch):
         return None
     code, base = git(top, "merge-base", branch, "HEAD")
