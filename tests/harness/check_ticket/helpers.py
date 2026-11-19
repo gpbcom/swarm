@@ -82,7 +82,7 @@ def valid_ticket_text(ticket_id: str = TICKET_ID) -> str:
         "",
         "## Screens touched",
         "",
-        f"- [Screen](../../specs/screens/{screen.as_posix()})",
+        f"- [Screen](../../specs/{screen.as_posix()})",
         "",
         "## Budgets touched",
         "",
