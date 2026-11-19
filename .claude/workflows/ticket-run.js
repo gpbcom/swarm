@@ -21,9 +21,9 @@ const TASK = {
   properties: {
     id: { type: 'string' }, title: { type: 'string' }, agent: { type: 'string' },
     depends_on: { type: 'array', items: { type: 'string' } }, files: { type: 'array', items: { type: 'string' } },
-    brief: { type: 'string' }, done_when: { type: 'string' }, wave: { type: 'integer' },
+    wave: { type: 'integer' },
   },
-  required: ['id', 'title', 'agent', 'depends_on', 'files', 'brief', 'done_when', 'wave'],
+  required: ['id', 'title', 'agent', 'depends_on', 'files', 'wave'],
 }
 const GATE = {
   type: 'object',
@@ -118,7 +118,11 @@ function note(event, by, result) { progress.push(`| ${event} | ${by} | ${result}
 
 function workerPrompt(t, extra) {
   return `Ticket ${ID}, task ${t.id}: ${t.title}.\nYour worktree branches from ticket/${ID} as it is now.\n` +
-    `Files you may change: ${t.files.join(', ')}.\nBrief: ${t.brief}\nDone when: ${t.done_when}\n` +
+    `Files you may change: ${t.files.join(', ')}.\n` +
+    (t.brief
+      ? `Brief: ${t.brief}\nDone when: ${t.done_when}\n`
+      : `First read your brief and done-when exactly as approved: run python3 .claude/scripts/plan.py task --ticket ${ID} --id ${t.id} ` +
+        `at the root of your worktree. Follow them as your brief.\n`) +
     (extra ? `\n${extra}\n` : '') +
     `Commit with the message "${ID} ${t.id}: <summary>". Never push, never merge.`
 }
@@ -147,7 +151,8 @@ async function integrate(results, label) {
 phase('Gate')
 const gate = await agent(
   `Read docs/tickets/${ID}/PLAN.md. approved is true only if its status line is exactly "**Plan:** 🟢 Approved". ` +
-  `Return the status line and the task graph of its json block exactly, without changing anything. ` +
+  `Return the status line, and in tasks the JSON array printed by python3 .claude/scripts/plan.py outline --ticket ${ID}, exactly, without changing anything ` +
+  `(the briefs are not part of it: each worker reads its own from the plan). ` +
   `If the branch ticket/${ID} exists, return in done_tasks the task ids that already have a commit on it whose message starts with "${ID} <task id>:" ` +
   `(git log ticket/${ID} --format=%s); otherwise an empty list.`,
   { agentType: 'scribe', schema: GATE, label: `gate ${ID}` },

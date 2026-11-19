@@ -4,6 +4,8 @@
 Usage, from the repository root:
     python3 .claude/scripts/plan.py render --ticket T0.02
     python3 .claude/scripts/plan.py check --ticket T0.02
+    python3 .claude/scripts/plan.py outline --ticket T0.02
+    python3 .claude/scripts/plan.py task --ticket T0.02 --id K07
 
 The ` ```json ` block of ``docs/tickets/<ID>/PLAN.md`` stays the only source of the task graph, the one the
 workflows read (TKT-3). ``render`` pretty-prints it, folds it in a ``<details>`` section, and writes from it,
@@ -12,6 +14,10 @@ one section per task with every field (agent, wave, dependencies, files, done wh
 section written by hand is removed, and the view goes just above ``## Task graph``, after the assumptions. ``render`` then reads the file back and fails unless the json block parses to
 exactly the same graph as before, so the data never changes. ``check`` prints what ``render`` would change and
 exits 1, or prints nothing.
+
+``outline`` prints, as one line of JSON, every task without its ``brief`` and ``done_when``: the small graph that the
+``/ticket-run`` gate returns. ``task`` prints the brief and the done-when of one task exactly as approved, so that a
+worker reads them from the plan itself and never from a model's copy.
 """
 
 from __future__ import annotations
@@ -21,7 +27,7 @@ import json
 import re
 import sys
 from pathlib import Path
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 ROOT = Path(__file__).resolve().parents[2]
 START = "<!-- plan:graph -->"
@@ -213,16 +219,35 @@ def render(text: str) -> str:
     return text
 
 
+def show(graph: List[Task], command: str, task_id: Optional[str]) -> int:
+    """Print the outline of the graph, or the brief and done-when of one task."""
+    if command == "outline":
+        outline = [{key: value for key, value in task.items() if key not in ("brief", "done_when")} for task in graph]
+        print(json.dumps(outline, ensure_ascii=False))
+        return 0
+    task = next((task for task in graph if task["id"] == task_id), None)
+    if task is None:
+        print(f"Unknown task: {task_id!r}. Known: {', '.join(str(t['id']) for t in graph)}.")
+        return 1
+    print(f"# {task['id']}: {task['title']}\n\n## Brief\n\n{task['brief']}\n\n## Done when\n\n{task['done_when']}")
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Render the task graph of a PLAN.md for people.")
-    parser.add_argument("command", choices=("render", "check"))
+    parser.add_argument("command", choices=("render", "check", "outline", "task"))
     parser.add_argument("--ticket", required=True)
+    parser.add_argument("--id", help="The task id, for the task command.")
     arguments = parser.parse_args()
     if not re.fullmatch(r"T\d\.\d{2}", arguments.ticket):
         parser.error(f"Invalid ticket: {arguments.ticket!r}. Must look like T1.07.")
+    if arguments.command == "task" and not arguments.id:
+        parser.error("The task command needs --id, such as --id K07.")
     path = ROOT / "docs" / "tickets" / arguments.ticket / "PLAN.md"
     try:
         text = path.read_text(encoding="utf-8")
+        if arguments.command in ("outline", "task"):
+            return show(read_graph(text)[1], arguments.command, arguments.id)
         rendered = render(text)
     except (OSError, PlanError) as error:
         print(f"{path.relative_to(ROOT)}: {error}")
