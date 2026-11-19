@@ -3,6 +3,7 @@ from __future__ import annotations
 from itertools import product
 
 import pytest
+
 from tests.conventions.helpers import services_root
 from tests.conventions.rules.convention_rule import ConventionRule
 from tests.conventions.rules.convention_rules import ConventionRules

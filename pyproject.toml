@@ -20,6 +20,11 @@ line-length = 120
 # rewrite them are ignored so that the linter follows the project's rule.
 ignore = ["UP006", "UP007", "UP035", "UP045"]
 
+[tool.ruff.lint.isort]
+# Tests are written before the code they import (TKT-4): pinning ``tests`` as first-party keeps the import order the
+# same whether or not the imported module exists yet.
+known-first-party = ["tests"]
+
 [tool.ruff.format]
 quote-style = "double"
 

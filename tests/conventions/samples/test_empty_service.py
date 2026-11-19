@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import List
 
 import pytest
+
 from tests.conventions.helpers import repo_root, run_convention_tests
 from tests.conventions.rules.convention_rules import ConventionRules
 from tests.conventions.rules.service_tree import ServiceTree

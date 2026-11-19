@@ -5,10 +5,10 @@ from pathlib import Path
 from typing import ClassVar, List
 
 import pytest
+
 from tests.conventions.helpers import run_convention_tests
 from tests.conventions.rules.convention_rules import ConventionRules
 from tests.conventions.rules.service_tree import ServiceTree
-
 from tests.conventions.samples.helpers import write_broken_service
 
 

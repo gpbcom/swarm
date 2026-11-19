@@ -4,9 +4,9 @@ from pathlib import Path
 from typing import Optional
 
 import pytest
-from tests.conventions.rules.service_tree import ServiceTree
 
 from tests.conventions.helpers import write_files
+from tests.conventions.rules.service_tree import ServiceTree
 
 
 class TestServiceTree:

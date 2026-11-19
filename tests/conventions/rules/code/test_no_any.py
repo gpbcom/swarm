@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Dict, List
 
 import pytest
+
 from tests.conventions.helpers import write_files
 from tests.conventions.rules.code.no_any import NoAny
 from tests.conventions.rules.service_tree import ServiceTree

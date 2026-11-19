@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Dict, List
 
 import pytest
+
 from tests.conventions.helpers import write_files
 from tests.conventions.rules.classes.pydantic_models_in_models import PydanticModelsInModels
 from tests.conventions.rules.service_tree import ServiceTree
