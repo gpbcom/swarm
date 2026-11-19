@@ -2,6 +2,17 @@
 
 **Status:** ✅ Done · **Ticket:** [TICKET.md](TICKET.md) · **Plan:** [PLAN.md](PLAN.md)
 
+<!-- ticket:specs -->
+## 📚 Specifications
+
+The technical pages, features, use cases and business rules of [TICKET.md](TICKET.md), copied by `python3 .claude/scripts/ticket_refs.py sync`.
+
+- [🏗️ Architecture: mono-repo](../../specs/technical/01-architecture.md#mono-repo)
+- [🏗️ Architecture: cells and the global layer](../../specs/technical/01-architecture.md#cells)
+- [🚢 Deployment: infrastructure as code](../../specs/technical/09-deployment.md#iac)
+- [🚢 Deployment: where it runs](../../specs/technical/09-deployment.md#providers)
+<!-- /ticket:specs -->
+
 ## 📝 Events
 
 | Time | Event | By | Result |

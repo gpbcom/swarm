@@ -20,9 +20,19 @@ const TICKET_SCHEMA = {
     id: { type: 'string' },
     title: { type: 'string' },
     criteria: { type: 'integer' },
+    specs: { type: 'array', items: { type: 'string' } },
     assumptions: { type: 'array', items: { type: 'string' } },
   },
-  required: ['id', 'title', 'criteria', 'assumptions'],
+  required: ['id', 'title', 'criteria', 'specs', 'assumptions'],
+}
+
+const WRITE_SCHEMA = {
+  type: 'object',
+  properties: {
+    written: { type: 'array', items: { type: 'string' } },
+    problems: { type: 'array', items: { type: 'string' } },
+  },
+  required: ['written', 'problems'],
 }
 
 const PLAN_SCHEMA = {
@@ -92,14 +102,24 @@ function computeWaves(tasks) {
 
 phase('Ticket')
 const ticket = await agent(
-  `Open ticket ${ID} of the Swarm roadmap: write docs/tickets/${ID}/TICKET.md and PROGRESS.md, keeping them if they already exist and are complete.`,
+  `Open ticket ${ID} of the Swarm roadmap: write docs/tickets/${ID}/TICKET.md and PROGRESS.md, keeping them if they already exist and are complete. ` +
+  `TICKET.md must link at least one technical page, feature, use case or business rule (TKT-2); return those links in specs.`,
   { agentType: 'ticket-writer', schema: TICKET_SCHEMA, label: `ticket-writer ${ID}` },
 )
 if (!ticket) throw new Error(`ticket-writer failed for ${ID}`)
+if (!ticket.specs.length) {
+  return {
+    ticket: ID,
+    stopped: 'TICKET.md links no technical page, feature, use case or business rule (TKT-2). Write or point to the specification the ticket builds on, then run /ticket-plan again.',
+    assumptions: ticket.assumptions,
+  }
+}
+log(`TICKET.md refers to ${ticket.specs.length} specification page(s)`)
 
 phase('Plan')
 const plan = await agent(
-  `Plan ticket ${ID} from docs/tickets/${ID}/TICKET.md as a task graph for parallel worker agents.`,
+  `Plan ticket ${ID} from docs/tickets/${ID}/TICKET.md as a task graph for parallel worker agents. ` +
+  `Every brief links the specification pages of TICKET.md that its task applies (TKT-2).`,
   { agentType: 'planner', schema: PLAN_SCHEMA, label: `planner ${ID}` },
 )
 if (!plan || !plan.tasks.length) throw new Error(`planner returned no task for ${ID}`)
@@ -109,14 +129,20 @@ const widest = Math.max(...Array.from({ length: waves }, (_, i) => graph.filter(
 log(`${graph.length} tasks in ${waves} waves, widest wave ${widest} (at most 8 agents run at once)`)
 
 phase('Write')
-await agent(
+const written = await agent(
   `Write docs/tickets/${ID}/PLAN.md for ticket ${ID} (${ticket.title}) with the status line "**Plan:** 🟡 Awaiting approval", ` +
   `this summary: ${JSON.stringify(plan.summary)}, the assumptions ${JSON.stringify([...ticket.assumptions, ...plan.assumptions])}, ` +
-  `the waves table, and this task graph in a json block, exactly: ${JSON.stringify(graph)}. ` +
-  `Then append to the Events table of docs/tickets/${ID}/PROGRESS.md: "Plan written: ${graph.length} tasks, ${waves} waves" (⏳ Awaiting approval), ` +
-  `and run python3 .claude/scripts/progress.py timings --ticket ${ID} --write.`,
-  { agentType: 'scribe', label: `scribe ${ID}` },
+  `then a "## Task graph" heading and this task graph in a json block, exactly: ${JSON.stringify(graph)}. ` +
+  `Then run python3 .claude/scripts/plan.py render --ticket ${ID}, which pretty-prints the json block and writes from it the waves table, ` +
+  `the dependency graph and one section per task for the person; it must print nothing. Then append to the Events table of docs/tickets/${ID}/PROGRESS.md: "Plan written: ${graph.length} tasks, ${waves} waves" (⏳ Awaiting approval), ` +
+  `Then run python3 .claude/scripts/ticket_refs.py sync --ticket ${ID}, which copies the specification references of TICKET.md into PLAN.md and PROGRESS.md, ` +
+  `and python3 .claude/scripts/progress.py timings --ticket ${ID} --write. ` +
+  `Last, run python3 .claude/scripts/ticket_refs.py check --ticket ${ID} and python3 .claude/scripts/plan.py check --ticket ${ID}, ` +
+  `and return in problems every line they print (none when all is well).`,
+  { agentType: 'scribe', schema: WRITE_SCHEMA, label: `scribe ${ID}` },
 )
+const problems = (written && written.problems) || ['the scribe returned no result']
+if (problems.length) log(`PLAN.md, PROGRESS.md or TICKET.md fails its checks: ${problems.join(' | ')}`)
 
 return {
   ticket: ID,
@@ -124,6 +150,8 @@ return {
   tasks: graph.length,
   waves,
   widestWave: widest,
+  specs: ticket.specs,
+  checks: problems.length ? problems : 'passed',
   assumptions: [...ticket.assumptions, ...plan.assumptions],
   next: `Review docs/tickets/${ID}/PLAN.md, change its status to "**Plan:** 🟢 Approved", then run /ticket-run ${ID}`,
 }

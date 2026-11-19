@@ -7,7 +7,7 @@ The 262 tickets of the [roadmap](../specs/roadmap/README.md), generated from its
 
 | Step | Command | Result |
 | --- | --- | --- |
-| 1. Plan | `/ticket-plan T1.07` | `TICKET.md`, `PROGRESS.md`, and `PLAN.md` with the task graph, awaiting approval |
+| 1. Plan | `/ticket-plan T1.07` | `TICKET.md`, `PROGRESS.md`, and `PLAN.md` with the task graph (waves, dependency graph and task details rendered by `.claude/scripts/plan.py`), awaiting approval |
 | 2. Approve | Edit `PLAN.md`: `**Plan:** 🟢 Approved` | The only human gate |
 | 3. Run | `/ticket-run T1.07` | Waves of agents in parallel worktrees, integration, verification, review, local merge into `develop` |
 

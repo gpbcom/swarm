@@ -46,14 +46,25 @@ the features, use cases and business rules it delivers (links with IDs); the tec
 acceptance criteria (the ticket's "done when" plus the features' Given/when/then criteria it closes); out of scope.
 It states nothing that the specifications or the roadmap do not state.
 
+**`TICKET.md`, `PLAN.md` and `PROGRESS.md` always refer to the specification:** `TICKET.md` links at least one
+technical page section, feature (📘 FS), use case (🎬 UC) or business rule (📏 BR), each link resolving. When the
+roadmap row names none, the ticket-writer links the specification sections that settle what the ticket builds (its
+paths, layers, tools and terms), each with one line quoting what that section says for the ticket. When no section
+does, the ticket is not planned: the specification is written first. `python3 .claude/scripts/ticket_refs.py sync`
+copies these links into a generated **📚 Specifications** section of `PLAN.md` and `PROGRESS.md`, and every task
+brief links the pages it applies.
+
 **Why:** the plan and the review are only as good as the ticket they start from.
 
-**Check:** the reviewer compares the delivered work with `TICKET.md`.
+**Check:** `python3 .claude/scripts/ticket_refs.py check --ticket <ID>` prints nothing (run by `/ticket-plan` and by
+the verifier's `checks.py`); the reviewer compares the delivered work with `TICKET.md`.
 
 ## <a id="tkt-3"></a>TKT-3: The plan and its approval
 
-**Rule:** `PLAN.md` starts with `**Plan:** 🟡 Awaiting approval`. It holds the task graph twice: a table for the
-person, and a ` ```json ` block that the workflow reads. Each task has: `id` (`K01`...), `title`, `agent` (an agent of
+**Rule:** `PLAN.md` starts with `**Plan:** 🟡 Awaiting approval`. Its ` ```json ` block, folded at the end of the
+page, is the only source of the task graph and the one the workflow reads. `python3 .claude/scripts/plan.py render
+--ticket <ID>` writes from it, for the person, the waves table, a Mermaid dependency graph and one section per task
+with every field; that view is never edited by hand, and `plan.py check` prints nothing when it is up to date. Each task has: `id` (`K01`...), `title`, `agent` (an agent of
 `.claude/agents/`), `depends_on`, `files` (the files it alone may change), `brief`, `done_when`. The waves are computed
 from `depends_on`. **The person approves by changing the line to `**Plan:** 🟢 Approved`**; `/ticket-run` refuses any
 other status.

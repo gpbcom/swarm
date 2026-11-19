@@ -8,7 +8,8 @@ Which checks apply is decided here, never by a model (TKT-6): a check whose targ
 workspace with no member crate, no TypeScript workspace package, no Python source for mypy) is reported under
 ``not_applicable`` with its reason. Only project code is checked with the AGENT.md tools (``services/``, ``packages/``,
 ``frontends/``, ``tests/``, ``deploy/``); ``.claude/`` and ``docs/`` are covered by ``specs.py check``, which always
-runs. Each check's output is saved to ``docs/tickets/<ID>/tests-evidences/<check>.txt``. The last line printed is
+runs, with ``ticket_refs.py check`` (TICKET.md, PLAN.md and PROGRESS.md refer to the specification, TKT-2) and
+``plan.py check`` (the readable view of PLAN.md is up to date). Each check's output is saved to ``docs/tickets/<ID>/tests-evidences/<check>.txt``. The last line printed is
 the JSON verdict: ``{"passed": bool, "failures": [{"check", "file", "detail", "environment"}], "not_applicable": [...], "passed_checks": [...]}``.
 A failure with ``environment: true`` comes from a missing tool or module, not from the code.
 """
@@ -150,6 +151,10 @@ def main() -> int:
     typescript_checks(checks, changed)
     terraform_checks(checks, changed)
     checks.check("specs check", ["python3", ".claude/skills/write-specs/scripts/specs.py", "check"], "docs/specs")
+    folder = f"docs/tickets/{ticket}"
+    checks.check("ticket refs", ["python3", ".claude/scripts/ticket_refs.py", "check", "--ticket", ticket], folder)
+    if (ROOT / folder / "PLAN.md").is_file():
+        checks.check("plan view", ["python3", ".claude/scripts/plan.py", "check", "--ticket", ticket], f"{folder}/PLAN.md")
     verdict = {"passed": not checks.failures, "failures": checks.failures,
                "not_applicable": checks.not_applicable, "passed_checks": checks.passed}
     print(json.dumps(verdict))

@@ -22,7 +22,8 @@ Read `TICKET.md`, the linked specifications, and the parts of the repository the
   mock-ups), `doc-writer` (documentation and specification pages).
 - **Files:** list the exact files each task may create or change; two tasks of the same wave never share a file.
 - **Briefs:** each brief is self-contained: what to do, which specification sections and rules apply, the files, and
-  `done_when` as a command or an observable result.
+  `done_when` as a command or an observable result. Every brief links, as relative paths from the repository root,
+  the technical pages, features, use cases or business rules of `TICKET.md` that its task applies (TKT-2).
 - Record any assumption the specifications do not settle (TKT-8).
 
 Return the graph through the structured output; write no file.
