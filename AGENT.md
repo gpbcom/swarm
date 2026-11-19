@@ -29,6 +29,18 @@ pnpm -r --if-present typecheck
 TypeScript packages and front ends extend `@swarm/config` (`packages/ts/config`), which holds the strict
 `tsconfig.base.json` and the eslint configuration.
 
+After any change to a shared model of `packages/python/swarm-models`, regenerate the generated types in this order:
+
+```bash
+uv run swarm-models-schemas
+cargo run -p swarm-models-codegen
+pnpm --filter ./packages/ts/live run generate
+```
+
+- `swarm-models-schemas` writes `packages/python/swarm-models/schemas/swarm_models.schema.json`.
+- `cargo run -p swarm-models-codegen`, run in `packages/rust`, writes `packages/rust/swarm-models/src/generated.rs`.
+- `pnpm --filter ./packages/ts/live run generate` writes `packages/ts/live/src/generated/models.ts`.
+
 - `.github/workflows/ci.yml` runs on every push and pull request.
 - Its first job runs `.github/scripts/detect_changes.py`, which selects the services, front ends and packages that
   changed.
@@ -36,6 +48,7 @@ TypeScript packages and front ends extend `@swarm/config` (`packages/ts/config`)
   for what was selected:
   - for each selected service: `ruff check`, `ruff format --check`, `mypy services/<service>/src`,
     `pytest services/<service>/tests` and that service's convention tests;
+  - the `packages` job of `python.yml` runs ruff, mypy and pytest on `packages/python`;
   - the tests under `tests/`;
   - for Rust: `cargo fmt`, `clippy` and `cargo test`;
   - for each TypeScript project: its `lint`, `typecheck` and `test` scripts;
@@ -94,6 +107,17 @@ as in a service.
 
 The Python rules in this file apply to `services/` and `packages/python/`. The front ends use React and TypeScript
 with a Tauri desktop shell, images go to GHCR, and Argo CD deploys them; see `docs/specs/technical/`.
+
+**Shared models**
+
+- **The models:** every Pydantic model shared between services lives in `packages/python/swarm-models`, under
+  `swarm_models/models/<concern>/`, and a service never redefines one.
+- **The single source:** the JSON Schema bundle, the Rust structs and the TypeScript types are generated from those
+  models, and are never edited by hand.
+- **The CI checks:** CI fails when one of them is stale. Three checks enforce it:
+  - the `packages` job of `python.yml` runs `swarm-models-schemas --check`;
+  - `cargo test` runs `generated_is_current` in `packages/rust/swarm-models`;
+  - the `test` script of `packages/ts/live` runs `generate.ts --check`.
 
 **Services**
 
