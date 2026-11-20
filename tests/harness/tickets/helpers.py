@@ -124,3 +124,25 @@ def finish_on_shared_branch(main: Path, ticket: str) -> None:
 
 def lines(result: subprocess.CompletedProcess[str]) -> List[str]:
     return [line for line in result.stdout.splitlines() if line.strip()]
+
+
+def branch_with_commit(main: Path, branch: str, name: str, content: str, message: str) -> str:
+    """Create ``branch`` from ``develop`` with one commit writing ``name``, come back to ``develop``, return the commit."""
+    git(main, "checkout", "-q", "-b", branch, "develop")
+    (main / name).write_text(content, encoding="utf-8")
+    git(main, "add", name)
+    git(main, "commit", "-q", "-m", message)
+    commit = git(main, "rev-parse", "HEAD")
+    git(main, "checkout", "-q", "develop")
+    return commit
+
+
+def add_remote(main: Path, *branches: str) -> Path:
+    """Give the repository a bare ``origin`` holding ``develop``, ``master`` and ``branches``, and return it."""
+    remote = main.parent / "origin.git"
+    git(main.parent, "init", "-q", "--bare", str(remote))
+    git(main, "remote", "add", "origin", str(remote))
+    git(main, "branch", "-f", "master", "develop")
+    git(main, "push", "-q", "origin", "develop", "master", *branches)
+    git(main, "fetch", "-q", "origin")
+    return remote

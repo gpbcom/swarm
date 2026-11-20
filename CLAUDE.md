@@ -55,6 +55,9 @@ This repository is a proof of concept for mastering the Claude Code harness; dro
   `feature/tickets`, with its files in `docs/tickets/<ID>/`; each commits only its own files when it finishes.
   `/ticket-run` checks the start rule first (prerequisites done, no open ticket on the same areas).
   `python3 .claude/scripts/tickets.py list|prune` shows the open tickets and, once all is merged, goes back to `develop`.
+- **Branches** (TKT-25): `tickets.py branches` gives every branch its verdict. Only a 🌱 live branch is rebased onto
+  `develop`; a merged, integrated or superseded one is deleted by `tickets.py prune`, after a backup bundle in
+  `.git/swarm/backups/`. `develop` and `master` are never rebased, reset, force-pushed or deleted.
 - **Issues and groups** (TKT-20): `/issue-plan <refs>` plans an issue with its child issues, or a group (`#12`,
   `T0.10`, `E0.4`, `P1`), the person approves the group with `python3 .claude/scripts/tickets.py approve <refs>`, and
   `/issue-run <refs>` runs it as fast as the start rule allows, with `tickets.py watch` reports every 2 minutes. The

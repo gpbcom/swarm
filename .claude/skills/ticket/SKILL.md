@@ -72,7 +72,8 @@ approved brief or check is approved again and recorded in 📝 Events before the
 | `python3 .claude/scripts/tickets.py resolve <refs>` | The tickets of a group, in order, with their state and what they wait for |
 | `python3 .claude/scripts/tickets.py watch <refs>` | The group's report every 2 minutes, with `▶️ CAN START <ID>` lines |
 | `python3 .claude/scripts/tickets.py list` | Every open ticket: the files it owns and its areas |
-| `python3 .claude/scripts/tickets.py prune` | Once everything is merged, puts the main checkout back on `develop` |
+| `python3 .claude/scripts/tickets.py prune` | Once everything is merged, puts the main checkout back on `develop`, then deletes every merged, integrated or superseded branch and worker worktree after a backup bundle (TKT-25) |
+| `python3 .claude/scripts/tickets.py branches` | Every branch with its verdict: 🔒 protected, 🔄 open, 🧹 delete, 🌱 live (the only ones to rebase) |
 | `python3 .claude/scripts/board.py show` or `/board` | The Kanban board in the terminal (TKT-17) |
 
 ## Templates

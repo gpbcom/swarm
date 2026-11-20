@@ -89,7 +89,8 @@ class TestTicketWorkflows:
         assert "board.py move --ticket ${ID} --status planned" in read_text(self.PLAN)
 
     @pytest.mark.parametrize(
-        "rule", ["tkt-15", "tkt-16", "tkt-17", "tkt-18", "tkt-19", "tkt-20", "tkt-21", "tkt-22", "tkt-23", "tkt-24"]
+        "rule",
+        ["tkt-15", "tkt-16", "tkt-17", "tkt-18", "tkt-19", "tkt-20", "tkt-21", "tkt-22", "tkt-23", "tkt-24", "tkt-25"],
     )
     def test_the_rules_hold_gitflow_parallel_tickets_and_the_board(self, rule: str) -> None:
         text = read_text(".claude/rules/tickets.md")

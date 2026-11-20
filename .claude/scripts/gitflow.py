@@ -6,7 +6,8 @@ Usage (by git, through ``.githooks/``; turned on per clone by ``python3 .claude/
     gitflow.py commit-msg <message file>
     gitflow.py pre-push <remote> <url>          (the refs pushed come on stdin)
 
-- ``develop`` and ``master`` change only through pull requests: no commit on them and no push to them.
+- ``develop`` and ``master`` change only through pull requests: no commit on them, no push to them, and they are never
+  deleted on the remote (TKT-25).
 - Branches follow GitFlow: ``feature/<name>`` (a ticket is ``feature/<ID>``), ``release/<version>``,
   ``hotfix/<name>``, ``bugfix/<name>``, ``support/<name>``. The workers' ``worktree-*`` branches never commit (TKT-5).
 - A commit on a ticket's branch, or on the tickets' shared branch ``feature/tickets``, starts with a ticket ID:
@@ -103,9 +104,16 @@ def pre_push(lines: List[str]) -> int:
         return 0
     for line in lines:
         parts = line.split()
-        if len(parts) != 4 or parts[1] == ZERO:
+        if len(parts) != 4:
             continue
         target = parts[2].removeprefix("refs/heads/")
+        if parts[1] == ZERO:
+            if target in PROTECTED:
+                return refuse(
+                    f"{target} is never deleted (TKT-25).",
+                    "delete only branches whose work develop holds: python3 .claude/scripts/tickets.py prune.",
+                )
+            continue
         if target in PROTECTED:
             return refuse(
                 f"no push to {target}: it changes through pull requests.",
