@@ -188,7 +188,8 @@ Each step must pass before the next one starts:
 Since T0.03, `tests/conventions/services/test_service_conventions.py` runs these rules against every service it finds
 under `services/`. The rules checked are: more than one top-level class in a file; more than five Python files in a
 folder; a nested function; `Any`; an import that Layout does not allow, checked in `src/` only; the lifecycle rule
-(`start` or `stop`, or `run` without a lifecycle base class); and a Pydantic model outside `src/models/`. `@staticmethod`,
+(`start` or `stop`, or `run` without a lifecycle base class); a Pydantic model outside `src/models/`; a module
+docstring; and a logger handed to a new object, checked in `src/` only. `@staticmethod`,
 attributes starting with an underscore and the node rules are not tested yet. Each rule is one class in
 `tests/conventions/rules/`. The environment variable `SWARM_CONVENTIONS_SERVICES_ROOT` runs the tests against another
 folder of services. `tests/conventions/packages/test_package_conventions.py` runs the same rules against every package of
@@ -206,6 +207,8 @@ definitions of `Runnable` and `AsyncRunnable` themselves.
 - A Pydantic model outside `src/models/`.
 - A class outside `src/models/` with `start` or `stop`, or with `run` but no lifecycle base class.
 - A node without `__call__`, or with `run`.
+- A file that starts with a docstring (a module docstring).
+- A call in `src/` that creates an object and hands it a logger (`logger=`, `self.logger`, `getLogger(...)`).
 
 ## File shape
 
@@ -291,7 +294,8 @@ Every runnable class except the nodes subclasses `Runnable` or `AsyncRunnable`, 
 
 ## Imports
 
-`from __future__ import annotations` comes first in every non-empty file, after the module docstring if there is one.
+`from __future__ import annotations` comes first in every non-empty file: a file never starts with a docstring
+(see [Docstrings and comments](#docstrings-and-comments)).
 Then come up to three groups, each under its own comment:
 
 ```python
@@ -332,6 +336,9 @@ from models.customers.exceptions import SECustomerCatalogUnreadable
 - Use `error` for a caught exception and `value` for a validator's input.
 
 ## Docstrings and comments
+
+**NEVER a file docstring,** in `src/` and in `tests/`, `__init__.py` and console scripts included: no module starts
+with a docstring. A file holds one class, and that class's docstring says what the file is for.
 
 Every class and method in `src/` has a Google-style docstring, private ones included. Types go in parentheses.
 
@@ -402,6 +409,12 @@ def __init__(self, config: DatabaseConfig, logger: Optional[Logger] = None) -> N
     self.config = config
     self.logger = logger if logger else getLogger(__name__)
 ```
+
+**NEVER hand a logger to a new object.** The logger parameter keeps its `None` default, and code that creates the
+object leaves it out, so that each class logs under its own module's name: `DurableConsumer(connection, config)`, never
+`DurableConsumer(connection, config, self.logger)` or `GreetingCommand(logger=self.logger)`. A subclass still hands its
+logger to its base class with `super().__init__(logger)`, which creates nothing. Tests may pass a logger, to test that
+parameter or to capture the logs.
 
 - Use lazy arguments, never an f-string: `self.logger.info("Created customer %s in %d ms.", name, duration_ms)`.
 - Use the levels this way:

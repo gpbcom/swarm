@@ -1,5 +1,3 @@
-"""The base exception of the Command model."""
-
 from __future__ import annotations
 
 

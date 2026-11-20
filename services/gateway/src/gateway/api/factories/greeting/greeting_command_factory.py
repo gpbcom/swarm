@@ -20,4 +20,4 @@ class GreetingCommandFactory(CommandFactory):
             Command: A new ``GreetingCommand``.
         """
         self.logger.debug("Building a greeting command.")
-        return GreetingCommand(logger=self.logger)
+        return GreetingCommand()

@@ -20,6 +20,11 @@ BROKEN_FILES: Dict[str, str] = {
         "def read() -> Store:\n    return Store()\n"
     ),
     f"{PACKAGE}/storage/store.py": "from __future__ import annotations\n\n\nclass Store:\n    pass\n",
+    f"{PACKAGE}/clients/documented.py": '"""A client that says what it is in a module docstring."""\n',
+    f"{PACKAGE}/storage/handing.py": (
+        "from __future__ import annotations\n\nfrom broken.storage.store import Store\n\n\n"
+        "def build() -> Store:\n    return Store(logger=None)\n"
+    ),
     f"{PACKAGE}/service/two_classes.py": (
         "from __future__ import annotations\n\n\nclass First:\n    pass\n\n\nclass Second:\n    pass\n"
     ),
@@ -49,7 +54,8 @@ def write_broken_service(services_root: Path) -> Path:
     classes (one_class_per_file), ``service/crowded/`` holds six modules (five_files_per_folder),
     ``service/typed.py`` imports ``Any`` (no_any), ``service/nested.py`` nests a function (no_nested_function),
     ``service/job.py`` has ``run`` without a base class (lifecycle_base_classes) and ``service/customer.py`` holds a
-    Pydantic model outside ``models`` (pydantic_models_in_models).
+    Pydantic model outside ``models`` (pydantic_models_in_models), ``clients/documented.py`` starts with a docstring
+    (no_module_docstring) and ``storage/handing.py`` hands a logger to a new ``Store`` (no_logger_argument).
     """
     root = services_root / "broken"
     files = dict(BROKEN_FILES)

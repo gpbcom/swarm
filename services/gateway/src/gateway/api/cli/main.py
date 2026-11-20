@@ -1,5 +1,3 @@
-"""Console entry point of the gateway."""
-
 from __future__ import annotations
 
 # Standard library imports

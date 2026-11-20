@@ -57,4 +57,4 @@ class DurableConsumerFactory[M: BaseModel](BusRunnableFactory[DurableConsumer[M]
         Returns:
             DurableConsumer[M]: A new consumer that is not started.
         """
-        return DurableConsumer(self.connection, self.config, self.message_type, self.handler, self.logger)
+        return DurableConsumer(self.connection, self.config, self.message_type, self.handler)
