@@ -8,7 +8,8 @@ Usage, from the main checkout:
     python3 .claude/scripts/tickets.py approve <refs>                      (the person's approval of a group's plans)
     python3 .claude/scripts/tickets.py next [--json] <refs>
     python3 .claude/scripts/tickets.py watch <refs> [--every 120] [--once]
-    python3 .claude/scripts/tickets.py prune
+    python3 .claude/scripts/tickets.py branches
+    python3 .claude/scripts/tickets.py prune [--dry-run]
     python3 .claude/scripts/tickets.py setup
 
 Every running ticket shares the main checkout and the branch ``feature/tickets``; its files live in
@@ -30,8 +31,13 @@ its own worktree on ``feature/<ID>`` until ``prune`` removes it once merged.
   - ``next`` prints the approved tickets of the group that may start now.
   - ``watch`` prints an exhaustive report of the group every ``--every`` seconds, with a ``▶️ CAN START <ID>`` line
     for each ticket that may start, and ends when the group is merged or waits for the person.
-- ``prune`` removes the merged legacy worktrees and their empty folder, brings ``develop`` up to date, and puts the
-  main checkout back on ``develop`` once no ticket is open and ``feature/tickets`` is merged.
+- ``branches`` gives every branch, local and on GitHub, its verdict against ``origin/develop`` (TKT-25): 🔒
+  protected (``master`` changes only through a release pull request), 🔄 open, 🧹 merged, integrated or superseded
+  (delete, never rebase), 🌱 live (the only ones to rebase). See ``branches.py``.
+- ``prune`` removes the merged legacy worktrees and their empty folder, brings ``develop`` up to date, puts the main
+  checkout back on ``develop`` once no ticket is open and ``feature/tickets`` is merged, then deletes every 🧹 branch
+  (locally and on GitHub), its worktree and the leftover ticket folders, after writing them all, uncommitted work
+  included, to a bundle in ``.git/swarm/backups/`` (TKT-25). ``--dry-run`` only says what it would delete.
 - ``setup`` turns on the GitFlow git hooks of ``.githooks/`` for this clone (TKT-15).
 """
 
@@ -51,6 +57,7 @@ from typing import Dict, List, Optional, Set, Tuple
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import branches
 from roadmap_gantt import areas, key, roadmap_rows
 from ticket_tree import (
     BRANCH_PREFIX,
@@ -526,8 +533,21 @@ def show_list(main: Path) -> None:
         print(f"  🔄 {ticket}  {title_of(main, ticket)[:60]} · 📄 {files} · 🗂️ {area}")
 
 
-def prune(main: Path) -> None:
-    """Remove the merged legacy worktrees, bring develop up to date, and leave feature/tickets once all is merged."""
+def branch_verdicts(main: Path, fetch: bool) -> Tuple[str, List[branches.Verdict]]:
+    """Return the develop reference and the verdict of every branch and leftover ticket folder (TKT-25)."""
+    if fetch and has_remote(main):
+        git(main, "fetch", "--quiet", "--prune", REMOTE, check=False)
+    ref = develop_ref(main)
+    done = set(done_tickets(main))
+    return ref, branches.classify(main, ref, done, set(open_tickets(main)))
+
+
+def prune(main: Path, dry_run: bool = False) -> None:
+    """Remove the merged legacy worktrees, bring develop up to date, leave feature/tickets once all is merged, then
+    delete every branch whose work develop holds, after a backup (TKT-25)."""
+    if dry_run:
+        branches.clean(main, branch_verdicts(main, fetch=True)[1], dry_run=True)
+        return
     ref = develop_ref(main, fetch=True)
     merged = merged_tickets(main, ref)
     for path, branch in worktrees(main):
@@ -555,6 +575,7 @@ def prune(main: Path) -> None:
     up_to_date = branch == DEVELOP and ref != DEVELOP and is_clean(main)
     if up_to_date and git(main, "merge", "--ff-only", "--quiet", ref, check=False)[0] == 0:
         print(f"⏩ {DEVELOP} is up to date with {ref}")
+    branches.clean(main, branch_verdicts(main, fetch=True)[1], dry_run=False)
 
 
 def setup(main: Path) -> None:
@@ -580,8 +601,9 @@ def main(argv: Optional[List[str]] = None) -> int:
     watch.add_argument("refs", nargs="+")
     watch.add_argument("--every", type=int, default=120)
     watch.add_argument("--once", action="store_true")
-    for name in ("list", "prune", "setup"):
+    for name in ("list", "branches", "setup"):
         sub.add_parser(name)
+    sub.add_parser("prune").add_argument("--dry-run", action="store_true")
     args = parser.parse_args(argv)
     top = Path(git(Path.cwd(), "rev-parse", "--show-toplevel")[1])
     main_dir = main_checkout(top)
@@ -622,8 +644,11 @@ def main(argv: Optional[List[str]] = None) -> int:
             time.sleep(args.every)
     elif args.command == "list":
         show_list(main_dir)
+    elif args.command == "branches":
+        ref, verdicts = branch_verdicts(main_dir, fetch=True)
+        branches.show(verdicts, ref)
     elif args.command == "prune":
-        prune(main_dir)
+        prune(main_dir, args.dry_run)
     else:
         setup(main_dir)
     return 0

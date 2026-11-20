@@ -61,6 +61,20 @@ class TestGitflowHooks:
         git(main, "checkout", "-b", "feature/x")
         assert git(main, "push", "origin", "feature/x").returncode == 0
 
+    def test_develop_and_master_are_never_deleted_on_github_and_a_merged_branch_is(self, tmp_path: Path) -> None:
+        main = make_repo(tmp_path)
+        remote = tmp_path / "remote.git"
+        git(tmp_path, "init", "--bare", str(remote))
+        git(main, "remote", "add", "origin", str(remote))
+        git(main, "branch", "master")
+        git(main, "branch", "feature/merged")
+        assert git(main, "push", "origin", "develop", "master", "feature/merged", **{BYPASS_ENV: "1"}).returncode == 0
+        for protected in ("develop", "master"):
+            refused = git(main, "push", "origin", "--delete", protected)
+            assert refused.returncode != 0
+            assert "TKT-25" in refused.stderr
+        assert git(main, "push", "origin", "--delete", "feature/merged").returncode == 0
+
 
 class TestGuardHook:
     @pytest.mark.parametrize(
@@ -127,6 +141,34 @@ class TestGuardHook:
     def test_a_push_to_develop_from_the_main_checkout_asks_the_person(self, tmp_path: Path) -> None:
         main = make_repo(tmp_path)
         assert guard("git push origin develop", main)["permissionDecision"] == "ask"
+
+    @pytest.mark.parametrize(
+        ("branch", "command"),
+        [
+            ("master", "git rebase develop"),
+            ("master", "git reset --hard origin/develop"),
+            ("develop", "git rebase origin/develop"),
+            ("feature/live", "git rebase develop master"),
+            ("feature/live", "git push --force origin master"),
+            ("feature/live", "git push -f origin develop"),
+            ("feature/live", "git push origin +master"),
+            ("feature/live", "git push origin --delete develop"),
+        ],
+    )
+    def test_develop_and_master_are_never_rebased_reset_or_forced(
+        self, tmp_path: Path, branch: str, command: str
+    ) -> None:
+        main = make_repo(tmp_path)
+        git(main, "checkout", "-b", branch)
+        decision = guard(command, main)
+        assert decision["permissionDecision"] == "deny"
+        assert "TKT-25" in str(decision["permissionDecisionReason"])
+
+    def test_a_live_branch_is_rebased_onto_develop(self, tmp_path: Path) -> None:
+        main = make_repo(tmp_path)
+        git(main, "checkout", "-b", "feature/live")
+        assert guard("git rebase origin/develop", main) == {}
+        assert guard("git push --force-with-lease origin feature/live", main) == {}
 
     def test_the_person_s_own_git_work_in_the_main_checkout_is_left_alone(self, tmp_path: Path) -> None:
         main = make_repo(tmp_path)

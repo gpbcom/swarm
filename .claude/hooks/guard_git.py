@@ -6,6 +6,8 @@
   worker's (``worktree-*``): ``git commit``, ``merge``, ``rebase``,
   ``reset``, ``stash``, ``push``, ``cherry-pick``, ``revert`` and ``gh pr merge`` are refused: only
   ``.claude/scripts/ticket_tree.py`` commits, publishes and merges a ticket (TKT-5).
+- Anywhere: ``develop`` and ``master`` are never rebased, ``master`` is never reset, and neither is force-pushed or
+  deleted on GitHub (TKT-25): a release or a hotfix pull request moves ``master``.
 - In any other checkout: a push to ``develop`` or ``master`` asks the person first.
 - Anywhere: ``tickets.py approve`` (a group's plans approved at once) asks the person first: the approval is theirs.
 
@@ -27,6 +29,16 @@ APPROVE = re.compile(r"\btickets\.py\s+approve\b")
 WRITES = re.compile(r"\bgit\s+(?:-C\s+\S+\s+|-c\s+\S+\s+)*(commit|merge|rebase|reset|stash|push|cherry-pick|revert)\b")
 PR_MERGE = re.compile(r"\bgh\s+pr\s+merge\b")
 NO_VERIFY = re.compile(r"\bgit\b[^|;&]*\s(--no-verify|commit\s+(?:[^|;&]*\s)?-n\b)")
+PROTECTED = ("develop", "master", "main")
+REBASE = re.compile(r"\bgit\s+(?:-C\s+\S+\s+|-c\s+\S+\s+)*rebase\b([^|;&]*)")
+RESET = re.compile(r"\bgit\s+(?:-C\s+\S+\s+|-c\s+\S+\s+)*reset\b")
+PUSH = re.compile(r"\bgit\s+(?:-C\s+\S+\s+)*push\b([^|;&]*)")
+FORCE = re.compile(r"(?:^|\s)(?:--force(?:-with-lease)?(?:=\S*)?|-f|--delete|-d)(?=\s|$)")
+REWRITE_REASON = (
+    "{target} is never rebased, reset, force-pushed or deleted (TKT-25): develop changes through pull requests, "
+    "master through a release or a hotfix pull request (TKT-15). Only a live branch is rebased onto develop: "
+    "`python3 .claude/scripts/tickets.py branches` says which."
+)
 PUSH_PROTECTED = re.compile(r"\bgit\s+(?:-C\s+\S+\s+)*push\b[^|;&]*?(?:\s|:)(develop|master|main)\b")
 
 
@@ -51,12 +63,37 @@ def code_of(command: str) -> str:
     return QUOTED.sub("''", "\n".join(lines))
 
 
+def rewritten_protected(command: str, branch: str) -> str:
+    """Return the protected branch a command would rebase, reset, force-push or delete, or an empty string."""
+    for rebase in REBASE.finditer(command):
+        words = rebase.group(1).split()
+        positional = [w for i, w in enumerate(words) if not w.startswith("-") and (i == 0 or words[i - 1] != "--onto")]
+        if len(positional) >= 2 and positional[1] in PROTECTED:
+            return positional[1]
+        if len(positional) < 2 and branch in PROTECTED:
+            return branch
+    if RESET.search(command) and branch == "master":
+        return branch
+    for push in PUSH.finditer(command):
+        words = push.group(1).split()
+        forced = FORCE.search(push.group(1)) is not None
+        for word in words:
+            name = word.lstrip("+").split(":")[-1]
+            if name in PROTECTED and (forced or word.startswith(("+", ":"))):
+                return name
+    return ""
+
+
 def decide(command: str, cwd: str) -> Optional[Tuple[str, str]]:
     """Return (decision, reason) for a Bash command, or None to let it run."""
     command = code_of(command)
     if NO_VERIFY.search(command):
         return "deny", "Skipping the git hooks (--no-verify) is not allowed: they hold the GitFlow rules (TKT-15)."
-    context = TICKET_CONTEXT.match(branch_of(cwd))
+    branch = branch_of(cwd)
+    protected = rewritten_protected(command, branch)
+    if protected:
+        return "deny", REWRITE_REASON.format(target=protected)
+    context = TICKET_CONTEXT.match(branch)
     write = WRITES.search(command) or PR_MERGE.search(command)
     if context and write:
         return "deny", (

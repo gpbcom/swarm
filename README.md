@@ -251,6 +251,10 @@ A ticket that changes a front end lists every screen it shows in its `TICKET.md`
 ### Afterwards
 
 Once every running ticket is merged, `python3 .claude/scripts/tickets.py prune` puts this checkout back on `develop`.
+It then deletes, locally and on GitHub, every branch whose work `develop` already holds, with its worker worktree,
+after saving them all to a bundle in `.git/swarm/backups/` (TKT-25); `prune --dry-run` only lists them.
+`python3 .claude/scripts/tickets.py branches` gives every branch its verdict: only a 🌱 live branch is rebased onto
+`develop`, and `develop` and `master` are never rebased, reset, force-pushed or deleted.
 On a new clone, run `python3 .claude/scripts/tickets.py setup` once to turn on the GitFlow git hooks.
 
 ## 🗂️ Repository layout

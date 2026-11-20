@@ -38,6 +38,7 @@ These rules apply to every ticket of the roadmap (`docs/specs/roadmap/`), worked
 | [TKT-22](#tkt-22) | Every rule names what enforces it, and more than a reading alone |
 | [TKT-23](#tkt-23) | "Done" has one definition, and every harness command can run again safely |
 | [TKT-24](#tkt-24) | Harness scripts run anywhere: a shallow CI checkout, no local develop, no GitHub |
+| [TKT-25](#tkt-25) | A branch lives as long as its work: only a live branch is rebased, the rest is deleted after a backup, and `master` is never rewritten |
 
 ## <a id="tkt-1"></a>TKT-1: Roadmap tickets, one folder each
 
@@ -569,3 +570,39 @@ board using it.
 **Check:** the tests of `tests/harness/board/test_board.py` (a dry run with a `gh` that always fails, `develop_ref`
 without `develop`) pass, and CI runs every harness test in its own shallow checkout.
 
+## <a id="tkt-25"></a>TKT-25: A branch lives as long as its work
+
+**Rule:**
+
+- Every branch, local and on GitHub, has one verdict against `origin/develop`, printed by `python3
+  .claude/scripts/tickets.py branches`:
+
+  | Verdict | Means | What happens |
+  | --- | --- | --- |
+  | 🔒 protected | `develop`, `master` | Never rebased, reset, force-pushed or deleted. `master` moves only through a release or a hotfix pull request (TKT-15) |
+  | 🔄 open | The branch checked out in the main checkout, an open ticket's branch, `feature/tickets` and the workers' `worktree-*` branches while a ticket is open | Left alone |
+  | 🧹 merged | An ancestor of `develop` | Deleted |
+  | 🧹 integrated | Every change already in `develop` under other commits (`git cherry`), as after a history rewrite | Deleted |
+  | 🧹 superseded | A worker's or a ticket's branch whose own commits all belong to done tickets (TKT-23): attempts `develop` replaced; a leftover `<repo>-tickets/<ID>` folder of a done ticket | Deleted, **never rebased** |
+  | 🌱 live | Commits of its own | **The only branches rebased onto `develop`** |
+
+- **"Rebase the branches" means the 🌱 live ones.** A 🧹 branch is never rebased: its rebase would bring back code
+  that `develop` replaced, or replay commits already there.
+- `tickets.py prune` deletes every 🧹 branch, locally and on GitHub, with its worktree, once the tickets are merged.
+  **Nothing is deleted without a backup:** it first writes one bundle in `.git/swarm/backups/` holding every branch it
+  deletes and, under `refs/swarm-backup/`, the uncommitted work of every worktree and folder it removes. It prints the
+  command that restores them. `prune --dry-run` says what it would delete and changes nothing.
+- A worker's worktree and branch never outlive the ticket: `ticket_tree.py integrate` removes them once integrated,
+  and `prune` removes what a stopped run left.
+
+**Why:** asked to "rebase all the branches on develop", the repository held 135 local branches, 7 merged branches on
+GitHub and 22 worker worktrees, none of them with work of its own. Twelve worker branches held first attempts that
+later fix rounds had replaced, and nine worktrees held uncommitted copies: rebasing them would have put old code back
+on top of `develop`, and deleting them by hand would have lost it with no way back. `master`, 359 commits behind,
+would have been rewritten outside GitFlow.
+
+**Check:** the tests of `tests/harness/tickets/test_branches.py` (verdicts, backup before deletion, dry run, workers
+kept while a ticket is open, GitHub branches, leftover folders) and of `tests/harness/gitflow/test_gitflow.py` (the
+PreToolUse hook `.claude/hooks/guard_git.py` refuses a rebase, a reset or a forced push of `develop` or `master`; the
+pre-push hook refuses deleting them) pass; `grep -n 'tkt-25' .claude/rules/tickets.md` finds the summary row and the
+heading.

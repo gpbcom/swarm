@@ -549,6 +549,38 @@
     "path": ".github/workflows/python.yml",
     "what": "CI runs the harness tests in a shallow checkout without develop"
    }
+  ],
+  "TKT-25": [
+   {
+    "kind": "script",
+    "path": ".claude/scripts/branches.py",
+    "what": "gives every branch its verdict; deletes only merged, integrated or superseded ones, after a backup bundle"
+   },
+   {
+    "kind": "script",
+    "path": ".claude/scripts/tickets.py",
+    "what": "branches prints the verdicts; prune [--dry-run] acts on them"
+   },
+   {
+    "kind": "hook",
+    "path": ".claude/hooks/guard_git.py",
+    "what": "refuses a rebase, a reset or a forced push or deletion of develop or master"
+   },
+   {
+    "kind": "hook",
+    "path": ".claude/scripts/gitflow.py",
+    "what": "the pre-push hook refuses deleting develop or master on the remote"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/tickets/test_branches.py",
+    "what": "verdicts, backup before deletion, dry run, open tickets' workers kept, GitHub branches"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/gitflow/test_gitflow.py",
+    "what": "develop and master are never rebased, reset, forced or deleted"
+   }
   ]
  }
 }
