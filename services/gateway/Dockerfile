@@ -1,0 +1,48 @@
+# syntax=docker/dockerfile:1.7
+# Build context: the repository root, because the shared uv.lock is there.
+
+FROM python:3.12.8-slim-bookworm AS build
+
+COPY --from=ghcr.io/astral-sh/uv:0.12.21 /uv /usr/local/bin/uv
+
+ENV UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy \
+    UV_PYTHON_DOWNLOADS=never \
+    UV_PROJECT_ENVIRONMENT=/opt/venv
+
+WORKDIR /workspace
+
+COPY pyproject.toml uv.lock ./
+COPY services/gateway/pyproject.toml services/gateway/pyproject.toml
+COPY packages/python/swarm-catalog/pyproject.toml packages/python/swarm-catalog/pyproject.toml
+COPY packages/python/swarm-lifecycle/pyproject.toml packages/python/swarm-lifecycle/pyproject.toml
+COPY packages/python/swarm-logging/pyproject.toml packages/python/swarm-logging/pyproject.toml
+COPY packages/python/swarm-models/pyproject.toml packages/python/swarm-models/pyproject.toml
+COPY packages/python/swarm-nats/pyproject.toml packages/python/swarm-nats/pyproject.toml
+
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-dev --no-editable --no-install-workspace --package swarm-gateway
+
+COPY README.md README.md
+COPY services/gateway services/gateway
+COPY packages/python packages/python
+
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-dev --no-editable --package swarm-gateway
+
+FROM python:3.12.8-slim-bookworm AS runtime
+
+ENV PATH="/opt/venv/bin:$PATH" \
+    PYTHONUNBUFFERED=1
+
+RUN groupadd --system --gid 10001 swarm \
+    && useradd --system --uid 10001 --gid swarm --home-dir /app --shell /usr/sbin/nologin swarm \
+    && mkdir -p /app \
+    && chown swarm:swarm /app
+
+COPY --from=build /opt/venv /opt/venv
+
+WORKDIR /app
+USER 10001:10001
+
+ENTRYPOINT ["swarm-gateway"]

@@ -1,0 +1,130 @@
+$ pnpm -r --if-present test
+(cwd ., on the ticket's own files only)
+
+Scope: 9 of 10 workspace projects
+packages/ts/ui test$ vitest run
+packages/ts/live test$ node --experimental-strip-types --test test/*.test.ts && node --experimental-strip-types scripts/generate.ts --check
+packages/ts/live test: TAP version 13
+packages/ts/live test: # (node:791859) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+packages/ts/live test: # (Use `node --trace-warnings ...` to show where the warning was created)
+packages/ts/live test: # Subtest: the live models generator
+packages/ts/live test:     # Subtest: starts the render with the banner
+packages/ts/live test:     ok 1 - starts the render with the banner
+packages/ts/live test:       ---
+packages/ts/live test:       duration_ms: 68.663019
+packages/ts/live test:       type: 'test'
+packages/ts/live test:       ...
+packages/ts/live test:     # Subtest: renders one exported type per definition
+packages/ts/live test:     ok 2 - renders one exported type per definition
+packages/ts/live test:       ---
+packages/ts/live test:       duration_ms: 5.54708
+packages/ts/live test:       type: 'test'
+packages/ts/live test:       ...
+packages/ts/live test:     # Subtest: renders the same text twice
+packages/ts/live test:     ok 3 - renders the same text twice
+packages/ts/live test:       ---
+packages/ts/live test:       duration_ms: 6.597822
+packages/ts/live test:       type: 'test'
+packages/ts/live test:       ...
+packages/ts/live test:     # Subtest: rejects invalid JSON
+packages/ts/live test:     ok 4 - rejects invalid JSON
+packages/ts/live test:       ---
+packages/ts/live test:       duration_ms: 0.307082
+packages/ts/live test:       type: 'test'
+packages/ts/live test:       ...
+packages/ts/live test:     # Subtest: is stale when the output is missing
+packages/ts/live test:     ok 5 - is stale when the output is missing
+packages/ts/live test:       ---
+packages/ts/live test:       duration_ms: 7.923676
+packages/ts/live test:       type: 'test'
+packages/ts/live test:       ...
+packages/ts/live test:     # Subtest: writes into missing folders and is then fresh
+packages/ts/live test:     ok 6 - writes into missing folders and is then fresh
+packages/ts/live test:       ---
+packages/ts/live test:       duration_ms: 10.218959
+packages/ts/live test:       type: 'test'
+packages/ts/live test:       ...
+packages/ts/live test:     # Subtest: is stale again after the output is edited
+packages/ts/live test:     ok 7 - is stale again after the output is edited
+packages/ts/live test:       ---
+packages/ts/live test:       duration_ms: 10.111818
+packages/ts/live test:       type: 'test'
+packages/ts/live test:       ...
+packages/ts/live test:     # Subtest: points at the schema and the generated file
+packages/ts/live test:     ok 8 - points at the schema and the generated file
+packages/ts/live test:       ---
+packages/ts/live test:       duration_ms: 0.224969
+packages/ts/live test:       type: 'test'
+packages/ts/live test:       ...
+packages/ts/live test:     1..8
+packages/ts/live test: ok 1 - the live models generator
+packages/ts/live test:   ---
+packages/ts/live test:   duration_ms: 113.453278
+packages/ts/live test:   type: 'suite'
+packages/ts/live test:   ...
+packages/ts/live test: 1..1
+packages/ts/live test: # tests 8
+packages/ts/live test: # suites 1
+packages/ts/live test: # pass 8
+packages/ts/live test: # fail 0
+packages/ts/live test: # cancelled 0
+packages/ts/live test: # skipped 0
+packages/ts/live test: # todo 0
+packages/ts/live test: # duration_ms 239.085975
+packages/ts/ui test: 
+packages/ts/ui test:  RUN  v5.1.1 /tmp/swarm-checks-_4n8akir/packages/ts/ui
+packages/ts/ui test: 
+packages/ts/live test: (node:791924) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+packages/ts/live test: (Use `node --trace-warnings ...` to show where the warning was created)
+packages/ts/live test: Done
+packages/ts/ui test: 
+packages/ts/ui test:  Test Files  7 passed (7)
+packages/ts/ui test:       Tests  154 passed (154)
+packages/ts/ui test:    Start at  15:36:32
+packages/ts/ui test:    Duration  1.16s (environment 64%, import 16%, tests 13%, transform 6%, worker 1%)
+packages/ts/ui test: 
+packages/ts/ui test: Done
+frontends/back-office test$ vitest run
+frontends/client-portal test$ vitest run
+frontends/mission-studio test$ vitest run
+frontends/ground-control test$ vitest run
+frontends/back-office test: 
+frontends/back-office test:  RUN  v5.1.1 /tmp/swarm-checks-_4n8akir/frontends/back-office
+frontends/back-office test: 
+frontends/client-portal test: 
+frontends/client-portal test:  RUN  v5.1.1 /tmp/swarm-checks-_4n8akir/frontends/client-portal
+frontends/client-portal test: 
+frontends/ground-control test: 
+frontends/ground-control test:  RUN  v5.1.1 /tmp/swarm-checks-_4n8akir/frontends/ground-control
+frontends/ground-control test: 
+frontends/mission-studio test: 
+frontends/mission-studio test:  RUN  v5.1.1 /tmp/swarm-checks-_4n8akir/frontends/mission-studio
+frontends/mission-studio test: 
+frontends/mission-studio test: 
+frontends/mission-studio test:  Test Files  1 passed (1)
+frontends/mission-studio test:       Tests  8 passed (8)
+frontends/mission-studio test:    Start at  15:36:34
+frontends/mission-studio test:    Duration  787ms (environment 49%, transform 24%, import 19%, tests 7%)
+frontends/mission-studio test: 
+frontends/mission-studio test: Done
+frontends/client-portal test: 
+frontends/client-portal test:  Test Files  1 passed (1)
+frontends/client-portal test:       Tests  9 passed (9)
+frontends/client-portal test:    Start at  15:36:34
+frontends/client-portal test:    Duration  891ms (environment 52%, transform 22%, import 21%, tests 4%, worker 1%)
+frontends/client-portal test: 
+frontends/ground-control test: 
+frontends/ground-control test:  Test Files  1 passed (1)
+frontends/ground-control test:       Tests  10 passed (10)
+frontends/ground-control test:    Start at  15:36:34
+frontends/ground-control test:    Duration  894ms (environment 50%, transform 23%, import 21%, tests 5%, worker 1%)
+frontends/ground-control test: 
+frontends/back-office test: 
+frontends/back-office test:  Test Files  1 passed (1)
+frontends/back-office test:       Tests  8 passed (8)
+frontends/back-office test:    Start at  15:36:34
+frontends/back-office test:    Duration  906ms (environment 52%, transform 23%, import 21%, tests 4%)
+frontends/back-office test: 
+frontends/client-portal test: Done
+frontends/back-office test: Done
+frontends/ground-control test: Done

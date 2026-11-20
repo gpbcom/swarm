@@ -1,0 +1,9 @@
+$ pnpm -r --if-present typecheck
+(cwd ., on the ticket's own files only)
+
+packages/ts/config typecheck$ tsc --noEmit -p tsconfig.json
+packages/ts/config typecheck: Done
+packages/ts/e2e typecheck$ tsc --noEmit -p tsconfig.json
+packages/ts/live typecheck$ tsc --noEmit -p tsconfig.json
+packages/ts/live typecheck: Done
+packages/ts/e2e typecheck: Done

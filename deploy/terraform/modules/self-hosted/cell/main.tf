@@ -3,8 +3,9 @@ resource "kubernetes_namespace_v1" "cell" {
     name = var.name
 
     labels = {
-      "app.kubernetes.io/part-of" = "swarm"
-      "swarm-cell"                = var.name
+      "app.kubernetes.io/part-of"   = "swarm"
+      "swarm-cell"                  = var.name
+      "policy.sigstore.dev/include" = "true"
     }
 
     annotations = {

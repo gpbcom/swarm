@@ -19,6 +19,9 @@ SHARED_FILES = frozenset(
         ".github/workflows/rust.yml",
         ".github/workflows/typescript.yml",
         ".github/workflows/specs.yml",
+        ".github/workflows/images.yml",
+        "compose.e2e.yaml",
+        ".dockerignore",
     }
 )
 REPOSITORY_PREFIXES = ("tests/", ".claude/")
@@ -43,6 +46,19 @@ def discover_typescript(root: Path) -> List[str]:
             continue
         for child in folder.iterdir():
             if child.is_dir() and (child / "package.json").is_file():
+                found.append(f"{parent}/{child.name}")
+    return sorted(found)
+
+
+def discover_images(root: Path) -> List[str]:
+    """List the image folders: ``services/<service>`` and ``frontends/<name>`` holding a ``Dockerfile``."""
+    found: List[str] = []
+    for parent in ("services", "frontends"):
+        folder = root / parent
+        if not folder.is_dir():
+            continue
+        for child in folder.iterdir():
+            if child.is_dir() and not child.name.startswith((".", "_")) and (child / "Dockerfile").is_file():
                 found.append(f"{parent}/{child.name}")
     return sorted(found)
 
@@ -93,7 +109,7 @@ def parse_args(argv: List[str]) -> Optional[Tuple[Path, bool]]:
 
 
 def main(argv: Optional[List[str]] = None) -> int:
-    """Print the five output lines for the changed paths on stdin."""
+    """Print the six output lines for the changed paths on stdin."""
     parsed = parse_args(sys.argv[1:] if argv is None else argv)
     if parsed is None:
         print(USAGE, file=sys.stderr)
@@ -101,9 +117,11 @@ def main(argv: Optional[List[str]] = None) -> int:
     root, select_all = parsed
     all_services = discover_services(root)
     all_typescript = discover_typescript(root)
+    all_images = discover_images(root)
 
     services: Set[str] = set()
     typescript: Set[str] = set()
+    images: Set[str] = set()
     rust = repository = specs = False
     everything = select_all
     paths = [] if select_all else read_paths(sys.stdin.read())
@@ -116,6 +134,8 @@ def main(argv: Optional[List[str]] = None) -> int:
             services.add(parts[1])
         elif parts[0] == "frontends" and len(parts) > 2 and f"frontends/{parts[1]}" in all_typescript:
             typescript.add(f"frontends/{parts[1]}")
+        if len(parts) > 2 and f"{parts[0]}/{parts[1]}" in all_images:
+            images.add(f"{parts[0]}/{parts[1]}")
         if path.startswith(REPOSITORY_PREFIXES):
             repository = True
         if path.startswith(SPECS_PREFIXES):
@@ -123,6 +143,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     if everything:
         services = set(all_services)
         typescript = set(all_typescript)
+        images = set(all_images)
         rust = rust_applies(root)
         repository = specs = True
 
@@ -131,6 +152,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     print(f"rust={str(rust).lower()}")
     print(f"repository={str(repository).lower()}")
     print(f"specs={str(specs).lower()}")
+    print(f"images={json.dumps(sorted(images), separators=(',', ':'))}")
     return 0
 
 

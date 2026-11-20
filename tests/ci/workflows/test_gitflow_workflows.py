@@ -9,7 +9,7 @@ from pydantic import JsonValue
 
 class TestGitflowWorkflows:
     ROOT: ClassVar[Path] = Path(__file__).resolve().parents[3]
-    WAITED_FOR: ClassVar[List[str]] = ["ci", "gitflow", "terraform"]
+    WAITED_FOR: ClassVar[List[str]] = ["ci", "gitflow", "terraform", "desktop"]
 
     def load(self, name: str) -> Dict[Union[str, bool], JsonValue]:
         path = self.ROOT / ".github" / "workflows" / name

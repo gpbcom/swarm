@@ -29,6 +29,7 @@ jobs:
       rust: ${{ steps.detect.outputs.rust }}
       repository: ${{ steps.detect.outputs.repository }}
       specs: ${{ steps.detect.outputs.specs }}
+      images: ${{ steps.detect.outputs.images }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -84,8 +85,20 @@ jobs:
     if: needs.changes.outputs.specs == 'true'
     uses: ./.github/workflows/specs.yml
 
-  result:
+  images:
     needs: [changes, python, rust, typescript, specs]
+    if: ${{ !cancelled() && !contains(needs.*.result, 'failure') && needs.changes.outputs.images != '[]' }}
+    uses: ./.github/workflows/images.yml
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    with:
+      images: ${{ needs.changes.outputs.images }}
+      publish: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master') }}
+
+  result:
+    needs: [changes, python, rust, typescript, specs, images]
     if: always()
     runs-on: ubuntu-latest
     steps:

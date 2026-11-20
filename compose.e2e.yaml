@@ -1,0 +1,7 @@
+# The real images of a pipeline run, for the Playwright tests. Front ends add their service here with the same image
+# pattern when they get their Dockerfile.
+services:
+  gateway:
+    image: ${SWARM_IMAGE_REGISTRY:-ghcr.io/gpbcom/swarm}/gateway:${SWARM_IMAGE_TAG:?SWARM_IMAGE_TAG names the images of a pipeline run}
+    pull_policy: missing
+    restart: "no"

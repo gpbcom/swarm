@@ -8,7 +8,7 @@ from typing import List
 
 from spec_build import build_texts
 from spec_check import Checker
-from spec_model import (FIXED_FILES, FIXED_PAGES, IDENTITY_CSS, IDENTITY_GROUP, ID_FILE, KINDS, MODES, MOCKUPS,
+from spec_model import (FIXED_FILES, FIXED_PAGES, IDENTITY_CSS, TOKENS_CSS, IDENTITY_GROUP, ID_FILE, KINDS, MODES, MOCKUPS,
                         ROOT, SPECS, TEMPLATES, discover, flowchart, identity_css, nodes, parse_tokens, screen_size,
                         slugify)
 from spec_screens import SOURCE_KEY, find_browser, mockups, png_for, png_info, render, source_hash
@@ -28,7 +28,7 @@ Usage, from anywhere:
 ``mockup``  creates the HTML mock-up of one state (a flow chart node) of a use case, to draw with components.css.
 ``render``  builds, then renders every mock-up whose PNG is missing or out of date (all of them with --all).
 ``build``   rewrites the generated content: summaries, navigation, page list, matrix, back links, palette, the
-            flow chart colours and visual-identity.css. It never touches other text.
+            flow chart colours, visual-identity.css and packages/ts/tokens/src/tokens.css. It never touches other text.
 ``check``   prints one line per breach, ``<file>: SPEC-<n>: <message>``, and exits 1. It prints nothing and exits 0
             when the specifications comply.
 """
@@ -134,6 +134,9 @@ def command_build() -> int:
         if not IDENTITY_CSS.is_file() or IDENTITY_CSS.read_text(encoding="utf-8") != css:
             IDENTITY_CSS.parent.mkdir(parents=True, exist_ok=True)
             IDENTITY_CSS.write_text(css, encoding="utf-8")
+        if not TOKENS_CSS.is_file() or TOKENS_CSS.read_text(encoding="utf-8") != css:
+            TOKENS_CSS.parent.mkdir(parents=True, exist_ok=True)
+            TOKENS_CSS.write_text(css, encoding="utf-8")
     return 0
 
 
