@@ -1,14 +1,4 @@
 #!/usr/bin/env python3
-"""Claude Code status line of Swarm: the GitFlow branch, the open tickets and the board, from local files only.
-
-Configured in ``.claude/settings.json`` (``statusLine``). Reads the session's JSON on stdin and prints one line:
-
-    🌿 feature/T0.09 · 🎫 T0.09 🔄 · open 🔄T0.09 👀T0.10 · 🗂️ ✅6 📝1 🔄1 👀1 🏁8/262 · 🧠 Opus
-
-The board counts come from ``.git/swarm/board.json``, written by ``board.py`` (``sync``, ``move``, ``bootstrap``),
-so the line never waits for GitHub.
-"""
-
 from __future__ import annotations
 
 import json

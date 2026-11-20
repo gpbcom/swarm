@@ -1,5 +1,19 @@
 #!/usr/bin/env python3
-"""Build and check the specifications under ``docs/specs`` against the SPEC rules (``.claude/rules/specs.md``).
+from __future__ import annotations
+
+import datetime
+import sys
+from pathlib import Path
+from typing import List
+
+from spec_build import build_texts
+from spec_check import Checker
+from spec_model import (FIXED_FILES, FIXED_PAGES, IDENTITY_CSS, IDENTITY_GROUP, ID_FILE, KINDS, MODES, MOCKUPS,
+                        ROOT, SPECS, TEMPLATES, discover, flowchart, identity_css, nodes, parse_tokens, screen_size,
+                        slugify)
+from spec_screens import SOURCE_KEY, find_browser, mockups, png_for, png_info, render, source_hash
+
+USAGE = """Build and check the specifications under ``docs/specs`` against the SPEC rules (``.claude/rules/specs.md``).
 
 Usage, from anywhere:
     python3 .claude/skills/write-specs/scripts/specs.py init
@@ -18,20 +32,6 @@ Usage, from anywhere:
 ``check``   prints one line per breach, ``<file>: SPEC-<n>: <message>``, and exits 1. It prints nothing and exits 0
             when the specifications comply.
 """
-
-from __future__ import annotations
-
-import datetime
-import sys
-from pathlib import Path
-from typing import List
-
-from spec_build import build_texts
-from spec_check import Checker
-from spec_model import (FIXED_FILES, FIXED_PAGES, IDENTITY_CSS, IDENTITY_GROUP, ID_FILE, KINDS, MODES, MOCKUPS,
-                        ROOT, SPECS, TEMPLATES, discover, flowchart, identity_css, nodes, parse_tokens, screen_size,
-                        slugify)
-from spec_screens import SOURCE_KEY, find_browser, mockups, png_for, png_info, render, source_hash
 
 
 def today() -> str:
@@ -159,7 +159,7 @@ def main() -> int:
         case ["check"]:
             return command_check()
         case _:
-            print(__doc__, file=sys.stderr)
+            print(USAGE, file=sys.stderr)
             return 2
 
 

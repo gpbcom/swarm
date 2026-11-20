@@ -30,6 +30,8 @@ class TestNoLoggerArgument:
             "Work(getLogger('work'))",
             "factories.Work(config, logging.getLogger(__name__))",
             "cls(config, logger)",
+            "super().__init__(logger)",
+            "super().__init__(config.status_interval_s, logger)",
         ],
     )
     def test_a_new_object_handed_a_logger_is_a_violation(self, tmp_path: Path, call: str) -> None:
@@ -42,7 +44,7 @@ class TestNoLoggerArgument:
         [
             "Work(config)",
             "Work()",
-            "super().__init__(config.status_interval_s, logger)",
+            "super().__init__(config.status_interval_s)",
             "self.logger.info('Built %s.', name)",
             "build(config, logger)",
         ],

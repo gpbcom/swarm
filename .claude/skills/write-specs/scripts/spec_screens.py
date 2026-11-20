@@ -1,5 +1,3 @@
-"""Screens: PNG files, their HTML mock-ups, and rendering mock-ups with a headless browser."""
-
 from __future__ import annotations
 
 import hashlib

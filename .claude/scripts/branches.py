@@ -1,27 +1,4 @@
 #!/usr/bin/env python3
-"""Branch hygiene: a branch lives as long as its work, and nothing is deleted without a backup (TKT-25).
-
-Used by ``python3 .claude/scripts/tickets.py branches`` (the verdicts) and ``tickets.py prune [--dry-run]`` (acting on
-them). Every branch, local and on GitHub, gets one verdict against ``origin/develop``:
-
-- 🔒 **protected**: ``develop``, ``master``, ``main``. ``master`` is never rebased, reset or deleted: it changes only
-  through a release or a hotfix pull request (TKT-15).
-- 🔄 **open**: the branch checked out in the main checkout or in a worktree other than a worker's, a branch of an
-  open ticket, ``feature/tickets`` and the workers' ``worktree-*`` branches while a ticket is open (a run may be
-  using them).
-- 🧹 **merged** (an ancestor of develop), **integrated** (every change already in develop under other commits, as
-  after a history rewrite: ``git cherry``) or **superseded** (a worker's or a ticket's branch whose own commits all
-  belong to done tickets: attempts that develop replaced). These are deleted, never rebased: a rebase would bring back
-  code that develop replaced.
-- 🌱 **live**: commits of its own. The only branches to rebase onto develop.
-
-Leftover folders of done tickets in ``<repo>-tickets/`` (from before TKT-16) are superseded too.
-
-Before deleting anything, ``prune`` writes one bundle in ``.git/swarm/backups/`` holding every branch it deletes and,
-under ``refs/swarm-backup/``, the uncommitted work of every worktree and folder it removes. Restore with
-``git fetch <bundle> 'refs/*:refs/restored/*'``.
-"""
-
 from __future__ import annotations
 
 import shutil

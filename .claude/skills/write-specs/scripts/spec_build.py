@@ -1,5 +1,3 @@
-"""Generated content: navigation, summaries, page list, matrix, back links, palette and flow chart colours."""
-
 from __future__ import annotations
 
 import re

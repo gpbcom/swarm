@@ -1,5 +1,14 @@
 #!/usr/bin/env python3
-"""The GitFlow rules of Swarm, run by the git hooks of ``.githooks/`` (TKT-15).
+from __future__ import annotations
+
+import os
+import re
+import subprocess
+import sys
+from pathlib import Path
+from typing import List, Optional
+
+USAGE = """The GitFlow rules of Swarm, run by the git hooks of ``.githooks/`` (TKT-15).
 
 Usage (by git, through ``.githooks/``; turned on per clone by ``python3 .claude/scripts/tickets.py setup``):
     gitflow.py pre-commit
@@ -16,15 +25,6 @@ Usage (by git, through ``.githooks/``; turned on per clone by ``python3 .claude/
 ``SWARM_GITFLOW_BYPASS=1`` lets the person step outside these rules on purpose (a first push, a release tag).
 Each refusal prints its reason and the way out on stderr, and exits 1.
 """
-
-from __future__ import annotations
-
-import os
-import re
-import subprocess
-import sys
-from pathlib import Path
-from typing import List, Optional
 
 BYPASS_ENV = "SWARM_GITFLOW_BYPASS"
 PROTECTED = ("develop", "master", "main")
@@ -127,7 +127,7 @@ def pre_push(lines: List[str]) -> int:
 
 def main(argv: List[str]) -> int:
     if not argv:
-        print(__doc__, file=sys.stderr)
+        print(USAGE, file=sys.stderr)
         return 2
     if argv[0] == "pre-commit":
         return pre_commit()

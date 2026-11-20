@@ -1,21 +1,4 @@
 #!/usr/bin/env python3
-"""SubagentStop hook: run the checks of the touched layer before a worker hands its task back.
-
-Usage, with the SubagentStop JSON on stdin:
-    python3 .claude/hooks/check_touched.py [--dry-run]
-
-The hook does nothing outside a linked git worktree, so the main working tree is never checked. It finds the files the
-worker changed, looks up the rules of ``layer-checks.json``
-that match them and runs the resulting commands from the top of the worktree. When a check fails, the hook exits 2 so
-that the agent fixes it, at most ``max_blocks`` times (TKT-6); after that it exits 0 and leaves the failure to the
-verifier. A missing executable is a note, not a failure. ``--dry-run`` only prints the commands.
-
-The files the worker changed are those that differ from the tree recorded by ``ticket_tree.py start`` (the file
-``swarm-base-tree`` in the worktree's git directory): the work of earlier tasks copied in by ``start`` is not the
-worker's, so it is not checked again (TKT-5). Without that file, they are the files committed since the base,
-modified, added or untracked.
-"""
-
 from __future__ import annotations
 
 import json

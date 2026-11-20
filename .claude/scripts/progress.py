@@ -1,5 +1,15 @@
 #!/usr/bin/env python3
-"""Report the progress of the running Claude Code workflow (ticket harness), exhaustively, with colour icons.
+from __future__ import annotations
+
+import json
+import re
+import subprocess
+import sys
+import time
+from datetime import datetime
+from pathlib import Path
+
+USAGE = """Report the progress of the running Claude Code workflow (ticket harness), exhaustively, with colour icons.
 
 Usage, from the repository root:
     python3 .claude/scripts/progress.py watch [--every 120] [--run <run id>]
@@ -20,16 +30,6 @@ between the ``<!-- timings -->`` markers (appended at the end if missing); witho
 Legend: 🏁 ended · ⏳ running · ❌ failed · ⚠️ stalled | phases ✅ done 🔄 running ⬜ waiting |
 models 🟣 opus 🔵 sonnet 🟢 haiku 🟠 fable ⚪ other | 🪙 tokens (input + output, cache reads excluded).
 """
-
-from __future__ import annotations
-
-import json
-import re
-import subprocess
-import sys
-import time
-from datetime import datetime
-from pathlib import Path
 
 PROJECTS = Path.home() / ".claude" / "projects"
 RUNNING_TYPES = {"launched", "started", "result"}
@@ -410,7 +410,7 @@ def main() -> int:
         print(f"wrote {write_timings(ticket, text)}" if "--write" in args else text)
         return 0
     if not args or args[0] not in ("watch", "once"):
-        print(__doc__, file=sys.stderr)
+        print(USAGE, file=sys.stderr)
         return 2
     every = int(args[args.index("--every") + 1]) if "--every" in args else 120
     run_id = args[args.index("--run") + 1] if "--run" in args else None

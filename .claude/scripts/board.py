@@ -1,5 +1,23 @@
 #!/usr/bin/env python3
-"""Mirror the roadmap on GitHub: issues, sub-issues, "blocked by" links and the Kanban project (TKT-15).
+from __future__ import annotations
+
+import argparse
+import json
+import posixpath
+import re
+import subprocess
+import sys
+import time
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple, Union
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from roadmap_gantt import GRAPH, ROADMAP, cells, expand, key, short
+from ticket_tree import find_home, main_checkout, open_states
+from tickets import develop_ref, done_tickets, finished_tickets
+
+USAGE = """Mirror the roadmap on GitHub: issues, sub-issues, "blocked by" links and the Kanban project (TKT-15).
 
 Usage, from the repository root:
     python3 .claude/scripts/board.py bootstrap [--dry-run]
@@ -18,24 +36,6 @@ the tickets merged on ``develop``, and ``show`` prints the board from the local 
 Columns: 📥 Backlog (prerequisites open), ✅ Ready (every prerequisite merged), 📝 Planned (PLAN.md awaits approval),
 🔄 Running (``/ticket-run``), 👀 In review (pull request open), 🏁 Done (merged into ``develop``).
 """
-
-from __future__ import annotations
-
-import argparse
-import json
-import posixpath
-import re
-import subprocess
-import sys
-import time
-from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Union
-
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-
-from roadmap_gantt import GRAPH, ROADMAP, cells, expand, key, short
-from ticket_tree import find_home, main_checkout, open_states
-from tickets import develop_ref, done_tickets, finished_tickets
 
 Json = Union[None, bool, int, float, str, List["Json"], Dict[str, "Json"]]
 
@@ -699,7 +699,7 @@ def show(include_all: bool) -> None:
 
 
 def main(argv: Optional[List[str]] = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser = argparse.ArgumentParser(description=USAGE.splitlines()[0])
     sub = parser.add_subparsers(dest="command", required=True)
     boot = sub.add_parser("bootstrap")
     boot.add_argument("--dry-run", action="store_true")
