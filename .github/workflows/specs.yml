@@ -19,11 +19,26 @@ jobs:
       - name: Check the specifications
         shell: bash
         run: |
+          set +e
           output="$(uv run python .claude/skills/write-specs/scripts/specs.py check)"
           status=$?
+          set -e
+          mkdir -p reports
+          if [ -n "$output" ]; then
+            printf '%s\n' "$output" > reports/specs-check.log
+          else
+            echo "specs.py check printed nothing." > reports/specs-check.log
+          fi
           if [ -n "$output" ]; then
             printf '%s\n' "$output"
           fi
           if [ "$status" -ne 0 ] || [ -n "$output" ]; then
             exit 1
           fi
+      - name: Keep the test reports (TKT-26)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report-specs
+          path: reports/
+          if-no-files-found: ignore

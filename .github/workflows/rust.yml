@@ -26,7 +26,17 @@ jobs:
       - name: Run clippy
         run: cargo clippy --workspace --all-targets --locked -- -D warnings
       - name: Run the tests
-        run: cargo test --workspace --locked
+        shell: bash
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/reports"
+          cargo test --workspace --locked 2>&1 | tee "$GITHUB_WORKSPACE/reports/rust-cargo-test.log"
+      - name: Keep the test reports (TKT-26)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report-rust
+          path: reports/
+          if-no-files-found: ignore
 
   bench:
     needs: check

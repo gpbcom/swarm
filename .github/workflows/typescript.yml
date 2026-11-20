@@ -35,4 +35,17 @@ jobs:
       - name: Type check
         run: pnpm --filter "./$PROJECT" run --if-present typecheck
       - name: Test
-        run: pnpm --filter "./$PROJECT" run --if-present test
+        id: test
+        shell: bash
+        run: |
+          name="${PROJECT//\//-}"
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+          mkdir -p reports
+          pnpm --filter "./$PROJECT" run --if-present test 2>&1 | tee "reports/$name.log"
+      - name: Keep the test reports (TKT-26)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report-ts-${{ steps.test.outputs.name }}
+          path: reports/
+          if-no-files-found: ignore

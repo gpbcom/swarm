@@ -94,7 +94,7 @@ class TestTypescriptWorkflow:
         assert "pnpm --filter" in run
         assert "$PROJECT" in run
         assert "--if-present" in run
-        assert run.strip().endswith(script)
+        assert f"run --if-present {script}" in run
 
     def test_there_are_exactly_four_run_steps(self) -> None:
         assert len(self.runs()) == 4

@@ -10,6 +10,7 @@
   deleted on GitHub (TKT-25): a release or a hotfix pull request moves ``master``.
 - In any other checkout: a push to ``develop`` or ``master`` asks the person first.
 - Anywhere: ``tickets.py approve`` (a group's plans approved at once) asks the person first: the approval is theirs.
+- Anywhere: starting a release (``gh workflow run release.yml``) asks the person first: it ends on master (TKT-26).
 
 Reads the hook's JSON on stdin and prints a decision (``deny`` or ``ask``) as JSON, or nothing to let the command run.
 """
@@ -26,6 +27,7 @@ HEREDOC = re.compile(r"<<-?\s*['\"]?(\w+)['\"]?")
 QUOTED = re.compile(r"'[^']*'|\"(?:[^\"\\]|\\.)*\"")
 TICKET_CONTEXT = re.compile(r"^(feature/tickets|feature/T\d+\.\d{2}|ticket/T\d+\.\d{2}|worktree-.*)$")
 APPROVE = re.compile(r"\btickets\.py\s+approve\b")
+RELEASE = re.compile(r"\bgh\s+workflow\s+run\s+release(?:\.yml)?\b")
 WRITES = re.compile(r"\bgit\s+(?:-C\s+\S+\s+|-c\s+\S+\s+)*(commit|merge|rebase|reset|stash|push|cherry-pick|revert)\b")
 PR_MERGE = re.compile(r"\bgh\s+pr\s+merge\b")
 NO_VERIFY = re.compile(r"\bgit\b[^|;&]*\s(--no-verify|commit\s+(?:[^|;&]*\s)?-n\b)")
@@ -106,6 +108,8 @@ def decide(command: str, cwd: str) -> Optional[Tuple[str, str]]:
             "ask",
             "This approves the plans of a group of tickets: the approval is the person's (TKT-3, TKT-20). Approve?",
         )
+    if RELEASE.search(command):
+        return "ask", "This starts a release, which ends merged into master and published (TKT-26). Release?"
     target = PUSH_PROTECTED.search(command)
     if target:
         return "ask", f"This pushes to {target.group(1)}, which changes through pull requests (TKT-15). Push anyway?"

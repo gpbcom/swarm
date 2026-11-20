@@ -48,17 +48,25 @@ jobs:
       - name: Pytest
         run: |
           if [ -d "services/$SERVICE/tests" ] && [ -n "$(find "services/$SERVICE/tests" -name 'test_*.py' -print -quit)" ]; then
-            uv run pytest "services/$SERVICE/tests" -n 2
+            uv run pytest "services/$SERVICE/tests" -n 2 --junitxml="reports/service-$SERVICE.xml"
           else
             echo "No tests for $SERVICE: pytest is not applicable."
           fi
       - name: Convention tests of the service
         run: |
           if [ -f tests/conventions/services/test_service_conventions.py ]; then
-            uv run pytest tests/conventions/services/test_service_conventions.py -k "$SERVICE-" -n 2
+            uv run pytest tests/conventions/services/test_service_conventions.py -k "$SERVICE-" -n 2 \
+              --junitxml="reports/conventions-$SERVICE.xml"
           else
             echo "No convention tests: not applicable."
           fi
+      - name: Keep the test reports (TKT-26)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report-python-service-${{ matrix.service }}
+          path: reports/
+          if-no-files-found: ignore
 
   repository:
     if: inputs.repository
@@ -89,7 +97,14 @@ jobs:
       - name: Ruff format check
         run: uv run ruff format --check tests .github/scripts
       - name: Repository tests
-        run: uv run pytest tests -n 2
+        run: uv run pytest tests -n 2 --junitxml=reports/repository.xml
+      - name: Keep the test reports (TKT-26)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report-python-repository
+          path: reports/
+          if-no-files-found: ignore
 
   packages:
     if: inputs.repository
@@ -134,9 +149,16 @@ jobs:
       - name: Pytest
         run: |
           if [ -n "$(find packages/python -name 'test_*.py' -print -quit)" ]; then
-            uv run pytest packages/python -n 2
+            uv run pytest packages/python -n 2 --junitxml=reports/packages.xml
           else
             echo "No tests in packages/python: pytest is not applicable."
           fi
       - name: JSON Schema bundle is up to date
         run: uv run swarm-models-schemas --check
+      - name: Keep the test reports (TKT-26)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report-python-packages
+          path: reports/
+          if-no-files-found: ignore
