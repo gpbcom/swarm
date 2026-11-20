@@ -254,6 +254,11 @@
     "what": "the verifier's deterministic checks"
    },
    {
+    "kind": "test",
+    "path": "tests/harness/checks/test_checks.py",
+    "what": "the checks run in a clean tree holding only the ticket's own work"
+   },
+   {
     "kind": "workflow",
     "path": ".claude/workflows/ticket-run.js",
     "what": "verify, review, documents, code review, then finish"

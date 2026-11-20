@@ -12,14 +12,22 @@ runs, with ``ticket_refs.py check`` (TICKET.md, PLAN.md and PROGRESS.md refer to
 ``plan.py check`` (the readable view of PLAN.md is up to date). Each check's output is saved to ``docs/tickets/<ID>/tests-evidences/<check>.txt``. The last line printed is
 the JSON verdict: ``{"passed": bool, "failures": [{"check", "file", "detail", "environment"}], "not_applicable": [...], "passed_checks": [...]}``.
 A failure with ``environment: true`` comes from a missing tool or module, not from the code.
+
+Several tickets share the main checkout (TKT-16), and the AGENT.md tools read a whole workspace (``uv`` the
+``services/*`` glob, ``pnpm -r`` every package), so another ticket's half-built work would fail this one. When the
+ticket has recorded its own files, every check runs in a clean temporary worktree of ``HEAD`` holding only the
+ticket's own changes (TKT-6), removed afterwards; the evidence is still written to the ticket's folder.
 """
 
 from __future__ import annotations
 
 import json
+import os
 import re
+import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 
@@ -35,14 +43,60 @@ TIMEOUT_S = 900
 ENVIRONMENT_MARKERS = ("ModuleNotFoundError", "No module named", "command not found")
 
 
-def run(command: List[str], cwd: Path = ROOT) -> Tuple[int, str]:
+def run(command: List[str], cwd: Path = ROOT, env: Optional[Dict[str, str]] = None) -> Tuple[int, str]:
     try:
-        result = subprocess.run(command, cwd=cwd, capture_output=True, text=True, timeout=TIMEOUT_S, check=False)
+        result = subprocess.run(
+            command,
+            cwd=cwd,
+            capture_output=True,
+            text=True,
+            timeout=TIMEOUT_S,
+            check=False,
+            env={**os.environ, **env} if env else None,
+        )
         return result.returncode, (result.stdout + result.stderr).strip()
     except FileNotFoundError as error:
         return 127, f"command not found: {error.filename}"
     except subprocess.TimeoutExpired:
         return 124, f"timed out after {TIMEOUT_S} s"
+
+
+def own_paths(ticket: str, root: Path = ROOT) -> Optional[List[str]]:
+    """Return the files and folders the ticket recorded as its own (TKT-16), or None when it recorded none."""
+    if not ticket:
+        return None
+    _, common = run(["git", "rev-parse", "--path-format=absolute", "--git-common-dir"], cwd=root)
+    state = Path(common.strip()) / "swarm" / ticket / "state.json"
+    paths = json.loads(state.read_text(encoding="utf-8")).get("paths") if state.is_file() else None
+    return [str(path) for path in paths] if isinstance(paths, list) else None
+
+
+def isolated_tree(changed: List[str], root: Path = ROOT) -> Path:
+    """Make a clean worktree of ``HEAD`` holding only the given changes of ``root``, and return its folder.
+
+    Every other ticket's uncommitted work stays out (L-22): each changed file is copied from ``root``, and a changed
+    file that no longer exists there is deleted. The caller removes the tree with ``remove_tree``.
+    """
+    tree = Path(tempfile.mkdtemp(prefix="swarm-checks-"))
+    code, out = run(["git", "worktree", "add", "--detach", "--force", str(tree), "HEAD"], cwd=root)
+    if code != 0:
+        shutil.rmtree(tree, ignore_errors=True)
+        raise RuntimeError(f"Could not make the clean worktree for the checks: {out}")
+    for name in changed:
+        source, target = root / name, tree / name
+        if source.is_file():
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(source, target)
+        elif target.is_file() or target.is_symlink():
+            target.unlink()
+    return tree
+
+
+def remove_tree(tree: Path, root: Path = ROOT) -> None:
+    """Remove a worktree made by ``isolated_tree``, whatever its state."""
+    run(["git", "worktree", "remove", "--force", str(tree)], cwd=root)
+    shutil.rmtree(tree, ignore_errors=True)
+    run(["git", "worktree", "prune"], cwd=root)
 
 
 def changed_files(base: str, ticket: str = "", root: Path = ROOT) -> List[str]:
@@ -55,12 +109,9 @@ def changed_files(base: str, ticket: str = "", root: Path = ROOT) -> List[str]:
     _, tracked = run(["git", "diff", "--name-only", merge_base.strip()], cwd=root)
     _, untracked = run(["git", "ls-files", "--others", "--exclude-standard"], cwd=root)
     found = sorted({line for line in f"{tracked}\n{untracked}".splitlines() if line})
-    _, common = run(["git", "rev-parse", "--path-format=absolute", "--git-common-dir"], cwd=root)
-    state = Path(common.strip()) / "swarm" / ticket / "state.json"
-    paths = json.loads(state.read_text(encoding="utf-8")).get("paths") if ticket and state.is_file() else None
-    if not isinstance(paths, list):
+    own = own_paths(ticket, root)
+    if own is None:
         return found
-    own = [str(path) for path in paths]
     return [name for name in found if any(name == path or name.startswith(path.rstrip("/") + "/") for path in own)]
 
 
@@ -119,18 +170,24 @@ def screen_problems(
 
 
 class Checks:
-    def __init__(self, ticket: str) -> None:
+    def __init__(self, ticket: str, root: Path = ROOT) -> None:
+        self.root = root
         self.evidence = ROOT / "docs" / "tickets" / ticket / "tests-evidences"
         self.evidence.mkdir(parents=True, exist_ok=True)
         self.failures: List[Dict[str, Union[str, bool]]] = []
         self.not_applicable: List[str] = []
         self.passed: List[str] = []
 
-    def check(self, name: str, command: List[str], file: str, cwd: Path = ROOT) -> bool:
-        code, out = run(command, cwd)
+    def check(
+        self, name: str, command: List[str], file: str, cwd: Optional[Path] = None, env: Optional[Dict[str, str]] = None
+    ) -> bool:
+        folder = cwd if cwd else self.root
+        code, out = run(command, folder, env)
         slug = re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
+        where = "the ticket's own files only" if self.root != ROOT else "the main checkout"
         (self.evidence / f"{slug}.txt").write_text(
-            f"$ {' '.join(command)}\n(cwd {cwd.relative_to(ROOT) or '.'})\n\n{out}\n", encoding="utf-8"
+            f"$ {' '.join(command)}\n(cwd {folder.relative_to(self.root) or '.'}, on {where})\n\n{out}\n",
+            encoding="utf-8",
         )
         if code == 0:
             self.passed.append(name)
@@ -145,14 +202,15 @@ class Checks:
 
 
 def python_checks(checks: Checks, changed: List[str]) -> None:
-    files = [f for f in changed if f.endswith(".py") and f.startswith(PROJECT_PREFIXES) and (ROOT / f).exists()]
+    root = checks.root
+    files = [f for f in changed if f.endswith(".py") and f.startswith(PROJECT_PREFIXES) and (root / f).exists()]
     if not files:
         checks.skip("python", "no Python project file changed")
         return
     checks.check("ruff check", ["uv", "run", "ruff", "check", *files], files[0])
     checks.check("ruff format", ["uv", "run", "ruff", "format", "--check", *files], files[0])
     sources = sorted(
-        str(p.relative_to(ROOT)) for pattern in ("services/*/src", "packages/python/*/src") for p in ROOT.glob(pattern)
+        str(p.relative_to(root)) for pattern in ("services/*/src", "packages/python/*/src") for p in root.glob(pattern)
     )
     if sources:
         checks.check("mypy", ["uv", "run", "mypy", *sources], sources[0])
@@ -162,7 +220,9 @@ def python_checks(checks: Checks, changed: List[str]) -> None:
 
 
 def rust_checks(checks: Checks, changed: List[str]) -> None:
-    manifest = ROOT / "packages" / "rust" / "Cargo.toml"
+    manifest = checks.root / "packages" / "rust" / "Cargo.toml"
+    # The clean tree shares the main checkout's build folder, so a check does not rebuild every crate from scratch.
+    target = {"CARGO_TARGET_DIR": str(ROOT / "packages" / "rust" / "target")}
     if not any(f.startswith("packages/rust/") for f in changed) or not manifest.exists():
         checks.skip("rust", "no Rust change")
         return
@@ -170,6 +230,7 @@ def rust_checks(checks: Checks, changed: List[str]) -> None:
         "cargo metadata",
         ["cargo", "metadata", "--no-deps", "--format-version", "1", "--locked", "--manifest-path", str(manifest)],
         "packages/rust/Cargo.toml",
+        env=target,
     )
     members = re.search(r"members\s*=\s*\[(.*?)\]", manifest.read_text(encoding="utf-8"), re.S)
     if not members or not members.group(1).strip():
@@ -177,14 +238,15 @@ def rust_checks(checks: Checks, changed: List[str]) -> None:
             checks.skip(name, "the Cargo workspace has no member crate yet")
         return
     cwd = manifest.parent
-    checks.check("cargo fmt", ["cargo", "fmt", "--all", "--check"], "packages/rust", cwd)
+    checks.check("cargo fmt", ["cargo", "fmt", "--all", "--check"], "packages/rust", cwd, target)
     checks.check(
         "cargo clippy",
         ["cargo", "clippy", "--workspace", "--all-targets", "--", "-D", "warnings"],
         "packages/rust",
         cwd,
+        target,
     )
-    checks.check("cargo test", ["cargo", "test", "--workspace"], "packages/rust", cwd)
+    checks.check("cargo test", ["cargo", "test", "--workspace"], "packages/rust", cwd, target)
 
 
 def typescript_checks(checks: Checks, changed: List[str]) -> None:
@@ -194,7 +256,8 @@ def typescript_checks(checks: Checks, changed: List[str]) -> None:
     ):
         checks.skip("typescript", "no TypeScript change")
         return
-    packages = [p for pattern in ("frontends/*/package.json", "packages/ts/*/package.json") for p in ROOT.glob(pattern)]
+    root = checks.root
+    packages = [p for pattern in ("frontends/*/package.json", "packages/ts/*/package.json") for p in root.glob(pattern)]
     if not packages:
         for name in ("eslint", "tsc", "vitest"):
             checks.skip(name, "no TypeScript workspace package yet")
@@ -214,7 +277,7 @@ def terraform_checks(checks: Checks, changed: List[str]) -> None:
     checks.check("terraform fmt", ["terraform", "fmt", "-check", "-recursive", "deploy/terraform"], "deploy/terraform")
     folders = sorted({str(Path(f).parent) if not f.endswith(".tftest.hcl") else str(Path(f).parent.parent) for f in tf})
     for folder in folders:
-        path = ROOT / folder
+        path = checks.root / folder
         if not list(path.glob("*.tf")):
             continue
         if not checks.check(
@@ -233,15 +296,32 @@ def main() -> int:
     if not re.fullmatch(r"T\d\.\d\d", ticket):
         print(__doc__, file=sys.stderr)
         return 2
-    checks = Checks(ticket)
     changed = changed_files(base, ticket)
+    tree = isolated_tree(changed) if own_paths(ticket) is not None else ROOT
+    try:
+        verdict = run_checks(ticket, base, changed, tree)
+    except Exception as error:
+        print(f"The checks stopped: {type(error).__name__}: {error}", file=sys.stderr)
+        raise
+    finally:
+        if tree != ROOT:
+            remove_tree(tree)
+    print(json.dumps(verdict))
+    return 0 if verdict["passed"] else 1
+
+
+def run_checks(
+    ticket: str, base: str, changed: List[str], root: Path
+) -> Dict[str, Union[bool, List[str], List[Dict[str, Union[str, bool]]]]]:
+    """Run every applicable check of the ticket in ``root`` and return the verdict."""
+    checks = Checks(ticket, root)
     python_checks(checks, changed)
     rust_checks(checks, changed)
     typescript_checks(checks, changed)
     terraform_checks(checks, changed)
     _, develop_files = run(["git", "ls-tree", "-r", "--name-only", base, f"docs/tickets/{PIPELINE_TICKET}"])
     pipeline_ready = ticket == PIPELINE_TICKET or f"docs/tickets/{PIPELINE_TICKET}/EXPLAIN.md" in develop_files
-    screen_failures, screen_reason = screen_problems(ROOT, ticket, changed, pipeline_ready)
+    screen_failures, screen_reason = screen_problems(root, ticket, changed, pipeline_ready)
     if screen_reason:
         checks.skip("screens captured", screen_reason)
     elif screen_failures:
@@ -252,18 +332,16 @@ def main() -> int:
     checks.check("specs check", ["python3", ".claude/skills/write-specs/scripts/specs.py", "check"], "docs/specs")
     folder = f"docs/tickets/{ticket}"
     checks.check("ticket refs", ["python3", ".claude/scripts/ticket_refs.py", "check", "--ticket", ticket], folder)
-    if (ROOT / folder / "PLAN.md").is_file():
+    if (root / folder / "PLAN.md").is_file():
         checks.check(
             "plan view", ["python3", ".claude/scripts/plan.py", "check", "--ticket", ticket], f"{folder}/PLAN.md"
         )
-    verdict = {
+    return {
         "passed": not checks.failures,
         "failures": checks.failures,
         "not_applicable": checks.not_applicable,
         "passed_checks": checks.passed,
     }
-    print(json.dumps(verdict))
-    return 0 if not checks.failures else 1
 
 
 if __name__ == "__main__":

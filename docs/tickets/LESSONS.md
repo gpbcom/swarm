@@ -1,0 +1,331 @@
+# 🧠 Harness lessons
+
+Every problem the ticket harness has caused or let through, while planning or running the tickets of the
+[roadmap](../specs/roadmap/README.md). The rules are in [`.claude/rules/tickets.md`](../../.claude/rules/tickets.md);
+this page keeps what happened, so that each problem is closed once and never met twice.
+
+## How this page works
+
+- One lesson per problem, with an ID (`L-<nn>`) that never changes and is never reused.
+- A new lesson is added at the end of [📋 Lessons](#lessons), with a row in the [summary](#summary), the day it is met.
+- Each lesson has the same parts: **Seen**, **What happened**, **Cause**, **Fix**, **Rule**.
+- A lesson is closed (🟢) only with the three things the harness asks of every gap: the fix, a test that fails without
+  it, and the rule with its enforcers in [`.claude/rules/enforcement.json`](../../.claude/rules/enforcement.json).
+
+| Status | Means |
+| --- | --- |
+| 🔴 Open | Not fixed. The next run can meet it again |
+| 🟡 Worked around | Handled by hand or by a habit of the session, with no test or rule behind it |
+| 🟢 Closed | Fixed, tested and ruled |
+| ⚪ By design | Expected behaviour, recorded so nobody "fixes" it |
+
+## <a id="summary"></a>📑 Summary
+
+| ID | Date | Problem | Status |
+| --- | --- | --- | --- |
+| [L-01](#l-01) | 2026-11-18 | A finding went to one owner when its files belonged to several tasks | 🟢 Closed |
+| [L-02](#l-02) | 2026-11-20 | A wrong wave-1 test stopped T0.09 four times | 🟢 Closed |
+| [L-03](#l-03) | 2026-11-20 | A ticket could be pushed before the person saw its code | 🟢 Closed |
+| [L-04](#l-04) | 2026-11-20 | A workflow name loaded an old `ticket-run.js` from a worktree | 🟡 Worked around |
+| [L-05](#l-05) | 2026-11-20 | `progress.py timings` wrote a stray file in a worktree | 🟡 Worked around |
+| [L-06](#l-06) | 2026-11-20 | `automerge` refused a pull request that changes `.github/workflows/` | ⚪ By design |
+| [L-07](#l-07) | 2026-11-20 | A roadmap change broke CI through the counts hard-coded in `test_board.py` | 🟡 Worked around |
+| [L-08](#l-08) | 2026-11-20 | `gh pr checks --json` does not exist in the installed `gh` | 🟡 Worked around |
+| [L-09](#l-09) | 2026-11-20 | `tickets.py watch` ends at once while a group is being planned | 🔴 Open |
+| [L-10](#l-10) | 2026-11-20 | `ticket-plan` still announces a worktree on `feature/<ID>` | 🔴 Open |
+| [L-11](#l-11) | 2026-11-20 | `board.py move` marks an epic and its phase Running when a ticket is only planned | 🔴 Open |
+| [L-12](#l-12) | 2026-11-20 | Plans written at once guessed the paths of a prerequisite ticket | 🔴 Open |
+| [L-13](#l-13) | 2026-11-20 | Plans change files outside their ticket's area, which the area lock does not see | 🔴 Open |
+| [L-14](#l-14) | 2026-11-20 | Planning a group changes `.claude/github.json`, and `prepare` then refuses every run | 🔴 Open |
+| [L-15](#l-15) | 2026-11-20 | Tracked files changed in the main checkout by an unknown hand | 🟡 Worked around |
+| [L-16](#l-16) | 2026-11-20 | `watch` and `next` offer to start tickets whose runs are already launched | 🔴 Open |
+| [L-17](#l-17) | 2026-11-20 | `docs/tickets/README.md` is out of date | 🔴 Open |
+| [L-18](#l-18) | 2026-11-20 | A plan can leave an acceptance criterion to the person without saying so at approval | 🔴 Open |
+| [L-19](#l-19) | 2026-11-20 | Workers' file writes wait on permission prompts, and a declined prompt stops a whole wave | 🔴 Open |
+| [L-20](#l-20) | 2026-11-20 | A ticket run dies with the Claude Code session that launched it | 🔴 Open |
+| [L-21](#l-21) | 2026-11-20 | `tickets.py watch` counts more tasks done than the plan has | 🔴 Open |
+| [L-22](#l-22) | 2026-11-20 | A ticket's checks fail on the half-built work of the other tickets in the shared checkout | 🟢 Closed |
+| [L-23](#l-23) | 2026-11-20 | The git guard judges the session's branch, not the folder a command runs in | 🔴 Open |
+
+## <a id="lessons"></a>📋 Lessons
+
+### <a id="l-01"></a>L-01: A finding went to one owner when its files belonged to several tasks
+
+- **Seen:** T0.08, fix rounds of the verifier and the reviewer.
+- **What happened:** the chart names came from `.Chart.Name` under an alias. The finding touched files of several
+  tasks, but only one task received it, so the fix round could not fix it.
+- **Cause:** fix routing picked a single owner per finding.
+- **Fix:** `ownersOf` in [`ticket-run.js`](../../.claude/workflows/ticket-run.js) sends a finding to every task that
+  owns one of its files. The chart name was fixed with the literal `vault-config` in `_helpers.tpl`.
+- **Rule:** [TKT-6](../../.claude/rules/tickets.md#tkt-6) (a failure goes back to the agent that owns the files).
+
+### <a id="l-02"></a>L-02: A wrong wave-1 test stopped T0.09 four times
+
+- **Seen:** T0.09, implementer retries.
+- **What happened:** tests written first had wrong helpers (`start` and `stop`), a wrong `Msg.respond` call, a wrong
+  `CredentialKind` import and a wrong `LinkProxy.close` order. Each retry of the implementer failed the same way, and
+  the person fixed the tests by hand.
+- **Cause:** a blocked worker could only fail; nothing sent the wrong file back to the task that owned it.
+- **Fix:** a worker reports `blocked_by`, and the workflow sends each file to its owner of an earlier wave before the
+  retry.
+- **Rule:** [TKT-19](../../.claude/rules/tickets.md#tkt-19).
+
+### <a id="l-03"></a>L-03: A ticket could be pushed before the person saw its code
+
+- **Seen:** T0.09.
+- **What happened:** a finished ticket was committed and pushed in the same run, and its pull request merged by
+  GitHub once CI passed. The person never saw the code before it left the machine.
+- **Cause:** the plan approval was the only human gate.
+- **Fix:** the run stops at `**Push:** 🟡 Awaiting code review` in `PLAN.md`; only `**Push:** 🟢 Approved` lets the
+  next run commit and push.
+- **Rule:** [TKT-18](../../.claude/rules/tickets.md#tkt-18).
+
+### <a id="l-04"></a>L-04: A workflow name loaded an old `ticket-run.js` from a worktree
+
+- **Seen:** T0.09, during the re-run that was to push.
+- **What happened:** the session had changed folder into the ticket's worktree. `Workflow({name: "ticket-run"})`
+  loaded that worktree's copy of the script, which predated the push gate of [L-03](#l-03). It was stopped before it
+  pushed.
+- **Cause:** a saved workflow's name resolves against the session's current folder, not the main checkout.
+- **Fix:** ticket workflows are launched with `scriptPath` set to the main checkout's
+  [`ticket-run.js`](../../.claude/workflows/ticket-run.js), and the launch summary is compared with the current
+  description. TKT-16 also removed the ticket worktrees. Nothing checks it: it is a habit of the session.
+- **Rule:** none yet. A test or a hook that refuses a ticket workflow loaded from outside the main checkout would
+  close it.
+
+### <a id="l-05"></a>L-05: `progress.py timings` wrote a stray file in a worktree
+
+- **Seen:** T0.09, end of run.
+- **What happened:** `progress.py timings --write` resolved the ticket folder against the folder it ran in and wrote a
+  `PROGRESS.md` outside the ticket's real folder.
+- **Cause:** the script did not know the main checkout from a worktree.
+- **Fix:** `main_checkout()`, `ticket_folder()` and `project_dir()` in
+  [`progress.py`](../../.claude/scripts/progress.py) always resolve to the main checkout.
+- **Rule:** [TKT-10](../../.claude/rules/tickets.md#tkt-10). No test proves the worktree case yet.
+
+### <a id="l-06"></a>L-06: `automerge` refused a pull request that changes `.github/workflows/`
+
+- **Seen:** pull request #347 (T0.09).
+- **What happened:** the pull request passed CI but was not merged. It was labelled `needs-person` and merged by
+  hand at the person's request.
+- **Cause:** a merge made with `GITHUB_TOKEN` may not carry changes to `.github/workflows/`.
+- **Fix:** none needed. A pull request that changes CI is merged by a person, or by the `RELEASE_TOKEN` of a release.
+- **Rule:** [TKT-15](../../.claude/rules/tickets.md#tkt-15), [TKT-26](../../.claude/rules/tickets.md#tkt-26).
+
+### <a id="l-07"></a>L-07: A roadmap change broke CI through the counts hard-coded in `test_board.py`
+
+- **Seen:** pull request #380 (the AI Assistant in the specifications and the roadmap).
+- **What happened:** adding 6 epics and 23 tickets made
+  [`tests/harness/board/test_board.py`](../../tests/harness/board/test_board.py) fail in CI, because it expects the
+  exact numbers of phases, epics, tickets and blocked-by links.
+- **Cause:** the counts are written by hand in the test, and nothing local runs that test when the roadmap changes.
+- **Fix:** the counts were updated by hand (commit `3363e68`).
+- **Rule:** none. Deriving the counts from `ticket-graph.json`, or running the board tests in `roadmap_gantt.py
+  check`, would catch it before CI.
+
+### <a id="l-08"></a>L-08: `gh pr checks --json` does not exist in the installed `gh`
+
+- **Seen:** waiting for the CI of pull request #380.
+- **What happened:** a watch loop built on `gh pr checks --json` failed at once.
+- **Cause:** the installed `gh` has no `--json` on `pr checks`.
+- **Fix:** read the exit code: `8` pending, `0` passed, `1` failed.
+- **Rule:** none. Any harness script that reads checks must use the exit code, or `gh api`.
+
+### <a id="l-09"></a>L-09: `tickets.py watch` ends at once while a group is being planned
+
+- **Seen:** `/issue-plan P0`.
+- **What happened:** the 2-minute reports of [TKT-9](../../.claude/rules/tickets.md#tkt-9) stopped as soon as they
+  started, while 11 plans were being written.
+- **Cause:** `report()` in [`tickets.py`](../../.claude/scripts/tickets.py) ends the watch when no ticket is running
+  or in review; a ticket being planned is neither.
+- **Fix:** to do. A ticket whose plan is being written must keep the watch alive.
+- **Rule:** [TKT-9](../../.claude/rules/tickets.md#tkt-9), [TKT-20](../../.claude/rules/tickets.md#tkt-20).
+
+### <a id="l-10"></a>L-10: `ticket-plan` still announces a worktree on `feature/<ID>`
+
+- **Seen:** `/issue-plan P0`.
+- **What happened:** the end message of the `ticket-plan` workflow tells the person the ticket gets its own worktree
+  on `feature/<ID>`.
+- **Cause:** the message was not updated when [TKT-16](../../.claude/rules/tickets.md#tkt-16) moved every ticket to
+  the main checkout on `feature/tickets`.
+- **Fix:** to do, with a test that the workflow's messages name `feature/tickets`.
+- **Rule:** [TKT-16](../../.claude/rules/tickets.md#tkt-16).
+
+### <a id="l-11"></a>L-11: `board.py move` marks an epic and its phase Running when a ticket is only planned
+
+- **Seen:** `/issue-plan P0`.
+- **What happened:** planning the P0 tickets moved their epics and the P0 phase to 🔄 Running on the board.
+- **Cause:** the cascade of `board.py move` to the parent issues treats 📝 Planned as work started.
+- **Fix:** to do. A parent is Running only when one of its tickets runs.
+- **Rule:** [TKT-17](../../.claude/rules/tickets.md#tkt-17).
+
+### <a id="l-12"></a>L-12: Plans written at once guessed the paths of a prerequisite ticket
+
+- **Seen:** `/issue-plan P0`.
+- **What happened:** T0.11, T0.16 and T0.18 build on the gateway application that T0.12 creates. Planned at the same
+  time as T0.12, they each guessed its files: `api/rest/gateway_app.py`, `api/http/gateway_app.py`,
+  `api/rest/application.py` and `models/gateway_config.py`, where T0.12's plan has `api/rest/gateway_rest_app.py`
+  and `models/config/gateway_config.py`. The person had the three plans corrected before approving them.
+- **Cause:** `/issue-plan` plans every ticket of a group at once, so a planner never sees the plan of a prerequisite
+  that does not exist yet. `check_plan.py` does not check that a file a task changes, without creating it, exists or
+  is created by a prerequisite's plan.
+- **Fix:** to do. Either plan a ticket after its prerequisites' plans, or make `check_plan.py` refuse such a path.
+- **Rule:** [TKT-3](../../.claude/rules/tickets.md#tkt-3), [TKT-20](../../.claude/rules/tickets.md#tkt-20).
+
+### <a id="l-13"></a>L-13: Plans change files outside their ticket's area, which the area lock does not see
+
+- **Seen:** `/issue-plan P0`, then `/issue-run P0`.
+- **What happened:** T0.15's task K18 changes files under `frontends/`, outside T0.15's areas. T0.14, whose area is
+  `packages/ts/tokens`, changed the specification scripts (`spec_check.py`, `spec_model.py`, `specs.py`) and
+  `.github/workflows/automerge.yml` and `desktop.yml`, while T0.10 changed `.github/workflows/ci.yml` beside it.
+- **Cause:** the area lock of [TKT-16](../../.claude/rules/tickets.md#tkt-16) reads the areas of
+  `ticket-graph.json`, not the `files` of the plan. Two tickets can then change the same file in the one checkout.
+- **Fix:** to do. `check_plan.py` should refuse a file outside the ticket's areas, or the lock should use the plan's
+  files.
+- **Rule:** [TKT-16](../../.claude/rules/tickets.md#tkt-16).
+
+### <a id="l-14"></a>L-14: Planning a group changes `.claude/github.json`, and `prepare` then refuses every run
+
+- **Seen:** `/issue-run P0`, at 14:11.
+- **What happened:** the four runs started (T0.10, T0.12, T0.13, T0.14) all stopped at once:
+  `ticket_tree.py prepare` refused to leave `develop` because tracked files had changes. One of them was
+  `.claude/github.json`, which `board.py` had changed when `/issue-plan` moved the cards to 📝 Planned.
+- **Cause:** the board's state is kept in a tracked file that the harness itself changes, and `prepare` refuses any
+  change to a tracked file on `develop`.
+- **Fix:** worked around by hand: the file was put aside, `prepare` was run once, and the file put back on
+  `feature/tickets`. To do: keep the board's state out of the tracked files (as `.git/swarm/board.json` already is), or
+  let `prepare` carry the harness's own files.
+- **Rule:** [TKT-16](../../.claude/rules/tickets.md#tkt-16), [TKT-23](../../.claude/rules/tickets.md#tkt-23) (a
+  command must not break the next one).
+
+### <a id="l-15"></a>L-15: Tracked files changed in the main checkout by an unknown hand
+
+- **Seen:** `/issue-run P0`, the same refusal as [L-14](#l-14).
+- **What happened:** two files of `packages/python/swarm-models` (`export_schemas.py` and `command.py`) had lost their
+  module docstring at 10:53, with no ticket open on them. Nobody could say which agent, hook or command did it.
+- **Cause:** unknown. Nothing records who changes a tracked file outside a ticket.
+- **Fix:** the docstrings were restored, and the removed lines kept as a patch. To do: find the source, and have
+  `prepare` name the tool or session behind a change when it can.
+- **Rule:** [TKT-5](../../.claude/rules/tickets.md#tkt-5) (a worker changes only its task's files).
+
+### <a id="l-16"></a>L-16: `watch` and `next` offer to start tickets whose runs are already launched
+
+- **Seen:** `/issue-run P0`.
+- **What happened:** the first reports after the launch still printed `▶️ CAN START` for the four tickets just
+  started, because their runs had not yet reached `prepare`. Only the session's memory of what it launched kept them
+  from being started twice.
+- **Cause:** a ticket becomes 🔄 running when its run has prepared it, not when it is launched.
+- **Fix:** to do. Record the launch (a lock in `.git/swarm/<ID>/`) before the workflow starts, so that `next` and
+  `watch` leave it out.
+- **Rule:** [TKT-20](../../.claude/rules/tickets.md#tkt-20), [TKT-23](../../.claude/rules/tickets.md#tkt-23)
+  (nothing is done twice).
+
+### <a id="l-17"></a>L-17: `docs/tickets/README.md` is out of date
+
+- **Seen:** 2026-11-20, while writing this page.
+- **What happened:** the [ticket index](README.md) still counts 262 tickets (the roadmap has 285), shows every P0
+  ticket ⬜ To do although T0.01 to T0.09 are merged, says a run ends with a local merge into `develop`, and does not
+  mention the push gate, `/issue-plan`, `/issue-run` or `tickets.py approve`.
+- **Cause:** the page is written by hand, and no check compares it with the roadmap or the merged tickets.
+- **Fix:** to do. Generate it from `ticket-graph.json` and `done_tickets()`, and check it.
+- **Rule:** [TKT-23](../../.claude/rules/tickets.md#tkt-23) (done is defined once).
+
+### <a id="l-18"></a>L-18: A plan can leave an acceptance criterion to the person without saying so at approval
+
+- **Seen:** `/issue-plan P0`, plan of T0.17.
+- **What happened:** T0.17's plan cannot show the end-to-end trace its ticket asks for: wiring the services is left to
+  the person, and the plan passed `check_plan.py`.
+- **Cause:** `check_plan.py` checks the graph, the waves and the file ownership, not that every acceptance criterion
+  of `TICKET.md` is met by a task.
+- **Fix:** to do. Each acceptance criterion should name the task that meets it, or say who else does.
+- **Rule:** [TKT-2](../../.claude/rules/tickets.md#tkt-2), [TKT-3](../../.claude/rules/tickets.md#tkt-3).
+
+### <a id="l-19"></a>L-19: Workers' file writes wait on permission prompts, and a declined prompt stops a whole wave
+
+- **Seen:** `/issue-run P0`, wave 2 of T0.10 and T0.14, at 14:15.
+- **What happened:** with four tickets running, the workers' Write and Edit calls in their worktrees
+  (`.claude/worktrees/wf_*`) raised permission prompts in the person's session. Some were declined, and the answer
+  ("STOP what you are doing and wait") reached the workers, which stopped without handing off. Their bash fallbacks were
+  refused too, by the auto-mode classifier or by the worktree guard ("too complex to verify"). T0.10 stopped with K11,
+  K13, K14 and K15 not done, T0.14 with K10.
+- **Cause:** nothing in the project settings allows the workers to write inside their own worktree, so every write
+  depends on the person answering a prompt they cannot tell apart from the main session's.
+- **Fix:** to do. Allow `Write` and `Edit` under `.claude/worktrees/` in `.claude/settings.json` (the worktree guard
+  already keeps each worker to its task's files), and have the workflow report a permission refusal as an
+  `environment` stop, not as a task failure.
+- **Rule:** [TKT-5](../../.claude/rules/tickets.md#tkt-5), [TKT-6](../../.claude/rules/tickets.md#tkt-6) (an
+  environment failure stops the run at once and goes to the person).
+
+### <a id="l-20"></a>L-20: A ticket run dies with the Claude Code session that launched it
+
+- **Seen:** `/issue-run P0`, after 14:17.
+- **What happened:** the Claude Code session restarted. The runs of T0.12 and T0.13, still in their first wave, and the
+  2-minute group watch ended with it, with no stop recorded in `PROGRESS.md` and 54 worktrees left behind.
+- **Cause:** workflows and monitors are background tasks of the session; nothing outside it notices that they died.
+- **Fix:** to do. `tickets.py watch` and `list` should flag a ticket marked running whose run has had no activity for a
+  while, and `prune` should remove the worktrees of a run that is gone. Re-running continues where it stopped
+  ([TKT-11](../../.claude/rules/tickets.md#tkt-11)), so no integrated work is lost.
+- **Rule:** [TKT-9](../../.claude/rules/tickets.md#tkt-9), [TKT-11](../../.claude/rules/tickets.md#tkt-11).
+
+### <a id="l-21"></a>L-21: `tickets.py watch` counts more tasks done than the plan has
+
+- **Seen:** `/issue-run P0`, report of 14:39, T0.10 in its checks.
+- **What happened:** the report showed `🧩 19/18 tasks` for T0.10, while `ticket_tree.py status --ticket T0.10` listed
+  exactly the 18 task ids of the plan as integrated.
+- **Cause:** not found yet. The watch counts something besides the integrated task ids, most likely a fix round
+  integrated after the waves.
+- **Fix:** to do. The count should be the set of the plan's task ids found in `integrated`, never more than the total.
+- **Rule:** [TKT-9](../../.claude/rules/tickets.md#tkt-9) (an exact report).
+
+### <a id="l-22"></a>L-22: A ticket's checks fail on the half-built work of the other tickets in the shared checkout
+
+- **Seen:** `/issue-run P0`, verification of T0.10 at 14:40, with T0.12, T0.13 and T0.14 running beside it.
+- **What happened:** T0.10's 18 tasks were integrated, then its checks failed 7 times, and 5 fix rounds could not
+  help. None of the failures was in T0.10's files:
+  - `services/simulator` (T0.13) and `services/fleet` (T0.12) held only their tests, written first, and no
+    `pyproject.toml` yet. The uv workspace glob `services/*` then broke every `uv run`: ruff, ruff format, mypy and
+    pytest;
+  - `pnpm -r` linted, type-checked and tested `packages/ts/ui`, whose tests (T0.14, wave 1) wait for code not written
+    yet.
+
+  The fixers were sent files of other tickets, rightly refused to touch them
+  ([TKT-19](../../.claude/rules/tickets.md#tkt-19)), and the run stopped.
+- **Cause:** every running ticket shares the main checkout ([TKT-16](../../.claude/rules/tickets.md#tkt-16)). The
+  verifier's `checks.py` picks the checks from the ticket's own files, but the tools themselves (`uv`, `pnpm -r`) read
+  the whole workspace, other tickets' uncommitted work included. Tests come first
+  ([TKT-4](../../.claude/rules/tickets.md#tkt-4)), so another ticket is red by design for most of its run.
+- **Fix:** [`checks.py`](../../.claude/scripts/checks.py) runs every check in a clean temporary worktree of the shared
+  branch's commit, into which it copies only the ticket's own changes (and deletes the files the ticket deleted),
+  then removes it; Cargo shares the main checkout's build folder. Run on T0.10's real work beside the three other
+  tickets, the same 51 files passed all 15 checks that had failed 7 times in the shared checkout. The test
+  `test_the_checks_run_on_a_clean_tree_of_the_ticket_s_own_work_only` of
+  [`tests/harness/checks/test_checks.py`](../../tests/harness/checks/test_checks.py) fails without it.
+- **Rule:** [TKT-6](../../.claude/rules/tickets.md#tkt-6) (the checks run in a clean tree of the ticket's own work),
+  [TKT-16](../../.claude/rules/tickets.md#tkt-16) (several tickets at once).
+
+### <a id="l-23"></a>L-23: The git guard judges the session's branch, not the folder a command runs in
+
+- **Seen:** committing the fix of [L-22](#l-22) on `feature/harness-isolated-checks`, in its own worktree
+  (`../swarm-harness-isolated-checks`), while the session sat in the main checkout on `feature/tickets`.
+- **What happened:** `cd ../swarm-harness-isolated-checks && git commit ...` was refused as a commit on a ticket's
+  branch (TKT-5). The person ran the commit, the push and the pull request.
+- **Cause:** [`guard_git.py`](../../.claude/hooks/guard_git.py) reads the branch of the hook's working folder (the
+  session's), and ignores a `cd <folder> &&` or `git -C <folder>` in the command. The session cannot move to a folder
+  outside the project either. So harness work cannot be committed from a session whose main checkout runs tickets, and
+  the reverse also holds: a command that `cd`s into `feature/tickets` from elsewhere would pass.
+- **Fix:** to do. The guard resolves the folder the git command acts on (`cd`, `-C`) and judges that folder's branch,
+  with a test for each case.
+- **Rule:** [TKT-5](../../.claude/rules/tickets.md#tkt-5), [TKT-15](../../.claude/rules/tickets.md#tkt-15).
+
+## <a id="already-ruled"></a>📜 Lessons already turned into rules
+
+Problems met before this page existed, each closed by a rule whose **Why** tells the story:
+
+| Rule | Problem it closed |
+| --- | --- |
+| [TKT-12](../../.claude/rules/tickets.md#tkt-12) | Every review round was a fresh full review, so a ticket never converged |
+| [TKT-22](../../.claude/rules/tickets.md#tkt-22) | SPEC-12's screenshots were enforced by nothing in the ticket harness |
+| [TKT-23](../../.claude/rules/tickets.md#tkt-23) | Commands assumed they ran once, on fresh input, and redid finished work |
+| [TKT-24](../../.claude/rules/tickets.md#tkt-24) | Pull request #345 failed three times in CI: no local `develop`, shallow history, no GitHub |
+| [TKT-25](../../.claude/rules/tickets.md#tkt-25) | 135 local branches and 22 worktrees, none with work of its own |
+| [TKT-26](../../.claude/rules/tickets.md#tkt-26) | `master` stayed on the first commit while 359 commits reached `develop` |
