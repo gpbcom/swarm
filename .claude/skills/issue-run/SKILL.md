@@ -8,7 +8,9 @@ description: Run a GitHub issue with all its child issues, or a group of issues,
 The arguments are references: `#12` (a ticket issue, or an epic or phase issue with every ticket under it), `T0.10`,
 `E0.4`, `P1`, several separated by spaces. Every ticket runs in the main checkout on `feature/tickets` (TKT-16).
 
-1. Run `python3 .claude/scripts/tickets.py resolve <refs>` and show it in full. Name the tickets that are not
+1. Run `python3 .claude/scripts/tickets.py resolve <refs>` and show it in full. Sub-issues already done (merged on
+   `develop`, or closed on GitHub) are left out, and `next` never returns a ticket that is running, in review or done:
+   nothing is started twice. When it prints "nothing to do", say so and stop. Name the tickets that are not
    approved yet (⬜ no plan, 📝 plan awaits approval): they do not run; `/issue-plan <refs>` and
    `python3 .claude/scripts/tickets.py approve <refs>` come first.
 2. Run `python3 .claude/scripts/tickets.py next <refs>`: one ticket ID per line, the approved tickets that may start

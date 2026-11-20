@@ -72,6 +72,7 @@ SCRIPTS = Path(__file__).resolve().parent
 REPOSITORY = SCRIPTS.parents[1]
 GRAPH_ENV = "SWARM_TICKET_GRAPH"
 CHECK_PLAN_ENV = "SWARM_CHECK_PLAN"
+CLOSED_ENV = "SWARM_CLOSED_ISSUES"
 GRAPH = Path("docs/specs/roadmap/gantt/ticket-graph.json")
 GITHUB_STATE = Path(".claude/github.json")
 HOOKS_PATH = ".githooks"
@@ -236,6 +237,42 @@ def expand(ident: str, children: Dict[str, List[str]]) -> List[str]:
     return found
 
 
+def closed_issues(main: Path, state: Dict[str, object]) -> Set[int]:
+    """Return the numbers of the closed issues of the repository: a ticket closed on GitHub is done (TKT-20).
+
+    ``SWARM_CLOSED_ISSUES`` (comma-separated numbers) replaces the question to GitHub, for tests; without it and
+    without GitHub (no ``repo`` in ``.claude/github.json``, ``gh`` missing or offline), no issue counts as closed.
+    """
+    given = os.environ.get(CLOSED_ENV)
+    if given is not None:
+        return {int(n) for n in given.split(",") if n.strip().isdigit()}
+    repo = state.get("repo")
+    if not isinstance(repo, str):
+        return set()
+    result = subprocess.run(
+        [
+            "gh",
+            "issue",
+            "list",
+            "-R",
+            repo,
+            "--state",
+            "closed",
+            "--limit",
+            "1000",
+            "--json",
+            "number",
+            "--jq",
+            ".[].number",
+        ],
+        cwd=main,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    return {int(n) for n in result.stdout.split() if n.isdigit()} if result.returncode == 0 else set()
+
+
 def resolve(main: Path, refs: List[str]) -> List[str]:
     """Return the tickets of a group, merged ones left out, every prerequisite before the tickets that need it."""
     state = github_state(main)
@@ -256,7 +293,10 @@ def resolve(main: Path, refs: List[str]) -> List[str]:
             raise SystemExit(f"{ref} ({ident}) holds no ticket: run python3 .claude/scripts/board.py bootstrap first.")
         wanted.extend(ticket for ticket in found if ticket not in wanted)
     merged = merged_tickets(main, develop_ref(main))
-    left = sorted((ticket for ticket in wanted if ticket not in merged), key=key)
+    closed = closed_issues(main, state)
+    numbers = {k: int(v["number"]) for k, v in issues.items() if isinstance(v, dict) and "number" in v}  # type: ignore[union-attr]
+    done = merged | {ticket for ticket in wanted if numbers.get(ticket) in closed}
+    left = sorted((ticket for ticket in wanted if ticket not in done), key=key)
     ordered: List[str] = []
     while left:
         ready = [t for t in left if not any(d in left for d in tickets.get(t, {}).get("deps", []))]  # type: ignore[union-attr]
@@ -325,8 +365,9 @@ def check_plan_passes(main: Path, ticket: str) -> bool:
 
 def approve(main: Path, group: List[str]) -> int:
     failed = 0
-    for ticket in group:
-        if plan_state(main, ticket) != "planned":
+    for row in rows(main, group):
+        ticket = str(row["ticket"])
+        if row["state"] != "planned":
             continue
         folder = folder_of(main, ticket)
         if not check_plan_passes(main, ticket):
@@ -525,7 +566,12 @@ def main(argv: Optional[List[str]] = None) -> int:
         return 1 if found and not args.force else 0
     if args.command == "resolve":
         found = rows(main_dir, resolve(main_dir, args.refs))
-        print(json.dumps(found, ensure_ascii=False)) if args.json else show_rows(found)
+        if args.json:
+            print(json.dumps(found, ensure_ascii=False))
+        elif not found:
+            print(f"🏁 Every ticket of {' '.join(args.refs)} is merged or closed: nothing to do.")
+        else:
+            show_rows(found)
     elif args.command == "next":
         startable = [str(r["ticket"]) for r in rows(main_dir, resolve(main_dir, args.refs)) if r["can_start"]]
         print(json.dumps(startable)) if args.json else print("\n".join(startable))

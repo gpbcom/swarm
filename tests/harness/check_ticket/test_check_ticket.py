@@ -105,3 +105,36 @@ class TestCheckTicket:
         found: List[str] = re.findall(r"^## (.+)$", text, flags=re.MULTILINE)
         expected: Tuple[str, ...] = (*HEADINGS, "Assumptions")
         assert tuple(found) == expected
+
+    FRONT_END = "T0.16"
+    NO_SCREEN_LINE = "- The ticket touches no screen."
+
+    def front_end_root(self, tmp_path: Path, screens: str) -> Path:
+        root = build_root(tmp_path, self.FRONT_END)
+        text = ticket_file(root, self.FRONT_END).read_text(encoding="utf-8")
+        head, rest = text.split("## Screens touched\n", 1)
+        _, tail = rest.split("## Budgets touched\n", 1)
+        ticket_file(root, self.FRONT_END).write_text(
+            f"{head}## Screens touched\n\n{screens}\n\n## Budgets touched\n{tail}", encoding="utf-8"
+        )
+        return root
+
+    def test_a_front_end_ticket_that_lists_its_screens_passes(self, tmp_path: Path) -> None:
+        root = self.front_end_root(tmp_path, "- [🖼️ UC-029 a1](../../specs/screens/UC-029/a1.png)")
+        result = self.run_script(root, self.FRONT_END)
+        assert result.stdout == "", result.stdout
+
+    def test_a_front_end_ticket_without_screens_is_refused(self, tmp_path: Path) -> None:
+        root = self.front_end_root(tmp_path, self.NO_SCREEN_LINE)
+        result = self.run_script(root, self.FRONT_END)
+        assert result.returncode == 1
+        assert "TKT-21" in result.stdout
+
+    def test_a_front_end_ticket_may_say_why_it_shows_no_screen(self, tmp_path: Path) -> None:
+        root = self.front_end_root(tmp_path, "- ➖ No screen: the app shells hold no state of a use case yet.")
+        assert self.run_script(root, self.FRONT_END).stdout == ""
+
+    def test_a_ticket_that_changes_no_front_end_may_touch_no_screen(self, tmp_path: Path) -> None:
+        root = build_root(tmp_path)
+        rewrite(root, "## Screens touched\n\n", f"## Screens touched\n\n{self.NO_SCREEN_LINE}\n\n")
+        assert self.run_script(root).stdout == ""

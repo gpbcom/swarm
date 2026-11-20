@@ -25,6 +25,10 @@ Review that diff for:
   per file; typing, logging, messages, tests), SPEC rules for specification pages, TKT rules.
 - **Performance and safety:** budgets of `docs/specs/technical/07-scalability.md#budgets` on hot paths; Operator
   isolation; no secret in code or logs.
+- **Screens (TKT-21):** for a ticket that changes a front end, every screen it shows is listed under "Screens touched"
+  and, once T0.20 is merged, captured as `📸 Screenshot` by the ticket (`checks.py` checks the files; you check that
+  the list is complete and each screenshot shows the state of its use case). A `➖ No screen` reason is sound, or a
+  blocking finding.
 - **Assumptions:** each one reported by the agents is acceptable under the specifications, or rejected.
 - **Decisions:** each implementation decision reported by the agents (choice, alternatives, trade-off) is sound;
   a decision that breaks a rule or a budget is a finding like any other. The explainer writes them to

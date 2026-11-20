@@ -15,6 +15,7 @@ GIT_ENV: Dict[str, str] = {
 }
 GRAPH_ENV = "SWARM_TICKET_GRAPH"
 CHECK_PLAN_ENV = "SWARM_CHECK_PLAN"
+CLOSED_ENV = "SWARM_CLOSED_ISSUES"
 SHARED_BRANCH = "feature/tickets"
 DONE = "T9.00"
 NEXT = "T9.01"
@@ -51,8 +52,8 @@ def repo_root() -> Path:
     return Path(__file__).resolve().parents[3]
 
 
-def environment(graph: Path, check_plan: str = "true") -> Dict[str, str]:
-    return {**os.environ, **GIT_ENV, GRAPH_ENV: str(graph), CHECK_PLAN_ENV: check_plan}
+def environment(graph: Path, check_plan: str = "true", closed: str = "") -> Dict[str, str]:
+    return {**os.environ, **GIT_ENV, GRAPH_ENV: str(graph), CHECK_PLAN_ENV: check_plan, CLOSED_ENV: closed}
 
 
 def git(cwd: Path, *args: str) -> str:
@@ -103,16 +104,22 @@ def write_plan(main: Path, ticket: str, status: str) -> Path:
     return plan
 
 
-def run(main: Path, *args: str, check_plan: str = "true") -> subprocess.CompletedProcess[str]:
+def run(main: Path, *args: str, check_plan: str = "true", closed: str = "") -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         [sys.executable, str(repo_root() / ".claude" / "scripts" / "tickets.py"), *args],
         cwd=main,
         check=False,
         capture_output=True,
         text=True,
-        env=environment(main.parent / "graph.json", check_plan),
+        env=environment(main.parent / "graph.json", check_plan, closed),
         timeout=60,
     )
+
+
+def finish_on_shared_branch(main: Path, ticket: str) -> None:
+    """Commit a finished ticket on feature/tickets, its pull request still open."""
+    git(main, "checkout", "-B", SHARED_BRANCH)
+    git(main, "commit", "--allow-empty", "-m", f"{ticket}: finished, pull request open")
 
 
 def lines(result: subprocess.CompletedProcess[str]) -> List[str]:

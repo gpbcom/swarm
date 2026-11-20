@@ -34,7 +34,9 @@
 
 ## Screens touched
 
-<!-- Link to a screen PNG, or to a use case screen row, or write the line saying the ticket touches no screen. -->
+<!-- Link to a screen PNG, or to a use case screen row, or write the line saying the ticket touches no screen.
+A ticket that changes a front end links every screen it shows: they are captured as 📸 Screenshot by the ticket
+itself (TKT-21). When it really shows none, write "- ➖ No screen: <why>" instead. -->
 
 - [🖼️ {{UC-ID}} {{node}}](../../specs/screens/{{UC-ID}}/{{node}}.png), or [🖼️ {{UC-ID}} {{node}}](../../specs/functional/use-cases/{{UC-ID}}-{{slug}}.md#screen-{{node}}).
 - {{The ticket touches no screen.}}
