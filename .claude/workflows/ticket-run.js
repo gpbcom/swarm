@@ -105,6 +105,23 @@ const CHECK = {
   properties: { passed: { type: 'boolean' }, problems: { type: 'array', items: { type: 'string' } } },
   required: ['passed', 'problems'],
 }
+// L-31: a step that runs one deterministic command goes to the runner agent, which only runs that command and reports
+// its exit code and output. The workflow decides from them, never from an agent's reading: the verifier, whose own job
+// is running checks.py, once returned the ticket's test failures as a refusal of the start rule.
+const RUN = {
+  type: 'object',
+  properties: { exit_code: { type: 'integer' }, output: { type: 'array', items: { type: 'string' } } },
+  required: ['exit_code', 'output'],
+}
+async function runExactly(prefix, command, expect, opts) {
+  const ran = await agent(
+    `${prefix}Run exactly this one command, and nothing else: ${command}\nReport its exit code and every line it printed.`,
+    { agentType: 'runner', schema: RUN, ...opts },
+  )
+  if (!ran) return null
+  const passed = ran.exit_code === expect.exit && (!expect.quiet || ran.output.length === 0)
+  return { passed, problems: ran.output, exit_code: ran.exit_code }
+}
 const REVIEW = {
   type: 'object',
   properties: {
@@ -266,9 +283,8 @@ const gate = await agent(
 if (!gate || !gate.approved) {
   return { ticket: ID, stopped: `Plan not approved (${gate ? gate.status : 'PLAN.md unreadable'}). Approve it in docs/tickets/${ID}/PLAN.md first.` }
 }
-const planCheck = await agent(
-  WHERE + `Run exactly python3 .claude/skills/ticket/scripts/check_plan.py ${ID} and report. passed is true only if it exits 0 and prints nothing; problems lists its output lines.`,
-  { agentType: 'verifier', schema: CHECK, label: `plan check ${ID}` },
+const planCheck = await runExactly(WHERE, `python3 .claude/skills/ticket/scripts/check_plan.py ${ID}`, { exit: 0, quiet: true },
+  { label: `plan check ${ID}` },
 )
 if (!planCheck || !planCheck.passed) {
   return { ticket: ID, stopped: 'PLAN.md fails check_plan.py', problems: planCheck ? planCheck.problems : ['check_plan.py did not report'] }
@@ -276,10 +292,8 @@ if (!planCheck || !planCheck.passed) {
 // TKT-16: the start rule. Every prerequisite merged on develop, no open ticket on the same areas, no field ticket
 // before its campaign. --force (the person's choice) logs the problems and goes on. TKT-23: a ticket already done
 // (merged, or its issue closed) or already finished (its pull request open) is refused even with --force.
-const startRule = await agent(
-  `Run exactly python3 .claude/scripts/tickets/tickets.py check --ticket ${ID}${FORCE ? ' --force' : ''} and report. ` +
-  `passed is true only if it exits 0; problems lists every line it prints.`,
-  { agentType: 'verifier', schema: CHECK, label: `start rule ${ID}` },
+const startRule = await runExactly('', `python3 .claude/scripts/tickets/tickets.py check --ticket ${ID}${FORCE ? ' --force' : ''}`,
+  { exit: 0, quiet: false }, { label: `start rule ${ID}` },
 )
 if (!startRule || !startRule.passed) {
   return { ticket: ID, stopped: 'The start rule refuses this ticket for now (TKT-16)', problems: startRule ? startRule.problems : ['tickets.py check did not report'],
@@ -465,9 +479,8 @@ if (done) {
   // checks it deterministically; the explainer fixes what it reports once, and finish refuses to commit otherwise. After
   // the person's review it runs again, because a change they made can leave the table of changes out of date.
   for (let round = 0; round <= 1; round++) {
-    const docsCheck = await agent(inHome(
-      `Run exactly python3 .claude/scripts/tickets/ticket_tree.py docs --ticket ${ID} and report. passed is true only if it exits 0 and prints nothing; problems lists its output lines.`),
-      { agentType: 'verifier', schema: CHECK, phase: 'Finish', label: `docs check ${ID} ${round + 1}` },
+    const docsCheck = await runExactly(inHome(''), `python3 .claude/scripts/tickets/ticket_tree.py docs --ticket ${ID}`,
+      { exit: 0, quiet: true }, { phase: 'Finish', label: `docs check ${ID} ${round + 1}` },
     )
     log(`Documents check ${round + 1}: ${docsCheck && docsCheck.passed ? 'passed' : `${docsCheck ? docsCheck.problems.length : '?'} problem(s)`}`)
     if (!docsCheck || docsCheck.passed || round === 1) break

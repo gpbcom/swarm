@@ -140,3 +140,18 @@ class TestTicketWorkflows:
         assert "python3 .claude/scripts/tickets/tickets.py done --ticket" in read_text(self.PLAN)
         assert "python3 .claude/scripts/tickets/tickets.py check --ticket" in read_text(self.RUN)
         assert "already done" in read_text(self.RUN)
+
+    @pytest.mark.parametrize("workflow", [".claude/workflows/ticket-run.js", ".claude/workflows/ticket-plan.js"])
+    def test_a_command_run_exactly_goes_to_the_runner_and_the_exit_code_decides(self, workflow: str) -> None:
+        text = read_text(workflow)
+        assert "agentType: 'runner'" in text
+        assert "ran.exit_code === expect.exit" in text
+        for call in text.split("agentType: 'verifier'")[1:]:
+            assert "VERDICT" in call.split("}")[0], "the verifier only runs checks.py and returns a VERDICT"
+
+    def test_the_start_rule_is_run_by_the_runner_never_the_verifier(self) -> None:
+        text = read_text(self.RUN)
+        step = text.split("const startRule = ", 1)[1].split("if (!startRule", 1)[0]
+        assert step.lstrip().startswith("await runExactly(")
+        assert "tickets/tickets.py check --ticket" in step
+        assert "verifier" not in step

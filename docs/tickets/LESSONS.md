@@ -53,9 +53,10 @@ this page keeps what happened, so that each problem is closed once and never met
 | [L-28](#l-28) | 2026-11-20 | A wrong import of the project's own code was taken for a missing tool, so no fixer was sent | 🟢 Closed |
 | [L-29](#l-29) | 2026-11-20 | A file several tickets change is committed whole by the first one that finishes | 🔴 Open |
 | [L-30](#l-30) | 2026-11-20 | `gh pr edit` fails on the deprecated Projects (classic), so `finish` could not update the pull request | 🟡 Worked around |
-| [L-31](#l-31) | 2026-11-20 | The start rule is read by a model, which reported the ticket's test errors as a refusal | 🔴 Open |
+| [L-31](#l-31) | 2026-11-20 | The start rule is read by a model, which reported the ticket's test errors as a refusal (seen twice) | 🟢 Closed |
 | [L-32](#l-32) | 2026-11-20 | A failing check was sent to the owner of the first file it was given, not of the file it failed on | 🟢 Closed |
 | [L-27](#l-27) | 2026-11-20 | The updates of a ticket run name the files and lines they change without linking to them | 🔴 Open |
+| [L-33](#l-33) | 2026-11-20 | `automerge` gave up when another merge moved `develop` at the same moment | 🔴 Open |
 
 ## <a id="lessons"></a>📋 Lessons
 
@@ -323,8 +324,10 @@ this page keeps what happened, so that each problem is closed once and never met
   session's), and ignores a `cd <folder> &&` or `git -C <folder>` in the command. The session cannot move to a folder
   outside the project either. So harness work cannot be committed from a session whose main checkout runs tickets, and
   the reverse also holds: a command that `cd`s into `feature/tickets` from elsewhere would pass.
+- **Seen again:** the guard's pattern for `git merge` also matches `git merge-base`, a read-only command, and refused a
+  script that only compared branches (17:10, preparing the merge of `develop` into `feature/tickets`).
 - **Fix:** to do. The guard resolves the folder the git command acts on (`cd`, `-C`) and judges that folder's branch,
-  with a test for each case.
+  with a test for each case; the write patterns match whole sub-commands (`merge`, not `merge-base`).
 - **Rule:** [TKT-5](../../.claude/rules/tickets.md#tkt-5), [TKT-15](../../.claude/rules/tickets.md#tkt-15).
 
 ### <a id="l-24"></a>L-24: The 2-minute report is too thin and not ergonomic: no progress bars, no phase, no space
@@ -525,7 +528,7 @@ this page keeps what happened, so that each problem is closed once and never met
   fails.
 - **Fix:** worked around by hand: the title and body were written with
   `gh api -X PATCH repos/gpbcom/swarm/pulls/388 -f title=... -f body=...`, exactly as `finish` builds them. To do:
-  `pull_request()` in [`ticket_tree.py`](../../.claude/scripts/ticket_tree.py) updates the pull request with the REST
+  `pull_request()` in [`ticket_tree.py`](../../.claude/scripts/tickets/ticket_tree.py) updates the pull request with the REST
   API and adds the label with `gh api .../issues/<n>/labels`, with a test using a stand-in `gh`.
 - **Rule:** [TKT-15](../../.claude/rules/tickets.md#tkt-15) (one `Closes` per finished ticket),
   [TKT-24](../../.claude/rules/tickets.md#tkt-24) (GitHub's answers may change; a harness script does not stop on them).
@@ -535,14 +538,23 @@ this page keeps what happened, so that each problem is closed once and never met
 - **Seen:** `/issue-run P0`, relaunch of T0.13 at 15:41.
 - **What happened:** the run stopped at its gate with "The start rule refuses this ticket for now (TKT-16)". The
   problem it listed was a pytest collection error of T0.13's own tests, which the start rule never looks at.
-  `python3 .claude/scripts/tickets.py check --ticket T0.13` printed nothing and exited 0: the rule passed. The run was
+  `python3 .claude/scripts/tickets/tickets.py check --ticket T0.13` printed nothing and exited 0: the rule passed. The run was
   launched again at once.
 - **Cause:** the gate of [`ticket-run.js`](../../.claude/workflows/ticket-run.js#L279-L283) asks an agent of type
   `verifier` to "run exactly" `tickets.py check`. The verifier's own instructions are to run `checks.py`: it ran the
   ticket's checks and returned their failures in the start rule's schema. A deterministic decision went through a
   model, and through an agent made for another job.
-- **Fix:** to do. The workflow takes the start rule's verdict from the script itself (its exit code and output, passed
-  through unchanged), never from an agent's summary, with a test that a ticket whose own tests fail still starts.
+- **Seen again:** relaunch of T0.13 at 17:20, after `develop` was merged into `feature/tickets`. The agent even wrote that
+  `tickets.py check` exited 0 and printed nothing, and still returned the ticket's own pytest failures as a refusal.
+  T0.13 was started with `--force`, on the person's decision.
+- **Fix:** every step of [`ticket-run.js`](../../.claude/workflows/ticket-run.js) and
+  [`ticket-plan.js`](../../.claude/workflows/ticket-plan.js) that runs one deterministic command (the plan check, the
+  start rule, the done check, the `TICKET.md` and `PLAN.md` checks, the documents check) goes to a new `runner` agent
+  ([`runner.md`](../../.claude/agents/runner.md), haiku, Bash only), which runs exactly that command and reports its exit
+  code and output. The workflow's `runExactly` decides from the exit code; the `verifier` only runs `checks.py`. The
+  tests `test_a_command_run_exactly_goes_to_the_runner_and_the_exit_code_decides` and
+  `test_the_start_rule_is_run_by_the_runner_never_the_verifier` of
+  [`test_ticket_workflows.py`](../../tests/harness/wiring/test_ticket_workflows.py) fail without it.
 - **Rule:** [TKT-16](../../.claude/rules/tickets.md#tkt-16) (the start rule),
   [TKT-6](../../.claude/rules/tickets.md#tkt-6) (deterministic, not a model's judgement).
 
@@ -554,7 +566,7 @@ this page keeps what happened, so that each problem is closed once and never met
   `packages/python/swarm-storage/tests/storage/postgres/migrations/test_alembic_migrator.py`. The failure named
   `packages/python/swarm-rest/src/swarm_rest/__init__.py`, the first file ruff was given, so it went to K18, which owns
   it, found nothing wrong there and changed nothing. The rounds ran out and the run stopped.
-- **Cause:** `Checks.check` in [`checks.py`](../../.claude/scripts/checks.py) recorded the `file` it was called with
+- **Cause:** `Checks.check` in [`checks.py`](../../.claude/scripts/tickets/checks.py) recorded the `file` it was called with
   (`files[0]`), whatever the tool's output said.
 - **Fix:** `failing_files()` reads the ticket's files the output names (ignoring lines that list many of them, such as
   an echoed command), and the check records one failure per file named, each with its lines, so each goes to its
@@ -562,6 +574,19 @@ this page keeps what happened, so that each problem is closed once and never met
   [`tests/harness/checks/test_checks.py`](../../tests/harness/checks/test_checks.py) fails without it. Run on T0.12's
   real ruff output, it names the three files.
 - **Rule:** [TKT-6](../../.claude/rules/tickets.md#tkt-6) (a failure goes back to the agent that owns the file).
+
+### <a id="l-33"></a>L-33: `automerge` gave up when another merge moved `develop` at the same moment
+
+- **Seen:** pull request #389, at 15:01, while #391 merged.
+- **What happened:** every check of #389 passed. `automerge.yml` tried to merge it while #391 was being merged, and
+  GitHub answered "Base branch was modified. Review and try the merge again." The run failed and nothing tried again:
+  #389 stayed open and green until someone noticed.
+- **Cause:** the merge step of [`automerge.yml`](../../.github/workflows/automerge.yml) calls `gh pr merge` once. Two
+  pull requests whose checks end together race for `develop`, and the loser is never retried.
+- **Fix:** worked around by re-running the failed run (`gh run rerun`). To do: retry the merge a few times with a
+  pause when GitHub answers that the base branch was modified, with a test under `tests/ci/release/` using the
+  stand-in `gh`.
+- **Rule:** [TKT-15](../../.claude/rules/tickets.md#tkt-15) (merged by GitHub once CI passes).
 
 ## <a id="already-ruled"></a>📜 Lessons already turned into rules
 
