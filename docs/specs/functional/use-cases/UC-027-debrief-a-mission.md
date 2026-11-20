@@ -1,7 +1,7 @@
 # 🎬 UC-027: Debrief a Mission
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ UC-026: Handle an Alert](UC-026-handle-an-alert.md) · 📄 **Page 53 / 108** · [UC-028: Assess a Mission against the request ▶️](UC-028-assess-a-mission-against-the-request.md)
+> [🏠 Index](../../README.md) · [◀️ UC-026: Handle an Alert](UC-026-handle-an-alert.md) · 📄 **Page 55 / 120** · [UC-028: Assess a Mission against the request ▶️](UC-028-assess-a-mission-against-the-request.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -137,5 +137,5 @@ One row per state of the flow chart: every action, success and failure node. Cli
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ UC-026: Handle an Alert](UC-026-handle-an-alert.md) · 📄 **Page 53 / 108** · [UC-028: Assess a Mission against the request ▶️](UC-028-assess-a-mission-against-the-request.md)
+> [🏠 Index](../../README.md) · [◀️ UC-026: Handle an Alert](UC-026-handle-an-alert.md) · 📄 **Page 55 / 120** · [UC-028: Assess a Mission against the request ▶️](UC-028-assess-a-mission-against-the-request.md)
 <!-- /spec:nav-bottom -->

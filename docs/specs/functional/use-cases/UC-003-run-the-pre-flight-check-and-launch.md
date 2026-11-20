@@ -1,7 +1,7 @@
 # 🎬 UC-003: Run the Pre-flight check and launch
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ UC-002: Simulate a Mission](UC-002-simulate-a-mission.md) · 📄 **Page 29 / 108** · [UC-004: Supervise a Squad and approve a Re-plan ▶️](UC-004-supervise-a-squad-and-approve-a-re-plan.md)
+> [🏠 Index](../../README.md) · [◀️ UC-002: Simulate a Mission](UC-002-simulate-a-mission.md) · 📄 **Page 31 / 120** · [UC-004: Supervise a Squad and approve a Re-plan ▶️](UC-004-supervise-a-squad-and-approve-a-re-plan.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -152,5 +152,5 @@ One row per state of the flow chart: every action, success and failure node. Eac
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ UC-002: Simulate a Mission](UC-002-simulate-a-mission.md) · 📄 **Page 29 / 108** · [UC-004: Supervise a Squad and approve a Re-plan ▶️](UC-004-supervise-a-squad-and-approve-a-re-plan.md)
+> [🏠 Index](../../README.md) · [◀️ UC-002: Simulate a Mission](UC-002-simulate-a-mission.md) · 📄 **Page 31 / 120** · [UC-004: Supervise a Squad and approve a Re-plan ▶️](UC-004-supervise-a-squad-and-approve-a-re-plan.md)
 <!-- /spec:nav-bottom -->

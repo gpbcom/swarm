@@ -1,7 +1,7 @@
 # 🧭 Functional specifications
 
 <!-- spec:nav-top -->
-> [🏠 Index](../README.md) · [◀️ Visual identity](../visual-identity.md) · 📄 **Page 4 / 108** · [FS-001: Mission design ▶️](features/FS-001-mission-design.md)
+> [🏠 Index](../README.md) · [◀️ Visual identity](../visual-identity.md) · 📄 **Page 4 / 120** · [FS-001: Mission design ▶️](features/FS-001-mission-design.md)
 <!-- /spec:nav-top -->
 
 <!-- spec:summary -->
@@ -45,6 +45,8 @@ Generated from the links in each feature and use case.
 | [📘 FS-020: Ground control Workspace and configuration](features/FS-020-ground-control-workspace-and-configuration.md) | [🎬 UC-023: Configure the Workspace of Ground control](use-cases/UC-023-configure-the-workspace-of-ground-control.md)<br>[🎬 UC-024: Configure each Drone of the Squad on the Site](use-cases/UC-024-configure-each-drone-of-the-squad-on-the-site.md) | [📏 BR-017: Every screen in four languages](business-rules/BR-017-every-screen-in-four-languages.md)<br>[📏 BR-023: Fixed safety controls](business-rules/BR-023-fixed-safety-controls.md)<br>[📏 BR-024: Alert thresholds within the Operator limits](business-rules/BR-024-alert-thresholds-within-the-operator-limits.md)<br>[📏 BR-025: On-site changes are checked again](business-rules/BR-025-on-site-changes-are-checked-again.md) |
 | [📘 FS-021: Ground control monitoring](features/FS-021-ground-control-monitoring.md) | [🎬 UC-004: Supervise a Squad and approve a Re-plan](use-cases/UC-004-supervise-a-squad-and-approve-a-re-plan.md)<br>[🎬 UC-006: Take manual control or abort](use-cases/UC-006-take-manual-control-or-abort.md)<br>[🎬 UC-025: Monitor a Mission in Ground control](use-cases/UC-025-monitor-a-mission-in-ground-control.md)<br>[🎬 UC-026: Handle an Alert](use-cases/UC-026-handle-an-alert.md)<br>[🎬 UC-030: Focus on a Drone](use-cases/UC-030-focus-on-a-drone.md) | [📏 BR-012: Pilot override always available](business-rules/BR-012-pilot-override-always-available.md)<br>[📏 BR-013: Re-plan approval](business-rules/BR-013-re-plan-approval.md)<br>[📏 BR-023: Fixed safety controls](business-rules/BR-023-fixed-safety-controls.md)<br>[📏 BR-027: The Pilot's attention is preserved](business-rules/BR-027-the-pilot-s-attention-is-preserved.md) |
 | [📘 FS-022: Debrief and assessment](features/FS-022-debrief-and-assessment.md) | [🎬 UC-011: Follow a Mission and download its Deliverables](use-cases/UC-011-follow-a-mission-and-download-its-deliverables.md)<br>[🎬 UC-027: Debrief a Mission](use-cases/UC-027-debrief-a-mission.md)<br>[🎬 UC-028: Assess a Mission against the request](use-cases/UC-028-assess-a-mission-against-the-request.md) | [📏 BR-009: Evidence integrity](business-rules/BR-009-evidence-integrity.md)<br>[📏 BR-021: AI agents propose, people decide](business-rules/BR-021-ai-agents-propose-people-decide.md)<br>[📏 BR-026: Scorecard against the request](business-rules/BR-026-scorecard-against-the-request.md) |
+| [📘 FS-023: AI Assistant](features/FS-023-ai-assistant.md) | [🎬 UC-031: Ask the Assistant](use-cases/UC-031-ask-the-assistant.md)<br>[🎬 UC-032: Set the Assistant permissions](use-cases/UC-032-set-the-assistant-permissions.md)<br>[🎬 UC-034: Let the Assistant hold a Squad](use-cases/UC-034-let-the-assistant-hold-a-squad.md) | [📏 BR-006: Fail-safe per Activity](business-rules/BR-006-fail-safe-per-activity.md)<br>[📏 BR-021: AI agents propose, people decide](business-rules/BR-021-ai-agents-propose-people-decide.md)<br>[📏 BR-028: Assistant permissions are layered](business-rules/BR-028-assistant-permissions-are-layered.md)<br>[📏 BR-029: Flight-critical acts need a Pilot on duty](business-rules/BR-029-flight-critical-acts-need-a-pilot-on-duty.md)<br>[📏 BR-030: The Assistant stays within its budget](business-rules/BR-030-the-assistant-stays-within-its-budget.md)<br>[📏 BR-032: The Assistant reaches only what its person may reach](business-rules/BR-032-the-assistant-reaches-only-what-its-person-may-reach.md) |
+| [📘 FS-024: ERP and Squad shortfall](features/FS-024-erp-and-squad-shortfall.md) | [🎬 UC-033: Cover a Squad shortfall through the ERP](use-cases/UC-033-cover-a-squad-shortfall-through-the-erp.md) | [📏 BR-021: AI agents propose, people decide](business-rules/BR-021-ai-agents-propose-people-decide.md)<br>[📏 BR-028: Assistant permissions are layered](business-rules/BR-028-assistant-permissions-are-layered.md)<br>[📏 BR-031: A Squad shortfall is covered through the ERP](business-rules/BR-031-a-squad-shortfall-is-covered-through-the-erp.md) |
 
 ```mermaid
 flowchart LR
@@ -70,6 +72,8 @@ flowchart LR
     FS020["📘 FS-020"]:::feature
     FS021["📘 FS-021"]:::feature
     FS022["📘 FS-022"]:::feature
+    FS023["📘 FS-023"]:::feature
+    FS024["📘 FS-024"]:::feature
     UC001["🎬 UC-001"]:::usecase
     UC002["🎬 UC-002"]:::usecase
     UC003["🎬 UC-003"]:::usecase
@@ -100,6 +104,10 @@ flowchart LR
     UC028["🎬 UC-028"]:::usecase
     UC029["🎬 UC-029"]:::usecase
     UC030["🎬 UC-030"]:::usecase
+    UC031["🎬 UC-031"]:::usecase
+    UC032["🎬 UC-032"]:::usecase
+    UC033["🎬 UC-033"]:::usecase
+    UC034["🎬 UC-034"]:::usecase
     BR001["📏 BR-001"]:::rule
     BR002["📏 BR-002"]:::rule
     BR003["📏 BR-003"]:::rule
@@ -127,6 +135,11 @@ flowchart LR
     BR025["📏 BR-025"]:::rule
     BR026["📏 BR-026"]:::rule
     BR027["📏 BR-027"]:::rule
+    BR028["📏 BR-028"]:::rule
+    BR029["📏 BR-029"]:::rule
+    BR030["📏 BR-030"]:::rule
+    BR031["📏 BR-031"]:::rule
+    BR032["📏 BR-032"]:::rule
     FS001 --> FS002
     FS001 --> FS003
     FS001 --> FS013
@@ -232,6 +245,21 @@ flowchart LR
     FS022 --> BR009
     FS022 --> BR021
     FS022 --> BR026
+    FS023 --> FS024
+    FS023 --> UC031
+    FS023 --> UC032
+    FS023 --> UC034
+    FS023 --> BR006
+    FS023 --> BR021
+    FS023 --> BR028
+    FS023 --> BR029
+    FS023 --> BR030
+    FS023 --> BR032
+    FS024 --> FS023
+    FS024 --> UC033
+    FS024 --> BR021
+    FS024 --> BR028
+    FS024 --> BR031
     UC001 --> FS006
     UC001 --> UC002
     UC001 --> BR001
@@ -356,6 +384,29 @@ flowchart LR
     UC030 --> UC025
     UC030 --> BR023
     UC030 --> BR027
+    UC031 --> UC021
+    UC031 --> UC022
+    UC031 --> UC026
+    UC031 --> BR021
+    UC031 --> BR028
+    UC031 --> BR030
+    UC031 --> BR032
+    UC032 --> BR028
+    UC032 --> BR029
+    UC033 --> UC021
+    UC033 --> BR011
+    UC033 --> BR021
+    UC033 --> BR022
+    UC033 --> BR028
+    UC033 --> BR031
+    UC034 --> UC026
+    UC034 --> UC032
+    UC034 --> BR003
+    UC034 --> BR006
+    UC034 --> BR012
+    UC034 --> BR021
+    UC034 --> BR029
+    UC034 --> BR030
     classDef feature fill:#e0e7ff,stroke:#4338ca,stroke-width:2px,color:#1e1b4b
     classDef usecase fill:#cffafe,stroke:#0e7490,stroke-width:2px,color:#083344
     classDef rule fill:#ffedd5,stroke:#c2410c,stroke-width:2px,color:#431407
@@ -365,5 +416,5 @@ flowchart LR
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../README.md) · [◀️ Visual identity](../visual-identity.md) · 📄 **Page 4 / 108** · [FS-001: Mission design ▶️](features/FS-001-mission-design.md)
+> [🏠 Index](../README.md) · [◀️ Visual identity](../visual-identity.md) · 📄 **Page 4 / 120** · [FS-001: Mission design ▶️](features/FS-001-mission-design.md)
 <!-- /spec:nav-bottom -->

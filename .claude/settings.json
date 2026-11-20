@@ -1,10 +1,55 @@
 {
     "permissions": {
         "allow": [
-            "Bash(python3 .claude/skills/write-specs/scripts/specs.py:*)"
+            "Bash(python3 .claude/skills/write-specs/scripts/specs.py:*)",
+            "Bash(python3 .claude/scripts/board.py show:*)",
+            "Bash(python3 .claude/scripts/tickets.py list:*)",
+            "Bash(python3 .claude/scripts/tickets.py check:*)"
+        ]
+    },
+    "hooks": {
+        "PreToolUse": [
+            {
+                "matcher": "Bash",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/guard_git.py",
+                        "timeout": 10
+                    }
+                ]
+            }
+        ],
+        "PostToolUse": [
+            {
+                "matcher": "Edit|Write|MultiEdit",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/format_edited.py",
+                        "timeout": 120
+                    }
+                ]
+            }
+        ],
+        "SubagentStop": [
+            {
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/check_touched.py",
+                        "timeout": 1800
+                    }
+                ]
+            }
         ]
     },
     "worktree": {
         "baseRef": "head"
+    },
+    "statusLine": {
+        "type": "command",
+        "command": "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/scripts/statusline.py",
+        "padding": 0
     }
 }

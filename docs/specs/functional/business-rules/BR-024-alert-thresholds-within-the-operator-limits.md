@@ -1,7 +1,7 @@
 # 📏 BR-024: Alert thresholds within the Operator limits
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ BR-023: Fixed safety controls](BR-023-fixed-safety-controls.md) · 📄 **Page 80 / 108** · [BR-025: On-site changes are checked again ▶️](BR-025-on-site-changes-are-checked-again.md)
+> [🏠 Index](../../README.md) · [◀️ BR-023: Fixed safety controls](BR-023-fixed-safety-controls.md) · 📄 **Page 86 / 120** · [BR-025: On-site changes are checked again ▶️](BR-025-on-site-changes-are-checked-again.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Type:** Validation · **Updated:** 2026-11-18
@@ -49,5 +49,5 @@ Pilots differ in experience and prefer earlier or later warnings, but the Operat
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ BR-023: Fixed safety controls](BR-023-fixed-safety-controls.md) · 📄 **Page 80 / 108** · [BR-025: On-site changes are checked again ▶️](BR-025-on-site-changes-are-checked-again.md)
+> [🏠 Index](../../README.md) · [◀️ BR-023: Fixed safety controls](BR-023-fixed-safety-controls.md) · 📄 **Page 86 / 120** · [BR-025: On-site changes are checked again ▶️](BR-025-on-site-changes-are-checked-again.md)
 <!-- /spec:nav-bottom -->

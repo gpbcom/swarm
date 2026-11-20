@@ -1,0 +1,69 @@
+$ cargo test --workspace
+(cwd packages/rust)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 7 tests
+test a_command_is_deserialised ... ok
+test a_command_round_trips_to_the_same_value ... ok
+test a_squad_frame_holds_its_frames ... ok
+test a_telemetry_frame_is_deserialised ... ok
+test a_telemetry_frame_with_an_unknown_state_is_refused ... ok
+test a_telemetry_frame_round_trips_to_the_same_value ... ok
+test a_telemetry_frame_with_an_unknown_key_is_refused ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 1 test
+test the_generated_structs_are_current ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 10 tests
+test a_missing_schema_is_an_error ... ok
+test rendering_text_that_is_not_json_fails ... ok
+test the_default_paths_point_into_the_models_crate ... ok
+test every_definition_becomes_a_type ... ok
+test the_first_line_is_the_header ... ok
+test rendering_the_fixture_succeeds ... ok
+test a_missing_output_is_stale ... ok
+test two_renders_are_equal ... ok
+test an_edited_output_is_stale_again ... ok
+test a_written_output_is_fresh_and_equals_the_render ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.06s
+     Running unittests src/lib.rs (target/debug/build/swarm-models/4e2915c3ea01aa57/out/swarm_models-4e2915c3ea01aa57)
+     Running tests/deserialise.rs (target/debug/build/swarm-models/d30141627bf9cff3/out/deserialise-d30141627bf9cff3)
+     Running tests/generated_is_current.rs (target/debug/build/swarm-models/34c0f05aeca03d1c/out/generated_is_current-34c0f05aeca03d1c)
+     Running unittests src/lib.rs (target/debug/build/swarm-models-codegen/27bd1ebe7d2bdca2/out/swarm_models_codegen-27bd1ebe7d2bdca2)
+     Running unittests src/main.rs (target/debug/build/swarm-models-codegen/921cc1abaaeba44d/out/swarm_models_codegen-921cc1abaaeba44d)
+     Running tests/render.rs (target/debug/build/swarm-models-codegen/16f95d15c1684872/out/render-16f95d15c1684872)
+   Doc-tests swarm_models
+   Doc-tests swarm_models_codegen

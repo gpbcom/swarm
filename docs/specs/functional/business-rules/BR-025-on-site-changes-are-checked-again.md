@@ -1,7 +1,7 @@
 # 📏 BR-025: On-site changes are checked again
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ BR-024: Alert thresholds within the Operator limits](BR-024-alert-thresholds-within-the-operator-limits.md) · 📄 **Page 81 / 108** · [BR-026: Scorecard against the request ▶️](BR-026-scorecard-against-the-request.md)
+> [🏠 Index](../../README.md) · [◀️ BR-024: Alert thresholds within the Operator limits](BR-024-alert-thresholds-within-the-operator-limits.md) · 📄 **Page 87 / 120** · [BR-026: Scorecard against the request ▶️](BR-026-scorecard-against-the-request.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Type:** Validation · **Updated:** 2026-11-18
@@ -47,5 +47,5 @@ On-site changes are normal (a spare Drone, a fresh Battery, another camera) but 
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ BR-024: Alert thresholds within the Operator limits](BR-024-alert-thresholds-within-the-operator-limits.md) · 📄 **Page 81 / 108** · [BR-026: Scorecard against the request ▶️](BR-026-scorecard-against-the-request.md)
+> [🏠 Index](../../README.md) · [◀️ BR-024: Alert thresholds within the Operator limits](BR-024-alert-thresholds-within-the-operator-limits.md) · 📄 **Page 87 / 120** · [BR-026: Scorecard against the request ▶️](BR-026-scorecard-against-the-request.md)
 <!-- /spec:nav-bottom -->

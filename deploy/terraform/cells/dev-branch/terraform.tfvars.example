@@ -1,0 +1,14 @@
+# Copy to a file outside the repository, such as ~/.config/swarm/dev-branch.tfvars, and edit it.
+# deploy/scripts/dev-cell.sh passes branch and cell_name itself.
+kubeconfig_path           = "/path/outside/repo/dev.kubeconfig"
+repository_url            = "https://git.example.org/swarm.git"
+database_image            = "registry.example.org/swarm/database:1"
+openbao_chart_version     = "0.16.2"
+argocd_apps_chart_version = "2.0.2"
+argocd_namespace          = "argocd"
+
+# The NATS operator JWT, the system account key and its JWT are public. Copy them from the dev operator that the person
+# creates once. The operator and account seeds never go in this file.
+nats_operator_jwt       = "eyJ0eXAiOiJKV1QifQ.placeholder-operator-jwt.placeholder-signature"
+nats_system_account     = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+nats_system_account_jwt = "eyJ0eXAiOiJKV1QifQ.placeholder-system-account-jwt.placeholder-signature"

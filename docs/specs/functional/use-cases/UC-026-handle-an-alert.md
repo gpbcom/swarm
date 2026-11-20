@@ -1,7 +1,7 @@
 # 🎬 UC-026: Handle an Alert
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ UC-025: Monitor a Mission in Ground control](UC-025-monitor-a-mission-in-ground-control.md) · 📄 **Page 52 / 108** · [UC-027: Debrief a Mission ▶️](UC-027-debrief-a-mission.md)
+> [🏠 Index](../../README.md) · [◀️ UC-025: Monitor a Mission in Ground control](UC-025-monitor-a-mission-in-ground-control.md) · 📄 **Page 54 / 120** · [UC-027: Debrief a Mission ▶️](UC-027-debrief-a-mission.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -140,10 +140,12 @@ One row per state of the flow chart: every action, success and failure node. Eac
 - [📘 FS-021: Ground control monitoring](../features/FS-021-ground-control-monitoring.md)
 - [🎬 UC-004: Supervise a Squad and approve a Re-plan](UC-004-supervise-a-squad-and-approve-a-re-plan.md)
 - [🎬 UC-025: Monitor a Mission in Ground control](UC-025-monitor-a-mission-in-ground-control.md)
+- [🎬 UC-031: Ask the Assistant](UC-031-ask-the-assistant.md)
+- [🎬 UC-034: Let the Assistant hold a Squad](UC-034-let-the-assistant-hold-a-squad.md)
 <!-- /spec:referenced-by -->
 
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ UC-025: Monitor a Mission in Ground control](UC-025-monitor-a-mission-in-ground-control.md) · 📄 **Page 52 / 108** · [UC-027: Debrief a Mission ▶️](UC-027-debrief-a-mission.md)
+> [🏠 Index](../../README.md) · [◀️ UC-025: Monitor a Mission in Ground control](UC-025-monitor-a-mission-in-ground-control.md) · 📄 **Page 54 / 120** · [UC-027: Debrief a Mission ▶️](UC-027-debrief-a-mission.md)
 <!-- /spec:nav-bottom -->

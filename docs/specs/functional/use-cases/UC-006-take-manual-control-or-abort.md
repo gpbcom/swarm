@@ -1,7 +1,7 @@
 # 🎬 UC-006: Take manual control or abort
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ UC-005: Lose a Drone in flight](UC-005-lose-a-drone-in-flight.md) · 📄 **Page 32 / 108** · [UC-007: Register a Drone and track its readiness ▶️](UC-007-register-a-drone-and-track-its-readiness.md)
+> [🏠 Index](../../README.md) · [◀️ UC-005: Lose a Drone in flight](UC-005-lose-a-drone-in-flight.md) · 📄 **Page 34 / 120** · [UC-007: Register a Drone and track its readiness ▶️](UC-007-register-a-drone-and-track-its-readiness.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -155,5 +155,5 @@ One row per state of the flow chart: every action, success and failure node. Eac
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ UC-005: Lose a Drone in flight](UC-005-lose-a-drone-in-flight.md) · 📄 **Page 32 / 108** · [UC-007: Register a Drone and track its readiness ▶️](UC-007-register-a-drone-and-track-its-readiness.md)
+> [🏠 Index](../../README.md) · [◀️ UC-005: Lose a Drone in flight](UC-005-lose-a-drone-in-flight.md) · 📄 **Page 34 / 120** · [UC-007: Register a Drone and track its readiness ▶️](UC-007-register-a-drone-and-track-its-readiness.md)
 <!-- /spec:nav-bottom -->

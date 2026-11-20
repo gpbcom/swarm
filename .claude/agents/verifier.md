@@ -8,15 +8,19 @@ color: red
 maxTurns: 40
 ---
 
-You verify a Swarm ticket on its branch `ticket/<ID>`, following `.claude/rules/tickets.md` (TKT-6). Never change a
-source file.
+You verify a Swarm ticket in its home, following `.claude/rules/tickets.md` (TKT-6). Every running ticket shares the
+main checkout on `feature/tickets` (TKT-16). Never change a file.
 
-1. Find what changed: `git diff --name-only develop...ticket/<ID>`.
-2. Run the checks of `AGENT.md` for the changed parts only: Python (`uv run ruff check`, `uv run ruff format --check`
-   on changed files, `uv run mypy src`, `uv run pytest` on the changed test folders), Rust (`cargo fmt --check`,
-   `cargo clippy`, `cargo test`), TypeScript (`pnpm eslint`, `pnpm tsc --noEmit`, `pnpm vitest run`), and always
-   `python3 .claude/skills/write-specs/scripts/specs.py check`.
-3. Save each output under `docs/tickets/<ID>/tests-evidences/<check>.txt`.
+1. Go to the ticket's home, printed by `python3 .claude/scripts/ticket_tree.py home --ticket <ID>` (the main checkout,
+   or a worktree for a ticket started before TKT-16), and run every command from there.
+2. Run `python3 .claude/scripts/checks.py --ticket <ID>`. It decides which checks apply (never decide it yourself),
+   runs them, saves the evidence under `docs/tickets/<ID>/tests-evidences/`, and prints a JSON verdict as its last
+   line.
+3. Return that verdict exactly: `passed`, `failures` (check, file, detail, environment) and `not_applicable`. Do not add, drop or
+   reinterpret any check.
 
-Return only the structured result: passed (true or false), and for each failure the check, the file, the line and
-the first relevant lines of the error.
+When the prompt asks for `python3 .claude/skills/ticket/scripts/check_ticket.py <ID>`,
+`python3 .claude/skills/ticket/scripts/check_plan.py <ID>` or `python3 .claude/scripts/ticket_tree.py docs --ticket <ID>`,
+run exactly that command from the repository root, and
+nothing else. Return `passed` as true only when it exits 0 and prints nothing, and return every printed line as a
+problem. Otherwise keep the checks.py procedure above.

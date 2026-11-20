@@ -1,0 +1,96 @@
+name: terraform
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - master
+      - "release/**"
+    paths:
+      - "deploy/terraform/**"
+      - ".github/workflows/terraform.yml"
+  push:
+    branches:
+      - master
+      - develop
+      - "release/**"
+      - "hotfix/**"
+    paths:
+      - "deploy/terraform/**"
+      - ".github/workflows/terraform.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        folder:
+          - deploy/terraform/modules/self-hosted/machines
+          - deploy/terraform/modules/self-hosted/network
+          - deploy/terraform/modules/self-hosted/k3s
+          - deploy/terraform/modules/self-hosted/object-storage
+          - deploy/terraform/modules/self-hosted/dns
+          - deploy/terraform/modules/self-hosted/argocd
+          - deploy/terraform/modules/self-hosted/vault
+          - deploy/terraform/modules/self-hosted/cell
+          - deploy/terraform/modules/self-hosted/cell-application
+          - deploy/terraform/cells/dev
+          - deploy/terraform/cells/dev-branch
+    steps:
+      - uses: actions/checkout@v7
+      - uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: ">= 1.10"
+          terraform_wrapper: false
+      - name: Check the format
+        run: terraform fmt -check -recursive deploy/terraform
+      - name: Initialise
+        working-directory: ${{ matrix.folder }}
+        run: terraform init -backend=false -input=false
+      - name: Validate
+        working-directory: ${{ matrix.folder }}
+        run: terraform validate
+      - name: Test
+        working-directory: ${{ matrix.folder }}
+        run: terraform test
+
+  plan:
+    needs: check
+    if: vars.DEV_CELL_MACHINES != ''
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: deploy/terraform/cells/dev
+    env:
+      TF_BACKEND_CONFIG: ${{ secrets.TF_BACKEND_CONFIG }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      TF_VAR_machines: ${{ vars.DEV_CELL_MACHINES }}
+      TF_VAR_ssh_user: ${{ vars.TF_VAR_SSH_USER }}
+      TF_VAR_k3s_version: ${{ vars.TF_VAR_K3S_VERSION }}
+      TF_VAR_api_allowed_cidrs: ${{ vars.TF_VAR_API_ALLOWED_CIDRS || '[]' }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: ">= 1.10"
+          terraform_wrapper: false
+      - name: Write the backend configuration
+        run: |
+          if [ -z "$TF_BACKEND_CONFIG" ]; then
+            echo "::error::The secret TF_BACKEND_CONFIG is missing or empty."
+            exit 1
+          fi
+          printf '%s\n' "$TF_BACKEND_CONFIG" > "$RUNNER_TEMP/backend.tfbackend"
+      - name: Set the paths plan does not use
+        run: |
+          echo "TF_VAR_ssh_private_key_path=$RUNNER_TEMP/unused_ssh_key" >> "$GITHUB_ENV"
+          echo "TF_VAR_kubeconfig_path=$RUNNER_TEMP/unused_kubeconfig" >> "$GITHUB_ENV"
+      - name: Initialise
+        run: terraform init -input=false -backend-config="$RUNNER_TEMP/backend.tfbackend"
+      - name: Plan
+        run: terraform plan -input=false -lock-timeout=5m

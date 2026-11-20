@@ -1,7 +1,7 @@
 # 📘 FS-020: Ground control Workspace and configuration
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ FS-019: Mission reports](FS-019-mission-reports.md) · 📄 **Page 24 / 108** · [FS-021: Ground control monitoring ▶️](FS-021-ground-control-monitoring.md)
+> [🏠 Index](../../README.md) · [◀️ FS-019: Mission reports](FS-019-mission-reports.md) · 📄 **Page 24 / 120** · [FS-021: Ground control monitoring ▶️](FS-021-ground-control-monitoring.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -104,5 +104,5 @@ Settled with the product owner ([interview](../../../research/interview.md)).
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ FS-019: Mission reports](FS-019-mission-reports.md) · 📄 **Page 24 / 108** · [FS-021: Ground control monitoring ▶️](FS-021-ground-control-monitoring.md)
+> [🏠 Index](../../README.md) · [◀️ FS-019: Mission reports](FS-019-mission-reports.md) · 📄 **Page 24 / 120** · [FS-021: Ground control monitoring ▶️](FS-021-ground-control-monitoring.md)
 <!-- /spec:nav-bottom -->

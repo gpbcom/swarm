@@ -1,7 +1,7 @@
 # 📘 FS-013: Light shows
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ FS-012: Operators, deployment and languages](FS-012-operators-deployment-and-languages.md) · 📄 **Page 17 / 108** · [FS-014: Agriculture ▶️](FS-014-agriculture.md)
+> [🏠 Index](../../README.md) · [◀️ FS-012: Operators, deployment and languages](FS-012-operators-deployment-and-languages.md) · 📄 **Page 17 / 120** · [FS-014: Agriculture ▶️](FS-014-agriculture.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -86,5 +86,5 @@ Settled with the product owner ([interview](../../../research/interview.md)).
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ FS-012: Operators, deployment and languages](FS-012-operators-deployment-and-languages.md) · 📄 **Page 17 / 108** · [FS-014: Agriculture ▶️](FS-014-agriculture.md)
+> [🏠 Index](../../README.md) · [◀️ FS-012: Operators, deployment and languages](FS-012-operators-deployment-and-languages.md) · 📄 **Page 17 / 120** · [FS-014: Agriculture ▶️](FS-014-agriculture.md)
 <!-- /spec:nav-bottom -->

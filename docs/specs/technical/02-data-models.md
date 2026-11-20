@@ -1,7 +1,7 @@
 # 🧱 Data models
 
 <!-- spec:nav-top -->
-> [🏠 Index](../README.md) · [◀️ Architecture](01-architecture.md) · 📄 **Page 86 / 108** · [Storage ▶️](03-storage.md)
+> [🏠 Index](../README.md) · [◀️ Architecture](01-architecture.md) · 📄 **Page 97 / 120** · [Storage ▶️](03-storage.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -38,7 +38,8 @@
 | fleet | `Drone`, `DroneModel`, `Payload`, `Battery`, `Dock`, `FieldKit`, `MaintenanceRecord`, `CompatibilityTest` |
 | processing | `ProcessingTask`, `Deliverable`, `Defect`, `DetectionModel` |
 | flight-engine | `TelemetryFrame`, `SquadFrame`, `Command`, `Alert`, `FlightLogEntry` |
-| agents | `Proposal`, `AgentSession`, `Delegation` |
+| agents | `Proposal`, `AgentSession`, `Delegation`, `AssistantPermission`, `AssistantActivity`, `Trigger`, `Conversation`, `KnowledgeDocument`, `AssistantBudget` |
+| erp (adapter in the `agents` service) | `ErpLink` (the ERP of an Operator and its credentials' name in Vault), `ErpOrderRef` (a Manufacturing order or Purchase order sent to the ERP, with its number and state) |
 | evidence | `EvidenceRecord`, `AnchorReceipt` |
 | notifier | `Notification`, `DeliveryAttempt` |
 | gateway | `Subscription` (live data), `ApiToken` |
@@ -118,5 +119,5 @@ All features; in particular [📘 FS-001](../functional/features/FS-001-mission-
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../README.md) · [◀️ Architecture](01-architecture.md) · 📄 **Page 86 / 108** · [Storage ▶️](03-storage.md)
+> [🏠 Index](../README.md) · [◀️ Architecture](01-architecture.md) · 📄 **Page 97 / 120** · [Storage ▶️](03-storage.md)
 <!-- /spec:nav-bottom -->

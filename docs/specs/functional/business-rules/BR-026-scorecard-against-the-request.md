@@ -1,7 +1,7 @@
 # 📏 BR-026: Scorecard against the request
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ BR-025: On-site changes are checked again](BR-025-on-site-changes-are-checked-again.md) · 📄 **Page 82 / 108** · [BR-027: The Pilot's attention is preserved ▶️](BR-027-the-pilot-s-attention-is-preserved.md)
+> [🏠 Index](../../README.md) · [◀️ BR-025: On-site changes are checked again](BR-025-on-site-changes-are-checked-again.md) · 📄 **Page 88 / 120** · [BR-027: The Pilot's attention is preserved ▶️](BR-027-the-pilot-s-attention-is-preserved.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Type:** Computation · **Updated:** 2026-11-18
@@ -49,5 +49,5 @@ The Client asked for a result, not for a flight. The Scorecard shows, criterion 
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ BR-025: On-site changes are checked again](BR-025-on-site-changes-are-checked-again.md) · 📄 **Page 82 / 108** · [BR-027: The Pilot's attention is preserved ▶️](BR-027-the-pilot-s-attention-is-preserved.md)
+> [🏠 Index](../../README.md) · [◀️ BR-025: On-site changes are checked again](BR-025-on-site-changes-are-checked-again.md) · 📄 **Page 88 / 120** · [BR-027: The Pilot's attention is preserved ▶️](BR-027-the-pilot-s-attention-is-preserved.md)
 <!-- /spec:nav-bottom -->

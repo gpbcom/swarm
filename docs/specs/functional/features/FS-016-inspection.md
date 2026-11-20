@@ -1,7 +1,7 @@
 # 📘 FS-016: Inspection
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ FS-015: Patrol](FS-015-patrol.md) · 📄 **Page 20 / 108** · [FS-017: Mission assistant ▶️](FS-017-mission-assistant.md)
+> [🏠 Index](../../README.md) · [◀️ FS-015: Patrol](FS-015-patrol.md) · 📄 **Page 20 / 120** · [FS-017: Mission assistant ▶️](FS-017-mission-assistant.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -85,5 +85,5 @@ Settled with the product owner ([interview](../../../research/interview.md)).
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ FS-015: Patrol](FS-015-patrol.md) · 📄 **Page 20 / 108** · [FS-017: Mission assistant ▶️](FS-017-mission-assistant.md)
+> [🏠 Index](../../README.md) · [◀️ FS-015: Patrol](FS-015-patrol.md) · 📄 **Page 20 / 120** · [FS-017: Mission assistant ▶️](FS-017-mission-assistant.md)
 <!-- /spec:nav-bottom -->

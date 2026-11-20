@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <title>UC-031 OK: Action done and recorded</title>
+  <link rel="stylesheet" href="../visual-identity.css">
+  <link rel="stylesheet" href="../components.css">
+</head>
+<body>
+<div class="window">
+  <header class="titlebar"><span class="app">⚙️ Swarm</span><span class="screen-title">Back office · Aerowing Services</span><span class="spacer"></span><span class="badge persona">👤 Fleet maintainer</span></header>
+  <div class="layout">
+    <nav class="sidebar">
+      <span class="nav-item active">🛸 Fleet</span>
+      <span class="nav-item">📜 Authorisations</span>
+      <span class="nav-item">📦 Deliverables</span>
+      <span class="nav-item">🔏 Evidence</span>
+      <span class="nav-item">👥 People</span>
+      <span class="nav-item">🔧 Settings</span>
+    </nav>
+    <main class="content">
+      <div class="tabs"><span class="tab active">🛸 Drones</span><span class="tab">Drone models</span><span class="tab">Payloads</span><span class="tab">Batteries</span></div>
+      <div class="banner success">✅ Charlie's maintenance is scheduled on 1 December. Charlie stays Ready until then.</div>
+      <div class="split">
+        <section class="card stack">
+          <table class="table">
+            <tr><th>Drone</th><th>Drone model</th><th>Payload</th><th>Maintenance</th><th>State</th></tr>
+            <tr><td>🛸 Alpha</td><td>X500</td><td>Thermal camera</td><td>Not due</td><td><span class="badge success">🔄 Drone: Ready</span></td></tr>
+            <tr><td>🛸 Bravo</td><td>X500</td><td>Thermal camera</td><td>Not due</td><td><span class="badge success">🔄 Drone: Ready</span></td></tr>
+            <tr><td>🛸 <strong>Charlie</strong></td><td>X500</td><td>➖</td><td><span class="badge success">✅ Scheduled 1 December</span></td><td><span class="badge success">🔄 Drone: Ready</span></td></tr>
+            <tr><td>🛸 Echo</td><td>X500</td><td>➖</td><td>Not due</td><td><span class="badge success">🔄 Drone: Ready</span></td></tr>
+          </table>
+          <span class="hint">Flight hours and maintenance intervals are sample values.</span>
+        </section>
+        <aside class="card panel">
+          <div class="row"><h2>💬 Assistant</h2><span class="spacer"></span><span class="badge system">⚙️ Assistant</span></div>
+          <div class="list">
+            <div class="list-item hint">🗃️ Assistant activity</div>
+            <div class="list-item">Request<span class="spacer"></span><span>Schedule Charlie's maintenance on 1 December.</span></div>
+            <div class="list-item">Assistant permission<span class="spacer"></span><span class="badge entity">🗃️ Schedule a maintenance: Propose</span></div>
+            <div class="list-item">Accepted by<span class="spacer"></span><span>👤 Fleet maintainer</span></div>
+            <div class="list-item">Sources<span class="spacer"></span><span>Flight logs of Charlie</span></div>
+            <div class="list-item"><span class="spacer"></span><span>Knowledge document: Maintenance procedure</span></div>
+          </div>
+          <span class="spacer"></span>
+          <div class="row"><span class="input muted spacer">Ask the Assistant</span><span class="button primary">Send</span></div>
+        </aside>
+      </div>
+    </main>
+  </div>
+  <footer class="statusbar"><span>🗃️ Aerowing Services</span><span>Cloud</span><span>💬 Conversation kept</span></footer>
+</div>
+</body>
+</html>

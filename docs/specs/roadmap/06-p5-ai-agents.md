@@ -1,7 +1,7 @@
 # 🛣️ P5: AI agents, MCP and A2A
 
 <!-- spec:nav-top -->
-> [🏠 Index](../README.md) · [◀️ P4: Agriculture](05-p4-agriculture.md) · 📄 **Page 101 / 108** · [P6: Light shows ▶️](07-p6-light-shows.md)
+> [🏠 Index](../README.md) · [◀️ P4: Agriculture](05-p4-agriculture.md) · 📄 **Page 112 / 120** · [P6: Light shows ▶️](07-p6-light-shows.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Sprints:** S36 to S43 · **Dates:** 8 May 2028 to 25 Aug 2028 · **Tickets:** about 30, plus one slot reserved for the Patrol beta
@@ -34,6 +34,13 @@ At the end of P5, on 25 August 2028 (milestone M5, AI agents in beta), the desig
 - **Serving**: the `agents` service runs as three Kubernetes Deployments, `agents-mcp`, `agents-a2a` and `agents-worker`, each behind its own Kubernetes Service and scaled by KEDA, as decided in [💬 Agents, MCP and A2A](../technical/04-engine.md#agents) (decision T39).
 - **LLM provider**: every agent runs on the [🔤 LLM provider](../glossary.md#term-llm-provider) and models the Operator chose: Claude models by default in the cloud, an open-weight model on the Operator's own servers on premises.
 
+**Second part of P5, in two steps.** S44 to S48, milestone M5b "Assistant in beta" on 17 November 2028: the front door, its permissions and its oversight. S53 to S56, in 2029, milestone M5c "Assistant complete" on 23 February 2029: its channels, Connectors, the ERP and its beta. The three agents become the specialists of one [⚙️ Assistant](../glossary.md#sys-assistant), the front door of every person ([📘 FS-023: AI Assistant](../functional/features/FS-023-ai-assistant.md), [📘 FS-024: ERP and Squad shortfall](../functional/features/FS-024-erp-and-squad-shortfall.md)):
+
+- **Everywhere:** a panel in the Mission studio, Ground control, the Back office and the Client portal, aware of the screen; by voice in the four languages; from a mobile phone; from Slack, Microsoft Teams and e-mail.
+- **Every action:** every action of Swarm and of each [🔤 Connector](../glossary.md#term-connector) is a tool of the Assistant, within the [🗃️ Assistant permission](../glossary.md#ent-assistant-permission) of the person: Off, Read, Propose or Act, set in layers, Propose by default ([📏 BR-028](../functional/business-rules/BR-028-assistant-permissions-are-layered.md)); [🔤 Flight-critical acts](../glossary.md#term-flight-critical-act) at Act only under a Pilot on duty ([📏 BR-029](../functional/business-rules/BR-029-flight-critical-acts-need-a-pilot-on-duty.md)).
+- **Triggers, memory and oversight:** events and schedules start it; it keeps each person's Conversations and cites the Operator's Knowledge documents; every act is in the Assistant activity, can be explained, and undone where possible; a monthly [🔤 Assistant budget](../glossary.md#term-assistant-budget) per Operator ([📏 BR-030](../functional/business-rules/BR-030-the-assistant-stays-within-its-budget.md)).
+- **Connectors and the ERP:** MCP and A2A connectors, REST APIs and webhooks, office tools, GIS, payments and IoT; the ERP port with Simple-ERP first, and the Squad shortfall covered through the [⚙️ ERP](../glossary.md#sys-erp) ([📏 BR-031](../functional/business-rules/BR-031-a-squad-shortfall-is-covered-through-the-erp.md)).
+
 ## <a id="scope"></a>🧺 Scope
 
 **Features**
@@ -45,6 +52,8 @@ At the end of P5, on 25 August 2028 (milestone M5, AI agents in beta), the desig
 | [📘 FS-019: Mission reports](../functional/features/FS-019-mission-reports.md) | The AI draft: the common skeleton, the sections per Activity (Inspection, Agriculture, Patrol; Light show added in [🛣️ P6](07-p6-light-shows.md)), changes in a conversation, publication by a person. The manual report template of [🛣️ P2](03-p2-inspection-product.md) stays as the fallback |
 | [📘 FS-021: Ground control monitoring](../functional/features/FS-021-ground-control-monitoring.md) | The Co-pilot's explanation in the Alerts area, next to the actions available |
 | [📘 FS-012: Operators, deployment and languages](../functional/features/FS-012-operators-deployment-and-languages.md) | Only its LLM provider part: the provider and models of each Operator, set at creation with the cloud default, now used by the agents and changeable in the Back office; the rest of FS-012 comes in [🛣️ P7](08-p7-scale-and-reach.md) |
+| [📘 FS-023: AI Assistant](../functional/features/FS-023-ai-assistant.md) | All of it, in the second part: the front door, its permissions, memory, oversight and budgets by M5b (S44 to S48); triggers, channels, Connectors and offline mode by M5c (S53 to S56) |
+| [📘 FS-024: ERP and Squad shortfall](../functional/features/FS-024-erp-and-squad-shortfall.md) | The ERP port, the Simple-ERP adapter and the Squad shortfall; the flows of Clients and Sites, quotes and invoices, Fleet costs and staff time as the port's operations, their use cases still to write |
 
 **Use cases**
 
@@ -54,6 +63,10 @@ At the end of P5, on 25 August 2028 (milestone M5, AI agents in beta), the desig
 | [🎬 UC-022: Receive the Mission report](../functional/use-cases/UC-022-receive-the-mission-report.md) | All of it, with the Report writer drafting; alternatives A1 to A3; five screens moved to 📸 Screenshot |
 | [🎬 UC-004: Supervise a Squad and approve a Re-plan](../functional/use-cases/UC-004-supervise-a-squad-and-approve-a-re-plan.md) | The Co-pilot part: the Re-plan proposed by the Co-pilot with its reasons, on top of the Re-plans the Squad proposes since [🛣️ P1](02-p1-first-flight.md) |
 | [🎬 UC-026: Handle an Alert](../functional/use-cases/UC-026-handle-an-alert.md) | The Co-pilot part: step 2 (the explanation and the proposed actions) and alternative A4 (critical Alerts spoken) |
+| [🎬 UC-031: Ask the Assistant](../functional/use-cases/UC-031-ask-the-assistant.md) | All of it, alternatives A1 to A8, six screens moved to 📸 Screenshot |
+| [🎬 UC-032: Set the Assistant permissions](../functional/use-cases/UC-032-set-the-assistant-permissions.md) | All of it, alternatives A1 to A4 |
+| [🎬 UC-033: Cover a Squad shortfall through the ERP](../functional/use-cases/UC-033-cover-a-squad-shortfall-through-the-erp.md) | All of it, alternatives A1 to A7, once Simple-ERP has its API ([🤝 P-10](11-hardware-and-partners.md#p-10)) |
+| [🎬 UC-034: Let the Assistant hold a Squad](../functional/use-cases/UC-034-let-the-assistant-hold-a-squad.md) | All of it, alternatives A1 to A7 |
 
 **Business rules**
 
@@ -66,6 +79,11 @@ At the end of P5, on 25 August 2028 (milestone M5, AI agents in beta), the desig
 | [📏 BR-008: Operator isolation](../functional/business-rules/BR-008-operator-isolation.md) | One MCP endpoint and one set of Agent Cards per Operator; agent tools read only the Operator's NATS subjects and rows |
 | [📏 BR-012: Pilot override always available](../functional/business-rules/BR-012-pilot-override-always-available.md) | While a Co-pilot proposal waits, the Pilot can still Hold, take manual control or abort; none of these is exposed to an Outside agent |
 | [📏 BR-017: Every screen in four languages](../functional/business-rules/BR-017-every-screen-in-four-languages.md) | Every new screen, every spoken Alert and every Mission report in English, French, German and Spanish |
+| [📏 BR-028: Assistant permissions are layered](../functional/business-rules/BR-028-assistant-permissions-are-layered.md) | The ceiling per Operator, the levels per role, a person may only lower their own; Propose by default; replaces the fixed gate of T5.23 at M5b |
+| [📏 BR-029: Flight-critical acts need a Pilot on duty](../functional/business-rules/BR-029-flight-critical-acts-need-a-pilot-on-duty.md) | A Pilot on duty who sees the Squad, a countdown the Pilot can cancel, the Pilot accountable in the Flight log |
+| [📏 BR-030: The Assistant stays within its budget](../functional/business-rules/BR-030-the-assistant-stays-within-its-budget.md) | Warning at 80 %, read-only at 100 %, help during a flight never stops |
+| [📏 BR-031: A Squad shortfall is covered through the ERP](../functional/business-rules/BR-031-a-squad-shortfall-is-covered-through-the-erp.md) | Shortfall shown, then a Manufacturing order, a Purchase order, the earliest date or a smaller Squad |
+| [📏 BR-032: The Assistant reaches only what its person may reach](../functional/business-rules/BR-032-the-assistant-reaches-only-what-its-person-may-reach.md) | Every tool runs with the rights of its person; Clients and Site agents see only their own |
 
 **Technical pages**
 
@@ -80,6 +98,7 @@ At the end of P5, on 25 August 2028 (milestone M5, AI agents in beta), the desig
 | [🔲 Cells](../technical/07-scalability.md#cells) | Every MCP server and A2A agent behind a Kubernetes Service and scaled by KEDA |
 | [🚢 Delivery](../technical/09-deployment.md#delivery) | KEDA in every cell with its NATS JetStream and Prometheus scalers and the HTTP add-on; the `agents` chart with its three `ScaledObject` resources |
 | [🎯 Service level objectives](../technical/08-observability.md#slos) | The SLO review and the dashboards the agents are added to |
+| [🔌 Connectors and the ERP port](../technical/05-api.md#connectors) | The ERP port and its operations, Simple-ERP, MCP and A2A connectors, REST APIs and webhooks, office and chat tools, secrets in Vault |
 
 ## <a id="epics"></a>🪜 Epics
 
@@ -94,6 +113,12 @@ At the end of P5, on 25 August 2028 (milestone M5, AI agents in beta), the desig
 | E5.7 | Human gate for Outside agents | [📏 BR-021](../functional/business-rules/BR-021-ai-agents-propose-people-decide.md), [📏 BR-012](../functional/business-rules/BR-012-pilot-override-always-available.md), [📏 BR-009](../functional/business-rules/BR-009-evidence-integrity.md) | `services/gateway`, `services/missions`, `services/notifier`, `services/evidence`, `frontends/client-portal` and `frontends/ground-control` (confirmation) | T5.23, T5.24, T5.29 (3) | Gate table as code and tests; pending confirmations with push Notification and PIN; abuse and injection test set |
 | E5.9 | Patrol beta support (reserved) | [🎬 UC-018](../functional/use-cases/UC-018-respond-to-a-site-alarm.md), [🎬 UC-019](../functional/use-cases/UC-019-request-a-patrol-on-demand.md) | Whichever services and apps the Patrol beta needs fixed | T5.31 (1) | The fix, its regression test and its screenshot update, as for any ticket |
 | E5.8 | Scale proof and beta | [📏 BR-017](../functional/business-rules/BR-017-every-screen-in-four-languages.md) | `tests/load`, `deploy/environments`, Grafana dashboards | T5.30 (1) | KEDA load test of the three Deployments; dashboards and alerts; enablement for the design partner |
+| E5.10 | Assistant, the front door | [🎬 UC-031](../functional/use-cases/UC-031-ask-the-assistant.md), [📏 BR-021](../functional/business-rules/BR-021-ai-agents-propose-people-decide.md), [📏 BR-032](../functional/business-rules/BR-032-the-assistant-reaches-only-what-its-person-may-reach.md) | `services/agents` (router graph, action catalogue, memory), all four apps (the panel), `packages/ts` | T5.32 to T5.35 (4) | The router graph, the action catalogue generated from the REST resources, the panel of each app, the knowledge search: four tracks |
+| E5.11 | Assistant permissions and oversight | [🎬 UC-032](../functional/use-cases/UC-032-set-the-assistant-permissions.md), [🎬 UC-034](../functional/use-cases/UC-034-let-the-assistant-hold-a-squad.md), [📏 BR-028](../functional/business-rules/BR-028-assistant-permissions-are-layered.md), [📏 BR-029](../functional/business-rules/BR-029-flight-critical-acts-need-a-pilot-on-duty.md), [📏 BR-030](../functional/business-rules/BR-030-the-assistant-stays-within-its-budget.md) | `services/gateway`, every service that owns an action, `services/agents`, `frontends/back-office`, `frontends/ground-control` | T5.36 to T5.40 (5) | The permission check, its screens, the flight-critical countdown, the activity log with Undo and the digest, the budgets |
+| E5.12 | Channels and triggers (2029) | [🎬 UC-031](../functional/use-cases/UC-031-ask-the-assistant.md), [🎬 UC-034](../functional/use-cases/UC-034-let-the-assistant-hold-a-squad.md), [📏 BR-017](../functional/business-rules/BR-017-every-screen-in-four-languages.md) | `services/agents`, `services/notifier`, the four apps, Slack and Teams apps | T5.41 to T5.45 (5) | Voice, mobile, chat tools, triggers and the offline mode, each on its own |
+| E5.13 | Connectors (2029) | [🎬 UC-031](../functional/use-cases/UC-031-ask-the-assistant.md), [📏 BR-032](../functional/business-rules/BR-032-the-assistant-reaches-only-what-its-person-may-reach.md) | `services/agents` (connector registry), `frontends/back-office`, Vault | T5.46 to T5.48 (3) | The registry first, then office tools and the GIS, payment and IoT connectors side by side |
+| E5.14 | ERP and Squad shortfall (2029) | [🎬 UC-033](../functional/use-cases/UC-033-cover-a-squad-shortfall-through-the-erp.md), [📏 BR-031](../functional/business-rules/BR-031-a-squad-shortfall-is-covered-through-the-erp.md) | `services/agents` (ERP port and Simple-ERP adapter), `services/planner`, `services/fleet`, `frontends/mission-studio` | T5.49 to T5.52 (4) | The port with its stand-in, Squad sizing, the adapter, the shortfall proposals |
+| E5.15 | Assistant beta (2029) | [📏 BR-017](../functional/business-rules/BR-017-every-screen-in-four-languages.md) | `tests/load`, evaluation sets, dashboards | T5.53, T5.54 (2) | Evaluation and injection sets, load test, enablement for the design partner; milestone M5b |
 
 ## <a id="sprints"></a>🗓️ Sprint plan
 
@@ -109,6 +134,18 @@ P5 starts while [🛣️ P4: Agriculture](05-p4-agriculture.md) finishes its spr
 | S41 | 17 to 28 Jul 2028 | T5.14 Report evaluation set; T5.15 Co-pilot graph on aggregates; T5.16 Co-pilot Re-plan proposals; T5.17 Explanations in Ground control; T5.18 Spoken Alerts; T5.19 Co-pilot evaluation on Replays | The Co-pilot reads the 1-second aggregates of a flying Mission; the Pilot gets its explanation and Re-plan in Ground control; critical Alerts are spoken | [🎬 UC-004](../functional/use-cases/UC-004-supervise-a-squad-and-approve-a-re-plan.md) with the Co-pilot on the simulated Squad, then on the weekly real flight of the staging test field |
 | S42 | 31 Jul to 11 Aug 2028 | T5.20 MCP server tools; T5.21 OAuth 2.1 delegation; T5.22 `agents-mcp` Deployment; T5.23 Human gate in the gateway and the missions service; T5.24 Confirmation on the person's own device; T5.25 A2A Agent Cards and tasks | An Outside agent connects through MCP as the delegate of a person; a launch it asks for waits for the person's PIN | An MCP client acting for Sam Carter asks for a launch: `202 Accepted`, push Notification on Sam's phone, PIN, launch |
 | S43 | 14 to 25 Aug 2028 | T5.26 `agents-a2a` Deployment; T5.27 Agent rate limits and ledger; T5.28 Registered outside agents; T5.29 Abuse and injection tests; T5.30 KEDA load test and beta enablement | MCP and A2A enabled for the design partner; the three Deployments hold their load test | The [end-of-phase demonstration](#demo); milestone M5 |
+| S44 | 28 Aug to 8 Sep 2028 | T5.33 Action catalogue | Every action of Swarm is a tool of the Assistant, run with the rights of its person | A tool asked for another Client's Mission is refused |
+| S45 | 11 to 22 Sep 2028 | T5.32 Assistant router graph; T5.36 Assistant permissions | Every action checked against the person's Assistant permission; the router hands work to the specialists | A Fleet maintainer asks a question and gets a proposal through the router, in the dev cell |
+| S46 | 25 Sep to 6 Oct 2028 | T5.34 Assistant panel in every app; T5.37 Permission screens | The panel in the four apps, aware of the screen; the permission screens | [🎬 UC-031](../functional/use-cases/UC-031-ask-the-assistant.md) and [🎬 UC-032](../functional/use-cases/UC-032-set-the-assistant-permissions.md) end to end |
+| S47 | 9 to 20 Oct 2028 | T5.35 Knowledge and memory; T5.38 Flight-critical acts | Answers cite the Operator's documents; the Assistant holds a Squad under a Pilot on duty | [🎬 UC-034](../functional/use-cases/UC-034-let-the-assistant-hold-a-squad.md) on the simulated Squad, with the countdown and the cancel |
+| S48 | 23 Oct to 3 Nov 2028 | T5.39 Activity log, Undo and digest; T5.40 Assistant budgets | Every act explained and undone where possible; the budgets hold | The [M5b demonstration](#demo), given at the end of S49; milestone M5b on 17 November 2028 |
+| S53 | 1 to 12 Jan 2029 | T5.41 Voice; T5.44 Triggers; T5.46 Connector registry; T5.49 ERP port | The Assistant by voice and on events; Connectors registered; the ERP port against its stand-in | A question by voice; the weather Trigger starting a Hold |
+| S54 | 15 to 26 Jan 2029 | T5.42 Mobile; T5.43 Chat tools; T5.45 Offline mode; T5.50 Squad sizing and shortfall | The Assistant on a phone, in Slack and Teams, and offline; the Squad shortfall shown in Design | A Site agent asks from a phone; Léa Martin sees the shortfall of M-2026-0412 |
+| S55 | 29 Jan to 9 Feb 2029 | T5.47 Office tools; T5.48 GIS, payment and IoT connectors; T5.51 Simple-ERP adapter; T5.52 Shortfall proposals | The ERP covers a Squad shortfall; the Connectors reach office tools, GIS, payments and IoT | [🎬 UC-033](../functional/use-cases/UC-033-cover-a-squad-shortfall-through-the-erp.md) end to end with Simple-ERP |
+| S56 | 12 to 23 Feb 2029 | T5.53 Assistant evaluations and injection tests; T5.54 Assistant beta | The whole Assistant used by the design partner within its permissions | The [M5c demonstration](#demo); milestone M5c |
+
+**Second part, in two steps.** S44 to S48: the 9 tickets of the core (E5.10, E5.11) beside [🛣️ P6](07-p6-light-shows.md) and [🛣️ P7](08-p7-scale-and-reach.md), 1 or 2 per sprint, so about 7 to 8 tickets per sprint in all, watched through [🎲 R-01](12-risks.md#r-01); milestone M5b at the end of S49. S53 to S56, in 2029, after general availability: the 14 tickets of the channels, Connectors, ERP and beta (E5.12 to E5.15), about 4 per sprint; milestone M5c. The ERP tickets need the Simple-ERP API, committed for 25 September 2028 ([🤝 P-10](11-hardware-and-partners.md#p-10)).
+
 
 **Tickets in detail**
 
@@ -145,6 +182,29 @@ P5 starts while [🛣️ P4: Agriculture](05-p4-agriculture.md) finishes its spr
 | T5.29 | S43 | E5.7 | Abuse and injection tests: instructions hidden in Mission names, Client requests or Defect notes; replayed confirmations; tokens of another Operator; attempts to reach abort or manual control | The set runs in CI; every case is refused and recorded |
 | T5.30 | S43 | E5.8 | KEDA load test of the three Deployments in staging with k6 and a burst of runs; dashboards and alerts for the agents; four languages checked; MCP and A2A enabled for the design partner in its OVHcloud cell | The [exit criteria](#exit) pass; milestone M5 |
 | T5.31 | S39 | E5.9 | Reserved slot for the Patrol beta (M3, 30 June 2028): the fixes its Dock site raises, chosen by the person at the start of S39 | Each fix merged with its test before M3; the slot is not used for P5 work |
+| T5.32 | S45 | E5.10 | Assistant router graph in `services/agents`: the front door every client talks to; answers itself or hands the run to the Mission assistant, Co-pilot or Report writer in the same `Conversation`; Conversations kept for the retention the Operator sets | A question goes to the right specialist and back in one Conversation; step 2 and A3 of [🎬 UC-031](../functional/use-cases/UC-031-ask-the-assistant.md) |
+| T5.33 | S44 | E5.10 | Action catalogue: every REST resource and command of Swarm as a typed tool, generated and grouped by area; each runs with the rights of its person ([📏 BR-032](../functional/business-rules/BR-032-the-assistant-reaches-only-what-its-person-may-reach.md)) | Every endpoint has its tool; a tool asked for another Client's Mission is refused (A7 of [🎬 UC-031](../functional/use-cases/UC-031-ask-the-assistant.md)) |
+| T5.34 | S46 | E5.10 | The Assistant panel in the Mission studio, Ground control, the Back office and the Client portal, aware of the screen the person is on; the screens of [🎬 UC-031](../functional/use-cases/UC-031-ask-the-assistant.md) to 📸 Screenshot | The six screens of [🎬 UC-031](../functional/use-cases/UC-031-ask-the-assistant.md) captured from the application in both modes |
+| T5.35 | S47 | E5.10 | Knowledge and memory: the Operator's Knowledge documents searched and cited, Swarm's user guide and the regulations of each Jurisdiction; learned preferences per person, visible and erasable | Every answer that uses a document cites it; a person erases a preference and it is not used again |
+| T5.36 | S45 | E5.11 | `AssistantPermission`: Off, Read, Propose or Act per action and role, ceiling per Operator, a person may only lower; checked in the gateway and the owning services; Propose by default; replaces the fixed gate of T5.23 ([📏 BR-028](../functional/business-rules/BR-028-assistant-permissions-are-layered.md), [📏 BR-021](../functional/business-rules/BR-021-ai-agents-propose-people-decide.md)) | Every example of BR-021 and BR-028 passes through the panel, MCP and A2A |
+| T5.37 | S46 | E5.11 | Permission screens: the ceiling in Swarm administration, **🔧 Settings › Assistant** per role in the Back office, a person's own settings ([🎬 UC-032](../functional/use-cases/UC-032-set-the-assistant-permissions.md)) | The five screens of [🎬 UC-032](../functional/use-cases/UC-032-set-the-assistant-permissions.md) captured from the application; A1 and A2 refused |
+| T5.38 | S47 | E5.11 | Flight-critical acts at Act: a Pilot on duty who has the Squad open in Ground control, the announcement spoken with its countdown (10 seconds by default, an Operator setting) and **Cancel**, the Pilot accountable in the Flight log ([📏 BR-029](../functional/business-rules/BR-029-flight-critical-acts-need-a-pilot-on-duty.md), [🎬 UC-034](../functional/use-cases/UC-034-let-the-assistant-hold-a-squad.md)) | Every example of BR-029 passes on the simulated Squad; the four screens of [🎬 UC-034](../functional/use-cases/UC-034-let-the-assistant-hold-a-squad.md) captured |
+| T5.39 | S48 | E5.11 | `AssistantActivity`: every act and proposal with its person, permission, trigger, sources and result; explain on demand; **Undo** for 5 minutes by default (an Operator setting) for reversible acts, a warning before irreversible ones; the daily digest in-app, by e-mail and in chat | An act at Act is undone within its time; the digest lists the day's acts and proposals of each person |
+| T5.40 | S48 | E5.11 | Assistant budgets: tokens and cost metered per call, person and Operator; usage and cost in the Back office; warning at 80 %, read-only at 100 %, help during a flight never stops ([📏 BR-030](../functional/business-rules/BR-030-the-assistant-stays-within-its-budget.md)) | Every example of BR-030 passes; a flight keeps its help with the budget spent |
+| T5.41 | S53 | E5.12 | Voice: speech in and out in the four languages, in the panel and in Ground control ([📏 BR-017](../functional/business-rules/BR-017-every-screen-in-four-languages.md)) | A question asked by voice in each language gets its answer spoken in that language |
+| T5.42 | S54 | E5.12 | The Assistant from a mobile phone, with push Notifications, for Site agents and Pilots on duty | A Site agent asks for a Patrol from a phone and follows it |
+| T5.43 | S54 | E5.12 | Chat tools: Slack and Microsoft Teams apps and e-mail, to talk to the Assistant and for it to post, with the person's identity and permissions | A question asked in Slack gets the same answer as in the panel; an act asked in Teams follows the person's permission |
+| T5.44 | S53 | E5.12 | Triggers: events read from NATS (Alarms, Alerts, Mission requests, failed checks, weather) and schedules set up by a person start runs on `agents-worker` for that person (step 1 of [🎬 UC-034](../functional/use-cases/UC-034-let-the-assistant-hold-a-squad.md)) | The weather Trigger starts the Hold of [🎬 UC-034](../functional/use-cases/UC-034-let-the-assistant-hold-a-squad.md); a weekly schedule runs on time |
+| T5.45 | S54 | E5.12 | Offline mode: an open-weight model on the Ground control machine answers and acts within the same permissions; cloud work waits for the link | With the link cut, the Pilot gets answers and the Hold of [🎬 UC-034](../functional/use-cases/UC-034-let-the-assistant-hold-a-squad.md) still works; cloud requests run when the link returns |
+| T5.46 | S53 | E5.13 | Connector registry in the Back office: MCP servers and A2A agents (beyond T5.28), REST APIs and webhooks with their URL, authentication and actions; each action in the catalogue with its permission; credentials in Vault | A registered REST API becomes tools of the Assistant at Propose by default; its credential never leaves Vault |
+| T5.47 | S55 | E5.13 | Office tools: the person's e-mail, calendar and documents in Microsoft 365 and Google Workspace, after their consent | The Assistant reads a person's calendar only after consent, and drafts an e-mail at Propose |
+| T5.48 | S55 | E5.13 | GIS, payment and asset or IoT connectors: one of each, chosen with the design partner in S53 | Each one reached by the Assistant with its permission and tested against its real service or its sandbox |
+| T5.49 | S53 | E5.14 | ERP port: the contract and its stand-in ERP for tests (Clients and Sites, quotes and invoices, assets and costs, staff time, stock and lead times, Manufacturing orders and Purchase orders); `ErpLink`, `ErpOrderRef` | Every operation of the port passes against the stand-in |
+| T5.50 | S54 | E5.14 | Squad sizing in **🖊️ Design**: how many Drones of which types the work needs and the flight profile from that; the Squad shortfall against the Fleet on the date ([📏 BR-031](../functional/business-rules/BR-031-a-squad-shortfall-is-covered-through-the-erp.md), steps 1 and 2 of [🎬 UC-033](../functional/use-cases/UC-033-cover-a-squad-shortfall-through-the-erp.md)) | Example 1 of BR-031 passes; screens A1 and A2 of [🎬 UC-033](../functional/use-cases/UC-033-cover-a-squad-shortfall-through-the-erp.md) captured |
+| T5.51 | S55 | E5.14 | Simple-ERP adapter of the ERP port through its API, and through MCP and A2A; the flows of Clients (master: the ERP) and Sites (master: Swarm), draft quotes priced and sent by the ERP, invoices, Fleet costs, and staff time (flight time, time on the Site, design time, hours entered) | Every operation of the port passes against Simple-ERP in staging |
+| T5.52 | S55 | E5.14 | Shortfall proposals: a Manufacturing order, a Purchase order of the missing parts, the earliest date, a smaller Squad; within the Assistant permissions ([🎬 UC-033](../functional/use-cases/UC-033-cover-a-squad-shortfall-through-the-erp.md)) | Every example of BR-031 and every alternative of [🎬 UC-033](../functional/use-cases/UC-033-cover-a-squad-shortfall-through-the-erp.md) passes with Simple-ERP; its screens captured |
+| T5.53 | S56 | E5.15 | Assistant evaluation set and injection tests: requests of every persona across the catalogue at every level, Flight-critical acts on Replays, instructions hidden in Knowledge documents, Connector answers and chat messages | The set runs in CI with its threshold; no injected instruction raises a permission or reaches another Client |
+| T5.54 | S56 | E5.15 | Assistant beta: load test of the front door, dashboards, the four languages checked, the whole Assistant enabled for the design partner with its permissions ([📏 BR-017](../functional/business-rules/BR-017-every-screen-in-four-languages.md)) | The M5c exit criteria are met; milestone M5c |
 
 ## <a id="demo"></a>🎤 Demo
 
@@ -159,6 +219,19 @@ Given on Friday 25 August 2028 to the design partner ([🤝 P-01](11-hardware-an
 7. **Outside agent through MCP.** An MCP client of Aerowing Services, acting for Léa, lists the Missions of the week and creates a Draft Mission: allowed, recorded with both names. Acting for Sam, it asks to launch the Mission: Swarm answers `202 Accepted`, Sam's phone shows the push Notification, he enters his PIN, and only then does the launch go ahead. It then asks to abort: the tool does not exist outside Ground control.
 8. **A2A.** An outside A2A client reads the Agent Card of the Report writer and delegates a report draft; the draft comes back as an artefact and stays a draft until Léa publishes it.
 9. **Scale.** The load test report: `agents-mcp` and `agents-a2a` scaled from 2 pods under a k6 burst and back, `agents-worker` from 0 on a burst of runs and back to 0, no request lost during scale-in, and the cost and latency of every model call on the dashboard.
+
+**M5b demonstration, Friday 17 November 2028**, to the design partner in its OVHcloud cell:
+
+1. **Ask.** The Fleet maintainer asks the Assistant in the Back office which Drones will not be Ready on 3 December; it answers with its sources, then proposes Charlie's maintenance, which the Fleet maintainer accepts ([🎬 UC-031](../functional/use-cases/UC-031-ask-the-assistant.md)).
+2. **Permissions.** The Swarm administrator raises two ceilings; Léa Martin sets the roles; Sam Carter lowers "Hold" for himself, then raises it back to the role level; an Act above the ceiling is refused ([🎬 UC-032](../functional/use-cases/UC-032-set-the-assistant-permissions.md)).
+3. **Flight.** In the Simulator, gusts beyond the limits: the Assistant announces a Hold with its countdown; Sam lets it run, and the Flight log names him accountable. A second time, he cancels ([🎬 UC-034](../functional/use-cases/UC-034-let-the-assistant-hold-a-squad.md)).
+4. **Oversight and cost.** The Assistant activity of the day, an act undone, the daily digest, and the budget dashboard of Aerowing Services.
+
+**M5c demonstration, Friday 23 February 2029:**
+
+1. **Shortfall.** Léa Martin sizes M-2026-0412 at three Drones; Swarm shows the shortfall; the Assistant reads Simple-ERP and proposes a Manufacturing order, which Léa accepts ([🎬 UC-033](../functional/use-cases/UC-033-cover-a-squad-shortfall-through-the-erp.md)).
+2. **Everywhere.** The same question by voice, from a phone and from Slack; then with the link cut, offline.
+3. **Connectors.** A registered REST API, a calendar after consent, a GIS layer and an IoT reading, each within its Assistant permission.
 
 ## <a id="exit"></a>🚪 Exit criteria
 
@@ -178,6 +251,21 @@ P5 closes at milestone M5 when every box below is ticked.
 - [ ] Every new screen, spoken Alert and Mission report is available in English, French, German and Spanish ([📏 BR-017](../functional/business-rules/BR-017-every-screen-in-four-languages.md)).
 - [ ] `python3 .claude/skills/write-specs/scripts/specs.py check` prints nothing.
 - [ ] MCP and A2A are enabled for the design-partner Operator in its OVHcloud cell, and its Mission planners and Pilots have used the three agents on real Missions.
+
+**M5b** closes the first step of the second part when every box below is ticked.
+
+- [ ] The acceptance criteria of [📘 FS-023](../functional/features/FS-023-ai-assistant.md#acceptance) about asking, permissions, Flight-critical acts and budgets pass.
+- [ ] [🎬 UC-031](../functional/use-cases/UC-031-ask-the-assistant.md), [🎬 UC-032](../functional/use-cases/UC-032-set-the-assistant-permissions.md) and [🎬 UC-034](../functional/use-cases/UC-034-let-the-assistant-hold-a-squad.md) pass end to end in Playwright against the real images, with every alternative of their core (voice, mobile, chat and offline come at M5c); their screens moved to 📸 Screenshot.
+- [ ] Every example of [📏 BR-021](../functional/business-rules/BR-021-ai-agents-propose-people-decide.md), [📏 BR-028](../functional/business-rules/BR-028-assistant-permissions-are-layered.md), [📏 BR-029](../functional/business-rules/BR-029-flight-critical-acts-need-a-pilot-on-duty.md), [📏 BR-030](../functional/business-rules/BR-030-the-assistant-stays-within-its-budget.md) and [📏 BR-032](../functional/business-rules/BR-032-the-assistant-reaches-only-what-its-person-may-reach.md) has a passing test through the panel, MCP and A2A.
+- [ ] The design partner's people have used the Assistant panel on their real work, within the permissions their Operator set.
+
+**M5c** closes P5 when every box below is ticked.
+
+- [ ] Every acceptance criterion of [📘 FS-023](../functional/features/FS-023-ai-assistant.md#acceptance) and of [📘 FS-024](../functional/features/FS-024-erp-and-squad-shortfall.md#acceptance) passes.
+- [ ] [🎬 UC-033](../functional/use-cases/UC-033-cover-a-squad-shortfall-through-the-erp.md) passes end to end with Simple-ERP, with every alternative; its screens moved to 📸 Screenshot; every example of [📏 BR-031](../functional/business-rules/BR-031-a-squad-shortfall-is-covered-through-the-erp.md) passes.
+- [ ] The Assistant evaluation set and the injection tests pass in CI with the thresholds the person set.
+- [ ] Every new screen and every spoken answer is in English, French, German and Spanish ([📏 BR-017](../functional/business-rules/BR-017-every-screen-in-four-languages.md)).
+- [ ] Simple-ERP has covered one real Squad shortfall of the design partner.
 
 ## <a id="dependencies"></a>⛓️ Dependencies
 
@@ -200,6 +288,7 @@ P5 closes at milestone M5 when every box below is ticked.
 | [🤝 P-01](11-hardware-and-partners.md#p-01) Design-partner Operator | S39 to S43 | Uses the agents on real Missions; its Mission planners and Pilots give the feedback for the evaluation sets |
 | [🛫 C-01](10-flight-test-campaigns.md#c-01) to [🛫 C-04](10-flight-test-campaigns.md#c-04) Flight test campaigns | Before S41 | Their Flight logs feed the Co-pilot evaluation on Replays |
 | [🤝 H-08](11-hardware-and-partners.md#h-08) GPU server for the on-premises test | S46 | Not needed in P5: the open-weight model is proved in staging; the on-premises run comes in [🛣️ P7](08-p7-scale-and-reach.md) |
+| [🤝 P-10](11-hardware-and-partners.md#p-10) Simple-ERP API | S55 | T5.51 and T5.52: the ERP of [🎬 UC-033](../functional/use-cases/UC-033-cover-a-squad-shortfall-through-the-erp.md); T5.49 works against a stand-in until then |
 
 ## <a id="risks"></a>🎲 Risks
 
@@ -210,12 +299,13 @@ P5 closes at milestone M5 when every box below is ticked.
 | [🎲 R-01](12-risks.md#r-01) Review bottleneck | P5 overlaps the P4 campaign and the start of P6, and its prompts are code to review | Only 4 P5 tickets in S36 to S38, none in S38; evaluation sets give the person a score, not a transcript, to review; the human gate (T5.23, T5.24) gets a line-by-line review |
 | [🎲 R-05](12-risks.md#r-05) Design partner lost | M5 needs a partner using the agents | Every demo step also runs on the sample cast in the simulation environment, so only the partner part of M5 would slip |
 | [🎲 R-08](12-risks.md#r-08) Scope too large for 24 months | Three agents, two protocols and a gate in eight sprints | T5.28 (calling registered outside agents) and the Patrol and Agriculture report sections move first if P5 slips; the gate, the Proposal flow and the three Deployments never move |
+| [🎲 R-10](12-risks.md#r-10) AI acting on flights | From M5b the Assistant may do Flight-critical acts at Act | Only under a Pilot on duty who sees the Squad, with a countdown and a cancel (T5.38); the Fail-safes never depend on it; the injection set covers every Flight-critical act (T5.53) |
 
 ## <a id="work-split"></a>🧑‍💻 Work split
 
 **What the person does**
 
-- **Reviews** the 30 tickets, most of them from S39; reads every prompt change as code, and the human gate (T5.23, T5.24) and the Proposal flow (T5.03) line by line.
+- **Reviews** the 53 tickets, most of them from S39; reads every prompt change as code, and the human gate (T5.23, T5.24) and the Proposal flow (T5.03) line by line.
 - **Decides** the default models per agent for the cloud, the open-weight model for on premises, the evaluation thresholds and the cost and latency targets (S39), which MCP tools are exposed in the beta, and when to enable MCP and A2A for the design partner.
 - **Flies** the weekly real flight on the staging test field as the Pilot from S41, with the Co-pilot on.
 - **Partners:** opens the LLM provider accounts ([🤝 P-08](11-hardware-and-partners.md#p-08)), runs the sessions where the design partner's Mission planners and Pilots use the agents, gives the demonstration.
@@ -230,5 +320,5 @@ P5 closes at milestone M5 when every box below is ticked.
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../README.md) · [◀️ P4: Agriculture](05-p4-agriculture.md) · 📄 **Page 101 / 108** · [P6: Light shows ▶️](07-p6-light-shows.md)
+> [🏠 Index](../README.md) · [◀️ P4: Agriculture](05-p4-agriculture.md) · 📄 **Page 112 / 120** · [P6: Light shows ▶️](07-p6-light-shows.md)
 <!-- /spec:nav-bottom -->

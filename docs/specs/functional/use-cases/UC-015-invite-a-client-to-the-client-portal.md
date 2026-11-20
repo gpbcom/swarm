@@ -1,7 +1,7 @@
 # 🎬 UC-015: Invite a Client to the Client portal
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ UC-014: Connect a new Drone model](UC-014-connect-a-new-drone-model.md) · 📄 **Page 41 / 108** · [UC-016: Import and fly a Light show ▶️](UC-016-import-and-fly-a-light-show.md)
+> [🏠 Index](../../README.md) · [◀️ UC-014: Connect a new Drone model](UC-014-connect-a-new-drone-model.md) · 📄 **Page 43 / 120** · [UC-016: Import and fly a Light show ▶️](UC-016-import-and-fly-a-light-show.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -139,5 +139,5 @@ One row per state of the flow chart: every action, success and failure node. Cli
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ UC-014: Connect a new Drone model](UC-014-connect-a-new-drone-model.md) · 📄 **Page 41 / 108** · [UC-016: Import and fly a Light show ▶️](UC-016-import-and-fly-a-light-show.md)
+> [🏠 Index](../../README.md) · [◀️ UC-014: Connect a new Drone model](UC-014-connect-a-new-drone-model.md) · 📄 **Page 43 / 120** · [UC-016: Import and fly a Light show ▶️](UC-016-import-and-fly-a-light-show.md)
 <!-- /spec:nav-bottom -->

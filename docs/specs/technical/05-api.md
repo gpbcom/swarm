@@ -1,7 +1,7 @@
 # 🔌 API layer
 
 <!-- spec:nav-top -->
-> [🏠 Index](../README.md) · [◀️ Engine and services](04-engine.md) · 📄 **Page 89 / 108** · [Security ▶️](06-security.md)
+> [🏠 Index](../README.md) · [◀️ Engine and services](04-engine.md) · 📄 **Page 100 / 120** · [Security ▶️](06-security.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -18,8 +18,9 @@
 4. [🎥 Video](#video)
 5. [🔁 Webhooks](#webhooks)
 6. [💬 MCP and A2A](#mcp-a2a)
-7. [🔁 Internal calls](#internal)
-8. [🔗 Features implemented](#features)
+7. [🔌 Connectors and the ERP port](#connectors)
+8. [🔁 Internal calls](#internal)
+9. [🔗 Features implemented](#features)
 <!-- /spec:summary -->
 
 ## <a id="overview"></a>🔭 Overview
@@ -75,9 +76,19 @@ server → SquadFrame | Alert | ReplanProposed | AlarmRaised | Notification   (M
 
 - **MCP server** per Operator: tools mirror the REST resources and the Proposal flow; OAuth 2.1 with Keycloak; the token names the person and the Outside agent.
 - **A2A:** Agent Cards for the Mission assistant, the Co-pilot and the Report writer at `/.well-known/agent.json` per Operator; tasks, streaming updates and artefacts per the A2A protocol.
-- **Rights:** an Outside agent has the rights of its person; acts that need the person (signing the Pre-flight check, launching) return `202 Accepted` with a pending confirmation, which completes only when the person confirms on their device ([🔐 the human gate](06-security.md#human-gate)). Abort and manual control are not exposed outside Ground control.
+- **Rights:** an Outside agent has the rights of its person, within the Assistant permissions of that person ([📏 BR-021](../functional/business-rules/BR-021-ai-agents-propose-people-decide.md), [📏 BR-028](../functional/business-rules/BR-028-assistant-permissions-are-layered.md)); acts that need the person (signing the Pre-flight check, launching) return `202 Accepted` with a pending confirmation, which completes only when the person confirms on their device ([🔐 the human gate](06-security.md#human-gate)). Abort and manual control are not exposed outside Ground control.
 - **Limits:** separate rate limits for agents, every call recorded in the evidence ledger.
 - **Serving:** the MCP server and the A2A agents run behind their own Kubernetes Services (`agents-mcp`, `agents-a2a`) and are scaled by KEDA; long runs go to `agents-worker`, scaled by KEDA on the JetStream queue ([🔩 Engine and services](04-engine.md#agents)).
+
+## <a id="connectors"></a>🔌 Connectors and the ERP port
+
+- **ERP port** ([📘 FS-024: ERP and Squad shortfall](../functional/features/FS-024-erp-and-squad-shortfall.md)): one contract in Swarm for every ERP. Its operations: read and keep in step Clients and Sites; create a quote from a Mission request and an invoice from a delivered Mission, with its Deliverables as proof; register Drones, Payloads and Batteries as assets with their purchase, maintenance and repair costs; send staff time per Mission; read stock, bills of materials, suppliers and lead times; place Manufacturing orders and Purchase orders and follow them ([📏 BR-031](../functional/business-rules/BR-031-a-squad-shortfall-is-covered-through-the-erp.md)).
+- **Simple-ERP** (`gpbcom/simple-erp`) is the first adapter of the port. It is reached through its API once that API exists, an external prerequisite ([🤝 P-10](../roadmap/11-hardware-and-partners.md#p-10)), and also through MCP and A2A.
+- **Connectors the Operator adds:** MCP servers and A2A agents registered in the Back office, and REST APIs and webhooks described by their URL, their authentication and the actions they allow. Each becomes tools of the action catalogue with its own Assistant permissions ([🔩 Engine and services](04-engine.md#agents)).
+- **Office tools:** the person's e-mail, calendar and documents in Microsoft 365 or Google Workspace, after that person's consent (OAuth), with that person's rights only.
+- **Chat tools:** Slack and Microsoft Teams apps, to talk to the Assistant and for it to post.
+- **GIS, payments, assets:** GIS and map servers, invoicing and payment services, asset registers and IoT platforms, each reached as a Connector of its own.
+- **Secrets:** every Connector credential is kept in Vault, never in configuration ([🔑 Secrets and keys](06-security.md#secrets)).
 
 ## <a id="internal"></a>🔁 Internal calls
 
@@ -92,5 +103,5 @@ server → SquadFrame | Alert | ReplanProposed | AlarmRaised | Notification   (M
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../README.md) · [◀️ Engine and services](04-engine.md) · 📄 **Page 89 / 108** · [Security ▶️](06-security.md)
+> [🏠 Index](../README.md) · [◀️ Engine and services](04-engine.md) · 📄 **Page 100 / 120** · [Security ▶️](06-security.md)
 <!-- /spec:nav-bottom -->

@@ -1,7 +1,7 @@
 # 📘 FS-011: Drone adapters
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ FS-010: Simulator and training](FS-010-simulator-and-training.md) · 📄 **Page 15 / 108** · [FS-012: Operators, deployment and languages ▶️](FS-012-operators-deployment-and-languages.md)
+> [🏠 Index](../../README.md) · [◀️ FS-010: Simulator and training](FS-010-simulator-and-training.md) · 📄 **Page 15 / 120** · [FS-012: Operators, deployment and languages ▶️](FS-012-operators-deployment-and-languages.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -82,5 +82,5 @@ Settled with the product owner ([interview](../../../research/interview.md)).
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ FS-010: Simulator and training](FS-010-simulator-and-training.md) · 📄 **Page 15 / 108** · [FS-012: Operators, deployment and languages ▶️](FS-012-operators-deployment-and-languages.md)
+> [🏠 Index](../../README.md) · [◀️ FS-010: Simulator and training](FS-010-simulator-and-training.md) · 📄 **Page 15 / 120** · [FS-012: Operators, deployment and languages ▶️](FS-012-operators-deployment-and-languages.md)
 <!-- /spec:nav-bottom -->

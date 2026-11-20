@@ -1,0 +1,16 @@
+image:
+  repository: nats
+  tag: "2.11.8"
+  pullPolicy: IfNotPresent
+ports:
+  client: 4222
+  monitor: 8222
+jetstream:
+  domain: ""
+  fileStorage:
+    size: 5Gi
+remote:
+  url: ""
+  credentialsSecret: nats-leaf-credentials
+  tlsSecret: nats-leaf-tls
+resources: {}

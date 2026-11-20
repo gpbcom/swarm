@@ -1,0 +1,26 @@
+# Copy to a file outside the repository, such as ~/.config/swarm/dev.tfvars, and edit it.
+machines = [
+  { name = "dev-server-1", address = "192.0.2.10", role = "server" },
+  { name = "dev-agent-1", address = "192.0.2.11", role = "agent" },
+  { name = "dev-agent-2", address = "192.0.2.12", role = "agent" },
+]
+
+ssh_user             = "swarm"
+ssh_private_key_path = "/path/outside/repo/id_ed25519"
+k3s_version          = "v1.31.4+k3s1"
+kubeconfig_path      = "/path/outside/repo/dev.kubeconfig"
+
+object_storage_enabled  = false
+object_storage_endpoint = "192.0.2.20:9000"
+object_storage_buckets  = ["dev-artifacts"]
+
+dns_enabled = false
+dns_server  = "192.0.2.53"
+dns_zone    = "dev.example.org."
+
+# Set platform_enabled to true on a second apply, once the first one has built the cluster and written the kubeconfig.
+platform_enabled          = false
+repository_url            = "https://git.example.org/swarm.git"
+argocd_chart_version      = "9.0.0"
+argocd_apps_chart_version = "2.0.0"
+platform_revision         = "develop"

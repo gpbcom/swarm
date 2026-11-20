@@ -1,0 +1,164 @@
+name: python
+
+on:
+  workflow_call:
+    inputs:
+      services:
+        description: "Compact JSON array of the services to check, as printed by detect_changes.py."
+        type: string
+        required: true
+      repository:
+        description: "Whether to run the repository tests and lint the CI scripts."
+        type: boolean
+        required: false
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  services:
+    if: inputs.services != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service: ${{ fromJSON(inputs.services) }}
+    env:
+      SERVICE: ${{ matrix.service }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.3.3
+        with:
+          enable-cache: true
+          python-version: "3.12"
+      - name: Install the workspace
+        run: uv sync --locked
+      - name: Ruff check
+        run: uv run ruff check "services/$SERVICE"
+      - name: Ruff format check
+        run: uv run ruff format --check "services/$SERVICE"
+      - name: Mypy
+        run: |
+          if [ -d "services/$SERVICE/src" ]; then
+            uv run mypy "services/$SERVICE/src"
+          else
+            echo "No source folder for $SERVICE: mypy is not applicable."
+          fi
+      - name: Pytest
+        run: |
+          if [ -d "services/$SERVICE/tests" ] && [ -n "$(find "services/$SERVICE/tests" -name 'test_*.py' -print -quit)" ]; then
+            uv run pytest "services/$SERVICE/tests" -n 2 --junitxml="reports/service-$SERVICE.xml"
+          else
+            echo "No tests for $SERVICE: pytest is not applicable."
+          fi
+      - name: Convention tests of the service
+        run: |
+          if [ -f tests/conventions/services/test_service_conventions.py ]; then
+            uv run pytest tests/conventions/services/test_service_conventions.py -k "$SERVICE-" -n 2 \
+              --junitxml="reports/conventions-$SERVICE.xml"
+          else
+            echo "No convention tests: not applicable."
+          fi
+      - name: Keep the test reports (TKT-26)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report-python-service-${{ matrix.service }}
+          path: reports/
+          if-no-files-found: ignore
+
+  repository:
+    if: inputs.repository
+    runs-on: ubuntu-latest
+    env:
+      NATS_SERVER_VERSION: "2.15.3"
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.3.3
+        with:
+          enable-cache: true
+          python-version: "3.12"
+      - name: Install the workspace
+        run: uv sync --locked
+      - name: Install nats-server
+        run: |
+          base="https://github.com/nats-io/nats-server/releases/download/v$NATS_SERVER_VERSION"
+          archive="nats-server-v$NATS_SERVER_VERSION-linux-amd64.tar.gz"
+          curl --fail --silent --show-error --location --remote-name "$base/$archive"
+          curl --fail --silent --show-error --location --remote-name "$base/SHA256SUMS"
+          sha256sum --check --ignore-missing SHA256SUMS
+          mkdir -p "$HOME/.local/bin"
+          tar --extract --gzip --file "$archive" --strip-components=1 --directory "$HOME/.local/bin" "nats-server-v$NATS_SERVER_VERSION-linux-amd64/nats-server"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          "$HOME/.local/bin/nats-server" --version
+      - name: Ruff check
+        run: uv run ruff check tests .github/scripts
+      - name: Ruff format check
+        run: uv run ruff format --check tests .github/scripts
+      - name: Repository tests
+        run: uv run pytest tests -n 2 --junitxml=reports/repository.xml
+      - name: Keep the test reports (TKT-26)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report-python-repository
+          path: reports/
+          if-no-files-found: ignore
+
+  packages:
+    if: inputs.repository
+    runs-on: ubuntu-latest
+    env:
+      NATS_SERVER_VERSION: "2.15.3"
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.3.3
+        with:
+          enable-cache: true
+          python-version: "3.12"
+      - name: Install the workspace
+        run: uv sync --locked
+      - name: Install nats-server
+        run: |
+          base="https://github.com/nats-io/nats-server/releases/download/v$NATS_SERVER_VERSION"
+          archive="nats-server-v$NATS_SERVER_VERSION-linux-amd64.tar.gz"
+          curl --fail --silent --show-error --location --remote-name "$base/$archive"
+          curl --fail --silent --show-error --location --remote-name "$base/SHA256SUMS"
+          sha256sum --check --ignore-missing SHA256SUMS
+          mkdir -p "$HOME/.local/bin"
+          tar --extract --gzip --file "$archive" --strip-components=1 --directory "$HOME/.local/bin" "nats-server-v$NATS_SERVER_VERSION-linux-amd64/nats-server"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          "$HOME/.local/bin/nats-server" --version
+      - name: Ruff check
+        run: uv run ruff check packages/python
+      - name: Ruff format check
+        run: uv run ruff format --check packages/python
+      - name: Mypy
+        run: |
+          found=0
+          for src in packages/python/*/src; do
+            if [ -d "$src" ]; then
+              found=1
+              uv run mypy "$src" || exit 1
+            fi
+          done
+          if [ "$found" = 0 ]; then
+            echo "No source folder in packages/python: mypy is not applicable."
+          fi
+      - name: Pytest
+        run: |
+          if [ -n "$(find packages/python -name 'test_*.py' -print -quit)" ]; then
+            uv run pytest packages/python -n 2 --junitxml=reports/packages.xml
+          else
+            echo "No tests in packages/python: pytest is not applicable."
+          fi
+      - name: JSON Schema bundle is up to date
+        run: uv run swarm-models-schemas --check
+      - name: Keep the test reports (TKT-26)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report-python-packages
+          path: reports/
+          if-no-files-found: ignore

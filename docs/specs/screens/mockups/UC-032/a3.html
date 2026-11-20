@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <title>UC-032 A3: Narrow my own levels</title>
+  <link rel="stylesheet" href="../visual-identity.css">
+  <link rel="stylesheet" href="../components.css">
+</head>
+<body>
+<div class="window">
+  <header class="titlebar"><span class="app">⚙️ Swarm</span><span class="screen-title">Ground control · M-2026-0412 Inspection of Les Vignes</span><span class="badge action">🔄 Mission: Planned</span><span class="spacer"></span><span class="button secondary">✋ Hold the Squad</span><span class="button danger">🛑 Abort</span></header>
+  <div class="layout">
+    <nav class="sidebar">
+      <span class="nav-item">🛰️ Flight</span>
+      <span class="nav-item">📋 Pre-flight</span>
+      <span class="nav-item">🛸 Squad</span>
+      <span class="nav-item">🎥 Video</span>
+      <span class="nav-item">📼 Debrief</span>
+      <span class="nav-item active">🔧 Settings</span>
+    </nav>
+    <main class="content">
+      <h1>🔧 Settings of Sam Carter</h1>
+      <div class="tabs"><span class="tab">Workspace</span><span class="tab">Alert thresholds</span><span class="tab">Units, language and mode</span><span class="tab">🎮 Control mapping</span><span class="tab active">Assistant</span></div>
+      <div class="row"><span class="muted">⚠️ Flight-critical act</span><span class="badge action">Off</span><span class="muted">does nothing</span><span class="badge system">Read</span><span class="muted">answers only</span><span class="badge decision">Propose</span><span class="muted">a person accepts</span><span class="badge success">Act</span><span class="muted">acts and reports</span></div>
+      <div class="grid-2">
+        <section class="card">
+          <table class="table">
+            <tr><th>Action</th><th>Level of the Pilot role</th><th>My level</th></tr>
+            <tr><td>Launch ⚠️</td><td><span class="badge decision">Propose</span></td><td><span class="badge decision">Propose</span></td></tr>
+            <tr><td>Hold ⚠️</td><td><span class="badge success">Act</span></td><td><span class="input">Propose ▾</span><div class="hint">Lowered from Act</div></td></tr>
+            <tr><td>Abort ⚠️</td><td><span class="badge decision">Propose</span></td><td><span class="badge decision">Propose</span></td></tr>
+          </table>
+        </section>
+        <section class="card stack">
+          <h2>My level for Hold</h2>
+          <div class="row"><span class="button secondary">Off</span><span class="button secondary">Read</span><span class="button primary">Propose</span><span class="button secondary">Act</span></div>
+          <p>The Assistant proposes a Hold of the Squad, and you accept it before it is done.</p>
+          <span class="hint">You may only lower your own levels. Act is the level of the Pilot role, set by Aerowing Services.</span>
+        </section>
+      </div>
+      <div class="row"><span class="spacer"></span><span class="button secondary">Cancel</span><span class="button primary">Save my levels</span></div>
+    </main>
+  </div>
+  <footer class="statusbar"><span>📡 Links: no Drone connected</span><span>EU (EASA)</span><span>👤 Sam Carter</span><span class="spacer"></span><span class="mono">2026-12-03 10:20</span></footer>
+</div>
+</body>
+</html>

@@ -1,7 +1,7 @@
 # 🏗️ Architecture
 
 <!-- spec:nav-top -->
-> [🏠 Index](../README.md) · [◀️ Technical specifications](README.md) · 📄 **Page 85 / 108** · [Data models ▶️](02-data-models.md)
+> [🏠 Index](../README.md) · [◀️ Technical specifications](README.md) · 📄 **Page 96 / 120** · [Data models ▶️](02-data-models.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -160,5 +160,5 @@ Every feature relies on this architecture; the edge exists for [📘 FS-002](../
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../README.md) · [◀️ Technical specifications](README.md) · 📄 **Page 85 / 108** · [Data models ▶️](02-data-models.md)
+> [🏠 Index](../README.md) · [◀️ Technical specifications](README.md) · 📄 **Page 96 / 120** · [Data models ▶️](02-data-models.md)
 <!-- /spec:nav-bottom -->

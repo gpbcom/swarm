@@ -1,0 +1,17 @@
+# Number of PostgreSQL instances of the cluster.
+instances: 1
+# The PostgreSQL image with PostGIS and TimescaleDB. Required: rendering fails when it is empty.
+imageName: ""
+storage:
+  # Size of each instance's volume.
+  size: 1Gi
+  # Storage class of the volume. Empty uses the cluster default.
+  storageClass: ""
+pooler:
+  # Number of PgBouncer instances.
+  instances: 1
+  # PgBouncer pool mode.
+  poolMode: transaction
+global:
+  # Names of the services of the cell: each gets a NOLOGIN group role and a schema of its own name.
+  services: []

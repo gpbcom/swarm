@@ -1,0 +1,5 @@
+$ uv run mypy packages/python/swarm-catalog/src packages/python/swarm-lifecycle/src packages/python/swarm-logging/src packages/python/swarm-models/src packages/python/swarm-nats/src services/gateway/src
+(cwd .)
+
+Success: no issues found in 316 source files
+warning: `VIRTUAL_ENV=/home/guillaume/Documents/Projects/PoC/swarm/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead

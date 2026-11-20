@@ -1,7 +1,7 @@
 # 🛣️ P3: Patrol
 
 <!-- spec:nav-top -->
-> [🏠 Index](../README.md) · [◀️ P2: Inspection product](03-p2-inspection-product.md) · 📄 **Page 99 / 108** · [P4: Agriculture ▶️](05-p4-agriculture.md)
+> [🏠 Index](../README.md) · [◀️ P2: Inspection product](03-p2-inspection-product.md) · 📄 **Page 110 / 120** · [P4: Agriculture ▶️](05-p4-agriculture.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Sprints:** S25 to S33 · **Dates:** 6 Dec 2027 to 7 Apr 2028 · **Tickets:** about 35
@@ -265,5 +265,5 @@ Milestone M3 ([🏆 Milestones](README.md#milestones)) comes after P3: the Dock 
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../README.md) · [◀️ P2: Inspection product](03-p2-inspection-product.md) · 📄 **Page 99 / 108** · [P4: Agriculture ▶️](05-p4-agriculture.md)
+> [🏠 Index](../README.md) · [◀️ P2: Inspection product](03-p2-inspection-product.md) · 📄 **Page 110 / 120** · [P4: Agriculture ▶️](05-p4-agriculture.md)
 <!-- /spec:nav-bottom -->

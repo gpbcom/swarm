@@ -1,7 +1,7 @@
 # 🩺 Observability
 
 <!-- spec:nav-top -->
-> [🏠 Index](../README.md) · [◀️ Scalability and performance](07-scalability.md) · 📄 **Page 92 / 108** · [Deployment ▶️](09-deployment.md)
+> [🏠 Index](../README.md) · [◀️ Scalability and performance](07-scalability.md) · 📄 **Page 103 / 120** · [Deployment ▶️](09-deployment.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -63,5 +63,5 @@ Supports every feature; directly [📘 FS-012](../functional/features/FS-012-ope
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../README.md) · [◀️ Scalability and performance](07-scalability.md) · 📄 **Page 92 / 108** · [Deployment ▶️](09-deployment.md)
+> [🏠 Index](../README.md) · [◀️ Scalability and performance](07-scalability.md) · 📄 **Page 103 / 120** · [Deployment ▶️](09-deployment.md)
 <!-- /spec:nav-bottom -->

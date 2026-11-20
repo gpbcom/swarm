@@ -1,7 +1,7 @@
 # 📏 BR-015: Approved Drone models only
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ BR-014: Simulation isolation](BR-014-simulation-isolation.md) · 📄 **Page 71 / 108** · [BR-016: Clients see only their own Missions ▶️](BR-016-clients-see-only-their-own-missions.md)
+> [🏠 Index](../../README.md) · [◀️ BR-014: Simulation isolation](BR-014-simulation-isolation.md) · 📄 **Page 77 / 120** · [BR-016: Clients see only their own Missions ▶️](BR-016-clients-see-only-their-own-missions.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Type:** Validation · **Updated:** 2026-11-18
@@ -49,5 +49,5 @@ Swarm talks to many families of Drones (MAVLink, DJI, Skydio, Parrot). Each Dron
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ BR-014: Simulation isolation](BR-014-simulation-isolation.md) · 📄 **Page 71 / 108** · [BR-016: Clients see only their own Missions ▶️](BR-016-clients-see-only-their-own-missions.md)
+> [🏠 Index](../../README.md) · [◀️ BR-014: Simulation isolation](BR-014-simulation-isolation.md) · 📄 **Page 77 / 120** · [BR-016: Clients see only their own Missions ▶️](BR-016-clients-see-only-their-own-missions.md)
 <!-- /spec:nav-bottom -->

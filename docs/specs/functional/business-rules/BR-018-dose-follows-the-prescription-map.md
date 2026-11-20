@@ -1,7 +1,7 @@
 # 📏 BR-018: Dose follows the Prescription map
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ BR-017: Every screen in four languages](BR-017-every-screen-in-four-languages.md) · 📄 **Page 74 / 108** · [BR-019: Site agents request, never pilot ▶️](BR-019-site-agents-request-never-pilot.md)
+> [🏠 Index](../../README.md) · [◀️ BR-017: Every screen in four languages](BR-017-every-screen-in-four-languages.md) · 📄 **Page 80 / 120** · [BR-019: Site agents request, never pilot ▶️](BR-019-site-agents-request-never-pilot.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Type:** Computation · **Updated:** 2026-11-18
@@ -48,5 +48,5 @@ Overdosing harms crops and the environment and breaks product regulations; spray
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ BR-017: Every screen in four languages](BR-017-every-screen-in-four-languages.md) · 📄 **Page 74 / 108** · [BR-019: Site agents request, never pilot ▶️](BR-019-site-agents-request-never-pilot.md)
+> [🏠 Index](../../README.md) · [◀️ BR-017: Every screen in four languages](BR-017-every-screen-in-four-languages.md) · 📄 **Page 80 / 120** · [BR-019: Site agents request, never pilot ▶️](BR-019-site-agents-request-never-pilot.md)
 <!-- /spec:nav-bottom -->

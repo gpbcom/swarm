@@ -1,0 +1,44 @@
+name: specs
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.3.3
+        with:
+          enable-cache: true
+          python-version: "3.12"
+      - run: uv sync --locked
+      - name: Check the specifications
+        shell: bash
+        run: |
+          set +e
+          output="$(uv run python .claude/skills/write-specs/scripts/specs.py check)"
+          status=$?
+          set -e
+          mkdir -p reports
+          if [ -n "$output" ]; then
+            printf '%s\n' "$output" > reports/specs-check.log
+          else
+            echo "specs.py check printed nothing." > reports/specs-check.log
+          fi
+          if [ -n "$output" ]; then
+            printf '%s\n' "$output"
+          fi
+          if [ "$status" -ne 0 ] || [ -n "$output" ]; then
+            exit 1
+          fi
+      - name: Keep the test reports (TKT-26)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report-specs
+          path: reports/
+          if-no-files-found: ignore

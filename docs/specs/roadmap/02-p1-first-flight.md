@@ -1,7 +1,7 @@
 # 🛣️ P1: First flight
 
 <!-- spec:nav-top -->
-> [🏠 Index](../README.md) · [◀️ P0: Foundations](01-p0-foundations.md) · 📄 **Page 97 / 108** · [P2: Inspection product ▶️](03-p2-inspection-product.md)
+> [🏠 Index](../README.md) · [◀️ P0: Foundations](01-p0-foundations.md) · 📄 **Page 108 / 120** · [P2: Inspection product ▶️](03-p2-inspection-product.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Sprints:** S05 to S13 · **Dates:** 1 Mar to 2 Jul 2027 · **Tickets:** about 45
@@ -377,5 +377,5 @@ The end-of-phase demonstration, on 2 July 2027, uses the sample cast of [🎨 th
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../README.md) · [◀️ P0: Foundations](01-p0-foundations.md) · 📄 **Page 97 / 108** · [P2: Inspection product ▶️](03-p2-inspection-product.md)
+> [🏠 Index](../README.md) · [◀️ P0: Foundations](01-p0-foundations.md) · 📄 **Page 108 / 120** · [P2: Inspection product ▶️](03-p2-inspection-product.md)
 <!-- /spec:nav-bottom -->

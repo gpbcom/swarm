@@ -1,0 +1,51 @@
+name: TypeScript
+
+on:
+  workflow_call:
+    inputs:
+      projects:
+        description: Compact JSON array of the TypeScript project paths to check.
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    if: inputs.projects != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        project: ${{ fromJSON(inputs.projects) }}
+    env:
+      PROJECT: ${{ matrix.project }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Lint
+        run: pnpm --filter "./$PROJECT" run --if-present lint
+      - name: Type check
+        run: pnpm --filter "./$PROJECT" run --if-present typecheck
+      - name: Test
+        id: test
+        shell: bash
+        run: |
+          name="${PROJECT//\//-}"
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+          mkdir -p reports
+          pnpm --filter "./$PROJECT" run --if-present test 2>&1 | tee "reports/$name.log"
+      - name: Keep the test reports (TKT-26)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report-ts-${{ steps.test.outputs.name }}
+          path: reports/
+          if-no-files-found: ignore

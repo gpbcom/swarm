@@ -1,7 +1,7 @@
 # 🎬 UC-010: Order a Mission in the Client portal
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ UC-009: Process flight data into Deliverables](UC-009-process-flight-data-into-deliverables.md) · 📄 **Page 36 / 108** · [UC-011: Follow a Mission and download its Deliverables ▶️](UC-011-follow-a-mission-and-download-its-deliverables.md)
+> [🏠 Index](../../README.md) · [◀️ UC-009: Process flight data into Deliverables](UC-009-process-flight-data-into-deliverables.md) · 📄 **Page 38 / 120** · [UC-011: Follow a Mission and download its Deliverables ▶️](UC-011-follow-a-mission-and-download-its-deliverables.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -128,5 +128,5 @@ One row per state of the flow chart: every action, success and failure node. Cli
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ UC-009: Process flight data into Deliverables](UC-009-process-flight-data-into-deliverables.md) · 📄 **Page 36 / 108** · [UC-011: Follow a Mission and download its Deliverables ▶️](UC-011-follow-a-mission-and-download-its-deliverables.md)
+> [🏠 Index](../../README.md) · [◀️ UC-009: Process flight data into Deliverables](UC-009-process-flight-data-into-deliverables.md) · 📄 **Page 38 / 120** · [UC-011: Follow a Mission and download its Deliverables ▶️](UC-011-follow-a-mission-and-download-its-deliverables.md)
 <!-- /spec:nav-bottom -->

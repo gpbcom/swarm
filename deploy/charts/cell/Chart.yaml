@@ -1,0 +1,23 @@
+apiVersion: v2
+name: cell
+description: Umbrella chart of one cell, bringing its NATS cluster, data platform and vault configuration.
+type: application
+version: 0.1.0
+dependencies:
+  - name: database
+    repository: file://../database
+    condition: database.enabled
+  - name: valkey
+    repository: file://../valkey
+    condition: valkey.enabled
+  - name: object-storage
+    alias: objectStorage
+    repository: file://../object-storage
+    condition: objectStorage.enabled
+  - name: vault-config
+    alias: vaultConfig
+    repository: file://../vault-config
+    condition: vaultConfig.enabled
+  - name: nats
+    repository: file://../nats
+    condition: nats.enabled

@@ -1,0 +1,4 @@
+$ pnpm -r --if-present typecheck
+(cwd .)
+
+$ tsc --noEmit -p tsconfig.json

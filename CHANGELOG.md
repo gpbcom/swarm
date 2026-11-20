@@ -1,0 +1,217 @@
+# 📜 Changelog
+
+Every release of Swarm, newest first: one line per commit of each pull request merged into `develop`, written by the release workflow (TKT-26).
+
+## [v0.1.0](docs/releases/v0.1.0/RELEASE_NOTES.md) - 2026-11-20
+
+### 🎫 Tickets
+
+- T0.09: NATS JetStream and Operator accounts (#347)
+- T0.08: Dev cell on k3s
+- T0.07: Rust core and benchmark gate
+- T0.06 K07: Tests for SchemaFolder
+- T0.06 K02: Tests for the Operator and CellAssignment models
+- T0.06 K08: Tests for SchemaExporter render, export and staleness
+- T0.06 K01: Tests for the SwarmModel base helpers
+- T0.06 K06: Tests for Command, CommandKind and CommandLane
+- T0.06 K09: tests for the swarm-models-schemas command line
+- T0.06 K03: Tests for Person, Role and RoleName
+- T0.06 K13: Tests for the packages job of the python workflow
+- T0.06 K10: tests for the swarm-models-codegen renderer
+- T0.06 K14: AGENT.md: shared models, regeneration commands and their CI checks
+- T0.06 K04: Tests for Actor, ActorKind and the Event envelope
+- T0.06 K12: tests of the @swarm/live generator
+- T0.06 K11: Tests: generated Rust swarm-models types are current and deserialise the Python frames
+- T0.06 K04: fix datetime import
+- T0.06 K05: Tests for TelemetryFrame, SquadFrame and DroneState
+- T0.06 K18: CI packages job checking packages/python and the JSON Schema bundle
+- T0.06 K15: Scaffold swarm-models, workspace configuration and SwarmModel base
+- T0.06 K17: @swarm/live package with the json-schema-to-typescript generator
+- T0.06 K16: swarm-models-codegen crate rendering typify structs from the schema bundle
+- T0.06 K24: SchemaFolder and the schema storage exceptions
+- T0.06 K19: Operator and CellAssignment models with their exceptions
+- T0.06 K23: Command model, CommandKind, CommandLane and their exceptions
+- T0.06 K20: Person, Role and RoleName with their exceptions
+- T0.06 K22: TelemetryFrame, SquadFrame, DroneState and their exceptions
+- T0.06 K21: Actor, ActorKind and Event models with their exceptions
+- T0.06 K04: a None agent name becomes the default on a Person actor
+- T0.06 K25: SchemaExporter renders the schema bundle and detects a stale one
+- T0.06 K26: swarm-models-schemas command line and the committed schema bundle
+- T0.06 K28: generated models.ts in @swarm/live, its index, and --check in the test script
+- T0.06 K27: swarm-models crate with the generated structs re-exported
+- T0.06 K21 K26: ruff format the Actor and export_schemas messages
+- Harness: hand-off without intermediate commits, explainer, ticket_tree.py
+- T0.06: Shared models and generated types
+- T0.04 done and T0.06 approved: closing documents and plan
+- T0.05: done; EXPLAIN.md, REVIEW.md, progress, timings, follow-ups and test evidences
+- T0.05 K05: tests of ColouredFormatter and JsonFormatter
+- T0.05 K07: convention rules run against every package of packages/python
+- T0.05 K08: tests for the definitions of Runnable and AsyncRunnable
+- T0.05 K03: tests for the YamlCatalog base
+- T0.05 K02: tests of the abstract factories
+- T0.05 K04: tests for LogFormat and LoggingConfig
+- T0.05 K06: tests for LoggingConfigurator and the reference logger.yaml
+- T0.05 K01: tests for Runnable and AsyncRunnable
+- T0.05 K11: AGENT.md and README name the Python base-class packages and their checks
+- T0.05 K09: tests for the gateway use of the lifecycle and logging packages
+- T0.05 K16: accept the definitions of Runnable and AsyncRunnable
+- T0.05 K10: scaffold the three packages, workspace configuration and gateway dependencies
+- T0.05 K13: add the YamlCatalog base and its unreadable exception
+- T0.05 K13: format the YamlCatalog base
+- T0.05 K15: add ColouredFormatter and JsonFormatter
+- T0.05 K12: add Runnable and AsyncRunnable
+- T0.05 K14: add swarm-logging models, LogFormat and exceptions
+- T0.05 K19: add Command base and GreetingCommand runnable
+- T0.05 K02 K06 fix: the tests follow the approved contracts
+- T0.05 K17: abstract factories in swarm-lifecycle
+- T0.05 K18: add LoggingConfigurator and the reference logger.yaml
+- T0.05 K20: CommandFactory, GreetingCommandFactory and main with lifecycle and logging
+- T0.03 done and T0.05 approved: closing documents and plan
+- T0.04 K08: AGENT.md describes the CI, what it runs and what triggers what
+- T0.04 K06: tests for the typescript.yml reusable workflow
+- T0.04 K07: tests for the specs.yml reusable workflow
+- T0.04 K02: tests for shared changes running everything
+- T0.04 K05: tests for the rust.yml reusable workflow
+- T0.04 K03: tests for the ci.yml change detection and step-2 jobs
+- T0.04 K04: tests for the python.yml reusable workflow
+- T0.04 K01: tests for change detection per service, front end, tests and specs
+- T0.04 K10: Add PyYAML to the dev dependency group
+- T0.04 K09: Add change detection script
+- T0.04 K14: Add typescript.yml reusable workflow
+- T0.04 K12: Add reusable python workflow
+- T0.04 K13: Add reusable Rust workflow
+- T0.04 K15: Add specs workflow
+- T0.04 K11: Add ci.yml with change detection and step-2 jobs
+- T0.03 done and T0.04 approved: closing documents and plan
+- T0.03 K08: tests for rustfmt and clippy settings of packages/rust
+- T0.03 K05: tests of the lifecycle base class and Pydantic model rules
+- T0.03 K02: tests for the one class per file and five files per folder rules
+- T0.03 K06: convention enforcement test and empty service sample test
+- T0.03 K07: tests for a broken sample service failing each convention rule
+- T0.03 K01: tests for shared convention helpers and ServiceTree
+- T0.03 K04: tests for the allowed layer imports rule
+- T0.03 K03: tests for the no_any and no_nested_function rules
+- T0.03 K10: AGENT.md: conventions rules enforced and Rust and TypeScript lint commands
+- T0.03 K09: tests for strict eslint and tsc settings of packages/ts
+- T0.03 K11: ServiceTree and ConventionRule base class
+- T0.03 K12: rustfmt and clippy settings in packages/rust
+- T0.03 K13: add the @swarm/config package with strict eslint and tsc settings
+- T0.03 K14: add the one class per file convention rule
+- T0.03 K15: five Python files per folder rule
+- T0.03 K17: rule no nested function
+- T0.03 K16: NoAny convention rule
+- T0.03 K20: add the PydanticModelsInModels convention rule
+- T0.03 K19: lifecycle base classes convention rule
+- T0.03 K18: LayerImports rule for allowed layer imports
+- T0.03 fix: tests are first-party for ruff, so tests written first keep their import order
+- T0.03 K21: ConventionRules registry of the seven rules
+- T0.02 done and T0.03 approved: closing documents, plan, and fix-task briefs
+- T0.02 K06: Ticket and review note templates of the ticket skill
+- T0.02 K14: Ticket rules for template sections, check scripts, review note and hooks (TKT-1, 2, 3, 6, 13)
+- T0.02 K03: tests for the PostToolUse hook that formats only the edited file
+- T0.02 K05: static tests of the harness wiring (hooks, agents, workflows)
+- T0.02 K02: tests for check_plan.py
+- T0.02 K04: tests for the SubagentStop check_touched hook
+- T0.02 K01: tests of check_ticket.py against docs/specs
+- T0.02 K13: Worker agents run the hooks that format edits and check the touched layer
+- T0.02 K12: Reviewer returns a review note and scribe writes REVIEW.md from it
+- T0.02 K15: Ticket-writer uses the template; verifier runs the ticket and plan checks
+- T0.02 K11: register the PostToolUse and SubagentStop hooks
+- T0.02 K17: plan check at the gate and review note in REVIEW.md
+- T0.02 K09: PostToolUse hook formatting only the edited file
+- T0.02 K16: ticket-plan checks TICKET.md and PLAN.md
+- T0.02 K08: add check_plan.py task graph checker
+- T0.02 K10: SubagentStop hook check_touched.py and layer-checks.json
+- T0.02 K01 fix: the valid ticket links its screen without a doubled screens/ folder
+- Harness: workers read their exact brief from PLAN.md, never from the gate's copy
+- T0.02 K07: check_ticket.py checks a TICKET.md against the template and docs/specs/
+- T0.02 K18: the ticket skill SKILL.md, with the three steps, templates, scripts, hooks and agents
+- T0.02 K19: the ticket README names the checks, hooks, REVIEW.md and the ticket template
+- T0.02: test evidences
+- T0.01: done; EXPLAIN.md, progress, timings and follow-ups
+- T0.01 K02: Tests for the gateway CLI main and its console script
+- T0.01 K05: Terraform tests for object-storage and dns modules
+- T0.01 K04: Terraform native tests for the k3s module
+- T0.01 K06: Terraform test for the dev cell root
+- T0.01 K03: Terraform tests for the machines and network modules
+- T0.01 K01: Layout tests for the mono-repo workspaces and Terraform
+- T0.01 K07: Ignore Terraform state, variables and build outputs
+- T0.01 K11: Terraform module preparing the self-hosted machines over SSH
+- T0.01 K14: Terraform module for self-hosted MinIO buckets
+- T0.01 K12: Terraform module for the self-hosted network firewall
+- T0.01 K10: pnpm workspace with Turborepo
+- T0.01 K15: Terraform module for self-hosted DNS
+- T0.01 K13: Terraform module for the self-hosted k3s cluster
+- T0.01 K08: uv workspace and the root src moved to services/gateway
+- T0.01 K16: CI terraform fmt, validate, test and plan
+- T0.01 K09: Cargo workspace in packages/rust
+- T0.01: approved K09 check fix; harness timings, tokens and re-run
+- T0.01 K18: AGENT.md commands and mono-repo status after the move
+- T0.01 K17: Terraform root of the dev cell
+- T0.01 K20: README how to start, workspaces and repository layout
+- T0.01 K19: deploy/terraform/README.md, how the dev cell is provisioned
+- T0.01 FIX: progress.py passes ruff check and format, made executable
+- T0.01: verification evidence; verifier reports checks with no target as not applicable
+- T0.01: PROGRESS.md events before timings; timings appended at the end when missing
+- T0.01 FIX: mono-repo convention tests import helpers by full path, use typing generics, check clients layer
+- T0.01 K13: keep the k3s join token off the remote-exec script and process list
+- T0.01 K18: AGENT.md commands and mono-repo status after the move
+- T0.01 K19: Terraform README for the dev cell, with the join token and CI variable notes
+- T0.01: ruff follows the AGENT.md typing rule; verification evidence
+- T0.01 FIX: kubeconfig trigger without path, pipefail and non-empty check
+- T0.01: verification evidence
+- T0.01 K18: AGENT.md commands and mono-repo status after the move
+- T0.01 K19: Terraform README for the dev cell, variables file kept outside the repository
+- T0.01 K20: README dependencies sentence matches the gateway pyproject.toml
+- T0.01 K19: Terraform README, reachability of the API from a workstation
+- T0.01 K10: pin turbo 2.11.11 to meet the minimum release age, drop the exclusion
+- T0.01: progress and evidence of the third run
+- T0.01: paused by the person; progress, timings and evidence
+- T0.01: re-run stopped, specs check cannot import Pillow (environment)
+- T0.01 K16: default api_allowed_cidrs to an empty list when the variable is unset
+- T0.01: refresh test evidences
+
+### 🧰 Harness
+
+- Harness: a release reaches master by itself (TKT-26) (#382)
+- Harness: a branch lives as long as its work (TKT-25) (#381)
+- Harness: every rule names its enforcers; one definition of done (#379)
+- Harness: front-end tickets capture their screens; groups skip done issues (#378)
+- Harness: tickets share one checkout and one branch; issues and groups (#348)
+- Board: the GitHub state of the roadmap (#346)
+- Board: a resumed bootstrap counts a link made before the stop as made (#345)
+- Board: an issue already closed counts as closed; develop found in CI (#345)
+- Board: the day of the last merge falls back to HEAD in a shallow checkout (#345)
+- Board: the dry run never calls GitHub (#345)
+- Harness: GitFlow on GitHub, several tickets at once, the board (#339)
+- Harness: EXPLAIN.md and IMPLEMENTATION.md link every file and line (TKT-14)
+- Harness: readable PLAN.md and specification references in every ticket document
+- harness: Pillow in the dev group; environment failures stop the run (TKT-6)
+- harness: the review converges (TKT-12)
+- harness: fix rounds route each finding to its owning task
+- harness: ticket-run v2 (timings, tokens, re-run, deterministic checks)
+
+### 📐 Specifications
+
+- Specs: AI Assistant, its permissions, Connectors and the ERP (#380)
+- Specs: the board test counts the Assistant's epics and tickets (#380)
+
+### 🚦 CI/CD and fixes
+
+- CI: automerge leaves a change to CI to a person (#344)
+- CI: actions on Node 24 (#341)
+- CI: pin setup-uv to v10.3.3, which publishes no v10 tag (#341)
+- CI: the dev cell waits until it is configured (#340)
+- CI: automerge reads the check runs of the head commit (#343)
+- CI: automerge may read the checks it waits for (#342)
+- CI: GitFlow triggers, one result check, Terraform plan once configured
+
+### 📦 Other changes
+
+- Roadmap: parallel plan and Gantt charts of the tickets
+- Ignore .vscode/: editor settings stay local
+- RunnableStatus.NOT_STARTED is "not-started"; T0.07 approved: ticket, plan and progress
+- Rules: yielded RunnableStatus, no raw strings, enums in models/enums.py, a log in every branch
+- Rules: no dict with hard-coded keys in methods, and async tasks yield their status
+- Rules: no Any or object as a type, and every try has an except
+- README: product presentation with logo, suite, activities and getting started

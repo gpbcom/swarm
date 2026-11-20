@@ -1,0 +1,9 @@
+from __future__ import annotations
+
+from swarm_nats.models.accounts.exceptions.issued_credential.se_invalid_issued_credential_exception import (
+    SEInvalidIssuedCredentialException,
+)
+
+
+class SEIssuedCredentialInvalidJwt(SEInvalidIssuedCredentialException):
+    """Exception raised when an invalid ``jwt`` is provided."""

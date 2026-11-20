@@ -1,7 +1,7 @@
 # 📘 FS-010: Simulator and training
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ FS-009: Evidence ledger and Anchoring](FS-009-evidence-ledger-and-anchoring.md) · 📄 **Page 14 / 108** · [FS-011: Drone adapters ▶️](FS-011-drone-adapters.md)
+> [🏠 Index](../../README.md) · [◀️ FS-009: Evidence ledger and Anchoring](FS-009-evidence-ledger-and-anchoring.md) · 📄 **Page 14 / 120** · [FS-011: Drone adapters ▶️](FS-011-drone-adapters.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -83,5 +83,5 @@ Settled with the product owner ([interview](../../../research/interview.md)).
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ FS-009: Evidence ledger and Anchoring](FS-009-evidence-ledger-and-anchoring.md) · 📄 **Page 14 / 108** · [FS-011: Drone adapters ▶️](FS-011-drone-adapters.md)
+> [🏠 Index](../../README.md) · [◀️ FS-009: Evidence ledger and Anchoring](FS-009-evidence-ledger-and-anchoring.md) · 📄 **Page 14 / 120** · [FS-011: Drone adapters ▶️](FS-011-drone-adapters.md)
 <!-- /spec:nav-bottom -->

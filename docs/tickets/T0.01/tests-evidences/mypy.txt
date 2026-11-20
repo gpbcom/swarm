@@ -1,0 +1,4 @@
+$ uv run mypy services/gateway/src
+(cwd .)
+
+Success: no issues found in 8 source files

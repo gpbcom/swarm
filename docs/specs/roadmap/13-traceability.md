@@ -1,7 +1,7 @@
 # 🧬 Traceability
 
 <!-- spec:nav-top -->
-> [🏠 Index](../README.md) · [◀️ Risks](12-risks.md) · 📄 **Page 108 / 108**
+> [🏠 Index](../README.md) · [◀️ Risks](12-risks.md) · 📄 **Page 119 / 120** · [Parallel plan ▶️](14-parallel-plan.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Sprints:** S01 to S52 · **Dates:** 4 Jan 2027 to 29 Dec 2028
@@ -22,7 +22,7 @@
 
 - **Phases:** every phase page that delivers part of the item; an item spread over several phases closes in the last one.
 - **Sprints:** the first and last sprint whose tickets or plan name the item, on the phase pages.
-- The 260 tickets themselves are listed on the phase pages, with their sprint and what makes them done.
+- The 285 tickets themselves are listed on the phase pages, with their sprint and what makes them done.
 
 ## <a id="features"></a>📘 Features
 
@@ -50,6 +50,8 @@
 | [📘 FS-020: Ground control Workspace and configuration](../functional/features/FS-020-ground-control-workspace-and-configuration.md) | [🛣️ P1: First flight](02-p1-first-flight.md) | Phase sprints |
 | [📘 FS-021: Ground control monitoring](../functional/features/FS-021-ground-control-monitoring.md) | [🛣️ P1: First flight](02-p1-first-flight.md)<br>[🛣️ P3: Patrol](04-p3-patrol.md)<br>[🛣️ P4: Agriculture](05-p4-agriculture.md)<br>[🛣️ P5: AI agents, MCP and A2A](06-p5-ai-agents.md) | Phase sprints |
 | [📘 FS-022: Debrief and assessment](../functional/features/FS-022-debrief-and-assessment.md) | [🛣️ P2: Inspection product](03-p2-inspection-product.md)<br>[🛣️ P3: Patrol](04-p3-patrol.md)<br>[🛣️ P4: Agriculture](05-p4-agriculture.md) | Phase sprints |
+| [📘 FS-023: AI Assistant](../functional/features/FS-023-ai-assistant.md) | [🛣️ P5: AI agents, MCP and A2A](06-p5-ai-agents.md) | S44 to S56 |
+| [📘 FS-024: ERP and Squad shortfall](../functional/features/FS-024-erp-and-squad-shortfall.md) | [🛣️ P5: AI agents, MCP and A2A](06-p5-ai-agents.md) | S53 to S55 |
 
 ## <a id="use-cases"></a>🎬 Use cases
 
@@ -85,6 +87,10 @@
 | [🎬 UC-028: Assess a Mission against the request](../functional/use-cases/UC-028-assess-a-mission-against-the-request.md) | [🛣️ P2: Inspection product](03-p2-inspection-product.md) | S20 to S23 |
 | [🎬 UC-029: Create an Operator](../functional/use-cases/UC-029-create-an-operator.md) | [🛣️ P0: Foundations](01-p0-foundations.md)<br>[🛣️ P7: Scale and reach](08-p7-scale-and-reach.md) | S04 to S51 |
 | [🎬 UC-030: Focus on a Drone](../functional/use-cases/UC-030-focus-on-a-drone.md) | [🛣️ P1: First flight](02-p1-first-flight.md) | S09 to S09 |
+| [🎬 UC-031: Ask the Assistant](../functional/use-cases/UC-031-ask-the-assistant.md) | [🛣️ P5: AI agents, MCP and A2A](06-p5-ai-agents.md) | S44 to S46 |
+| [🎬 UC-032: Set the Assistant permissions](../functional/use-cases/UC-032-set-the-assistant-permissions.md) | [🛣️ P5: AI agents, MCP and A2A](06-p5-ai-agents.md) | S45 to S46 |
+| [🎬 UC-033: Cover a Squad shortfall through the ERP](../functional/use-cases/UC-033-cover-a-squad-shortfall-through-the-erp.md) | [🛣️ P5: AI agents, MCP and A2A](06-p5-ai-agents.md) | S54 to S55 |
+| [🎬 UC-034: Let the Assistant hold a Squad](../functional/use-cases/UC-034-let-the-assistant-hold-a-squad.md) | [🛣️ P5: AI agents, MCP and A2A](06-p5-ai-agents.md) | S47 to S47 |
 
 ## <a id="business-rules"></a>📏 Business rules
 
@@ -117,9 +123,14 @@
 | [📏 BR-025: On-site changes are checked again](../functional/business-rules/BR-025-on-site-changes-are-checked-again.md) | [🛣️ P1: First flight](02-p1-first-flight.md) | Phase sprints |
 | [📏 BR-026: Scorecard against the request](../functional/business-rules/BR-026-scorecard-against-the-request.md) | [🛣️ P2: Inspection product](03-p2-inspection-product.md)<br>[🛣️ P3: Patrol](04-p3-patrol.md) | Phase sprints |
 | [📏 BR-027: The Pilot's attention is preserved](../functional/business-rules/BR-027-the-pilot-s-attention-is-preserved.md) | [🛣️ P1: First flight](02-p1-first-flight.md) | Phase sprints |
+| [📏 BR-028: Assistant permissions are layered](../functional/business-rules/BR-028-assistant-permissions-are-layered.md) | [🛣️ P5: AI agents, MCP and A2A](06-p5-ai-agents.md) | S45 to S46 |
+| [📏 BR-029: Flight-critical acts need a Pilot on duty](../functional/business-rules/BR-029-flight-critical-acts-need-a-pilot-on-duty.md) | [🛣️ P5: AI agents, MCP and A2A](06-p5-ai-agents.md) | S47 to S47 |
+| [📏 BR-030: The Assistant stays within its budget](../functional/business-rules/BR-030-the-assistant-stays-within-its-budget.md) | [🛣️ P5: AI agents, MCP and A2A](06-p5-ai-agents.md) | S48 to S48 |
+| [📏 BR-031: A Squad shortfall is covered through the ERP](../functional/business-rules/BR-031-a-squad-shortfall-is-covered-through-the-erp.md) | [🛣️ P5: AI agents, MCP and A2A](06-p5-ai-agents.md) | S54 to S55 |
+| [📏 BR-032: The Assistant reaches only what its person may reach](../functional/business-rules/BR-032-the-assistant-reaches-only-what-its-person-may-reach.md) | [🛣️ P5: AI agents, MCP and A2A](06-p5-ai-agents.md) | S44 to S44 |
 
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../README.md) · [◀️ Risks](12-risks.md) · 📄 **Page 108 / 108**
+> [🏠 Index](../README.md) · [◀️ Risks](12-risks.md) · 📄 **Page 119 / 120** · [Parallel plan ▶️](14-parallel-plan.md)
 <!-- /spec:nav-bottom -->

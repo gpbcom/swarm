@@ -1,0 +1,6 @@
+apiVersion: v2
+name: nats-leaf
+description: The NATS leaf node of one edge, buffering in JetStream while the cell is unreachable.
+type: application
+version: 0.1.0
+appVersion: "2.11.8"

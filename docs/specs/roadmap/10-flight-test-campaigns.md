@@ -1,7 +1,7 @@
 # 🛫 Flight test campaigns
 
 <!-- spec:nav-top -->
-> [🏠 Index](../README.md) · [◀️ Regulatory track](09-regulatory-track.md) · 📄 **Page 105 / 108** · [Hardware and partners ▶️](11-hardware-and-partners.md)
+> [🏠 Index](../README.md) · [◀️ Regulatory track](09-regulatory-track.md) · 📄 **Page 116 / 120** · [Hardware and partners ▶️](11-hardware-and-partners.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Sprints:** S10 to S52 · **Dates:** 10 May 2027 to 29 Dec 2028
@@ -53,5 +53,5 @@
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../README.md) · [◀️ Regulatory track](09-regulatory-track.md) · 📄 **Page 105 / 108** · [Hardware and partners ▶️](11-hardware-and-partners.md)
+> [🏠 Index](../README.md) · [◀️ Regulatory track](09-regulatory-track.md) · 📄 **Page 116 / 120** · [Hardware and partners ▶️](11-hardware-and-partners.md)
 <!-- /spec:nav-bottom -->

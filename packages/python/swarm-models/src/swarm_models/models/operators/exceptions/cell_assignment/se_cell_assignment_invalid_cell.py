@@ -1,0 +1,9 @@
+from __future__ import annotations
+
+from swarm_models.models.operators.exceptions.cell_assignment.se_invalid_cell_assignment_exception import (
+    SEInvalidCellAssignmentException,
+)
+
+
+class SECellAssignmentInvalidCell(SEInvalidCellAssignmentException):
+    """Exception raised when an invalid ``cell`` is provided."""

@@ -1,7 +1,7 @@
 # 📘 FS-021: Ground control monitoring
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ FS-020: Ground control Workspace and configuration](FS-020-ground-control-workspace-and-configuration.md) · 📄 **Page 25 / 108** · [FS-022: Debrief and assessment ▶️](FS-022-debrief-and-assessment.md)
+> [🏠 Index](../../README.md) · [◀️ FS-020: Ground control Workspace and configuration](FS-020-ground-control-workspace-and-configuration.md) · 📄 **Page 25 / 120** · [FS-022: Debrief and assessment ▶️](FS-022-debrief-and-assessment.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -106,5 +106,5 @@ Settled with the product owner ([interview](../../../research/interview.md)).
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ FS-020: Ground control Workspace and configuration](FS-020-ground-control-workspace-and-configuration.md) · 📄 **Page 25 / 108** · [FS-022: Debrief and assessment ▶️](FS-022-debrief-and-assessment.md)
+> [🏠 Index](../../README.md) · [◀️ FS-020: Ground control Workspace and configuration](FS-020-ground-control-workspace-and-configuration.md) · 📄 **Page 25 / 120** · [FS-022: Debrief and assessment ▶️](FS-022-debrief-and-assessment.md)
 <!-- /spec:nav-bottom -->

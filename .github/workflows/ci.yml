@@ -1,0 +1,100 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - master
+      - develop
+      - "release/**"
+      - "hotfix/**"
+  pull_request:
+    branches:
+      - develop
+      - master
+      - "release/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      services: ${{ steps.detect.outputs.services }}
+      typescript: ${{ steps.detect.outputs.typescript }}
+      rust: ${{ steps.detect.outputs.rust }}
+      repository: ${{ steps.detect.outputs.repository }}
+      specs: ${{ steps.detect.outputs.specs }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Detect what changed
+        id: detect
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PUSH_BEFORE: ${{ github.event.before }}
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            BASE="$PR_BASE"
+          else
+            BASE="$PUSH_BEFORE"
+          fi
+          if [ -z "$BASE" ] || [ "$BASE" = "0000000000000000000000000000000000000000" ] \
+            || ! git cat-file -e "$BASE^{commit}" 2>/dev/null; then
+            echo "No usable base commit, selecting everything."
+            python .github/scripts/detect_changes.py --all >> "$GITHUB_OUTPUT"
+          else
+            git diff --name-only "$BASE" "$HEAD_SHA" | python .github/scripts/detect_changes.py >> "$GITHUB_OUTPUT"
+          fi
+          echo "Selected:"
+          cat "$GITHUB_OUTPUT"
+
+  python:
+    needs: changes
+    if: needs.changes.outputs.services != '[]' || needs.changes.outputs.repository == 'true'
+    uses: ./.github/workflows/python.yml
+    with:
+      services: ${{ needs.changes.outputs.services }}
+      repository: ${{ needs.changes.outputs.repository == 'true' }}
+
+  rust:
+    needs: changes
+    if: needs.changes.outputs.rust == 'true'
+    uses: ./.github/workflows/rust.yml
+
+  typescript:
+    needs: changes
+    if: needs.changes.outputs.typescript != '[]'
+    uses: ./.github/workflows/typescript.yml
+    with:
+      projects: ${{ needs.changes.outputs.typescript }}
+
+  specs:
+    needs: changes
+    if: needs.changes.outputs.specs == 'true'
+    uses: ./.github/workflows/specs.yml
+
+  result:
+    needs: [changes, python, rust, typescript, specs]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail when a check failed or was cancelled
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: |
+          echo "$NEEDS"
+          if echo "$NEEDS" | grep -qE '"result": "(failure|cancelled)"'; then
+            echo "::error::A check failed or was cancelled."
+            exit 1
+          fi

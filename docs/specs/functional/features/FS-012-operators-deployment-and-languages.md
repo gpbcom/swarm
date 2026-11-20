@@ -1,7 +1,7 @@
 # 📘 FS-012: Operators, deployment and languages
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ FS-011: Drone adapters](FS-011-drone-adapters.md) · 📄 **Page 16 / 108** · [FS-013: Light shows ▶️](FS-013-light-shows.md)
+> [🏠 Index](../../README.md) · [◀️ FS-011: Drone adapters](FS-011-drone-adapters.md) · 📄 **Page 16 / 120** · [FS-013: Light shows ▶️](FS-013-light-shows.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -88,5 +88,5 @@ Settled with the product owner ([interview](../../../research/interview.md)).
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ FS-011: Drone adapters](FS-011-drone-adapters.md) · 📄 **Page 16 / 108** · [FS-013: Light shows ▶️](FS-013-light-shows.md)
+> [🏠 Index](../../README.md) · [◀️ FS-011: Drone adapters](FS-011-drone-adapters.md) · 📄 **Page 16 / 120** · [FS-013: Light shows ▶️](FS-013-light-shows.md)
 <!-- /spec:nav-bottom -->

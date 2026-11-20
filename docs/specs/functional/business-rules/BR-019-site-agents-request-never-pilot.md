@@ -1,7 +1,7 @@
 # 📏 BR-019: Site agents request, never pilot
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ BR-018: Dose follows the Prescription map](BR-018-dose-follows-the-prescription-map.md) · 📄 **Page 75 / 108** · [BR-020: Defects confirmed by a person ▶️](BR-020-defects-confirmed-by-a-person.md)
+> [🏠 Index](../../README.md) · [◀️ BR-018: Dose follows the Prescription map](BR-018-dose-follows-the-prescription-map.md) · 📄 **Page 81 / 120** · [BR-020: Defects confirmed by a person ▶️](BR-020-defects-confirmed-by-a-person.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Type:** Authorisation · **Updated:** 2026-11-18
@@ -48,5 +48,5 @@ Site agents know the Site but are not qualified Pilots. The Pilot remains respon
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ BR-018: Dose follows the Prescription map](BR-018-dose-follows-the-prescription-map.md) · 📄 **Page 75 / 108** · [BR-020: Defects confirmed by a person ▶️](BR-020-defects-confirmed-by-a-person.md)
+> [🏠 Index](../../README.md) · [◀️ BR-018: Dose follows the Prescription map](BR-018-dose-follows-the-prescription-map.md) · 📄 **Page 81 / 120** · [BR-020: Defects confirmed by a person ▶️](BR-020-defects-confirmed-by-a-person.md)
 <!-- /spec:nav-bottom -->

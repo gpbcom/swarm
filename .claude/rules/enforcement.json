@@ -1,0 +1,638 @@
+{
+ "about": "How each rule of .claude/rules/specs.md and .claude/rules/tickets.md is enforced (TKT-22). Every rule has at least one enforcer that is not only an agent's reading; tests/harness/wiring/test_enforcement.py fails otherwise. Kinds: test, script, hook, workflow, ci, agent.",
+ "rules": {
+  "SPEC-1": [
+   {
+    "kind": "script",
+    "path": ".claude/skills/write-specs/scripts/spec_check.py",
+    "what": "specs.py check reports it; it must print nothing"
+   },
+   {
+    "kind": "ci",
+    "path": ".github/workflows/specs.yml",
+    "what": "CI runs specs.py check on every change of the specifications"
+   }
+  ],
+  "SPEC-2": [
+   {
+    "kind": "script",
+    "path": ".claude/skills/write-specs/scripts/spec_check.py",
+    "what": "specs.py check reports it; it must print nothing"
+   },
+   {
+    "kind": "ci",
+    "path": ".github/workflows/specs.yml",
+    "what": "CI runs specs.py check on every change of the specifications"
+   }
+  ],
+  "SPEC-3": [
+   {
+    "kind": "script",
+    "path": ".claude/skills/write-specs/scripts/spec_check.py",
+    "what": "specs.py check reports it; it must print nothing"
+   },
+   {
+    "kind": "ci",
+    "path": ".github/workflows/specs.yml",
+    "what": "CI runs specs.py check on every change of the specifications"
+   }
+  ],
+  "SPEC-4": [
+   {
+    "kind": "script",
+    "path": ".claude/skills/write-specs/scripts/spec_check.py",
+    "what": "specs.py check reports it; it must print nothing"
+   },
+   {
+    "kind": "ci",
+    "path": ".github/workflows/specs.yml",
+    "what": "CI runs specs.py check on every change of the specifications"
+   }
+  ],
+  "SPEC-5": [
+   {
+    "kind": "script",
+    "path": ".claude/skills/write-specs/scripts/spec_check.py",
+    "what": "specs.py check reports it; it must print nothing"
+   },
+   {
+    "kind": "ci",
+    "path": ".github/workflows/specs.yml",
+    "what": "CI runs specs.py check on every change of the specifications"
+   }
+  ],
+  "SPEC-6": [
+   {
+    "kind": "script",
+    "path": ".claude/skills/write-specs/scripts/spec_check.py",
+    "what": "specs.py check reports it; it must print nothing"
+   },
+   {
+    "kind": "ci",
+    "path": ".github/workflows/specs.yml",
+    "what": "CI runs specs.py check on every change of the specifications"
+   }
+  ],
+  "SPEC-7": [
+   {
+    "kind": "script",
+    "path": ".claude/skills/write-specs/scripts/spec_check.py",
+    "what": "specs.py check reports it; it must print nothing"
+   },
+   {
+    "kind": "ci",
+    "path": ".github/workflows/specs.yml",
+    "what": "CI runs specs.py check on every change of the specifications"
+   }
+  ],
+  "SPEC-8": [
+   {
+    "kind": "script",
+    "path": ".claude/skills/write-specs/scripts/spec_check.py",
+    "what": "specs.py check reports it; it must print nothing"
+   },
+   {
+    "kind": "ci",
+    "path": ".github/workflows/specs.yml",
+    "what": "CI runs specs.py check on every change of the specifications"
+   }
+  ],
+  "SPEC-9": [
+   {
+    "kind": "script",
+    "path": ".claude/skills/write-specs/scripts/spec_check.py",
+    "what": "specs.py check reports it; it must print nothing"
+   },
+   {
+    "kind": "ci",
+    "path": ".github/workflows/specs.yml",
+    "what": "CI runs specs.py check on every change of the specifications"
+   }
+  ],
+  "SPEC-10": [
+   {
+    "kind": "script",
+    "path": ".claude/skills/write-specs/scripts/spec_check.py",
+    "what": "specs.py check reports it; it must print nothing"
+   },
+   {
+    "kind": "ci",
+    "path": ".github/workflows/specs.yml",
+    "what": "CI runs specs.py check on every change of the specifications"
+   },
+   {
+    "kind": "agent",
+    "path": ".claude/agents/reviewer.md",
+    "what": "plain British English and no invented fact are checked by reading"
+   }
+  ],
+  "SPEC-11": [
+   {
+    "kind": "script",
+    "path": ".claude/skills/write-specs/scripts/spec_check.py",
+    "what": "specs.py check reports it; it must print nothing"
+   },
+   {
+    "kind": "ci",
+    "path": ".github/workflows/specs.yml",
+    "what": "CI runs specs.py check on every change of the specifications"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/board/test_board.py",
+    "what": "generated pages of the harness stay generated (roadmap_gantt check)"
+   }
+  ],
+  "SPEC-12": [
+   {
+    "kind": "script",
+    "path": ".claude/skills/write-specs/scripts/spec_check.py",
+    "what": "specs.py check reports it; it must print nothing"
+   },
+   {
+    "kind": "ci",
+    "path": ".github/workflows/specs.yml",
+    "what": "CI runs specs.py check on every change of the specifications"
+   },
+   {
+    "kind": "script",
+    "path": ".claude/scripts/checks.py",
+    "what": "front-end tickets capture their screens as screenshots (TKT-21)"
+   }
+  ],
+  "SPEC-13": [
+   {
+    "kind": "script",
+    "path": ".claude/skills/write-specs/scripts/spec_check.py",
+    "what": "specs.py check reports it; it must print nothing"
+   },
+   {
+    "kind": "ci",
+    "path": ".github/workflows/specs.yml",
+    "what": "CI runs specs.py check on every change of the specifications"
+   }
+  ],
+  "TKT-1": [
+   {
+    "kind": "script",
+    "path": ".claude/scripts/ticket_tree.py",
+    "what": "finish refuses a ticket whose documents are missing (docs)"
+   },
+   {
+    "kind": "agent",
+    "path": ".claude/agents/reviewer.md",
+    "what": "the ticket folder holds its files before the ticket is called done"
+   }
+  ],
+  "TKT-2": [
+   {
+    "kind": "script",
+    "path": ".claude/skills/ticket/scripts/check_ticket.py",
+    "what": "TICKET.md against the template and docs/specs/"
+   },
+   {
+    "kind": "script",
+    "path": ".claude/scripts/ticket_refs.py",
+    "what": "TICKET.md, PLAN.md and PROGRESS.md refer to the specification"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/check_ticket/test_check_ticket.py",
+    "what": "the checks of TICKET.md"
+   }
+  ],
+  "TKT-3": [
+   {
+    "kind": "script",
+    "path": ".claude/skills/ticket/scripts/check_plan.py",
+    "what": "the task graph and its status line"
+   },
+   {
+    "kind": "workflow",
+    "path": ".claude/workflows/ticket-run.js",
+    "what": "the gate refuses a plan that is not approved"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/check_plan/test_check_plan.py",
+    "what": "the checks of PLAN.md"
+   }
+  ],
+  "TKT-4": [
+   {
+    "kind": "script",
+    "path": ".claude/skills/ticket/scripts/check_plan.py",
+    "what": "tests first, file ownership per wave, parallelism"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/check_plan/test_check_plan.py",
+    "what": "waves, ownership and tests first"
+   }
+  ],
+  "TKT-5": [
+   {
+    "kind": "script",
+    "path": ".claude/scripts/ticket_tree.py",
+    "what": "hand-offs, integration and the single commit"
+   },
+   {
+    "kind": "hook",
+    "path": ".claude/hooks/guard_git.py",
+    "what": "agents never commit, merge or push by hand"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/ticket_tree/test_ticket_tree.py",
+    "what": "hand-offs, integration and finish"
+   }
+  ],
+  "TKT-6": [
+   {
+    "kind": "script",
+    "path": ".claude/scripts/checks.py",
+    "what": "the verifier's deterministic checks"
+   },
+   {
+    "kind": "workflow",
+    "path": ".claude/workflows/ticket-run.js",
+    "what": "verify, review, documents, code review, then finish"
+   },
+   {
+    "kind": "agent",
+    "path": ".claude/agents/reviewer.md",
+    "what": "the reviewer approves the diff"
+   }
+  ],
+  "TKT-7": [
+   {
+    "kind": "test",
+    "path": "tests/harness/wiring/test_agent_definitions.py",
+    "what": "every agent has the model and effort of TKT-7"
+   }
+  ],
+  "TKT-8": [
+   {
+    "kind": "workflow",
+    "path": ".claude/workflows/ticket-run.js",
+    "what": "assumptions are collected and passed to the reviewer"
+   },
+   {
+    "kind": "agent",
+    "path": ".claude/agents/reviewer.md",
+    "what": "each assumption is accepted or rejected"
+   }
+  ],
+  "TKT-9": [
+   {
+    "kind": "script",
+    "path": ".claude/scripts/progress.py",
+    "what": "the exhaustive progress report"
+   },
+   {
+    "kind": "script",
+    "path": ".claude/scripts/tickets.py",
+    "what": "the group report of tickets.py watch"
+   }
+  ],
+  "TKT-10": [
+   {
+    "kind": "script",
+    "path": ".claude/scripts/progress.py",
+    "what": "timings and tokens written into PROGRESS.md"
+   },
+   {
+    "kind": "workflow",
+    "path": ".claude/workflows/ticket-run.js",
+    "what": "the scribe writes the timings at the end of every run"
+   }
+  ],
+  "TKT-11": [
+   {
+    "kind": "script",
+    "path": ".claude/scripts/ticket_tree.py",
+    "what": "status lists the integrated tasks"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/ticket_tree/test_ticket_tree.py",
+    "what": "status after a run"
+   }
+  ],
+  "TKT-12": [
+   {
+    "kind": "workflow",
+    "path": ".claude/workflows/ticket-run.js",
+    "what": "one full review, then confirm-only rounds; follow-ups never block"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/wiring/test_ticket_workflows.py",
+    "what": "the review returns a note and its rounds"
+   }
+  ],
+  "TKT-13": [
+   {
+    "kind": "hook",
+    "path": ".claude/hooks/format_edited.py",
+    "what": "formats the edited file"
+   },
+   {
+    "kind": "hook",
+    "path": ".claude/hooks/check_touched.py",
+    "what": "checks the touched layer"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/check_touched/test_check_touched.py",
+    "what": "the stop hook"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/format_edited/test_format_edited.py",
+    "what": "the format hook"
+   }
+  ],
+  "TKT-14": [
+   {
+    "kind": "script",
+    "path": ".claude/scripts/ticket_tree.py",
+    "what": "docs checks EXPLAIN.md and IMPLEMENTATION.md; finish refuses otherwise"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/ticket_tree/test_ticket_tree.py",
+    "what": "the documents check"
+   }
+  ],
+  "TKT-15": [
+   {
+    "kind": "script",
+    "path": ".claude/scripts/gitflow.py",
+    "what": "the GitFlow git hooks"
+   },
+   {
+    "kind": "hook",
+    "path": ".claude/hooks/guard_git.py",
+    "what": "no --no-verify, no push to develop or master"
+   },
+   {
+    "kind": "ci",
+    "path": ".github/workflows/gitflow.yml",
+    "what": "every pull request's branch, base and title"
+   },
+   {
+    "kind": "ci",
+    "path": ".github/workflows/automerge.yml",
+    "what": "merged once every check passed"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/gitflow/test_gitflow.py",
+    "what": "the hooks"
+   },
+   {
+    "kind": "test",
+    "path": "tests/ci/workflows/test_gitflow_workflows.py",
+    "what": "the GitFlow workflows"
+   }
+  ],
+  "TKT-16": [
+   {
+    "kind": "script",
+    "path": ".claude/scripts/tickets.py",
+    "what": "the start rule and the area locks"
+   },
+   {
+    "kind": "script",
+    "path": ".claude/scripts/ticket_tree.py",
+    "what": "one checkout, the ticket's own files, one commit each"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/tickets/test_tickets.py",
+    "what": "start rule, area locks, prune"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/ticket_tree/test_ticket_tree.py",
+    "what": "two tickets in one checkout"
+   }
+  ],
+  "TKT-17": [
+   {
+    "kind": "script",
+    "path": ".claude/scripts/board.py",
+    "what": "the board on GitHub and its columns"
+   },
+   {
+    "kind": "script",
+    "path": ".claude/scripts/statusline.py",
+    "what": "the status line"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/board/test_board.py",
+    "what": "bootstrap and resume"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/statusline/test_statusline.py",
+    "what": "the status line"
+   }
+  ],
+  "TKT-18": [
+   {
+    "kind": "workflow",
+    "path": ".claude/workflows/ticket-run.js",
+    "what": "the run stops for the code review until PLAN.md says Push approved"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/wiring/test_ticket_workflows.py",
+    "what": "the push gate is wired"
+   }
+  ],
+  "TKT-19": [
+   {
+    "kind": "workflow",
+    "path": ".claude/workflows/ticket-run.js",
+    "what": "blocking files go to their owner before the retry"
+   }
+  ],
+  "TKT-20": [
+   {
+    "kind": "script",
+    "path": ".claude/scripts/tickets.py",
+    "what": "resolve, approve, next and watch"
+   },
+   {
+    "kind": "hook",
+    "path": ".claude/hooks/guard_git.py",
+    "what": "the person confirms a group approval"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/tickets/test_groups.py",
+    "what": "groups, done sub-issues left out"
+   }
+  ],
+  "TKT-21": [
+   {
+    "kind": "script",
+    "path": ".claude/skills/ticket/scripts/check_ticket.py",
+    "what": "a front-end ticket lists its screens"
+   },
+   {
+    "kind": "script",
+    "path": ".claude/skills/ticket/scripts/check_plan.py",
+    "what": "its plan captures them after the front-end work"
+   },
+   {
+    "kind": "script",
+    "path": ".claude/scripts/checks.py",
+    "what": "screens captured as screenshots"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/check_plan/test_screen_capture.py",
+    "what": "the capture task"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/checks/test_checks.py",
+    "what": "the screens check"
+   },
+   {
+    "kind": "agent",
+    "path": ".claude/agents/reviewer.md",
+    "what": "the list of screens is complete"
+   }
+  ],
+  "TKT-22": [
+   {
+    "kind": "test",
+    "path": "tests/harness/wiring/test_enforcement.py",
+    "what": "every rule has an enforcer that exists, beyond reading alone"
+   }
+  ],
+  "TKT-23": [
+   {
+    "kind": "script",
+    "path": ".claude/scripts/tickets.py",
+    "what": "done_tickets, the one definition of done; check and done refuse a done or finished ticket"
+   },
+   {
+    "kind": "workflow",
+    "path": ".claude/workflows/ticket-plan.js",
+    "what": "refuses to plan a ticket already done"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/tickets/test_groups.py",
+    "what": "done tickets are never planned, approved or run again"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/board/test_board.py",
+    "what": "a resumed bootstrap counts what exists as done"
+   }
+  ],
+  "TKT-24": [
+   {
+    "kind": "test",
+    "path": "tests/harness/board/test_board.py",
+    "what": "the dry run never calls GitHub; develop is found in a CI checkout"
+   },
+   {
+    "kind": "ci",
+    "path": ".github/workflows/python.yml",
+    "what": "CI runs the harness tests in a shallow checkout without develop"
+   }
+  ],
+  "TKT-25": [
+   {
+    "kind": "script",
+    "path": ".claude/scripts/branches.py",
+    "what": "gives every branch its verdict; deletes only merged, integrated or superseded ones, after a backup bundle"
+   },
+   {
+    "kind": "script",
+    "path": ".claude/scripts/tickets.py",
+    "what": "branches prints the verdicts; prune [--dry-run] acts on them"
+   },
+   {
+    "kind": "hook",
+    "path": ".claude/hooks/guard_git.py",
+    "what": "refuses a rebase, a reset or a forced push or deletion of develop or master"
+   },
+   {
+    "kind": "hook",
+    "path": ".claude/scripts/gitflow.py",
+    "what": "the pre-push hook refuses deleting develop or master on the remote"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/tickets/test_branches.py",
+    "what": "verdicts, backup before deletion, dry run, open tickets' workers kept, GitHub branches"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/gitflow/test_gitflow.py",
+    "what": "develop and master are never rebased, reset, forced or deleted"
+   },
+   {
+    "kind": "workflow",
+    "path": ".github/workflows/automerge.yml",
+    "what": "deletes the head branch of a pull request merged into develop, unless it moved; never develop or master"
+   },
+   {
+    "kind": "test",
+    "path": "tests/ci/release/test_automerge.py",
+    "what": "a merged branch is deleted, a branch that moved is kept"
+   }
+  ],
+  "TKT-26": [
+   {
+    "kind": "workflow",
+    "path": ".github/workflows/release.yml",
+    "what": "runs every suite, writes the changelog, notes and test reports on release/<version>, opens the pull request to master"
+   },
+   {
+    "kind": "workflow",
+    "path": ".github/workflows/automerge.yml",
+    "what": "merges the release into master, tags it, publishes the GitHub release, merges it back into develop"
+   },
+   {
+    "kind": "script",
+    "path": ".github/scripts/release_notes.py",
+    "what": "writes CHANGELOG.md, RELEASE_NOTES.md and TEST_REPORT.md; refuses a release without test reports"
+   },
+   {
+    "kind": "ci",
+    "path": ".github/workflows/python.yml",
+    "what": "every suite keeps its test report as a test-report-* artifact"
+   },
+   {
+    "kind": "hook",
+    "path": ".claude/hooks/guard_git.py",
+    "what": "asks the person before a release starts"
+   },
+   {
+    "kind": "test",
+    "path": "tests/ci/release/test_automerge.py",
+    "what": "release into master, tag, way back to develop, token required"
+   },
+   {
+    "kind": "test",
+    "path": "tests/ci/release/test_release_workflow.py",
+    "what": "every suite runs and keeps its report; the release waits for all of them"
+   },
+   {
+    "kind": "test",
+    "path": "tests/ci/release_notes/test_release_notes.py",
+    "what": "version, changelog, release notes, test report, no release without reports"
+   }
+  ]
+ }
+}

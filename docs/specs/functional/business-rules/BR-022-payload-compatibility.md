@@ -1,7 +1,7 @@
 # 📏 BR-022: Payload compatibility
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ BR-021: AI agents propose, people decide](BR-021-ai-agents-propose-people-decide.md) · 📄 **Page 78 / 108** · [BR-023: Fixed safety controls ▶️](BR-023-fixed-safety-controls.md)
+> [🏠 Index](../../README.md) · [◀️ BR-021: AI agents propose, people decide](BR-021-ai-agents-propose-people-decide.md) · 📄 **Page 84 / 120** · [BR-023: Fixed safety controls ▶️](BR-023-fixed-safety-controls.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Type:** Validation · **Updated:** 2026-11-18
@@ -46,10 +46,11 @@ Mixed Squads are the strength of a swarm: in an Inspection, a thermal camera and
 - [🎬 UC-001: Design a Mission](../use-cases/UC-001-design-a-mission.md)
 - [🎬 UC-007: Register a Drone and track its readiness](../use-cases/UC-007-register-a-drone-and-track-its-readiness.md)
 - [🎬 UC-024: Configure each Drone of the Squad on the Site](../use-cases/UC-024-configure-each-drone-of-the-squad-on-the-site.md)
+- [🎬 UC-033: Cover a Squad shortfall through the ERP](../use-cases/UC-033-cover-a-squad-shortfall-through-the-erp.md)
 <!-- /spec:referenced-by -->
 
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ BR-021: AI agents propose, people decide](BR-021-ai-agents-propose-people-decide.md) · 📄 **Page 78 / 108** · [BR-023: Fixed safety controls ▶️](BR-023-fixed-safety-controls.md)
+> [🏠 Index](../../README.md) · [◀️ BR-021: AI agents propose, people decide](BR-021-ai-agents-propose-people-decide.md) · 📄 **Page 84 / 120** · [BR-023: Fixed safety controls ▶️](BR-023-fixed-safety-controls.md)
 <!-- /spec:nav-bottom -->

@@ -1,7 +1,7 @@
 # 📏 BR-012: Pilot override always available
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ BR-011: Drone readiness](BR-011-drone-readiness.md) · 📄 **Page 68 / 108** · [BR-013: Re-plan approval ▶️](BR-013-re-plan-approval.md)
+> [🏠 Index](../../README.md) · [◀️ BR-011: Drone readiness](BR-011-drone-readiness.md) · 📄 **Page 74 / 120** · [BR-013: Re-plan approval ▶️](BR-013-re-plan-approval.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Type:** Constraint · **Updated:** 2026-11-18
@@ -47,10 +47,11 @@ The Pilot is the remote pilot in command in both Jurisdictions. Autonomy helps t
 - [🎬 UC-005: Lose a Drone in flight](../use-cases/UC-005-lose-a-drone-in-flight.md)
 - [🎬 UC-006: Take manual control or abort](../use-cases/UC-006-take-manual-control-or-abort.md)
 - [🎬 UC-025: Monitor a Mission in Ground control](../use-cases/UC-025-monitor-a-mission-in-ground-control.md)
+- [🎬 UC-034: Let the Assistant hold a Squad](../use-cases/UC-034-let-the-assistant-hold-a-squad.md)
 <!-- /spec:referenced-by -->
 
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ BR-011: Drone readiness](BR-011-drone-readiness.md) · 📄 **Page 68 / 108** · [BR-013: Re-plan approval ▶️](BR-013-re-plan-approval.md)
+> [🏠 Index](../../README.md) · [◀️ BR-011: Drone readiness](BR-011-drone-readiness.md) · 📄 **Page 74 / 120** · [BR-013: Re-plan approval ▶️](BR-013-re-plan-approval.md)
 <!-- /spec:nav-bottom -->

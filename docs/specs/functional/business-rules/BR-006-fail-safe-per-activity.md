@@ -1,7 +1,7 @@
 # 📏 BR-006: Fail-safe per Activity
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ BR-005: Autonomy level per Activity](BR-005-autonomy-level-per-activity.md) · 📄 **Page 62 / 108** · [BR-007: Launch only after a passed Pre-flight check ▶️](BR-007-launch-only-after-a-passed-pre-flight-check.md)
+> [🏠 Index](../../README.md) · [◀️ BR-005: Autonomy level per Activity](BR-005-autonomy-level-per-activity.md) · 📄 **Page 68 / 120** · [BR-007: Launch only after a passed Pre-flight check ▶️](BR-007-launch-only-after-a-passed-pre-flight-check.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Type:** Constraint · **Updated:** 2026-11-18
@@ -43,12 +43,14 @@ Above an audience, any surprise is a danger: stopping everything is the safe ans
 <!-- spec:referenced-by -->
 - [📘 FS-004: Fail-safes and emergencies](../features/FS-004-fail-safes-and-emergencies.md)
 - [📘 FS-013: Light shows](../features/FS-013-light-shows.md)
+- [📘 FS-023: AI Assistant](../features/FS-023-ai-assistant.md)
 - [🎬 UC-005: Lose a Drone in flight](../use-cases/UC-005-lose-a-drone-in-flight.md)
 - [🎬 UC-016: Import and fly a Light show](../use-cases/UC-016-import-and-fly-a-light-show.md)
+- [🎬 UC-034: Let the Assistant hold a Squad](../use-cases/UC-034-let-the-assistant-hold-a-squad.md)
 <!-- /spec:referenced-by -->
 
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ BR-005: Autonomy level per Activity](BR-005-autonomy-level-per-activity.md) · 📄 **Page 62 / 108** · [BR-007: Launch only after a passed Pre-flight check ▶️](BR-007-launch-only-after-a-passed-pre-flight-check.md)
+> [🏠 Index](../../README.md) · [◀️ BR-005: Autonomy level per Activity](BR-005-autonomy-level-per-activity.md) · 📄 **Page 68 / 120** · [BR-007: Launch only after a passed Pre-flight check ▶️](BR-007-launch-only-after-a-passed-pre-flight-check.md)
 <!-- /spec:nav-bottom -->

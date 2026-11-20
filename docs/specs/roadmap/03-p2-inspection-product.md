@@ -1,7 +1,7 @@
 # 🛣️ P2: Inspection product
 
 <!-- spec:nav-top -->
-> [🏠 Index](../README.md) · [◀️ P1: First flight](02-p1-first-flight.md) · 📄 **Page 98 / 108** · [P3: Patrol ▶️](04-p3-patrol.md)
+> [🏠 Index](../README.md) · [◀️ P1: First flight](02-p1-first-flight.md) · 📄 **Page 109 / 120** · [P3: Patrol ▶️](04-p3-patrol.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Sprints:** S14 to S24 · **Dates:** 5 Jul 2027 to 3 Dec 2027 · **Tickets:** about 50
@@ -293,5 +293,5 @@ P2 also prepares P3: the Dock vendor is chosen in S22 ([🤝 H-05](11-hardware-a
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../README.md) · [◀️ P1: First flight](02-p1-first-flight.md) · 📄 **Page 98 / 108** · [P3: Patrol ▶️](04-p3-patrol.md)
+> [🏠 Index](../README.md) · [◀️ P1: First flight](02-p1-first-flight.md) · 📄 **Page 109 / 120** · [P3: Patrol ▶️](04-p3-patrol.md)
 <!-- /spec:nav-bottom -->

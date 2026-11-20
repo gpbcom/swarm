@@ -7,9 +7,11 @@ The 262 tickets of the [roadmap](../specs/roadmap/README.md), generated from its
 
 | Step | Command | Result |
 | --- | --- | --- |
-| 1. Plan | `/ticket-plan T1.07` | `TICKET.md`, `PROGRESS.md`, and `PLAN.md` with the task graph, awaiting approval |
+| 1. Plan | `/ticket-plan T1.07` | `TICKET.md` is checked by `check_ticket.py`, then `PROGRESS.md` and `PLAN.md` with the task graph (waves, dependency graph and task details rendered by `.claude/scripts/plan.py`) are written and checked by `check_plan.py`, awaiting approval |
 | 2. Approve | Edit `PLAN.md`: `**Plan:** 🟢 Approved` | The only human gate |
-| 3. Run | `/ticket-run T1.07` | Waves of agents in parallel worktrees, integration, verification, review, local merge into `develop` |
+| 3. Run | `/ticket-run T1.07` | Waves of agents in parallel worktrees. Hooks format each edited file, and check the touched layer, before a task is handed back. Then integration, verification, review, the reviewer's note in `REVIEW.md`, and local merge into `develop` |
+
+The ticket template [`TICKET.md`](../../.claude/skills/ticket/templates/TICKET.md) is the form `TICKET.md` is written from.
 
 Status: ⬜ To do · 🟡 Planned (folder and plan exist) · 🔵 In progress · ✅ Done.
 

@@ -1,0 +1,14 @@
+$ terraform test
+(cwd deploy/terraform/modules/self-hosted/machines)
+
+tests/machines.tftest.hcl... [37min progress[0m
+[0m  run "three_machines_give_three_instances"... [32mpass[0m[0m
+  run "servers_output_lists_the_server"... [32mpass[0m[0m
+  run "agents_output_lists_the_agents"... [32mpass[0m[0m
+  run "a_list_without_a_server_is_refused"... [32mpass[0m[0m
+  run "an_unknown_role_is_refused"... [32mpass[0m[0m
+  run "duplicate_names_are_refused"... [32mpass[0m[0m
+tests/machines.tftest.hcl... [37mtearing down[0m
+[0mtests/machines.tftest.hcl... [32mpass[0m[0m
+
+[32mSuccess![0m[0m 6 passed, 0 failed.

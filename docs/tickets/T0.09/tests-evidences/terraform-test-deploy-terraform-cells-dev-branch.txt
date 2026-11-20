@@ -1,0 +1,15 @@
+$ terraform test
+(cwd deploy/terraform/cells/dev-branch)
+
+tests/dev_branch.tftest.hcl... [37min progress[0m
+[0m  run "plans_the_cell_of_a_branch"... [32mpass[0m[0m
+  run "refuses_a_cell_name_that_is_not_a_label"... [32mpass[0m[0m
+  run "refuses_a_cell_without_a_database_image"... [32mpass[0m[0m
+  run "refuses_an_empty_branch"... [32mpass[0m[0m
+  run "refuses_an_empty_nats_operator_jwt"... [32mpass[0m[0m
+  run "refuses_a_system_account_that_is_not_an_account_key"... [32mpass[0m[0m
+  run "refuses_an_empty_system_account_jwt"... [32mpass[0m[0m
+tests/dev_branch.tftest.hcl... [37mtearing down[0m
+[0mtests/dev_branch.tftest.hcl... [32mpass[0m[0m
+
+[32mSuccess![0m[0m 7 passed, 0 failed.

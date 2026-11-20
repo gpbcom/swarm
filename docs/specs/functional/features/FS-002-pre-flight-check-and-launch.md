@@ -1,7 +1,7 @@
 # 📘 FS-002: Pre-flight check and launch
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ FS-001: Mission design](FS-001-mission-design.md) · 📄 **Page 6 / 108** · [FS-003: Live supervision ▶️](FS-003-live-supervision.md)
+> [🏠 Index](../../README.md) · [◀️ FS-001: Mission design](FS-001-mission-design.md) · 📄 **Page 6 / 120** · [FS-003: Live supervision ▶️](FS-003-live-supervision.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -93,5 +93,5 @@ Settled with the product owner ([interview](../../../research/interview.md)).
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ FS-001: Mission design](FS-001-mission-design.md) · 📄 **Page 6 / 108** · [FS-003: Live supervision ▶️](FS-003-live-supervision.md)
+> [🏠 Index](../../README.md) · [◀️ FS-001: Mission design](FS-001-mission-design.md) · 📄 **Page 6 / 120** · [FS-003: Live supervision ▶️](FS-003-live-supervision.md)
 <!-- /spec:nav-bottom -->

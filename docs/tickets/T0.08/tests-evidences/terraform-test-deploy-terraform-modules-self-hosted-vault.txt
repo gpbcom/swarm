@@ -1,0 +1,11 @@
+$ terraform test
+(cwd deploy/terraform/modules/self-hosted/vault)
+
+tests/vault.tftest.hcl... [37min progress[0m
+[0m  run "installs_the_vault_of_a_cell"... [32mpass[0m[0m
+  run "refuses_a_namespace_that_is_not_a_label"... [32mpass[0m[0m
+  run "refuses_a_floating_chart_version"... [32mpass[0m[0m
+tests/vault.tftest.hcl... [37mtearing down[0m
+[0mtests/vault.tftest.hcl... [32mpass[0m[0m
+
+[32mSuccess![0m[0m 3 passed, 0 failed.

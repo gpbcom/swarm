@@ -1,7 +1,7 @@
 # 📏 BR-011: Drone readiness
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ BR-010: Valid Authorisation for the Jurisdiction](BR-010-valid-authorisation-for-the-jurisdiction.md) · 📄 **Page 67 / 108** · [BR-012: Pilot override always available ▶️](BR-012-pilot-override-always-available.md)
+> [🏠 Index](../../README.md) · [◀️ BR-010: Valid Authorisation for the Jurisdiction](BR-010-valid-authorisation-for-the-jurisdiction.md) · 📄 **Page 73 / 120** · [BR-012: Pilot override always available ▶️](BR-012-pilot-override-always-available.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Type:** Validation · **Updated:** 2026-11-18
@@ -47,10 +47,11 @@ One weak Drone endangers the whole Squad and, under BR-006, can stop a Light sho
 - [🎬 UC-007: Register a Drone and track its readiness](../use-cases/UC-007-register-a-drone-and-track-its-readiness.md)
 - [🎬 UC-014: Connect a new Drone model](../use-cases/UC-014-connect-a-new-drone-model.md)
 - [🎬 UC-024: Configure each Drone of the Squad on the Site](../use-cases/UC-024-configure-each-drone-of-the-squad-on-the-site.md)
+- [🎬 UC-033: Cover a Squad shortfall through the ERP](../use-cases/UC-033-cover-a-squad-shortfall-through-the-erp.md)
 <!-- /spec:referenced-by -->
 
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ BR-010: Valid Authorisation for the Jurisdiction](BR-010-valid-authorisation-for-the-jurisdiction.md) · 📄 **Page 67 / 108** · [BR-012: Pilot override always available ▶️](BR-012-pilot-override-always-available.md)
+> [🏠 Index](../../README.md) · [◀️ BR-010: Valid Authorisation for the Jurisdiction](BR-010-valid-authorisation-for-the-jurisdiction.md) · 📄 **Page 73 / 120** · [BR-012: Pilot override always available ▶️](BR-012-pilot-override-always-available.md)
 <!-- /spec:nav-bottom -->

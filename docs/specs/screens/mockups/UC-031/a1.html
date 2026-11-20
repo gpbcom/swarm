@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <title>UC-031 A1: Ask in the Assistant panel</title>
+  <link rel="stylesheet" href="../visual-identity.css">
+  <link rel="stylesheet" href="../components.css">
+</head>
+<body>
+<div class="window">
+  <header class="titlebar"><span class="app">⚙️ Swarm</span><span class="screen-title">Back office · Aerowing Services</span><span class="spacer"></span><span class="badge persona">👤 Fleet maintainer</span></header>
+  <div class="layout">
+    <nav class="sidebar">
+      <span class="nav-item active">🛸 Fleet</span>
+      <span class="nav-item">📜 Authorisations</span>
+      <span class="nav-item">📦 Deliverables</span>
+      <span class="nav-item">🔏 Evidence</span>
+      <span class="nav-item">👥 People</span>
+      <span class="nav-item">🔧 Settings</span>
+    </nav>
+    <main class="content">
+      <div class="tabs"><span class="tab active">🛸 Drones</span><span class="tab">Drone models</span><span class="tab">Payloads</span><span class="tab">Batteries</span></div>
+      <div class="split">
+        <section class="card stack">
+          <table class="table">
+            <tr><th>Drone</th><th>Drone model</th><th>Payload</th><th>Maintenance</th><th>State</th></tr>
+            <tr><td>🛸 Alpha</td><td>X500</td><td>Thermal camera</td><td>Not due</td><td><span class="badge success">🔄 Drone: Ready</span></td></tr>
+            <tr><td>🛸 Bravo</td><td>X500</td><td>Thermal camera</td><td>Not due</td><td><span class="badge success">🔄 Drone: Ready</span></td></tr>
+            <tr><td>🛸 Charlie</td><td>X500</td><td>➖</td><td>48 of 50 h · due 2 December</td><td><span class="badge success">🔄 Drone: Ready</span></td></tr>
+            <tr><td>🛸 Echo</td><td>X500</td><td>➖</td><td>Not due</td><td><span class="badge success">🔄 Drone: Ready</span></td></tr>
+          </table>
+          <span class="hint">Flight hours and maintenance intervals are sample values.</span>
+        </section>
+        <aside class="card panel">
+          <div class="row"><h2>💬 Assistant</h2><span class="spacer"></span><span class="badge system">⚙️ Assistant</span></div>
+          <div class="conversation">
+          <div class="message person"><strong>👤 Fleet maintainer</strong><p>Which Drones will not be Ready for the Mission of 3 December, and why?</p></div>
+          </div>
+          <span class="hint">⏳ The Assistant is reading the Fleet as you may see it.</span>
+          <span class="spacer"></span>
+          <div class="row"><span class="input muted spacer">Ask the Assistant</span><span class="button primary">Send</span></div>
+        </aside>
+      </div>
+    </main>
+  </div>
+  <footer class="statusbar"><span>🗃️ Aerowing Services</span><span>Cloud</span><span>💬 Conversation kept</span></footer>
+</div>
+</body>
+</html>

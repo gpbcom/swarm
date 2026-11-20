@@ -1,0 +1,75 @@
+name: Rust
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/rust
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install the toolchain of rust-toolchain.toml
+        run: |
+          rustup toolchain install
+          rustup show active-toolchain
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: packages/rust
+      - name: Check the format
+        run: cargo fmt --all --check
+      - name: Run clippy
+        run: cargo clippy --workspace --all-targets --locked -- -D warnings
+      - name: Run the tests
+        shell: bash
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/reports"
+          cargo test --workspace --locked 2>&1 | tee "$GITHUB_WORKSPACE/reports/rust-cargo-test.log"
+      - name: Keep the test reports (TKT-26)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report-rust
+          path: reports/
+          if-no-files-found: ignore
+
+  bench:
+    needs: check
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/rust
+    env:
+      BASE_SHA: ${{ github.event.pull_request.base.sha }}
+      CARGO_TARGET_DIR: ${{ github.workspace }}/packages/rust/target
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Install the toolchain of rust-toolchain.toml
+        run: |
+          rustup toolchain install
+          rustup show active-toolchain
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: packages/rust
+      - name: Benchmark the base commit
+        run: |
+          git worktree add --detach "$RUNNER_TEMP/base" "$BASE_SHA"
+          if compgen -G "$RUNNER_TEMP/base/packages/rust/*/benches/*.rs" > /dev/null \
+            || compgen -G "$RUNNER_TEMP/base/packages/rust/benches/*.rs" > /dev/null; then
+            cd "$RUNNER_TEMP/base/packages/rust"
+            cargo bench --locked --workspace --bench '*' -- --save-baseline pr-base
+          else
+            echo "The base commit has no benchmark: nothing to compare."
+          fi
+      - name: Benchmark the pull request
+        run: cargo bench --workspace --locked --bench '*' -- --baseline-lenient pr-base
+      - name: Run the 5 % gate
+        run: python3 ../../.github/scripts/bench_gate.py --criterion-dir "$CARGO_TARGET_DIR/criterion"

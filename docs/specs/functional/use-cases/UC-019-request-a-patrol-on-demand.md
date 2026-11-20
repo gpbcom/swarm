@@ -1,7 +1,7 @@
 # 🎬 UC-019: Request a Patrol on demand
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ UC-018: Respond to a Site Alarm](UC-018-respond-to-a-site-alarm.md) · 📄 **Page 45 / 108** · [UC-020: Review the Defects of an Inspection ▶️](UC-020-review-the-defects-of-an-inspection.md)
+> [🏠 Index](../../README.md) · [◀️ UC-018: Respond to a Site Alarm](UC-018-respond-to-a-site-alarm.md) · 📄 **Page 47 / 120** · [UC-020: Review the Defects of an Inspection ▶️](UC-020-review-the-defects-of-an-inspection.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -140,5 +140,5 @@ One row per state of the flow chart: every action, success and failure node. Cli
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ UC-018: Respond to a Site Alarm](UC-018-respond-to-a-site-alarm.md) · 📄 **Page 45 / 108** · [UC-020: Review the Defects of an Inspection ▶️](UC-020-review-the-defects-of-an-inspection.md)
+> [🏠 Index](../../README.md) · [◀️ UC-018: Respond to a Site Alarm](UC-018-respond-to-a-site-alarm.md) · 📄 **Page 47 / 120** · [UC-020: Review the Defects of an Inspection ▶️](UC-020-review-the-defects-of-an-inspection.md)
 <!-- /spec:nav-bottom -->

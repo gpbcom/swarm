@@ -1,0 +1,13 @@
+image:
+  repository: valkey/valkey
+  tag: "8.1.4"
+  pullPolicy: IfNotPresent
+port: 6379
+persistence:
+  size: 1Gi
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    memory: 256Mi

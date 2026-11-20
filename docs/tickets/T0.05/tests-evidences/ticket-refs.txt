@@ -1,0 +1,4 @@
+$ python3 .claude/scripts/ticket_refs.py check --ticket T0.05
+(cwd .)
+
+

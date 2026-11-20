@@ -1,7 +1,7 @@
 # 📘 FS-003: Live supervision
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ FS-002: Pre-flight check and launch](FS-002-pre-flight-check-and-launch.md) · 📄 **Page 7 / 108** · [FS-004: Fail-safes and emergencies ▶️](FS-004-fail-safes-and-emergencies.md)
+> [🏠 Index](../../README.md) · [◀️ FS-002: Pre-flight check and launch](FS-002-pre-flight-check-and-launch.md) · 📄 **Page 7 / 120** · [FS-004: Fail-safes and emergencies ▶️](FS-004-fail-safes-and-emergencies.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -88,5 +88,5 @@ Settled with the product owner ([interview](../../../research/interview.md)).
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ FS-002: Pre-flight check and launch](FS-002-pre-flight-check-and-launch.md) · 📄 **Page 7 / 108** · [FS-004: Fail-safes and emergencies ▶️](FS-004-fail-safes-and-emergencies.md)
+> [🏠 Index](../../README.md) · [◀️ FS-002: Pre-flight check and launch](FS-002-pre-flight-check-and-launch.md) · 📄 **Page 7 / 120** · [FS-004: Fail-safes and emergencies ▶️](FS-004-fail-safes-and-emergencies.md)
 <!-- /spec:nav-bottom -->

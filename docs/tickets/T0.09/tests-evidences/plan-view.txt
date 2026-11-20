@@ -1,0 +1,4 @@
+$ python3 .claude/scripts/plan.py check --ticket T0.09
+(cwd .)
+
+

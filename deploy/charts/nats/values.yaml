@@ -1,0 +1,32 @@
+replicas: 3
+
+image:
+  repository: nats
+  tag: "2.11.6"
+  pullPolicy: IfNotPresent
+
+ports:
+  client: 4222
+  cluster: 6222
+  leafnodes: 7422
+  monitor: 8222
+
+jetstream:
+  domain: cell
+  fileStorage:
+    size: 10Gi
+  memoryStorage:
+    size: 256Mi
+
+# The operator JWT, the system account public key and its JWT are public values. No private key goes here.
+auth:
+  operatorJwt: ""
+  systemAccount: ""
+  systemAccountJwt: ""
+
+leafnodes:
+  enabled: false
+  tls:
+    secretName: nats-leafnodes-tls
+
+resources: {}

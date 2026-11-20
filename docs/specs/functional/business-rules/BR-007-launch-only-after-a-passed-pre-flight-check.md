@@ -1,7 +1,7 @@
 # 📏 BR-007: Launch only after a passed Pre-flight check
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ BR-006: Fail-safe per Activity](BR-006-fail-safe-per-activity.md) · 📄 **Page 63 / 108** · [BR-008: Operator isolation ▶️](BR-008-operator-isolation.md)
+> [🏠 Index](../../README.md) · [◀️ BR-006: Fail-safe per Activity](BR-006-fail-safe-per-activity.md) · 📄 **Page 69 / 120** · [BR-008: Operator isolation ▶️](BR-008-operator-isolation.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Type:** Validation · **Updated:** 2026-11-18
@@ -49,5 +49,5 @@ Swarm verifies what a machine can verify better than a person; the Pilot remains
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ BR-006: Fail-safe per Activity](BR-006-fail-safe-per-activity.md) · 📄 **Page 63 / 108** · [BR-008: Operator isolation ▶️](BR-008-operator-isolation.md)
+> [🏠 Index](../../README.md) · [◀️ BR-006: Fail-safe per Activity](BR-006-fail-safe-per-activity.md) · 📄 **Page 69 / 120** · [BR-008: Operator isolation ▶️](BR-008-operator-isolation.md)
 <!-- /spec:nav-bottom -->

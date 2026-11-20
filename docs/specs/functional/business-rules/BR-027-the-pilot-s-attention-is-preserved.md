@@ -1,7 +1,7 @@
 # 📏 BR-027: The Pilot's attention is preserved
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ BR-026: Scorecard against the request](BR-026-scorecard-against-the-request.md) · 📄 **Page 83 / 108** · [Technical specifications ▶️](../../technical/README.md)
+> [🏠 Index](../../README.md) · [◀️ BR-026: Scorecard against the request](BR-026-scorecard-against-the-request.md) · 📄 **Page 89 / 120** · [BR-028: Assistant permissions are layered ▶️](BR-028-assistant-permissions-are-layered.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Type:** Constraint · **Updated:** 2026-11-18
@@ -50,5 +50,5 @@ One Pilot supervises several Drones. A screen that changes by itself, or too man
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ BR-026: Scorecard against the request](BR-026-scorecard-against-the-request.md) · 📄 **Page 83 / 108** · [Technical specifications ▶️](../../technical/README.md)
+> [🏠 Index](../../README.md) · [◀️ BR-026: Scorecard against the request](BR-026-scorecard-against-the-request.md) · 📄 **Page 89 / 120** · [BR-028: Assistant permissions are layered ▶️](BR-028-assistant-permissions-are-layered.md)
 <!-- /spec:nav-bottom -->

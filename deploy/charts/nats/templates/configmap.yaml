@@ -1,0 +1,54 @@
+{{- include "nats.validate" . -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nats-config
+  labels:
+    app.kubernetes.io/name: nats
+data:
+  nats.conf: |
+    server_name: $SERVER_NAME
+    port: {{ .Values.ports.client }}
+    http_port: {{ .Values.ports.monitor }}
+
+    jetstream {
+      store_dir: /data/jetstream
+      max_file_store: {{ .Values.jetstream.fileStorage.size }}
+      max_memory_store: {{ .Values.jetstream.memoryStorage.size }}
+      domain: {{ .Values.jetstream.domain | quote }}
+    }
+
+    cluster {
+      name: nats
+      port: {{ .Values.ports.cluster }}
+      routes: [
+    {{- range $index := until (int .Values.replicas) }}
+        nats://nats-{{ $index }}.nats-headless.{{ $.Release.Namespace }}.svc:{{ $.Values.ports.cluster }}
+    {{- end }}
+      ]
+    }
+
+    operator: {{ .Values.auth.operatorJwt }}
+    system_account: {{ .Values.auth.systemAccount }}
+
+    resolver {
+      type: full
+      dir: /data/resolver
+      allow_delete: false
+    }
+
+    resolver_preload {
+      {{ .Values.auth.systemAccount }}: {{ .Values.auth.systemAccountJwt }}
+    }
+    {{- if .Values.leafnodes.enabled }}
+
+    leafnodes {
+      port: {{ .Values.ports.leafnodes }}
+      tls {
+        cert_file: /etc/nats-leafnodes-tls/tls.crt
+        key_file: /etc/nats-leafnodes-tls/tls.key
+        ca_file: /etc/nats-leafnodes-tls/ca.crt
+        verify: true
+      }
+    }
+    {{- end }}

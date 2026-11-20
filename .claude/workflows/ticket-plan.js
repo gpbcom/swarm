@@ -4,6 +4,7 @@ export const meta = {
   whenToUse: 'Start a ticket of the Swarm roadmap, for example /ticket-plan T1.07 (TKT rules in .claude/rules/tickets.md)',
   phases: [
     { title: 'Ticket', detail: 'ticket-writer writes TICKET.md and PROGRESS.md' },
+    { title: 'Check', detail: 'check_ticket.py checks the IDs, links and sections of TICKET.md' },
     { title: 'Plan', detail: 'planner designs the task graph; waves and file ownership computed in code' },
     { title: 'Write', detail: 'scribe writes PLAN.md, awaiting approval' },
   ],
@@ -20,9 +21,25 @@ const TICKET_SCHEMA = {
     id: { type: 'string' },
     title: { type: 'string' },
     criteria: { type: 'integer' },
+    specs: { type: 'array', items: { type: 'string' } },
     assumptions: { type: 'array', items: { type: 'string' } },
   },
-  required: ['id', 'title', 'criteria', 'assumptions'],
+  required: ['id', 'title', 'criteria', 'specs', 'assumptions'],
+}
+
+const CHECK = {
+  type: 'object',
+  properties: { passed: { type: 'boolean' }, problems: { type: 'array', items: { type: 'string' } } },
+  required: ['passed', 'problems'],
+}
+
+const WRITE_SCHEMA = {
+  type: 'object',
+  properties: {
+    written: { type: 'array', items: { type: 'string' } },
+    problems: { type: 'array', items: { type: 'string' } },
+  },
+  required: ['written', 'problems'],
 }
 
 const PLAN_SCHEMA = {
@@ -91,15 +108,60 @@ function computeWaves(tasks) {
 }
 
 phase('Ticket')
+// TKT-23: a ticket already done (merged, or its issue closed on GitHub) or finished (its pull request open) is never
+// planned again: tickets.py holds the one definition of done.
+const notDone = await agent(
+  `Run exactly python3 .claude/scripts/tickets.py done --ticket ${ID} and report. passed is true only if it exits 1 ` +
+  `and prints nothing (the ticket still needs work); problems lists every line it prints.`,
+  { agentType: 'verifier', schema: CHECK, label: `done check ${ID}` },
+)
+if (!notDone || !notDone.passed) {
+  return { ticket: ID, stopped: (notDone && notDone.problems.join(' ')) || 'tickets.py done did not report', next: 'Nothing to plan.' }
+}
 const ticket = await agent(
-  `Open ticket ${ID} of the Swarm roadmap: write docs/tickets/${ID}/TICKET.md and PROGRESS.md, keeping them if they already exist and are complete.`,
+  `Open ticket ${ID} of the Swarm roadmap: write docs/tickets/${ID}/TICKET.md and PROGRESS.md, keeping them if they already exist and are complete. ` +
+  `TICKET.md must link at least one technical page, feature, use case or business rule (TKT-2); return those links in specs.`,
   { agentType: 'ticket-writer', schema: TICKET_SCHEMA, label: `ticket-writer ${ID}` },
 )
 if (!ticket) throw new Error(`ticket-writer failed for ${ID}`)
+if (!ticket.specs.length) {
+  return {
+    ticket: ID,
+    stopped: 'TICKET.md links no technical page, feature, use case or business rule (TKT-2). Write or point to the specification the ticket builds on, then run /ticket-plan again.',
+    assumptions: ticket.assumptions,
+  }
+}
+log(`TICKET.md refers to ${ticket.specs.length} specification page(s)`)
+
+phase('Check')
+const checkTicket = () => agent(
+  `From the repository root, run exactly: python3 .claude/skills/ticket/scripts/check_ticket.py ${ID}. ` +
+  `Return passed (true when it exits 0 and prints nothing) and, in problems, every line it printed.`,
+  { agentType: 'verifier', schema: CHECK, label: `check TICKET.md ${ID}` },
+)
+let ticketCheck = await checkTicket()
+if (!ticketCheck || !ticketCheck.passed) {
+  const first = (ticketCheck && ticketCheck.problems) || ['the verifier returned no result']
+  log(`TICKET.md fails check_ticket.py: ${first.join(' | ')}`)
+  await agent(
+    `Fix only docs/tickets/${ID}/TICKET.md so that python3 .claude/skills/ticket/scripts/check_ticket.py ${ID} passes. ` +
+    `Its problems: ${JSON.stringify(first)}. Change nothing else.`,
+    { agentType: 'ticket-writer', schema: TICKET_SCHEMA, label: `ticket-writer fix ${ID}` },
+  )
+  ticketCheck = await checkTicket()
+  if (!ticketCheck || !ticketCheck.passed) {
+    return {
+      ticket: ID,
+      stopped: 'TICKET.md fails check_ticket.py',
+      problems: (ticketCheck && ticketCheck.problems) || ['the verifier returned no result'],
+    }
+  }
+}
 
 phase('Plan')
 const plan = await agent(
-  `Plan ticket ${ID} from docs/tickets/${ID}/TICKET.md as a task graph for parallel worker agents.`,
+  `Plan ticket ${ID} from docs/tickets/${ID}/TICKET.md as a task graph for parallel worker agents. ` +
+  `Every brief links the specification pages of TICKET.md that its task applies (TKT-2).`,
   { agentType: 'planner', schema: PLAN_SCHEMA, label: `planner ${ID}` },
 )
 if (!plan || !plan.tasks.length) throw new Error(`planner returned no task for ${ID}`)
@@ -109,13 +171,38 @@ const widest = Math.max(...Array.from({ length: waves }, (_, i) => graph.filter(
 log(`${graph.length} tasks in ${waves} waves, widest wave ${widest} (at most 8 agents run at once)`)
 
 phase('Write')
-await agent(
+const written = await agent(
   `Write docs/tickets/${ID}/PLAN.md for ticket ${ID} (${ticket.title}) with the status line "**Plan:** 🟡 Awaiting approval", ` +
   `this summary: ${JSON.stringify(plan.summary)}, the assumptions ${JSON.stringify([...ticket.assumptions, ...plan.assumptions])}, ` +
-  `the waves table, and this task graph in a json block, exactly: ${JSON.stringify(graph)}. ` +
-  `Then append to docs/tickets/${ID}/PROGRESS.md: "Plan written: ${graph.length} tasks, ${waves} waves, awaiting approval" (⏳).`,
-  { agentType: 'scribe', label: `scribe ${ID}` },
+  `then a "## Task graph" heading and this task graph in a json block, exactly: ${JSON.stringify(graph)}. ` +
+  `Then run python3 .claude/scripts/plan.py render --ticket ${ID}, which pretty-prints the json block and writes from it the waves table, ` +
+  `the dependency graph and one section per task for the person; it must print nothing. Then append to the Events table of docs/tickets/${ID}/PROGRESS.md: "Plan written: ${graph.length} tasks, ${waves} waves" (⏳ Awaiting approval), ` +
+  `Then run python3 .claude/scripts/ticket_refs.py sync --ticket ${ID}, which copies the specification references of TICKET.md into PLAN.md and PROGRESS.md, ` +
+  `and python3 .claude/scripts/progress.py timings --ticket ${ID} --write. ` +
+  `Then run python3 .claude/scripts/board.py move --ticket ${ID} --status planned, which moves its card to 📝 Planned on the GitHub board (TKT-17); ` +
+  `if it fails because gh is missing or offline, go on. ` +
+  `Last, run python3 .claude/scripts/ticket_refs.py check --ticket ${ID} and python3 .claude/scripts/plan.py check --ticket ${ID}, ` +
+  `and return in problems every line they print (none when all is well).`,
+  { agentType: 'scribe', schema: WRITE_SCHEMA, label: `scribe ${ID}` },
 )
+const problems = (written && written.problems) || ['the scribe returned no result']
+if (problems.length) log(`PLAN.md, PROGRESS.md or TICKET.md fails its checks: ${problems.join(' | ')}`)
+
+const planVerdict = await agent(
+  `From the repository root, run exactly: python3 .claude/skills/ticket/scripts/check_plan.py ${ID}. ` +
+  `Return passed (true when it exits 0 and prints nothing) and, in problems, every line it printed.`,
+  { agentType: 'verifier', schema: CHECK, label: `check PLAN.md ${ID}` },
+)
+let planCheck = 'passed'
+if (!planVerdict || !planVerdict.passed) {
+  const planProblems = (planVerdict && planVerdict.problems) || ['the verifier returned no result']
+  planCheck = planProblems
+  log(`PLAN.md fails check_plan.py: ${planProblems.join(' | ')}`)
+  await agent(
+    `Append to the Events table of docs/tickets/${ID}/PROGRESS.md the row "Plan check failed: ${planProblems.length} problems" (⚠️). Change nothing else.`,
+    { agentType: 'scribe', schema: WRITE_SCHEMA, label: `scribe plan check ${ID}` },
+  )
+}
 
 return {
   ticket: ID,
@@ -123,6 +210,9 @@ return {
   tasks: graph.length,
   waves,
   widestWave: widest,
+  specs: ticket.specs,
+  planCheck,
+  checks: problems.length ? problems : 'passed',
   assumptions: [...ticket.assumptions, ...plan.assumptions],
-  next: `Review docs/tickets/${ID}/PLAN.md, change its status to "**Plan:** 🟢 Approved", then run /ticket-run ${ID}`,
+  next: `Review docs/tickets/${ID}/PLAN.md, change its status to "**Plan:** 🟢 Approved", then run /ticket-run ${ID}: it gives the ticket its own worktree on feature/${ID}, so other tickets can run at the same time (TKT-16)`,
 }

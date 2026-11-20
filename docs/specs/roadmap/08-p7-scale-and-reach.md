@@ -1,7 +1,7 @@
 # 🛣️ P7: Scale and reach
 
 <!-- spec:nav-top -->
-> [🏠 Index](../README.md) · [◀️ P6: Light shows](07-p6-light-shows.md) · 📄 **Page 103 / 108** · [Regulatory track ▶️](09-regulatory-track.md)
+> [🏠 Index](../README.md) · [◀️ P6: Light shows](07-p6-light-shows.md) · 📄 **Page 114 / 120** · [Regulatory track ▶️](09-regulatory-track.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Sprints:** S45 to S52 · **Dates:** 11 Sep to 29 Dec 2028 · **Tickets:** about 30
@@ -103,7 +103,7 @@ Reach milestone **M7, general availability, on 29 December 2028 (S52)**: Inspect
 
 ## <a id="sprints"></a>🗓️ Sprint plan
 
-P7 shares S45 to S48 with [🛣️ P6: Light shows](07-p6-light-shows.md), which takes 4 tickets in each of them for the M6 show, so P7 starts with 2 tickets per sprint and takes the whole capacity from S49. Across both phases, S45 to S50 carry about 6 merged tickets each and S51 and S52 carry 5: one more than the usual capacity, see [🎲 R-01](12-risks.md#r-01) below.
+P7 shares S45 to S48 with [🛣️ P6: Light shows](07-p6-light-shows.md), which takes 4 tickets in each of them for the M6 show, and with the core of the Assistant of [🛣️ P5](06-p5-ai-agents.md), 2 tickets in each of S45 to S48, so P7 starts with 2 tickets per sprint and takes the whole capacity from S49. Across the three phases, S45 to S48 carry about 8 merged tickets each, S49 and S50 about 6, and S51 and S52 carry 5: one more than the usual capacity, see [🎲 R-01](12-risks.md#r-01) below.
 
 | Sprint | Dates | Tickets | Sprint goal | What can be shown |
 | --- | --- | --- | --- | --- |
@@ -241,7 +241,7 @@ The M7 demonstration, on 29 December 2028, uses the sample cast of the [🎨 Vis
 | [🎲 R-15](12-risks.md#r-15) Regulation changes | US rules for several Drones per Pilot may move | The US cell opens for testing only; US Operators fly under their own Authorisations, recorded like EU ones |
 | [🎲 R-07](12-risks.md#r-07) Weather and seasons | C-07 flies in December, for every Activity | Fly each Activity on the first suitable day of S50; Agriculture and Light shows, which stay in beta, can be validated in the Simulator if the weather blocks them |
 | [🎲 R-11](12-risks.md#r-11) Crash or hardware loss in tests | C-07 flies the whole test fleet on a release candidate | Fail-safe drill at the start of each C-07 flight day; no flight on a build that misses a budget |
-| [🎲 R-01](12-risks.md#r-01) Review bottleneck | S45 to S50 carry about 6 tickets each across P6 and P7, while the person flies C-06 (S46 to S48) and C-07 (S50 to S52) | Infrastructure tickets (charts, values, bundle) are reviewed on their test runs and plans; safety-path changes are frozen after S50 except fixes |
+| [🎲 R-01](12-risks.md#r-01) Review bottleneck | S45 to S48 carry about 8 tickets each across P5, P6 and P7, and S49 and S50 about 6, while the person flies C-06 (S46 to S48) and C-07 (S50 to S52) | Infrastructure tickets (charts, values, bundle) are reviewed on their test runs and plans; safety-path changes are frozen after S50 except fixes |
 | [🎲 R-08](12-risks.md#r-08) Scope too large | P7 is the last phase; nothing can slip past M7 | Order of cuts if needed: the Skydio adapter, then the blockchain option, then the US cell; the M7 proof itself is never cut |
 
 ## <a id="work-split"></a>🧑‍💻 Work split
@@ -264,5 +264,5 @@ The M7 demonstration, on 29 December 2028, uses the sample cast of the [🎨 Vis
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../README.md) · [◀️ P6: Light shows](07-p6-light-shows.md) · 📄 **Page 103 / 108** · [Regulatory track ▶️](09-regulatory-track.md)
+> [🏠 Index](../README.md) · [◀️ P6: Light shows](07-p6-light-shows.md) · 📄 **Page 114 / 120** · [Regulatory track ▶️](09-regulatory-track.md)
 <!-- /spec:nav-bottom -->

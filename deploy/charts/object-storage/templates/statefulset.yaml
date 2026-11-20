@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: object-storage
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: object-storage
+spec:
+  serviceName: object-storage
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: object-storage
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: object-storage
+    spec:
+      containers:
+        - name: minio
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - server
+            - /data
+          envFrom:
+            - secretRef:
+                name: {{ .Values.rootCredentialsSecret }}
+          ports:
+            - name: api
+              containerPort: {{ .Values.port }}
+          readinessProbe:
+            httpGet:
+              path: /minio/health/ready
+              port: api
+          livenessProbe:
+            httpGet:
+              path: /minio/health/live
+              port: api
+          volumeMounts:
+            - name: data
+              mountPath: /data
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: {{ .Values.persistence.size }}

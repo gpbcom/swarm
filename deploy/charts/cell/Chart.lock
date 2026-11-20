@@ -1,0 +1,18 @@
+dependencies:
+- name: database
+  repository: file://../database
+  version: 0.1.0
+- name: valkey
+  repository: file://../valkey
+  version: 0.1.0
+- name: object-storage
+  repository: file://../object-storage
+  version: 0.1.0
+- name: vault-config
+  repository: file://../vault-config
+  version: 0.1.0
+- name: nats
+  repository: file://../nats
+  version: 0.1.0
+digest: sha256:df2da7abf90d431ab8ca95702c53be730081d4d035ac6e843e25440fbdb3515a
+generated: "2026-11-19T00:00:00.0000000+00:00"
