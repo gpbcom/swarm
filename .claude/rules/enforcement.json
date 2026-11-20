@@ -133,6 +133,11 @@
     "what": "specs.py check reports it; it must print nothing"
    },
    {
+    "kind": "test",
+    "path": "tests/harness/write_specs/test_tokens_package.py",
+    "what": "build writes the tokens package and check reports it stale"
+   },
+   {
     "kind": "ci",
     "path": ".github/workflows/specs.yml",
     "what": "CI runs specs.py check on every change of the specifications"

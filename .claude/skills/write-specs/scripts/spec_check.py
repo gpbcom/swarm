@@ -8,7 +8,7 @@ from typing import Dict, List, Set
 
 from spec_build import build_texts, references
 from spec_model import (ANCHOR, ARROW, CLASSDEF, COMMON_BLOCKS, COMPONENTS_CSS, DEFAULT_COLOURS, EXTRA_BLOCKS,
-                        FIXED_PAGES, GLOSSARY_CLASSES, H1, IDENTITY_CSS, IDENTITY_GROUP, ID_FILE, KINDS, MODES, MOCKUPS,
+                        FIXED_PAGES, GLOSSARY_CLASSES, H1, IDENTITY_CSS, TOKENS_CSS, IDENTITY_GROUP, ID_FILE, KINDS, MODES, MOCKUPS,
                         REQUIRED_SECTIONS, REQUIRED_TOKENS, ROOT, RULE_TYPE, SCREEN_CLASSES, SCREEN_SOURCES, SCREENS,
                         SPECS, STATUS_KINDS, STATUSES, RULE_TYPES, Node, Page, Term, dark_tokens, flowchart, h2s,
                         has_block, identity_css, images, links, nodes, palette, parse_glossary, parse_tokens, relpath,
@@ -97,6 +97,8 @@ class Checker:
         expected = identity_css(self.tokens, self.dark)
         if not IDENTITY_CSS.is_file() or IDENTITY_CSS.read_text(encoding="utf-8") != expected:
             self.error(IDENTITY_CSS, 11, "out of date: run specs.py build.")
+        if not TOKENS_CSS.is_file() or TOKENS_CSS.read_text(encoding="utf-8") != expected:
+            self.error(TOKENS_CSS, 11, "out of date: run specs.py build.")
 
     def check_ids(self) -> None:
         seen: Dict[str, Page] = {}

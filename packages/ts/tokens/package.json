@@ -1,0 +1,11 @@
+{
+  "name": "@swarm/tokens",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./tokens.css": "./src/tokens.css"
+  },
+  "devDependencies": {
+    "@swarm/config": "workspace:*"
+  }
+}

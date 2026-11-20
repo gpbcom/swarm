@@ -22,7 +22,7 @@ python3 .claude/skills/write-specs/scripts/specs.py <command>
 | `new fs\|uc\|br "Title"` | Creates the next feature, use case or business rule from its template, then builds |
 | `mockup <UC-ID> <node>` | Creates the HTML mock-up of one state (a flow chart node) of a use case |
 | `render [--all] [<UC-ID>...]` | Builds, then renders every mock-up whose PNG is missing or out of date |
-| `build` | Rewrites the generated content: page list, summaries, navigation, matrix, back links, palette, flow chart colours, `visual-identity.css` |
+| `build` | Rewrites the generated content: page list, summaries, navigation, matrix, back links, palette, flow chart colours, `visual-identity.css`, `packages/ts/tokens/src/tokens.css` |
 | `check` | Prints one line per breach, `<file>: SPEC-<n>: <message>`, and nothing when all is well |
 
 The templates are in `templates/`. Never copy one by hand: `new` and `mockup` name the files.
@@ -64,7 +64,7 @@ If no browser is found, set `SPECS_BROWSER` to the path of Chrome or Chromium.
 ## Visual identity
 
 - `docs/specs/visual-identity.md` is the only place where a colour, a font, a size or the screen size is chosen
-  (SPEC-13). Its tokens become `screens/mockups/visual-identity.css` and the flow chart colours on `build`.
+  (SPEC-13). Its tokens become `screens/mockups/visual-identity.css`, `packages/ts/tokens/src/tokens.css` and the flow chart colours on `build`.
 - New component: add its class to `screens/mockups/components.css` (with `var(--...)` only), add it to the
   **🧩 Components** table and to `screens/mockups/identity/components.html`, then `specs.py render --all`.
 - Changing a token or a component makes every PNG out of date: run `specs.py render --all`, then look at the

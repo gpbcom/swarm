@@ -337,14 +337,15 @@ broken or missing link breaks that path.
   - the text between `<!-- spec:<name> -->` and `<!-- /spec:<name> -->`: page lists, summaries, navigation bars, the
     traceability matrix, **🔗 Referenced by** and the palette of the visual identity;
   - the style of every `classDef` line of the flow charts;
-  - `docs/specs/screens/mockups/visual-identity.css`.
+  - `docs/specs/screens/mockups/visual-identity.css`;
+  - `packages/ts/tokens/src/tokens.css`, the same tokens for the apps, beside it.
 - `specs.py render` writes the PNG of every mock-up (SPEC-12).
 - Run `specs.py build` after every change to `docs/specs/`, then `specs.py check`, which must print nothing before the
   work is reported as done.
 
 **Why:** a summary, a page number or a matrix maintained by hand drifts at the first change.
 
-**Check:** `specs.py check` reports every page, and `visual-identity.css`, that differs from what `build` would write.
+**Check:** `specs.py check` reports every page, `visual-identity.css` and `packages/ts/tokens/src/tokens.css`, that differs from what `build` would write.
 
 ## <a id="spec-12"></a>SPEC-12: A screen for every state
 
@@ -397,8 +398,9 @@ without its two PNGs.
   colour has a light and a dark value, both lower-case `#rrggbb`; other tokens may leave the dark value empty when it
   is the same. Sizes, spaces, radii and the screen size are in `px`. The required tokens are listed in
   `spec_model.py` (`REQUIRED_TOKENS`).
-- `specs.py build` writes the tokens as CSS variables into `screens/mockups/visual-identity.css`, the dark values
-  under `prefers-color-scheme: dark`, and the light colours into every flow chart (SPEC-8).
+- `specs.py build` writes the tokens as CSS variables into `screens/mockups/visual-identity.css` and into the tokens
+  package `packages/ts/tokens/src/tokens.css`, the dark values under `prefers-color-scheme: dark`, and the light colours
+  into every flow chart (SPEC-8).
 - The visual identity also fixes the **frame of each part of Swarm** (title bar, side bar items, status bar), so that
   every screen of Ground control, the Mission studio, the Back office and the Client portal looks the same.
 - `screens/mockups/components.css` defines the components with `var(--...)` only: no colour and no font value of its

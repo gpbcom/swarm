@@ -15,6 +15,7 @@ TEMPLATES = Path(__file__).resolve().parents[1] / "templates"
 SCREENS = SPECS / "screens"
 MOCKUPS = SCREENS / "mockups"
 IDENTITY_CSS = MOCKUPS / "visual-identity.css"
+TOKENS_CSS = ROOT / "packages" / "ts" / "tokens" / "src" / "tokens.css"
 COMPONENTS_CSS = MOCKUPS / "components.css"
 IDENTITY_GROUP = "identity"
 MODES = ("light", "dark")
