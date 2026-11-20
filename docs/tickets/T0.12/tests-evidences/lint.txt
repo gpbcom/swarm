@@ -1,0 +1,23 @@
+$ pnpm -r --if-present lint
+(cwd ., on the ticket's own files only)
+
+packages/ts/config lint$ eslint .
+packages/ts/config lint: Done
+frontends/desktop lint$ eslint .
+packages/ts/live lint$ eslint .
+packages/ts/api-client lint$ eslint .
+packages/ts/e2e lint$ eslint .
+frontends/desktop lint: Done
+packages/ts/ui lint$ eslint .
+packages/ts/api-client lint: Done
+packages/ts/live lint: Done
+packages/ts/e2e lint: Done
+packages/ts/ui lint: Done
+frontends/back-office lint$ eslint .
+frontends/mission-studio lint$ eslint .
+frontends/ground-control lint$ eslint .
+frontends/client-portal lint$ eslint .
+frontends/ground-control lint: Done
+frontends/back-office lint: Done
+frontends/client-portal lint: Done
+frontends/mission-studio lint: Done

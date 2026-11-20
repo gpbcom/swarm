@@ -1,0 +1,307 @@
+$ cargo test --workspace --locked (in packages/rust)
+Date: 2026-11-20
+exit: 0
+
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.27
+   Compiling zmij v1.0.23
+   Compiling serde_json v1.0.154
+   Compiling serde_core v1.0.229
+   Compiling itoa v1.0.19
+   Compiling serde v1.0.229
+   Compiling memchr v2.8.3
+   Compiling thiserror v2.0.21
+   Compiling cfg-if v1.0.5
+   Compiling libc v0.2.191
+   Compiling autocfg v1.5.1
+   Compiling crossbeam-utils v0.8.23
+   Compiling zerocopy v0.8.63
+   Compiling crossbeam-epoch v0.9.21
+   Compiling crossbeam-deque v0.8.8
+   Compiling shlex v2.0.1
+   Compiling find-msvc-tools v0.1.15
+   Compiling semver v1.0.28
+   Compiling schemars v0.8.22
+   Compiling rayon-core v1.13.0
+   Compiling either v1.19.0
+   Compiling cc v1.11.2
+   Compiling smallvec v1.16.6
+   Compiling dyn-clone v1.0.20
+   Compiling anstyle v1.0.14
+   Compiling plotters-backend v0.3.7
+   Compiling heck v0.5.0
+   Compiling regex-syntax v0.8.12
+   Compiling ciborium-io v0.2.2
+   Compiling clap_lex v1.1.2
+   Compiling version-ranges v0.1.3
+   Compiling itertools v0.13.0
+   Compiling same-file v1.0.6
+   Compiling cast v0.3.0
+   Compiling anes v0.1.6
+   Compiling oorandom v11.1.5
+   Compiling clap_builder v4.6.7
+   Compiling plotters-svg v0.3.7
+   Compiling walkdir v2.5.0
+   Compiling log v0.4.35
+   Compiling num-traits v0.2.19
+   Compiling bitflags v2.13.2
+   Compiling aho-corasick v1.1.5
+   Compiling regress v0.12.0
+   Compiling crc-any v2.5.1
+   Compiling quick-xml v0.38.4
+   Compiling lazy_static v1.5.1
+   Compiling prettyplease v0.2.37
+   Compiling byteorder v1.5.0
+   Compiling rustix v1.1.6
+   Compiling getrandom v0.4.3
+   Compiling linux-raw-sys v0.12.1
+   Compiling mavlink-core v0.16.2
+   Compiling jiff-core v0.1.8
+   Compiling once_cell v1.21.4
+   Compiling syn v3.0.10
+   Compiling syn v2.0.119
+   Compiling fastrand v2.5.0
+   Compiling regex-automata v0.4.19
+   Compiling rayon v1.12.0
+   Compiling page_size v0.6.0
+   Compiling plotters v0.3.7
+   Compiling swarm-core-mavlink v0.1.0 (/home/guillaume/Documents/Projects/PoC/swarm/.claude/worktrees/wf_f6a24ca4-baf-8/packages/rust/swarm-core/mavlink)
+   Compiling criterion-plot v0.8.2
+   Compiling swarm-core-planner v0.1.0 (/home/guillaume/Documents/Projects/PoC/swarm/.claude/worktrees/wf_f6a24ca4-baf-8/packages/rust/swarm-core/planner)
+   Compiling swarm-core-safety v0.1.0 (/home/guillaume/Documents/Projects/PoC/swarm/.claude/worktrees/wf_f6a24ca4-baf-8/packages/rust/swarm-core/safety)
+   Compiling clap v4.6.8
+   Compiling alloca v0.4.0
+   Compiling tempfile v3.27.0
+   Compiling regex v1.13.2
+   Compiling uuid v1.29.3
+   Compiling jiff v0.2.46
+   Compiling codespace v0.1.0
+   Compiling serde_derive_internals v0.29.1
+   Compiling serde_derive v1.0.229
+   Compiling thiserror-impl v2.0.21
+   Compiling zerocopy-derive v0.8.63
+   Compiling strum_macros v0.28.0
+   Compiling num-derive v0.4.2
+   Compiling schemars_derive v0.8.22
+   Compiling mavlink-bindgen v0.16.2
+   Compiling strum v0.28.0
+   Compiling mavlink v0.16.2
+   Compiling tinytemplate v1.2.1
+   Compiling swarm-models v0.1.0 (/home/guillaume/Documents/Projects/PoC/swarm/.claude/worktrees/wf_f6a24ca4-baf-8/packages/rust/swarm-models)
+   Compiling serde_tokenstream v0.3.0
+   Compiling typespace v0.1.3
+   Compiling half v2.7.1
+   Compiling ciborium-ll v0.2.2
+   Compiling ciborium v0.2.2
+   Compiling typify-impl v0.10.1
+   Compiling criterion v0.8.2
+   Compiling swarm-synthetic-drones v0.1.0 (/home/guillaume/Documents/Projects/PoC/swarm/.claude/worktrees/wf_f6a24ca4-baf-8/packages/rust/swarm-synthetic-drones)
+   Compiling typify-macro v0.10.1
+   Compiling typify v0.10.1
+   Compiling swarm-models-codegen v0.1.0 (/home/guillaume/Documents/Projects/PoC/swarm/.claude/worktrees/wf_f6a24ca4-baf-8/packages/rust/swarm-models-codegen)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 16.55s
+     Running unittests src/lib.rs (target/debug/build/swarm-core-mavlink/b7b9b54d75b9c605/out/swarm_core_mavlink-b7b9b54d75b9c605)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/encode.rs (target/debug/build/swarm-core-mavlink/d9c2a82c6c9af8b8/out/encode-d9c2a82c6c9af8b8)
+
+running 4 tests
+test one_two_three_encodes_to_six ... ok
+test an_empty_slice_encodes_to_zero ... ok
+test the_sum_wraps_instead_of_panicking ... ok
+test two_calls_on_the_same_values_give_the_same_sum ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/build/swarm-core-planner/4455a702959fab2a/out/swarm_core_planner-4455a702959fab2a)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/plan.rs (target/debug/build/swarm-core-planner/7e0956c99cbff991/out/plan-7e0956c99cbff991)
+
+running 4 tests
+test a_sum_that_overflows_wraps_to_zero_and_never_panics ... ok
+test an_empty_slice_gives_zero ... ok
+test one_two_and_three_give_six ... ok
+test two_calls_on_the_same_thousand_values_agree_with_the_plain_sum ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/build/swarm-core-safety/522690328a4c5ccf/out/swarm_core_safety-522690328a4c5ccf)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/tick.rs (target/debug/build/swarm-core-safety/ad0954a7bc1c88b4/out/tick-ad0954a7bc1c88b4)
+
+running 4 tests
+test a_sum_that_overflows_wraps_instead_of_panicking ... ok
+test an_empty_slice_gives_zero ... ok
+test one_two_three_gives_six ... ok
+test two_calls_on_the_same_values_give_the_sum_of_the_range ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/build/swarm-models/3b687e3e4e57fcbc/out/swarm_models-3b687e3e4e57fcbc)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/deserialise.rs (target/debug/build/swarm-models/cdb296be54eeda38/out/deserialise-cdb296be54eeda38)
+
+running 7 tests
+test a_command_is_deserialised ... ok
+test a_command_round_trips_to_the_same_value ... ok
+test a_squad_frame_holds_its_frames ... ok
+test a_telemetry_frame_round_trips_to_the_same_value ... ok
+test a_telemetry_frame_with_an_unknown_state_is_refused ... ok
+test a_telemetry_frame_is_deserialised ... ok
+test a_telemetry_frame_with_an_unknown_key_is_refused ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/generated_is_current.rs (target/debug/build/swarm-models/ced0ead385e2116c/out/generated_is_current-ced0ead385e2116c)
+
+running 1 test
+test the_generated_structs_are_current ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running unittests src/lib.rs (target/debug/build/swarm-models-codegen/a19ad9b83e74b9d4/out/swarm_models_codegen-a19ad9b83e74b9d4)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (target/debug/build/swarm-models-codegen/9b9322a37d0cf0a4/out/swarm_models_codegen-9b9322a37d0cf0a4)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/render.rs (target/debug/build/swarm-models-codegen/9af84c23d6596218/out/render-9af84c23d6596218)
+
+running 11 tests
+test a_missing_schema_is_an_error ... ok
+test the_default_paths_point_into_the_models_crate ... ok
+test rendering_text_that_is_not_json_fails ... ok
+test a_date_time_becomes_a_jiff_timestamp_never_chrono ... ok
+test rendering_the_fixture_succeeds ... ok
+test every_definition_becomes_a_type ... ok
+test a_missing_output_is_stale ... ok
+test the_first_line_is_the_header ... ok
+test an_edited_output_is_stale_again ... ok
+test two_renders_are_equal ... ok
+test a_written_output_is_fresh_and_equals_the_render ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running unittests src/lib.rs (target/debug/build/swarm-synthetic-drones/59b9c41b1e14793a/out/swarm_synthetic_drones-59b9c41b1e14793a)
+
+running 5 tests
+test link::tests::a_count_of_zero_is_refused ... ok
+test link::tests::a_speed_that_is_not_positive_is_refused ... ok
+test link::tests::system_ids_and_ports_must_fit_for_every_drone ... ok
+test link::tests::an_error_says_which_argument_is_wrong ... ok
+test link::tests::the_default_configuration_is_valid ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (target/debug/build/swarm-synthetic-drones/68816db152bb1260/out/swarm_synthetic_drones-68816db152bb1260)
+
+running 4 tests
+test tests::help_asks_for_the_usage ... ok
+test tests::bad_arguments_are_refused ... ok
+test tests::every_flag_sets_its_field ... ok
+test tests::no_argument_runs_the_defaults ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/drone.rs (target/debug/build/swarm-synthetic-drones/3f0cede4c2efed95/out/drone-3f0cede4c2efed95)
+
+running 17 tests
+test a_flying_drone_emits_a_position_each_tick ... ok
+test a_full_upload_is_requested_item_by_item_then_accepted ... ok
+test a_mission_count_gives_the_request_of_item_zero ... ok
+test a_message_for_another_system_gives_no_output ... ok
+test a_land_command_lands_then_the_state_is_landed ... ok
+test a_mission_start_without_a_mission_is_denied ... ok
+test a_mission_start_when_armed_with_a_mission_is_accepted_and_flies ... ok
+test a_mission_start_when_not_armed_is_denied ... ok
+test a_new_drone_is_landed_at_home_with_its_system_id ... ok
+test a_pause_holds_the_position_and_a_continue_resumes ... ok
+test an_unknown_command_is_unsupported ... ok
+test an_unsupported_item_command_is_refused ... ok
+test a_return_to_launch_returns_then_lands_at_home ... ok
+test arming_is_accepted_and_the_state_becomes_armed ... ok
+test the_heartbeat_is_a_quadrotor_and_flags_the_armed_state ... ok
+test the_takeoff_is_reached_when_the_altitude_is_within_tolerance ... ok
+test the_items_are_reached_in_order_then_the_drone_lands_and_is_disarmed ... ok
+
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/route.rs (target/debug/build/swarm-synthetic-drones/a1a7955fb21ca4b0/out/route-a1a7955fb21ca4b0)
+
+running 6 tests
+test a_step_between_waypoints_returns_none ... ok
+test a_square_route_reaches_every_waypoint_in_order_then_completes ... ok
+test an_empty_route_is_complete_at_once ... ok
+test offset_and_distance_agree_within_half_a_percent ... ok
+test the_elapsed_time_is_the_path_length_over_the_speed ... ok
+test the_final_position_is_within_the_tolerance_of_the_last_waypoint ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/udp.rs (target/debug/build/swarm-synthetic-drones/5af2c6693bdba5a0/out/udp-5af2c6693bdba5a0)
+
+running 3 tests
+test a_count_of_zero_is_refused_with_a_message ... ok
+test each_drone_answers_with_its_own_system_id ... ok
+test each_drone_flies_a_square_mission_and_reports_every_item ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 8.30s
+
+   Doc-tests swarm_core_mavlink
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests swarm_core_planner
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests swarm_core_safety
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests swarm_models
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests swarm_models_codegen
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests swarm_synthetic_drones
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

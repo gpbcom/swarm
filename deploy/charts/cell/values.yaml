@@ -11,3 +11,5 @@ vaultConfig:
   enabled: true
 nats:
   enabled: true
+simulator:
+  enabled: false

@@ -1,0 +1,43 @@
+T0.13 acceptance evidence
+Date: 2026-11-20
+
+$ uv run pytest tests/simulator -rs -v
+exit: 0
+
+tests/simulator/test_command_isolation.py::TestCommandIsolation::test_a_command_to_a_drone_outside_the_registry_is_refused_and_logged PASSED
+tests/simulator/test_command_isolation.py::TestCommandIsolation::test_a_serve_started_with_a_service_credential_exits_and_never_connects PASSED
+tests/simulator/test_simulated_flight_log.py::TestSimulatedFlightLog::test_every_row_of_the_flight_log_is_marked_simulated PASSED
+tests/simulator/test_simulated_flight_log.py::TestSimulatedFlightLog::test_a_row_that_is_not_simulated_is_refused_by_the_database PASSED
+tests/simulator/test_simulated_flight_log.py::TestSimulatedFlightLog::test_each_drone_logs_its_flight_in_order PASSED
+tests/simulator/test_square_route_flight.py::TestSquareRouteFlight::test_ten_synthetic_drones_complete_a_square_route PASSED
+tests/simulator/test_square_route_flight.py::TestSquareRouteFlight::test_ten_synthetic_drones_and_one_px4_sitl_drone_all_complete_it SKIPPED
+
+=========================== short test summary info ============================
+SKIPPED [1] tests/simulator/test_square_route_flight.py:42: the PX4 SITL image swarm-px4-sitl:local is not built, see SWARM_PX4_SITL_IMAGE
+======================== 6 passed, 1 skipped in 24.26s =========================
+
+PX4 SITL image build
+$ docker build -f deploy/images/px4-sitl/Dockerfile -t swarm-px4-sitl:local .
+Result: not built. Docker is installed (client 29.8.1) but the build failed at once with "permission denied while
+trying to connect to the docker API at unix:///var/run/docker.sock": the sandbox of this run cannot reach the Docker
+daemon. The PX4 part could not run here.
+
+Summary per criterion
+(1) Square route: test_ten_synthetic_drones_complete_a_square_route PASSED, so 10 synthetic Drones fly the square
+    route. test_ten_synthetic_drones_and_one_px4_sitl_drone_all_complete_it SKIPPED: the PX4 SITL image
+    swarm-px4-sitl:local is not built (see SWARM_PX4_SITL_IMAGE), because Docker was not usable here. The PX4 SITL
+    Drone is therefore not verified by this run.
+(2) Command isolation: test_a_command_to_a_drone_outside_the_registry_is_refused_and_logged PASSED, and
+    test_a_serve_started_with_a_service_credential_exits_and_never_connects PASSED. A Command from simulated
+    credentials to a Drone outside the registry is refused and logged.
+(3) Flight log: test_every_row_of_the_flight_log_is_marked_simulated,
+    test_a_row_that_is_not_simulated_is_refused_by_the_database and test_each_drone_logs_its_flight_in_order all
+    PASSED. The Flight log is marked simulated.
+
+Other results
+- cargo test --workspace --locked in packages/rust: passed (see rust.txt).
+- uv run pytest services/simulator/tests -n 2 -rs: 467 passed (see simulator-service.txt).
+
+Left to the person
+The run in the dev cell itself is left to the person, after the merge, with the chart deploy/charts/simulator. The
+PX4 SITL image build and its test are to be run on a machine where Docker is usable.

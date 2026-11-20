@@ -14,5 +14,8 @@ dependencies:
 - name: nats
   repository: file://../nats
   version: 0.1.0
-digest: sha256:df2da7abf90d431ab8ca95702c53be730081d4d035ac6e843e25440fbdb3515a
-generated: "2026-11-19T00:00:00.0000000+00:00"
+- name: simulator
+  repository: file://../simulator
+  version: 0.1.0
+digest: sha256:ddb2f727917682655104f5c3c29a493479a01bf2bf3d5e13699e7623916cc0d8
+generated: "2026-11-20T00:00:00.0000000+00:00"

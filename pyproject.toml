@@ -3,6 +3,8 @@ members = ["services/*", "packages/python/*"]
 
 [dependency-groups]
 dev = [
+    "asyncpg-stubs>=0.30.0",
+    "httpx>=0.27",
     "maturin>=1.7",
     "mypy>=1.10",
     "pillow>=11.0",
@@ -26,7 +28,7 @@ ignore = ["UP006", "UP007", "UP035", "UP045"]
 # Tests are written before the code they import (TKT-4): pinning ``tests`` as first-party keeps the import order the
 # same whether or not the imported module exists yet. The code of the repository is first-party, so that the AGENT.md
 # import groups match ruff.
-known-first-party = ["tests", "gateway", "swarm_catalog", "swarm_lifecycle", "swarm_logging", "swarm_models", "swarm_nats"]
+known-first-party = ["tests", "gateway", "missions", "fleet", "simulator", "swarm_catalog", "swarm_lifecycle", "swarm_logging", "swarm_models", "swarm_nats", "swarm_rest", "swarm_storage"]
 
 [tool.ruff.format]
 quote-style = "double"
@@ -37,28 +39,47 @@ pythonpath = ["."]
 testpaths = [
     "tests",
     "services/gateway/tests",
+    "services/missions/tests",
+    "services/fleet/tests",
+    "services/simulator/tests",
     "packages/python/swarm-lifecycle/tests",
     "packages/python/swarm-catalog/tests",
     "packages/python/swarm-logging/tests",
     "packages/python/swarm-models/tests",
     "packages/python/swarm-nats/tests",
+    "packages/python/swarm-storage/tests",
+    "packages/python/swarm-rest/tests",
 ]
 
 [tool.mypy]
 files = [
     "services/gateway/src",
+    "services/missions/src",
+    "services/fleet/src",
+    "services/simulator/src",
     "packages/python/swarm-lifecycle/src",
     "packages/python/swarm-catalog/src",
     "packages/python/swarm-logging/src",
     "packages/python/swarm-models/src",
     "packages/python/swarm-nats/src",
+    "packages/python/swarm-storage/src",
+    "packages/python/swarm-rest/src",
 ]
 mypy_path = [
     "services/gateway/src",
+    "services/missions/src",
+    "services/fleet/src",
+    "services/simulator/src",
     "packages/python/swarm-lifecycle/src",
     "packages/python/swarm-catalog/src",
     "packages/python/swarm-logging/src",
     "packages/python/swarm-models/src",
     "packages/python/swarm-nats/src",
+    "packages/python/swarm-storage/src",
+    "packages/python/swarm-rest/src",
 ]
 explicit_package_bases = true
+
+[[tool.mypy.overrides]]
+module = ["pymavlink.*"]
+ignore_missing_imports = true

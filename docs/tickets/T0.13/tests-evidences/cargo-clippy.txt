@@ -1,0 +1,11 @@
+$ cargo clippy --workspace --all-targets -- -D warnings
+(cwd packages/rust, on the ticket's own files only)
+
+Checking swarm-core-safety v0.1.0 (/tmp/swarm-checks-ve63kwnp/packages/rust/swarm-core/safety)
+    Checking swarm-core-mavlink v0.1.0 (/tmp/swarm-checks-ve63kwnp/packages/rust/swarm-core/mavlink)
+    Checking swarm-core-planner v0.1.0 (/tmp/swarm-checks-ve63kwnp/packages/rust/swarm-core/planner)
+    Checking swarm-models v0.1.0 (/tmp/swarm-checks-ve63kwnp/packages/rust/swarm-models)
+    Checking swarm-synthetic-drones v0.1.0 (/tmp/swarm-checks-ve63kwnp/packages/rust/swarm-synthetic-drones)
+    Checking swarm-models-codegen v0.1.0 (/tmp/swarm-checks-ve63kwnp/packages/rust/swarm-models-codegen)
+    Checking swarm-core-python v0.1.0 (/tmp/swarm-checks-ve63kwnp/packages/rust/swarm-core/python)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.44s

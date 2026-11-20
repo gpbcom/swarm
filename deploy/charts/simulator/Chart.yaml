@@ -1,0 +1,6 @@
+apiVersion: v2
+name: simulator
+description: The simulator of one cell, with its synthetic Drones and PX4 SITL, kept apart from the real fleet.
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
