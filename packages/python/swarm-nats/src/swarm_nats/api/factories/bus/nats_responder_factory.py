@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 # Standard library imports
-from logging import Logger
+from logging import Logger, getLogger
 from typing import Awaitable, Callable, Optional, Type
 
 # Third-party imports
@@ -42,7 +42,8 @@ class NatsResponderFactory[Q: BaseModel, R: BaseModel](BusRunnableFactory[NatsRe
             handler (Callable[[Q], Awaitable[R]]): The coroutine that answers one request.
             logger (Optional[Logger]): Logger to use. A logger named after the module is used when it is ``None``.
         """
-        super().__init__(logger)
+        super().__init__()
+        self.logger = logger if logger else getLogger(__name__)
         self.connection = connection
         self.config = config
         self.request_type = request_type

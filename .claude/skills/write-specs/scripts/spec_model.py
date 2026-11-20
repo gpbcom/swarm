@@ -1,5 +1,3 @@
-"""Shared model of the specifications: layout, pages, glossary, design tokens and Markdown helpers."""
-
 from __future__ import annotations
 
 import os

@@ -102,7 +102,7 @@ Notes:
 #[serde(deny_unknown_fields)]
 pub struct CellAssignment {
     ///The moment of the assignment, in UTC.
-    pub assigned_at: ::chrono::DateTime<::chrono::offset::Utc>,
+    pub assigned_at: ::jiff::Timestamp,
     ///The name of the cell.
     pub cell: ::std::string::String,
     ///The version 7 identifier of the operator.
@@ -376,7 +376,7 @@ pub struct Event {
     #[serde(skip_serializing_if = "::std::option::Option::is_none")]
     pub mission_id: ::std::option::Option<::uuid::Uuid>,
     ///When it happened, in UTC with microseconds.
-    pub occurred_at: ::chrono::DateTime<::chrono::offset::Utc>,
+    pub occurred_at: ::jiff::Timestamp,
     ///The Operator the event belongs to.
     pub operator_id: ::uuid::Uuid,
     ///The model that changed.

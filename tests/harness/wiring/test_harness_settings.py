@@ -61,4 +61,4 @@ class TestHarnessSettings:
         settings = read_json(".claude/settings.json")
         status_line = settings["statusLine"]  # type: ignore[index]
         assert status_line["type"] == "command"  # type: ignore[index]
-        assert ".claude/scripts/statusline.py" in str(status_line["command"])  # type: ignore[index]
+        assert ".claude/scripts/reports/statusline.py" in str(status_line["command"])  # type: ignore[index]

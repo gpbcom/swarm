@@ -1,9 +1,21 @@
 #!/usr/bin/env python3
-"""Build the parallel plan of the roadmap: which tickets can run at the same time, and their Gantt charts.
+from __future__ import annotations
+
+import argparse
+import datetime as dt
+import heapq
+import json
+import re
+import subprocess
+import sys
+from pathlib import Path
+from typing import Dict, List, Optional, Set, Tuple, Union
+
+USAGE = """Build the parallel plan of the roadmap: which tickets can run at the same time, and their Gantt charts.
 
 Usage, from the repository root:
-    python3 .claude/scripts/roadmap_gantt.py build
-    python3 .claude/scripts/roadmap_gantt.py check
+    python3 .claude/scripts/reports/roadmap_gantt.py build
+    python3 .claude/scripts/reports/roadmap_gantt.py check
 
 Inputs:
 - the ticket rows of the eight phase pages ``docs/specs/roadmap/0[1-8]-*.md`` (sprint, title);
@@ -22,19 +34,7 @@ this script) and the text between the ``<!-- gantt:plan -->`` markers of ``docs/
 run ``specs.py build`` after it. ``check`` prints one line per stale output and exits 1, or prints nothing.
 """
 
-from __future__ import annotations
-
-import argparse
-import datetime as dt
-import heapq
-import json
-import re
-import subprocess
-import sys
-from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple, Union
-
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 ROADMAP = ROOT / "docs" / "specs" / "roadmap"
 GRAPH = ROADMAP / "gantt" / "ticket-graph.json"
 HTML = ROADMAP / "gantt" / "parallel-plan.html"
@@ -551,7 +551,7 @@ def with_block(page: str, block: str) -> str:
 
 
 def main(argv: Optional[List[str]] = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser = argparse.ArgumentParser(description=USAGE.splitlines()[0])
     parser.add_argument("command", choices=["build", "check"])
     args = parser.parse_args(argv)
     plan = Plan()
@@ -563,7 +563,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         return 0
     stale = [path for path, text in outputs.items() if not path.is_file() or path.read_text(encoding="utf-8") != text]
     for path in stale:
-        print(f"{path.relative_to(ROOT)}: out of date, run python3 .claude/scripts/roadmap_gantt.py build")
+        print(f"{path.relative_to(ROOT)}: out of date, run python3 .claude/scripts/reports/roadmap_gantt.py build")
     return 1 if stale else 0
 
 

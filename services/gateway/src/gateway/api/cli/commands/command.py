@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 # Standard library imports
-from logging import Logger
+from logging import Logger, getLogger
 from typing import Optional
 
 # First-party imports
@@ -25,5 +25,6 @@ class Command(Runnable):
         Args:
             logger (Optional[Logger]): Logger to use. A default logger is used when it is ``None``.
         """
-        super().__init__(logger)
+        super().__init__()
+        self.logger = logger if logger else getLogger(__name__)
         self.exit_code = 0

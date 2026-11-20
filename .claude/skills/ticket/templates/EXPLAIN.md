@@ -3,7 +3,7 @@
 <!-- line by line. Every claim points at a file and its lines. Never invent a behaviour the diff does not show. -->
 <!-- EVERY file and line is a clickable relative link, never a bare path (TKT-14): -->
 <!-- [`path/file.py:42`](../../../path/file.py#L42), [`path/file.py:42-50`](../../../path/file.py#L42-L50), -->
-<!-- [`path/file.py`](../../../path/file.py). Check: python3 .claude/scripts/ticket_tree.py docs --ticket {{ID}} -->
+<!-- [`path/file.py`](../../../path/file.py). Check: python3 .claude/scripts/tickets/ticket_tree.py docs --ticket {{ID}} -->
 
 # {{ID}}: {{Title}}
 
@@ -28,7 +28,7 @@
 
 ## 🧱 Files and lines changed
 
-<!-- The table between the markers is generated: python3 .claude/scripts/ticket_tree.py changes --ticket {{ID}} --write -->
+<!-- The table between the markers is generated: python3 .claude/scripts/tickets/ticket_tree.py changes --ticket {{ID}} --write -->
 <!-- Never edit it by hand. Lines are those of the new version of each file. The ticket's own folder is left out. -->
 
 <!-- changes -->

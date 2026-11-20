@@ -5,7 +5,7 @@
 <!-- ticket:specs -->
 ## 📚 Specifications
 
-The technical pages, features, use cases and business rules of [TICKET.md](TICKET.md), copied by `python3 .claude/scripts/ticket_refs.py sync`.
+The technical pages, features, use cases and business rules of [TICKET.md](TICKET.md), copied by `python3 .claude/scripts/tickets/ticket_refs.py sync`.
 
 - [🔩 Engine and services](../../specs/technical/04-engine.md#overview)
 - [🩺 Observability: signals](../../specs/technical/08-observability.md#signals)
@@ -55,7 +55,7 @@ The technical pages, features, use cases and business rules of [TICKET.md](TICKE
 <!-- timings -->
 ## ⏱️ Timings
 
-Measured from the agents' transcripts by `python3 .claude/scripts/progress.py timings --ticket T0.05` (TKT-10).
+Measured from the agents' transcripts by `python3 .claude/scripts/reports/progress.py timings --ticket T0.05` (TKT-10).
 
 | Measure | Value |
 | --- | --- |

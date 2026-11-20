@@ -1,5 +1,3 @@
-"""Check the specifications against the SPEC rules. Every breach is one line: ``<file>: SPEC-<n>: <message>``."""
-
 from __future__ import annotations
 
 import re

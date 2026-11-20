@@ -199,7 +199,7 @@ review the code before it is pushed, and GitHub merges it once CI passes.
   are in `docs/tickets/<ID>/`: `TICKET.md`, `PLAN.md`, `PROGRESS.md`, then `EXPLAIN.md`, `IMPLEMENTATION.md` and
   `REVIEW.md`.
 - A ticket's work stays uncommitted until it is done. VS Code's Source Control shows every running ticket's changes
-  at once; `python3 .claude/scripts/ticket_tree.py diff --ticket <ID>` shows one ticket's own files.
+  at once; `python3 .claude/scripts/tickets/ticket_tree.py diff --ticket <ID>` shows one ticket's own files.
 - When a ticket is done and you have reviewed it, it becomes **one commit** on `feature/tickets` holding only its own
   files, pushed with the branch's pull request to `develop` (`Closes #<issue>`). GitHub merges it once CI passes, the
   issue closes and its card moves to 🏁 Done.
@@ -225,7 +225,7 @@ A group is named by references: `#12` (a ticket issue, or an **epic or phase iss
 
 ```text
 /issue-plan #12             plans every ticket of issue #12 and its child issues at once, then stops
-python3 .claude/scripts/tickets.py approve #12
+python3 .claude/scripts/tickets/tickets.py approve #12
                             approves every plan of the group that passes its check, in one go
 /issue-run #12              starts every approved ticket the start rule allows, the others as soon as they may
 /issue-plan P1 T2.04 #57    a group mixing a phase, a ticket and an issue
@@ -242,20 +242,20 @@ A ticket that changes a front end lists every screen it shows in its `TICKET.md`
 | Where | Shows |
 | --- | --- |
 | The 2-minute reports in Claude Code | Every ticket of the group, or every agent of a run, with its state, tokens and checks |
-| `/board` or `python3 .claude/scripts/board.py show` | The Kanban board in the terminal |
+| `/board` or `python3 .claude/scripts/github/board.py show` | The Kanban board in the terminal |
 | The Claude Code status line | The branch, the running tickets and the board's counts |
 | [The project on GitHub](https://github.com/users/gpbcom/projects/7) | The board, the issues and their links |
-| `python3 .claude/scripts/tickets.py resolve <refs>` | A group's tickets, in order, with their state and what they wait for |
-| `python3 .claude/scripts/tickets.py list` | The running tickets and the files each one owns |
+| `python3 .claude/scripts/tickets/tickets.py resolve <refs>` | A group's tickets, in order, with their state and what they wait for |
+| `python3 .claude/scripts/tickets/tickets.py list` | The running tickets and the files each one owns |
 
 ### Afterwards
 
-Once every running ticket is merged, `python3 .claude/scripts/tickets.py prune` puts this checkout back on `develop`.
+Once every running ticket is merged, `python3 .claude/scripts/tickets/tickets.py prune` puts this checkout back on `develop`.
 It then deletes, locally and on GitHub, every branch whose work `develop` already holds, with its worker worktree,
 after saving them all to a bundle in `.git/swarm/backups/` (TKT-25); `prune --dry-run` only lists them.
-`python3 .claude/scripts/tickets.py branches` gives every branch its verdict: only a 🌱 live branch is rebased onto
+`python3 .claude/scripts/tickets/tickets.py branches` gives every branch its verdict: only a 🌱 live branch is rebased onto
 `develop`, and `develop` and `master` are never rebased, reset, force-pushed or deleted.
-On a new clone, run `python3 .claude/scripts/tickets.py setup` once to turn on the GitFlow git hooks.
+On a new clone, run `python3 .claude/scripts/tickets/tickets.py setup` once to turn on the GitFlow git hooks.
 
 ## 🚢 Releases
 

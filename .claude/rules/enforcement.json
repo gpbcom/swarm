@@ -161,7 +161,7 @@
    },
    {
     "kind": "script",
-    "path": ".claude/scripts/checks.py",
+    "path": ".claude/scripts/tickets/checks.py",
     "what": "front-end tickets capture their screens as screenshots (TKT-21)"
    }
   ],
@@ -180,7 +180,7 @@
   "TKT-1": [
    {
     "kind": "script",
-    "path": ".claude/scripts/ticket_tree.py",
+    "path": ".claude/scripts/tickets/ticket_tree.py",
     "what": "finish refuses a ticket whose documents are missing (docs)"
    },
    {
@@ -197,7 +197,7 @@
    },
    {
     "kind": "script",
-    "path": ".claude/scripts/ticket_refs.py",
+    "path": ".claude/scripts/tickets/ticket_refs.py",
     "what": "TICKET.md, PLAN.md and PROGRESS.md refer to the specification"
    },
    {
@@ -238,7 +238,7 @@
   "TKT-5": [
    {
     "kind": "script",
-    "path": ".claude/scripts/ticket_tree.py",
+    "path": ".claude/scripts/tickets/ticket_tree.py",
     "what": "hand-offs, integration and the single commit"
    },
    {
@@ -255,13 +255,13 @@
   "TKT-6": [
    {
     "kind": "script",
-    "path": ".claude/scripts/checks.py",
+    "path": ".claude/scripts/tickets/checks.py",
     "what": "the verifier's deterministic checks"
    },
    {
     "kind": "test",
     "path": "tests/harness/checks/test_checks.py",
-    "what": "the checks run in a clean tree holding only the ticket's own work; a missing project module is a code failure, not the environment's"
+    "what": "the checks run in a clean tree holding only the ticket's own work; a missing project module is a code failure; a failure names the file the tool reports"
    },
    {
     "kind": "workflow",
@@ -296,19 +296,19 @@
   "TKT-9": [
    {
     "kind": "script",
-    "path": ".claude/scripts/progress.py",
+    "path": ".claude/scripts/reports/progress.py",
     "what": "the exhaustive progress report"
    },
    {
     "kind": "script",
-    "path": ".claude/scripts/tickets.py",
+    "path": ".claude/scripts/tickets/tickets.py",
     "what": "the group report of tickets.py watch"
    }
   ],
   "TKT-10": [
    {
     "kind": "script",
-    "path": ".claude/scripts/progress.py",
+    "path": ".claude/scripts/reports/progress.py",
     "what": "timings and tokens written into PROGRESS.md"
    },
    {
@@ -320,7 +320,7 @@
   "TKT-11": [
    {
     "kind": "script",
-    "path": ".claude/scripts/ticket_tree.py",
+    "path": ".claude/scripts/tickets/ticket_tree.py",
     "what": "status lists the integrated tasks"
    },
    {
@@ -366,7 +366,7 @@
   "TKT-14": [
    {
     "kind": "script",
-    "path": ".claude/scripts/ticket_tree.py",
+    "path": ".claude/scripts/tickets/ticket_tree.py",
     "what": "docs checks EXPLAIN.md and IMPLEMENTATION.md; finish refuses otherwise"
    },
    {
@@ -378,7 +378,7 @@
   "TKT-15": [
    {
     "kind": "script",
-    "path": ".claude/scripts/gitflow.py",
+    "path": ".claude/scripts/github/gitflow.py",
     "what": "the GitFlow git hooks"
    },
    {
@@ -410,12 +410,12 @@
   "TKT-16": [
    {
     "kind": "script",
-    "path": ".claude/scripts/tickets.py",
+    "path": ".claude/scripts/tickets/tickets.py",
     "what": "the start rule and the area locks"
    },
    {
     "kind": "script",
-    "path": ".claude/scripts/ticket_tree.py",
+    "path": ".claude/scripts/tickets/ticket_tree.py",
     "what": "one checkout, the ticket's own files, one commit each"
    },
    {
@@ -432,12 +432,12 @@
   "TKT-17": [
    {
     "kind": "script",
-    "path": ".claude/scripts/board.py",
+    "path": ".claude/scripts/github/board.py",
     "what": "the board on GitHub and its columns"
    },
    {
     "kind": "script",
-    "path": ".claude/scripts/statusline.py",
+    "path": ".claude/scripts/reports/statusline.py",
     "what": "the status line"
    },
    {
@@ -473,7 +473,7 @@
   "TKT-20": [
    {
     "kind": "script",
-    "path": ".claude/scripts/tickets.py",
+    "path": ".claude/scripts/tickets/tickets.py",
     "what": "resolve, approve, next and watch"
    },
    {
@@ -500,7 +500,7 @@
    },
    {
     "kind": "script",
-    "path": ".claude/scripts/checks.py",
+    "path": ".claude/scripts/tickets/checks.py",
     "what": "screens captured as screenshots"
    },
    {
@@ -529,7 +529,7 @@
   "TKT-23": [
    {
     "kind": "script",
-    "path": ".claude/scripts/tickets.py",
+    "path": ".claude/scripts/tickets/tickets.py",
     "what": "done_tickets, the one definition of done; check and done refuse a done or finished ticket"
    },
    {
@@ -563,12 +563,12 @@
   "TKT-25": [
    {
     "kind": "script",
-    "path": ".claude/scripts/branches.py",
+    "path": ".claude/scripts/github/branches.py",
     "what": "gives every branch its verdict; deletes only merged, integrated or superseded ones, after a backup bundle"
    },
    {
     "kind": "script",
-    "path": ".claude/scripts/tickets.py",
+    "path": ".claude/scripts/tickets/tickets.py",
     "what": "branches prints the verdicts; prune [--dry-run] acts on them"
    },
    {
@@ -578,7 +578,7 @@
    },
    {
     "kind": "hook",
-    "path": ".claude/scripts/gitflow.py",
+    "path": ".claude/scripts/github/gitflow.py",
     "what": "the pre-push hook refuses deleting develop or master on the remote"
    },
    {

@@ -12,14 +12,14 @@ You keep the documents of one ticket folder `docs/tickets/<ID>/` up to date, fol
 (TKT-1, TKT-3, TKT-6). Write only what you are given: never invent results. Use British English and no em dash.
 
 - `PLAN.md`: the status line given to you, a summary, the assumptions, then under `## Task graph` the task graph in
-  a ` ```json ` block exactly as given. Then run `python3 .claude/scripts/plan.py render --ticket <ID>`: it writes
+  a ` ```json ` block exactly as given. Then run `python3 .claude/scripts/tickets/plan.py render --ticket <ID>`: it writes
   the readable view (waves table, dependency graph, one section per task) from the json block. Never write or edit
-  that view by hand. Then run `python3 .claude/scripts/ticket_refs.py sync --ticket <ID>`: it copies the
+  that view by hand. Then run `python3 .claude/scripts/tickets/ticket_refs.py sync --ticket <ID>`: it copies the
   specification references of `TICKET.md` into the **📚 Specifications** section of `PLAN.md` and `PROGRESS.md`.
   Never write that section by hand either.
 - `PROGRESS.md`: append rows to the 📝 Events table (`| Time | Event | By | Result |`), with the current time from
   `date '+%Y-%m-%d %H:%M'` and ✅, ❌, ⏳ or ⚠️. At the end of every workflow, run
-  `python3 .claude/scripts/progress.py timings --ticket <ID> --write` (TKT-10): it writes the elapsed times and the
+  `python3 .claude/scripts/reports/progress.py timings --ticket <ID> --write` (TKT-10): it writes the elapsed times and the
   tokens consumed; never write those figures yourself.
 - `EXPLAIN.md` and `IMPLEMENTATION.md` are written by the **explainer**, never by you (TKT-14).
 - **🔜 Follow-ups** (TKT-12): when given non-blocking review findings, list them in `PROGRESS.md` under

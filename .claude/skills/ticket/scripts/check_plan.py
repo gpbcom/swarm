@@ -1,17 +1,3 @@
-"""Check the task graph of a ticket's PLAN.md (TKT-3, TKT-4, TKT-21).
-
-A ticket that changes a front end and lists screens in its TICKET.md needs a ``mockup-writer`` task that owns both
-PNGs of every listed screen and depends on every ``frontend-implementer`` task: it captures them as screenshots.
-
-Usage, from anywhere:
-    python3 .claude/skills/ticket/scripts/check_plan.py <ID> [--root <repo root>] [--min-parallel N]
-
-It reads ``<root>/docs/tickets/<ID>/PLAN.md`` and prints one line per problem,
-``docs/tickets/<ID>/PLAN.md: <message>``, then exits 1. When the plan is sound it prints nothing and exits 0. A bad
-ID gives the usage on stderr and exit 2. The default root is the repository holding the script, and the default
-``--min-parallel`` is 1.
-"""
-
 from __future__ import annotations
 
 import json

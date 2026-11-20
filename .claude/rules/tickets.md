@@ -71,13 +71,13 @@ criteria it closes); out of scope. It states nothing that the specifications or 
 technical page section, feature (📘 FS), use case (🎬 UC) or business rule (📏 BR), each link resolving. When the
 roadmap row names none, the ticket-writer links the specification sections that settle what the ticket builds (its
 paths, layers, tools and terms), each with one line quoting what that section says for the ticket. When no section
-does, the ticket is not planned: the specification is written first. `python3 .claude/scripts/ticket_refs.py sync`
+does, the ticket is not planned: the specification is written first. `python3 .claude/scripts/tickets/ticket_refs.py sync`
 copies these links into a generated **📚 Specifications** section of `PLAN.md` and `PROGRESS.md`, and every task
 brief links the pages it applies.
 
 **Why:** the plan and the review are only as good as the ticket they start from.
 
-**Check:** `python3 .claude/scripts/ticket_refs.py check --ticket <ID>` prints nothing (run by `/ticket-plan` and by
+**Check:** `python3 .claude/scripts/tickets/ticket_refs.py check --ticket <ID>` prints nothing (run by `/ticket-plan` and by
 the verifier's `checks.py`). `python3 .claude/skills/ticket/scripts/check_ticket.py <ID>` prints nothing when every FS,
 UC and BR ID and every link resolves in `docs/specs/`, and the sections are in order; `/ticket-plan` runs it. A ticket
 that fails goes back to the ticket-writer once, then the run stops. The reviewer compares the delivered work with
@@ -86,7 +86,7 @@ that fails goes back to the ticket-writer once, then the run stops. The reviewer
 ## <a id="tkt-3"></a>TKT-3: The plan and its approval
 
 **Rule:** `PLAN.md` starts with `**Plan:** 🟡 Awaiting approval`. Its ` ```json ` block, folded at the end of the
-page, is the only source of the task graph and the one the workflow reads. `python3 .claude/scripts/plan.py render
+page, is the only source of the task graph and the one the workflow reads. `python3 .claude/scripts/tickets/plan.py render
 --ticket <ID>` writes from it, for the person, the waves table, a Mermaid dependency graph and one section per task
 with every field; that view is never edited by hand, and `plan.py check` prints nothing when it is up to date. Each task has: `id` (`K01`...), `title`, `agent` (an agent of
 `.claude/agents/`), `depends_on`, `files` (the files it alone may change), `brief`, `done_when`. The waves are computed
@@ -119,7 +119,7 @@ ticket runs in parallel, the more tickets each sprint can close.
 **Rule:**
 
 - Every running ticket works in the **main checkout**, its *home*, on the branch `feature/tickets` that they all share
-  (TKT-15, TKT-16). `python3 .claude/scripts/ticket_tree.py prepare` puts the main checkout on it (from
+  (TKT-15, TKT-16). `python3 .claude/scripts/tickets/ticket_tree.py prepare` puts the main checkout on it (from
   `origin/develop` when no other ticket runs) and records the ticket's own files in `.git/swarm/<ID>/state.json`,
   starting with `docs/tickets/<ID>/`, where its documents stay.
 - **No intermediate commit.** Until the ticket is done, its work (code, tests, documents) stays **uncommitted** in the
@@ -152,14 +152,14 @@ ticket runs in parallel, the more tickets each sprint can close.
 and one merge per wave, and a ticket that stops halfway leaves nothing half-finished in the history. Parallel agents
 never edit the same checkout; parallel tickets share one, but each commits only its own files.
 
-**Check:** `git log develop` shows one commit per ticket and its merge; `python3 .claude/scripts/ticket_tree.py status
+**Check:** `git log develop` shows one commit per ticket and its merge; `python3 .claude/scripts/tickets/ticket_tree.py status
 --ticket <ID>` lists the tasks integrated so far; the tests of `tests/harness/ticket_tree/` pass.
 
 ## <a id="tkt-6"></a>TKT-6: Done
 
 **Rule:** a ticket is done when:
 
-1. the **verifier** reports every applicable check passing, as decided and run by `.claude/scripts/checks.py`
+1. the **verifier** reports every applicable check passing, as decided and run by `.claude/scripts/tickets/checks.py`
    (deterministic, not a model's judgement): the AGENT.md tools on changed project code (ruff, mypy, pytest, cargo,
    pnpm, Terraform) and `specs.py check`; a check whose target does not exist yet is not applicable, never failed.
    **The checks run in a clean temporary worktree of the shared branch's commit that holds only the ticket's own
@@ -177,7 +177,8 @@ A failed check or a requested change goes back to the agent that owns the files,
 stops and the person is told. A check that fails because of the environment (a missing tool or third-party module, flagged
 `environment` by `checks.py`) goes to no agent: the run stops at once and the person fixes the environment. A
 missing module of the project itself (`tests.…`, a service or a package of the repository) is a wrong import in the
-ticket's code, and goes to its owner like any failure.
+ticket's code, and goes to its owner like any failure. Each failure names the file the tool reports it in (not the first
+file the tool was given), so that it goes to the owner of that file.
 
 **Why:** "done" must mean merged code that works and that someone else can understand.
 
@@ -219,7 +220,7 @@ most conservative option, records it as an **assumption** in its result, and the
 **Rule:** as soon as `/ticket-plan` or `/ticket-run` is launched, the main session arms the Monitor tool with
 
 ```bash
-python3 .claude/scripts/progress.py watch --every 120 --run <run id>
+python3 .claude/scripts/reports/progress.py watch --every 120 --run <run id>
 ```
 
 (`timeout_ms` 1800000, re-armed at each expiry until the run ends). Each update is an **exhaustive report with colour
@@ -244,7 +245,7 @@ stalls (⚠️ no change for 20 minutes). The same script with `once` gives the 
 **Rule:** at the end of every ticket workflow (plan, run, re-run), whether it finishes or stops, the scribe runs
 
 ```bash
-python3 .claude/scripts/progress.py timings --ticket <ID> --write
+python3 .claude/scripts/reports/progress.py timings --ticket <ID> --write
 ```
 
 which writes, between the `<!-- timings -->` markers of `PROGRESS.md`, measured from the agents' transcripts:
@@ -263,7 +264,7 @@ each with its time.
 
 ## <a id="tkt-11"></a>TKT-11: Re-running continues
 
-**Rule:** `/ticket-run <ID>` skips every task that `python3 .claude/scripts/ticket_tree.py status --ticket <ID>` lists
+**Rule:** `/ticket-run <ID>` skips every task that `python3 .claude/scripts/tickets/ticket_tree.py status --ticket <ID>` lists
 as integrated (the integrator records it when it applies the task's hand-off, TKT-5), and starts from the first wave
 with work left. For a ticket started before TKT-5 dropped intermediate commits, a task with a commit
 `<ID> <task id>:` on `ticket/<ID>` counts as integrated too. A change to an approved plan (a task's brief or check) is approved by the person
@@ -318,7 +319,7 @@ the heading.
 - **`EXPLAIN.md`: how it works.** What the ticket delivers; how the mechanism works, step by step in the order it runs,
   each step linked to the file and line that does it; the files and lines changed; how to test it; the evidence; the
   assumptions accepted and the follow-ups. The table of files and line ranges is written between the
-  `<!-- changes -->` markers by `python3 .claude/scripts/ticket_tree.py changes --ticket <ID> --write`, never by
+  `<!-- changes -->` markers by `python3 .claude/scripts/tickets/ticket_tree.py changes --ticket <ID> --write`, never by
   hand, and leaves out the ticket's own folder.
 - **`IMPLEMENTATION.md`: why this way.** The constraints any solution had to respect, then one section per decision:
   the option chosen, its real alternatives, what speaks for and against each in this repository (a rule, a budget, an
@@ -335,7 +336,7 @@ the heading.
 developer, person or agent, inherits the code: one needs to know where things are and how they work, the other why
 they are this way and what changing them would cost.
 
-**Check:** `python3 .claude/scripts/ticket_tree.py docs --ticket <ID>` prints nothing before the commit (the changes
+**Check:** `python3 .claude/scripts/tickets/ticket_tree.py docs --ticket <ID>` prints nothing before the commit (the changes
 table is up to date, no placeholder is left, every file and line is a link, and every link opens an existing file at a
 line inside it); `ticket_tree.py finish` refuses to commit otherwise, and the workflow sends its problems back to the
 explainer once. Both files have every section of their template, and `grep -n 'tkt-14' .claude/rules/tickets.md` finds the summary row
@@ -359,7 +360,7 @@ and the heading.
   deletes its head branch unless it moved since (TKT-25). A failing check leaves it open for the person.
 - `.github/workflows/gitflow.yml` checks every pull request: the branch is a GitFlow branch, it targets the right base,
   and a ticket's title starts with its ID.
-- The git hooks of `.githooks/` (`python3 .claude/scripts/tickets.py setup`, once per clone) refuse a commit on
+- The git hooks of `.githooks/` (`python3 .claude/scripts/tickets/tickets.py setup`, once per clone) refuse a commit on
   `develop` or `master`, a commit by a worker, a branch outside GitFlow, a ticket commit without its ID, and a push to
   `develop` or `master`. `SWARM_GITFLOW_BYPASS=1` lets the person step outside on purpose. The PreToolUse hook
   `.claude/hooks/guard_git.py` refuses `--no-verify` everywhere and asks before any push to `develop` or `master`.
@@ -380,7 +381,7 @@ the work in progress. A private repository of a free account has no branch prote
   documents in `docs/tickets/<ID>/`. `/ticket-plan` and `/ticket-run` of several tickets run at the same time; each
   touches only its own files, recorded in `.git/swarm/<ID>/state.json`, and commits only those when it finishes. A
   ticket started before this rule keeps its own worktree on `feature/<ID>` until it is merged.
-- **Start rule**, checked by `python3 .claude/scripts/tickets.py check --ticket <ID>` at the gate of `/ticket-run`:
+- **Start rule**, checked by `python3 .claude/scripts/tickets/tickets.py check --ticket <ID>` at the gate of `/ticket-run`:
   - every prerequisite of the ticket in `docs/specs/roadmap/gantt/ticket-graph.json` is **done**: merged on
     `origin/develop` (its `EXPLAIN.md` is there), or committed on `feature/tickets` (finished, its pull request open),
     since the shared branch already holds its code;
@@ -389,7 +390,7 @@ the work in progress. A private repository of a free account has no branch prote
   - a field ticket (the fixes of a campaign) starts once its campaign has flown.
 
   `/ticket-run <ID> --force` starts anyway, on the person's decision, and logs the problems in `PROGRESS.md`.
-- `python3 .claude/scripts/tickets.py list` shows the open tickets and the files each owns; `prune` removes the
+- `python3 .claude/scripts/tickets/tickets.py list` shows the open tickets and the files each owns; `prune` removes the
   worktrees of tickets started before this rule once they are merged, and puts the main checkout back on `develop`
   once no ticket is open and `feature/tickets` is merged. VS Code's Source Control shows the uncommitted work of every
   running ticket at once, in the one checkout.
@@ -408,13 +409,13 @@ the same code, so their pull requests merge without conflicts.
 
 - The GitHub project **Swarm roadmap** mirrors the roadmap: one issue per phase, epic and ticket, the tickets as
   sub-issues of their epic and the epics of their phase, one milestone per phase, a **Blocked by** link per
-  prerequisite of the ticket graph. `python3 .claude/scripts/board.py bootstrap` creates them once (resumable) and
+  prerequisite of the ticket graph. `python3 .claude/scripts/github/board.py bootstrap` creates them once (resumable) and
   records them in `.claude/github.json`.
 - Every ticket sits in one column: 📥 Backlog (a prerequisite is open), ✅ Ready, 📝 Planned (`/ticket-plan`),
   🔄 Running (`/ticket-run`), 👀 In review (pull request open), 🏁 Done (merged). The workflows move the card;
   `board.py sync` recomputes every column from the repository.
-- The board shows in three places: the project's board view on GitHub, `python3 .claude/scripts/board.py show` (and
-  `/board`) in a terminal, and the Claude Code status line (`.claude/scripts/statusline.py`), which reads the local
+- The board shows in three places: the project's board view on GitHub, `python3 .claude/scripts/github/board.py show` (and
+  `/board`) in a terminal, and the Claude Code status line (`.claude/scripts/reports/statusline.py`), which reads the local
   cache `.git/swarm/board.json` and never waits for GitHub.
 
 **Why:** with several tickets running, the person needs one place that says what runs, what waits for review and what
@@ -435,7 +436,7 @@ ticket of the roadmap.
   **Push:** 🟡 Awaiting code review
   ```
 
-- The person reviews the code where it lies, uncommitted in the main checkout (`python3 .claude/scripts/ticket_tree.py
+- The person reviews the code where it lies, uncommitted in the main checkout (`python3 .claude/scripts/tickets/ticket_tree.py
   diff --ticket <ID>` shows only this ticket's files; VS Code's Source Control shows every running ticket), with
   `EXPLAIN.md` as the guide. They may change it.
 - **The person approves by changing the line to `**Push:** 🟢 Approved`**, then runs `/ticket-run <ID>` again. That run
@@ -475,14 +476,14 @@ logs the blockers it sends before its retry.
 
 - A group of tickets is named by **references**: an issue number (`#12`: a ticket issue, or an epic or a phase issue
   with every ticket under it, through the sub-issues recorded in `.claude/github.json`), a ticket ID (`T0.10`), an epic
-  ID (`E0.4`) or a phase ID (`P1`), several separated by spaces. `python3 .claude/scripts/tickets.py resolve <refs>`
+  ID (`E0.4`) or a phase ID (`P1`), several separated by spaces. `python3 .claude/scripts/tickets/tickets.py resolve <refs>`
   lists the tickets, every prerequisite before the tickets that need it, each with its state. **Done sub-issues are
   left out**: merged on `develop` (their `EXPLAIN.md` is there) or closed on GitHub. Running `/issue-plan` or
   `/issue-run` again on the same references never plans or starts them twice; `tickets.py next` never returns a
   ticket that is running, in review or done.
 - **`/issue-plan <refs>`** plans every ticket of the group that has no `PLAN.md` yet, all at once (one `ticket-plan`
   workflow each), then stops.
-- **One approval for the group:** the person reads the plans, then runs `python3 .claude/scripts/tickets.py approve
+- **One approval for the group:** the person reads the plans, then runs `python3 .claude/scripts/tickets/tickets.py approve
   <refs>`, which approves every plan of the group that awaits approval and passes `check_plan.py`, records it in each
   `PROGRESS.md` and moves the cards. The PreToolUse hook asks the person before Claude runs it: the approval stays
   theirs (TKT-3).
@@ -547,7 +548,7 @@ not exist or a file that does not exist, or a rule has only agents as enforcers.
 
 **Rule:**
 
-- **Done is defined once**, by `done_tickets()` in `.claude/scripts/tickets.py`: a ticket merged on `origin/develop`
+- **Done is defined once**, by `done_tickets()` in `.claude/scripts/tickets/tickets.py`: a ticket merged on `origin/develop`
   (its `EXPLAIN.md` is there) or whose issue is closed on GitHub. A ticket **finished** has its commit on
   `feature/tickets`, its pull request open. Every script that needs it (`tickets.py`, `board.py`) uses that function.
 - `/ticket-plan` (`tickets.py done`) and `/ticket-run` (`tickets.py check`) refuse a ticket done or finished, even with
@@ -561,7 +562,7 @@ ticket; the bootstrap stopped on a link it had made just before a stop; and `/ti
 ticket again. Each came from a command that assumed it ran once, on fresh input.
 
 **Check:** the tests of `tests/harness/tickets/test_groups.py` (done tickets never planned, approved or run again)
-and of `tests/harness/board/test_board.py` (resume) pass; `grep -n 'done_tickets' .claude/scripts/board.py` finds the
+and of `tests/harness/board/test_board.py` (resume) pass; `grep -n 'done_tickets' .claude/scripts/github/board.py` finds the
 board using it.
 
 ## <a id="tkt-24"></a>TKT-24: Harness scripts run anywhere
@@ -584,7 +585,7 @@ without `develop`) pass, and CI runs every harness test in its own shallow check
 **Rule:**
 
 - Every branch, local and on GitHub, has one verdict against `origin/develop`, printed by `python3
-  .claude/scripts/tickets.py branches`:
+  .claude/scripts/tickets/tickets.py branches`:
 
   | Verdict | Means | What happens |
   | --- | --- | --- |

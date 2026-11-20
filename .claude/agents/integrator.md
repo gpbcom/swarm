@@ -12,7 +12,7 @@ You integrate the work of a Swarm ticket, following `.claude/rules/tickets.md` (
 ticket shares the main checkout and the branch `feature/tickets`; each ticket's work stays **uncommitted** there until
 it is done, beside the other tickets' work: **never run `git commit`, `git merge`, `git rebase`, `git push`, `git
 stash`, `git reset`, `git checkout -- <file>` or `git clean` yourself** (the PreToolUse hook refuses most of them), and
-never touch a file of another ticket. Every step goes through `python3 .claude/scripts/ticket_tree.py`.
+never touch a file of another ticket. Every step goes through `python3 .claude/scripts/tickets/ticket_tree.py`.
 
 - **Prepare:** `ticket_tree.py prepare --ticket <ID>`, in the main checkout, puts it on `feature/tickets` (from
   `origin/develop` when no other ticket runs) and records the ticket's own files, starting with `docs/tickets/<ID>/`;

@@ -1,7 +1,16 @@
 #!/usr/bin/env python3
-"""The GitFlow rules of Swarm, run by the git hooks of ``.githooks/`` (TKT-15).
+from __future__ import annotations
 
-Usage (by git, through ``.githooks/``; turned on per clone by ``python3 .claude/scripts/tickets.py setup``):
+import os
+import re
+import subprocess
+import sys
+from pathlib import Path
+from typing import List, Optional
+
+USAGE = """The GitFlow rules of Swarm, run by the git hooks of ``.githooks/`` (TKT-15).
+
+Usage (by git, through ``.githooks/``; turned on per clone by ``python3 .claude/scripts/tickets/tickets.py setup``):
     gitflow.py pre-commit
     gitflow.py commit-msg <message file>
     gitflow.py pre-push <remote> <url>          (the refs pushed come on stdin)
@@ -16,15 +25,6 @@ Usage (by git, through ``.githooks/``; turned on per clone by ``python3 .claude/
 ``SWARM_GITFLOW_BYPASS=1`` lets the person step outside these rules on purpose (a first push, a release tag).
 Each refusal prints its reason and the way out on stderr, and exits 1.
 """
-
-from __future__ import annotations
-
-import os
-import re
-import subprocess
-import sys
-from pathlib import Path
-from typing import List, Optional
 
 BYPASS_ENV = "SWARM_GITFLOW_BYPASS"
 PROTECTED = ("develop", "master", "main")
@@ -71,7 +71,7 @@ def pre_commit() -> int:
     if WORKER.match(current):
         return refuse(
             "a worker never commits (TKT-5): its work is handed off uncommitted.",
-            "python3 .claude/scripts/ticket_tree.py handoff --ticket <ID> --task <K..>",
+            "python3 .claude/scripts/tickets/ticket_tree.py handoff --ticket <ID> --task <K..>",
         )
     problem = name_problem(current)
     if problem:
@@ -88,7 +88,7 @@ def commit_msg(path: str) -> int:
     if branch() == SHARED_BRANCH and not ANY_TICKET.match(subject):
         return refuse(
             f"a commit on {SHARED_BRANCH} is one ticket's commit and starts with its ID.",
-            '"T0.10: <title of TICKET.md>" (python3 .claude/scripts/ticket_tree.py finish writes it).',
+            '"T0.10: <title of TICKET.md>" (python3 .claude/scripts/tickets/ticket_tree.py finish writes it).',
         )
     ticket = TICKET_BRANCH.match(branch())
     if ticket and not re.match(rf"^{re.escape(ticket.group(1))}[: ]", subject):
@@ -111,7 +111,7 @@ def pre_push(lines: List[str]) -> int:
             if target in PROTECTED:
                 return refuse(
                     f"{target} is never deleted (TKT-25).",
-                    "delete only branches whose work develop holds: python3 .claude/scripts/tickets.py prune.",
+                    "delete only branches whose work develop holds: python3 .claude/scripts/tickets/tickets.py prune.",
                 )
             continue
         if target in PROTECTED:
@@ -127,7 +127,7 @@ def pre_push(lines: List[str]) -> int:
 
 def main(argv: List[str]) -> int:
     if not argv:
-        print(__doc__, file=sys.stderr)
+        print(USAGE, file=sys.stderr)
         return 2
     if argv[0] == "pre-commit":
         return pre_commit()

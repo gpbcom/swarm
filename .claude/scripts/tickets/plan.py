@@ -1,25 +1,4 @@
 #!/usr/bin/env python3
-"""Render the task graph of a ticket's PLAN.md for people, from its json block.
-
-Usage, from the repository root:
-    python3 .claude/scripts/plan.py render --ticket T0.02
-    python3 .claude/scripts/plan.py check --ticket T0.02
-    python3 .claude/scripts/plan.py outline --ticket T0.02
-    python3 .claude/scripts/plan.py task --ticket T0.02 --id K07
-
-The ` ```json ` block of ``docs/tickets/<ID>/PLAN.md`` stays the only source of the task graph, the one the
-workflows read (TKT-3). ``render`` pretty-prints it, folds it in a ``<details>`` section, and writes from it,
-between the ``<!-- plan:graph -->`` markers, the human-readable view: the waves table, a Mermaid dependency graph and
-one section per task with every field (agent, wave, dependencies, files, done when, brief). A legacy ``## Waves``
-section written by hand is removed, and the view goes just above ``## Task graph``, after the assumptions. ``render`` then reads the file back and fails unless the json block parses to
-exactly the same graph as before, so the data never changes. ``check`` prints what ``render`` would change and
-exits 1, or prints nothing.
-
-``outline`` prints, as one line of JSON, every task without its ``brief`` and ``done_when``: the small graph that the
-``/ticket-run`` gate returns. ``task`` prints the brief and the done-when of one task exactly as approved, so that a
-worker reads them from the plan itself and never from a model's copy.
-"""
-
 from __future__ import annotations
 
 import argparse
@@ -29,7 +8,7 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 START = "<!-- plan:graph -->"
 END = "<!-- /plan:graph -->"
 JSON_BLOCK = re.compile(r"^```json[ \t]*\n(.*?)\n```[ \t]*$", re.DOTALL | re.MULTILINE)
@@ -130,7 +109,7 @@ def render_view(graph: List[Task]) -> str:
     lines: List[str] = [START, ""]
     lines += [
         "> [!NOTE]",
-        "> Generated from the json block at the end of this page by `python3 .claude/scripts/plan.py render`.",
+        "> Generated from the json block at the end of this page by `python3 .claude/scripts/tickets/plan.py render`.",
         "> To change a task, edit the json block, then render again: never edit this view by hand.",
         "",
         "## Waves",

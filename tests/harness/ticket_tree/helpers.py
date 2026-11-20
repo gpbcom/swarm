@@ -38,7 +38,7 @@ def repo_root() -> Path:
 
 
 def script_path() -> Path:
-    return repo_root() / ".claude" / "scripts" / "ticket_tree.py"
+    return repo_root() / ".claude" / "scripts" / "tickets" / "ticket_tree.py"
 
 
 def environment() -> Dict[str, str]:

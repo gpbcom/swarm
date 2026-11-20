@@ -69,7 +69,7 @@ class TestTicketWorkflows:
 
     def test_ticket_run_applies_the_start_rule_at_the_gate(self) -> None:
         text = read_text(self.RUN)
-        assert "python3 .claude/scripts/tickets.py check --ticket" in text
+        assert "python3 .claude/scripts/tickets/tickets.py check --ticket" in text
         assert "--force" in text
 
     def test_ticket_run_works_in_the_ticket_s_own_worktree(self) -> None:
@@ -114,8 +114,8 @@ class TestTicketWorkflows:
     def test_a_group_skill_runs_its_workflow_and_watches_the_group(self, skill: str, workflow: str) -> None:
         text = read_text(f".claude/skills/{skill}/SKILL.md")
         assert f"`{workflow}`" in text
-        assert "python3 .claude/scripts/tickets.py watch <refs> --every 120" in text
-        assert "python3 .claude/scripts/tickets.py resolve <refs>" in text
+        assert "python3 .claude/scripts/tickets/tickets.py watch <refs> --every 120" in text
+        assert "python3 .claude/scripts/tickets/tickets.py resolve <refs>" in text
 
     def test_only_the_person_approves_a_group(self) -> None:
         text = read_text(".claude/skills/issue-plan/SKILL.md")
@@ -137,6 +137,6 @@ class TestTicketWorkflows:
         assert "TKT-21" in text
 
     def test_ticket_plan_and_ticket_run_refuse_a_ticket_already_done(self) -> None:
-        assert "python3 .claude/scripts/tickets.py done --ticket" in read_text(self.PLAN)
-        assert "python3 .claude/scripts/tickets.py check --ticket" in read_text(self.RUN)
+        assert "python3 .claude/scripts/tickets/tickets.py done --ticket" in read_text(self.PLAN)
+        assert "python3 .claude/scripts/tickets/tickets.py check --ticket" in read_text(self.RUN)
         assert "already done" in read_text(self.RUN)

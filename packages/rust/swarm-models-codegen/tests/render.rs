@@ -84,3 +84,12 @@ fn the_default_paths_point_into_the_models_crate() {
     assert!(default_output_path().ends_with("swarm-models/src/generated.rs"));
     assert!(default_schema_path().ends_with("swarm-models/schemas/swarm_models.schema.json"));
 }
+
+#[test]
+fn a_date_time_becomes_a_jiff_timestamp_never_chrono() {
+    let schema = r#"{"$defs": {"Stamp": {"type": "object", "title": "Stamp", "required": ["at"],
+        "properties": {"at": {"type": "string", "format": "date-time", "title": "At", "description": "When."}}}}}"#;
+    let text = render(schema).expect("the schema renders");
+    assert!(text.contains("::jiff::Timestamp"), "{text}");
+    assert!(!text.contains("chrono"), "{text}");
+}

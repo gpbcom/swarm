@@ -1,8 +1,24 @@
 #!/usr/bin/env python3
-"""Run every applicable check of a ticket deterministically, save the evidence, and print the verdict as JSON.
+from __future__ import annotations
+
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple, Union
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "skills" / "ticket" / "scripts"))
+
+from check_ticket import has_no_screen_reason, screens_of, screens_section, touches_front_end
+
+USAGE = """Run every applicable check of a ticket deterministically, save the evidence, and print the verdict as JSON.
 
 Usage, from the repository root, on the ticket branch:
-    python3 .claude/scripts/checks.py --ticket T0.01 [--base develop]
+    python3 .claude/scripts/tickets/checks.py --ticket T0.01 [--base develop]
 
 Which checks apply is decided here, never by a model (TKT-6): a check whose target does not exist yet (a Cargo
 workspace with no member crate, no TypeScript workspace package, no Python source for mypy) is reported under
@@ -19,23 +35,7 @@ ticket has recorded its own files, every check runs in a clean temporary worktre
 ticket's own changes (TKT-6), removed afterwards; the evidence is still written to the ticket's folder.
 """
 
-from __future__ import annotations
-
-import json
-import os
-import re
-import shutil
-import subprocess
-import sys
-import tempfile
-from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Union
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "skills" / "ticket" / "scripts"))
-
-from check_ticket import has_no_screen_reason, screens_of, screens_section, touches_front_end
-
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 PROJECT_PREFIXES = ("services/", "packages/", "frontends/", "tests/", "deploy/")
 TIMEOUT_S = 900
 # A failure whose output holds one of these is caused by the environment (a missing tool or module), not by the
@@ -188,9 +188,30 @@ def screen_problems(
     return failures, None
 
 
+FAILING_FILES_MAX = 10
+
+
+def failing_files(out: str, changed: List[str]) -> List[Tuple[str, str]]:
+    """Return the ticket's files a failed check's output names, each with the output lines that name it (L-32).
+
+    A tool reports the file it fails on (``services/missions/tests/api/cli/test_x.py:27:18``), which is rarely the first
+    file it was given: the failure goes to the owner of the file named, so that the right task fixes it.
+    """
+    # A line naming many of the ticket's files is a list (an echoed command, a list of files checked), not a failure.
+    lines = [line for line in out.splitlines() if sum(name in line for name in changed) <= 2]
+    found: List[Tuple[str, str]] = []
+    for name in sorted(changed, key=len, reverse=True):
+        hits = [line for line in lines if name in line]
+        if hits and not any(name in other for other, _ in found):
+            found.append((name, "\n".join(hits[:12])))
+    order = {name: index for index, name in enumerate(changed)}
+    return sorted(found, key=lambda pair: order.get(pair[0], 0))[:FAILING_FILES_MAX]
+
+
 class Checks:
-    def __init__(self, ticket: str, root: Path = ROOT) -> None:
+    def __init__(self, ticket: str, root: Path = ROOT, changed: Optional[List[str]] = None) -> None:
         self.root = root
+        self.changed = changed or []
         self.evidence = ROOT / "docs" / "tickets" / ticket / "tests-evidences"
         self.evidence.mkdir(parents=True, exist_ok=True)
         self.failures: List[Dict[str, Union[str, bool]]] = []
@@ -213,7 +234,14 @@ class Checks:
             return True
         detail = "\n".join(out.splitlines()[-12:])
         environment = environment_failure(code, out, self.root)
-        self.failures.append({"check": name, "file": file, "detail": detail[:1500], "environment": environment})
+        named = [] if environment else failing_files(out, self.changed)
+        if not named:
+            self.failures.append({"check": name, "file": file, "detail": detail[:1500], "environment": environment})
+            return False
+        for path, lines in named:
+            self.failures.append(
+                {"check": name, "file": path, "detail": f"{lines}\n...\n{detail}"[:1500], "environment": False}
+            )
         return False
 
     def skip(self, name: str, reason: str) -> None:
@@ -313,7 +341,7 @@ def main() -> int:
     ticket = args[args.index("--ticket") + 1] if "--ticket" in args else ""
     base = args[args.index("--base") + 1] if "--base" in args else "develop"
     if not re.fullmatch(r"T\d\.\d\d", ticket):
-        print(__doc__, file=sys.stderr)
+        print(USAGE, file=sys.stderr)
         return 2
     changed = changed_files(base, ticket)
     tree = isolated_tree(changed) if own_paths(ticket) is not None else ROOT
@@ -333,7 +361,7 @@ def run_checks(
     ticket: str, base: str, changed: List[str], root: Path
 ) -> Dict[str, Union[bool, List[str], List[Dict[str, Union[str, bool]]]]]:
     """Run every applicable check of the ticket in ``root`` and return the verdict."""
-    checks = Checks(ticket, root)
+    checks = Checks(ticket, root, changed)
     python_checks(checks, changed)
     rust_checks(checks, changed)
     typescript_checks(checks, changed)
@@ -350,10 +378,10 @@ def run_checks(
         checks.passed.append("screens captured")
     checks.check("specs check", ["python3", ".claude/skills/write-specs/scripts/specs.py", "check"], "docs/specs")
     folder = f"docs/tickets/{ticket}"
-    checks.check("ticket refs", ["python3", ".claude/scripts/ticket_refs.py", "check", "--ticket", ticket], folder)
+    checks.check("ticket refs", ["python3", ".claude/scripts/tickets/ticket_refs.py", "check", "--ticket", ticket], folder)
     if (root / folder / "PLAN.md").is_file():
         checks.check(
-            "plan view", ["python3", ".claude/scripts/plan.py", "check", "--ticket", ticket], f"{folder}/PLAN.md"
+            "plan view", ["python3", ".claude/scripts/tickets/plan.py", "check", "--ticket", ticket], f"{folder}/PLAN.md"
         )
     return {
         "passed": not checks.failures,

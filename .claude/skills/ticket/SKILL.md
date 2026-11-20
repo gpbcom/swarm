@@ -67,14 +67,14 @@ approved brief or check is approved again and recorded in 📝 Events before the
 | Command | Does |
 | --- | --- |
 | `/issue-plan <refs>` | Plans every ticket of an issue with its child issues, or of a group: `#12` (a ticket, an epic or a phase issue), `T0.10`, `E0.4`, `P1`, several at once |
-| `python3 .claude/scripts/tickets.py approve <refs>` | The person's approval of every plan of the group that passes `check_plan.py` (Claude asks first) |
+| `python3 .claude/scripts/tickets/tickets.py approve <refs>` | The person's approval of every plan of the group that passes `check_plan.py` (Claude asks first) |
 | `/issue-run <refs>` | Runs the approved tickets of the group, every one the start rule allows at once, the others as soon as they may |
-| `python3 .claude/scripts/tickets.py resolve <refs>` | The tickets of a group, in order, with their state and what they wait for |
-| `python3 .claude/scripts/tickets.py watch <refs>` | The group's report every 2 minutes, with `▶️ CAN START <ID>` lines |
-| `python3 .claude/scripts/tickets.py list` | Every open ticket: the files it owns and its areas |
-| `python3 .claude/scripts/tickets.py prune` | Once everything is merged, puts the main checkout back on `develop`, then deletes every merged, integrated or superseded branch and worker worktree after a backup bundle (TKT-25) |
-| `python3 .claude/scripts/tickets.py branches` | Every branch with its verdict: 🔒 protected, 🔄 open, 🧹 delete, 🌱 live (the only ones to rebase) |
-| `python3 .claude/scripts/board.py show` or `/board` | The Kanban board in the terminal (TKT-17) |
+| `python3 .claude/scripts/tickets/tickets.py resolve <refs>` | The tickets of a group, in order, with their state and what they wait for |
+| `python3 .claude/scripts/tickets/tickets.py watch <refs>` | The group's report every 2 minutes, with `▶️ CAN START <ID>` lines |
+| `python3 .claude/scripts/tickets/tickets.py list` | Every open ticket: the files it owns and its areas |
+| `python3 .claude/scripts/tickets/tickets.py prune` | Once everything is merged, puts the main checkout back on `develop`, then deletes every merged, integrated or superseded branch and worker worktree after a backup bundle (TKT-25) |
+| `python3 .claude/scripts/tickets/tickets.py branches` | Every branch with its verdict: 🔒 protected, 🔄 open, 🧹 delete, 🌱 live (the only ones to rebase) |
+| `python3 .claude/scripts/github/board.py show` or `/board` | The Kanban board in the terminal (TKT-17) |
 
 ## Templates
 
@@ -91,10 +91,10 @@ approved brief or check is approved again and recorded in 📝 Events before the
 | --- | --- | --- |
 | `scripts/check_ticket.py` | `python3 .claude/skills/ticket/scripts/check_ticket.py <ID>` | `TICKET.md` against the template and `docs/specs/`: IDs, links, sections |
 | `scripts/check_plan.py` | `python3 .claude/skills/ticket/scripts/check_plan.py <ID> [--min-parallel N]` | The task graph of `PLAN.md`: ids, agents, dependencies, files, waves |
-| `.claude/scripts/checks.py` | `python3 .claude/scripts/checks.py --ticket <ID> [--base develop]` | Every applicable check of the code and the specifications, with the verdict in JSON |
-| `.claude/scripts/ticket_tree.py` | `python3 .claude/scripts/ticket_tree.py <command> --ticket <ID>` | The uncommitted work: `prepare`, `status`, `start`, `handoff`, `integrate`, `diff`, `changes` (the files and lines table of `EXPLAIN.md`), `docs` (every file and line of `EXPLAIN.md` and `IMPLEMENTATION.md` is a working clickable link), `finish` (the single commit, refused while `docs` finds a problem) |
-| `.claude/scripts/progress.py` | `python3 .claude/scripts/progress.py watch --every 120 --run <run id>` | The progress report of a run, every 2 minutes (TKT-9) |
-| `.claude/scripts/progress.py` | `python3 .claude/scripts/progress.py timings --ticket <ID> --write` | Elapsed time and tokens in `PROGRESS.md` (TKT-10) |
+| `.claude/scripts/tickets/checks.py` | `python3 .claude/scripts/tickets/checks.py --ticket <ID> [--base develop]` | Every applicable check of the code and the specifications, with the verdict in JSON |
+| `.claude/scripts/tickets/ticket_tree.py` | `python3 .claude/scripts/tickets/ticket_tree.py <command> --ticket <ID>` | The uncommitted work: `prepare`, `status`, `start`, `handoff`, `integrate`, `diff`, `changes` (the files and lines table of `EXPLAIN.md`), `docs` (every file and line of `EXPLAIN.md` and `IMPLEMENTATION.md` is a working clickable link), `finish` (the single commit, refused while `docs` finds a problem) |
+| `.claude/scripts/reports/progress.py` | `python3 .claude/scripts/reports/progress.py watch --every 120 --run <run id>` | The progress report of a run, every 2 minutes (TKT-9) |
+| `.claude/scripts/reports/progress.py` | `python3 .claude/scripts/reports/progress.py timings --ticket <ID> --write` | Elapsed time and tokens in `PROGRESS.md` (TKT-10) |
 
 The scripts print nothing when all is well, except `checks.py`, `progress.py` and `ticket_tree.py`, which print their report.
 

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 # Standard library imports
-from logging import Logger
+from logging import Logger, getLogger
 from typing import Awaitable, Callable, Optional, Type
 
 # Third-party imports
@@ -41,7 +41,8 @@ class DurableConsumerFactory[M: BaseModel](BusRunnableFactory[DurableConsumer[M]
             handler (Callable[[M], Awaitable[None]]): What is done with each decoded message.
             logger (Optional[Logger]): Logger to use. A logger named after the module is used when it is ``None``.
         """
-        super().__init__(logger)
+        super().__init__()
+        self.logger = logger if logger else getLogger(__name__)
         self.connection = connection
         self.config = config
         self.message_type = message_type
@@ -57,4 +58,4 @@ class DurableConsumerFactory[M: BaseModel](BusRunnableFactory[DurableConsumer[M]
         Returns:
             DurableConsumer[M]: A new consumer that is not started.
         """
-        return DurableConsumer(self.connection, self.config, self.message_type, self.handler, self.logger)
+        return DurableConsumer(self.connection, self.config, self.message_type, self.handler)

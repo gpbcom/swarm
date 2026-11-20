@@ -1,26 +1,4 @@
 #!/usr/bin/env python3
-"""Report the progress of the running Claude Code workflow (ticket harness), exhaustively, with colour icons.
-
-Usage, from the repository root:
-    python3 .claude/scripts/progress.py watch [--every 120] [--run <run id>]
-    python3 .claude/scripts/progress.py once [--run <run id>]
-
-``watch`` prints one report every ``--every`` seconds (default 120, rule TKT-9) and exits when the workflow ends (an end
-event, or every agent returned and the journal quiet for 90 seconds), or
-after 20 minutes without any change (stalled). Arm it with the Monitor tool: each report is one notification.
-``once`` prints a single report. Without ``--run``, the most recently changed workflow of this project is used.
-
-    python3 .claude/scripts/progress.py timings --ticket <ID> [--write]
-
-``timings`` measures a ticket from the transcripts of every workflow run that worked on it (ticket-plan, ticket-run,
-re-runs): the overall time, the time agents worked, the time waiting between runs, and per run, per phase and per step
-the start, end and elapsed time (rule TKT-10). ``--write`` puts the result into ``docs/tickets/<ID>/PROGRESS.md``
-between the ``<!-- timings -->`` markers (appended at the end if missing); without it, the Markdown is printed.
-
-Legend: 🏁 ended · ⏳ running · ❌ failed · ⚠️ stalled | phases ✅ done 🔄 running ⬜ waiting |
-models 🟣 opus 🔵 sonnet 🟢 haiku 🟠 fable ⚪ other | 🪙 tokens (input + output, cache reads excluded).
-"""
-
 from __future__ import annotations
 
 import json
@@ -31,6 +9,28 @@ import time
 from datetime import datetime
 from pathlib import Path
 
+USAGE = """Report the progress of the running Claude Code workflow (ticket harness), exhaustively, with colour icons.
+
+Usage, from the repository root:
+    python3 .claude/scripts/reports/progress.py watch [--every 120] [--run <run id>]
+    python3 .claude/scripts/reports/progress.py once [--run <run id>]
+
+``watch`` prints one report every ``--every`` seconds (default 120, rule TKT-9) and exits when the workflow ends (an end
+event, or every agent returned and the journal quiet for 90 seconds), or
+after 20 minutes without any change (stalled). Arm it with the Monitor tool: each report is one notification.
+``once`` prints a single report. Without ``--run``, the most recently changed workflow of this project is used.
+
+    python3 .claude/scripts/reports/progress.py timings --ticket <ID> [--write]
+
+``timings`` measures a ticket from the transcripts of every workflow run that worked on it (ticket-plan, ticket-run,
+re-runs): the overall time, the time agents worked, the time waiting between runs, and per run, per phase and per step
+the start, end and elapsed time (rule TKT-10). ``--write`` puts the result into ``docs/tickets/<ID>/PROGRESS.md``
+between the ``<!-- timings -->`` markers (appended at the end if missing); without it, the Markdown is printed.
+
+Legend: 🏁 ended · ⏳ running · ❌ failed · ⚠️ stalled | phases ✅ done 🔄 running ⬜ waiting |
+models 🟣 opus 🔵 sonnet 🟢 haiku 🟠 fable ⚪ other | 🪙 tokens (input + output, cache reads excluded).
+"""
+
 PROJECTS = Path.home() / ".claude" / "projects"
 RUNNING_TYPES = {"launched", "started", "result"}
 STALL_S = 20 * 60
@@ -40,7 +40,7 @@ MODEL_ICONS = (("opus", "🟣 opus"), ("sonnet", "🔵 sonnet"), ("haiku", "🟢
 
 def worktrees() -> list[tuple[Path, str]]:
     """Return every checkout of the repository with its branch, the main checkout first (``git worktree list``)."""
-    here = Path(__file__).resolve().parents[2]
+    here = Path(__file__).resolve().parents[3]
     try:
         out = subprocess.run(
             ["git", "-C", str(here), "worktree", "list", "--porcelain"], capture_output=True, text=True, check=True
@@ -331,7 +331,7 @@ def timings(ticket: str) -> str:
     lines = [
         "## ⏱️ Timings",
         "",
-        f"Measured from the agents' transcripts by `python3 .claude/scripts/progress.py timings --ticket {ticket}` (TKT-10).",
+        f"Measured from the agents' transcripts by `python3 .claude/scripts/reports/progress.py timings --ticket {ticket}` (TKT-10).",
         "",
         "| Measure | Value |",
         "| --- | --- |",
@@ -410,7 +410,7 @@ def main() -> int:
         print(f"wrote {write_timings(ticket, text)}" if "--write" in args else text)
         return 0
     if not args or args[0] not in ("watch", "once"):
-        print(__doc__, file=sys.stderr)
+        print(USAGE, file=sys.stderr)
         return 2
     every = int(args[args.index("--every") + 1]) if "--every" in args else 120
     run_id = args[args.index("--run") + 1] if "--run" in args else None

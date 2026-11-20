@@ -268,7 +268,8 @@ Each step must pass before the next one starts:
 Since T0.03, `tests/conventions/services/test_service_conventions.py` runs these rules against every service it finds
 under `services/`. The rules checked are: more than one top-level class in a file; more than five Python files in a
 folder; a nested function; `Any`; an import that Layout does not allow, checked in `src/` only; the lifecycle rule
-(`start` or `stop`, or `run` without a lifecycle base class); and a Pydantic model outside `src/models/`. `@staticmethod`,
+(`start` or `stop`, or `run` without a lifecycle base class); a Pydantic model outside `src/models/`; a module
+docstring; and a logger handed to a new object or to `super().__init__`, checked in `src/` only. `@staticmethod`,
 attributes starting with an underscore and the node rules are not tested yet. Each rule is one class in
 `tests/conventions/rules/`. The environment variable `SWARM_CONVENTIONS_SERVICES_ROOT` runs the tests against another
 folder of services. `tests/conventions/packages/test_package_conventions.py` runs the same rules against every package of
@@ -276,7 +277,8 @@ folder of services. `tests/conventions/packages/test_package_conventions.py` run
 definitions of `Runnable` and `AsyncRunnable` themselves.
 
 - More than one top-level class in a file, whatever the kind of class, except several enums in an `enums.py`.
-- More than five Python files in a folder, not counting `__init__.py` and `conftest.py`.
+- More than five Python files in a folder, not counting `__init__.py` and `conftest.py`. The rule of [File shape](#file-shape)
+  also counts JavaScript, TypeScript and Rust files, in every folder of the repository.
 - A nested function.
 - `@staticmethod`. Use an instance method or a `@classmethod`.
 - `Any`. See [Typing](#typing).
@@ -286,6 +288,9 @@ definitions of `Runnable` and `AsyncRunnable` themselves.
 - A Pydantic model outside `src/models/`.
 - A class outside `src/models/` with `start` or `stop`, or with `run` but no lifecycle base class.
 - A node without `__call__`, or with `run`.
+- A file that starts with a docstring (a module docstring).
+- A call in `src/` that hands a logger to a new object or to `super().__init__` (`logger=`, `self.logger`,
+  `getLogger(...)`).
 
 ## File shape
 
@@ -298,10 +303,13 @@ nothing else.
 **Classes that share a method name share a base class.** `TaskNode` has `__call__`, and `YamlCatalog` has `load`. If two
 methods only happen to share a name and mean different things, rename one instead.
 
-**NEVER more than five Python files in one folder.** When a folder would go past five, create sub-folders and dispatch
-its files by entity type: `storage/customers/repositories/` for the repositories, `models/customers/exceptions/` for
-the exceptions. This applies to `src/` and `tests/`, including `exceptions/` folders. `__init__.py` and `conftest.py` do not
-count towards the five.
+**NEVER more than five code files in one folder,** whatever their language: Python, JavaScript, TypeScript and Rust
+together (`.py`, `.js`, `.jsx`, `.mjs`, `.cjs`, `.ts`, `.tsx`, `.rs`). When a folder would go past five, create sub-folders
+and dispatch its files by entity type or by theme: `storage/customers/repositories/` for the repositories,
+`models/customers/exceptions/` for the exceptions, `.claude/scripts/tickets/` for the ticket scripts. This applies to every
+folder of the repository: `src/` and `tests/` of the services and packages, `frontends/`, `packages/ts/`, `packages/rust/`,
+the harness under `.claude/` and the CI scripts, including `exceptions/` folders. The entry files of a folder do not count
+towards the five: `__init__.py` and `conftest.py`, `index.ts` and `index.js`, and Rust's `lib.rs`, `main.rs` and `mod.rs`.
 
 An `exceptions/` package's `__init__.py` re-exports everything under it, so callers keep importing from the package. Other code is imported by its full path: `from service.customers.customer_service import CustomerService`.
 
@@ -356,8 +364,8 @@ Every runnable class except the nodes subclasses `Runnable` or `AsyncRunnable`, 
   sub-folders: `ServiceFactory` in `service/factories/`, and `CommandFactory` in `api/factories/`. Do not call a
   runnable's constructor in `src/` outside a factory.
 - The base classes are `swarm_lifecycle.runnables.runnable.Runnable` and `swarm_lifecycle.runnables.async_runnable.AsyncRunnable`.
-  A subclass passes its logger to `super().__init__(logger)`, and an `AsyncRunnable` subclass passes its status
-  interval first: `super().__init__(config.status_interval_s, logger)`.
+  A subclass calls `super().__init__()`, or `super().__init__(config.status_interval_s)` for an `AsyncRunnable`, with
+  no logger, then sets its own `self.logger = logger if logger else getLogger(__name__)`.
 - An abstract factory of a layer subclasses `swarm_lifecycle.factories.runnable_factory.RunnableFactory[...]` or
   `swarm_lifecycle.factories.async_runnable_factory.AsyncRunnableFactory[...]`. A concrete factory implements `_build()`,
   and callers call `create()`.
@@ -371,7 +379,8 @@ Every runnable class except the nodes subclasses `Runnable` or `AsyncRunnable`, 
 
 ## Imports
 
-`from __future__ import annotations` comes first in every non-empty file, after the module docstring if there is one.
+`from __future__ import annotations` comes first in every non-empty file: a file never starts with a docstring
+(see [Docstrings and comments](#docstrings-and-comments)).
 Then come up to three groups, each under its own comment:
 
 ```python
@@ -412,6 +421,9 @@ from models.customers.exceptions import SECustomerCatalogUnreadable
 - Use `error` for a caught exception and `value` for a validator's input.
 
 ## Docstrings and comments
+
+**NEVER a file docstring,** in `src/` and in `tests/`, `__init__.py` and console scripts included: no module starts
+with a docstring. A file holds one class, and that class's docstring says what the file is for.
 
 Every class and method in `src/` has a Google-style docstring, private ones included. Types go in parentheses.
 
@@ -482,6 +494,12 @@ def __init__(self, config: DatabaseConfig, logger: Optional[Logger] = None) -> N
     self.config = config
     self.logger = logger if logger else getLogger(__name__)
 ```
+
+**NEVER hand a logger to a new object.** The logger parameter keeps its `None` default, and code that creates the
+object leaves it out, so that each class logs under its own module's name: `DurableConsumer(connection, config)`, never
+`DurableConsumer(connection, config, self.logger)` or `GreetingCommand(logger=self.logger)`. **Nor does a subclass hand
+it to its base class:** it calls `super().__init__()` without it, then sets its own `self.logger`. Tests may pass a
+logger to an object they test, to test that parameter or to capture the logs.
 
 - Use lazy arguments, never an f-string: `self.logger.info("Created customer %s in %d ms.", name, duration_ms)`.
 - Use the levels this way:

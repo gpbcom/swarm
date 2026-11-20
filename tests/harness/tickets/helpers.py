@@ -106,7 +106,7 @@ def write_plan(main: Path, ticket: str, status: str) -> Path:
 
 def run(main: Path, *args: str, check_plan: str = "true", closed: str = "") -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        [sys.executable, str(repo_root() / ".claude" / "scripts" / "tickets.py"), *args],
+        [sys.executable, str(repo_root() / ".claude" / "scripts" / "tickets" / "tickets.py"), *args],
         cwd=main,
         check=False,
         capture_output=True,

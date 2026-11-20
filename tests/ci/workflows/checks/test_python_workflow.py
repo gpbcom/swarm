@@ -15,7 +15,7 @@ class TestPythonWorkflow:
     VERSION_PATTERN: ClassVar[str] = r"\d+\.\d+\.\d+"
 
     def root(self) -> Path:
-        return Path(__file__).resolve().parents[3]
+        return Path(__file__).resolve().parents[4]
 
     def load(self) -> Dict[Union[str, bool], JsonValue]:
         path = self.root() / ".github" / "workflows" / "python.yml"

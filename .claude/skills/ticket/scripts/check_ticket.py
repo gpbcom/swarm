@@ -1,16 +1,3 @@
-"""Check a ticket's TICKET.md against the ticket template and docs/specs/ (TKT-2, TKT-21).
-
-A ticket that changes a front end (its area in the ticket graph) links every screen it shows under "Screens touched",
-or says ``- ➖ No screen: <why>``.
-
-Usage, from anywhere:
-    python3 .claude/skills/ticket/scripts/check_ticket.py <ID> [--root <repo root>]
-
-It reads ``<root>/docs/tickets/<ID>/TICKET.md``, resolves its relative links from that folder, and prints one line per
-problem, ``docs/tickets/<ID>/TICKET.md: <message>``, then exits 1. When the ticket is sound it prints nothing and
-exits 0. A bad ID gives the usage on stderr and exit 2. The default root is the repository holding the script.
-"""
-
 from __future__ import annotations
 
 import json
@@ -20,7 +7,7 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "scripts"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "scripts" / "reports"))
 
 from roadmap_gantt import areas
 

@@ -8,7 +8,7 @@ description: Plan a GitHub issue with all its child issues, or a group of issues
 The arguments are references: `#12` (a ticket issue, or an epic or phase issue with every ticket under it), `T0.10`,
 `E0.4`, `P1`, several separated by spaces.
 
-1. Run `python3 .claude/scripts/tickets.py resolve <refs>` and show its output to the person in full: the tickets of
+1. Run `python3 .claude/scripts/tickets/tickets.py resolve <refs>` and show its output to the person in full: the tickets of
    the group in the order of their prerequisites, each with its state. Sub-issues already done (merged on `develop`,
    or closed on GitHub) are left out and never planned again. When it prints "nothing to do", say so and stop. A
    reference it refuses ends the skill: say why.
@@ -16,11 +16,11 @@ The arguments are references: `#12` (a ticket issue, or an epic or phase issue w
    `ticket-plan` and the ticket ID as `args`, **all in the same message** so that they run at once. The person asked
    for this command, which allows the Workflow tool. Leave out the tickets that already have a plan.
 3. Arm the **Monitor** tool (`timeout_ms` 1800000, re-armed at each expiry while a plan runs) with
-   `python3 .claude/scripts/tickets.py watch <refs> --every 120`, and relay each report to the person in full, keeping
+   `python3 .claude/scripts/tickets/tickets.py watch <refs> --every 120`, and relay each report to the person in full, keeping
    its icons (TKT-9).
 4. When every plan is written, stop the monitor and tell the person, in a few lines:
    - which `PLAN.md` files to read (`docs/tickets/<ID>/PLAN.md`) and any plan check that failed;
-   - that one command approves them all: `python3 .claude/scripts/tickets.py approve <refs>`; it approves only the plans
+   - that one command approves them all: `python3 .claude/scripts/tickets/tickets.py approve <refs>`; it approves only the plans
      that pass `check_plan.py`, records it and moves the cards;
    - then `/issue-run <refs>` runs the group.
 

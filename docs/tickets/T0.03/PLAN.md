@@ -5,7 +5,7 @@
 <!-- ticket:specs -->
 ## 📚 Specifications
 
-The technical pages, features, use cases and business rules of [TICKET.md](TICKET.md), copied by `python3 .claude/scripts/ticket_refs.py sync`.
+The technical pages, features, use cases and business rules of [TICKET.md](TICKET.md), copied by `python3 .claude/scripts/tickets/ticket_refs.py sync`.
 
 - [🧅 Architecture: layers inside each service](../../specs/technical/01-architecture.md#layers)
 - [🗂️ Architecture: mono-repo](../../specs/technical/01-architecture.md#mono-repo)
@@ -48,12 +48,12 @@ No two tasks of the same wave share a file.
 - The rustfmt and clippy options are not settled by the specifications. Taken: rustfmt with `edition = "2021"` (from `workspace.package`), `max_width = 120` (the repository line length) and stable options only; `[workspace.lints]` with clippy `all` at deny and `pedantic` at warn, both priority -1, and rust `missing_docs` at warn. CI's `-D warnings` makes warnings fail. Member crates opt in with `[lints] workspace = true`. No crate exists until T0.07, so cargo fmt and clippy are checked on a throwaway crate that is never committed.
 - The strict eslint and `tsc` settings go in a private shared package `packages/ts/config` (`@swarm/config`): a strict `tsconfig.base.json` and a flat `eslint.config.js` using typescript-eslint `strictTypeChecked` and `stylisticTypeChecked`. Its own `lint` and `typecheck` scripts give the checks something real to run. The package name and the list of strict compiler options are not in the specifications. Dependency versions are those pnpm resolves at install time, pinned exactly like `turbo`. The task needs network access for `pnpm install`.
 - AGENT.md gets two small factual additions (K10): which rules `tests/conventions/` now enforces, and the Rust and TypeScript lint commands. The ticket leaves this documentation implicit, and TKT-4 asks for documentation beside the code. The `tests/conventions/mono_repo/` tests stay unchanged.
-- `pyproject.toml` (`testpaths`, ruff, mypy) and `.claude/scripts/checks.py` are not changed. The new tests sit under `tests/`, which `testpaths` and the verifier's pytest run already cover. Running them in CI is T0.04.
+- `pyproject.toml` (`testpaths`, ruff, mypy) and `.claude/scripts/tickets/checks.py` are not changed. The new tests sit under `tests/`, which `testpaths` and the verifier's pytest run already cover. Running them in CI is T0.04.
 
 <!-- plan:graph -->
 
 > [!NOTE]
-> Generated from the json block at the end of this page by `python3 .claude/scripts/plan.py render`.
+> Generated from the json block at the end of this page by `python3 .claude/scripts/tickets/plan.py render`.
 > To change a task, edit the json block, then render again: never edit this view by hand.
 
 ## Waves

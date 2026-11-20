@@ -21,9 +21,11 @@ class TestBrokenService:
         "layer_imports",
         "lifecycle_base_classes",
         "pydantic_models_in_models",
+        "no_module_docstring",
+        "no_logger_argument",
     ]
 
-    def test_the_rules_are_the_seven_of_the_ticket(self) -> None:
+    def test_the_rules_are_the_nine_of_agent_md(self) -> None:
         assert [rule.NAME for rule in ConventionRules.all()] == self.NAMES
 
     @pytest.mark.parametrize(
@@ -36,6 +38,8 @@ class TestBrokenService:
             ("layer_imports", "routes.py"),
             ("lifecycle_base_classes", "job.py"),
             ("pydantic_models_in_models", "customer.py"),
+            ("no_module_docstring", "documented.py"),
+            ("no_logger_argument", "handing.py"),
         ],
     )
     def test_each_rule_reports_exactly_one_violation(self, tmp_path: Path, name: str, expected: str) -> None:
@@ -51,7 +55,7 @@ class TestBrokenService:
         result = run_convention_tests(services_root)
         output = result.stdout + result.stderr
         assert result.returncode != 0
-        assert re.search(r"\b7 failed\b", output)
+        assert re.search(r"\b9 failed\b", output)
         assert not re.search(r"\b[1-9]\d* passed\b", output)
         for name in self.NAMES:
             assert len(re.findall(rf"FAILED .*\[broken-{name}\]", output)) == 1

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 # Standard library imports
 import asyncio
-from logging import Logger
+from logging import Logger, getLogger
 from typing import ClassVar, List, Optional
 
 # First-party imports
@@ -22,7 +22,8 @@ class RecordingAsyncRunnable(AsyncRunnable):
         status_interval_s: float = STATUS_INTERVAL_S,
         logger: Optional[Logger] = None,
     ) -> None:
-        super().__init__(status_interval_s, logger)
+        super().__init__(status_interval_s)
+        self.logger = logger if logger else getLogger(__name__)
         self.fail_in = fail_in
         self.initialize_for_s = initialize_for_s
         self.run_for_s = run_for_s
