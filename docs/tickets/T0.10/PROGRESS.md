@@ -5,7 +5,7 @@
 <!-- ticket:specs -->
 ## 📚 Specifications
 
-The technical pages, features, use cases and business rules of [TICKET.md](TICKET.md), copied by `python3 .claude/scripts/ticket_refs.py sync`.
+The technical pages, features, use cases and business rules of [TICKET.md](TICKET.md), copied by `python3 .claude/scripts/tickets/ticket_refs.py sync`.
 
 - [🧰 Deployment: CI/CD](../../specs/technical/09-deployment.md#ci)
 - [🛡️ Security: supply chain and testing](../../specs/technical/06-security.md#supply-chain)
@@ -43,7 +43,6 @@ The technical pages, features, use cases and business rules of [TICKET.md](TICKE
 | 2026-11-20 15:02 | Review 1 (full) | reviewer | ✅ 0 blocking, 8 follow-ups |
 | 2026-11-20 15:02 | Waiting for the person's code review: nothing is committed or pushed until PLAN.md says **Push:** 🟢 Approved (TKT-18) | - | 👀 |
 | 2026-11-20 15:33 | Code reviewed by the person, push approved (TKT-18) | person | 🟢 Approved |
-| 2026-11-20 15:36 | Push approved after the code review | 👤 person | 🟢 |
 
 ## 🔜 Follow-ups
 
@@ -63,7 +62,7 @@ Non-blocking findings of the review (TKT-12), not holding the merge.
 <!-- timings -->
 ## ⏱️ Timings
 
-Measured from the agents' transcripts by `python3 .claude/scripts/progress.py timings --ticket T0.10` (TKT-10).
+Measured from the agents' transcripts by `python3 .claude/scripts/reports/progress.py timings --ticket T0.10` (TKT-10).
 
 | Measure | Value |
 | --- | --- |
