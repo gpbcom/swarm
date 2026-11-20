@@ -174,8 +174,10 @@ never edit the same checkout; parallel tickets share one, but each commits only 
 6. the work and these documents are committed once and merged into `develop` (TKT-5).
 
 A failed check or a requested change goes back to the agent that owns the files, at most twice; then the ticket
-stops and the person is told. A check that fails because of the environment (a missing tool or module, flagged
-`environment` by `checks.py`) goes to no agent: the run stops at once and the person fixes the environment.
+stops and the person is told. A check that fails because of the environment (a missing tool or third-party module, flagged
+`environment` by `checks.py`) goes to no agent: the run stops at once and the person fixes the environment. A
+missing module of the project itself (`tests.…`, a service or a package of the repository) is a wrong import in the
+ticket's code, and goes to its owner like any failure.
 
 **Why:** "done" must mean merged code that works and that someone else can understand.
 

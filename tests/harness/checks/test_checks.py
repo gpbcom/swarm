@@ -7,6 +7,8 @@ import sys
 from pathlib import Path
 from typing import Dict, List
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[3]
 GIT_ENV = {
     "GIT_AUTHOR_NAME": "T",
@@ -167,3 +169,26 @@ class TestChecks:
         assert verdict["gone"] is True
         listed = subprocess.run(["git", "worktree", "list"], cwd=repo, capture_output=True, text=True, check=True)
         assert len(listed.stdout.splitlines()) == 1
+
+    @pytest.mark.parametrize(
+        ("code", "out", "environment"),
+        [
+            (127, "command not found: cargo", True),
+            (1, "ModuleNotFoundError: No module named 'asyncpg'", True),
+            (1, "ModuleNotFoundError: No module named 'tests.api'", False),
+            (1, "ModuleNotFoundError: No module named 'swarm_rest.api'", False),
+            (1, "ModuleNotFoundError: No module named 'asyncpg'\nNo module named 'tests.api'", False),
+            (1, "AssertionError: 1 != 2", False),
+        ],
+    )
+    def test_a_missing_module_of_the_project_is_the_code_s_fault_not_the_environment_s(
+        self, tmp_path: Path, code: int, out: str, environment: bool
+    ) -> None:
+        (tmp_path / "tests").mkdir()
+        (tmp_path / "packages/python/swarm-rest/src/swarm_rest").mkdir(parents=True)
+        script = (
+            f"import sys; sys.path.insert(0, {str(ROOT / '.claude' / 'scripts')!r}); import checks; "
+            f"from pathlib import Path; print(checks.environment_failure({code!r}, {out!r}, Path({str(tmp_path)!r})))"
+        )
+        result = subprocess.run([sys.executable, "-c", script], capture_output=True, text=True, check=True)
+        assert result.stdout.strip() == str(environment)
