@@ -49,11 +49,16 @@ This repository is a proof of concept for mastering the Claude Code harness; dro
   (`.claude/rules/tickets.md`). `/ticket-plan <ID>` writes `docs/tickets/<ID>/TICKET.md` and a task graph in
   `PLAN.md`, then stops; the person approves the plan (`**Plan:** 🟢 Approved`); `/ticket-run <ID>` runs the waves in
   parallel worktrees, integrates, verifies, reviews, writes `EXPLAIN.md` and `IMPLEMENTATION.md` (TKT-14), then commits
-  once and opens its pull request to `develop`, merged by GitHub once CI passes (TKT-15).
-- **Several tickets at once** (TKT-16): each ticket runs in its own worktree `<repository>-tickets/<ID>/` on
-  `feature/<ID>`; the main checkout stays on `develop`. `/ticket-run` checks the start rule first (prerequisites merged,
-  no open ticket on the same areas). `python3 .claude/scripts/tickets.py list|prune|workspace` shows the open tickets,
-  removes the merged ones and writes the VS Code workspace `swarm.code-workspace` with every ticket side by side.
+  once and opens its pull request to `develop`, merged by GitHub once CI passes (TKT-15). Before the commit, the run
+  stops for the person's code review: nothing is pushed until `PLAN.md` says `**Push:** 🟢 Approved` (TKT-18).
+- **Several tickets at once** (TKT-16): every running ticket works in the main checkout, on the shared branch
+  `feature/tickets`, with its files in `docs/tickets/<ID>/`; each commits only its own files when it finishes.
+  `/ticket-run` checks the start rule first (prerequisites done, no open ticket on the same areas).
+  `python3 .claude/scripts/tickets.py list|prune` shows the open tickets and, once all is merged, goes back to `develop`.
+- **Issues and groups** (TKT-20): `/issue-plan <refs>` plans an issue with its child issues, or a group (`#12`,
+  `T0.10`, `E0.4`, `P1`), the person approves the group with `python3 .claude/scripts/tickets.py approve <refs>`, and
+  `/issue-run <refs>` runs it as fast as the start rule allows, with `tickets.py watch` reports every 2 minutes. The
+  README's "Working on tickets" explains it all.
 - **Agents:** `.claude/agents/` (planner and reviewer on opus, workers on sonnet, mechanical work on haiku, TKT-7);
   workflows in `.claude/workflows/`.
 - **Progress every 2 minutes** (TKT-9): when a ticket workflow starts, arm the Monitor tool with
@@ -62,7 +67,8 @@ This repository is a proof of concept for mastering the Claude Code harness; dro
 - **Commits and GitFlow** (TKT-5, TKT-15): the repository is `gpbcom/swarm` on GitHub. `develop` and `master` change
   only through pull requests; work happens on `feature/`, `bugfix/`, `release/` and `hotfix/` branches. A ticket's work
   stays uncommitted in its worktree while it runs, carried between worktrees by `.claude/scripts/ticket_tree.py`, and
-  is committed once, when the ticket is done, then pushed with its pull request. The git hooks of `.githooks/`
+  is committed once, when the ticket is done and the person has reviewed the code (TKT-18), then pushed with its
+  pull request. The git hooks of `.githooks/`
   (`python3 .claude/scripts/tickets.py setup`, once per clone) and `.claude/hooks/guard_git.py` enforce it. No commit
   or push is made outside the harness unless the person asks.
 - **Board** (TKT-17): the GitHub project **Swarm roadmap** holds one issue per phase, epic and ticket, in columns 📥

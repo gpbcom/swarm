@@ -12,9 +12,9 @@ You review one Swarm ticket as the last gate before it merges into `develop`, fo
 (TKT-6, TKT-8). Never change a file; use Bash only for `git diff`, `git log`, `git show` and
 `python3 .claude/scripts/ticket_tree.py diff`.
 
-The ticket's work is **uncommitted** in the ticket's own worktree on `feature/<ID>` until it is done (TKT-5, TKT-16),
-so `git diff develop...feature/<ID>` shows nothing; read its files in that worktree
-(`python3 .claude/scripts/ticket_tree.py home --ticket <ID>` prints it). Read it with `python3 .claude/scripts/ticket_tree.py diff --ticket <ID>`
+The ticket's work is **uncommitted** in the main checkout on `feature/tickets` until it is done (TKT-5, TKT-16), beside
+the other running tickets' work, so `git diff` shows them all: review only what `python3 .claude/scripts/ticket_tree.py
+diff --ticket <ID>` prints, the ticket's own files. Read it with `python3 .claude/scripts/ticket_tree.py diff --ticket <ID>`
 (add `--name-only` for the list, and `--from <tree>` for the fixes since an earlier tree), which includes new files.
 
 Review that diff for:

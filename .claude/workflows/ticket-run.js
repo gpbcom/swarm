@@ -1,13 +1,13 @@
 export const meta = {
   name: 'ticket-run',
-  description: 'Run an approved ticket plan in its own worktree on feature/<ID>: parallel waves handed off uncommitted, integration, verification, review, EXPLAIN.md and IMPLEMENTATION.md, then one commit pushed with its pull request to develop, merged by GitHub once CI passes',
-  whenToUse: 'After the person approved docs/tickets/<ID>/PLAN.md, for example /ticket-run T1.07, or /ticket-run T1.07 --force to start despite the start rule (TKT rules in .claude/rules/tickets.md). Several tickets may run at once (TKT-16)',
+  description: 'Run an approved ticket plan in the main checkout, on the branch feature/tickets shared by every running ticket: parallel waves handed off uncommitted, integration, verification, review, EXPLAIN.md and IMPLEMENTATION.md, then stop for the person to review the code; once they approve the push, one commit pushed with its pull request to develop, merged by GitHub once CI passes',
+  whenToUse: 'After the person approved docs/tickets/<ID>/PLAN.md, for example /ticket-run T1.07, or /ticket-run T1.07 --force to start despite the start rule (TKT rules in .claude/rules/tickets.md). Run it again after setting "**Push:** 🟢 Approved" in PLAN.md to push the reviewed code (TKT-18). Several tickets may run at once (TKT-16)',
   phases: [
-    { title: 'Gate', detail: 'refuse unless PLAN.md is approved and the start rule holds; give the ticket its worktree' },
+    { title: 'Gate', detail: 'refuse unless PLAN.md is approved and the start rule holds; put the main checkout on feature/tickets' },
     { title: 'Waves', detail: 'workers in their own worktrees, at most 8 at once, hand off uncommitted; integrator applies each wave' },
     { title: 'Verify', detail: 'verifier runs every check; owners fix failures, at most twice' },
     { title: 'Review', detail: 'reviewer gates the diff; owners fix findings, at most twice' },
-    { title: 'Finish', detail: 'EXPLAIN.md, IMPLEMENTATION.md, REVIEW.md, PROGRESS.md, then the single commit pushed with its pull request' },
+    { title: 'Finish', detail: 'EXPLAIN.md, IMPLEMENTATION.md, REVIEW.md, PROGRESS.md, then stop for the person to review the code; once approved, the single commit pushed with its pull request' },
   ],
 }
 
@@ -33,9 +33,17 @@ const GATE = {
   properties: {
     approved: { type: 'boolean' }, status: { type: 'string' }, tasks: { type: 'array', items: TASK },
     done_tasks: { type: 'array', items: { type: 'string' } },
+    push_approved: { type: 'boolean' }, push_status: { type: 'string' },
   },
-  required: ['approved', 'status', 'tasks', 'done_tasks'],
+  required: ['approved', 'status', 'tasks', 'done_tasks', 'push_approved'],
 }
+// TKT-18: the person reviews the code before anything is committed or pushed. The run that finishes the work stops with
+// this line in PLAN.md, under the plan's status line; the person changes it to PUSH_APPROVED and runs /ticket-run again.
+const PUSH_AWAITING = '**Push:** 🟡 Awaiting code review'
+const PUSH_APPROVED = '**Push:** 🟢 Approved'
+// TKT-10: the timings are written by the main checkout's progress.py, which finds every run's transcripts and writes
+// into the ticket's home (the main checkout, or the worktree of a ticket started before TKT-16).
+const TIMINGS = `python3 "$(git worktree list --porcelain | sed -n '1s/^worktree //p')/.claude/scripts/progress.py" timings --ticket ${ID} --write`
 // TKT-14: an implementation choice where a reasonable alternative existed, for IMPLEMENTATION.md.
 const DECISION = {
   type: 'object',
@@ -56,6 +64,11 @@ const RESULT = {
     assumptions: { type: 'array', items: { type: 'string' } },
     decisions: { type: 'array', items: DECISION },
     note: { type: 'string' },
+    // TKT-19: the files of other tasks (most often a test of wave 1) that are wrong and stop this task.
+    blocked_by: {
+      type: 'array',
+      items: { type: 'object', properties: { file: { type: 'string' }, problem: { type: 'string' } }, required: ['file', 'problem'] },
+    },
   },
   required: ['status', 'worktree', 'files_changed', 'checks', 'assumptions', 'decisions'],
 }
@@ -129,12 +142,14 @@ async function limited(items, n, fn) {
 }
 
 const progress = []
-// TKT-16: the ticket's work lives in its own worktree (its home, on feature/<ID>), never in the main checkout, so that
+// TKT-16: every running ticket shares the main checkout (its home) and the branch feature/tickets; each touches only its
+// own files and docs/tickets/<ID>/, so that
 // several tickets run at once. Every agent but the workers works there.
 let HOME = ''
 function inHome(text) {
   return HOME
-    ? `Work in the ticket's worktree ${HOME} (branch feature/${ID}): run every command from there (cd ${HOME}) and read and write the ticket's files under it, never in the main checkout. ${text}`
+    ? `Work in the main checkout ${HOME} (branch feature/tickets, shared with the other running tickets): run every command from there (cd ${HOME}), ` +
+      `and change only this ticket's files and docs/tickets/${ID}/, never another ticket's uncommitted work. ${text}`
     : text
 }
 // The tree of the integrated, uncommitted work after the last integration (TKT-5): the confirm-fixes review diffs from it.
@@ -142,7 +157,7 @@ let currentTree = ''
 function note(event, by, result) { progress.push(`| ${event} | ${by} | ${result} |`) }
 
 function workerPrompt(t, extra) {
-  return `Ticket ${ID}, task ${t.id}: ${t.title}.\nThe ticket's work lives uncommitted in its own worktree ${HOME || `on feature/${ID}`} (TKT-5, TKT-16), not in yours. ` +
+  return `Ticket ${ID}, task ${t.id}: ${t.title}.\nThe ticket's work lives uncommitted in the main checkout ${HOME || 'on feature/tickets'} (TKT-5, TKT-16), not in yours. ` +
     `First run python3 .claude/scripts/ticket_tree.py start --ticket ${ID} at the root of your worktree: it moves your worktree to the ticket's commit and copies that work in.\n` +
     `Files you may change: ${t.files.join(', ')}.\n` +
     (!/^K\d{2}$/.test(t.id)
@@ -150,6 +165,8 @@ function workerPrompt(t, extra) {
       : `First read your brief and done-when exactly as approved: run python3 .claude/scripts/plan.py task --ticket ${ID} --id ${t.id} ` +
         `at the root of your worktree. Follow them as your brief.\n`) +
     (extra ? `\n${extra}\n` : '') +
+    `If a file you may not change (for example a test written by another task) is wrong and stops you, never work around it ` +
+    `(no shim, no skip): hand off what you did, set status to blocked and list each such file in blocked_by with exactly what to change (TKT-19).\n` +
     `Never commit, push or merge. Last, run python3 .claude/scripts/ticket_tree.py handoff --ticket ${ID} --task ${t.id} ` +
     `(again after any later change), and report your decisions (choice, alternatives, trade-off, file:line) for IMPLEMENTATION.md.`
 }
@@ -165,7 +182,7 @@ async function integrate(results, label) {
   const ids = results.filter(r => r.result && r.result.status === 'done').map(r => r.task.id)
   if (!ids.length) return null
   const merge = await agent(inHome(
-    `Ticket ${ID}: integrate the hand-offs of these tasks into the ticket's worktree, in this order: ` +
+    `Ticket ${ID}: integrate the hand-offs of these tasks into the main checkout, in this order: ` +
     `python3 .claude/scripts/ticket_tree.py integrate --ticket ${ID} ${ids.map(id => `--task ${JSON.stringify(id)}`).join(' ')}. ` +
     `Then run the quick checks for what they changed (ruff check, cargo check or tsc as relevant). Commit nothing (TKT-5).`),
     { agentType: 'integrator', schema: MERGE, phase: label, label: `integrator ${label}` },
@@ -173,94 +190,6 @@ async function integrate(results, label) {
   note(`Integrate (${label})`, 'integrator', merge ? `✅ ${merge.integrated.length} integrated, ${merge.blocked.length} blocked, not committed` : '❌ failed')
   if (merge && /^[0-9a-f]{7,40}$/.test(merge.tree)) currentTree = merge.tree
   return merge
-}
-
-// Gate ---------------------------------------------------------------------------------------------------------
-phase('Gate')
-const WHERE = `Work in the ticket's worktree if it already has one (python3 .claude/scripts/ticket_tree.py home --ticket ${ID} prints its path; run every command from there), otherwise in the main checkout. `
-const gate = await agent(
-  WHERE + `Read docs/tickets/${ID}/PLAN.md. approved is true only if its status line is exactly "**Plan:** 🟢 Approved". ` +
-  `Return the status line, and in tasks the JSON array printed by python3 .claude/scripts/plan.py outline --ticket ${ID}, exactly, without changing anything ` +
-  `(the briefs are not part of it: each worker reads its own from the plan). ` +
-  `Return in done_tasks the list "integrated" printed by python3 .claude/scripts/ticket_tree.py status --ticket ${ID} ` +
-  `(the tasks already integrated, uncommitted, by an earlier run, TKT-11).`,
-  { agentType: 'scribe', schema: GATE, label: `gate ${ID}` },
-)
-if (!gate || !gate.approved) {
-  return { ticket: ID, stopped: `Plan not approved (${gate ? gate.status : 'PLAN.md unreadable'}). Approve it in docs/tickets/${ID}/PLAN.md first.` }
-}
-const planCheck = await agent(
-  WHERE + `Run exactly python3 .claude/skills/ticket/scripts/check_plan.py ${ID} and report. passed is true only if it exits 0 and prints nothing; problems lists its output lines.`,
-  { agentType: 'verifier', schema: CHECK, label: `plan check ${ID}` },
-)
-if (!planCheck || !planCheck.passed) {
-  return { ticket: ID, stopped: 'PLAN.md fails check_plan.py', problems: planCheck ? planCheck.problems : ['check_plan.py did not report'] }
-}
-// TKT-16: the start rule. Every prerequisite merged on develop, no open ticket on the same areas, no field ticket
-// before its campaign. --force (the person's choice) logs the problems and goes on.
-const startRule = await agent(
-  `Run exactly python3 .claude/scripts/tickets.py check --ticket ${ID}${FORCE ? ' --force' : ''} and report. ` +
-  `passed is true only if it exits 0; problems lists every line it prints.`,
-  { agentType: 'verifier', schema: CHECK, label: `start rule ${ID}` },
-)
-if (!startRule || !startRule.passed) {
-  return { ticket: ID, stopped: 'The start rule refuses this ticket for now (TKT-16)', problems: startRule ? startRule.problems : ['tickets.py check did not report'],
-    next: `Wait for what it names, or run /ticket-run ${ID} --force to start anyway.` }
-}
-if (startRule.problems.length) note(`Started with --force despite: ${startRule.problems.join(' / ')}`, '👤 person', '⚠️')
-const tasks = gate.tasks
-const alreadyDone = new Set(gate.done_tasks || [])
-if (alreadyDone.size) log(`Re-run: ${alreadyDone.size} task(s) already integrated on ticket/${ID} are skipped (TKT-11): ${[...alreadyDone].join(', ')}`)
-const waveCount = Math.max(...tasks.map(t => t.wave))
-const prepared = await agent(
-  `Ticket ${ID}: run python3 .claude/scripts/ticket_tree.py prepare --ticket ${ID} from the main checkout: it gives the ticket its own ` +
-  `worktree on feature/${ID} (from origin/develop) and moves docs/tickets/${ID}/ into it (TKT-16). Return its "home" in home and its "tree" in tree. ` +
-  `Then run python3 .claude/scripts/board.py move --ticket ${ID} --status running and python3 .claude/scripts/tickets.py workspace; ` +
-  `if board.py fails (gh missing or offline), say so in conflicts_resolved and go on. If prepare refuses, put its reason in blocked and change nothing.`,
-  { agentType: 'integrator', schema: MERGE, label: `integrator prepare ${ID}` },
-)
-if (!prepared || prepared.blocked.length || !prepared.home) {
-  return { ticket: ID, stopped: `The ticket's worktree could not be prepared (TKT-16)`, problems: prepared ? prepared.blocked : ['prepare did not report'] }
-}
-HOME = prepared.home
-log(`Ticket ${ID} works in ${HOME} on feature/${ID}`)
-if (/^[0-9a-f]{7,40}$/.test(prepared.tree)) currentTree = prepared.tree
-
-// Waves --------------------------------------------------------------------------------------------------------
-phase('Waves')
-const assumptions = []
-const decisions = []
-function collect(results) {
-  results.forEach(r => {
-    if (!r.result) return
-    assumptions.push(...r.result.assumptions.map(a => `${r.task.id}: ${a}`))
-    decisions.push(...(r.result.decisions || []).map(d => ({ task: r.task.id, ...d })))
-  })
-}
-for (let w = 1; w <= waveCount; w++) {
-  const waveTasks = tasks.filter(t => t.wave === w && !alreadyDone.has(t.id))
-  if (!waveTasks.length) { log(`Wave ${w}/${waveCount}: nothing left`); continue }
-  log(`Wave ${w}/${waveCount}: ${waveTasks.length} tasks`)
-  let results = await runTasks(waveTasks, 'Waves')
-  const retry = results.filter(r => !r.result || r.result.status !== 'done')
-  if (retry.length) {
-    log(`Wave ${w}: retrying ${retry.length} task(s) once`)
-    const again = await runTasks(retry.map(r => r.task), 'Waves',
-      `A first attempt did not finish: ${retry.map(r => (r.result && r.result.note) || 'no result').join(' | ')}`)
-    results = results.filter(r => r.result && r.result.status === 'done').concat(again)
-  }
-  collect(results)
-  const okCount = results.filter(r => r.result && r.result.status === 'done').length
-  note(`Wave ${w}: ${okCount} of ${results.length} tasks done`, 'workers', okCount === results.length ? '✅' : '❌')
-  const failed = results.filter(r => !r.result || r.result.status !== 'done')
-  await integrate(results, 'Waves')
-  if (failed.length) {
-    await agent(inHome(`Append to the Events table of docs/tickets/${ID}/PROGRESS.md these events (Event | By | Result): ${progress.join(' ')} and "Stopped in wave ${w}: ${failed.map(f => f.task.id).join(', ')} not done" (❌). ` +
-      `Then run python3 .claude/scripts/progress.py timings --ticket ${ID} --write.`),
-      { agentType: 'scribe', label: `scribe ${ID}` })
-    return { ticket: ID, stopped: `Wave ${w}: ${failed.map(f => f.task.id).join(', ')} not done after one retry`, assumptions,
-      next: `The integrated work stays uncommitted in ${HOME} on feature/${ID}; /ticket-run ${ID} continues from wave ${w} (TKT-11).` }
-  }
 }
 
 // Fix loop: send each failure or finding to every task that owns one of its files, each fixer only its own problems
@@ -322,10 +251,123 @@ async function fixRound(items, label) {
   await integrate(results, label)
 }
 
+// Gate ---------------------------------------------------------------------------------------------------------
+phase('Gate')
+const WHERE = `Work in the ticket's home: python3 .claude/scripts/ticket_tree.py home --ticket ${ID} prints it (the main checkout, or a worktree for a ticket started before TKT-16); run every command from there. `
+const gate = await agent(
+  WHERE + `Read docs/tickets/${ID}/PLAN.md. approved is true only if its status line is exactly "**Plan:** 🟢 Approved". ` +
+  `Return the status line, and in tasks the JSON array printed by python3 .claude/scripts/plan.py outline --ticket ${ID}, exactly, without changing anything ` +
+  `(the briefs are not part of it: each worker reads its own from the plan). ` +
+  `Return in done_tasks the list "integrated" printed by python3 .claude/scripts/ticket_tree.py status --ticket ${ID} ` +
+  `(the tasks already integrated, uncommitted, by an earlier run, TKT-11). ` +
+  `Return in push_status the line of PLAN.md that starts with "**Push:**" (empty if there is none), and push_approved true only if that line is exactly "${PUSH_APPROVED}" (TKT-18).`,
+  { agentType: 'scribe', schema: GATE, label: `gate ${ID}` },
+)
+if (!gate || !gate.approved) {
+  return { ticket: ID, stopped: `Plan not approved (${gate ? gate.status : 'PLAN.md unreadable'}). Approve it in docs/tickets/${ID}/PLAN.md first.` }
+}
+const planCheck = await agent(
+  WHERE + `Run exactly python3 .claude/skills/ticket/scripts/check_plan.py ${ID} and report. passed is true only if it exits 0 and prints nothing; problems lists its output lines.`,
+  { agentType: 'verifier', schema: CHECK, label: `plan check ${ID}` },
+)
+if (!planCheck || !planCheck.passed) {
+  return { ticket: ID, stopped: 'PLAN.md fails check_plan.py', problems: planCheck ? planCheck.problems : ['check_plan.py did not report'] }
+}
+// TKT-16: the start rule. Every prerequisite merged on develop, no open ticket on the same areas, no field ticket
+// before its campaign. --force (the person's choice) logs the problems and goes on.
+const startRule = await agent(
+  `Run exactly python3 .claude/scripts/tickets.py check --ticket ${ID}${FORCE ? ' --force' : ''} and report. ` +
+  `passed is true only if it exits 0; problems lists every line it prints.`,
+  { agentType: 'verifier', schema: CHECK, label: `start rule ${ID}` },
+)
+if (!startRule || !startRule.passed) {
+  return { ticket: ID, stopped: 'The start rule refuses this ticket for now (TKT-16)', problems: startRule ? startRule.problems : ['tickets.py check did not report'],
+    next: `Wait for what it names, or run /ticket-run ${ID} --force to start anyway.` }
+}
+if (startRule.problems.length) note(`Started with --force despite: ${startRule.problems.join(' / ')}`, '👤 person', '⚠️')
+const tasks = gate.tasks
+const alreadyDone = new Set(gate.done_tasks || [])
+if (alreadyDone.size) log(`Re-run: ${alreadyDone.size} task(s) already integrated on ticket/${ID} are skipped (TKT-11): ${[...alreadyDone].join(', ')}`)
+// TKT-18: the person approved the push of the code they reviewed. Every task is integrated and the review is done, so
+// this run only checks the code again (the person may have changed it), then commits and pushes. An approval written
+// before every task is integrated does not count: the person has not seen that code yet.
+const pushOnly = Boolean(gate.push_approved && tasks.every(t => alreadyDone.has(t.id)))
+if (pushOnly) {
+  log(`Push approved by the person (TKT-18): checks, then the commit and the pull request`)
+  note('Push approved after the code review', '👤 person', '🟢')
+}
+const waveCount = Math.max(...tasks.map(t => t.wave))
+const prepared = await agent(
+  `Ticket ${ID}: run python3 .claude/scripts/ticket_tree.py prepare --ticket ${ID} from the main checkout: it puts the main checkout on ` +
+  `feature/tickets, the branch every running ticket shares (from origin/develop when no other ticket runs), and records the ticket's own files (TKT-16). ` +
+  `Return its "home" in home and its "tree" in tree. Then run python3 .claude/scripts/board.py move --ticket ${ID} --status running; ` +
+  `if board.py fails (gh missing or offline), say so in conflicts_resolved and go on. If prepare refuses, put its reason in blocked and change nothing.`,
+  { agentType: 'integrator', schema: MERGE, label: `integrator prepare ${ID}` },
+)
+if (!prepared || prepared.blocked.length || !prepared.home) {
+  return { ticket: ID, stopped: `The main checkout could not take the ticket on feature/tickets (TKT-16)`, problems: prepared ? prepared.blocked : ['prepare did not report'] }
+}
+HOME = prepared.home
+log(`Ticket ${ID} works in ${HOME} on feature/tickets`)
+if (/^[0-9a-f]{7,40}$/.test(prepared.tree)) currentTree = prepared.tree
+
+// Waves --------------------------------------------------------------------------------------------------------
+phase('Waves')
+const assumptions = []
+const decisions = []
+function collect(results) {
+  results.forEach(r => {
+    if (!r.result) return
+    assumptions.push(...r.result.assumptions.map(a => `${r.task.id}: ${a}`))
+    decisions.push(...(r.result.decisions || []).map(d => ({ task: r.task.id, ...d })))
+  })
+}
+for (let w = 1; w <= waveCount; w++) {
+  const waveTasks = tasks.filter(t => t.wave === w && !alreadyDone.has(t.id))
+  if (!waveTasks.length) { log(`Wave ${w}/${waveCount}: nothing left`); continue }
+  log(`Wave ${w}/${waveCount}: ${waveTasks.length} tasks`)
+  let results = await runTasks(waveTasks, 'Waves')
+  const retry = results.filter(r => !r.result || r.result.status !== 'done')
+  if (retry.length) {
+    // TKT-19: a task blocked by another task's file (most often a wrong test of wave 1) cannot fix it itself. Its owner
+    // fixes it first and the fix is integrated, so that the retry starts from the corrected file instead of failing
+    // the same way. The blocked task is never named in check, so that ownersOf does not send the problem back to it.
+    // Only files of tasks of earlier waves are sent: a file a later wave writes is not wrong yet, only missing.
+    const reported = retry.flatMap(r => ((r.result && r.result.blocked_by) || []).map(b => ({
+      file: b.file, check: 'a file that stops another task', detail: `${b.problem} (reported by the task that it blocks)`,
+    })))
+    const blockers = reported.filter(b => ownersOf(b).every(o => Number.isInteger(o.wave) && o.wave < w))
+    if (reported.length > blockers.length) {
+      log(`Wave ${w}: ${reported.length - blockers.length} reported blocker(s) not sent, because no earlier task owns them: ${reported.filter(b => !blockers.includes(b)).map(b => b.file).join(', ')}`)
+    }
+    if (blockers.length) {
+      log(`Wave ${w}: ${blockers.length} file(s) of other tasks block ${retry.length} task(s); their owners fix them before the retry (TKT-19)`)
+      note(`Wave ${w}: ${blockers.length} blocking file(s) sent to their owners: ${blockers.map(b => b.file).join(', ')}`, 'workers', '🔁')
+      await fixRound(blockers, 'Waves')
+    }
+    log(`Wave ${w}: retrying ${retry.length} task(s) once`)
+    const again = await runTasks(retry.map(r => r.task), 'Waves',
+      `A first attempt did not finish: ${retry.map(r => (r.result && r.result.note) || 'no result').join(' | ')}`)
+    results = results.filter(r => r.result && r.result.status === 'done').concat(again)
+  }
+  collect(results)
+  const okCount = results.filter(r => r.result && r.result.status === 'done').length
+  note(`Wave ${w}: ${okCount} of ${results.length} tasks done`, 'workers', okCount === results.length ? '✅' : '❌')
+  const failed = results.filter(r => !r.result || r.result.status !== 'done')
+  await integrate(results, 'Waves')
+  if (failed.length) {
+    await agent(inHome(`Append to the Events table of docs/tickets/${ID}/PROGRESS.md these events (Event | By | Result): ${progress.join(' ')} and "Stopped in wave ${w}: ${failed.map(f => f.task.id).join(', ')} not done" (❌). ` +
+      `Then run ${TIMINGS}.`),
+      { agentType: 'scribe', label: `scribe ${ID}` })
+    return { ticket: ID, stopped: `Wave ${w}: ${failed.map(f => f.task.id).join(', ')} not done after one retry`, assumptions,
+      next: `The integrated work stays uncommitted in ${HOME} on feature/tickets; /ticket-run ${ID} continues from wave ${w} (TKT-11).` }
+  }
+}
+
 phase('Verify')
 let verdict = null
 for (let round = 0; round <= MAX_FIX_ROUNDS; round++) {
-  verdict = await agent(inHome(`Verify ticket ${ID} on feature/${ID}.`), { agentType: 'verifier', schema: VERDICT, phase: 'Verify', label: `verifier round ${round + 1}` })
+  verdict = await agent(inHome(`Verify ticket ${ID}: python3 .claude/scripts/checks.py --ticket ${ID} checks only its own files.`), { agentType: 'verifier', schema: VERDICT, phase: 'Verify', label: `verifier round ${round + 1}` })
   note(`Verify ${round + 1}${verdict && verdict.not_applicable && verdict.not_applicable.length ? ` (${verdict.not_applicable.length} not applicable)` : ''}`, 'verifier', verdict && verdict.passed ? '✅ passed' : `❌ ${verdict ? verdict.failures.length : '?'} failures`)
   if (!verdict || verdict.passed || round === MAX_FIX_ROUNDS) break
   // TKT-6: a missing tool or module is the environment's fault; fixers cannot repair it, so stop at once.
@@ -349,7 +391,8 @@ function keep(findings) {
   }
   return findings.filter(x => x.severity === 'blocking')
 }
-if (verdict && verdict.passed) {
+if (pushOnly) log('Review skipped: it was done before the person reviewed the code (TKT-18)')
+if (verdict && verdict.passed && !pushOnly) {
   let reviewedTree = null
   for (let round = 0; round <= MAX_FIX_ROUNDS; round++) {
     const prompt = inHome(round === 0
@@ -369,7 +412,7 @@ if (verdict && verdict.passed) {
     if (!blocking.length || round === MAX_FIX_ROUNDS) break
     reviewedTree = currentTree
     await fixRound(blocking.map(f => ({ file: f.file, check: f.rule, detail: f.change })), 'Review')
-    verdict = await agent(inHome(`Verify ticket ${ID} on feature/${ID}.`), { agentType: 'verifier', schema: VERDICT, phase: 'Review', label: `verifier after review ${round + 1}` })
+    verdict = await agent(inHome(`Verify ticket ${ID}: python3 .claude/scripts/checks.py --ticket ${ID} checks only its own files.`), { agentType: 'verifier', schema: VERDICT, phase: 'Review', label: `verifier after review ${round + 1}` })
     if (!verdict || !verdict.passed) break
   }
 }
@@ -377,38 +420,49 @@ if (followUps.length) log(`${followUps.length} follow-up(s) recorded, not blocki
 
 // Finish -------------------------------------------------------------------------------------------------------
 // TKT-5: nothing is committed before this point. The documents are written first, so that the ticket's single commit
-// holds them with the work; the commit and the merge into develop are the last writes of the run.
+// holds them with the work. TKT-18: the run that completes the work stops here for the person to review the code; only
+// a run after they approved the push (pushOnly) makes the commit and the push, the last writes of the ticket.
 phase('Finish')
-const done = Boolean(verdict && verdict.passed && review && blocking.length === 0)
+const done = Boolean(verdict && verdict.passed && (pushOnly || (review && blocking.length === 0)))
 const followUpRows = followUps.map(f => ({ file: f.file, change: f.change }))
 const scribeWork = agent(inHome(
   `Ticket ${ID}: append to the Events table of docs/tickets/${ID}/PROGRESS.md these events (Event | By | Result): ${progress.join(' ')}. ` +
   (done
-    ? `Set TICKET.md status to "✅ Done".`
+    ? (pushOnly
+      ? ''
+      : `Set TICKET.md status to "✅ Done". In docs/tickets/${ID}/PLAN.md, put the line "${PUSH_AWAITING}" on its own paragraph right after ` +
+        `the "**Plan:**" status line, replacing any line that starts with "**Push:**" (TKT-18). ` +
+        `Add a row "Waiting for the person's code review: nothing is committed or pushed until PLAN.md says ${PUSH_APPROVED} (TKT-18)" (👀).`)
     : `Add a row "Stopped: ${environmentFailure ? 'environment problem (missing tool or module), the person fixes the environment and re-runs' : verdict && !verdict.passed ? 'checks failing' : 'blocking review findings left after the fix rounds; the person decides'}" (❌) with the open failures or findings: ${JSON.stringify(verdict && !verdict.passed ? verdict.failures : blocking)}. ` +
-      `Add a row "Work left uncommitted in ${HOME} on feature/${ID}; /ticket-run ${ID} continues it" (⚠️).`) +
+      `Add a row "Work left uncommitted in ${HOME} on feature/tickets; /ticket-run ${ID} continues it" (⚠️).`) +
   (review ? ` Write docs/tickets/${ID}/REVIEW.md exactly from the note of the last review: ${JSON.stringify(review.note)}.` : '') +
   (followUps.length ? ` Add a section "## 🔜 Follow-ups" to PROGRESS.md listing these non-blocking findings, one row each (file, what to change): ${JSON.stringify(followUpRows)}.` : '') +
-  (done ? '' : ` Finally run python3 .claude/scripts/progress.py timings --ticket ${ID} --write.`)),
+  (done ? '' : ` Finally run ${TIMINGS}.`)),
   { agentType: 'scribe', phase: 'Finish', label: `scribe ${ID}` },
 )
 let finished = null
+let awaitingReview = false
 if (done) {
-  // TKT-14: EXPLAIN.md and IMPLEMENTATION.md are written beside the scribe's documents (different files).
-  await Promise.all([
-    scribeWork,
-    agent(inHome(
-      `Ticket ${ID} is done; its work is uncommitted in its worktree on feature/${ID}. Write docs/tickets/${ID}/EXPLAIN.md and ` +
-      `docs/tickets/${ID}/IMPLEMENTATION.md following your instructions and the templates of .claude/skills/ticket/templates/. ` +
-      `Decisions reported by the agents: ${JSON.stringify(decisions)}. ` +
-      `Assumptions accepted by the reviewer: ${JSON.stringify(review.assumptions_accepted)}. ` +
-      `Review note: ${JSON.stringify(review.note)}. ` +
-      `Follow-ups (for EXPLAIN.md): ${JSON.stringify(followUpRows)}.`),
-      { agentType: 'explainer', phase: 'Finish', label: `explainer ${ID}` },
-    ),
-  ])
+  if (pushOnly) {
+    await scribeWork
+  } else {
+    // TKT-14: EXPLAIN.md and IMPLEMENTATION.md are written beside the scribe's documents (different files).
+    await Promise.all([
+      scribeWork,
+      agent(inHome(
+        `Ticket ${ID} is done; its work is uncommitted in the main checkout on feature/tickets (python3 .claude/scripts/ticket_tree.py diff --ticket ${ID} shows only its own files). Write docs/tickets/${ID}/EXPLAIN.md and ` +
+        `docs/tickets/${ID}/IMPLEMENTATION.md following your instructions and the templates of .claude/skills/ticket/templates/. ` +
+        `Decisions reported by the agents: ${JSON.stringify(decisions)}. ` +
+        `Assumptions accepted by the reviewer: ${JSON.stringify(review.assumptions_accepted)}. ` +
+        `Review note: ${JSON.stringify(review.note)}. ` +
+        `Follow-ups (for EXPLAIN.md): ${JSON.stringify(followUpRows)}.`),
+        { agentType: 'explainer', phase: 'Finish', label: `explainer ${ID}` },
+      ),
+    ])
+  }
   // TKT-14: every file and line of EXPLAIN.md and IMPLEMENTATION.md is a working clickable link. ticket_tree.py docs
-  // checks it deterministically; the explainer fixes what it reports once, and finish refuses to commit otherwise.
+  // checks it deterministically; the explainer fixes what it reports once, and finish refuses to commit otherwise. After
+  // the person's review it runs again, because a change they made can leave the table of changes out of date.
   for (let round = 0; round <= 1; round++) {
     const docsCheck = await agent(inHome(
       `Run exactly python3 .claude/scripts/ticket_tree.py docs --ticket ${ID} and report. passed is true only if it exits 0 and prints nothing; problems lists its output lines.`),
@@ -418,18 +472,26 @@ if (done) {
     if (!docsCheck || docsCheck.passed || round === 1) break
     await agent(inHome(
       `Ticket ${ID}: fix only these problems of docs/tickets/${ID}/EXPLAIN.md and IMPLEMENTATION.md, so that every file and line ` +
-      `they mention is a clickable link that opens it (TKT-14), then run python3 .claude/scripts/ticket_tree.py docs --ticket ${ID} until it prints nothing: ` +
+      `they mention is a clickable link that opens it (TKT-14); when the table of changes is out of date, rewrite it with ` +
+      `python3 .claude/scripts/ticket_tree.py changes --ticket ${ID} --write. Then run python3 .claude/scripts/ticket_tree.py docs --ticket ${ID} until it prints nothing: ` +
       `${JSON.stringify(docsCheck.problems)}`),
       { agentType: 'explainer', phase: 'Finish', label: `explainer ${ID} (fix links)` },
     )
   }
-  finished = await agent(inHome(
-    `Ticket ${ID} is done. First run python3 .claude/scripts/progress.py timings --ticket ${ID} --write, ` +
-    `then python3 .claude/scripts/ticket_tree.py finish --ticket ${ID}: the ticket's single commit on feature/${ID}, rebased on origin/develop ` +
-    `if develop moved, pushed, with its pull request to develop labelled automerge; GitHub merges it once CI passes (TKT-15). ` +
-    `Never push or merge yourself. Put anything that stops it in blocked, the commit in tree, and the pull request's URL in pull_request.`),
-    { agentType: 'integrator', schema: MERGE, phase: 'Finish', label: `integrator finish ${ID}` },
-  )
+  if (pushOnly) {
+    finished = await agent(inHome(
+      `Ticket ${ID} is done and the person reviewed its code and approved the push (TKT-18). First run ${TIMINGS}, ` +
+      `then python3 .claude/scripts/ticket_tree.py finish --ticket ${ID}: the ticket's single commit on feature/tickets, holding only its own files ` +
+      `(the other running tickets stay uncommitted), pushed, with the pull request of feature/tickets to develop opened or updated (Closes its issue, ` +
+      `label automerge); GitHub merges it once CI passes (TKT-15). ` +
+      `Never push or merge yourself. Put anything that stops it in blocked, the commit in tree, and the pull request's URL in pull_request.`),
+      { agentType: 'integrator', schema: MERGE, phase: 'Finish', label: `integrator finish ${ID}` },
+    )
+  } else {
+    awaitingReview = true
+    await agent(inHome(`Ticket ${ID}: run ${TIMINGS}. Commit nothing (TKT-18).`),
+      { agentType: 'scribe', phase: 'Finish', label: `scribe ${ID} (timings)` })
+  }
 } else {
   await scribeWork
 }
@@ -451,10 +513,16 @@ return {
   documents: done ? [`docs/tickets/${ID}/EXPLAIN.md`, `docs/tickets/${ID}/IMPLEMENTATION.md`] : [],
   assumptions,
   decisions: decisions.length,
-  next: merged ? (pullRequest
-      ? `Pull request ${pullRequest}: GitHub merges it into develop once CI passes, the issue closes and the card moves to 🏁 Done. Then python3 .claude/scripts/tickets.py prune removes ${HOME}.`
-      : `One commit on feature/${ID}, merged into develop locally (no remote). python3 .claude/scripts/tickets.py prune removes ${HOME}.`)
+  awaitingReview,
+  next: awaitingReview
+    ? `Review the code before anything is committed or pushed (TKT-18): it is uncommitted in ${HOME} on feature/tickets ` +
+      `(python3 .claude/scripts/ticket_tree.py diff --ticket ${ID} shows only this ticket's files; VS Code's Source Control shows every running ticket), explained file by file in ` +
+      `${HOME}/docs/tickets/${ID}/EXPLAIN.md. When it suits you, change "${PUSH_AWAITING}" to "${PUSH_APPROVED}" in ` +
+      `${HOME}/docs/tickets/${ID}/PLAN.md and run /ticket-run ${ID}: it checks the code again, then commits and pushes it with its pull request.`
+    : merged ? (pullRequest
+      ? `Pull request ${pullRequest}: GitHub merges it into develop once CI passes, the issue closes and the card moves to 🏁 Done. Once every running ticket is merged, python3 .claude/scripts/tickets.py prune puts the main checkout back on develop.`
+      : `One commit on feature/tickets, merged into develop locally (no remote).`)
     : done ? `The documents are written but the commit or the merge stopped: ${finished ? finished.blocked.join('; ') : 'the integrator did not report'}`
     : environmentFailure ? `Fix the environment (see the failing checks in ${HOME}/docs/tickets/${ID}/PROGRESS.md), then run /ticket-run ${ID} again. The work stays uncommitted in ${HOME}.`
-    : `See ${HOME}/docs/tickets/${ID}/PROGRESS.md. The work stays uncommitted in ${HOME} on feature/${ID}.`,
+    : `See ${HOME}/docs/tickets/${ID}/PROGRESS.md. The work stays uncommitted in ${HOME} on feature/tickets.`,
 }

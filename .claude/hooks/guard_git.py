@@ -2,10 +2,12 @@
 """PreToolUse hook: keep the agents' Bash commands inside GitFlow and TKT-5 (TKT-15).
 
 - Anywhere: ``--no-verify`` (skipping the git hooks of ``.githooks/``) is refused.
-- In a ticket's worktree (``feature/<ID>``) or a worker's (``worktree-*``): ``git commit``, ``merge``, ``rebase``,
+- On the tickets' shared branch (``feature/tickets``), in a ticket worktree from before TKT-16 (``feature/<ID>``) or in a
+  worker's (``worktree-*``): ``git commit``, ``merge``, ``rebase``,
   ``reset``, ``stash``, ``push``, ``cherry-pick``, ``revert`` and ``gh pr merge`` are refused: only
   ``.claude/scripts/ticket_tree.py`` commits, publishes and merges a ticket (TKT-5).
 - In any other checkout: a push to ``develop`` or ``master`` asks the person first.
+- Anywhere: ``tickets.py approve`` (a group's plans approved at once) asks the person first: the approval is theirs.
 
 Reads the hook's JSON on stdin and prints a decision (``deny`` or ``ask``) as JSON, or nothing to let the command run.
 """
@@ -20,7 +22,8 @@ from typing import Dict, List, Optional, Tuple
 
 HEREDOC = re.compile(r"<<-?\s*['\"]?(\w+)['\"]?")
 QUOTED = re.compile(r"'[^']*'|\"(?:[^\"\\]|\\.)*\"")
-TICKET_CONTEXT = re.compile(r"^(feature/T\d+\.\d{2}|ticket/T\d+\.\d{2}|worktree-.*)$")
+TICKET_CONTEXT = re.compile(r"^(feature/tickets|feature/T\d+\.\d{2}|ticket/T\d+\.\d{2}|worktree-.*)$")
+APPROVE = re.compile(r"\btickets\.py\s+approve\b")
 WRITES = re.compile(r"\bgit\s+(?:-C\s+\S+\s+|-c\s+\S+\s+)*(commit|merge|rebase|reset|stash|push|cherry-pick|revert)\b")
 PR_MERGE = re.compile(r"\bgh\s+pr\s+merge\b")
 NO_VERIFY = re.compile(r"\bgit\b[^|;&]*\s(--no-verify|commit\s+(?:[^|;&]*\s)?-n\b)")
@@ -60,6 +63,11 @@ def decide(command: str, cwd: str) -> Optional[Tuple[str, str]]:
             f"`{write.group(0)}` is not run by hand in a ticket's or a worker's worktree (TKT-5): "
             "workers hand off with `python3 .claude/scripts/ticket_tree.py handoff`, the integrator integrates with "
             "`ticket_tree.py integrate`, and only `ticket_tree.py finish` commits, pushes and opens the pull request."
+        )
+    if APPROVE.search(command):
+        return (
+            "ask",
+            "This approves the plans of a group of tickets: the approval is the person's (TKT-3, TKT-20). Approve?",
         )
     target = PUSH_PROTECTED.search(command)
     if target:

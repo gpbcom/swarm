@@ -23,7 +23,7 @@
 ## <a id="overview"></a>🔭 Overview
 
 - **Why:** the roadmap plans about 5 tickets merged per sprint, one ticket after another in each sprint. Most tickets do not need each other: the longest chain of tickets that must follow one another is short, so many can be open together.
-- **What limits it:** the harness runs one ticket at a time, because `ticket_tree.py prepare` puts the main checkout on `ticket/<ID>` until `finish` merges it ([🎫 TKT-5](../../../.claude/rules/tickets.md#tkt-5)). With several tickets open, the person's review becomes the limit ([🎲 R-01](12-risks.md#r-01)).
+- **What limits it:** every running ticket shares the main checkout and the branch `feature/tickets`, each committing only its own files ([🎫 TKT-5](../../../.claude/rules/tickets.md#tkt-5), [🎫 TKT-16](../../../.claude/rules/tickets.md#tkt-16)); prerequisites and area locks decide which can run together, and with several tickets open the person's review becomes the limit ([🎲 R-01](12-risks.md#r-01)).
 - **What does not move:** the [🏛️ Regulatory track](09-regulatory-track.md), the [🤝 Hardware and partners](11-hardware-and-partners.md) and the [🛫 Flight test campaigns](10-flight-test-campaigns.md). Tickets whose acceptance needs them are built and tested on the Simulator first, and accepted on the roadmap's dates.
 - **Interactive Gantt chart:** [gantt/parallel-plan.html](gantt/parallel-plan.html), opened in a browser, shows every ticket per scenario, its prerequisites and what it unblocks, the critical path and the field dates.
 - **Rebuilt, never edited by hand:** `python3 .claude/scripts/roadmap_gantt.py build` rewrites the interactive page and the sections between the `gantt:plan` markers below, from [gantt/ticket-graph.json](gantt/ticket-graph.json), the phase pages and the tickets merged on `develop`; then run `specs.py build`. `roadmap_gantt.py check` prints nothing when both are up to date.
@@ -206,12 +206,12 @@ How the harness runs several tickets at once, under the rules [🎫 TKT-15](../.
 
 | Change | What it does |
 | --- | --- |
-| One worktree per ticket | `ticket_tree.py prepare` gives each ticket its own worktree `<repository>-tickets/<ID>/` on `feature/<ID>`, from `origin/develop`; the main checkout stays on `develop`. Still one commit per ticket ([🎫 TKT-5](../../../.claude/rules/tickets.md#tkt-5)) |
-| Start on merged prerequisites | `tickets.py check` at the gate of `/ticket-run`: every prerequisite of [gantt/ticket-graph.json](gantt/ticket-graph.json) merged on `origin/develop`, no field ticket before its campaign; `--force` starts anyway, logged |
+| One checkout, one shared branch | Every running ticket works in the main checkout on `feature/tickets`, its documents in `docs/tickets/<ID>/`; `ticket_tree.py` records each ticket's own files, and `finish` commits only those, one commit per ticket ([🎫 TKT-5](../../../.claude/rules/tickets.md#tkt-5)) |
+| Start on done prerequisites | `tickets.py check` at the gate of `/ticket-run`: every prerequisite of [gantt/ticket-graph.json](gantt/ticket-graph.json) merged on `origin/develop` or committed on `feature/tickets`, no field ticket before its campaign; `--force` starts anyway, logged |
 | Area locks | The same check refuses a ticket while an open ticket changes one of the same services, front ends or packages |
-| Pull request per ticket | `ticket_tree.py finish` rebases the ticket's commit on `origin/develop` if it moved, pushes it and opens its pull request; the `automerge` workflow merges it once every check passed |
+| Pull request per finish | `ticket_tree.py finish` pushes `feature/tickets` and opens or updates its pull request, one `Closes #<issue>` per ticket; the `automerge` workflow merges it once every check passed |
 | Lighter review | Line by line only for identity, isolation and the Simulator's isolation, on tests and screens for the rest, as [🛣️ P0](01-p0-foundations.md#work-split) already plans |
-| Board and VS Code | The GitHub project mirrors every ticket's state; `tickets.py workspace` puts `develop` and every open ticket side by side in VS Code; the Claude Code status line shows them |
+| Issues and groups | `/issue-plan` and `/issue-run` plan and run an issue with its child issues, or a group of issues, approved once, as fast as the start rule allows ([🎫 TKT-20](../../../.claude/rules/tickets.md#tkt-20)); the GitHub board, `/board` and the status line follow every ticket |
 
 ## <a id="method"></a>🧮 Method
 

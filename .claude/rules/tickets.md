@@ -24,9 +24,12 @@ These rules apply to every ticket of the roadmap (`docs/specs/roadmap/`), worked
 | [TKT-12](#tkt-12) | The review converges: only blocking findings are fixed, later rounds only confirm the fixes |
 | [TKT-13](#tkt-13) | Hooks format the edited files and check the touched layer before a task is handed back |
 | [TKT-14](#tkt-14) | `EXPLAIN.md` explains how the work works, file by file and line by line; `IMPLEMENTATION.md` justifies each choice against its alternatives |
-| [TKT-15](#tkt-15) | GitFlow on GitHub: `feature/<ID>` branches, a pull request per ticket merged once CI passes, hooks that refuse the rest |
-| [TKT-16](#tkt-16) | Several tickets run at once, each in its own worktree, under a start rule and area locks |
+| [TKT-15](#tkt-15) | GitFlow on GitHub: the tickets' branch `feature/tickets`, a pull request merged once CI passes, hooks that refuse the rest |
+| [TKT-16](#tkt-16) | Several tickets run at once in the main checkout, on one shared branch, under a start rule and area locks |
 | [TKT-17](#tkt-17) | The GitHub board mirrors the roadmap and every ticket's state, in Claude Code and VS Code too |
+| [TKT-18](#tkt-18) | The person reviews the code before anything is committed or pushed |
+| [TKT-19](#tkt-19) | A worker blocked by another task's file reports it, and that task's owner fixes it before the retry |
+| [TKT-20](#tkt-20) | A GitHub issue with its child issues, or a group of issues, is planned at once, approved once and run as fast as the start rule allows |
 
 ## <a id="tkt-1"></a>TKT-1: Roadmap tickets, one folder each
 
@@ -105,12 +108,14 @@ ticket runs in parallel, the more tickets each sprint can close.
 
 **Rule:**
 
-- The ticket's branch is `feature/<ID>` (TKT-15), created from `origin/develop`. `python3 .claude/scripts/ticket_tree.py
-  prepare` gives it its own worktree, its *home*, `<repository>-tickets/<ID>/` beside the main checkout, and moves
-  `docs/tickets/<ID>/` into it. The main checkout stays on `develop` (TKT-16).
-- **No intermediate commit.** Until the ticket is done, its work (code, tests, documents) stays **uncommitted** in its
-  home. No agent runs `git commit`, `git merge`, `git rebase`, `git stash`, `git reset` or `git push`: the PreToolUse
-  hook `.claude/hooks/guard_git.py` refuses them in a ticket's or a worker's worktree. Every step goes through
+- Every running ticket works in the **main checkout**, its *home*, on the branch `feature/tickets` that they all share
+  (TKT-15, TKT-16). `python3 .claude/scripts/ticket_tree.py prepare` puts the main checkout on it (from
+  `origin/develop` when no other ticket runs) and records the ticket's own files in `.git/swarm/<ID>/state.json`,
+  starting with `docs/tickets/<ID>/`, where its documents stay.
+- **No intermediate commit.** Until the ticket is done, its work (code, tests, documents) stays **uncommitted** in the
+  main checkout, beside the other running tickets' work. No agent runs `git commit`, `git merge`, `git rebase`, `git
+  stash`, `git reset` or `git push`: the PreToolUse hook `.claude/hooks/guard_git.py` refuses them on `feature/tickets`
+  and in a worker's worktree. Every step goes through
   `ticket_tree.py`, which compares git *trees* (never commits) on a temporary index.
 - Every worker runs in its own git worktree and changes only its task's files:
   - its first step, `ticket_tree.py start`, moves the worktree to the home's commit if `develop` moved since, copies
@@ -118,20 +123,24 @@ ticket runs in parallel, the more tickets each sprint can close.
   - its last step, `ticket_tree.py handoff --task <task id>`, saves its own changes since that tree as a patch in the
     shared git directory (`.git/swarm/<ID>/pending/`).
 - After each wave, the **integrator** runs `ticket_tree.py integrate` with the wave's task ids in task order: it applies
-  each patch to the home, stops at the first conflict for the integrator to resolve, removes the integrated worktrees
-  and records the task ids (TKT-11).
-- When the ticket is done (TKT-6), the documents are written first, then the integrator runs `ticket_tree.py finish`:
-  **one commit** on `feature/<ID>`, titled with the title of `TICKET.md`, rebased on `origin/develop` if it moved,
-  pushed, and its pull request opened to `develop` (TKT-15). The commit and the push are the last writes of the run, so
-  `PROGRESS.md` does not record them: git and the pull request do. Without a remote, `finish` merges the branch into
-  `develop` locally with `--no-ff`, as before TKT-15.
+  each patch to the main checkout, adds the files it changes to the ticket's own files, stops at the first conflict for
+  the integrator to resolve, removes the integrated worktrees and records the task ids (TKT-11). `ticket_tree.py diff`,
+  `changes` and `docs`, and the verifier's `checks.py`, look at the ticket's own files only.
+- When the ticket is done (TKT-6), the documents are written first, and the run stops for the person's code review
+  (TKT-18). Once the person approves the push, the next run checks the code again, then the integrator runs
+  `ticket_tree.py finish`:
+  **one commit** on `feature/tickets`, titled with the title of `TICKET.md`, holding **only the ticket's own files**
+  (the other running tickets stay uncommitted), pushed, and the pull request of `feature/tickets` opened or updated
+  (TKT-15). One finish at a time: a lock in `.git/swarm/` serialises them. The commit and the push are the last writes
+  of the run, so `PROGRESS.md` does not record them: git and the pull request do. Without a remote, `finish` merges the
+  branch into `develop` locally with `--no-ff`.
 - A ticket that stops keeps its work uncommitted in its home, and `/ticket-run` continues it (TKT-11).
-- **Only `finish` pushes**, and only the ticket's own branch. Nothing is ever pushed to `develop` or `master` by hand
+- **Only `finish` pushes**, and only `feature/tickets`. Nothing is ever pushed to `develop` or `master` by hand
   (TKT-15).
 
 **Why:** the history of `develop` gets one readable commit per ticket and its merge, instead of one commit per task
-and one merge per wave, and a ticket that stops halfway leaves nothing half-finished in the history. Parallel agents,
-and parallel tickets, never edit the same checkout.
+and one merge per wave, and a ticket that stops halfway leaves nothing half-finished in the history. Parallel agents
+never edit the same checkout; parallel tickets share one, but each commits only its own files.
 
 **Check:** `git log develop` shows one commit per ticket and its merge; `python3 .claude/scripts/ticket_tree.py status
 --ticket <ID>` lists the tasks integrated so far; the tests of `tests/harness/ticket_tree/` pass.
@@ -147,7 +156,8 @@ and parallel tickets, never edit the same checkout.
    returns a short review note, written to `REVIEW.md`;
 3. `EXPLAIN.md`, `IMPLEMENTATION.md` (TKT-14), `REVIEW.md` and `PROGRESS.md` are written, with the evidence in
    `tests-evidences/`;
-4. the work and these documents are committed once and merged into `develop` (TKT-5).
+4. the person has reviewed the code and approved the push (TKT-18);
+5. the work and these documents are committed once and merged into `develop` (TKT-5).
 
 A failed check or a requested change goes back to the agent that owns the files, at most twice; then the ticket
 stops and the person is told. A check that fails because of the environment (a missing tool or module, flagged
@@ -318,11 +328,12 @@ and the heading.
 **Rule:**
 
 - The repository is `gpbcom/swarm` on GitHub, private. `master` holds the releases, `develop` the next one (the default
-  branch). Work happens on GitFlow branches only: `feature/<name>` (a roadmap ticket is `feature/<ID>`, harness work
-  `feature/harness-<name>`), `bugfix/<name>`, `release/<version>`, `hotfix/<name>`.
+  branch). Work happens on GitFlow branches only: `feature/<name>` (the roadmap tickets share `feature/tickets`,
+  TKT-16; harness work is `feature/harness-<name>`), `bugfix/<name>`, `release/<version>`, `hotfix/<name>`.
 - `develop` and `master` change **only through pull requests**, merged with a merge commit (squash and rebase merges
-  are turned off). A ticket's pull request goes to `develop`, its title is the title of `TICKET.md`
-  (`T0.09: NATS JetStream and Operator accounts`) and its body `Closes #<issue>`. A release goes `release/<version>` →
+  are turned off). The pull request of `feature/tickets` goes to `develop`: one commit and one `Closes #<issue>` per
+  finished ticket, titled with the ticket's `TICKET.md` title when it holds one ticket
+  (`T0.10: Dev cell observability`), `Tickets T0.10, T0.12` when it holds several. A release goes `release/<version>` →
   `master`, tagged `v<version>`, then `master` → `develop`; a hotfix the same way.
 - `ticket_tree.py finish` labels the ticket's pull request `automerge`: the workflow `.github/workflows/automerge.yml`
   merges it once every check (`ci`, `gitflow`, `terraform`) has passed on its head commit, which closes its issue. A
@@ -346,19 +357,23 @@ the work in progress. A private repository of a free account has no branch prote
 
 **Rule:**
 
-- Each running ticket lives in its own worktree, its home `<repository>-tickets/<ID>/` on `feature/<ID>` (TKT-5). The
-  main checkout stays on `develop`, so `/ticket-plan` and `/ticket-run` of several tickets may run at the same time.
-  Every agent of a run but the workers works in the home; `ticket_tree.py` finds it from any checkout.
+- Every running ticket lives in the **main checkout**, on the shared branch `feature/tickets` (TKT-5), with its
+  documents in `docs/tickets/<ID>/`. `/ticket-plan` and `/ticket-run` of several tickets run at the same time; each
+  touches only its own files, recorded in `.git/swarm/<ID>/state.json`, and commits only those when it finishes. A
+  ticket started before this rule keeps its own worktree on `feature/<ID>` until it is merged.
 - **Start rule**, checked by `python3 .claude/scripts/tickets.py check --ticket <ID>` at the gate of `/ticket-run`:
-  - every prerequisite of the ticket in `docs/specs/roadmap/gantt/ticket-graph.json` is merged on `origin/develop` (its
-    `EXPLAIN.md` is there);
-  - no open ticket changes one of the same areas (a service, a front end, a package): **area lock**;
+  - every prerequisite of the ticket in `docs/specs/roadmap/gantt/ticket-graph.json` is **done**: merged on
+    `origin/develop` (its `EXPLAIN.md` is there), or committed on `feature/tickets` (finished, its pull request open),
+    since the shared branch already holds its code;
+  - no open ticket changes one of the same areas (a service, a front end, a package): **area lock**, which keeps two
+    tickets of the same checkout from changing the same files;
   - a field ticket (the fixes of a campaign) starts once its campaign has flown.
 
   `/ticket-run <ID> --force` starts anyway, on the person's decision, and logs the problems in `PROGRESS.md`.
-- `python3 .claude/scripts/tickets.py list` shows the open tickets, `prune` removes the worktree and branch of each
-  merged one and fast-forwards `develop`, and `workspace` writes `swarm.code-workspace`: `develop` and every open
-  ticket side by side in VS Code, whose Source Control then shows the live, uncommitted work of every ticket at once.
+- `python3 .claude/scripts/tickets.py list` shows the open tickets and the files each owns; `prune` removes the
+  worktrees of tickets started before this rule once they are merged, and puts the main checkout back on `develop`
+  once no ticket is open and `feature/tickets` is merged. VS Code's Source Control shows the uncommitted work of every
+  running ticket at once, in the one checkout.
 - At most 8 agents run per ticket (TKT-4); the person keeps the number of tickets open to what they can review
   ([⛓️ Parallel plan](../../docs/specs/roadmap/14-parallel-plan.md)).
 
@@ -389,3 +404,74 @@ can start next, from GitHub, from VS Code and from the terminal alike.
 **Check:** the tests of `tests/harness/statusline/` pass; `board.py bootstrap --dry-run` counts every phase, epic and
 ticket of the roadmap.
 
+## <a id="tkt-18"></a>TKT-18: The person reviews the code before the push
+
+**Rule:**
+
+- The run that completes a ticket (checks passing, review approved, `EXPLAIN.md` and `IMPLEMENTATION.md` written)
+  **commits nothing and pushes nothing**. It stops and writes, on its own line under the plan's status line of
+  `PLAN.md`:
+
+  ```markdown
+  **Push:** 🟡 Awaiting code review
+  ```
+
+- The person reviews the code where it lies, uncommitted in the main checkout (`python3 .claude/scripts/ticket_tree.py
+  diff --ticket <ID>` shows only this ticket's files; VS Code's Source Control shows every running ticket), with
+  `EXPLAIN.md` as the guide. They may change it.
+- **The person approves by changing the line to `**Push:** 🟢 Approved`**, then runs `/ticket-run <ID>` again. That run
+  skips the waves and the review already done, runs the checks again (the person may have changed the code), checks
+  the documents, then commits and pushes with the pull request (TKT-5, TKT-15).
+- An approval written before every task is integrated does not count: the run does the work and stops for review
+  again.
+
+**Why:** the person answers for what reaches `develop`. Seeing the code before it leaves the machine costs one look at
+a diff, and a pushed pull request is merged by GitHub as soon as CI passes (TKT-15), with no other chance to stop it.
+
+**Check:** the workflow returns `awaitingReview` and makes no commit while `PLAN.md` does not say `**Push:** 🟢
+Approved`; `grep -n 'tkt-18' .claude/rules/tickets.md` finds the summary row and the heading.
+
+## <a id="tkt-19"></a>TKT-19: Blocking files go back to their owner
+
+**Rule:**
+
+- A worker never changes a file outside its task, and never works around a wrong one (no shim, no skipped test). When
+  a file of another task stops it (most often a test of wave 1 with a wrong import, a wrong helper or a wrong call),
+  it hands off what it did, reports `blocked`, and lists each such file in `blocked_by` with exactly what to change.
+- Before retrying the blocked task, the workflow sends each of those files to the task that owns it, as in a fix round
+  (the test-writer for a test), integrates the fix, and only then retries the blocked task, which starts from the
+  corrected file.
+- Only files of tasks of earlier waves are sent: a file a later wave writes is missing, not wrong. The others are
+  logged and left to the retry.
+
+**Why:** tests come first (TKT-4), so a wrong test only shows when an implementer runs it. Retrying the implementer
+alone fails the same way, and stopped T0.09 four times until the person fixed the tests by hand.
+
+**Check:** `grep -n 'tkt-19' .claude/rules/tickets.md` finds the summary row and the heading; the wave of the workflow
+logs the blockers it sends before its retry.
+
+## <a id="tkt-20"></a>TKT-20: An issue with its child issues, or a group of issues
+
+**Rule:**
+
+- A group of tickets is named by **references**: an issue number (`#12`: a ticket issue, or an epic or a phase issue
+  with every ticket under it, through the sub-issues recorded in `.claude/github.json`), a ticket ID (`T0.10`), an epic
+  ID (`E0.4`) or a phase ID (`P1`), several separated by spaces. `python3 .claude/scripts/tickets.py resolve <refs>`
+  lists the tickets, merged ones left out, every prerequisite before the tickets that need it, each with its state.
+- **`/issue-plan <refs>`** plans every ticket of the group that has no `PLAN.md` yet, all at once (one `ticket-plan`
+  workflow each), then stops.
+- **One approval for the group:** the person reads the plans, then runs `python3 .claude/scripts/tickets.py approve
+  <refs>`, which approves every plan of the group that awaits approval and passes `check_plan.py`, records it in each
+  `PROGRESS.md` and moves the cards. The PreToolUse hook asks the person before Claude runs it: the approval stays
+  theirs (TKT-3).
+- **`/issue-run <refs>`** starts, at once, every approved ticket of the group that the start rule allows
+  (`tickets.py next`), with no fixed number of lanes; it follows the group with `tickets.py watch <refs>` (a report
+  every 2 minutes, TKT-9) and starts each ticket as soon as its `▶️ CAN START` line appears, until the group is merged.
+  A ticket that stops is reported and the others go on; each still stops for the person's code review (TKT-18).
+
+**Why:** an epic or a phase is the unit the person thinks in; planning and approving it in one go, and letting the
+start rule pace the runs, keeps the agents busy while the person reviews ([⛓️ Parallel
+plan](../../docs/specs/roadmap/14-parallel-plan.md)).
+
+**Check:** the tests of `tests/harness/tickets/test_groups.py` pass; `grep -n 'tkt-20' .claude/rules/tickets.md` finds the
+summary row and the heading.

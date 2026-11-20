@@ -44,5 +44,19 @@ class TestStatusLine:
         assert "✅1 📝0 🔄1 👀1 🏁1/4" in line
         assert line.endswith("🧠 Opus")
 
+    def test_it_shows_the_tickets_running_in_the_shared_checkout(self, tmp_path: Path) -> None:
+        main = tmp_path / "main"
+        main.mkdir()
+        git(main, "init", "-b", "develop")
+        git(main, "commit", "--allow-empty", "-m", "initial")
+        git(main, "checkout", "-b", "feature/tickets")
+        for ticket in ("T9.01", "T9.02"):
+            (main / ".git" / "swarm" / ticket).mkdir(parents=True)
+            (main / ".git" / "swarm" / ticket / "state.json").write_text("{}", encoding="utf-8")
+        (main / ".git" / "swarm" / "board.json").write_text(json.dumps(BOARD), encoding="utf-8")
+        line = status_line(main)
+        assert line.startswith("🌿 feature/tickets")
+        assert "open 🔄T9.01 👀T9.02" in line
+
     def test_it_never_fails_outside_a_repository(self, tmp_path: Path) -> None:
         assert status_line(tmp_path).startswith("🔀")

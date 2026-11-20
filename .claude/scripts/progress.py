@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import json
 import re
+import subprocess
 import sys
 import time
 from datetime import datetime
@@ -37,8 +38,38 @@ QUIET_END_S = 90
 MODEL_ICONS = (("opus", "🟣 opus"), ("sonnet", "🔵 sonnet"), ("haiku", "🟢 haiku"), ("fable", "🟠 fable"))
 
 
+def worktrees() -> list[tuple[Path, str]]:
+    """Return every checkout of the repository with its branch, the main checkout first (``git worktree list``)."""
+    here = Path(__file__).resolve().parents[2]
+    try:
+        out = subprocess.run(
+            ["git", "-C", str(here), "worktree", "list", "--porcelain"], capture_output=True, text=True, check=True
+        ).stdout
+    except (OSError, subprocess.CalledProcessError):
+        return [(here, "")]
+    found: list[tuple[Path, str]] = []
+    for block in out.strip().split("\n\n"):
+        fields = dict(line.split(" ", 1) for line in block.splitlines() if " " in line)
+        if "worktree" in fields:
+            found.append((Path(fields["worktree"]), fields.get("branch", "").removeprefix("refs/heads/")))
+    return found or [(here, "")]
+
+
+def main_checkout() -> Path:
+    """Return the main checkout, whose transcripts hold every run even when this script runs in a ticket's worktree."""
+    return worktrees()[0][0]
+
+
+def ticket_folder(ticket: str) -> Path:
+    """Return docs/tickets/<ID>/ in the ticket's own worktree when it has one (TKT-16), else in the main checkout."""
+    for path, branch in worktrees():
+        if branch in (f"feature/{ticket}", f"ticket/{ticket}"):
+            return path / "docs" / "tickets" / ticket
+    return main_checkout() / "docs" / "tickets" / ticket
+
+
 def project_dir() -> Path:
-    return PROJECTS / re.sub(r"[^A-Za-z0-9]", "-", str(Path(__file__).resolve().parents[2]))
+    return PROJECTS / re.sub(r"[^A-Za-z0-9]", "-", str(main_checkout()))
 
 
 def find_run(run_id: str | None) -> Path | None:
@@ -356,7 +387,7 @@ def timings(ticket: str) -> str:
 
 
 def write_timings(ticket: str, text: str) -> Path:
-    path = Path(__file__).resolve().parents[2] / "docs" / "tickets" / ticket / "PROGRESS.md"
+    path = ticket_folder(ticket) / "PROGRESS.md"
     current = path.read_text(encoding="utf-8") if path.exists() else f"# {ticket}: Progress\n"
     block = f"<!-- timings -->\n{text}\n<!-- /timings -->"
     if "<!-- timings -->" in current:

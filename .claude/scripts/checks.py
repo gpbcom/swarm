@@ -41,15 +41,23 @@ def run(command: List[str], cwd: Path = ROOT) -> Tuple[int, str]:
         return 124, f"timed out after {TIMEOUT_S} s"
 
 
-def changed_files(base: str) -> List[str]:
+def changed_files(base: str, ticket: str = "", root: Path = ROOT) -> List[str]:
     # The ticket's work stays uncommitted until the ticket is done (TKT-5): compare the working tree, untracked files
-    # included, with the point where the branch left the base.
-    code, merge_base = run(["git", "merge-base", base, "HEAD"])
+    # included, with the point where the branch left the base. Several tickets share the checkout (TKT-16): when the
+    # ticket recorded its own files, only those are checked, so another ticket's half-done work never fails it.
+    code, merge_base = run(["git", "merge-base", base, "HEAD"], cwd=root)
     if code != 0:
         return []
-    _, tracked = run(["git", "diff", "--name-only", merge_base.strip()])
-    _, untracked = run(["git", "ls-files", "--others", "--exclude-standard"])
-    return sorted({line for line in f"{tracked}\n{untracked}".splitlines() if line})
+    _, tracked = run(["git", "diff", "--name-only", merge_base.strip()], cwd=root)
+    _, untracked = run(["git", "ls-files", "--others", "--exclude-standard"], cwd=root)
+    found = sorted({line for line in f"{tracked}\n{untracked}".splitlines() if line})
+    _, common = run(["git", "rev-parse", "--path-format=absolute", "--git-common-dir"], cwd=root)
+    state = Path(common.strip()) / "swarm" / ticket / "state.json"
+    paths = json.loads(state.read_text(encoding="utf-8")).get("paths") if ticket and state.is_file() else None
+    if not isinstance(paths, list):
+        return found
+    own = [str(path) for path in paths]
+    return [name for name in found if any(name == path or name.startswith(path.rstrip("/") + "/") for path in own)]
 
 
 class Checks:
@@ -63,7 +71,9 @@ class Checks:
     def check(self, name: str, command: List[str], file: str, cwd: Path = ROOT) -> bool:
         code, out = run(command, cwd)
         slug = re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
-        (self.evidence / f"{slug}.txt").write_text(f"$ {' '.join(command)}\n(cwd {cwd.relative_to(ROOT) or '.'})\n\n{out}\n", encoding="utf-8")
+        (self.evidence / f"{slug}.txt").write_text(
+            f"$ {' '.join(command)}\n(cwd {cwd.relative_to(ROOT) or '.'})\n\n{out}\n", encoding="utf-8"
+        )
         if code == 0:
             self.passed.append(name)
             return True
@@ -83,7 +93,9 @@ def python_checks(checks: Checks, changed: List[str]) -> None:
         return
     checks.check("ruff check", ["uv", "run", "ruff", "check", *files], files[0])
     checks.check("ruff format", ["uv", "run", "ruff", "format", "--check", *files], files[0])
-    sources = sorted(str(p.relative_to(ROOT)) for pattern in ("services/*/src", "packages/python/*/src") for p in ROOT.glob(pattern))
+    sources = sorted(
+        str(p.relative_to(ROOT)) for pattern in ("services/*/src", "packages/python/*/src") for p in ROOT.glob(pattern)
+    )
     if sources:
         checks.check("mypy", ["uv", "run", "mypy", *sources], sources[0])
     else:
@@ -96,8 +108,11 @@ def rust_checks(checks: Checks, changed: List[str]) -> None:
     if not any(f.startswith("packages/rust/") for f in changed) or not manifest.exists():
         checks.skip("rust", "no Rust change")
         return
-    checks.check("cargo metadata", ["cargo", "metadata", "--no-deps", "--format-version", "1", "--locked",
-                                     "--manifest-path", str(manifest)], "packages/rust/Cargo.toml")
+    checks.check(
+        "cargo metadata",
+        ["cargo", "metadata", "--no-deps", "--format-version", "1", "--locked", "--manifest-path", str(manifest)],
+        "packages/rust/Cargo.toml",
+    )
     members = re.search(r"members\s*=\s*\[(.*?)\]", manifest.read_text(encoding="utf-8"), re.S)
     if not members or not members.group(1).strip():
         for name in ("cargo fmt", "cargo clippy", "cargo test"):
@@ -105,12 +120,20 @@ def rust_checks(checks: Checks, changed: List[str]) -> None:
         return
     cwd = manifest.parent
     checks.check("cargo fmt", ["cargo", "fmt", "--all", "--check"], "packages/rust", cwd)
-    checks.check("cargo clippy", ["cargo", "clippy", "--workspace", "--all-targets", "--", "-D", "warnings"], "packages/rust", cwd)
+    checks.check(
+        "cargo clippy",
+        ["cargo", "clippy", "--workspace", "--all-targets", "--", "-D", "warnings"],
+        "packages/rust",
+        cwd,
+    )
     checks.check("cargo test", ["cargo", "test", "--workspace"], "packages/rust", cwd)
 
 
 def typescript_checks(checks: Checks, changed: List[str]) -> None:
-    if not any(f.startswith(("frontends/", "packages/ts/")) or f in ("package.json", "pnpm-workspace.yaml", "turbo.json") for f in changed):
+    if not any(
+        f.startswith(("frontends/", "packages/ts/")) or f in ("package.json", "pnpm-workspace.yaml", "turbo.json")
+        for f in changed
+    ):
         checks.skip("typescript", "no TypeScript change")
         return
     packages = [p for pattern in ("frontends/*/package.json", "packages/ts/*/package.json") for p in ROOT.glob(pattern)]
@@ -136,7 +159,9 @@ def terraform_checks(checks: Checks, changed: List[str]) -> None:
         path = ROOT / folder
         if not list(path.glob("*.tf")):
             continue
-        if not checks.check(f"terraform init {folder}", ["terraform", "init", "-backend=false", "-input=false"], folder, path):
+        if not checks.check(
+            f"terraform init {folder}", ["terraform", "init", "-backend=false", "-input=false"], folder, path
+        ):
             continue
         checks.check(f"terraform validate {folder}", ["terraform", "validate"], folder, path)
         if (path / "tests").is_dir():
@@ -151,7 +176,7 @@ def main() -> int:
         print(__doc__, file=sys.stderr)
         return 2
     checks = Checks(ticket)
-    changed = changed_files(base)
+    changed = changed_files(base, ticket)
     python_checks(checks, changed)
     rust_checks(checks, changed)
     typescript_checks(checks, changed)
@@ -160,9 +185,15 @@ def main() -> int:
     folder = f"docs/tickets/{ticket}"
     checks.check("ticket refs", ["python3", ".claude/scripts/ticket_refs.py", "check", "--ticket", ticket], folder)
     if (ROOT / folder / "PLAN.md").is_file():
-        checks.check("plan view", ["python3", ".claude/scripts/plan.py", "check", "--ticket", ticket], f"{folder}/PLAN.md")
-    verdict = {"passed": not checks.failures, "failures": checks.failures,
-               "not_applicable": checks.not_applicable, "passed_checks": checks.passed}
+        checks.check(
+            "plan view", ["python3", ".claude/scripts/plan.py", "check", "--ticket", ticket], f"{folder}/PLAN.md"
+        )
+    verdict = {
+        "passed": not checks.failures,
+        "failures": checks.failures,
+        "not_applicable": checks.not_applicable,
+        "passed_checks": checks.passed,
+    }
     print(json.dumps(verdict))
     return 0 if not checks.failures else 1
 

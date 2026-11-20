@@ -42,9 +42,10 @@ def line(payload: Dict[str, object]) -> str:
     current = branch.split("/", 1)[1] if branch.startswith("feature/") else ""
     if TICKET.match(current):
         parts.append(f"🎫 {current} {ICONS.get(status.get(current, 'running'), '🔄')}")
-    open_tickets = [
-        m for m in re.findall(r"branch refs/heads/feature/(T\d+\.\d{2})", git(cwd, "worktree", "list", "--porcelain"))
-    ]
+    legacy = re.findall(r"branch refs/heads/feature/(T\d+\.\d{2})", git(cwd, "worktree", "list", "--porcelain"))
+    states = Path(common) / "swarm" if common else None
+    shared = sorted(p.name for p in states.iterdir() if TICKET.match(p.name)) if states and states.is_dir() else []
+    open_tickets = sorted(set(shared) | set(legacy))
     if open_tickets:
         parts.append("open " + " ".join(f"{ICONS.get(status.get(t, 'running'), '🔄')}{t}" for t in open_tickets))
     tickets = {k: v for k, v in status.items() if TICKET.match(k)}

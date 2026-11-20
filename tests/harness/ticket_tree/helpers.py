@@ -10,7 +10,8 @@ from typing import Dict, List
 from pydantic import JsonValue
 
 TICKET = "T9.01"
-TICKET_BRANCH = f"feature/{TICKET}"
+OTHER = "T9.02"
+SHARED_BRANCH = "feature/tickets"
 LEGACY_BRANCH = f"ticket/{TICKET}"
 TICKET_FOLDER = f"docs/tickets/{TICKET}"
 TICKET_TITLE = f"{TICKET}: Smoke ticket"
@@ -71,9 +72,18 @@ def run_json(cwd: Path, *args: str) -> Dict[str, JsonValue]:
     return loaded
 
 
-def home(main: Path) -> Path:
-    """Return the worktree that holds the ticket's work, beside the main checkout (TKT-16)."""
+def legacy_home(main: Path) -> Path:
+    """Return where a ticket started before TKT-16 kept its own worktree, beside the main checkout."""
     return main.parent / f"{main.name}-tickets" / TICKET
+
+
+def add_ticket(main: Path, ticket: str) -> None:
+    """Write a second ticket's folder, uncommitted, as /ticket-plan does."""
+    folder = main / "docs" / "tickets" / ticket
+    folder.mkdir(parents=True)
+    (folder / "TICKET.md").write_text(f"# {ticket}: Second ticket\n", encoding="utf-8")
+    (folder / "EXPLAIN.md").write_text(f"# Explain\n\n\n\n{CHANGES_MARKERS}", encoding="utf-8")
+    (folder / "IMPLEMENTATION.md").write_text("# Implementation\n\n\n", encoding="utf-8")
 
 
 def make_repo(base: Path) -> Path:
@@ -108,8 +118,8 @@ def integrated_repo(base: Path) -> Path:
 
 
 def documents_problems(main: Path, explain: str, implementation: str) -> str:
-    """Write the documents in the ticket's home, generate their changes table, and return what ``docs`` prints."""
-    write_documents(home(main), explain, implementation)
+    """Write the documents, generate their changes table, and return what ``docs`` prints."""
+    write_documents(main, explain, implementation)
     assert run(main, "changes", "--write").returncode == 0
     return run(main, "docs").stdout
 
@@ -125,15 +135,15 @@ def commit_count(main: Path, branch: str) -> int:
     return int(git(main, "rev-list", "--count", branch))
 
 
-def worker_writes(main: Path, name: str, task: str, files: Dict[str, str]) -> Path:
-    """Start a worker worktree, write ``files`` into it and hand them off as ``task``."""
+def worker_writes(main: Path, name: str, task: str, files: Dict[str, str], ticket: str = TICKET) -> Path:
+    """Start a worker worktree, write ``files`` into it and hand them off as ``task`` of ``ticket``."""
     worker = add_worktree(main, name)
-    assert run(worker, "start").returncode == 0
+    assert run(worker, "start", ticket=ticket).returncode == 0
     for relative, text in files.items():
         path = worker / relative
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(text, encoding="utf-8")
-    assert run(worker, "handoff", "--task", task).returncode == 0
+    assert run(worker, "handoff", "--task", task, ticket=ticket).returncode == 0
     return worker
 
 

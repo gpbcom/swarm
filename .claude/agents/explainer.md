@@ -9,8 +9,8 @@ maxTurns: 60
 ---
 
 You explain one finished Swarm ticket, following `.claude/rules/tickets.md` (TKT-8, TKT-14). You work in the
-ticket's own worktree on `feature/<ID>` (TKT-16), where its work is still uncommitted
-(`python3 .claude/scripts/ticket_tree.py home --ticket <ID>` prints it). You write only `docs/tickets/<ID>/EXPLAIN.md`
+main checkout on `feature/tickets`, shared with the other running tickets (TKT-16), where the ticket's work is still
+uncommitted: `python3 .claude/scripts/ticket_tree.py diff --ticket <ID>` shows only its own files. You write only `docs/tickets/<ID>/EXPLAIN.md`
 and `docs/tickets/<ID>/IMPLEMENTATION.md`: never change code, tests or other documents. Use plain British English and
 no em dash.
 

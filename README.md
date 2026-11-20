@@ -15,7 +15,8 @@
   <a href="#-architecture">Architecture</a> ·
   <a href="#-roadmap">Roadmap</a> ·
   <a href="#-documentation">Documentation</a> ·
-  <a href="#-getting-started">Getting started</a>
+  <a href="#-getting-started">Getting started</a> ·
+  <a href="#-working-on-tickets">Tickets</a>
 </p>
 
 ---
@@ -184,6 +185,69 @@ pnpm turbo run build
 
 Terraform creates a cell's machines, network and k3s cluster. Follow
 [deploy/terraform/README.md](deploy/terraform/README.md).
+
+## 🎫 Working on tickets
+
+The roadmap's tickets are built by Claude Code agents under the rules of
+[.claude/rules/tickets.md](.claude/rules/tickets.md). Each ticket is a GitHub issue of the project
+[Swarm roadmap](https://github.com/users/gpbcom/projects/7), under its epic and its phase. You approve each plan,
+review the code before it is pushed, and GitHub merges it once CI passes.
+
+### Where the work happens
+
+- Every running ticket works in **this checkout**, on the branch `feature/tickets` that they all share. Its documents
+  are in `docs/tickets/<ID>/`: `TICKET.md`, `PLAN.md`, `PROGRESS.md`, then `EXPLAIN.md`, `IMPLEMENTATION.md` and
+  `REVIEW.md`.
+- A ticket's work stays uncommitted until it is done. VS Code's Source Control shows every running ticket's changes
+  at once; `python3 .claude/scripts/ticket_tree.py diff --ticket <ID>` shows one ticket's own files.
+- When a ticket is done and you have reviewed it, it becomes **one commit** on `feature/tickets` holding only its own
+  files, pushed with the branch's pull request to `develop` (`Closes #<issue>`). GitHub merges it once CI passes, the
+  issue closes and its card moves to 🏁 Done.
+- Two tickets never change the same service, front end or package at the same time (area locks), and a ticket starts
+  only once the tickets it builds on are done.
+
+### One ticket
+
+```text
+/ticket-plan T0.10          writes docs/tickets/T0.10/TICKET.md and PLAN.md, then stops
+                            read PLAN.md, change its status line to "**Plan:** 🟢 Approved"
+/ticket-run T0.10           runs the agents, checks, reviews, writes EXPLAIN.md, then stops for your code review
+                            read the code, change "**Push:** 🟡 Awaiting code review" to "**Push:** 🟢 Approved"
+/ticket-run T0.10           checks again, commits, pushes, opens the pull request
+```
+
+`/ticket-run T0.10 --force` starts a ticket even though the start rule would hold it back (logged in `PROGRESS.md`).
+
+### An issue with its child issues, or a group of issues
+
+A group is named by references: `#12` (a ticket issue, or an **epic or phase issue with every ticket under it**),
+`T0.10`, `E0.4`, `P1`, several separated by spaces.
+
+```text
+/issue-plan #12             plans every ticket of issue #12 and its child issues at once, then stops
+python3 .claude/scripts/tickets.py approve #12
+                            approves every plan of the group that passes its check, in one go
+/issue-run #12              starts every approved ticket the start rule allows, the others as soon as they may
+/issue-plan P1 T2.04 #57    a group mixing a phase, a ticket and an issue
+```
+
+Each ticket of a group still stops for your code review before its push.
+
+### Following the work
+
+| Where | Shows |
+| --- | --- |
+| The 2-minute reports in Claude Code | Every ticket of the group, or every agent of a run, with its state, tokens and checks |
+| `/board` or `python3 .claude/scripts/board.py show` | The Kanban board in the terminal |
+| The Claude Code status line | The branch, the running tickets and the board's counts |
+| [The project on GitHub](https://github.com/users/gpbcom/projects/7) | The board, the issues and their links |
+| `python3 .claude/scripts/tickets.py resolve <refs>` | A group's tickets, in order, with their state and what they wait for |
+| `python3 .claude/scripts/tickets.py list` | The running tickets and the files each one owns |
+
+### Afterwards
+
+Once every running ticket is merged, `python3 .claude/scripts/tickets.py prune` puts this checkout back on `develop`.
+On a new clone, run `python3 .claude/scripts/tickets.py setup` once to turn on the GitFlow git hooks.
 
 ## 🗂️ Repository layout
 
