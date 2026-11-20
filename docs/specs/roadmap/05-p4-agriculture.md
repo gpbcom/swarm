@@ -1,7 +1,7 @@
 # 🛣️ P4: Agriculture
 
 <!-- spec:nav-top -->
-> [🏠 Index](../README.md) · [◀️ P3: Patrol](04-p3-patrol.md) · 📄 **Page 100 / 109** · [P5: AI agents, MCP and A2A ▶️](06-p5-ai-agents.md)
+> [🏠 Index](../README.md) · [◀️ P3: Patrol](04-p3-patrol.md) · 📄 **Page 111 / 120** · [P5: AI agents, MCP and A2A ▶️](06-p5-ai-agents.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Sprints:** S32 to S38 · **Dates:** 13 Mar 2028 to 16 Jun 2028 · **Tickets:** about 25, plus one slot reserved for the Patrol beta
@@ -231,5 +231,5 @@ P4 closes when every box below is ticked. A box that cannot be ticked by 16 June
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../README.md) · [◀️ P3: Patrol](04-p3-patrol.md) · 📄 **Page 100 / 109** · [P5: AI agents, MCP and A2A ▶️](06-p5-ai-agents.md)
+> [🏠 Index](../README.md) · [◀️ P3: Patrol](04-p3-patrol.md) · 📄 **Page 111 / 120** · [P5: AI agents, MCP and A2A ▶️](06-p5-ai-agents.md)
 <!-- /spec:nav-bottom -->

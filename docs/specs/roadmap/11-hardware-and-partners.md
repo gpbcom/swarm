@@ -1,7 +1,7 @@
 # 🤝 Hardware and partners
 
 <!-- spec:nav-top -->
-> [🏠 Index](../README.md) · [◀️ Flight test campaigns](10-flight-test-campaigns.md) · 📄 **Page 106 / 109** · [Risks ▶️](12-risks.md)
+> [🏠 Index](../README.md) · [◀️ Flight test campaigns](10-flight-test-campaigns.md) · 📄 **Page 117 / 120** · [Risks ▶️](12-risks.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Sprints:** S01 to S52 · **Dates:** 4 Jan 2027 to 29 Dec 2028
@@ -45,6 +45,7 @@
 | <a id="p-07"></a>P-07 | A qualified timestamping authority (eIDAS) | S20 | 8 Oct 2027 | Default Anchoring of Evidence records |
 | <a id="p-08"></a>P-08 | LLM provider accounts (Claude by default; others for the provider-agnostic tests) | S36 | 19 May 2028 | The AI agents of P5 |
 | <a id="p-09"></a>P-09 | A blockchain aggregator account | S47 | 20 Oct 2028 | The blockchain Anchoring option of P7 |
+| <a id="p-10"></a>P-10 | Simple-ERP (`gpbcom/simple-erp`): its API with the operations of the ERP port. Committed to be ready by S46 | S46 | 25 Sep 2028 | The ERP of the Squad shortfall, quotes and invoices, Fleet costs and staff time ([📘 FS-024](../functional/features/FS-024-erp-and-squad-shortfall.md)) |
 
 ## <a id="budget"></a>📉 Ordering lead times
 
@@ -55,5 +56,5 @@
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../README.md) · [◀️ Flight test campaigns](10-flight-test-campaigns.md) · 📄 **Page 106 / 109** · [Risks ▶️](12-risks.md)
+> [🏠 Index](../README.md) · [◀️ Flight test campaigns](10-flight-test-campaigns.md) · 📄 **Page 117 / 120** · [Risks ▶️](12-risks.md)
 <!-- /spec:nav-bottom -->

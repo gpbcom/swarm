@@ -1,7 +1,7 @@
 # 🎬 UC-017: Spray a Field with refills
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ UC-016: Import and fly a Light show](UC-016-import-and-fly-a-light-show.md) · 📄 **Page 43 / 109** · [UC-018: Respond to a Site Alarm ▶️](UC-018-respond-to-a-site-alarm.md)
+> [🏠 Index](../../README.md) · [◀️ UC-016: Import and fly a Light show](UC-016-import-and-fly-a-light-show.md) · 📄 **Page 45 / 120** · [UC-018: Respond to a Site Alarm ▶️](UC-018-respond-to-a-site-alarm.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -153,5 +153,5 @@ One row per state of the flow chart: every action, success and failure node. Cli
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ UC-016: Import and fly a Light show](UC-016-import-and-fly-a-light-show.md) · 📄 **Page 43 / 109** · [UC-018: Respond to a Site Alarm ▶️](UC-018-respond-to-a-site-alarm.md)
+> [🏠 Index](../../README.md) · [◀️ UC-016: Import and fly a Light show](UC-016-import-and-fly-a-light-show.md) · 📄 **Page 45 / 120** · [UC-018: Respond to a Site Alarm ▶️](UC-018-respond-to-a-site-alarm.md)
 <!-- /spec:nav-bottom -->

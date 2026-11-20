@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <title>UC-033 KO: Shortfall left open</title>
+  <link rel="stylesheet" href="../visual-identity.css">
+  <link rel="stylesheet" href="../components.css">
+</head>
+<body>
+<div class="window">
+  <header class="titlebar"><span class="app">⚙️ Swarm</span><span class="screen-title">Mission studio · M-2026-0412 Inspection of Les Vignes</span><span class="badge action">🔄 Mission: Draft</span><span class="spacer"></span><span class="badge persona">👤 Léa Martin</span></header>
+  <div class="layout">
+    <nav class="sidebar">
+      <span class="nav-item">🗺️ Missions</span>
+      <span class="nav-item active">🖊️ Design</span>
+      <span class="nav-item">🕹️ Simulate</span>
+      <span class="nav-item">💬 Assistant</span>
+    </nav>
+    <main class="content">
+      <h1>Size the Squad</h1>
+      <div class="banner failure">❌ <strong>Squad shortfall: 1 Drone.</strong> The Mission cannot become Planned until the Squad is complete.</div>
+      <section class="card stack">
+        <h2>🗃️ Squad: 2 of 3 Drones with a thermal camera</h2>
+        <table class="table">
+          <tr><th>Drone</th><th>Drone model</th><th>Payload</th><th>Block</th><th>State</th></tr>
+          <tr><td>🛸 Alpha</td><td>X500</td><td>Thermal camera</td><td>Block 1</td><td><span class="badge success">🔄 Drone: Ready</span></td></tr>
+          <tr><td>🛸 Bravo</td><td>X500</td><td>Thermal camera</td><td>Block 2</td><td><span class="badge success">🔄 Drone: Ready</span></td></tr>
+          <tr><td class="muted">Missing</td><td>X500</td><td>Thermal camera</td><td>Block 3</td><td><span class="badge failure">❌ No Drone</span></td></tr>
+        </table>
+        <span class="hint">Echo is taken by M-2026-0420 on 3 December (📏 BR-031).</span>
+      </section>
+      <section class="card stack">
+        <h2>Ways rejected</h2>
+        <div class="checklist">
+          <span class="check fail">❌ Manufacturing order for one X500: rejected, nothing sent to the ERP</span>
+          <span class="check fail">❌ Move the Mission to 4 December: rejected</span>
+          <span class="check fail">❌ A Squad of two Drones: rejected</span>
+        </div>
+        <div class="row"><span class="badge action">🔄 Mission: Draft</span><span class="muted">Nothing ordered.</span><span class="spacer"></span><span class="button secondary">💬 Ask the Assistant again</span></div>
+      </section>
+    </main>
+  </div>
+  <footer class="statusbar"><span>❌ Squad shortfall: 1 Drone</span><span>📜 Authorisation EU (EASA), Inspection and BVLOS, Valid to 2027-06-30</span><span>Saved</span></footer>
+</div>
+</body>
+</html>

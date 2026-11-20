@@ -1,7 +1,7 @@
 # 🛣️ Roadmap
 
 <!-- spec:nav-top -->
-> [🏠 Index](../README.md) · [◀️ GUI and WebUI](../technical/10-frontends.md) · 📄 **Page 95 / 109** · [P0: Foundations ▶️](01-p0-foundations.md)
+> [🏠 Index](../README.md) · [◀️ GUI and WebUI](../technical/10-frontends.md) · 📄 **Page 106 / 120** · [P0: Foundations ▶️](01-p0-foundations.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -32,13 +32,13 @@
 | Flight tests | The person flies as the Pilot, with a small fleet, under the Open category, then a Specific category Authorisation |
 | Launch | A design-partner Operator from month 6, betas per Activity, general availability of Inspection and Patrol in month 24 |
 
-**Capacity.** About **5 tickets merged per sprint**, about 260 over the 24 months; from S41 to S52, where P5, P6 and P7 overlap, about **6 per sprint** (accepted, watched through [🎲 R-01](12-risks.md#r-01) and [🎲 R-08](12-risks.md#r-08)). The person's review is the bottleneck: each ticket is split by the agents into parallel tasks (code, tests, mock-up updates, documentation), so a ticket takes days, not weeks. Phases overlap because agents can work on two phases while the person reviews.
+**Capacity.** About **5 tickets merged per sprint**, about 285 in all; from S41 to S52, where P5, P6 and P7 overlap, about **6 per sprint**, and about **7 to 8** from S44 to S48 while the core of the Assistant is built. The rest of the Assistant, 14 tickets, runs in S53 to S56, in 2029, after general availability (accepted, watched through [🎲 R-01](12-risks.md#r-01) and [🎲 R-08](12-risks.md#r-08)). The person's review is the bottleneck: each ticket is split by the agents into parallel tasks (code, tests, mock-up updates, documentation), so a ticket takes days, not weeks. Phases overlap because agents can work on two phases while the person reviews.
 
 ## <a id="timeline"></a>📆 Timeline
 
 ```mermaid
 gantt
-    title Swarm roadmap, 2027 to 2028
+    title Swarm roadmap, 2027 to 2029
     dateFormat YYYY-MM-DD
     axisFormat %b %Y
     section Build
@@ -47,15 +47,19 @@ gantt
     P2 Inspection product          :p2, 2027-07-05, 2027-12-03
     P3 Patrol                      :p3, 2027-12-06, 2028-04-07
     P4 Agriculture                 :p4, 2028-03-13, 2028-06-16
-    P5 AI agents, MCP and A2A      :p5, 2028-05-08, 2028-08-25
+    P5 AI agents, MCP and A2A      :p5, 2028-05-08, 2028-11-03
+    P5 Assistant complete          :p5c, 2029-01-01, 2029-02-23
     P6 Light shows                 :p6, 2028-07-17, 2028-11-03
     P7 Scale and reach             :p7, 2028-09-11, 2028-12-29
     section Market
     Design partner signed          :milestone, 2027-06-18, 0d
     Inspection beta                :milestone, 2027-12-17, 0d
     Patrol beta                    :milestone, 2028-06-30, 0d
+    AI agents in beta              :milestone, 2028-08-25, 0d
     Agriculture beta               :milestone, 2028-10-06, 0d
+    Assistant in beta              :milestone, 2028-11-17, 0d
     General availability           :milestone, 2028-12-29, 0d
+    Assistant complete             :milestone, 2029-02-23, 0d
 ```
 
 ## <a id="phases"></a>🛣️ Phases
@@ -67,7 +71,7 @@ gantt
 | [🛣️ P2: Inspection product](03-p2-inspection-product.md) | S14 to S24 | 5 Jul to 3 Dec 2027 | Processing (OpenDroneMap, detection), Deliverables and Defects, Back office, Client portal, evidence ledger, Debrief and Scorecard |
 | [🛣️ P3: Patrol](04-p3-patrol.md) | S25 to S33 | 6 Dec 2027 to 7 Apr 2028 | Docks, Parrot adapter, Alarms and webhooks, Site agents, video at scale, Notifications |
 | [🛣️ P4: Agriculture](05-p4-agriculture.md) | S32 to S38 | 13 Mar to 16 Jun 2028 | Fields, Prescription maps, dose computation, refills, spray Drones, spring campaign |
-| [🛣️ P5: AI agents, MCP and A2A](06-p5-ai-agents.md) | S36 to S43 | 8 May to 25 Aug 2028 | Mission assistant, Co-pilot, Report writer, MCP server and A2A behind Kubernetes Services with KEDA, the human gate |
+| [🛣️ P5: AI agents, MCP and A2A](06-p5-ai-agents.md) | S36 to S48, then S53 to S56 | 8 May to 3 Nov 2028, then 1 Jan to 23 Feb 2029 | Mission assistant, Co-pilot, Report writer, MCP server and A2A behind Kubernetes Services with KEDA, the human gate; then the Assistant, front door of every person, with its permissions, Connectors and the ERP |
 | [🛣️ P6: Light shows](07-p6-light-shows.md) | S41 to S48 | 17 Jul to 3 Nov 2028 | Choreography import and designer, partitioned edge, show coordinator, 5,000-Drone load test, a real show |
 | [🛣️ P7: Scale and reach](08-p7-scale-and-reach.md) | S45 to S52 | 11 Sep to 29 Dec 2028 | Cells at target, OVHcloud and Scaleway production, US self-hosted cell, on-premises bundle, DJI and Skydio adapters, general availability |
 
@@ -82,6 +86,8 @@ gantt
 | M3 | Patrol beta | 30 Jun 2028 | S39 | A Dock site patrols on a schedule and on Alarms for one month |
 | M4 | Agriculture beta | 6 Oct 2028 | S46 | An autumn seeding campaign on a partner farm, with dose maps |
 | M5 | AI agents in beta | 25 Aug 2028 | S43 | Mission assistant, Co-pilot and Report writer used by the design partner; MCP and A2A enabled for one Operator |
+| M5b | Assistant in beta | 17 Nov 2028 | S49 | The design partner's people use the Assistant panel on their real work, within the permissions their Operator set; the Assistant holds a simulated Squad under a Pilot on duty |
+| M5c | Assistant complete | 23 Feb 2029 | S56 | The Assistant by voice, on a phone, in chat tools and offline, with its Connectors; Simple-ERP covers a real Squad shortfall |
 | M6 | Light show demonstration | 3 Nov 2028 | S48 | A real show of about 50 Drones, and 5,000 simulated Drones on a partitioned edge within budget |
 | M7 | General availability | 29 Dec 2028 | S52 | Inspection and Patrol sold in the EU cloud cells; a full cell at target load in staging; the on-premises bundle installed once |
 
@@ -109,5 +115,5 @@ gantt
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../README.md) · [◀️ GUI and WebUI](../technical/10-frontends.md) · 📄 **Page 95 / 109** · [P0: Foundations ▶️](01-p0-foundations.md)
+> [🏠 Index](../README.md) · [◀️ GUI and WebUI](../technical/10-frontends.md) · 📄 **Page 106 / 120** · [P0: Foundations ▶️](01-p0-foundations.md)
 <!-- /spec:nav-bottom -->

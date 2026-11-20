@@ -1,7 +1,7 @@
 # ⛓️ Parallel plan
 
 <!-- spec:nav-top -->
-> [🏠 Index](../README.md) · [◀️ Traceability](13-traceability.md) · 📄 **Page 109 / 109**
+> [🏠 Index](../README.md) · [◀️ Traceability](13-traceability.md) · 📄 **Page 120 / 120**
 <!-- /spec:nav-top -->
 
 **Status:** 🟡 Draft · **Updated:** 2026-11-19
@@ -32,16 +32,16 @@
 
 ## <a id="timeline"></a>📆 Timeline
 
-As of 19 Nov 2026: 8 of the 262 tickets are merged. The 244 software tickets left are scheduled in working days of 6 hours, without holidays. The [interactive Gantt chart](gantt/parallel-plan.html) shows every ticket.
+As of 20 Nov 2026: 9 of the 285 tickets are merged. The 266 software tickets left are scheduled in working days of 6 hours, without holidays. The [interactive Gantt chart](gantt/parallel-plan.html) shows every ticket.
 
 | Scenario | Lanes | Review time | Working days | Built by | Review load |
 | --- | --- | --- | --- | --- | --- |
-| Today's harness, one ticket at a time | 1 | full | 65 | 17 Feb 2027 | 39 % |
-| 2 tickets at once | 2 | full | 37 | 11 Jan 2027 | 67 % |
-| 3 tickets at once | 3 | full | 31 | 31 Dec 2026 | 81 % |
-| 4 tickets at once | 4 | full | 29 | 30 Dec 2026 | 86 % |
-| 4 at once, lighter review | 4 | halved off identity and isolation | 18 | 15 Dec 2026 | 68 % |
-| 6 at once, lighter review | 6 | halved off identity and isolation | 17 | 14 Dec 2026 | 72 % |
+| Today's harness, one ticket at a time | 1 | full | 72 | 1 Mar 2027 | 39 % |
+| 2 tickets at once | 2 | full | 42 | 18 Jan 2027 | 66 % |
+| 3 tickets at once | 3 | full | 35 | 7 Jan 2027 | 79 % |
+| 4 tickets at once | 4 | full | 33 | 6 Jan 2027 | 84 % |
+| 4 at once, lighter review | 4 | halved off identity and isolation | 22 | 21 Dec 2026 | 64 % |
+| 6 at once, lighter review | 6 | halved off identity and isolation | 20 | 17 Dec 2026 | 69 % |
 | Roadmap plan, 5 tickets per sprint | | | 24 months | 29 Dec 2028 | |
 
 ```mermaid
@@ -49,12 +49,12 @@ gantt
     title Building the software tickets, by scenario
     dateFormat YYYY-MM-DD
     axisFormat %d %b
-    Today's harness one ticket at a time :serial, 2026-11-19, 2027-02-17
-    2 tickets at once :k2, 2026-11-19, 2027-01-11
-    3 tickets at once :k3, 2026-11-19, 2026-12-31
-    4 tickets at once :k4, 2026-11-19, 2026-12-30
-    4 at once lighter review :k4_light, 2026-11-19, 2026-12-15
-    6 at once lighter review :k6_light, 2026-11-19, 2026-12-14
+    Today's harness one ticket at a time :serial, 2026-11-20, 2027-03-01
+    2 tickets at once :k2, 2026-11-20, 2027-01-18
+    3 tickets at once :k3, 2026-11-20, 2027-01-07
+    4 tickets at once :k4, 2026-11-20, 2027-01-06
+    4 at once lighter review :k4_light, 2026-11-20, 2026-12-21
+    6 at once lighter review :k6_light, 2026-11-20, 2026-12-17
 ```
 
 With 4 tickets at once, every phase overlaps the others:
@@ -64,57 +64,59 @@ gantt
     title Phases, 4 tickets at once
     dateFormat YYYY-MM-DD
     axisFormat %d %b
-    P0 Foundations (12) :p0, 2026-11-19, 2026-12-04
-    P1 First flight (43) :p1, 2026-11-19, 2026-12-29
-    P2 Inspection product (49) :p2, 2026-11-19, 2026-12-28
-    P3 Patrol (34) :p3, 2026-11-25, 2026-12-28
-    P4 Agriculture (25) :p4, 2026-11-20, 2026-12-29
-    P5 AI agents (30) :p5, 2026-11-26, 2026-12-22
-    P6 Light shows (23) :p6, 2026-11-25, 2026-12-25
-    P7 Scale and reach (28) :p7, 2026-12-02, 2026-12-30
+    P0 Foundations (11) :p0, 2026-11-20, 2026-12-09
+    P1 First flight (43) :p1, 2026-11-20, 2027-01-05
+    P2 Inspection product (49) :p2, 2026-11-20, 2027-01-04
+    P3 Patrol (34) :p3, 2026-11-23, 2027-01-04
+    P4 Agriculture (25) :p4, 2026-11-25, 2027-01-05
+    P5 AI agents (53) :p5, 2026-11-25, 2026-12-31
+    P6 Light shows (23) :p6, 2026-11-20, 2027-01-01
+    P7 Scale and reach (28) :p7, 2026-12-07, 2027-01-06
 ```
 
 ## <a id="dependencies"></a>⛓️ Dependencies
 
 **Ready now**, every ticket they need merged:
 
-- T0.09: NATS JetStream and Operator accounts
 - T0.10: Images, scans, signatures and Playwright
 - T0.12: Service skeletons with row-level security
+- T0.13: Simulator base
 - T0.14: Design tokens, components and app shells
 - T1.01: Safety tick in Rust
+- T1.09: Coverage planner
 - T4.02: Shapefile parser in the Rust planner crate
 - T6.03: Separation between every two Drones in every frame, in the swarm-core planner crate
 
-**Critical path**, 17 tickets and 38 hours of work: the floor, whatever the number of lanes.
+**Critical path**, 18 tickets and 40 hours of work: the floor, whatever the number of lanes.
 
-T0.09 › T0.13 › T0.18 › T0.19 › T1.08 › T1.11 › T1.13 › T1.14 › T1.16 › T1.17 › T4.14 › T4.16 › T4.22 › T5.11 › T5.25 › T5.26 › T5.30
+T0.12 › T0.18 › T0.19 › T1.08 › T1.11 › T1.13 › T1.14 › T1.16 › T1.17 › T4.14 › T4.16 › T4.22 › T5.11 › T5.25 › T5.28 › T5.46 › T5.47 › T5.54
 
 **Waves**: a ticket's wave is one more than the latest wave of the tickets it needs. Tickets of a wave can run together when they share no area.
 
 | Wave | Tickets | Count |
 | --- | --- | --- |
-| 1 | T0.09 T0.10 T0.12 T0.14 T1.01 T4.02 T6.03 | 7 |
-| 2 | T0.11 T0.13 T0.15 T1.05 T1.09 T2.03 T2.04 T2.05 T3.01 T4.01 T4.03 T5.01 T6.01 | 13 |
-| 3 | T0.16 T0.18 T2.06 T2.09 T2.10 T2.13 T2.14 T2.15 T2.16 T3.02 T3.03 T3.05 T4.04 T4.05 T4.09 T5.02 T6.02 T6.05 T6.14 | 19 |
-| 4 | T0.19 T0.20 T1.02 T1.04 T1.06 T1.07 T1.29 T2.11 T2.12 T2.17 T2.22 T2.34 T2.48 T3.06 T3.11 T3.18 T3.24 T4.08 T4.13 T7.15 T7.18 | 21 |
-| 5 | T0.17 T1.03 T1.08 T1.10 T1.12 T1.32 T2.18 T2.30 T2.39 T3.07 T4.10 T5.10 T7.02 | 13 |
-| 6 | T1.11 T1.15 T1.22 T2.01 T2.19 T2.24 T2.42 T2.49 T3.08 T3.10 T4.07 T4.12 T4.20 T4.25 T5.05 T6.04 T6.09 T6.21 T7.08 T7.09 T7.11 | 21 |
-| 7 | T1.13 T1.25 T1.30 T2.02 T2.08 T2.20 T2.21 T2.40 T3.04 T3.09 T3.12 T3.16 T4.06 T4.11 T5.03 T6.06 T6.07 T6.08 T7.03 T7.16 | 20 |
-| 8 | T1.14 T1.38 T2.07 T2.23 T2.25 T3.19 T3.30 T4.15 T4.21 T5.04 T5.20 T6.10 T7.04 T7.05 T7.13 T7.17 | 16 |
-| 9 | T1.16 T1.18 T1.20 T1.21 T1.26 T1.27 T1.28 T1.31 T1.44 T2.26 T2.27 T3.17 T3.20 T3.21 T5.06 T5.21 T5.22 T6.12 T6.15 T6.18 T6.22 T7.06 T7.07 T7.10 T7.12 T7.24 | 26 |
-| 10 | T1.17 T1.23 T1.37 T1.43 T1.45 T2.28 T2.29 T3.13 T3.25 T5.07 T5.15 T5.18 T6.11 T6.17 T7.23 T7.25 | 16 |
-| 11 | T1.19 T1.40 T2.31 T2.41 T3.14 T3.15 T3.22 T3.35 T4.14 T5.08 T5.09 T5.16 T5.23 T6.13 T6.16 T7.14 | 16 |
-| 12 | T1.24 T1.36 T2.32 T2.35 T2.37 T3.23 T3.26 T3.28 T3.29 T4.16 T4.17 T4.19 T4.24 T5.17 T5.19 T5.24 T6.23 T7.28 | 18 |
-| 13 | T1.34 T2.33 T2.36 T2.38 T3.27 T3.34 T4.18 T4.22 T7.19 T7.29 T7.30 | 11 |
-| 14 | T1.35 T2.46 T2.47 T4.23 T5.11 | 5 |
-| 15 | T1.41 T1.42 T3.31 T5.12 T5.14 T5.25 T7.22 | 7 |
-| 16 | T2.43 T5.13 T5.26 T5.27 T5.28 T5.29 T6.19 T7.01 | 8 |
-| 17 | T2.44 T2.45 T3.33 T5.30 T6.20 T7.20 T7.21 | 7 |
+| 1 | T0.10 T0.12 T0.13 T0.14 T1.01 T1.09 T4.02 T6.03 | 8 |
+| 2 | T0.11 T0.15 T0.18 T1.05 T2.03 T2.04 T2.05 T3.01 T4.01 T4.03 T4.05 T5.01 T6.01 | 13 |
+| 3 | T0.16 T0.19 T1.02 T1.04 T1.29 T2.06 T2.09 T2.10 T2.13 T2.14 T2.15 T2.16 T3.02 T3.03 T3.05 T3.06 T4.04 T4.09 T4.13 T5.02 T6.02 T6.05 T6.14 | 23 |
+| 4 | T0.17 T0.20 T1.03 T1.06 T1.07 T1.08 T1.10 T1.32 T2.11 T2.12 T2.17 T2.22 T2.30 T2.34 T2.48 T3.07 T3.11 T3.18 T3.24 T4.08 T4.10 T5.10 T7.15 T7.18 | 24 |
+| 5 | T1.11 T1.12 T1.15 T1.22 T2.01 T2.18 T2.24 T2.39 T2.42 T2.49 T3.08 T3.10 T4.07 T4.20 T4.25 T5.05 T6.04 T6.09 T7.02 T7.08 T7.09 T7.11 | 22 |
+| 6 | T1.13 T1.25 T1.30 T2.02 T2.08 T2.19 T2.20 T2.40 T3.04 T3.09 T3.12 T3.16 T4.06 T4.11 T4.12 T5.03 T6.06 T6.07 T6.08 T6.21 T7.03 T7.16 | 22 |
+| 7 | T1.14 T1.38 T2.07 T2.21 T2.25 T3.19 T3.30 T4.15 T5.04 T5.20 T6.10 T7.04 T7.05 T7.13 T7.17 | 15 |
+| 8 | T1.16 T1.18 T1.20 T1.21 T1.26 T1.27 T1.28 T1.31 T1.44 T2.23 T2.26 T2.27 T3.17 T3.20 T3.21 T4.21 T5.06 T5.21 T5.22 T5.33 T6.12 T6.15 T6.18 T6.22 T7.06 T7.07 T7.10 T7.12 T7.24 | 29 |
+| 9 | T1.17 T1.23 T1.37 T1.43 T1.45 T2.28 T2.29 T3.13 T3.25 T5.07 T5.15 T5.18 T5.49 T6.11 T6.17 T7.23 T7.25 | 17 |
+| 10 | T1.19 T1.40 T2.31 T2.41 T3.14 T3.15 T3.22 T3.35 T4.14 T5.08 T5.09 T5.16 T5.23 T5.51 T6.13 T6.16 T7.14 | 17 |
+| 11 | T1.24 T1.36 T2.32 T2.35 T2.37 T3.23 T3.26 T3.28 T3.29 T4.16 T4.17 T4.19 T4.24 T5.17 T5.19 T5.24 T5.36 T6.23 T7.28 | 19 |
+| 12 | T1.34 T2.33 T2.36 T2.38 T3.27 T3.34 T4.18 T4.22 T5.37 T5.38 T5.39 T5.40 T5.44 T7.19 T7.29 T7.30 | 16 |
+| 13 | T1.35 T2.46 T2.47 T4.23 T5.11 | 5 |
+| 14 | T1.41 T1.42 T3.31 T5.12 T5.14 T5.25 T5.32 T7.22 | 8 |
+| 15 | T2.43 T5.13 T5.26 T5.27 T5.28 T5.29 T5.34 T5.35 T5.43 T5.50 T6.19 T7.01 | 12 |
+| 16 | T2.44 T2.45 T3.33 T5.30 T5.41 T5.42 T5.45 T5.46 T5.52 T6.20 T7.20 T7.21 | 12 |
+| 17 | T5.47 T5.48 T5.53 | 3 |
+| 18 | T5.54 | 1 |
 
 ## <a id="field"></a>🛫 Field validation
 
-44 software tickets are built and tested on the Simulator first, but their acceptance waits for an external item. 10 more only exist after a campaign or the Patrol beta. These keep the dates of the roadmap: parallel work does not move them.
+46 software tickets are built and tested on the Simulator first, but their acceptance waits for an external item. 10 more only exist after a campaign or the Patrol beta. These keep the dates of the roadmap: parallel work does not move them.
 
 ```mermaid
 gantt
@@ -122,7 +124,7 @@ gantt
     dateFormat YYYY-MM-DD
     axisFormat %b %Y
     section Software
-    244 tickets, 4 at once :sw, 2026-11-19, 2026-12-30
+    266 tickets, 4 at once :sw, 2026-11-20, 2027-01-06
     section Regulatory
     G-01 Operator registration :milestone, g-01, 2027-01-29, 0d
     G-02 A2 certificate :milestone, g-02, 2027-03-26, 0d
@@ -153,6 +155,7 @@ gantt
     P-08 LLM provider accounts :milestone, p-08, 2028-05-19, 0d
     P-05 Show event :milestone, p-05, 2028-09-08, 0d
     P-09 Blockchain aggregator :milestone, p-09, 2028-10-20, 0d
+    P-10 Simple-ERP API :milestone, p-10, 2028-09-25, 0d
     section Flight test campaigns
     C-01 Inspection of a test area :c-01, 2027-05-10, 2027-06-18
     C-02 Inspection of a solar farm :c-02, 2027-09-27, 2027-12-03
@@ -182,13 +185,14 @@ gantt
 | [🤝 H-08](11-hardware-and-partners.md#h-08) GPU server | 6 Oct 2028 | T7.17 | ➖ |
 | [🤝 H-09](11-hardware-and-partners.md#h-09) DJI Drone | 20 Oct 2028 | T7.25 | ➖ |
 | [🤝 H-10](11-hardware-and-partners.md#h-10) Skydio Drone | 20 Oct 2028 | T7.25 | ➖ |
-| [🤝 P-06](11-hardware-and-partners.md#p-06) Hosting providers | 4 Jan 2027 | T1.29 T1.38 T2.49 T5.10 T5.22 T5.26 T5.30 T7.03 T7.04 T7.05 T7.11 T7.29 | ➖ |
-| [🤝 P-01](11-hardware-and-partners.md#p-01) Design-partner Operator | 18 Jun 2027 | T1.38 T1.44 T2.16 T5.30 | ➖ |
+| [🤝 P-06](11-hardware-and-partners.md#p-06) Hosting providers | 4 Jan 2027 | T1.29 T1.38 T2.49 T5.10 T5.22 T5.26 T5.30 T5.54 T7.03 T7.04 T7.05 T7.11 T7.29 | ➖ |
+| [🤝 P-01](11-hardware-and-partners.md#p-01) Design-partner Operator | 18 Jun 2027 | T1.38 T1.44 T2.16 T5.30 T5.54 | ➖ |
 | [🤝 P-07](11-hardware-and-partners.md#p-07) Timestamping authority | 8 Oct 2027 | T2.34 | ➖ |
 | [🤝 P-03](11-hardware-and-partners.md#p-03) Dock site | 28 Jan 2028 | T3.35 | ➖ |
 | [🤝 P-04](11-hardware-and-partners.md#p-04) Partner farm | 25 Feb 2028 | T4.02 | ➖ |
 | [🤝 P-08](11-hardware-and-partners.md#p-08) LLM provider accounts | 19 May 2028 | T5.02 | ➖ |
 | [🤝 P-09](11-hardware-and-partners.md#p-09) Blockchain aggregator | 20 Oct 2028 | T7.18 | ➖ |
+| [🤝 P-10](11-hardware-and-partners.md#p-10) Simple-ERP API | 25 Sep 2028 | T5.51 | ➖ |
 | [🛫 C-01](10-flight-test-campaigns.md#c-01) Inspection of a test area | 10 May 2027 | T1.28 T1.32 T1.35 T1.36 T1.37 T2.06 T2.16 T5.19 | T1.33 T1.39 |
 | [🛫 C-02](10-flight-test-campaigns.md#c-02) Inspection of a solar farm | 27 Sep 2027 | T2.39 T2.41 T2.49 T5.19 | T2.50 |
 | [🛫 C-03](10-flight-test-campaigns.md#c-03) Patrol of a warehouse | 14 Feb 2028 | T3.16 T5.19 | T3.32 |
@@ -224,5 +228,5 @@ How the harness runs several tickets at once, under the rules [🎫 TKT-15](../.
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../README.md) · [◀️ Traceability](13-traceability.md) · 📄 **Page 109 / 109**
+> [🏠 Index](../README.md) · [◀️ Traceability](13-traceability.md) · 📄 **Page 120 / 120**
 <!-- /spec:nav-bottom -->

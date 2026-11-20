@@ -1,7 +1,7 @@
 # 🎨 Visual identity
 
 <!-- spec:nav-top -->
-> [🏠 Index](README.md) · [◀️ Glossary](glossary.md) · 📄 **Page 3 / 109** · [Functional specifications ▶️](functional/README.md)
+> [🏠 Index](README.md) · [◀️ Glossary](glossary.md) · 📄 **Page 3 / 120** · [Functional specifications ▶️](functional/README.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -232,5 +232,5 @@ flowchart LR
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](README.md) · [◀️ Glossary](glossary.md) · 📄 **Page 3 / 109** · [Functional specifications ▶️](functional/README.md)
+> [🏠 Index](README.md) · [◀️ Glossary](glossary.md) · 📄 **Page 3 / 120** · [Functional specifications ▶️](functional/README.md)
 <!-- /spec:nav-bottom -->

@@ -1,7 +1,7 @@
 # 🎬 UC-001: Design a Mission
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ FS-022: Debrief and assessment](../features/FS-022-debrief-and-assessment.md) · 📄 **Page 27 / 109** · [UC-002: Simulate a Mission ▶️](UC-002-simulate-a-mission.md)
+> [🏠 Index](../../README.md) · [◀️ FS-024: ERP and Squad shortfall](../features/FS-024-erp-and-squad-shortfall.md) · 📄 **Page 29 / 120** · [UC-002: Simulate a Mission ▶️](UC-002-simulate-a-mission.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -152,5 +152,5 @@ One row per state of the flow chart: every action, success and failure node. Cli
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ FS-022: Debrief and assessment](../features/FS-022-debrief-and-assessment.md) · 📄 **Page 27 / 109** · [UC-002: Simulate a Mission ▶️](UC-002-simulate-a-mission.md)
+> [🏠 Index](../../README.md) · [◀️ FS-024: ERP and Squad shortfall](../features/FS-024-erp-and-squad-shortfall.md) · 📄 **Page 29 / 120** · [UC-002: Simulate a Mission ▶️](UC-002-simulate-a-mission.md)
 <!-- /spec:nav-bottom -->

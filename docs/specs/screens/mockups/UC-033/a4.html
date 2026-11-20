@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <title>UC-033 A4: Send the Manufacturing order to the ERP</title>
+  <link rel="stylesheet" href="../visual-identity.css">
+  <link rel="stylesheet" href="../components.css">
+</head>
+<body>
+<div class="window">
+  <header class="titlebar"><span class="app">⚙️ Swarm</span><span class="screen-title">Mission studio · M-2026-0412 Inspection of Les Vignes</span><span class="badge action">🔄 Mission: Draft</span><span class="spacer"></span><span class="badge persona">👤 Léa Martin</span></header>
+  <div class="layout">
+    <nav class="sidebar">
+      <span class="nav-item">🗺️ Missions</span>
+      <span class="nav-item">🖊️ Design</span>
+      <span class="nav-item">🕹️ Simulate</span>
+      <span class="nav-item active">💬 Assistant</span>
+    </nav>
+    <main class="content">
+      <div class="grid-2">
+        <section class="card stack">
+          <div class="conversation">
+          <div class="message person"><strong>👤 Léa Martin</strong><p>Take the Manufacturing order for one X500.</p></div>
+          <div class="message agent"><strong>⚙️ Assistant</strong><p>Here is the Manufacturing order. Your Assistant permission "Place a Manufacturing order" is at Propose, so I do not send it myself. Accept it and Swarm sends it to the ERP.</p></div>
+          </div>
+        </section>
+        <aside class="card stack">
+          <div class="row"><h2>🗃️ Manufacturing order proposal</h2><span class="spacer"></span><span class="badge system">⚙️ Assistant</span></div>
+          <table class="table">
+            <tr><td class="muted">Drone model</td><td>X500</td></tr>
+            <tr><td class="muted">Quantity</td><td class="mono">1</td></tr>
+            <tr><td class="muted">Needed by</td><td>2 December 2026</td></tr>
+            <tr><td class="muted">Ready on</td><td>27 November 2026, according to the ERP</td></tr>
+            <tr><td class="muted">Parts</td><td>Every part in stock, no Purchase order</td></tr>
+            <tr><td class="muted">ERP</td><td>Simple-ERP</td></tr>
+            <tr><td class="muted">For</td><td>Squad of M-2026-0412, third Drone</td></tr>
+            <tr><td class="muted">Assistant permission</td><td>Place a Manufacturing order <span class="badge decision">Propose</span></td></tr>
+          </table>
+          <div class="banner system">⚙️ Nothing reaches the ERP until you accept (📏 BR-021).</div>
+          <div class="row"><span class="button primary">✅ Accept</span><span class="button secondary">Reject</span></div>
+        </aside>
+      </div>
+    </main>
+  </div>
+  <footer class="statusbar"><span>⚠️ Squad shortfall: 1 Drone</span><span>⚙️ ERP: Simple-ERP, connected</span><span>Awaiting your decision</span></footer>
+</div>
+</body>
+</html>

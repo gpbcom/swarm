@@ -1,7 +1,7 @@
 # 📏 BR-004: Pilot ratio
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ BR-003: Weather limits](BR-003-weather-limits.md) · 📄 **Page 60 / 109** · [BR-005: Autonomy level per Activity ▶️](BR-005-autonomy-level-per-activity.md)
+> [🏠 Index](../../README.md) · [◀️ BR-003: Weather limits](BR-003-weather-limits.md) · 📄 **Page 66 / 120** · [BR-005: Autonomy level per Activity ▶️](BR-005-autonomy-level-per-activity.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Type:** Constraint · **Updated:** 2026-11-18
@@ -49,5 +49,5 @@ In the EU and in the US, one Pilot for several Drones is allowed only within the
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ BR-003: Weather limits](BR-003-weather-limits.md) · 📄 **Page 60 / 109** · [BR-005: Autonomy level per Activity ▶️](BR-005-autonomy-level-per-activity.md)
+> [🏠 Index](../../README.md) · [◀️ BR-003: Weather limits](BR-003-weather-limits.md) · 📄 **Page 66 / 120** · [BR-005: Autonomy level per Activity ▶️](BR-005-autonomy-level-per-activity.md)
 <!-- /spec:nav-bottom -->

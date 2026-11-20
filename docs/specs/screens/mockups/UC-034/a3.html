@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <title>UC-034 A3: Announce the Hold with its countdown</title>
+  <link rel="stylesheet" href="../visual-identity.css">
+  <link rel="stylesheet" href="../components.css">
+</head>
+<body>
+<div class="window">
+  <header class="titlebar"><span class="app">⚙️ Swarm</span><span class="screen-title">Ground control · M-2026-0412 Inspection of Les Vignes</span><span class="badge success">🔄 Mission: Flying</span><span class="spacer"></span><span class="button secondary">✋ Hold the Squad</span><span class="button danger">🛑 Abort</span></header>
+  <div class="layout">
+    <nav class="sidebar">
+      <span class="nav-item active">🛰️ Flight</span>
+      <span class="nav-item">📋 Pre-flight</span>
+      <span class="nav-item">🛸 Squad</span>
+      <span class="nav-item">🎥 Video</span>
+      <span class="nav-item">📼 Debrief</span>
+      <span class="nav-item">🔧 Settings</span>
+    </nav>
+    <main class="content">
+      <div class="banner system">⚙️ Assistant: Hold of the Squad in 10 s 🔊</div>
+      <div class="split">
+        <div class="map">
+          <div class="zone geofence c1 r1 w12 h8"></div>
+          <div class="zone done c2 r2 w5 h3"></div>
+          <div class="zone c7 r2 w5 h3"></div>
+          <div class="zone risk c2 r5 w10 h3"></div>
+          <span class="marker entity c4 r3">🛸 Alpha</span>
+          <span class="marker entity c9 r3">🛸 Bravo</span>
+          <span class="marker entity c4 r6">🛸 Charlie</span>
+          <span class="marker decision c9 r6 w3">⚠️ Gusts 14 m/s</span>
+          <span class="marker persona c1 r8">👤 Pilot</span>
+        </div>
+        <aside class="panel">
+        <section class="card">
+          <h2>⚠️ Alerts and ⚙️ Assistant</h2>
+          <div class="conversation">
+            <div class="message agent">Gusts of 14 m/s, beyond the 12 m/s limit of the Inspection. "Hold" is at Act for Pilots, and you are on duty and accountable (📏 BR-029).</div>
+          </div>
+          <div class="row"><span>⏳ Countdown</span><span class="spacer"></span><span class="mono">10 s left</span></div>
+          <div class="progress decision"><span class="p100"></span></div>
+          <span class="button primary">Cancel the Hold</span>
+          <span class="hint">🔊 Spoken in English. You can act yourself at any time (📏 BR-012).</span>
+          <div class="row"><span class="button secondary">✋ Hold the Squad</span><span class="button secondary">🎮 Manual control</span><span class="button danger">🛑 Abort</span></div>
+        </section>
+        </aside>
+      </div>
+      <div class="grid-2">
+        <section class="card">
+          <h2>🛸 Squad</h2>
+          <div class="list">
+            <div class="list-item"><div class="row spacer">🛸 Alpha<span class="spacer"></span><span class="badge success">🔄 Drone: Airborne</span><span class="hint">RGB · 62&nbsp;% · Link Good · 40 m</span></div></div>
+            <div class="list-item"><div class="row spacer">🛸 Bravo<span class="spacer"></span><span class="badge success">🔄 Drone: Airborne</span><span class="hint">RGB · 60&nbsp;% · Link Good · 40 m</span></div></div>
+            <div class="list-item"><div class="row spacer">🛸 Charlie<span class="spacer"></span><span class="badge success">🔄 Drone: Airborne</span><span class="hint">Thermal · 56&nbsp;% · Link Good · 40 m</span></div></div>
+          </div>
+        </section>
+        <section class="card">
+          <h2>⚠️ Alerts</h2>
+          <div class="list">
+            <div class="list-item"><span class="badge decision">⚠️</span>Weather service: gusts of 14 m/s at Les Vignes, beyond the limit of 12 m/s of the Inspection</div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <footer class="statusbar"><span>📡 Links: 3 radio, quality Good</span><span>EU (EASA)</span><span>👤 Sam Carter</span><span class="badge persona">🔄 Pilot: Supervising</span><span class="spacer"></span><span class="mono">2026-12-03 10:41</span></footer>
+</div>
+</body>
+</html>

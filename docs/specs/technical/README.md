@@ -1,7 +1,7 @@
 # 🛠️ Technical specifications
 
 <!-- spec:nav-top -->
-> [🏠 Index](../README.md) · [◀️ BR-027: The Pilot's attention is preserved](../functional/business-rules/BR-027-the-pilot-s-attention-is-preserved.md) · 📄 **Page 84 / 109** · [Architecture ▶️](01-architecture.md)
+> [🏠 Index](../README.md) · [◀️ BR-032: The Assistant reaches only what its person may reach](../functional/business-rules/BR-032-the-assistant-reaches-only-what-its-person-may-reach.md) · 📄 **Page 95 / 120** · [Architecture ▶️](01-architecture.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -68,5 +68,5 @@ The 44 technical decisions (T1 to T44) and their reasons are in the [technical i
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../README.md) · [◀️ BR-027: The Pilot's attention is preserved](../functional/business-rules/BR-027-the-pilot-s-attention-is-preserved.md) · 📄 **Page 84 / 109** · [Architecture ▶️](01-architecture.md)
+> [🏠 Index](../README.md) · [◀️ BR-032: The Assistant reaches only what its person may reach](../functional/business-rules/BR-032-the-assistant-reaches-only-what-its-person-may-reach.md) · 📄 **Page 95 / 120** · [Architecture ▶️](01-architecture.md)
 <!-- /spec:nav-bottom -->

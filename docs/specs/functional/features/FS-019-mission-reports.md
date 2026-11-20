@@ -1,7 +1,7 @@
 # 📘 FS-019: Mission reports
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ FS-018: Live Co-pilot](FS-018-live-co-pilot.md) · 📄 **Page 23 / 109** · [FS-020: Ground control Workspace and configuration ▶️](FS-020-ground-control-workspace-and-configuration.md)
+> [🏠 Index](../../README.md) · [◀️ FS-018: Live Co-pilot](FS-018-live-co-pilot.md) · 📄 **Page 23 / 120** · [FS-020: Ground control Workspace and configuration ▶️](FS-020-ground-control-workspace-and-configuration.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -84,5 +84,5 @@ Settled with the product owner ([interview](../../../research/interview.md)).
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ FS-018: Live Co-pilot](FS-018-live-co-pilot.md) · 📄 **Page 23 / 109** · [FS-020: Ground control Workspace and configuration ▶️](FS-020-ground-control-workspace-and-configuration.md)
+> [🏠 Index](../../README.md) · [◀️ FS-018: Live Co-pilot](FS-018-live-co-pilot.md) · 📄 **Page 23 / 120** · [FS-020: Ground control Workspace and configuration ▶️](FS-020-ground-control-workspace-and-configuration.md)
 <!-- /spec:nav-bottom -->

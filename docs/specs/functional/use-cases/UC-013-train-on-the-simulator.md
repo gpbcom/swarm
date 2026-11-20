@@ -1,7 +1,7 @@
 # 🎬 UC-013: Train on the Simulator
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ UC-012: Verify the Evidence record of a flight](UC-012-verify-the-evidence-record-of-a-flight.md) · 📄 **Page 39 / 109** · [UC-014: Connect a new Drone model ▶️](UC-014-connect-a-new-drone-model.md)
+> [🏠 Index](../../README.md) · [◀️ UC-012: Verify the Evidence record of a flight](UC-012-verify-the-evidence-record-of-a-flight.md) · 📄 **Page 41 / 120** · [UC-014: Connect a new Drone model ▶️](UC-014-connect-a-new-drone-model.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -143,5 +143,5 @@ One row per state of the flow chart: every action, success and failure node. Cli
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ UC-012: Verify the Evidence record of a flight](UC-012-verify-the-evidence-record-of-a-flight.md) · 📄 **Page 39 / 109** · [UC-014: Connect a new Drone model ▶️](UC-014-connect-a-new-drone-model.md)
+> [🏠 Index](../../README.md) · [◀️ UC-012: Verify the Evidence record of a flight](UC-012-verify-the-evidence-record-of-a-flight.md) · 📄 **Page 41 / 120** · [UC-014: Connect a new Drone model ▶️](UC-014-connect-a-new-drone-model.md)
 <!-- /spec:nav-bottom -->

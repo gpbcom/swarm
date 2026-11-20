@@ -1,7 +1,7 @@
 # 🎬 UC-012: Verify the Evidence record of a flight
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ UC-011: Follow a Mission and download its Deliverables](UC-011-follow-a-mission-and-download-its-deliverables.md) · 📄 **Page 38 / 109** · [UC-013: Train on the Simulator ▶️](UC-013-train-on-the-simulator.md)
+> [🏠 Index](../../README.md) · [◀️ UC-011: Follow a Mission and download its Deliverables](UC-011-follow-a-mission-and-download-its-deliverables.md) · 📄 **Page 40 / 120** · [UC-013: Train on the Simulator ▶️](UC-013-train-on-the-simulator.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -131,5 +131,5 @@ One row per state of the flow chart: every action, success and failure node. Cli
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ UC-011: Follow a Mission and download its Deliverables](UC-011-follow-a-mission-and-download-its-deliverables.md) · 📄 **Page 38 / 109** · [UC-013: Train on the Simulator ▶️](UC-013-train-on-the-simulator.md)
+> [🏠 Index](../../README.md) · [◀️ UC-011: Follow a Mission and download its Deliverables](UC-011-follow-a-mission-and-download-its-deliverables.md) · 📄 **Page 40 / 120** · [UC-013: Train on the Simulator ▶️](UC-013-train-on-the-simulator.md)
 <!-- /spec:nav-bottom -->

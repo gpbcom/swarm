@@ -1,7 +1,7 @@
 # 🎬 UC-002: Simulate a Mission
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ UC-001: Design a Mission](UC-001-design-a-mission.md) · 📄 **Page 28 / 109** · [UC-003: Run the Pre-flight check and launch ▶️](UC-003-run-the-pre-flight-check-and-launch.md)
+> [🏠 Index](../../README.md) · [◀️ UC-001: Design a Mission](UC-001-design-a-mission.md) · 📄 **Page 30 / 120** · [UC-003: Run the Pre-flight check and launch ▶️](UC-003-run-the-pre-flight-check-and-launch.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -137,5 +137,5 @@ One row per state of the flow chart: every action, success and failure node. Cli
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ UC-001: Design a Mission](UC-001-design-a-mission.md) · 📄 **Page 28 / 109** · [UC-003: Run the Pre-flight check and launch ▶️](UC-003-run-the-pre-flight-check-and-launch.md)
+> [🏠 Index](../../README.md) · [◀️ UC-001: Design a Mission](UC-001-design-a-mission.md) · 📄 **Page 30 / 120** · [UC-003: Run the Pre-flight check and launch ▶️](UC-003-run-the-pre-flight-check-and-launch.md)
 <!-- /spec:nav-bottom -->

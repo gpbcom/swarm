@@ -1,7 +1,7 @@
 # 🗄️ Storage
 
 <!-- spec:nav-top -->
-> [🏠 Index](../README.md) · [◀️ Data models](02-data-models.md) · 📄 **Page 87 / 109** · [Engine and services ▶️](04-engine.md)
+> [🏠 Index](../README.md) · [◀️ Data models](02-data-models.md) · 📄 **Page 98 / 120** · [Engine and services ▶️](04-engine.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -127,5 +127,5 @@ op-<operator_id>/                      one bucket per Operator, encrypted, versi
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../README.md) · [◀️ Data models](02-data-models.md) · 📄 **Page 87 / 109** · [Engine and services ▶️](04-engine.md)
+> [🏠 Index](../README.md) · [◀️ Data models](02-data-models.md) · 📄 **Page 98 / 120** · [Engine and services ▶️](04-engine.md)
 <!-- /spec:nav-bottom -->

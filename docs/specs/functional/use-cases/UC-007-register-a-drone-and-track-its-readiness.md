@@ -1,7 +1,7 @@
 # 🎬 UC-007: Register a Drone and track its readiness
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ UC-006: Take manual control or abort](UC-006-take-manual-control-or-abort.md) · 📄 **Page 33 / 109** · [UC-008: Record an Authorisation ▶️](UC-008-record-an-authorisation.md)
+> [🏠 Index](../../README.md) · [◀️ UC-006: Take manual control or abort](UC-006-take-manual-control-or-abort.md) · 📄 **Page 35 / 120** · [UC-008: Record an Authorisation ▶️](UC-008-record-an-authorisation.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -146,5 +146,5 @@ One row per state of the flow chart: every action, success and failure node. Cli
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ UC-006: Take manual control or abort](UC-006-take-manual-control-or-abort.md) · 📄 **Page 33 / 109** · [UC-008: Record an Authorisation ▶️](UC-008-record-an-authorisation.md)
+> [🏠 Index](../../README.md) · [◀️ UC-006: Take manual control or abort](UC-006-take-manual-control-or-abort.md) · 📄 **Page 35 / 120** · [UC-008: Record an Authorisation ▶️](UC-008-record-an-authorisation.md)
 <!-- /spec:nav-bottom -->

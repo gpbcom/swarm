@@ -1,7 +1,7 @@
 # 🎬 UC-028: Assess a Mission against the request
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ UC-027: Debrief a Mission](UC-027-debrief-a-mission.md) · 📄 **Page 54 / 109** · [UC-029: Create an Operator ▶️](UC-029-create-an-operator.md)
+> [🏠 Index](../../README.md) · [◀️ UC-027: Debrief a Mission](UC-027-debrief-a-mission.md) · 📄 **Page 56 / 120** · [UC-029: Create an Operator ▶️](UC-029-create-an-operator.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -142,5 +142,5 @@ One row per state of the flow chart: every action, success and failure node. Cli
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ UC-027: Debrief a Mission](UC-027-debrief-a-mission.md) · 📄 **Page 54 / 109** · [UC-029: Create an Operator ▶️](UC-029-create-an-operator.md)
+> [🏠 Index](../../README.md) · [◀️ UC-027: Debrief a Mission](UC-027-debrief-a-mission.md) · 📄 **Page 56 / 120** · [UC-029: Create an Operator ▶️](UC-029-create-an-operator.md)
 <!-- /spec:nav-bottom -->

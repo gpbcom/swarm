@@ -1,7 +1,7 @@
 # 🎬 UC-029: Create an Operator
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ UC-028: Assess a Mission against the request](UC-028-assess-a-mission-against-the-request.md) · 📄 **Page 55 / 109** · [UC-030: Focus on a Drone ▶️](UC-030-focus-on-a-drone.md)
+> [🏠 Index](../../README.md) · [◀️ UC-028: Assess a Mission against the request](UC-028-assess-a-mission-against-the-request.md) · 📄 **Page 57 / 120** · [UC-030: Focus on a Drone ▶️](UC-030-focus-on-a-drone.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -126,5 +126,5 @@ One row per state of the flow chart: every action, success and failure node. Cli
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ UC-028: Assess a Mission against the request](UC-028-assess-a-mission-against-the-request.md) · 📄 **Page 55 / 109** · [UC-030: Focus on a Drone ▶️](UC-030-focus-on-a-drone.md)
+> [🏠 Index](../../README.md) · [◀️ UC-028: Assess a Mission against the request](UC-028-assess-a-mission-against-the-request.md) · 📄 **Page 57 / 120** · [UC-030: Focus on a Drone ▶️](UC-030-focus-on-a-drone.md)
 <!-- /spec:nav-bottom -->

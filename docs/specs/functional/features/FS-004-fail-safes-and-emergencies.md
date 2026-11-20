@@ -1,7 +1,7 @@
 # 📘 FS-004: Fail-safes and emergencies
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ FS-003: Live supervision](FS-003-live-supervision.md) · 📄 **Page 8 / 109** · [FS-005: Fleet and readiness ▶️](FS-005-fleet-and-readiness.md)
+> [🏠 Index](../../README.md) · [◀️ FS-003: Live supervision](FS-003-live-supervision.md) · 📄 **Page 8 / 120** · [FS-005: Fleet and readiness ▶️](FS-005-fleet-and-readiness.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -93,5 +93,5 @@ Settled with the product owner ([interview](../../../research/interview.md)).
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ FS-003: Live supervision](FS-003-live-supervision.md) · 📄 **Page 8 / 109** · [FS-005: Fleet and readiness ▶️](FS-005-fleet-and-readiness.md)
+> [🏠 Index](../../README.md) · [◀️ FS-003: Live supervision](FS-003-live-supervision.md) · 📄 **Page 8 / 120** · [FS-005: Fleet and readiness ▶️](FS-005-fleet-and-readiness.md)
 <!-- /spec:nav-bottom -->

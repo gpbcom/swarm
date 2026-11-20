@@ -1,7 +1,7 @@
 # 📘 FS-015: Patrol
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ FS-014: Agriculture](FS-014-agriculture.md) · 📄 **Page 19 / 109** · [FS-016: Inspection ▶️](FS-016-inspection.md)
+> [🏠 Index](../../README.md) · [◀️ FS-014: Agriculture](FS-014-agriculture.md) · 📄 **Page 19 / 120** · [FS-016: Inspection ▶️](FS-016-inspection.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -90,5 +90,5 @@ Settled with the product owner ([interview](../../../research/interview.md)).
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ FS-014: Agriculture](FS-014-agriculture.md) · 📄 **Page 19 / 109** · [FS-016: Inspection ▶️](FS-016-inspection.md)
+> [🏠 Index](../../README.md) · [◀️ FS-014: Agriculture](FS-014-agriculture.md) · 📄 **Page 19 / 120** · [FS-016: Inspection ▶️](FS-016-inspection.md)
 <!-- /spec:nav-bottom -->

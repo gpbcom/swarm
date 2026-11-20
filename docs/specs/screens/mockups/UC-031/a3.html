@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <title>UC-031 A3: Propose the action</title>
+  <link rel="stylesheet" href="../visual-identity.css">
+  <link rel="stylesheet" href="../components.css">
+</head>
+<body>
+<div class="window">
+  <header class="titlebar"><span class="app">⚙️ Swarm</span><span class="screen-title">Back office · Aerowing Services</span><span class="spacer"></span><span class="badge persona">👤 Fleet maintainer</span></header>
+  <div class="layout">
+    <nav class="sidebar">
+      <span class="nav-item active">🛸 Fleet</span>
+      <span class="nav-item">📜 Authorisations</span>
+      <span class="nav-item">📦 Deliverables</span>
+      <span class="nav-item">🔏 Evidence</span>
+      <span class="nav-item">👥 People</span>
+      <span class="nav-item">🔧 Settings</span>
+    </nav>
+    <main class="content">
+      <div class="tabs"><span class="tab active">🛸 Drones</span><span class="tab">Drone models</span><span class="tab">Payloads</span><span class="tab">Batteries</span></div>
+      <div class="split">
+        <section class="card stack">
+          <table class="table">
+            <tr><th>Drone</th><th>Drone model</th><th>Payload</th><th>Maintenance</th><th>State</th></tr>
+            <tr><td>🛸 Alpha</td><td>X500</td><td>Thermal camera</td><td>Not due</td><td><span class="badge success">🔄 Drone: Ready</span></td></tr>
+            <tr><td>🛸 Bravo</td><td>X500</td><td>Thermal camera</td><td>Not due</td><td><span class="badge success">🔄 Drone: Ready</span></td></tr>
+            <tr><td>🛸 <strong>Charlie</strong></td><td>X500</td><td>➖</td><td><span class="badge decision">⚠️ 48 of 50 h · due 2 December</span></td><td><span class="badge success">🔄 Drone: Ready</span></td></tr>
+            <tr><td>🛸 Echo</td><td>X500</td><td>➖</td><td>Not due</td><td><span class="badge success">🔄 Drone: Ready</span></td></tr>
+          </table>
+          <span class="hint">Flight hours and maintenance intervals are sample values.</span>
+        </section>
+        <aside class="card panel">
+          <div class="row"><h2>💬 Assistant</h2><span class="spacer"></span><span class="badge system">⚙️ Assistant</span></div>
+          <div class="conversation">
+          <div class="message person"><strong>👤 Fleet maintainer</strong><p>Schedule Charlie's maintenance on 1 December.</p></div>
+          <div class="message agent"><strong>⚙️ Assistant</strong><p>Here is what I will do. Nothing takes effect until you accept it (📏 BR-021).</p></div>
+          </div>
+          <section class="card stack">
+            <h2>Proposal</h2>
+            <div class="list">
+              <div class="list-item">Maintenance of Charlie<span class="spacer"></span><span>1 December</span></div>
+              <div class="list-item">Charlie<span class="spacer"></span><span>Ready until 1 December</span></div>
+              <div class="list-item">Schedule a maintenance<span class="spacer"></span><span class="badge entity">🗃️ Assistant permission: Propose</span></div>
+            </div>
+            <div class="row"><span class="button primary">✅ Accept</span><span class="button secondary">Edit</span><span class="button secondary">Reject</span></div>
+          </section>
+        </aside>
+      </div>
+    </main>
+  </div>
+  <footer class="statusbar"><span>🗃️ Aerowing Services</span><span>Cloud</span><span>Nothing changed until you accept</span></footer>
+</div>
+</body>
+</html>

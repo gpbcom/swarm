@@ -1,7 +1,7 @@
 # 📘 FS-009: Evidence ledger and Anchoring
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ FS-008: Client portal](FS-008-client-portal.md) · 📄 **Page 13 / 109** · [FS-010: Simulator and training ▶️](FS-010-simulator-and-training.md)
+> [🏠 Index](../../README.md) · [◀️ FS-008: Client portal](FS-008-client-portal.md) · 📄 **Page 13 / 120** · [FS-010: Simulator and training ▶️](FS-010-simulator-and-training.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -84,5 +84,5 @@ Settled with the product owner ([interview](../../../research/interview.md)).
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ FS-008: Client portal](FS-008-client-portal.md) · 📄 **Page 13 / 109** · [FS-010: Simulator and training ▶️](FS-010-simulator-and-training.md)
+> [🏠 Index](../../README.md) · [◀️ FS-008: Client portal](FS-008-client-portal.md) · 📄 **Page 13 / 120** · [FS-010: Simulator and training ▶️](FS-010-simulator-and-training.md)
 <!-- /spec:nav-bottom -->

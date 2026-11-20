@@ -1,7 +1,7 @@
 # 📏 BR-017: Every screen in four languages
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ BR-016: Clients see only their own Missions](BR-016-clients-see-only-their-own-missions.md) · 📄 **Page 73 / 109** · [BR-018: Dose follows the Prescription map ▶️](BR-018-dose-follows-the-prescription-map.md)
+> [🏠 Index](../../README.md) · [◀️ BR-016: Clients see only their own Missions](BR-016-clients-see-only-their-own-missions.md) · 📄 **Page 79 / 120** · [BR-018: Dose follows the Prescription map ▶️](BR-018-dose-follows-the-prescription-map.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Type:** Constraint · **Updated:** 2026-11-18
@@ -50,5 +50,5 @@ Operators and Clients work across Europe and the US. A Pilot must read Alerts in
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ BR-016: Clients see only their own Missions](BR-016-clients-see-only-their-own-missions.md) · 📄 **Page 73 / 109** · [BR-018: Dose follows the Prescription map ▶️](BR-018-dose-follows-the-prescription-map.md)
+> [🏠 Index](../../README.md) · [◀️ BR-016: Clients see only their own Missions](BR-016-clients-see-only-their-own-missions.md) · 📄 **Page 79 / 120** · [BR-018: Dose follows the Prescription map ▶️](BR-018-dose-follows-the-prescription-map.md)
 <!-- /spec:nav-bottom -->

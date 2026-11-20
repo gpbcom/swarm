@@ -1,7 +1,7 @@
 # 📏 BR-013: Re-plan approval
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ BR-012: Pilot override always available](BR-012-pilot-override-always-available.md) · 📄 **Page 69 / 109** · [BR-014: Simulation isolation ▶️](BR-014-simulation-isolation.md)
+> [🏠 Index](../../README.md) · [◀️ BR-012: Pilot override always available](BR-012-pilot-override-always-available.md) · 📄 **Page 75 / 120** · [BR-014: Simulation isolation ▶️](BR-014-simulation-isolation.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Type:** Authorisation · **Updated:** 2026-11-18
@@ -54,5 +54,5 @@ The Pilot must keep a correct picture of what the Squad does, without being aske
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ BR-012: Pilot override always available](BR-012-pilot-override-always-available.md) · 📄 **Page 69 / 109** · [BR-014: Simulation isolation ▶️](BR-014-simulation-isolation.md)
+> [🏠 Index](../../README.md) · [◀️ BR-012: Pilot override always available](BR-012-pilot-override-always-available.md) · 📄 **Page 75 / 120** · [BR-014: Simulation isolation ▶️](BR-014-simulation-isolation.md)
 <!-- /spec:nav-bottom -->

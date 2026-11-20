@@ -1,7 +1,7 @@
 # 🎬 UC-020: Review the Defects of an Inspection
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ UC-019: Request a Patrol on demand](UC-019-request-a-patrol-on-demand.md) · 📄 **Page 46 / 109** · [UC-021: Plan a Mission with the Mission assistant ▶️](UC-021-plan-a-mission-with-the-mission-assistant.md)
+> [🏠 Index](../../README.md) · [◀️ UC-019: Request a Patrol on demand](UC-019-request-a-patrol-on-demand.md) · 📄 **Page 48 / 120** · [UC-021: Plan a Mission with the Mission assistant ▶️](UC-021-plan-a-mission-with-the-mission-assistant.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -137,5 +137,5 @@ One row per state of the flow chart: every action, success and failure node. Cli
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ UC-019: Request a Patrol on demand](UC-019-request-a-patrol-on-demand.md) · 📄 **Page 46 / 109** · [UC-021: Plan a Mission with the Mission assistant ▶️](UC-021-plan-a-mission-with-the-mission-assistant.md)
+> [🏠 Index](../../README.md) · [◀️ UC-019: Request a Patrol on demand](UC-019-request-a-patrol-on-demand.md) · 📄 **Page 48 / 120** · [UC-021: Plan a Mission with the Mission assistant ▶️](UC-021-plan-a-mission-with-the-mission-assistant.md)
 <!-- /spec:nav-bottom -->
