@@ -8,8 +8,9 @@ mod error;
 use std::fs;
 use std::path::{Path, PathBuf};
 
+use schemars::schema::{InstanceType, SchemaObject};
 use serde_json::Value;
-use typify::{TypeSpace, TypeSpaceSettings};
+use typify::{TypeSpace, TypeSpaceImpl, TypeSpaceSettings};
 
 pub use error::CodegenError;
 
@@ -38,6 +39,29 @@ fn rewrite_references(value: &mut Value) {
     }
 }
 
+/// The Rust type of a JSON Schema `date-time`.
+///
+/// typify maps it to `chrono` by default; chrono is unmaintained (RUSTSEC-2026-0543), and jiff is the replacement the
+/// advisory recommends. Titles and descriptions are ignored when typify matches a conversion, so this one rule covers
+/// every timestamp of the bundle.
+const TIMESTAMP: &str = "::jiff::Timestamp";
+
+/// Builds the typify settings: the defaults, with every `date-time` string rendered as a [`TIMESTAMP`].
+fn settings() -> TypeSpaceSettings {
+    let date_time = SchemaObject {
+        instance_type: Some(InstanceType::String.into()),
+        format: Some("date-time".to_owned()),
+        ..SchemaObject::default()
+    };
+    let mut settings = TypeSpaceSettings::default();
+    settings.with_conversion(
+        date_time,
+        TIMESTAMP,
+        [TypeSpaceImpl::Display, TypeSpaceImpl::FromStr].into_iter(),
+    );
+    settings
+}
+
 /// Renders the Rust source of every `$defs` entry of a schema bundle.
 ///
 /// The text starts with [`HEADER`] and a newline, and is the same for the same bundle.
@@ -57,7 +81,7 @@ pub fn render(schema: &str) -> Result<String, CodegenError> {
     rewrite_references(&mut bundle);
     let root: schemars::schema::RootSchema = serde_json::from_value(bundle).map_err(CodegenError::Schema)?;
 
-    let mut type_space = TypeSpace::new(&TypeSpaceSettings::default());
+    let mut type_space = TypeSpace::new(&settings());
     type_space
         .add_ref_types(root.definitions)
         .map_err(|error| CodegenError::Generation(error.to_string()))?;
