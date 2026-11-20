@@ -46,6 +46,12 @@ this page keeps what happened, so that each problem is closed once and never met
 | [L-21](#l-21) | 2026-11-20 | `tickets.py watch` counts more tasks done than the plan has | 🔴 Open |
 | [L-22](#l-22) | 2026-11-20 | A ticket's checks fail on the half-built work of the other tickets in the shared checkout | 🟢 Closed |
 | [L-23](#l-23) | 2026-11-20 | The git guard judges the session's branch, not the folder a command runs in | 🔴 Open |
+| [L-24](#l-24) | 2026-11-20 | The 2-minute report is too thin and not ergonomic: no progress bars, no phase, no space, no links to the files | 🔴 Open |
+| [L-25](#l-25) | 2026-11-20 | A fix round on a test file traded one lint error for another, and the retry was spent | 🔴 Open |
+| [L-26](#l-26) | 2026-11-20 | A task's "done when" needs a file a later wave writes, so it can never be done in its wave | 🔴 Open |
+| [L-27](#l-27) | 2026-11-20 | A worker changed another ticket's files, and its hand-off made them this ticket's own | 🔴 Open |
+| [L-28](#l-28) | 2026-11-20 | A wrong import of the project's own code was taken for a missing tool, so no fixer was sent | 🟢 Closed |
+| [L-27](#l-27) | 2026-11-20 | The updates of a ticket run name the files and lines they change without linking to them | 🔴 Open |
 
 ## <a id="lessons"></a>📋 Lessons
 
@@ -316,6 +322,167 @@ this page keeps what happened, so that each problem is closed once and never met
 - **Fix:** to do. The guard resolves the folder the git command acts on (`cd`, `-C`) and judges that folder's branch,
   with a test for each case.
 - **Rule:** [TKT-5](../../.claude/rules/tickets.md#tkt-5), [TKT-15](../../.claude/rules/tickets.md#tkt-15).
+
+### <a id="l-24"></a>L-24: The 2-minute report is too thin and not ergonomic: no progress bars, no phase, no space
+
+- **Seen:** `/issue-run P0`, every report of `tickets.py watch P0`.
+- **What happened:** each report repeats the board state of all 11 tickets, one long line each, with their areas and
+  their prerequisites. It does not show what a running ticket is doing (which wave, checks, review, documents) or how far
+  it is, and a report where nothing changed looks the same as one where a ticket moved. The person asked for a
+  colourised, synthetic update.
+- **Cause:** `report()` in [`tickets.py`](../../.claude/scripts/tickets.py) prints the board (states, areas,
+  prerequisites), not the runs. The run's phase is in the events of each ticket's `PROGRESS.md` and in the run's
+  journal, which the watch does not read. The count of tasks is also wrong ([L-21](#l-21)).
+- **Fix:** to do. **The update MUST be colourised with icons, and MUST tell more about what each ticket is doing
+  than a line of state**: a block per running ticket with progress bars, its phase, who works on what, what just
+  ended and what comes next, then one line for the waiting tickets. A first one-line-per-ticket version was judged
+  too thin by the person.
+
+  **It MUST also be ergonomic: modern, with more space.** The second version (one dense block of lines per ticket)
+  was judged hard to read. Each ticket is a card with a rail on its left, blank lines between its parts, labels and
+  bars aligned in columns, the phases as a stepper, and the report is relayed in a monospace block so the columns
+  hold:
+
+  ```text
+  🎫 P0  ·  🕒 15:06  ·  🔄 3 running  ·  🔍 1 to review  ·  🏁 0/11 merged
+
+  ╭─ 🔄 T0.12  Service skeletons with row-level security                ⏱️ 10m  🪙 304k
+  │
+  │   ✅ Gate ── 🔄 Waves ── ⬜ Verify ── ⬜ Review ── ⬜ Finish
+  │
+  │   Tasks   ▰▰▰▰▰▰▱▱▱▱   20 / 31
+  │   Waves   ▰▰▰▰▱▱▱▱▱▱    3 / 8     now in wave 4
+  │
+  │   👷  K20   swarm_storage: pool, unit of work, migrator     🔵 sonnet   5m42s
+  │   ✅  K22   swarm_rest idempotency                           6 files
+  │   ⏭️  wave 5   K23 · K25 · K26 · K27
+  ╰─
+
+  ╭─ 🔍 T0.10  Images, scans, signatures and Playwright
+  │   Awaits your code review: docs/tickets/T0.10/EXPLAIN.md, then Push: 🟢 Approved in PLAN.md
+  ╰─
+
+  ⛓️  Waiting   T0.11 ← T0.12   ·   T0.15 ← T0.12, T0.14   ·   T0.16 ← T0.11, T0.14, T0.15   ·   4 more
+  ```
+
+  **It MUST also hold clickable links to the files and lines each task created or changed, for quick access.** A
+  report in a monospace block cannot hold links, so the report is written in Markdown instead: a heading per ticket,
+  the stepper and the bars in inline code, and a table of its tasks whose last column links every file the task
+  changed to its first changed line, relative to the workspace root:
+
+  ```markdown
+  #### 🔄 T0.12 · Service skeletons with row-level security · ⏱️ 16 min · 🪙 655k
+
+  `✅ Gate ── 🔄 Waves ── ⬜ Verify ── ⬜ Review ── ⬜ Finish`
+
+  `Tasks ▰▰▰▰▰▰▰▰▱▱ 26/31`  `Waves ▰▰▰▰▰▰▱▱▱▱ 5/8`  now in wave 6
+
+  | | Task | Agent | Files |
+  | --- | --- | --- | --- |
+  | 👷 | K24 swarm_rest runnables | 🔵 sonnet · 1m10s | |
+  | ✅ | K23 swarm_rest REST conventions | 5 files | [problem_handlers.py](packages/python/swarm-rest/src/swarm_rest/api/rest/problem_handlers.py#L1) · [entity_tag.py](packages/python/swarm-rest/src/swarm_rest/api/rest/entity_tag.py#L1) · +3 |
+
+  ⏭️ wave 7: K28 · K29 · K30
+  ```
+
+  The file names come from the `files_changed` of each task's result in the run's journal, the line from
+  `git diff -U0` (line 1 for a new file). A task that changed more than four files shows four and `+N`.
+
+  - the task bar counts the plan's task ids integrated (never more than the plan has, [L-21](#l-21)), the wave bar
+    the waves whose every task is integrated;
+  - the phases line is the run's own (✅ done ▸ 🔄 running ▸ ⬜ waiting), with 🔧 fixes, ❌ stopped and why, and
+    🔍 awaits your code review where they apply;
+  - **now** names each running agent by its task ID and the start of its title, with its model icon (🟣 opus 🔵
+    sonnet 🟢 haiku) and how long it has run; **just ended** names what finished since the last report, with its
+    result (files changed, checks passed, ❌ failed and why); **next** says what starts when the current step ends;
+  - a ticket that changed since the last report is marked 🆕, and a run with no activity for 20 minutes ⚠️ stalled;
+  - the board's long lines (areas, prerequisites) go to `tickets.py resolve`, which keeps them.
+- **Rule:** [TKT-9](../../.claude/rules/tickets.md#tkt-9) (the reports), to be updated with this format and a test of
+  the report's lines.
+
+### <a id="l-25"></a>L-25: A fix round on a test file traded one lint error for another, and the retry was spent
+
+- **Seen:** `/issue-run P0`, wave 4 of T0.14, at 15:00.
+- **What happened:** K16 (the frames of `packages/ts/ui`) was done: its tests and the type check passed. Lint failed
+  only on `test/frames.test.tsx`, written by K07 in wave 1. The fix round of
+  [TKT-19](../../.claude/rules/tickets.md#tkt-19) sent it to K07, which replaced `as HTMLElement` with a `!` after an
+  optional chain: `non-nullable-type-assertion-style` was gone, `no-non-null-assertion` and
+  `no-non-null-asserted-optional-chain` came in. The retry of K16 met the new errors and the run stopped.
+- **Cause:** the owner fixing a blocking file is not asked to run the linter and the type check on that file before
+  handing it back, so a fix can break another rule of the same file. One retry leaves no room for that.
+- **Fix:** to do. The brief of a blocking-file fix ends with the checks of that file's layer (lint and type check for
+  TypeScript, ruff and mypy for Python), and the fixer hands back only when they pass.
+- **Rule:** [TKT-19](../../.claude/rules/tickets.md#tkt-19), [TKT-13](../../.claude/rules/tickets.md#tkt-13) (the
+  touched layer is checked before a task is handed back).
+
+### <a id="l-26"></a>L-26: A task's "done when" needs a file a later wave writes, so it can never be done in its wave
+
+- **Seen:** `/issue-run P0`, wave 3 of T0.13, at 15:13.
+- **What happened:** K26 (the `MAVLink` state machine of the synthetic Drone) was finished twice: its 17 drone tests
+  and 6 route tests passed, and clippy was clean on its own targets. Its `done_when` asks for
+  `cargo clippy --workspace --all-targets -- -D warnings`, which compiles
+  [`tests/udp.rs`](../../packages/rust/swarm-synthetic-drones/tests/udp.rs). That test reads
+  `env!("CARGO_BIN_EXE_swarm-synthetic-drones")`, and the binary comes from K31, three waves later. K26 reported
+  `blocked`, the retry met the same wall, and the run stopped.
+- **Cause:** `check_plan.py` checks the graph, the waves and the file ownership, not that a task's `done_when` can pass
+  with only the files of its wave and the earlier ones. [TKT-19](../../.claude/rules/tickets.md#tkt-19) already says
+  that a file a later wave writes is missing, not wrong, but the workflow still counts the task as not done.
+- **Fix:** to do. Two parts:
+  - the planner scopes each `done_when` to what exists by its wave (here
+    `cargo clippy -p swarm-synthetic-drones --lib --test drone --test route`), and the workspace-wide checks belong to
+    the verifier;
+  - a task whose only blockers are files of later waves counts as done once it has handed off, with the blockers
+    logged.
+- **Rule:** [TKT-3](../../.claude/rules/tickets.md#tkt-3), [TKT-4](../../.claude/rules/tickets.md#tkt-4),
+  [TKT-19](../../.claude/rules/tickets.md#tkt-19).
+
+### <a id="l-27"></a>L-27: The updates of a ticket run name the files and lines they change without linking to them
+
+- **Seen:** `/ticket-run T0.13`, at 15:15.
+- **What happened:** the person asked that the updates of a run contain clickable links to the files and lines
+  created or modified, for quick access, and that this be written in this page.
+- **Cause:** to do. The progress reports and the events of `PROGRESS.md` name the files in plain text, and the
+  links of [TKT-14](../../.claude/rules/tickets.md#tkt-14) cover only `EXPLAIN.md` and `IMPLEMENTATION.md`.
+- **Fix:** to do. The updates that name a changed file or line link to it, relative to `docs/tickets/<ID>/`, as
+  TKT-14 asks of the explainer.
+- **Rule:** [TKT-14](../../.claude/rules/tickets.md#tkt-14) (the link form); the rule for the updates is not written yet.
+
+### <a id="l-27"></a>L-27: A worker changed another ticket's files, and its hand-off made them this ticket's own
+
+- **Seen:** `/issue-run P0`, checks of T0.12 at 15:20.
+- **What happened:** T0.12's checks failed in the clean tree of [L-22](#l-22): `uv` found
+  `services/simulator/` without its `pyproject.toml`. T0.12's own files held 19 files of
+  `services/simulator/src/simulator/models/config/exceptions/`, which belong to T0.13. They came with the hand-off of
+  T0.12's K21 (the `swarm_rest` models), applied as `021-K21.patch`. K21 had renamed exception files to an `s_e_`
+  prefix in every `exceptions/` folder of its worktree, T0.13's included, since `ticket_tree.py start` copies every
+  running ticket's work into a worker's worktree. T0.13's own files did not list them, so its commit would have left
+  them out. The fixers sent to `swarm-catalog/src` and the tests could do nothing.
+- **Cause:** nothing stops a worker from changing a file outside its task's `files`
+  ([TKT-19](../../.claude/rules/tickets.md#tkt-19) asks it not to), `handoff` takes every change of the worktree, and
+  `integrate` adds every file of the patch to the ticket's own files, even one another ticket owns.
+- **Fix:** worked around by hand: the 19 paths were moved from `.git/swarm/T0.12/state.json` to T0.13's, with an event
+  in each `PROGRESS.md`. To do: `handoff` keeps only the files of the task's `files` and reports the others, and
+  `integrate` refuses a file another open ticket owns.
+- **Rule:** [TKT-5](../../.claude/rules/tickets.md#tkt-5) (a worker changes only its task's files),
+  [TKT-16](../../.claude/rules/tickets.md#tkt-16) (each ticket touches only its own files).
+
+### <a id="l-28"></a>L-28: A wrong import of the project's own code was taken for a missing tool, so no fixer was sent
+
+- **Seen:** `/issue-run P0`, checks of T0.12 at 15:23, once [L-22](#l-22) and [L-27](#l-27) were out of the way.
+- **What happened:** pytest could not collect 7 test files: the `swarm-rest` tests import `tests.api.…`, which does not
+  resolve from the repository root, and `tests/postgres/test_postgres_fixture.py` imports `POSTGRES_APP_ROLE` from a
+  `conftest` that resolves to the one of `swarm-nats`. Those are mistakes in the ticket's code. The run stopped as an
+  environment problem, which goes to no agent ([TKT-6](../../.claude/rules/tickets.md#tkt-6)), so nobody was asked to
+  fix them, and every re-run would have stopped the same way.
+- **Cause:** `checks.py` flagged any output holding `ModuleNotFoundError` or `No module named` as the environment's
+  fault, whatever the module.
+- **Fix:** [`checks.py`](../../.claude/scripts/checks.py) flags a missing module as the environment's only when it is
+  not the project's own code (`tests`, `conftest`, a folder of the repository, a package of `services/*/src` or
+  `packages/python/*/src`). The parametrised test
+  `test_a_missing_module_of_the_project_is_the_code_s_fault_not_the_environment_s` of
+  [`tests/harness/checks/test_checks.py`](../../tests/harness/checks/test_checks.py) fails without it.
+- **Rule:** [TKT-6](../../.claude/rules/tickets.md#tkt-6) (an environment failure is a missing tool or third-party
+  module; a missing module of the project goes to its owner).
 
 ## <a id="already-ruled"></a>📜 Lessons already turned into rules
 

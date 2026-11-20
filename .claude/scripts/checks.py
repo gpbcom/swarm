@@ -40,7 +40,10 @@ PROJECT_PREFIXES = ("services/", "packages/", "frontends/", "tests/", "deploy/")
 TIMEOUT_S = 900
 # A failure whose output holds one of these is caused by the environment (a missing tool or module), not by the
 # ticket's code: fixer agents cannot repair it, so the run stops and the person fixes the environment (TKT-6).
-ENVIRONMENT_MARKERS = ("ModuleNotFoundError", "No module named", "command not found")
+ENVIRONMENT_MARKERS = ("command not found",)
+# A missing module is the environment's fault only when it is not the project's own code: ``No module named
+# 'tests.api'`` or ``'swarm_rest'`` is a wrong import or a wrong path in the ticket, which its owner fixes (L-28).
+MISSING_MODULE = re.compile(r"No module named '([^']+)'")
 
 
 def run(command: List[str], cwd: Path = ROOT, env: Optional[Dict[str, str]] = None) -> Tuple[int, str]:
@@ -59,6 +62,22 @@ def run(command: List[str], cwd: Path = ROOT, env: Optional[Dict[str, str]] = No
         return 127, f"command not found: {error.filename}"
     except subprocess.TimeoutExpired:
         return 124, f"timed out after {TIMEOUT_S} s"
+
+
+def first_party(module: str, root: Path = ROOT) -> bool:
+    """Tell whether a module name belongs to the repository: its tests, a service or a Python package."""
+    top = module.split(".")[0]
+    if top in ("tests", "conftest") or (root / top).exists():
+        return True
+    return any(root.glob(f"services/*/src/{top}")) or any(root.glob(f"packages/python/*/src/{top}"))
+
+
+def environment_failure(code: int, out: str, root: Path = ROOT) -> bool:
+    """Tell whether a failed check comes from the environment (a missing tool or third-party module), not the code."""
+    if code == 127 or any(marker in out for marker in ENVIRONMENT_MARKERS):
+        return True
+    missing = MISSING_MODULE.findall(out)
+    return bool(missing) and not any(first_party(name, root) for name in missing)
 
 
 def own_paths(ticket: str, root: Path = ROOT) -> Optional[List[str]]:
@@ -193,7 +212,7 @@ class Checks:
             self.passed.append(name)
             return True
         detail = "\n".join(out.splitlines()[-12:])
-        environment = code == 127 or any(marker in out for marker in ENVIRONMENT_MARKERS)
+        environment = environment_failure(code, out, self.root)
         self.failures.append({"check": name, "file": file, "detail": detail[:1500], "environment": environment})
         return False
 
