@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import ClassVar, Dict
+from typing import ClassVar, Dict, cast
+
+from pydantic import JsonValue
 
 from tests.ci.release.helpers import (
     GITHUB_TOKEN,
@@ -12,6 +14,7 @@ from tests.ci.release.helpers import (
     calls_to,
     run_automerge,
     scenario,
+    workflow,
 )
 
 
@@ -32,6 +35,20 @@ class TestAutomerge:
         assert back["token"] == RELEASE_TOKEN
         assert calls.index(merge) < calls.index(release) < calls.index(back)
         assert not [call for call in calls if "DELETE" in argv(call)]
+
+    def test_a_release_branch_deleted_by_github_on_merge_is_recreated_for_the_way_back(self, tmp_path: Path) -> None:
+        case = scenario("release/0.1.0", "master", [], self.GREEN)
+        case["branch_gone"] = True
+        calls = run_automerge(tmp_path, case)
+        [recreate] = [call for call in calls if "git/refs" in argv(call) and "POST" in argv(call)]
+        assert f"ref=refs/heads/release/0.1.0 -f sha={HEAD_SHA}" in argv(recreate)
+        assert recreate["token"] == RELEASE_TOKEN
+        [back] = calls_to(calls, "pr", "create")
+        assert calls.index(recreate) < calls.index(back)
+
+    def test_a_release_branch_still_there_is_left_as_it_is(self, tmp_path: Path) -> None:
+        calls = run_automerge(tmp_path, scenario("release/0.1.0", "master", [], self.GREEN))
+        assert not [call for call in calls if "git/refs" in argv(call) and "POST" in argv(call)]
 
     def test_no_release_reaches_master_without_the_release_token(self, tmp_path: Path) -> None:
         calls = run_automerge(tmp_path, scenario("release/0.1.0", "master", [], self.GREEN), release_token="")
@@ -77,6 +94,12 @@ class TestAutomerge:
         calls = run_automerge(tmp_path, scenario("feature/ci", "develop", [".github/workflows/ci.yml"], self.GREEN))
         assert not calls_to(calls, "pr", "merge")
         assert any("needs-person" in argv(call) for call in calls)
+
+    def test_the_last_run_of_the_commit_merges_even_when_it_is_a_push(self) -> None:
+        jobs = cast(Dict[str, Dict[str, JsonValue]], workflow("automerge.yml")["jobs"])
+        condition = str(jobs["merge"]["if"])
+        assert "github.event.workflow_run.conclusion == 'success'" in condition
+        assert "workflow_run.event" not in condition
 
     def test_no_pull_request_at_this_commit_does_nothing(self, tmp_path: Path) -> None:
         case = scenario("feature/x", "develop", [], self.GREEN)

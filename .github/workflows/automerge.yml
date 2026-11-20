@@ -25,7 +25,9 @@ concurrency:
 
 jobs:
   merge:
-    if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success'
+    # Any run of the commit, pull request or push: the last one to end is the one that may merge (TKT-26). A push to a
+    # branch without an open pull request at that commit does nothing.
+    if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
       - name: Merge the pull request when every check passed
@@ -77,6 +79,11 @@ jobs:
             fi
             GH_TOKEN="$RELEASE_TOKEN" gh release create "v$version" -R "$REPO" --target "$sha" \
               --title "Swarm v$version" --notes-file "$RUNNER_TEMP/notes.md"
+            # GitHub deletes the head branch of a merge made with a person's token: bring it back at the released commit.
+            if ! gh api "repos/$REPO/git/ref/heads/$HEAD_BRANCH" > /dev/null 2>&1; then
+              GH_TOKEN="$RELEASE_TOKEN" gh api -X POST "repos/$REPO/git/refs" -f "ref=refs/heads/$HEAD_BRANCH" -f "sha=$HEAD_SHA" --silent
+              echo "Recreated $HEAD_BRANCH at $HEAD_SHA for its way back to develop."
+            fi
             GH_TOKEN="$RELEASE_TOKEN" gh pr create -R "$REPO" --base develop --head "$HEAD_BRANCH" --label automerge \
               --title "Release v$version: back to develop" \
               --body "Brings the changelog, the release notes and the test reports of v$version (#$pr) back to develop (TKT-26)."

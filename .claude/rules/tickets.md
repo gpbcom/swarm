@@ -631,7 +631,9 @@ heading.
 - Every CI run keeps its test reports as `test-report-*` artifacts, failed runs included.
 - `.github/workflows/automerge.yml` merges the release into `master` once every check passed (merge commit), tags
   `v<version>`, publishes the GitHub release with the release notes, and opens the way back to `develop`, which it
-  merges the same way, then deletes `release/<version>` (TKT-25). Only `release/` and `hotfix/` go to `master`.
+  merges the same way, then deletes `release/<version>` (TKT-25). GitHub deletes the release branch itself when a
+  person's token merges it into `master`; `automerge.yml` then recreates it at the released commit for the way back.
+  Only `release/` and `hotfix/` go to `master`.
 - The secret `RELEASE_TOKEN` (a token of the repository with contents, pull requests and workflows in write) does what
   `GITHUB_TOKEN` may not: its pull requests start CI, and its merge into `master` may carry `.github/workflows/`.
   Without it, the release stops at once and says so.
