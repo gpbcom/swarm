@@ -80,7 +80,7 @@ def git(cwd: Path, *args: str) -> None:
 
 
 def develop_ref(repo: Path) -> str:
-    code = f"import sys; sys.path.insert(0, {str(SCRIPT.parents[1] / "reports")!r}); import roadmap_gantt; print(roadmap_gantt.develop_ref({str(repo)!r}))"
+    code = f"import sys; sys.path.insert(0, {str(SCRIPT.parents[1] / 'reports')!r}); import roadmap_gantt; print(roadmap_gantt.develop_ref({str(repo)!r}))"
     return subprocess.run(
         [sys.executable, "-c", code], cwd=ROOT, capture_output=True, text=True, check=True
     ).stdout.strip()
