@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+# Standard library imports
 import shutil
 from pathlib import Path
 from typing import List
 
+# Third-party imports
 import pytest
 
+# First-party imports
 from tests.conventions.helpers import repo_root, run_convention_tests
 from tests.conventions.rules.convention_rules import ConventionRules
 from tests.conventions.rules.service_tree import ServiceTree
@@ -47,7 +50,7 @@ class TestEmptyService:
     def test_the_convention_tests_pass_unchanged(self, root: Path) -> None:
         result = run_convention_tests(root)
         assert result.returncode == 0, result.stdout + result.stderr
-        assert "18 passed" in result.stdout
+        assert "20 passed" in result.stdout
         assert "failed" not in result.stdout
 
     def test_no_convention_test_names_the_empty_service(self) -> None:

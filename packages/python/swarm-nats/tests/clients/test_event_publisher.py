@@ -1,14 +1,17 @@
 from __future__ import annotations
 
+# Standard library imports
 from datetime import UTC, datetime
 from typing import ClassVar, Dict, Optional
 from uuid import UUID
 
+# Third-party imports
 import pytest
 from nats.aio.client import Client
 from nats.js.errors import NotFoundError
 from pydantic import JsonValue
 
+# First-party imports
 from swarm_models.models.events.actor import Actor
 from swarm_models.models.events.enums import ActorKind
 from swarm_models.models.events.event import Event

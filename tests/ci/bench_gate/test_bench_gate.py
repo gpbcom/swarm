@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+# Standard library imports
 import json
 from pathlib import Path
 from typing import ClassVar, List
 
+# Third-party imports
 import pytest
 
+# First-party imports
 from tests.ci.bench_gate.helpers import run_gate, write_change
 
 

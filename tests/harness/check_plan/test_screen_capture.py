@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+# Standard library imports
 import json
 import os
 import subprocess
@@ -7,8 +8,10 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Optional
 
+# Third-party imports
 from pydantic import JsonValue
 
+# First-party imports
 from tests.harness.check_plan.helpers import APPROVED, a_task, repo_root, script_path
 
 FRONT_END = "T0.16"

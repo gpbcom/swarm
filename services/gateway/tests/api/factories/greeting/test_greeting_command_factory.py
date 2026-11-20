@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+# Third-party imports
 import pytest
 
+# First-party imports
 from gateway.api.cli.commands.greeting_command import GreetingCommand
 from gateway.api.factories.command_factory import CommandFactory
 from gateway.api.factories.greeting.greeting_command_factory import GreetingCommandFactory

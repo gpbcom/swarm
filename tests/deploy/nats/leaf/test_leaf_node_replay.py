@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+# Standard library imports
 import asyncio
 import shutil
 from pathlib import Path
@@ -7,6 +8,7 @@ from string import Template
 from typing import ClassVar, List, Optional
 from uuid import UUID
 
+# Third-party imports
 import pytest
 from nats.aio.client import Client
 from nats.js.api import StreamInfo

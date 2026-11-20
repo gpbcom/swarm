@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+# Standard library imports
 from typing import ClassVar, Dict
 
+# Third-party imports
 import pytest
 from nkeys import KeyPair
 

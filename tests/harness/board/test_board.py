@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+# Standard library imports
 import os
 import subprocess
 import sys
 from pathlib import Path
 
+# Third-party imports
 import pytest
 
 ROOT = Path(__file__).resolve().parents[3]

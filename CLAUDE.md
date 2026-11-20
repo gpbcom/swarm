@@ -4,7 +4,7 @@
 
 ## Code rules never to break
 
-Ten rules of [AGENT.md](AGENT.md) hold for people and agents alike, in `src/` and `tests/`:
+Eleven rules of [AGENT.md](AGENT.md) hold for people and agents alike, in `src/` and `tests/`:
 
 - **No `Any` and no `object` as a type.** Both are too generic. Write the real type: `JsonValue` for parsed JSON, YAML
   or TOML, a `Union` for several known types, a `Callable[...]` with its signature, a generic with its real parameter
@@ -13,6 +13,10 @@ Ten rules of [AGENT.md](AGENT.md) hold for people and agents alike, in `src/` an
   folder of the repository, the harness included: past five, create sub-folders by entity type or theme. Entry files
   (`__init__.py`, `conftest.py`, `index.ts`, `index.js`, `lib.rs`, `main.rs`, `mod.rs`) do not count (AGENT.md, File
   shape).
+- **Three import groups, each under its comment.** `# Standard library imports`, `# Third-party imports`, then
+  `# First-party imports`, in that order, each holding only imports of its kind, in every module of `src/` and
+  `tests/` except `__init__.py`. An import ruff's isort would move elsewhere stays in its group with `# isort: skip`
+  (AGENT.md, Imports).
 - **No file docstring.** No module starts with a docstring, `__init__.py` included: `from __future__ import
   annotations` comes first, and the docstring of the file's one class says what it is for (AGENT.md, Docstrings and
   comments).

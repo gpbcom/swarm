@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+# Standard library imports
 from typing import ClassVar, Dict
 
+# Third-party imports
 import pytest
 
+# First-party imports
 from tests.harness.wiring.helpers import agent_body, agent_files, agent_frontmatter, agent_path, read_text
 
 

@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+# Standard library imports
 from typing import ClassVar, Dict, Optional
 
+# Third-party imports
 import pytest
 from pydantic import JsonValue, ValidationError
 
+# First-party imports
 from swarm_logging.models.enums import LogFormat
 from swarm_logging.models.exceptions import (
     SEInvalidLoggingConfigException,

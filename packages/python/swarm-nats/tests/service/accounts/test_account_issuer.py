@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+# Standard library imports
 from typing import ClassVar, Dict, List, cast
 from uuid import UUID
 
+# Third-party imports
 import pytest
 from pydantic import JsonValue
 
+# First-party imports
 from swarm_nats.models.accounts.exceptions import SENatsJwtInvalidError
 from swarm_nats.models.accounts.issued_account import IssuedAccount
 from swarm_nats.models.accounts.issued_credential import IssuedCredential

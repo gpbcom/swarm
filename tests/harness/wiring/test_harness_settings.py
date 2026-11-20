@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+# Standard library imports
 import re
 from typing import Dict, List
 
+# Third-party imports
 from pydantic import JsonValue
 
+# First-party imports
 from tests.harness.wiring.helpers import read_json
 
 

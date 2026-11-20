@@ -1,13 +1,16 @@
 from __future__ import annotations
 
+# Standard library imports
 import json
 import re
 from pathlib import Path
 from typing import ClassVar, Dict, List
 
+# Third-party imports
 import pytest
 from pydantic import JsonValue
 
+# First-party imports
 from tests.harness.format_edited.helpers import (
     CATALOGUE_RELATIVE,
     CWD_KEY,

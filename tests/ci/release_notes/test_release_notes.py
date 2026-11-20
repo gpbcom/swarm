@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+# Standard library imports
 from pathlib import Path
 
+# Third-party imports
 import pytest
 
+# First-party imports
 from tests.ci.release_notes.helpers import FEATURE, RULE, TICKET, TICKET_TITLE, git, make_repo, run, write_reports
 
 VERSION = "0.2.0"

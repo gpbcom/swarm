@@ -1,12 +1,15 @@
 from __future__ import annotations
 
+# Standard library imports
 import json
 import logging
 from pathlib import Path
 from typing import List
 
+# Third-party imports
 import pytest
 
+# First-party imports
 from swarm_models.models.commands.command import Command
 from swarm_models.models.events.actor import Actor
 from swarm_models.models.events.event import Event

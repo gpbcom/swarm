@@ -1,15 +1,18 @@
 from __future__ import annotations
 
+# Standard library imports
 import json
 import logging
 import logging.handlers
 from pathlib import Path
 from typing import ClassVar, Dict, Iterator, Optional
 
+# Third-party imports
 import pytest
 import yaml
 from pydantic import JsonValue
 
+# First-party imports
 from swarm_logging.configurators.logging_configurator import LoggingConfigurator
 from swarm_logging.formatters.coloured_formatter import ColouredFormatter
 from swarm_logging.formatters.json_formatter import JsonFormatter

@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+# Standard library imports
 from pathlib import Path
 from typing import ClassVar, Dict
 
+# Third-party imports
 import pytest
 from pydantic import JsonValue
 
+# First-party imports
 from tests.harness.check_touched.helpers import (
     COUNTER_NAME,
     add_worktree,

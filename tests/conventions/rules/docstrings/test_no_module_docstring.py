@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+# Standard library imports
 from pathlib import Path
 from typing import ClassVar, Dict, List
 
+# First-party imports
 from tests.conventions.helpers import write_files
 from tests.conventions.rules.docstrings.no_module_docstring import NoModuleDocstring
 from tests.conventions.rules.service_tree import ServiceTree

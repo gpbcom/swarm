@@ -8,6 +8,7 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Optional
 
+# Third-party imports
 from pydantic import JsonValue
 
 TICKET_ID = "T9.99"

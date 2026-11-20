@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+# Standard library imports
 import shutil
 import socket
 import subprocess
@@ -7,6 +8,7 @@ import time
 from pathlib import Path
 from typing import AsyncIterator, Iterator
 
+# Third-party imports
 import nats
 import pytest
 from nats.aio.client import Client

@@ -1,12 +1,15 @@
 from __future__ import annotations
 
+# Standard library imports
 import logging
 from logging import Logger, getLogger
 from typing import Callable, Dict
 
+# Third-party imports
 import pytest
 from lifecycle_recording_runnable import RecordingRunnable
 
+# First-party imports
 from swarm_lifecycle.runnables.runnable import Runnable
 
 

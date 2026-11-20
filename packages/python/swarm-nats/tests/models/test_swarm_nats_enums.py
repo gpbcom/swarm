@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+# Standard library imports
 from enum import StrEnum
 from typing import ClassVar, Dict, Type
 
+# Third-party imports
 import pytest
 
+# First-party imports
 from swarm_nats.models.enums import CredentialKind, NatsClaimType, StreamRetention, StreamStorage
 
 

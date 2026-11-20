@@ -9,9 +9,8 @@ from typing import ClassVar, Iterator, List, Tuple
 import nats
 import pytest
 
-from swarm_nats.models.accounts.issued_credential import IssuedCredential
-
 # First-party imports
+from swarm_nats.models.accounts.issued_credential import IssuedCredential
 from swarm_nats.models.enums import CredentialKind
 from swarm_nats.models.subjects.operator_subjects import OperatorSubjects
 from swarm_nats.service.accounts.nats_jwt_signer import NatsJwtSigner

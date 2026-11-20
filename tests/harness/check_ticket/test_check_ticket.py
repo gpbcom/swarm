@@ -1,13 +1,16 @@
 from __future__ import annotations
 
+# Standard library imports
 import re
 import subprocess
 import sys
 from pathlib import Path
 from typing import List, Tuple
 
+# Third-party imports
 import pytest
 
+# First-party imports
 from tests.harness.check_ticket.helpers import (
     HEADINGS,
     TICKET_ID,

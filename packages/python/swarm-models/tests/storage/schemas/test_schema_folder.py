@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+# Standard library imports
 import logging
 from pathlib import Path
 
+# Third-party imports
 import pytest
 
+# First-party imports
 from swarm_models.models.schemas.exceptions import SESchemaError, SESchemaUnreadableError, SESchemaUnwritableError
 from swarm_models.storage.schemas.schema_folder import SchemaFolder
 
