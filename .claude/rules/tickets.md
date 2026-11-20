@@ -161,7 +161,10 @@ never edit the same checkout; parallel tickets share one, but each commits only 
 
 1. the **verifier** reports every applicable check passing, as decided and run by `.claude/scripts/checks.py`
    (deterministic, not a model's judgement): the AGENT.md tools on changed project code (ruff, mypy, pytest, cargo,
-   pnpm, Terraform) and `specs.py check`; a check whose target does not exist yet is not applicable, never failed;
+   pnpm, Terraform) and `specs.py check`; a check whose target does not exist yet is not applicable, never failed.
+   **The checks run in a clean temporary worktree of the shared branch's commit that holds only the ticket's own
+   changes**, never in the shared checkout: `uv` and `pnpm -r` read the whole workspace, and the other running
+   tickets' work is half built by design (tests first, TKT-4), so it would fail this ticket;
 2. the **reviewer** approves the diff against `TICKET.md`, the specifications and the rules (AGENT.md, SPEC, TKT), and
    returns a short review note, written to `REVIEW.md`;
 3. `EXPLAIN.md`, `IMPLEMENTATION.md` (TKT-14), `REVIEW.md` and `PROGRESS.md` are written, with the evidence in
@@ -176,7 +179,9 @@ stops and the person is told. A check that fails because of the environment (a m
 
 **Why:** "done" must mean merged code that works and that someone else can understand.
 
-**Check:** `/ticket-run` ends with the verifier's and the reviewer's verdicts in `PROGRESS.md`.
+**Check:** `/ticket-run` ends with the verifier's and the reviewer's verdicts in `PROGRESS.md`; the tests of
+`tests/harness/checks/` pass, one of them proving that another ticket's uncommitted change never reaches the clean
+tree.
 
 ## <a id="tkt-7"></a>TKT-7: Models and cost (balanced tier)
 

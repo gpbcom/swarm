@@ -89,6 +89,21 @@ def two_tickets_at_work(tmp_path: Path, paths: object) -> Path:
     return tmp_path
 
 
+def clean_tree(repo: Path) -> Dict[str, object]:
+    code = (
+        f"import sys, json; sys.path.insert(0, {str(ROOT / '.claude' / 'scripts')!r}); import checks; "
+        f"from pathlib import Path; repo = Path({str(repo)!r}); "
+        f"tree = checks.isolated_tree(checks.changed_files('develop', {TICKET!r}, repo), repo); "
+        f"files = sorted(str(p.relative_to(tree)) for p in tree.rglob('*') if p.is_file() and '.git' not in p.parts); "
+        f"texts = {{name: (tree / name).read_text() for name in files}}; "
+        f"checks.remove_tree(tree, repo); "
+        f"print(json.dumps({{'files': files, 'texts': texts, 'gone': not tree.exists()}}))"
+    )
+    result = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, check=True)
+    loaded: Dict[str, object] = json.loads(result.stdout)
+    return loaded
+
+
 class TestChecks:
     def test_a_ticket_is_checked_on_its_own_files_only(self, tmp_path: Path) -> None:
         repo = two_tickets_at_work(tmp_path, ["services/mine/a.py", f"docs/tickets/{TICKET}/"])
@@ -128,3 +143,27 @@ class TestChecks:
         verdict = screen_verdict(root, [], True)
         assert verdict["failures"] == []
         assert "No screen" in str(verdict["reason"])
+
+    def test_the_checks_run_on_a_clean_tree_of_the_ticket_s_own_work_only(self, tmp_path: Path) -> None:
+        repo = two_tickets_at_work(tmp_path, ["services/mine/", "base.txt", "gone.txt", f"docs/tickets/{TICKET}/"])
+        (repo / "gone.txt").write_text("old\n", encoding="utf-8")
+        (repo / "shared.txt").write_text("committed\n", encoding="utf-8")
+        git(repo, "add", "gone.txt", "shared.txt")
+        git(repo, "commit", "-m", "two more files")
+        (repo / "gone.txt").unlink()
+        (repo / "base.txt").write_text("changed by the ticket\n", encoding="utf-8")
+        (repo / "shared.txt").write_text("changed by another ticket\n", encoding="utf-8")
+        verdict = clean_tree(repo)
+        assert verdict["files"] == [
+            "base.txt",
+            f"docs/tickets/{TICKET}/TICKET.md",
+            "services/mine/a.py",
+            "shared.txt",
+        ]
+        texts = verdict["texts"]
+        assert isinstance(texts, dict)
+        assert texts["base.txt"] == "changed by the ticket\n"
+        assert texts["shared.txt"] == "committed\n"
+        assert verdict["gone"] is True
+        listed = subprocess.run(["git", "worktree", "list"], cwd=repo, capture_output=True, text=True, check=True)
+        assert len(listed.stdout.splitlines()) == 1
