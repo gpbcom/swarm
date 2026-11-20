@@ -1,7 +1,7 @@
 # 📘 FS-014: Agriculture
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ FS-013: Light shows](FS-013-light-shows.md) · 📄 **Page 18 / 109** · [FS-015: Patrol ▶️](FS-015-patrol.md)
+> [🏠 Index](../../README.md) · [◀️ FS-013: Light shows](FS-013-light-shows.md) · 📄 **Page 18 / 120** · [FS-015: Patrol ▶️](FS-015-patrol.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -89,5 +89,5 @@ Settled with the product owner ([interview](../../../research/interview.md)).
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ FS-013: Light shows](FS-013-light-shows.md) · 📄 **Page 18 / 109** · [FS-015: Patrol ▶️](FS-015-patrol.md)
+> [🏠 Index](../../README.md) · [◀️ FS-013: Light shows](FS-013-light-shows.md) · 📄 **Page 18 / 120** · [FS-015: Patrol ▶️](FS-015-patrol.md)
 <!-- /spec:nav-bottom -->

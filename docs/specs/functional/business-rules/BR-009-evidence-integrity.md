@@ -1,7 +1,7 @@
 # 📏 BR-009: Evidence integrity
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ BR-008: Operator isolation](BR-008-operator-isolation.md) · 📄 **Page 65 / 109** · [BR-010: Valid Authorisation for the Jurisdiction ▶️](BR-010-valid-authorisation-for-the-jurisdiction.md)
+> [🏠 Index](../../README.md) · [◀️ BR-008: Operator isolation](BR-008-operator-isolation.md) · 📄 **Page 71 / 120** · [BR-010: Valid Authorisation for the Jurisdiction ▶️](BR-010-valid-authorisation-for-the-jurisdiction.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Type:** Constraint · **Updated:** 2026-11-18
@@ -56,5 +56,5 @@ Authorities, insurers, Clients and courts need to trust that a Flight log, a spr
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ BR-008: Operator isolation](BR-008-operator-isolation.md) · 📄 **Page 65 / 109** · [BR-010: Valid Authorisation for the Jurisdiction ▶️](BR-010-valid-authorisation-for-the-jurisdiction.md)
+> [🏠 Index](../../README.md) · [◀️ BR-008: Operator isolation](BR-008-operator-isolation.md) · 📄 **Page 71 / 120** · [BR-010: Valid Authorisation for the Jurisdiction ▶️](BR-010-valid-authorisation-for-the-jurisdiction.md)
 <!-- /spec:nav-bottom -->

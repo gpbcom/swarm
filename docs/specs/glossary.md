@@ -1,7 +1,7 @@
 # 📖 Glossary
 
 <!-- spec:nav-top -->
-> [🏠 Index](README.md) · [◀️ Swarm specifications](README.md) · 📄 **Page 2 / 109** · [Visual identity ▶️](visual-identity.md)
+> [🏠 Index](README.md) · [◀️ Swarm specifications](README.md) · 📄 **Page 2 / 120** · [Visual identity ▶️](visual-identity.md)
 <!-- /spec:nav-top -->
 
 > [!IMPORTANT]
@@ -68,6 +68,13 @@ The things Swarm stores, receives or produces.
 | <a id="ent-workspace"></a>🗃️ **Workspace** | The arrangement of the panels of Ground control (map, Squad, video, Alerts, progress) over the screens of one platform, saved per Pilot: desktop with several screens, laptop, tablet or web browser. | - |
 | <a id="ent-debrief"></a>🗃️ **Debrief** | The review of a Mission after landing: Replay, plan against actual, quality checks of the data and Scorecard. | post-mortem |
 | <a id="ent-scorecard"></a>🗃️ **Scorecard** | The result of a Mission against each acceptance criterion of the Client's request, passed or failed, with its evidence. | - |
+| <a id="ent-assistant-permission"></a>🗃️ **Assistant permission** | What the Assistant may do for one action, or group of actions, of Swarm: **Off**, **Read**, **Propose** (a person accepts) or **Act** (it acts and reports, after the person confirms where the Operator asked for it). Set in layers: a ceiling per Operator by the Swarm administrator, the levels per role by the Operator, and each person may only narrow their own. | AI rights |
+| <a id="ent-assistant-activity"></a>🗃️ **Assistant activity** | One act or proposal of the Assistant: the person it acted for, the Assistant permission used, what started it, the data and rules it used, the result, and whether it can still be undone. | AI log |
+| <a id="ent-trigger"></a>🗃️ **Trigger** | What starts the Assistant without a person asking at that moment: an event (an Alarm, an Alert, a Mission request, a failed check, a weather change) or a schedule a person set up. | automation rule |
+| <a id="ent-conversation"></a>🗃️ **Conversation** | The messages between one person and the Assistant, kept and searchable for the retention the Operator sets. | chat history |
+| <a id="ent-knowledge-document"></a>🗃️ **Knowledge document** | A document of the Operator, such as its operations manual, a procedure, a checklist or a contract, that the Assistant searches and cites. | - |
+| <a id="ent-manufacturing-order"></a>🗃️ **Manufacturing order** | An order in the ERP to build Drones of a Drone model the Operator builds in-house, from its bill of materials. | production order |
+| <a id="ent-purchase-order"></a>🗃️ **Purchase order** | An order in the ERP to buy Drones, Payloads, Batteries, spares or raw materials from a supplier. | buying order |
 
 ## <a id="systems"></a>⚙️ Systems
 
@@ -84,13 +91,15 @@ Swarm itself, and the external systems it talks to.
 | <a id="sys-client-portal"></a>⚙️ **Client portal** | The web part of Swarm for Clients and Site agents. | customer portal |
 | <a id="sys-simulator"></a>⚙️ **Simulator** | Flies a virtual Squad with the real flight software of each Drone model, to test Missions and train Pilots. | digital twin |
 | <a id="sys-drone-adapter"></a>⚙️ **Drone adapter** | The part of Swarm that talks to one family of Drones: MAVLink (PX4, ArduPilot), DJI, Skydio or Parrot. | driver |
-| <a id="sys-mission-assistant"></a>⚙️ **Mission assistant** | The AI agent that proposes a Mission from the Mission planner's description and checks it against the rules. Runs on the LLM provider the Operator chose. | chatbot |
-| <a id="sys-co-pilot"></a>⚙️ **Co-pilot** | The AI agent that watches the Telemetry in flight, explains Alerts and proposes Re-plans to the Pilot. Runs on the LLM provider the Operator chose. | autopilot assistant |
-| <a id="sys-report-writer"></a>⚙️ **Report writer** | The AI agent that drafts the Mission report and the compliance evidence after a Mission. Runs on the LLM provider the Operator chose. | - |
+| <a id="sys-mission-assistant"></a>⚙️ **Mission assistant** | The AI agent that proposes a Mission from the Mission planner's description and checks it against the rules. One of the specialists of the Assistant. Runs on the LLM provider the Operator chose. | chatbot |
+| <a id="sys-co-pilot"></a>⚙️ **Co-pilot** | The AI agent that watches the Telemetry in flight, explains Alerts and proposes Re-plans to the Pilot. One of the specialists of the Assistant. Runs on the LLM provider the Operator chose. | autopilot assistant |
+| <a id="sys-report-writer"></a>⚙️ **Report writer** | The AI agent that drafts the Mission report and the compliance evidence after a Mission. One of the specialists of the Assistant. Runs on the LLM provider the Operator chose. | - |
 | <a id="sys-site-security-system"></a>⚙️ **Site security system** | The intrusion and fire detection system of a Site, which sends Alarms to Swarm. | - |
 | <a id="sys-anchoring-service"></a>⚙️ **Anchoring service** | Where Evidence records are anchored, as the Operator chooses: a timestamping authority (eIDAS, RFC 3161) or a blockchain. | - |
 | <a id="sys-weather-service"></a>⚙️ **Weather service** | Gives the forecast and the current wind, rain, temperature and visibility at a Site. | - |
 | <a id="sys-u-space-service"></a>⚙️ **U-space service** | The airspace service of a Jurisdiction (U-space in the EU, LAANC in the US) that receives flight intentions and grants airspace. | UTM |
+| <a id="sys-assistant"></a>⚙️ **Assistant** | The AI front door of Swarm: every person talks to it in any part of Swarm, by voice, on a mobile phone or from a chat tool. It answers, or hands the work to the Mission assistant, the Co-pilot or the Report writer, and does only what its Assistant permissions allow. Runs on the LLM provider the Operator chose. | bot, virtual assistant |
+| <a id="sys-erp"></a>⚙️ **ERP** | The business management system of an Operator: Clients and Sites, quotes and invoices, Fleet assets and costs, staff time, stock, Manufacturing orders and Purchase orders. Swarm reaches every ERP the same way; Simple-ERP is the first. | accounting software |
 
 ## <a id="terms"></a>🔤 Terms
 
@@ -127,6 +136,10 @@ The other words that have a precise meaning in the specifications.
 | <a id="term-mosaic"></a>🔤 **Mosaic** | The grid of live video tiles in Ground control, one per Drone, up to the number of streams the Pilot chose. | video wall |
 | <a id="term-llm-provider"></a>🔤 **LLM provider** | The supplier of the language models behind the AI agents. Swarm is provider-agnostic: each Operator chooses its LLM provider and models; on premises, an open-weight model on its own servers. | - |
 | <a id="term-outside-agent"></a>🔤 **Outside agent** | An AI agent outside Swarm that connects through MCP or A2A on behalf of a person, as that person's delegate, with that person's rights. | external bot |
+| <a id="term-assistant-budget"></a>🔤 **Assistant budget** | The monthly amount an Operator, and optionally each person, may spend on the LLM provider of the Assistant: a warning at 80 %, then read-only answers at 100 % until it is raised. Help during a flight never stops. | AI quota |
+| <a id="term-connector"></a>🔤 **Connector** | A link the Assistant uses to reach a system outside Swarm: an MCP server or A2A agent the Operator registered, a REST API or webhook, the person's e-mail, calendar and documents, a chat tool, a GIS, invoicing and payments, an asset register or IoT platform, or the ERP. Each has its own Assistant permissions. | plug-in |
+| <a id="term-flight-critical-act"></a>🔤 **Flight-critical act** | Signing the Pre-flight check, launching, aborting, Hold, Return to Squad and manual control: the acts the Assistant may do by itself only while a Pilot is on duty for the Squad and sees it in Ground control. | - |
+| <a id="term-squad-shortfall"></a>🔤 **Squad shortfall** | What a planned Squad needs and the Fleet cannot supply on the Mission date: Drones of a Drone model, Payloads or Batteries. | fleet gap |
 
 ## <a id="states"></a>🔄 States
 
@@ -176,5 +189,5 @@ The states a persona or an entity can be in, named `<Persona or entity>: <State>
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](README.md) · [◀️ Swarm specifications](README.md) · 📄 **Page 2 / 109** · [Visual identity ▶️](visual-identity.md)
+> [🏠 Index](README.md) · [◀️ Swarm specifications](README.md) · 📄 **Page 2 / 120** · [Visual identity ▶️](visual-identity.md)
 <!-- /spec:nav-bottom -->

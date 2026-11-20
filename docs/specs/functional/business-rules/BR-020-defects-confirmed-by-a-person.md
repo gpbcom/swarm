@@ -1,7 +1,7 @@
 # 📏 BR-020: Defects confirmed by a person
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ BR-019: Site agents request, never pilot](BR-019-site-agents-request-never-pilot.md) · 📄 **Page 76 / 109** · [BR-021: AI agents propose, people decide ▶️](BR-021-ai-agents-propose-people-decide.md)
+> [🏠 Index](../../README.md) · [◀️ BR-019: Site agents request, never pilot](BR-019-site-agents-request-never-pilot.md) · 📄 **Page 82 / 120** · [BR-021: AI agents propose, people decide ▶️](BR-021-ai-agents-propose-people-decide.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Type:** Validation · **Updated:** 2026-11-18
@@ -49,5 +49,5 @@ Detection models make mistakes. A false Defect sent to a Client costs a site vis
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ BR-019: Site agents request, never pilot](BR-019-site-agents-request-never-pilot.md) · 📄 **Page 76 / 109** · [BR-021: AI agents propose, people decide ▶️](BR-021-ai-agents-propose-people-decide.md)
+> [🏠 Index](../../README.md) · [◀️ BR-019: Site agents request, never pilot](BR-019-site-agents-request-never-pilot.md) · 📄 **Page 82 / 120** · [BR-021: AI agents propose, people decide ▶️](BR-021-ai-agents-propose-people-decide.md)
 <!-- /spec:nav-bottom -->

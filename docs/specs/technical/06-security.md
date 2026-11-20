@@ -1,7 +1,7 @@
 # 🔐 Security
 
 <!-- spec:nav-top -->
-> [🏠 Index](../README.md) · [◀️ API layer](05-api.md) · 📄 **Page 90 / 109** · [Scalability and performance ▶️](07-scalability.md)
+> [🏠 Index](../README.md) · [◀️ API layer](05-api.md) · 📄 **Page 101 / 120** · [Scalability and performance ▶️](07-scalability.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -14,7 +14,7 @@
 
 1. [🔑 Identity](#identity)
 2. [👥 Roles and Operator isolation](#authorisation)
-3. [🛡️ The human gate for Outside agents](#human-gate)
+3. [🛡️ The human gate for AI agents](#human-gate)
 4. [📡 Links to Drones, Docks and the edge](#links)
 5. [🔑 Secrets and keys](#secrets)
 6. [🛡️ Supply chain and testing](#supply-chain)
@@ -45,18 +45,22 @@
 - **NATS accounts per Operator:** a service acting for one Operator can only publish and subscribe on `op.<operator_id>.…`.
 - **Object storage:** one bucket per Operator, access through signed URLs only.
 
-## <a id="human-gate"></a>🛡️ The human gate for Outside agents
+## <a id="human-gate"></a>🛡️ The human gate for AI agents
 
-An [🔤 Outside agent](../glossary.md#term-outside-agent) connected through MCP or A2A holds a token naming the person it acts for and the agent itself. It may do what that person may do ([📏 BR-021](../functional/business-rules/BR-021-ai-agents-propose-people-decide.md)), with these gates:
+Every act of an AI agent (the [⚙️ Assistant](../glossary.md#sys-assistant), its specialists, or an [🔤 Outside agent](../glossary.md#term-outside-agent) connected through MCP or A2A) names the person it acts for, and runs only within the [🗃️ Assistant permission](../glossary.md#ent-assistant-permission) of that action for that person ([📏 BR-021](../functional/business-rules/BR-021-ai-agents-propose-people-decide.md), [📏 BR-028](../functional/business-rules/BR-028-assistant-permissions-are-layered.md)). An Outside agent holds a token naming that person and the agent itself.
 
-| Act | Through an Outside agent |
+| Assistant permission | What the gateway and the services do |
 | --- | --- |
-| Read, propose, create drafts | Allowed |
-| Approve a Re-plan, publish a Deliverable or Scorecard, invite a Client | Allowed as the person's delegate, recorded with both names |
-| Sign the Pre-flight check, launch | Pending until the person confirms on their own device (push Notification, then their PIN) |
-| Abort, manual control, Hold the Squad | Not available: Ground control only |
+| Off | Refuse, and say who sets the permission |
+| Read | Read only what the person may read ([📏 BR-032](../functional/business-rules/BR-032-the-assistant-reaches-only-what-its-person-may-reach.md)) |
+| Propose | Create a `Proposal`; it takes effect when a person accepts it, recorded with their name |
+| Act | Do it and record it with the person it acted for; ask the person to confirm first where the Operator set it; a Flight-critical act only while a Pilot is on duty for the Squad and sees it in Ground control, announced with a countdown the Pilot can cancel ([📏 BR-029](../functional/business-rules/BR-029-flight-critical-acts-need-a-pilot-on-duty.md)) |
 
-The gate is enforced in the gateway and the missions service, never trusted to the agent. Every delegated call is recorded in the evidence ledger.
+- **Outside agents:** signing the Pre-flight check and launching always wait for the person's confirmation on their own device (push Notification, then their PIN), whatever the Assistant permission.
+- **Layers:** the Swarm administrator sets a ceiling per Operator, the Operator sets each role within it, each person may only lower their own levels; a new Operator starts at Propose everywhere ([📏 BR-028](../functional/business-rules/BR-028-assistant-permissions-are-layered.md)).
+- **Before the Assistant permissions (milestone M5):** the fixed gate of P5 applies. Read, propose and drafts are allowed; approving a Re-plan, publishing a Deliverable or Scorecard and inviting a Client are allowed as the person's delegate, recorded with both names; signing the Pre-flight check and launching wait for the person's confirmation on their own device (push Notification, then their PIN); abort, manual control and Hold stay in Ground control.
+
+The gate is enforced in the gateway and the services, never trusted to the agent. Every act of an AI agent is recorded in the `AssistantActivity` and in the evidence ledger.
 
 ## <a id="links"></a>📡 Links to Drones, Docks and the edge
 
@@ -88,10 +92,10 @@ The gate is enforced in the gateway and the missions service, never trusted to t
 
 ## <a id="features"></a>🔗 Features implemented
 
-[📘 FS-002](../functional/features/FS-002-pre-flight-check-and-launch.md), [📘 FS-009](../functional/features/FS-009-evidence-ledger-and-anchoring.md), [📘 FS-012](../functional/features/FS-012-operators-deployment-and-languages.md), [📘 FS-015](../functional/features/FS-015-patrol.md), [📘 FS-017](../functional/features/FS-017-mission-assistant.md).
+[📘 FS-002](../functional/features/FS-002-pre-flight-check-and-launch.md), [📘 FS-009](../functional/features/FS-009-evidence-ledger-and-anchoring.md), [📘 FS-012](../functional/features/FS-012-operators-deployment-and-languages.md), [📘 FS-015](../functional/features/FS-015-patrol.md), [📘 FS-017](../functional/features/FS-017-mission-assistant.md), [📘 FS-023](../functional/features/FS-023-ai-assistant.md).
 
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../README.md) · [◀️ API layer](05-api.md) · 📄 **Page 90 / 109** · [Scalability and performance ▶️](07-scalability.md)
+> [🏠 Index](../README.md) · [◀️ API layer](05-api.md) · 📄 **Page 101 / 120** · [Scalability and performance ▶️](07-scalability.md)
 <!-- /spec:nav-bottom -->

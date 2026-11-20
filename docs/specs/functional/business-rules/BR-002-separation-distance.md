@@ -1,7 +1,7 @@
 # 📏 BR-002: Separation distance
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ BR-001: Geofence and Altitude ceiling](BR-001-geofence-and-altitude-ceiling.md) · 📄 **Page 58 / 109** · [BR-003: Weather limits ▶️](BR-003-weather-limits.md)
+> [🏠 Index](../../README.md) · [◀️ BR-001: Geofence and Altitude ceiling](BR-001-geofence-and-altitude-ceiling.md) · 📄 **Page 64 / 120** · [BR-003: Weather limits ▶️](BR-003-weather-limits.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Type:** Constraint · **Updated:** 2026-11-18
@@ -51,5 +51,5 @@ A collision inside the Squad is the risk that a single Drone does not have. In a
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ BR-001: Geofence and Altitude ceiling](BR-001-geofence-and-altitude-ceiling.md) · 📄 **Page 58 / 109** · [BR-003: Weather limits ▶️](BR-003-weather-limits.md)
+> [🏠 Index](../../README.md) · [◀️ BR-001: Geofence and Altitude ceiling](BR-001-geofence-and-altitude-ceiling.md) · 📄 **Page 64 / 120** · [BR-003: Weather limits ▶️](BR-003-weather-limits.md)
 <!-- /spec:nav-bottom -->

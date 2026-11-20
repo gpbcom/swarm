@@ -212,6 +212,12 @@
     "2028-10-20",
     "Blockchain aggregator",
     "11-hardware-and-partners.md#p-09"
+   ],
+   [
+    "P-10",
+    "2028-09-25",
+    "Simple-ERP API",
+    "11-hardware-and-partners.md#p-10"
    ]
   ],
   "campaigns": [
@@ -2990,6 +2996,255 @@
    "area": "docs/specs",
    "size": "S",
    "note": "Last cleanup, after fixes"
+  },
+  "T5.32": {
+   "deps": [
+    "T5.03",
+    "T5.06",
+    "T5.11",
+    "T5.15"
+   ],
+   "external": [],
+   "area": "services/agents router graph, Conversations",
+   "size": "M",
+   "note": "Front door of FS-023"
+  },
+  "T5.33": {
+   "deps": [
+    "T5.04",
+    "T5.20"
+   ],
+   "external": [],
+   "area": "services/agents action catalogue, every service owning an action",
+   "size": "L",
+   "note": "Every action as a tool"
+  },
+  "T5.34": {
+   "deps": [
+    "T5.32",
+    "T5.08"
+   ],
+   "external": [],
+   "area": "four apps: Assistant panel",
+   "size": "L",
+   "note": "UC-031 screens"
+  },
+  "T5.35": {
+   "deps": [
+    "T5.32"
+   ],
+   "external": [],
+   "area": "services/agents knowledge and memory",
+   "size": "M",
+   "note": ""
+  },
+  "T5.36": {
+   "deps": [
+    "T5.23",
+    "T5.33"
+   ],
+   "external": [],
+   "area": "services/gateway and owning services: Assistant permissions",
+   "size": "L",
+   "note": "Replaces the fixed gate of T5.23"
+  },
+  "T5.37": {
+   "deps": [
+    "T5.36",
+    "T0.16",
+    "T2.14"
+   ],
+   "external": [],
+   "area": "frontends/back-office permission screens, Swarm administration",
+   "size": "M",
+   "note": "UC-032"
+  },
+  "T5.38": {
+   "deps": [
+    "T5.36",
+    "T5.17",
+    "T5.18"
+   ],
+   "external": [],
+   "area": "frontends/ground-control, services/agents: Flight-critical acts",
+   "size": "L",
+   "note": "UC-034, BR-029"
+  },
+  "T5.39": {
+   "deps": [
+    "T5.36"
+   ],
+   "external": [],
+   "area": "services/agents activity log, Undo, digest",
+   "size": "M",
+   "note": ""
+  },
+  "T5.40": {
+   "deps": [
+    "T5.36",
+    "T5.05"
+   ],
+   "external": [],
+   "area": "services/agents budgets, back-office usage",
+   "size": "M",
+   "note": "BR-030"
+  },
+  "T5.41": {
+   "deps": [
+    "T5.34",
+    "T5.18"
+   ],
+   "external": [],
+   "area": "voice in the four apps",
+   "size": "M",
+   "note": ""
+  },
+  "T5.42": {
+   "deps": [
+    "T5.34",
+    "T3.11"
+   ],
+   "external": [],
+   "area": "mobile, push Notifications",
+   "size": "M",
+   "note": ""
+  },
+  "T5.43": {
+   "deps": [
+    "T5.32",
+    "T5.36"
+   ],
+   "external": [],
+   "area": "Slack and Teams apps, e-mail",
+   "size": "M",
+   "note": ""
+  },
+  "T5.44": {
+   "deps": [
+    "T5.10",
+    "T5.36"
+   ],
+   "external": [],
+   "area": "services/agents Triggers on agents-worker",
+   "size": "M",
+   "note": ""
+  },
+  "T5.45": {
+   "deps": [
+    "T5.02",
+    "T5.34"
+   ],
+   "external": [],
+   "area": "frontends/ground-control offline model",
+   "size": "L",
+   "note": ""
+  },
+  "T5.46": {
+   "deps": [
+    "T5.28",
+    "T5.33",
+    "T5.36"
+   ],
+   "external": [],
+   "area": "services/agents connector registry, back-office, Vault",
+   "size": "L",
+   "note": ""
+  },
+  "T5.47": {
+   "deps": [
+    "T5.46"
+   ],
+   "external": [],
+   "area": "office tools connectors",
+   "size": "M",
+   "note": ""
+  },
+  "T5.48": {
+   "deps": [
+    "T5.46"
+   ],
+   "external": [],
+   "area": "GIS, payment and IoT connectors",
+   "size": "M",
+   "note": "Chosen with the design partner in S53"
+  },
+  "T5.49": {
+   "deps": [
+    "T5.33"
+   ],
+   "external": [],
+   "area": "services/agents ERP port and stand-in",
+   "size": "M",
+   "note": ""
+  },
+  "T5.50": {
+   "deps": [
+    "T1.06",
+    "T1.11",
+    "T5.32"
+   ],
+   "external": [],
+   "area": "services/planner, frontends/mission-studio Squad sizing",
+   "size": "M",
+   "note": "UC-033 steps 1 and 2"
+  },
+  "T5.51": {
+   "deps": [
+    "T5.49"
+   ],
+   "external": [
+    "P-10"
+   ],
+   "area": "services/agents Simple-ERP adapter",
+   "size": "L",
+   "note": "Waits for the Simple-ERP API"
+  },
+  "T5.52": {
+   "deps": [
+    "T5.36",
+    "T5.50",
+    "T5.51"
+   ],
+   "external": [],
+   "area": "services/agents, frontends/mission-studio shortfall proposals",
+   "size": "L",
+   "note": "UC-033"
+  },
+  "T5.53": {
+   "deps": [
+    "T5.29",
+    "T5.38",
+    "T5.46"
+   ],
+   "external": [],
+   "area": "evaluation and injection sets",
+   "size": "M",
+   "note": ""
+  },
+  "T5.54": {
+   "deps": [
+    "T5.34",
+    "T5.35",
+    "T5.37",
+    "T5.39",
+    "T5.40",
+    "T5.41",
+    "T5.42",
+    "T5.43",
+    "T5.44",
+    "T5.45",
+    "T5.47",
+    "T5.48",
+    "T5.52",
+    "T5.53"
+   ],
+   "external": [
+    "P-01",
+    "P-06"
+   ],
+   "area": "tests/load, dashboards, OVHcloud cell",
+   "size": "L",
+   "note": "Exit gate for M5b"
   }
  }
 }

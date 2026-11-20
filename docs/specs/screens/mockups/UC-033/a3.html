@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <title>UC-033 A3: Propose ways to cover it</title>
+  <link rel="stylesheet" href="../visual-identity.css">
+  <link rel="stylesheet" href="../components.css">
+</head>
+<body>
+<div class="window">
+  <header class="titlebar"><span class="app">⚙️ Swarm</span><span class="screen-title">Mission studio · M-2026-0412 Inspection of Les Vignes</span><span class="badge action">🔄 Mission: Draft</span><span class="spacer"></span><span class="badge persona">👤 Léa Martin</span></header>
+  <div class="layout">
+    <nav class="sidebar">
+      <span class="nav-item">🗺️ Missions</span>
+      <span class="nav-item">🖊️ Design</span>
+      <span class="nav-item">🕹️ Simulate</span>
+      <span class="nav-item active">💬 Assistant</span>
+    </nav>
+    <main class="content">
+      <div class="banner decision">⚠️ <strong>Squad shortfall: 1 Drone</strong><span class="spacer"></span><span>Needs 3 X500 with a thermal camera on 3 December, the Fleet has 2.</span></div>
+      <div class="grid-2">
+        <section class="card stack">
+          <div class="conversation">
+          <div class="message person"><strong>👤 Léa Martin</strong><p>How can I cover the Squad shortfall of M-2026-0412?</p></div>
+          <div class="message agent"><strong>⚙️ Assistant</strong><p>I read Simple-ERP, your ERP. Every part of the X500 is in stock, so no Purchase order is needed and a Manufacturing order for one X500 is ready on 27 November. I also checked the Fleet: 4 December is the earliest date it alone completes the Squad. Here are four ways, each with its effect. Choose one: nothing happens until you do.</p></div>
+          </div>
+        </section>
+        <aside class="card stack">
+          <h2>Ways to cover the Squad shortfall</h2>
+          <table class="table">
+            <tr><th>Way</th><th>Effect</th><th></th></tr>
+            <tr><td>🗃️ Manufacturing order for one X500</td><td>Ready on 27 November, every part in stock (from the ERP)</td><td><span class="button primary">Choose</span></td></tr>
+            <tr><td>Move the Mission to 4 December</td><td>The earliest date the Fleet alone completes the Squad</td><td><span class="button secondary">Choose</span></td></tr>
+            <tr><td>A Squad of two Drones</td><td>Flies 1 h 30 instead of 1 h</td><td><span class="button secondary">Choose</span></td></tr>
+            <tr><td>Leave the shortfall open</td><td>Nothing is ordered, the Mission cannot become Planned</td><td><span class="button secondary">Choose</span></td></tr>
+          </table>
+          <span class="hint">The Assistant proposes, you decide (📏 BR-021). Stock and lead times come from the ERP (📏 BR-031).</span>
+        </aside>
+      </div>
+    </main>
+  </div>
+  <footer class="statusbar"><span>⚠️ Squad shortfall: 1 Drone</span><span>⚙️ ERP: Simple-ERP, connected</span><span>Not saved</span></footer>
+</div>
+</body>
+</html>

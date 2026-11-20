@@ -1,7 +1,7 @@
 # 📘 FS-018: Live Co-pilot
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ FS-017: Mission assistant](FS-017-mission-assistant.md) · 📄 **Page 22 / 109** · [FS-019: Mission reports ▶️](FS-019-mission-reports.md)
+> [🏠 Index](../../README.md) · [◀️ FS-017: Mission assistant](FS-017-mission-assistant.md) · 📄 **Page 22 / 120** · [FS-019: Mission reports ▶️](FS-019-mission-reports.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -82,5 +82,5 @@ Settled with the product owner ([interview](../../../research/interview.md)).
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ FS-017: Mission assistant](FS-017-mission-assistant.md) · 📄 **Page 22 / 109** · [FS-019: Mission reports ▶️](FS-019-mission-reports.md)
+> [🏠 Index](../../README.md) · [◀️ FS-017: Mission assistant](FS-017-mission-assistant.md) · 📄 **Page 22 / 120** · [FS-019: Mission reports ▶️](FS-019-mission-reports.md)
 <!-- /spec:nav-bottom -->

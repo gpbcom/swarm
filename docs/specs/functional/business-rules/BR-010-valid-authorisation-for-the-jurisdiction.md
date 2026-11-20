@@ -1,7 +1,7 @@
 # 📏 BR-010: Valid Authorisation for the Jurisdiction
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ BR-009: Evidence integrity](BR-009-evidence-integrity.md) · 📄 **Page 66 / 109** · [BR-011: Drone readiness ▶️](BR-011-drone-readiness.md)
+> [🏠 Index](../../README.md) · [◀️ BR-009: Evidence integrity](BR-009-evidence-integrity.md) · 📄 **Page 72 / 120** · [BR-011: Drone readiness ▶️](BR-011-drone-readiness.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Type:** Validation · **Updated:** 2026-11-18
@@ -52,5 +52,5 @@ Flights with several Drones per Pilot, or BVLOS, are in the Specific category in
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ BR-009: Evidence integrity](BR-009-evidence-integrity.md) · 📄 **Page 66 / 109** · [BR-011: Drone readiness ▶️](BR-011-drone-readiness.md)
+> [🏠 Index](../../README.md) · [◀️ BR-009: Evidence integrity](BR-009-evidence-integrity.md) · 📄 **Page 72 / 120** · [BR-011: Drone readiness ▶️](BR-011-drone-readiness.md)
 <!-- /spec:nav-bottom -->

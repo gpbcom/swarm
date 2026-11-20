@@ -1,7 +1,7 @@
 # 🎬 UC-021: Plan a Mission with the Mission assistant
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ UC-020: Review the Defects of an Inspection](UC-020-review-the-defects-of-an-inspection.md) · 📄 **Page 47 / 109** · [UC-022: Receive the Mission report ▶️](UC-022-receive-the-mission-report.md)
+> [🏠 Index](../../README.md) · [◀️ UC-020: Review the Defects of an Inspection](UC-020-review-the-defects-of-an-inspection.md) · 📄 **Page 49 / 120** · [UC-022: Receive the Mission report ▶️](UC-022-receive-the-mission-report.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -112,7 +112,7 @@ One row per state of the flow chart: every action, success and failure node. Cli
 | A1 | 2 | The Mission assistant cannot meet a rule, for example no Ready Drone carries a thermal camera on that day | The proposal shows the rule as failed and says why; the Mission planner edits the need or rejects the proposal ([📏 BR-021](../business-rules/BR-021-ai-agents-propose-people-decide.md)) |
 | A2 | 4 | The Mission planner asks for something that breaks a rule, such as a route above the Altitude ceiling | The Mission assistant keeps the rule as failed in the proposal and explains it; accepting it gives a Draft Mission that cannot become Planned until fixed ([🎬 UC-001](UC-001-design-a-mission.md)) |
 | A3 | 5 | The Mission planner rejects the proposal | Nothing is created or changed; the Mission stays Requested and the conversation is kept (KO) |
-| A4 | 2 to 4 | The Mission assistant would act by itself, such as saving or planning the Mission | Not allowed: every proposal takes effect only when the Mission planner accepts it ([📏 BR-021](../business-rules/BR-021-ai-agents-propose-people-decide.md)) |
+| A4 | 2 to 4 | The Mission assistant would act by itself, such as saving or planning the Mission | Only if the [🗃️ Assistant permission](../../glossary.md#ent-assistant-permission) of that action is Act for the Mission planner; at Propose, the default, it takes effect only when the Mission planner accepts it ([📏 BR-021](../business-rules/BR-021-ai-agents-propose-people-decide.md)) |
 
 ## <a id="business-rules"></a>📏 Business rules applied
 
@@ -130,10 +130,12 @@ One row per state of the flow chart: every action, success and failure node. Cli
 <!-- spec:referenced-by -->
 - [📘 FS-001: Mission design](../features/FS-001-mission-design.md)
 - [📘 FS-017: Mission assistant](../features/FS-017-mission-assistant.md)
+- [🎬 UC-031: Ask the Assistant](UC-031-ask-the-assistant.md)
+- [🎬 UC-033: Cover a Squad shortfall through the ERP](UC-033-cover-a-squad-shortfall-through-the-erp.md)
 <!-- /spec:referenced-by -->
 
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ UC-020: Review the Defects of an Inspection](UC-020-review-the-defects-of-an-inspection.md) · 📄 **Page 47 / 109** · [UC-022: Receive the Mission report ▶️](UC-022-receive-the-mission-report.md)
+> [🏠 Index](../../README.md) · [◀️ UC-020: Review the Defects of an Inspection](UC-020-review-the-defects-of-an-inspection.md) · 📄 **Page 49 / 120** · [UC-022: Receive the Mission report ▶️](UC-022-receive-the-mission-report.md)
 <!-- /spec:nav-bottom -->

@@ -1,7 +1,7 @@
 # 📏 BR-005: Autonomy level per Activity
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ BR-004: Pilot ratio](BR-004-pilot-ratio.md) · 📄 **Page 61 / 109** · [BR-006: Fail-safe per Activity ▶️](BR-006-fail-safe-per-activity.md)
+> [🏠 Index](../../README.md) · [◀️ BR-004: Pilot ratio](BR-004-pilot-ratio.md) · 📄 **Page 67 / 120** · [BR-006: Fail-safe per Activity ▶️](BR-006-fail-safe-per-activity.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Type:** Constraint · **Updated:** 2026-11-18
@@ -55,5 +55,5 @@ A pre-planned Light show is predictable above an audience and easier to authoris
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ BR-004: Pilot ratio](BR-004-pilot-ratio.md) · 📄 **Page 61 / 109** · [BR-006: Fail-safe per Activity ▶️](BR-006-fail-safe-per-activity.md)
+> [🏠 Index](../../README.md) · [◀️ BR-004: Pilot ratio](BR-004-pilot-ratio.md) · 📄 **Page 67 / 120** · [BR-006: Fail-safe per Activity ▶️](BR-006-fail-safe-per-activity.md)
 <!-- /spec:nav-bottom -->

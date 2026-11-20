@@ -1,7 +1,7 @@
 # 🎲 Risks
 
 <!-- spec:nav-top -->
-> [🏠 Index](../README.md) · [◀️ Hardware and partners](11-hardware-and-partners.md) · 📄 **Page 107 / 109** · [Traceability ▶️](13-traceability.md)
+> [🏠 Index](../README.md) · [◀️ Hardware and partners](11-hardware-and-partners.md) · 📄 **Page 118 / 120** · [Traceability ▶️](13-traceability.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Sprints:** S01 to S52 · **Dates:** 4 Jan 2027 to 29 Dec 2028
@@ -55,5 +55,5 @@
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../README.md) · [◀️ Hardware and partners](11-hardware-and-partners.md) · 📄 **Page 107 / 109** · [Traceability ▶️](13-traceability.md)
+> [🏠 Index](../README.md) · [◀️ Hardware and partners](11-hardware-and-partners.md) · 📄 **Page 118 / 120** · [Traceability ▶️](13-traceability.md)
 <!-- /spec:nav-bottom -->

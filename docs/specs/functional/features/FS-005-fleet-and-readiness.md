@@ -1,7 +1,7 @@
 # 📘 FS-005: Fleet and readiness
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ FS-004: Fail-safes and emergencies](FS-004-fail-safes-and-emergencies.md) · 📄 **Page 9 / 109** · [FS-006: Authorisations and compliance ▶️](FS-006-authorisations-and-compliance.md)
+> [🏠 Index](../../README.md) · [◀️ FS-004: Fail-safes and emergencies](FS-004-fail-safes-and-emergencies.md) · 📄 **Page 9 / 120** · [FS-006: Authorisations and compliance ▶️](FS-006-authorisations-and-compliance.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -87,5 +87,5 @@ Settled with the product owner ([interview](../../../research/interview.md)).
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ FS-004: Fail-safes and emergencies](FS-004-fail-safes-and-emergencies.md) · 📄 **Page 9 / 109** · [FS-006: Authorisations and compliance ▶️](FS-006-authorisations-and-compliance.md)
+> [🏠 Index](../../README.md) · [◀️ FS-004: Fail-safes and emergencies](FS-004-fail-safes-and-emergencies.md) · 📄 **Page 9 / 120** · [FS-006: Authorisations and compliance ▶️](FS-006-authorisations-and-compliance.md)
 <!-- /spec:nav-bottom -->

@@ -1,7 +1,7 @@
 # 🔩 Engine and services
 
 <!-- spec:nav-top -->
-> [🏠 Index](../README.md) · [◀️ Storage](03-storage.md) · 📄 **Page 88 / 109** · [API layer ▶️](05-api.md)
+> [🏠 Index](../README.md) · [◀️ Storage](03-storage.md) · 📄 **Page 99 / 120** · [API layer ▶️](05-api.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -102,6 +102,13 @@ Written in Rust, used both as a library (in the flight engine, for offline Re-pl
 - **A2A:** each agent published with an Agent Card; outside agents can delegate tasks to them, and Swarm's agents can call outside agents the Operator registered.
 - **Outside agents** get the rights of the person they act for; the human gate of [📏 BR-021](../functional/business-rules/BR-021-ai-agents-propose-people-decide.md) is enforced in the gateway and the missions service, not in the agent (see [🔐 Security](06-security.md#human-gate)).
 - **Evaluations:** prompts, tools and test sets are versioned in the repository and run in CI; a drop in score fails the build.
+- **Assistant, the front door** ([📘 FS-023: AI Assistant](../functional/features/FS-023-ai-assistant.md)): a router graph in the same `agents` service, which every part of Swarm, the mobile app, voice and the chat tools talk to. It answers itself or hands the run to the graph of the Mission assistant, the Co-pilot or the Report writer, in the same `Conversation`.
+- **Action catalogue:** every action of Swarm is a typed tool, built from the REST resources and commands and grouped by area, and so is every action of a Connector. Before a tool runs, the gateway and the owning service check the `AssistantPermission` of the person the run acts for: Off, Read, Propose or Act ([📏 BR-028](../functional/business-rules/BR-028-assistant-permissions-are-layered.md), [🛡️ The human gate](06-security.md#human-gate)).
+- **Triggers:** events read from NATS (Alarms, Alerts, Mission requests, failed checks, weather changes) and schedules start runs on `agents-worker` for the person who set them up, within that person's permissions.
+- **Memory and knowledge:** a `Conversation` per person, kept for the retention the Operator sets; the Operator's Knowledge documents, Swarm's user guide and the regulations of each Jurisdiction searched with their citations; preferences learnt per person, which the person can see and erase. Everything stays inside the Operator ([📏 BR-032](../functional/business-rules/BR-032-the-assistant-reaches-only-what-its-person-may-reach.md)).
+- **Voice, mobile and chat tools:** speech in and out in the four languages; the mobile app, Slack and Microsoft Teams are further clients of the same Assistant ([🔌 Connectors and the ERP port](05-api.md#connectors)).
+- **Offline:** online by default; the Assistant may also run offline on an open-weight model on the Ground control machine, with the same permissions.
+- **Budgets:** tokens and cost are metered per call, per person and per Operator against the Assistant budget; at 100 % only read tools run, except during a flight ([📏 BR-030](../functional/business-rules/BR-030-the-assistant-stays-within-its-budget.md)).
 
 **Deployment of the agents (decision T39).** The `agents` service builds one image run as three Kubernetes Deployments, **each behind its own Kubernetes Service and scaled by KEDA**:
 
@@ -135,5 +142,5 @@ Written in Rust, used both as a library (in the flight engine, for offline Re-pl
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../README.md) · [◀️ Storage](03-storage.md) · 📄 **Page 88 / 109** · [API layer ▶️](05-api.md)
+> [🏠 Index](../README.md) · [◀️ Storage](03-storage.md) · 📄 **Page 99 / 120** · [API layer ▶️](05-api.md)
 <!-- /spec:nav-bottom -->

@@ -1,7 +1,7 @@
 # 🎬 UC-025: Monitor a Mission in Ground control
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ UC-024: Configure each Drone of the Squad on the Site](UC-024-configure-each-drone-of-the-squad-on-the-site.md) · 📄 **Page 51 / 109** · [UC-026: Handle an Alert ▶️](UC-026-handle-an-alert.md)
+> [🏠 Index](../../README.md) · [◀️ UC-024: Configure each Drone of the Squad on the Site](UC-024-configure-each-drone-of-the-squad-on-the-site.md) · 📄 **Page 53 / 120** · [UC-026: Handle an Alert ▶️](UC-026-handle-an-alert.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -148,5 +148,5 @@ One row per state of the flow chart: every action, success and failure node. Eac
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ UC-024: Configure each Drone of the Squad on the Site](UC-024-configure-each-drone-of-the-squad-on-the-site.md) · 📄 **Page 51 / 109** · [UC-026: Handle an Alert ▶️](UC-026-handle-an-alert.md)
+> [🏠 Index](../../README.md) · [◀️ UC-024: Configure each Drone of the Squad on the Site](UC-024-configure-each-drone-of-the-squad-on-the-site.md) · 📄 **Page 53 / 120** · [UC-026: Handle an Alert ▶️](UC-026-handle-an-alert.md)
 <!-- /spec:nav-bottom -->

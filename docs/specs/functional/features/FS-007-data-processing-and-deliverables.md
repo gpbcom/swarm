@@ -1,7 +1,7 @@
 # 📘 FS-007: Data processing and Deliverables
 
 <!-- spec:nav-top -->
-> [🏠 Index](../../README.md) · [◀️ FS-006: Authorisations and compliance](FS-006-authorisations-and-compliance.md) · 📄 **Page 11 / 109** · [FS-008: Client portal ▶️](FS-008-client-portal.md)
+> [🏠 Index](../../README.md) · [◀️ FS-006: Authorisations and compliance](FS-006-authorisations-and-compliance.md) · 📄 **Page 11 / 120** · [FS-008: Client portal ▶️](FS-008-client-portal.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Updated:** 2026-11-18
@@ -84,5 +84,5 @@ Settled with the product owner ([interview](../../../research/interview.md)).
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../../README.md) · [◀️ FS-006: Authorisations and compliance](FS-006-authorisations-and-compliance.md) · 📄 **Page 11 / 109** · [FS-008: Client portal ▶️](FS-008-client-portal.md)
+> [🏠 Index](../../README.md) · [◀️ FS-006: Authorisations and compliance](FS-006-authorisations-and-compliance.md) · 📄 **Page 11 / 120** · [FS-008: Client portal ▶️](FS-008-client-portal.md)
 <!-- /spec:nav-bottom -->

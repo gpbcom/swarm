@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <title>UC-032 A1: Set the ceiling of the Operator</title>
+  <link rel="stylesheet" href="../visual-identity.css">
+  <link rel="stylesheet" href="../components.css">
+</head>
+<body>
+<div class="window">
+  <header class="titlebar"><span class="app">⚙️ Swarm</span><span class="screen-title">Back office · Swarm administration</span><span class="spacer"></span><span class="badge persona">👤 Swarm administrator</span></header>
+  <div class="layout">
+    <nav class="sidebar">
+      <span class="nav-item active">➕ Operators</span>
+      <span class="nav-item">👥 People</span>
+      <span class="nav-item">🔧 Settings</span>
+    </nav>
+    <main class="content">
+      <div class="row muted"><span>➕ Operators</span><span>›</span><span>Aerowing Services</span><span>›</span><span>Assistant ceiling</span></div>
+      <h1>Assistant ceiling of Aerowing Services</h1>
+      <div class="row"><span class="muted">⚠️ Flight-critical act</span><span class="badge action">Off</span><span class="muted">does nothing</span><span class="badge system">Read</span><span class="muted">answers only</span><span class="badge decision">Propose</span><span class="muted">a person accepts</span><span class="badge success">Act</span><span class="muted">acts and reports</span></div>
+      <section class="card">
+        <table class="table">
+          <tr><th>Area</th><th>Action</th><th>Ceiling</th><th>Change</th></tr>
+          <tr><td class="muted">🗺️ Missions</td><td>Design a Mission</td><td><span class="input">Propose ▾</span></td><td><span class="muted">Default</span></td></tr>
+          <tr><td class="muted">🛰️ Flight</td><td>Launch ⚠️</td><td><span class="input">Propose ▾</span></td><td><span class="muted">Default</span></td></tr>
+          <tr><td class="muted"></td><td>Hold ⚠️</td><td><span class="input">Act ▾</span></td><td><span class="badge success">Raised from Propose</span></td></tr>
+          <tr><td class="muted"></td><td>Abort ⚠️</td><td><span class="input">Propose ▾</span></td><td><span class="muted">Default</span></td></tr>
+          <tr><td class="muted">🛸 Fleet</td><td>Ground a Drone</td><td><span class="input">Propose ▾</span></td><td><span class="muted">Default</span></td></tr>
+          <tr><td class="muted"></td><td>Place a Purchase order</td><td><span class="input">Act ▾</span></td><td><span class="badge success">Raised from Propose</span></td></tr>
+          <tr><td class="muted">📦 Deliverables</td><td>Publish a Deliverable</td><td><span class="input">Propose ▾</span></td><td><span class="muted">Default</span></td></tr>
+          <tr><td class="muted">👥 People and access</td><td>Invite a Client</td><td><span class="input">Propose ▾</span></td><td><span class="muted">Default</span></td></tr>
+        </table>
+      </section>
+      <div class="row"><span class="hint">Aerowing Services sets the level of each role within this ceiling, and never above it.</span><span class="spacer"></span><span class="button secondary">Cancel</span><span class="button primary">Save the ceiling</span></div>
+    </main>
+  </div>
+  <footer class="statusbar"><span>👤 Swarm administrator</span><span>Cloud</span></footer>
+</div>
+</body>
+</html>

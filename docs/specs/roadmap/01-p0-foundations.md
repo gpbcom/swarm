@@ -1,7 +1,7 @@
 # 🛣️ P0: Foundations
 
 <!-- spec:nav-top -->
-> [🏠 Index](../README.md) · [◀️ Roadmap](README.md) · 📄 **Page 96 / 109** · [P1: First flight ▶️](02-p1-first-flight.md)
+> [🏠 Index](../README.md) · [◀️ Roadmap](README.md) · 📄 **Page 107 / 120** · [P1: First flight ▶️](02-p1-first-flight.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Sprints:** S01 to S04 · **Dates:** 4 Jan to 26 Feb 2027 · **Tickets:** about 20
@@ -247,5 +247,5 @@ No hardware and no flight test are needed in P0: every Drone is simulated.
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../README.md) · [◀️ Roadmap](README.md) · 📄 **Page 96 / 109** · [P1: First flight ▶️](02-p1-first-flight.md)
+> [🏠 Index](../README.md) · [◀️ Roadmap](README.md) · 📄 **Page 107 / 120** · [P1: First flight ▶️](02-p1-first-flight.md)
 <!-- /spec:nav-bottom -->

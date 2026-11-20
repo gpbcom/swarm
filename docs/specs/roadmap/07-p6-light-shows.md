@@ -1,7 +1,7 @@
 # 🛣️ P6: Light shows
 
 <!-- spec:nav-top -->
-> [🏠 Index](../README.md) · [◀️ P5: AI agents, MCP and A2A](06-p5-ai-agents.md) · 📄 **Page 102 / 109** · [P7: Scale and reach ▶️](08-p7-scale-and-reach.md)
+> [🏠 Index](../README.md) · [◀️ P5: AI agents, MCP and A2A](06-p5-ai-agents.md) · 📄 **Page 113 / 120** · [P7: Scale and reach ▶️](08-p7-scale-and-reach.md)
 <!-- /spec:nav-top -->
 
 **Status:** 🟢 Approved · **Sprints:** S41 to S48 · **Dates:** 17 Jul to 3 Nov 2028 · **Tickets:** about 25
@@ -94,7 +94,7 @@ Deliver [📘 FS-013](../functional/features/FS-013-light-shows.md) end to end, 
 
 ## <a id="sprints"></a>🗓️ Sprint plan
 
-P6 shares S41 to S43 with [🛣️ P5: AI agents, MCP and A2A](06-p5-ai-agents.md), which plans 5 tickets in each of them, and S45 to S48 with [🛣️ P7: Scale and reach](08-p7-scale-and-reach.md). P6 therefore takes one ticket per sprint until P5 reaches milestone M5, then most of the capacity. The counts below are P6's share; with the other phase each sprint carries about 6 merged tickets (see the note on capacity in [🎲 Risks](#risks)).
+P6 shares S41 to S48 with [🛣️ P5: AI agents, MCP and A2A](06-p5-ai-agents.md), which plans 5 or 6 tickets in each of S41 to S43 and 1 or 2 in each of S44 to S48 for the core of the Assistant, and S45 to S48 with [🛣️ P7: Scale and reach](08-p7-scale-and-reach.md). P6 therefore takes one ticket per sprint until P5 reaches milestone M5, then most of the capacity. The counts below are P6's share; with the other phases each sprint carries about 7 or 8 merged tickets (see the note on capacity in [🎲 Risks](#risks)).
 
 | Sprint | Dates | Tickets | Sprint goal | What can be shown |
 | --- | --- | --- | --- | --- |
@@ -215,7 +215,7 @@ If the event authorisation of [🏛️ G-08](09-regulatory-track.md#g-08) is ref
 | [🎲 R-03](12-risks.md#r-03) Safety tick budget missed | The Light show tick runs at 50 Hz, with deviation from the Choreography added | Benchmarks of the show tick from T6.10 (S45) on; the sector size can drop below 1,000 Drones if the tick misses 10 ms; no real flight with a missed budget |
 | [🎲 R-07](12-risks.md#r-07) Weather and seasons | C-06 falls in October, in the evening, outdoors | Two rehearsal dates and a reserve show date with P-05; the weather limits of the Pre-flight check apply unchanged |
 | [🎲 R-11](12-risks.md#r-11) Crash or hardware loss in tests | About 50 rented Drones fly close together | Every rehearsal starts with a Fail-safe drill (one Drone faulted, whole Squad lands); the rental terms of H-07 and the insurance of G-08 are checked before the first rehearsal |
-| [🎲 R-01](12-risks.md#r-01) Review bottleneck | P6 overlaps P5 (S41 to S43) and P7 (S45 to S48), and the person flies [🛫 C-05](10-flight-test-campaigns.md#c-05) (S44 to S46) and C-06 (S46 to S48) | P6 takes one ticket per sprint while P5 finishes; from S44 the safety-path tickets (E6.2, E6.4, E6.5) are reviewed first, and agents prepare the screenshots and the documentation while the person flies; across P5, P6 and P7, S41 to S50 carry about 6 tickets each, one more than the usual capacity |
+| [🎲 R-01](12-risks.md#r-01) Review bottleneck | P6 overlaps P5 (S41 to S48) and P7 (S45 to S48), and the person flies [🛫 C-05](10-flight-test-campaigns.md#c-05) (S44 to S46) and C-06 (S46 to S48) | P6 takes one ticket per sprint while P5 finishes; from S44 the safety-path tickets (E6.2, E6.4, E6.5) are reviewed first, and agents prepare the screenshots and the documentation while the person flies; across P5, P6 and P7, S41 to S50 carry about 6 tickets each, one more than the usual capacity |
 | [🎲 R-08](12-risks.md#r-08) Scope too large | The designer could grow without limit | The designer stays a timeline of formations, transitions and colours; complex shows come from Blender or Skybrush Studio |
 
 ## <a id="work-split"></a>🧑‍💻 Work split
@@ -237,5 +237,5 @@ If the event authorisation of [🏛️ G-08](09-regulatory-track.md#g-08) is ref
 <!-- spec:nav-bottom -->
 ---
 
-> [🏠 Index](../README.md) · [◀️ P5: AI agents, MCP and A2A](06-p5-ai-agents.md) · 📄 **Page 102 / 109** · [P7: Scale and reach ▶️](08-p7-scale-and-reach.md)
+> [🏠 Index](../README.md) · [◀️ P5: AI agents, MCP and A2A](06-p5-ai-agents.md) · 📄 **Page 113 / 120** · [P7: Scale and reach ▶️](08-p7-scale-and-reach.md)
 <!-- /spec:nav-bottom -->
