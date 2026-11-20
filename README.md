@@ -257,6 +257,27 @@ after saving them all to a bundle in `.git/swarm/backups/` (TKT-25); `prune --dr
 `develop`, and `develop` and `master` are never rebased, reset, force-pushed or deleted.
 On a new clone, run `python3 .claude/scripts/tickets.py setup` once to turn on the GitFlow git hooks.
 
+## 🚢 Releases
+
+A release reaches `master` by itself (TKT-26). Start it from Claude Code with `/release`, or from a terminal:
+
+```bash
+gh workflow run release.yml --ref develop                 # the next minor version after the last v* tag
+gh workflow run release.yml --ref develop -f version=1.0.0
+```
+
+| Step | Done by | What happens |
+| --- | --- | --- |
+| 1. Test | `release.yml` | Every suite of CI runs on the commit of `develop`, with everything selected; each keeps its report |
+| 2. Write | `release.yml` | On `release/<version>`: `CHANGELOG.md`, `docs/releases/v<version>/RELEASE_NOTES.md`, `TEST_REPORT.md` and the raw reports in `tests/` |
+| 3. Merge | `automerge.yml` | The pull request to `master` is merged once every check passed, tagged `v<version>` and published as a GitHub release |
+| 4. Back | `automerge.yml` | `release/<version>` comes back to `develop` by its own pull request, then is deleted |
+
+Nobody commits or merges by hand. The repository needs, once, the secret `RELEASE_TOKEN`: a fine-grained token of
+`gpbcom/swarm` with **Contents**, **Pull requests**, **Issues** and **Workflows** in read and write
+(`gh secret set RELEASE_TOKEN -R gpbcom/swarm`). It lets the release's pull requests start CI and its merge carry
+`.github/workflows/`, which GitHub's own token may not.
+
 ## 🗂️ Repository layout
 
 | Path | Holds |

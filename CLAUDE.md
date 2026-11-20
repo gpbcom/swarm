@@ -58,6 +58,9 @@ This repository is a proof of concept for mastering the Claude Code harness; dro
 - **Branches** (TKT-25): `tickets.py branches` gives every branch its verdict. Only a 🌱 live branch is rebased onto
   `develop`; a merged, integrated or superseded one is deleted by `tickets.py prune`, after a backup bundle in
   `.git/swarm/backups/`. `develop` and `master` are never rebased, reset, force-pushed or deleted.
+- **Releases** (TKT-26): `/release` starts `.github/workflows/release.yml` on `develop`; every suite runs, the
+  changelog, release notes and test reports are written on `release/<version>`, and `automerge.yml` merges it into
+  `master`, tags it, publishes it and brings it back to `develop`. No commit or merge by hand.
 - **Issues and groups** (TKT-20): `/issue-plan <refs>` plans an issue with its child issues, or a group (`#12`,
   `T0.10`, `E0.4`, `P1`), the person approves the group with `python3 .claude/scripts/tickets.py approve <refs>`, and
   `/issue-run <refs>` runs it as fast as the start rule allows, with `tickets.py watch` reports every 2 minutes. The

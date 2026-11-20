@@ -108,6 +108,12 @@ class TestGuardHook:
         assert decision["permissionDecision"] == "ask"
         assert "TKT-3" in str(decision["permissionDecisionReason"])
 
+    def test_starting_a_release_asks_the_person(self, tmp_path: Path) -> None:
+        main = make_repo(tmp_path)
+        decision = guard("gh workflow run release.yml --ref develop -f version=0.1.0", main)
+        assert decision["permissionDecision"] == "ask"
+        assert "TKT-26" in str(decision["permissionDecisionReason"])
+
     def test_a_worker_cannot_commit_either(self, tmp_path: Path) -> None:
         main = make_repo(tmp_path)
         git(main, "checkout", "-b", "worktree-wf_3")

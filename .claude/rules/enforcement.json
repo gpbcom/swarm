@@ -580,6 +580,58 @@
     "kind": "test",
     "path": "tests/harness/gitflow/test_gitflow.py",
     "what": "develop and master are never rebased, reset, forced or deleted"
+   },
+   {
+    "kind": "workflow",
+    "path": ".github/workflows/automerge.yml",
+    "what": "deletes the head branch of a pull request merged into develop, unless it moved; never develop or master"
+   },
+   {
+    "kind": "test",
+    "path": "tests/ci/release/test_automerge.py",
+    "what": "a merged branch is deleted, a branch that moved is kept"
+   }
+  ],
+  "TKT-26": [
+   {
+    "kind": "workflow",
+    "path": ".github/workflows/release.yml",
+    "what": "runs every suite, writes the changelog, notes and test reports on release/<version>, opens the pull request to master"
+   },
+   {
+    "kind": "workflow",
+    "path": ".github/workflows/automerge.yml",
+    "what": "merges the release into master, tags it, publishes the GitHub release, merges it back into develop"
+   },
+   {
+    "kind": "script",
+    "path": ".github/scripts/release_notes.py",
+    "what": "writes CHANGELOG.md, RELEASE_NOTES.md and TEST_REPORT.md; refuses a release without test reports"
+   },
+   {
+    "kind": "ci",
+    "path": ".github/workflows/python.yml",
+    "what": "every suite keeps its test report as a test-report-* artifact"
+   },
+   {
+    "kind": "hook",
+    "path": ".claude/hooks/guard_git.py",
+    "what": "asks the person before a release starts"
+   },
+   {
+    "kind": "test",
+    "path": "tests/ci/release/test_automerge.py",
+    "what": "release into master, tag, way back to develop, token required"
+   },
+   {
+    "kind": "test",
+    "path": "tests/ci/release/test_release_workflow.py",
+    "what": "every suite runs and keeps its report; the release waits for all of them"
+   },
+   {
+    "kind": "test",
+    "path": "tests/ci/release_notes/test_release_notes.py",
+    "what": "version, changelog, release notes, test report, no release without reports"
    }
   ]
  }

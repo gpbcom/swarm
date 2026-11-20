@@ -39,6 +39,7 @@ These rules apply to every ticket of the roadmap (`docs/specs/roadmap/`), worked
 | [TKT-23](#tkt-23) | "Done" has one definition, and every harness command can run again safely |
 | [TKT-24](#tkt-24) | Harness scripts run anywhere: a shallow CI checkout, no local develop, no GitHub |
 | [TKT-25](#tkt-25) | A branch lives as long as its work: only a live branch is rebased, the rest is deleted after a backup, and `master` is never rewritten |
+| [TKT-26](#tkt-26) | A release reaches `master` by itself, with its changelog, its release notes and its test reports |
 
 ## <a id="tkt-1"></a>TKT-1: Roadmap tickets, one folder each
 
@@ -344,10 +345,11 @@ and the heading.
   are turned off). The pull request of `feature/tickets` goes to `develop`: one commit and one `Closes #<issue>` per
   finished ticket, titled with the ticket's `TICKET.md` title when it holds one ticket
   (`T0.10: Dev cell observability`), `Tickets T0.10, T0.12` when it holds several. A release goes `release/<version>` →
-  `master`, tagged `v<version>`, then `master` → `develop`; a hotfix the same way.
+  `master`, tagged `v<version>`, then back to `develop` by its own pull request, all by itself (TKT-26); a hotfix the
+  same way.
 - `ticket_tree.py finish` labels the ticket's pull request `automerge`: the workflow `.github/workflows/automerge.yml`
-  merges it once every check (`ci`, `gitflow`, `terraform`) has passed on its head commit, which closes its issue. A
-  failing check leaves it open for the person.
+  merges it once every check (`ci`, `gitflow`, `terraform`) has passed on its head commit, which closes its issue, then
+  deletes its head branch unless it moved since (TKT-25). A failing check leaves it open for the person.
 - `.github/workflows/gitflow.yml` checks every pull request: the branch is a GitFlow branch, it targets the right base,
   and a ticket's title starts with its ID.
 - The git hooks of `.githooks/` (`python3 .claude/scripts/tickets.py setup`, once per clone) refuse a commit on
@@ -606,3 +608,40 @@ kept while a ticket is open, GitHub branches, leftover folders) and of `tests/ha
 PreToolUse hook `.claude/hooks/guard_git.py` refuses a rebase, a reset or a forced push of `develop` or `master`; the
 pre-push hook refuses deleting them) pass; `grep -n 'tkt-25' .claude/rules/tickets.md` finds the summary row and the
 heading.
+
+## <a id="tkt-26"></a>TKT-26: A release reaches master by itself
+
+**Rule:**
+
+- A release is started on `develop`, by the person, with `/release` or `gh workflow run release.yml --ref develop [-f
+  version=x.y.z]` (the next minor version after the last `v*` tag by default, `0.1.0` first). Nobody commits by hand
+  after that, and nobody merges by hand.
+- `.github/workflows/release.yml` runs **every suite of CI** on that commit, with every service, package and front end
+  selected. Only when all of them pass does it write, with `.github/scripts/release_notes.py`, on `release/<version>`:
+
+  | File | Holds |
+  | --- | --- |
+  | `CHANGELOG.md` | A new section on top: one line per commit of each pull request merged since the last release, grouped by kind (tickets, harness, specifications, CI/CD and fixes, other) |
+  | `docs/releases/v<version>/RELEASE_NOTES.md` | The tickets delivered with the features, use cases and business rules they deliver, the test summary, the changes by kind |
+  | `docs/releases/v<version>/TEST_REPORT.md` | One row per test suite (passed, failed, skipped, time) and the verdict |
+  | `docs/releases/v<version>/tests/` | The raw reports: the JUnit XML of pytest and the logs of cargo, Vitest and `specs.py check` |
+
+  then opens the pull request to `master`, labelled `automerge`. **No release reaches `master` without its test
+  reports:** `release_notes.py write` refuses to write anything when CI left no report.
+- Every CI run keeps its test reports as `test-report-*` artifacts, failed runs included.
+- `.github/workflows/automerge.yml` merges the release into `master` once every check passed (merge commit), tags
+  `v<version>`, publishes the GitHub release with the release notes, and opens the way back to `develop`, which it
+  merges the same way, then deletes `release/<version>` (TKT-25). Only `release/` and `hotfix/` go to `master`.
+- The secret `RELEASE_TOKEN` (a token of the repository with contents, pull requests and workflows in write) does what
+  `GITHUB_TOKEN` may not: its pull requests start CI, and its merge into `master` may carry `.github/workflows/`.
+  Without it, the release stops at once and says so.
+- Starting a release is the person's decision: the PreToolUse hook asks before Claude runs it.
+
+**Why:** `master` had stayed on the first commit while 359 commits reached `develop`, because a release needed a
+person to branch, write the notes, merge into `master`, tag and merge back by hand. A release by hand is late, and its
+notes and test reports are whatever someone remembers to write.
+
+**Check:** the tests of `tests/ci/release/` (the release workflow, the reports of every suite, and `automerge.yml` run
+under bash with a stand-in `gh`: the merge into `master`, the tag, the way back, the token) and of
+`tests/ci/release_notes/` (version, changelog, release notes, test report, no release without reports) pass;
+`grep -n 'tkt-26' .claude/rules/tickets.md` finds the summary row and the heading.
