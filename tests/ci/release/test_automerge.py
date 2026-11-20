@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import ClassVar, Dict
+from typing import ClassVar, Dict, cast
+
+from pydantic import JsonValue
 
 from tests.ci.release.helpers import (
     GITHUB_TOKEN,
@@ -12,6 +14,7 @@ from tests.ci.release.helpers import (
     calls_to,
     run_automerge,
     scenario,
+    workflow,
 )
 
 
@@ -91,6 +94,12 @@ class TestAutomerge:
         calls = run_automerge(tmp_path, scenario("feature/ci", "develop", [".github/workflows/ci.yml"], self.GREEN))
         assert not calls_to(calls, "pr", "merge")
         assert any("needs-person" in argv(call) for call in calls)
+
+    def test_the_last_run_of_the_commit_merges_even_when_it_is_a_push(self) -> None:
+        jobs = cast(Dict[str, Dict[str, JsonValue]], workflow("automerge.yml")["jobs"])
+        condition = str(jobs["merge"]["if"])
+        assert "github.event.workflow_run.conclusion == 'success'" in condition
+        assert "workflow_run.event" not in condition
 
     def test_no_pull_request_at_this_commit_does_nothing(self, tmp_path: Path) -> None:
         case = scenario("feature/x", "develop", [], self.GREEN)

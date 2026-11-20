@@ -25,7 +25,9 @@ concurrency:
 
 jobs:
   merge:
-    if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success'
+    # Any run of the commit, pull request or push: the last one to end is the one that may merge (TKT-26). A push to a
+    # branch without an open pull request at that commit does nothing.
+    if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
       - name: Merge the pull request when every check passed
