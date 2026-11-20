@@ -1,5 +1,3 @@
-"""The Command model."""
-
 from __future__ import annotations
 
 # Standard library imports

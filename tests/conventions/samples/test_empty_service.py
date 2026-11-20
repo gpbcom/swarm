@@ -47,7 +47,7 @@ class TestEmptyService:
     def test_the_convention_tests_pass_unchanged(self, root: Path) -> None:
         result = run_convention_tests(root)
         assert result.returncode == 0, result.stdout + result.stderr
-        assert "14 passed" in result.stdout
+        assert "18 passed" in result.stdout
         assert "failed" not in result.stdout
 
     def test_no_convention_test_names_the_empty_service(self) -> None:

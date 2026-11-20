@@ -1,5 +1,3 @@
-"""Command line that writes or checks the committed JSON Schema bundle."""
-
 from __future__ import annotations
 
 # Standard library imports

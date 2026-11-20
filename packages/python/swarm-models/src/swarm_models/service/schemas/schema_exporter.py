@@ -63,7 +63,7 @@ class SchemaExporter:
             logger (Optional[Logger]): Logger instance.
         """
         self.logger = logger if logger else getLogger(__name__)
-        self.folder = SchemaFolder(root or SchemaFolder.DEFAULT_ROOT, self.logger)
+        self.folder = SchemaFolder(root or SchemaFolder.DEFAULT_ROOT)
 
     ############################
     # Publicly Exposed Methods #

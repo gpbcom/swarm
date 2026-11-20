@@ -1,5 +1,3 @@
-"""The kinds of command."""
-
 from __future__ import annotations
 
 # Standard library imports
