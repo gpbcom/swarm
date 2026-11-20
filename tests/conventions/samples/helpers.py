@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+# Standard library imports
 from pathlib import Path
 from typing import Dict
 
+# First-party imports
 from tests.conventions.helpers import write_files
 
 PACKAGE = "src/broken"
@@ -15,21 +17,22 @@ BROKEN_FILES: Dict[str, str] = {
     f"{PACKAGE}/clients/__init__.py": "",
     f"{PACKAGE}/models/__init__.py": "",
     f"{PACKAGE}/api/routes.py": (
-        "from __future__ import annotations\n\n"
+        "from __future__ import annotations\n\n# First-party imports\n"
         "from broken.storage.store import Store\n\n\n"
         "def read() -> Store:\n    return Store()\n"
     ),
     f"{PACKAGE}/storage/store.py": "from __future__ import annotations\n\n\nclass Store:\n    pass\n",
+    f"{PACKAGE}/models/unsectioned.py": "from __future__ import annotations\n\nimport os\n\nSEPARATOR = os.sep\n",
     f"{PACKAGE}/clients/documented.py": '"""A client that says what it is in a module docstring."""\n',
     f"{PACKAGE}/storage/handing.py": (
-        "from __future__ import annotations\n\nfrom broken.storage.store import Store\n\n\n"
+        "from __future__ import annotations\n\n# First-party imports\nfrom broken.storage.store import Store\n\n\n"
         "def build() -> Store:\n    return Store(logger=None)\n"
     ),
     f"{PACKAGE}/service/two_classes.py": (
         "from __future__ import annotations\n\n\nclass First:\n    pass\n\n\nclass Second:\n    pass\n"
     ),
     f"{PACKAGE}/service/typed.py": (
-        "from __future__ import annotations\n\nfrom typing import Any\n\n\n"
+        "from __future__ import annotations\n\n# Standard library imports\nfrom typing import Any\n\n\n"
         "def echo(value: Any) -> None:\n    return None\n"
     ),
     f"{PACKAGE}/service/nested.py": (
@@ -40,7 +43,7 @@ BROKEN_FILES: Dict[str, str] = {
         "from __future__ import annotations\n\n\nclass Job:\n    def run(self) -> None:\n        return None\n"
     ),
     f"{PACKAGE}/service/customer.py": (
-        "from __future__ import annotations\n\nfrom pydantic import BaseModel\n\n\n"
+        "from __future__ import annotations\n\n# Third-party imports\nfrom pydantic import BaseModel\n\n\n"
         "class Customer(BaseModel):\n    name: str = 'x'\n"
     ),
     f"{PACKAGE}/service/crowded/__init__.py": "",
@@ -55,7 +58,8 @@ def write_broken_service(services_root: Path) -> Path:
     ``service/typed.py`` imports ``Any`` (no_any), ``service/nested.py`` nests a function (no_nested_function),
     ``service/job.py`` has ``run`` without a base class (lifecycle_base_classes) and ``service/customer.py`` holds a
     Pydantic model outside ``models`` (pydantic_models_in_models), ``clients/documented.py`` starts with a docstring
-    (no_module_docstring) and ``storage/handing.py`` hands a logger to a new ``Store`` (no_logger_argument).
+    (no_module_docstring), ``storage/handing.py`` hands a logger to a new ``Store`` (no_logger_argument) and
+    ``models/unsectioned.py`` imports ``os`` with no section comment (import_sections).
     """
     root = services_root / "broken"
     files = dict(BROKEN_FILES)

@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+# Third-party imports
 import pytest
 
+# First-party imports
 from swarm_logging.models.enums import LogFormat
 
 

@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+# Standard library imports
 from pathlib import Path
 from typing import ClassVar, Dict, List
 
+# Third-party imports
 import pytest
 
+# First-party imports
 from tests.conventions.helpers import write_files
 from tests.conventions.rules.logging.no_logger_argument import NoLoggerArgument
 from tests.conventions.rules.service_tree import ServiceTree

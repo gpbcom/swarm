@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+# Standard library imports
 from typing import ClassVar, Dict, List, Union
 
+# Third-party imports
 import pytest
 from pydantic import JsonValue, SecretStr, ValidationError
 
+# First-party imports
 from swarm_nats.models.accounts.exceptions import (
     SEInvalidIssuedOperatorException,
     SEIssuedAccountInvalidName,

@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+# Standard library imports
 from typing import ClassVar, Dict, List, Optional, Type
 from uuid import UUID
 
+# Third-party imports
 import pytest
 from pydantic import JsonValue
 
+# First-party imports
 from swarm_models.models.people.exceptions import (
     SEInvalidPersonException,
     SEPersonInvalidEmail,

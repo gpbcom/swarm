@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+# Standard library imports
 from logging import DEBUG, Logger, getLogger
 
+# Third-party imports
 import pytest
 from lifecycle_sample_runnable import SampleRunnable
 from lifecycle_sample_runnable_factory import SampleRunnableFactory
 
+# First-party imports
 from swarm_lifecycle.factories.factory import Factory
 from swarm_lifecycle.factories.runnable_factory import RunnableFactory
 from swarm_lifecycle.runnables.runnable import Runnable

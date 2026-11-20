@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+# Standard library imports
 from typing import ClassVar, Dict, List
 
+# Third-party imports
 import pytest
 from pydantic import JsonValue, ValidationError
 
+# First-party imports
 from swarm_nats.models.config.durable_consumer_config import DurableConsumerConfig
 from swarm_nats.models.config.exceptions import (
     SEDurableConsumerConfigInvalidAckWait,

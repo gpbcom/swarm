@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+# Standard library imports
 from pathlib import Path
 from typing import Optional
 
+# Third-party imports
 import pytest
 from pydantic import ValidationError, create_model
 
+# First-party imports
 from swarm_catalog.models.exceptions import SEYamlCatalogUnreadable
 from swarm_catalog.models.yaml_catalog import YamlCatalog
 

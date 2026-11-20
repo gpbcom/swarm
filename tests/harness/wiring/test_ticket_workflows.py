@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+# Standard library imports
 import re
 
+# Third-party imports
 import pytest
 
+# First-party imports
 from tests.harness.wiring.helpers import phase_titles, read_text
 
 

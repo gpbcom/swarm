@@ -12,6 +12,7 @@ from tests.conventions.rules.convention_rule import ConventionRule
 from tests.conventions.rules.docstrings.no_module_docstring import NoModuleDocstring
 from tests.conventions.rules.files.five_files_per_folder import FiveFilesPerFolder
 from tests.conventions.rules.files.one_class_per_file import OneClassPerFile
+from tests.conventions.rules.imports.import_sections import ImportSections
 from tests.conventions.rules.layers.layer_imports import LayerImports
 from tests.conventions.rules.logging.no_logger_argument import NoLoggerArgument
 
@@ -45,4 +46,5 @@ class ConventionRules:
             PydanticModelsInModels(),
             NoModuleDocstring(),
             NoLoggerArgument(),
+            ImportSections(),
         ]

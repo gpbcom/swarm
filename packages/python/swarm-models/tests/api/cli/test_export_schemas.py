@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+# Standard library imports
 from importlib.metadata import entry_points
 from pathlib import Path
 
+# Third-party imports
 import pytest
 
+# First-party imports
 from swarm_models.api.cli.export_schemas import main
 
 

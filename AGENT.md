@@ -189,7 +189,8 @@ Since T0.03, `tests/conventions/services/test_service_conventions.py` runs these
 under `services/`. The rules checked are: more than one top-level class in a file; more than five Python files in a
 folder; a nested function; `Any`; an import that Layout does not allow, checked in `src/` only; the lifecycle rule
 (`start` or `stop`, or `run` without a lifecycle base class); a Pydantic model outside `src/models/`; a module
-docstring; and a logger handed to a new object or to `super().__init__`, checked in `src/` only. `@staticmethod`,
+docstring; an import outside its group (`tests/conventions/imports/` also checks the root `tests/`); and a logger
+handed to a new object or to `super().__init__`, checked in `src/` only. `@staticmethod`,
 attributes starting with an underscore and the node rules are not tested yet. Each rule is one class in
 `tests/conventions/rules/`. The environment variable `SWARM_CONVENTIONS_SERVICES_ROOT` runs the tests against another
 folder of services. `tests/conventions/packages/test_package_conventions.py` runs the same rules against every package of
@@ -209,6 +210,8 @@ definitions of `Runnable` and `AsyncRunnable` themselves.
 - A class outside `src/models/` with `start` or `stop`, or with `run` but no lifecycle base class.
 - A node without `__call__`, or with `run`.
 - A file that starts with a docstring (a module docstring).
+- An import outside the group of its kind, a group without its comment, or groups out of order (`src/` and `tests/`,
+  except `__init__.py`).
 - A call in `src/` that hands a logger to a new object or to `super().__init__` (`logger=`, `self.logger`,
   `getLogger(...)`).
 
@@ -301,7 +304,7 @@ Every runnable class except the nodes subclasses `Runnable` or `AsyncRunnable`, 
 
 `from __future__ import annotations` comes first in every non-empty file: a file never starts with a docstring
 (see [Docstrings and comments](#docstrings-and-comments)).
-Then come up to three groups, each under its own comment:
+Then come up to three groups, **in this order, each under its own comment, and each import in its own group**:
 
 ```python
 from __future__ import annotations
@@ -319,7 +322,13 @@ from models.customers.exceptions import SECustomerCatalogUnreadable
 
 - Imports are absolute, at the top of the file, never inside a function.
 - Import exceptions from their package (`models.customers.exceptions`), not from the file that defines them.
-- Test files, `__init__.py` files and most exception files have no group comments.
+- **Every module of `src/` and `tests/` has its groups,** exception files and test files included. Only `__init__.py`
+  files, which only re-export, have none. A group with no import is left out with its comment.
+- **An import sits in the group of what it imports,** whatever ruff's isort thinks: the standard library, a third-party
+  distribution, or the repository's own code (a package of `services/`, `packages/`, `backend/`, `tests`, or a name of
+  `known-first-party`). Where isort would move an import into another group, it stays in its AGENT.md group, marked
+  `# isort: skip` on its line. Adding the module to `known-first-party` in `pyproject.toml` is better when it is
+  first-party code.
 
 ## Typing
 

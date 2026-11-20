@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+# Standard library imports
 from enum import StrEnum
 from typing import ClassVar, Dict
 
+# Third-party imports
 import pytest
 
+# First-party imports
 from swarm_models.models.people.enums import RoleName
 
 

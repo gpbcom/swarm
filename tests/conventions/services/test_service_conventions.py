@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+# Standard library imports
 from itertools import product
 
+# Third-party imports
 import pytest
 
+# First-party imports
 from tests.conventions.helpers import services_root
 from tests.conventions.rules.convention_rule import ConventionRule
 from tests.conventions.rules.convention_rules import ConventionRules

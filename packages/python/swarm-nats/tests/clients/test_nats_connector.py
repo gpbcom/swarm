@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+# Standard library imports
 import socket
 import time
 
+# Third-party imports
 import pytest
 
+# First-party imports
 from swarm_nats.clients.nats_connector import NatsConnector
 from swarm_nats.models.bus.exceptions import SENatsConnectionError
 from swarm_nats.models.config.nats_client_config import NatsClientConfig

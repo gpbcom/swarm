@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+# First-party imports
 from swarm_nats.models.accounts.exceptions.errors.se_nats_accounts_error import SENatsAccountsError
 
 

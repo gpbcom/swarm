@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+# Standard library imports
 from pathlib import Path
 from typing import Dict, List
 
+# Third-party imports
 import pytest
 
+# First-party imports
 from tests.conventions.helpers import write_files
 from tests.conventions.rules.files.five_files_per_folder import FiveFilesPerFolder
 from tests.conventions.rules.service_tree import ServiceTree

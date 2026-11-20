@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+# Standard library imports
 from pathlib import Path
 from typing import ClassVar, Dict, cast
 
+# Third-party imports
 from pydantic import JsonValue
 
+# First-party imports
 from tests.ci.release.helpers import (
     GITHUB_TOKEN,
     HEAD_SHA,

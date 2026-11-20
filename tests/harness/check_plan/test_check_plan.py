@@ -4,9 +4,11 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Dict, List, Tuple
 
+# Third-party imports
 import pytest
 from pydantic import JsonValue
 
+# First-party imports
 from tests.harness.check_plan.helpers import (
     APPROVED,
     AWAITING,

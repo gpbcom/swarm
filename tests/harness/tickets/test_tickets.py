@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+# Standard library imports
 from pathlib import Path
 
+# First-party imports
 from tests.harness.tickets.helpers import (
     DONE,
     FIELD,

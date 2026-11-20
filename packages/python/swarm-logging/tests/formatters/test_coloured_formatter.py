@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+# Standard library imports
 import logging
 import sys
 from typing import Tuple, Union
 
+# Third-party imports
 import pytest
 
+# First-party imports
 from swarm_logging.formatters.coloured_formatter import ColouredFormatter
 
 

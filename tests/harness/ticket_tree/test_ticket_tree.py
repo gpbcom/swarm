@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+# Standard library imports
 from pathlib import Path
 
+# Third-party imports
 import pytest
 
+# First-party imports
 from tests.harness.ticket_tree.helpers import (
     COMMIT_KEY,
     CONFLICTS_KEY,
