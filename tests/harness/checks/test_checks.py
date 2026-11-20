@@ -192,3 +192,26 @@ class TestChecks:
         )
         result = subprocess.run([sys.executable, "-c", script], capture_output=True, text=True, check=True)
         assert result.stdout.strip() == str(environment)
+
+    def test_a_failure_goes_to_the_file_the_tool_names_not_to_the_first_file_it_was_given(self) -> None:
+        changed = [
+            "packages/python/swarm-rest/src/swarm_rest/__init__.py",
+            "services/missions/tests/api/cli/test_missions_console_scripts.py",
+            "services/fleet/tests/api/cli/test_fleet_console_scripts.py",
+        ]
+        out = (
+            f"$ uv run ruff check {' '.join(changed)}\n"
+            "PLW1510 `subprocess.run` without explicit `check` argument\n"
+            "  --> services/missions/tests/api/cli/test_missions_console_scripts.py:27:18\n"
+            "PLW1510 `subprocess.run` without explicit `check` argument\n"
+            "  --> /tmp/swarm-checks-x/services/fleet/tests/api/cli/test_fleet_console_scripts.py:27:18\n"
+            "Found 2 errors.\n"
+        )
+        script = (
+            f"import sys, json; sys.path.insert(0, {str(ROOT / '.claude' / 'scripts' / 'tickets')!r}); import checks; "
+            f"print(json.dumps(checks.failing_files({out!r}, {changed!r})))"
+        )
+        result = subprocess.run([sys.executable, "-c", script], capture_output=True, text=True, check=True)
+        named = json.loads(result.stdout)
+        assert [path for path, _ in named] == changed[1:]
+        assert ":27:18" in named[0][1]

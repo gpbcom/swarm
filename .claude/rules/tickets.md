@@ -177,7 +177,8 @@ A failed check or a requested change goes back to the agent that owns the files,
 stops and the person is told. A check that fails because of the environment (a missing tool or third-party module, flagged
 `environment` by `checks.py`) goes to no agent: the run stops at once and the person fixes the environment. A
 missing module of the project itself (`tests.…`, a service or a package of the repository) is a wrong import in the
-ticket's code, and goes to its owner like any failure.
+ticket's code, and goes to its owner like any failure. Each failure names the file the tool reports it in (not the first
+file the tool was given), so that it goes to the owner of that file.
 
 **Why:** "done" must mean merged code that works and that someone else can understand.
 

@@ -188,9 +188,30 @@ def screen_problems(
     return failures, None
 
 
+FAILING_FILES_MAX = 10
+
+
+def failing_files(out: str, changed: List[str]) -> List[Tuple[str, str]]:
+    """Return the ticket's files a failed check's output names, each with the output lines that name it (L-32).
+
+    A tool reports the file it fails on (``services/missions/tests/api/cli/test_x.py:27:18``), which is rarely the first
+    file it was given: the failure goes to the owner of the file named, so that the right task fixes it.
+    """
+    # A line naming many of the ticket's files is a list (an echoed command, a list of files checked), not a failure.
+    lines = [line for line in out.splitlines() if sum(name in line for name in changed) <= 2]
+    found: List[Tuple[str, str]] = []
+    for name in sorted(changed, key=len, reverse=True):
+        hits = [line for line in lines if name in line]
+        if hits and not any(name in other for other, _ in found):
+            found.append((name, "\n".join(hits[:12])))
+    order = {name: index for index, name in enumerate(changed)}
+    return sorted(found, key=lambda pair: order.get(pair[0], 0))[:FAILING_FILES_MAX]
+
+
 class Checks:
-    def __init__(self, ticket: str, root: Path = ROOT) -> None:
+    def __init__(self, ticket: str, root: Path = ROOT, changed: Optional[List[str]] = None) -> None:
         self.root = root
+        self.changed = changed or []
         self.evidence = ROOT / "docs" / "tickets" / ticket / "tests-evidences"
         self.evidence.mkdir(parents=True, exist_ok=True)
         self.failures: List[Dict[str, Union[str, bool]]] = []
@@ -213,7 +234,14 @@ class Checks:
             return True
         detail = "\n".join(out.splitlines()[-12:])
         environment = environment_failure(code, out, self.root)
-        self.failures.append({"check": name, "file": file, "detail": detail[:1500], "environment": environment})
+        named = [] if environment else failing_files(out, self.changed)
+        if not named:
+            self.failures.append({"check": name, "file": file, "detail": detail[:1500], "environment": environment})
+            return False
+        for path, lines in named:
+            self.failures.append(
+                {"check": name, "file": path, "detail": f"{lines}\n...\n{detail}"[:1500], "environment": False}
+            )
         return False
 
     def skip(self, name: str, reason: str) -> None:
@@ -333,7 +361,7 @@ def run_checks(
     ticket: str, base: str, changed: List[str], root: Path
 ) -> Dict[str, Union[bool, List[str], List[Dict[str, Union[str, bool]]]]]:
     """Run every applicable check of the ticket in ``root`` and return the verdict."""
-    checks = Checks(ticket, root)
+    checks = Checks(ticket, root, changed)
     python_checks(checks, changed)
     rust_checks(checks, changed)
     typescript_checks(checks, changed)

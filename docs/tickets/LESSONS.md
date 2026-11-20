@@ -47,10 +47,14 @@ this page keeps what happened, so that each problem is closed once and never met
 | [L-22](#l-22) | 2026-11-20 | A ticket's checks fail on the half-built work of the other tickets in the shared checkout | 🟢 Closed |
 | [L-23](#l-23) | 2026-11-20 | The git guard judges the session's branch, not the folder a command runs in | 🔴 Open |
 | [L-24](#l-24) | 2026-11-20 | The 2-minute report is too thin and not ergonomic: no progress bars, no phase, no space, no links to the files | 🔴 Open |
-| [L-25](#l-25) | 2026-11-20 | A fix round on a test file traded one lint error for another, and the retry was spent | 🔴 Open |
+| [L-25](#l-25) | 2026-11-20 | A fix round on a test file traded one error for another, and the retry was spent (seen twice) | 🔴 Open |
 | [L-26](#l-26) | 2026-11-20 | A task's "done when" needs a file a later wave writes, so it can never be done in its wave | 🔴 Open |
 | [L-27](#l-27) | 2026-11-20 | A worker changed another ticket's files, and its hand-off made them this ticket's own | 🔴 Open |
 | [L-28](#l-28) | 2026-11-20 | A wrong import of the project's own code was taken for a missing tool, so no fixer was sent | 🟢 Closed |
+| [L-29](#l-29) | 2026-11-20 | A file several tickets change is committed whole by the first one that finishes | 🔴 Open |
+| [L-30](#l-30) | 2026-11-20 | `gh pr edit` fails on the deprecated Projects (classic), so `finish` could not update the pull request | 🟡 Worked around |
+| [L-31](#l-31) | 2026-11-20 | The start rule is read by a model, which reported the ticket's test errors as a refusal | 🔴 Open |
+| [L-32](#l-32) | 2026-11-20 | A failing check was sent to the owner of the first file it was given, not of the file it failed on | 🟢 Closed |
 | [L-27](#l-27) | 2026-11-20 | The updates of a ticket run name the files and lines they change without linking to them | 🔴 Open |
 
 ## <a id="lessons"></a>📋 Lessons
@@ -408,9 +412,18 @@ this page keeps what happened, so that each problem is closed once and never met
   [TKT-19](../../.claude/rules/tickets.md#tkt-19) sent it to K07, which replaced `as HTMLElement` with a `!` after an
   optional chain: `non-nullable-type-assertion-style` was gone, `no-non-null-assertion` and
   `no-non-null-asserted-optional-chain` came in. The retry of K16 met the new errors and the run stopped.
+- **Seen again:** wave 4 of T0.13, at 15:28. K29 (the Flight log store) was blocked by
+  `services/simulator/tests/storage/edge/test_flight_log_store.py`, which built `FlightLogEntry` objects with
+  `uuid4()` ids where version 7 is required. K07's fix built them with `uuid.UUID(int=..., version=7)`, which Python 3.12
+  refuses: the file no longer even collected, and the run stopped again.
+- **Seen a third time:** wave 5 of T0.13, at 15:40. K33's test file
+  `services/simulator/tests/service/factories/flights/test_squad_flight_factory.py` had two bugs, one behind the other:
+  a `str` passed where a `Path` was needed, then every stand-in Drone built with `system_id` 1. Each fix round
+  revealed the next one, and the single retry stopped the run each time.
 - **Cause:** the owner fixing a blocking file is not asked to run the linter and the type check on that file before
   handing it back, so a fix can break another rule of the same file. One retry leaves no room for that.
-- **Fix:** to do. The brief of a blocking-file fix ends with the checks of that file's layer (lint and type check for
+- **Fix:** to do. A retry is granted while each round fixes something new, up to a bound. The brief of a
+  blocking-file fix ends with the checks of that file's layer (lint and type check for
   TypeScript, ruff and mypy for Python), and the fixer hands back only when they pass.
 - **Rule:** [TKT-19](../../.claude/rules/tickets.md#tkt-19), [TKT-13](../../.claude/rules/tickets.md#tkt-13) (the
   touched layer is checked before a task is handed back).
@@ -483,6 +496,72 @@ this page keeps what happened, so that each problem is closed once and never met
   [`tests/harness/checks/test_checks.py`](../../tests/harness/checks/test_checks.py) fails without it.
 - **Rule:** [TKT-6](../../.claude/rules/tickets.md#tkt-6) (an environment failure is a missing tool or third-party
   module; a missing module of the project goes to its owner).
+
+### <a id="l-29"></a>L-29: A file several tickets change is committed whole by the first one that finishes
+
+- **Seen:** `/issue-run P0`, the commit of T0.10 (`0612aa6`, pull request #388) at 15:36.
+- **What happened:** `AGENT.md` was among the own files of T0.10, T0.12, T0.13 and T0.14, and `README.md` among
+  those of T0.10 and T0.14. `ticket_tree.py finish` commits a ticket's own files as they are in the shared checkout,
+  so T0.10's commit took both files whole: with T0.14's lines on the desktop shell and T0.12's on the REST contract
+  and `packages/ts/api-client`, code that was not committed yet. Merged alone, `develop` would describe code it does
+  not have.
+- **Cause:** the area lock of [TKT-16](../../.claude/rules/tickets.md#tkt-16) does not cover the shared files
+  (`AGENT.md`, `README.md`, the lock files, the root `pyproject.toml`, `.github/workflows/`), several plans own them
+  at once ([L-13](#l-13)), and `finish` commits files, not each ticket's own lines.
+- **Fix:** to do. Either a shared file belongs to one open ticket at a time (the start rule waits, or `check_plan.py`
+  refuses it), or `finish` commits only the ticket's own hunks of a shared file (from the patches it integrated),
+  leaving the others' lines uncommitted.
+- **Rule:** [TKT-5](../../.claude/rules/tickets.md#tkt-5) (one commit holds only the ticket's own work),
+  [TKT-16](../../.claude/rules/tickets.md#tkt-16).
+
+### <a id="l-30"></a>L-30: `gh pr edit` fails on the deprecated Projects (classic), so `finish` could not update the pull request
+
+- **Seen:** `/issue-run P0`, the finish of T0.14 at 15:39, on pull request #388 that T0.10 had opened.
+- **What happened:** the commit of T0.14 was made and pushed, but `ticket_tree.py finish` stopped: `gh pr edit` failed
+  with the GraphQL error "Projects (classic) is being deprecated" on `repository.pullRequest.projectCards`. The pull
+  request kept T0.10's title and had no `Closes` line for T0.14, so merging it would not have closed issue #89.
+- **Cause:** the installed `gh` reads the classic project cards of a pull request before editing it, and GitHub now
+  refuses that query. Creating a pull request does not hit it, so the first ticket of a branch passes and the second
+  fails.
+- **Fix:** worked around by hand: the title and body were written with
+  `gh api -X PATCH repos/gpbcom/swarm/pulls/388 -f title=... -f body=...`, exactly as `finish` builds them. To do:
+  `pull_request()` in [`ticket_tree.py`](../../.claude/scripts/ticket_tree.py) updates the pull request with the REST
+  API and adds the label with `gh api .../issues/<n>/labels`, with a test using a stand-in `gh`.
+- **Rule:** [TKT-15](../../.claude/rules/tickets.md#tkt-15) (one `Closes` per finished ticket),
+  [TKT-24](../../.claude/rules/tickets.md#tkt-24) (GitHub's answers may change; a harness script does not stop on them).
+
+### <a id="l-31"></a>L-31: The start rule is read by a model, which reported the ticket's test errors as a refusal
+
+- **Seen:** `/issue-run P0`, relaunch of T0.13 at 15:41.
+- **What happened:** the run stopped at its gate with "The start rule refuses this ticket for now (TKT-16)". The
+  problem it listed was a pytest collection error of T0.13's own tests, which the start rule never looks at.
+  `python3 .claude/scripts/tickets.py check --ticket T0.13` printed nothing and exited 0: the rule passed. The run was
+  launched again at once.
+- **Cause:** the gate of [`ticket-run.js`](../../.claude/workflows/ticket-run.js#L279-L283) asks an agent of type
+  `verifier` to "run exactly" `tickets.py check`. The verifier's own instructions are to run `checks.py`: it ran the
+  ticket's checks and returned their failures in the start rule's schema. A deterministic decision went through a
+  model, and through an agent made for another job.
+- **Fix:** to do. The workflow takes the start rule's verdict from the script itself (its exit code and output, passed
+  through unchanged), never from an agent's summary, with a test that a ticket whose own tests fail still starts.
+- **Rule:** [TKT-16](../../.claude/rules/tickets.md#tkt-16) (the start rule),
+  [TKT-6](../../.claude/rules/tickets.md#tkt-6) (deterministic, not a model's judgement).
+
+### <a id="l-32"></a>L-32: A failing check was sent to the owner of the first file it was given, not of the file it failed on
+
+- **Seen:** `/issue-run P0`, the last check rounds of T0.12, at 15:37.
+- **What happened:** ruff found three `PLW1510` errors (`subprocess.run` without `check=`), in
+  `services/missions/tests/api/cli/test_missions_console_scripts.py`, its migrate-command test and
+  `packages/python/swarm-storage/tests/storage/postgres/migrations/test_alembic_migrator.py`. The failure named
+  `packages/python/swarm-rest/src/swarm_rest/__init__.py`, the first file ruff was given, so it went to K18, which owns
+  it, found nothing wrong there and changed nothing. The rounds ran out and the run stopped.
+- **Cause:** `Checks.check` in [`checks.py`](../../.claude/scripts/checks.py) recorded the `file` it was called with
+  (`files[0]`), whatever the tool's output said.
+- **Fix:** `failing_files()` reads the ticket's files the output names (ignoring lines that list many of them, such as
+  an echoed command), and the check records one failure per file named, each with its lines, so each goes to its
+  owner. The test `test_a_failure_goes_to_the_file_the_tool_names_not_to_the_first_file_it_was_given` of
+  [`tests/harness/checks/test_checks.py`](../../tests/harness/checks/test_checks.py) fails without it. Run on T0.12's
+  real ruff output, it names the three files.
+- **Rule:** [TKT-6](../../.claude/rules/tickets.md#tkt-6) (a failure goes back to the agent that owns the file).
 
 ## <a id="already-ruled"></a>📜 Lessons already turned into rules
 
