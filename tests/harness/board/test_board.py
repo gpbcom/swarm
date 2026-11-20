@@ -64,7 +64,7 @@ class TestBoard:
             env={**os.environ, "PATH": f"{offline}{os.pathsep}{os.environ['PATH']}"},
         )
         assert result.returncode == 0, result.stderr
-        assert result.stdout.splitlines()[-1] == "8 phases, 68 epics, 262 tickets, 595 blocked-by"
+        assert result.stdout.splitlines()[-1] == "8 phases, 74 epics, 285 tickets, 655 blocked-by"
 
 
 GIT_ENV = {
