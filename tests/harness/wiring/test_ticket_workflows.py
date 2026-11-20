@@ -88,7 +88,9 @@ class TestTicketWorkflows:
     def test_ticket_plan_moves_the_ticket_to_planned(self) -> None:
         assert "board.py move --ticket ${ID} --status planned" in read_text(self.PLAN)
 
-    @pytest.mark.parametrize("rule", ["tkt-15", "tkt-16", "tkt-17", "tkt-18", "tkt-19", "tkt-20", "tkt-21"])
+    @pytest.mark.parametrize(
+        "rule", ["tkt-15", "tkt-16", "tkt-17", "tkt-18", "tkt-19", "tkt-20", "tkt-21", "tkt-22", "tkt-23", "tkt-24"]
+    )
     def test_the_rules_hold_gitflow_parallel_tickets_and_the_board(self, rule: str) -> None:
         text = read_text(".claude/rules/tickets.md")
         assert f"[{rule.upper()}](#{rule})" in text
@@ -119,3 +121,8 @@ class TestTicketWorkflows:
         text = read_text(".claude/skills/ticket/templates/TICKET.md")
         assert "➖ No screen" in text
         assert "TKT-21" in text
+
+    def test_ticket_plan_and_ticket_run_refuse_a_ticket_already_done(self) -> None:
+        assert "python3 .claude/scripts/tickets.py done --ticket" in read_text(self.PLAN)
+        assert "python3 .claude/scripts/tickets.py check --ticket" in read_text(self.RUN)
+        assert "already done" in read_text(self.RUN)

@@ -7,6 +7,10 @@ These rules apply to every ticket of the roadmap (`docs/specs/roadmap/`), worked
 
 - Each rule has an ID (`TKT-<n>`) that never changes. New rules are added at the end with the next free ID.
 - Each rule has the same parts: **Rule**, **Why**, **Check**.
+- Each rule, here and in `.claude/rules/specs.md`, is listed in `.claude/rules/enforcement.json` with what enforces it
+  (TKT-22).
+- **A gap found in the harness is closed with three things:** the fix, a test that fails without it, and the rule that
+  makes it a gap (a new rule or a changed one), with its enforcers in `.claude/rules/enforcement.json`.
 
 | ID | Rule |
 | --- | --- |
@@ -31,6 +35,9 @@ These rules apply to every ticket of the roadmap (`docs/specs/roadmap/`), worked
 | [TKT-19](#tkt-19) | A worker blocked by another task's file reports it, and that task's owner fixes it before the retry |
 | [TKT-20](#tkt-20) | A GitHub issue with its child issues, or a group of issues, is planned at once, approved once and run as fast as the start rule allows |
 | [TKT-21](#tkt-21) | A ticket that changes a front end lists the screens it shows and captures them as screenshots before it is done |
+| [TKT-22](#tkt-22) | Every rule names what enforces it, and more than a reading alone |
+| [TKT-23](#tkt-23) | "Done" has one definition, and every harness command can run again safely |
+| [TKT-24](#tkt-24) | Harness scripts run anywhere: a shallow CI checkout, no local develop, no GitHub |
 
 ## <a id="tkt-1"></a>TKT-1: Roadmap tickets, one folder each
 
@@ -505,4 +512,60 @@ ticket that builds it keeps the specification's picture and the product the same
 **Check:** `check_ticket.py` refuses a front-end ticket that lists no screen and gives no reason; `check_plan.py`
 refuses its plan without a capture task after the front-end work; `checks.py` runs "screens captured"; the tests of
 `tests/harness/check_ticket/`, `tests/harness/check_plan/test_screen_capture.py` and `tests/harness/checks/` pass.
+
+## <a id="tkt-22"></a>TKT-22: Every rule names what enforces it
+
+**Rule:**
+
+- Every rule of `.claude/rules/specs.md` (SPEC) and of this file (TKT) has an entry in
+  `.claude/rules/enforcement.json`: the tests, scripts, hooks, workflows, CI jobs and agents that enforce it, each
+  with what it checks.
+- At least one enforcer of each rule is not an agent's reading: a test, a script, a hook, a workflow or a CI job. A
+  rule checked by reading only is a wish.
+- An obligation a specification rule puts on the code is enforced where the code is built: in the ticket harness.
+  SPEC-12's screenshots are checked by the plan, the verifier and the reviewer of every front-end ticket (TKT-21).
+- A new rule, or a gap closed, adds its entry in the same change.
+
+**Why:** SPEC-12 asked for screenshots once the app shows a state, and nothing in the ticket harness ever checked it:
+front-end tickets would have merged with mock-ups. A rule without an enforcer is found missing only when it has
+already failed.
+
+**Check:** `tests/harness/wiring/test_enforcement.py` fails when a rule has no entry, an entry names a rule that does
+not exist or a file that does not exist, or a rule has only agents as enforcers.
+
+## <a id="tkt-23"></a>TKT-23: One definition of done, and commands that can run again
+
+**Rule:**
+
+- **Done is defined once**, by `done_tickets()` in `.claude/scripts/tickets.py`: a ticket merged on `origin/develop`
+  (its `EXPLAIN.md` is there) or whose issue is closed on GitHub. A ticket **finished** has its commit on
+  `feature/tickets`, its pull request open. Every script that needs it (`tickets.py`, `board.py`) uses that function.
+- `/ticket-plan` (`tickets.py done`) and `/ticket-run` (`tickets.py check`) refuse a ticket done or finished, even with
+  `--force`; `/issue-plan`, `/issue-run`, `tickets.py approve` and `tickets.py next` leave such tickets out.
+- **Every harness command can run again on the same input** and does nothing twice: a resumed bootstrap counts what
+  GitHub already holds as made, a re-run ticket continues where it stopped (TKT-11), a group skips what is done.
+  Each such command has a test that runs it again, or on finished work.
+
+**Why:** groups knew only merged tickets, not closed ones; `approve` would have approved the plan of a finished
+ticket; the bootstrap stopped on a link it had made just before a stop; and `/ticket-run` would have run a merged
+ticket again. Each came from a command that assumed it ran once, on fresh input.
+
+**Check:** the tests of `tests/harness/tickets/test_groups.py` (done tickets never planned, approved or run again)
+and of `tests/harness/board/test_board.py` (resume) pass; `grep -n 'done_tickets' .claude/scripts/board.py` finds the
+board using it.
+
+## <a id="tkt-24"></a>TKT-24: Harness scripts run anywhere
+
+**Rule:** a harness script never needs, unless it is its purpose:
+
+- a local `develop` branch (CI checks out a pull request alone): it finds `develop`, then `origin/develop`, then
+  `HEAD` (`roadmap_gantt.develop_ref()`);
+- the full history (CI's checkout is shallow): a date or a commit it cannot find falls back to `HEAD`;
+- GitHub (CI has no login, a dry run touches nothing): reading GitHub is optional and a missing answer means "nothing
+  known", never a stop.
+
+**Why:** #345 failed three times in CI on these three assumptions, which every local run met.
+
+**Check:** the tests of `tests/harness/board/test_board.py` (a dry run with a `gh` that always fails, `develop_ref`
+without `develop`) pass, and CI runs every harness test in its own shallow checkout.
 

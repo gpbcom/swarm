@@ -96,6 +96,34 @@ class TestGroups:
         assert approved.read_text(encoding="utf-8") == before
         assert AWAITING in finished.read_text(encoding="utf-8")
 
+    def test_a_done_ticket_is_never_run_again_even_forced(self, tmp_path: Path) -> None:
+        main = make_repo(tmp_path)
+        for args in (["check", "--ticket", DONE], ["check", "--ticket", DONE, "--force"]):
+            result = run(main, *args)
+            assert result.returncode == 1
+            assert "already done" in result.stdout
+
+    def test_a_ticket_closed_on_github_is_never_run_again(self, tmp_path: Path) -> None:
+        main = make_repo(tmp_path)
+        result = run(main, "check", "--ticket", NEXT, "--force", closed=str(ISSUES[NEXT]))
+        assert result.returncode == 1
+        assert "already done" in result.stdout
+
+    def test_a_finished_ticket_is_never_run_again_even_forced(self, tmp_path: Path) -> None:
+        main = make_repo(tmp_path)
+        finish_on_shared_branch(main, NEXT)
+        result = run(main, "check", "--ticket", NEXT, "--force")
+        assert result.returncode == 1
+        assert "already finished" in result.stdout
+
+    @pytest.mark.parametrize(("ticket", "closed", "expected"), [(DONE, "", 0), (NEXT, "", 1), (NEXT, "4", 0)])
+    def test_done_tells_whether_a_ticket_needs_no_more_work(
+        self, tmp_path: Path, ticket: str, closed: str, expected: int
+    ) -> None:
+        result = run(make_repo(tmp_path), "done", "--ticket", ticket, closed=closed)
+        assert result.returncode == expected
+        assert (result.stdout != "") == (expected == 0)
+
     def test_resolve_shows_each_ticket_s_state(self, tmp_path: Path) -> None:
         main = make_repo(tmp_path)
         write_plan(main, NEXT, AWAITING)

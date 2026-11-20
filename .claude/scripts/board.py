@@ -33,9 +33,9 @@ from typing import Dict, List, Optional, Tuple, Union
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from roadmap_gantt import GRAPH, ROADMAP, cells, expand, key, merged, short
+from roadmap_gantt import GRAPH, ROADMAP, cells, expand, key, short
 from ticket_tree import find_home, main_checkout, open_states
-from tickets import develop_ref, finished_tickets
+from tickets import develop_ref, done_tickets, finished_tickets
 
 Json = Union[None, bool, int, float, str, List["Json"], Dict[str, "Json"]]
 
@@ -273,7 +273,7 @@ class Board:
         self.state = load_state()
         self.phases, self.epics, self.tickets = roadmap()
         self.graph = json.loads(GRAPH.read_text(encoding="utf-8"))
-        self.done, _ = merged()
+        self.done = set(done_tickets(MAIN))
         self.finished = finished_tickets(MAIN, develop_ref(MAIN))
         self.open = set(open_states(MAIN))
         self.by_id = {t["id"]: t for t in self.tickets}

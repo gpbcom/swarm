@@ -59,6 +59,10 @@ This repository is a proof of concept for mastering the Claude Code harness; dro
   `T0.10`, `E0.4`, `P1`), the person approves the group with `python3 .claude/scripts/tickets.py approve <refs>`, and
   `/issue-run <refs>` runs it as fast as the start rule allows, with `tickets.py watch` reports every 2 minutes. The
   README's "Working on tickets" explains it all.
+- **Rules that hold** (TKT-21 to TKT-24): a front-end ticket captures its screens as screenshots; every SPEC and TKT
+  rule names its enforcers in `.claude/rules/enforcement.json`; "done" is defined once (`tickets.py done_tickets`) and
+  no command does anything twice; harness scripts run in a shallow CI checkout without `develop` or GitHub. **A gap
+  found in the harness is closed with the fix, a test that fails without it, and the rule with its enforcers.**
 - **Agents:** `.claude/agents/` (planner and reviewer on opus, workers on sonnet, mechanical work on haiku, TKT-7);
   workflows in `.claude/workflows/`.
 - **Progress every 2 minutes** (TKT-9): when a ticket workflow starts, arm the Monitor tool with
