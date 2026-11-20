@@ -16,16 +16,16 @@ from typing import Dict, List, Optional, Tuple, Union
 USAGE = """Carry the uncommitted work of a ticket between worktrees, and commit it once, when the ticket is done (TKT-5, TKT-16).
 
 Usage (any command but start and handoff may run from the main checkout or from the ticket's worktree):
-    python3 .claude/scripts/ticket_tree.py prepare   --ticket T0.07
-    python3 .claude/scripts/ticket_tree.py home      --ticket T0.07
-    python3 .claude/scripts/ticket_tree.py status    --ticket T0.07
-    python3 .claude/scripts/ticket_tree.py start     --ticket T0.07                 (worker worktree, first step)
-    python3 .claude/scripts/ticket_tree.py handoff   --ticket T0.07 --task K01      (worker worktree, last step)
-    python3 .claude/scripts/ticket_tree.py integrate --ticket T0.07 --task K01 [--task K02 ...] [--resolved]
-    python3 .claude/scripts/ticket_tree.py diff      --ticket T0.07 [--from TREE] [--name-only]
-    python3 .claude/scripts/ticket_tree.py changes   --ticket T0.07 [--write | --check]
-    python3 .claude/scripts/ticket_tree.py docs      --ticket T0.07                 (prints nothing when all is well)
-    python3 .claude/scripts/ticket_tree.py finish    --ticket T0.07 [--no-pull-request]
+    python3 .claude/scripts/tickets/ticket_tree.py prepare   --ticket T0.07
+    python3 .claude/scripts/tickets/ticket_tree.py home      --ticket T0.07
+    python3 .claude/scripts/tickets/ticket_tree.py status    --ticket T0.07
+    python3 .claude/scripts/tickets/ticket_tree.py start     --ticket T0.07                 (worker worktree, first step)
+    python3 .claude/scripts/tickets/ticket_tree.py handoff   --ticket T0.07 --task K01      (worker worktree, last step)
+    python3 .claude/scripts/tickets/ticket_tree.py integrate --ticket T0.07 --task K01 [--task K02 ...] [--resolved]
+    python3 .claude/scripts/tickets/ticket_tree.py diff      --ticket T0.07 [--from TREE] [--name-only]
+    python3 .claude/scripts/tickets/ticket_tree.py changes   --ticket T0.07 [--write | --check]
+    python3 .claude/scripts/tickets/ticket_tree.py docs      --ticket T0.07                 (prints nothing when all is well)
+    python3 .claude/scripts/tickets/ticket_tree.py finish    --ticket T0.07 [--no-pull-request]
 
 Every ticket lives in its own worktree, its *home*: ``<repository>-tickets/<ID>/`` beside the main checkout, on the
 GitFlow branch ``feature/<ID>`` (TKT-15). The main checkout stays on ``develop``, so several tickets run at once
@@ -837,7 +837,7 @@ def publish(home: Path, ticket: str, open_pull_request: bool) -> Dict[str, JsonD
     result: Dict[str, JsonData] = {"pushed": True, "branch": branch}
     if open_pull_request:
         result["pull_request"] = pull_request(home, branch)
-        board = home / ".claude" / "scripts" / "board.py"
+        board = home / ".claude" / "scripts" / "github" / "board.py"
         if board.is_file():
             run_tool(home, sys.executable, str(board), "move", "--ticket", ticket, "--status", "review")
     return result

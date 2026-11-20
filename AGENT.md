@@ -197,7 +197,8 @@ folder of services. `tests/conventions/packages/test_package_conventions.py` run
 definitions of `Runnable` and `AsyncRunnable` themselves.
 
 - More than one top-level class in a file, whatever the kind of class, except several enums in an `enums.py`.
-- More than five Python files in a folder, not counting `__init__.py` and `conftest.py`.
+- More than five Python files in a folder, not counting `__init__.py` and `conftest.py`. The rule of [File shape](#file-shape)
+  also counts JavaScript, TypeScript and Rust files, in every folder of the repository.
 - A nested function.
 - `@staticmethod`. Use an instance method or a `@classmethod`.
 - `Any`. See [Typing](#typing).
@@ -222,10 +223,13 @@ nothing else.
 **Classes that share a method name share a base class.** `TaskNode` has `__call__`, and `YamlCatalog` has `load`. If two
 methods only happen to share a name and mean different things, rename one instead.
 
-**NEVER more than five Python files in one folder.** When a folder would go past five, create sub-folders and dispatch
-its files by entity type: `storage/customers/repositories/` for the repositories, `models/customers/exceptions/` for
-the exceptions. This applies to `src/` and `tests/`, including `exceptions/` folders. `__init__.py` and `conftest.py` do not
-count towards the five.
+**NEVER more than five code files in one folder,** whatever their language: Python, JavaScript, TypeScript and Rust
+together (`.py`, `.js`, `.jsx`, `.mjs`, `.cjs`, `.ts`, `.tsx`, `.rs`). When a folder would go past five, create sub-folders
+and dispatch its files by entity type or by theme: `storage/customers/repositories/` for the repositories,
+`models/customers/exceptions/` for the exceptions, `.claude/scripts/tickets/` for the ticket scripts. This applies to every
+folder of the repository: `src/` and `tests/` of the services and packages, `frontends/`, `packages/ts/`, `packages/rust/`,
+the harness under `.claude/` and the CI scripts, including `exceptions/` folders. The entry files of a folder do not count
+towards the five: `__init__.py` and `conftest.py`, `index.ts` and `index.js`, and Rust's `lib.rs`, `main.rs` and `mod.rs`.
 
 An `exceptions/` package's `__init__.py` re-exports everything under it, so callers keep importing from the package. Other code is imported by its full path: `from service.customers.customer_service import CustomerService`.
 

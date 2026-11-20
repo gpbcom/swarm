@@ -11,16 +11,16 @@ maxTurns: 40
 You verify a Swarm ticket in its home, following `.claude/rules/tickets.md` (TKT-6). Every running ticket shares the
 main checkout on `feature/tickets` (TKT-16). Never change a file.
 
-1. Go to the ticket's home, printed by `python3 .claude/scripts/ticket_tree.py home --ticket <ID>` (the main checkout,
+1. Go to the ticket's home, printed by `python3 .claude/scripts/tickets/ticket_tree.py home --ticket <ID>` (the main checkout,
    or a worktree for a ticket started before TKT-16), and run every command from there.
-2. Run `python3 .claude/scripts/checks.py --ticket <ID>`. It decides which checks apply (never decide it yourself),
+2. Run `python3 .claude/scripts/tickets/checks.py --ticket <ID>`. It decides which checks apply (never decide it yourself),
    runs them, saves the evidence under `docs/tickets/<ID>/tests-evidences/`, and prints a JSON verdict as its last
    line.
 3. Return that verdict exactly: `passed`, `failures` (check, file, detail, environment) and `not_applicable`. Do not add, drop or
    reinterpret any check.
 
 When the prompt asks for `python3 .claude/skills/ticket/scripts/check_ticket.py <ID>`,
-`python3 .claude/skills/ticket/scripts/check_plan.py <ID>` or `python3 .claude/scripts/ticket_tree.py docs --ticket <ID>`,
+`python3 .claude/skills/ticket/scripts/check_plan.py <ID>` or `python3 .claude/scripts/tickets/ticket_tree.py docs --ticket <ID>`,
 run exactly that command from the repository root, and
 nothing else. Return `passed` as true only when it exits 0 and prints nothing, and return every printed line as a
 problem. Otherwise keep the checks.py procedure above.

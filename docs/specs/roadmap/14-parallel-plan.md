@@ -26,7 +26,7 @@
 - **What limits it:** every running ticket shares the main checkout and the branch `feature/tickets`, each committing only its own files ([🎫 TKT-5](../../../.claude/rules/tickets.md#tkt-5), [🎫 TKT-16](../../../.claude/rules/tickets.md#tkt-16)); prerequisites and area locks decide which can run together, and with several tickets open the person's review becomes the limit ([🎲 R-01](12-risks.md#r-01)).
 - **What does not move:** the [🏛️ Regulatory track](09-regulatory-track.md), the [🤝 Hardware and partners](11-hardware-and-partners.md) and the [🛫 Flight test campaigns](10-flight-test-campaigns.md). Tickets whose acceptance needs them are built and tested on the Simulator first, and accepted on the roadmap's dates.
 - **Interactive Gantt chart:** [gantt/parallel-plan.html](gantt/parallel-plan.html), opened in a browser, shows every ticket per scenario, its prerequisites and what it unblocks, the critical path and the field dates.
-- **Rebuilt, never edited by hand:** `python3 .claude/scripts/roadmap_gantt.py build` rewrites the interactive page and the sections between the `gantt:plan` markers below, from [gantt/ticket-graph.json](gantt/ticket-graph.json), the phase pages and the tickets merged on `develop`; then run `specs.py build`. `roadmap_gantt.py check` prints nothing when both are up to date.
+- **Rebuilt, never edited by hand:** `python3 .claude/scripts/reports/roadmap_gantt.py build` rewrites the interactive page and the sections between the `gantt:plan` markers below, from [gantt/ticket-graph.json](gantt/ticket-graph.json), the phase pages and the tickets merged on `develop`; then run `specs.py build`. `roadmap_gantt.py check` prints nothing when both are up to date.
 
 <!-- gantt:plan -->
 

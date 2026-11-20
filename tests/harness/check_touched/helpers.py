@@ -95,7 +95,7 @@ def run_hook(cwd: Path, *args: str) -> subprocess.CompletedProcess[str]:
 
 
 def ticket_tree_path() -> Path:
-    return repo_root() / ".claude" / "scripts" / "ticket_tree.py"
+    return repo_root() / ".claude" / "scripts" / "tickets" / "ticket_tree.py"
 
 
 def run_ticket_tree(cwd: Path, *args: str) -> subprocess.CompletedProcess[str]:

@@ -43,7 +43,7 @@ const PUSH_AWAITING = '**Push:** 🟡 Awaiting code review'
 const PUSH_APPROVED = '**Push:** 🟢 Approved'
 // TKT-10: the timings are written by the main checkout's progress.py, which finds every run's transcripts and writes
 // into the ticket's home (the main checkout, or the worktree of a ticket started before TKT-16).
-const TIMINGS = `python3 "$(git worktree list --porcelain | sed -n '1s/^worktree //p')/.claude/scripts/progress.py" timings --ticket ${ID} --write`
+const TIMINGS = `python3 "$(git worktree list --porcelain | sed -n '1s/^worktree //p')/.claude/scripts/reports/progress.py" timings --ticket ${ID} --write`
 // TKT-14: an implementation choice where a reasonable alternative existed, for IMPLEMENTATION.md.
 const DECISION = {
   type: 'object',
@@ -158,16 +158,16 @@ function note(event, by, result) { progress.push(`| ${event} | ${by} | ${result}
 
 function workerPrompt(t, extra) {
   return `Ticket ${ID}, task ${t.id}: ${t.title}.\nThe ticket's work lives uncommitted in the main checkout ${HOME || 'on feature/tickets'} (TKT-5, TKT-16), not in yours. ` +
-    `First run python3 .claude/scripts/ticket_tree.py start --ticket ${ID} at the root of your worktree: it moves your worktree to the ticket's commit and copies that work in.\n` +
+    `First run python3 .claude/scripts/tickets/ticket_tree.py start --ticket ${ID} at the root of your worktree: it moves your worktree to the ticket's commit and copies that work in.\n` +
     `Files you may change: ${t.files.join(', ')}.\n` +
     (!/^K\d{2}$/.test(t.id)
       ? `Brief: ${t.brief}\nDone when: ${t.done_when}\n`
-      : `First read your brief and done-when exactly as approved: run python3 .claude/scripts/plan.py task --ticket ${ID} --id ${t.id} ` +
+      : `First read your brief and done-when exactly as approved: run python3 .claude/scripts/tickets/plan.py task --ticket ${ID} --id ${t.id} ` +
         `at the root of your worktree. Follow them as your brief.\n`) +
     (extra ? `\n${extra}\n` : '') +
     `If a file you may not change (for example a test written by another task) is wrong and stops you, never work around it ` +
     `(no shim, no skip): hand off what you did, set status to blocked and list each such file in blocked_by with exactly what to change (TKT-19).\n` +
-    `Never commit, push or merge. Last, run python3 .claude/scripts/ticket_tree.py handoff --ticket ${ID} --task ${t.id} ` +
+    `Never commit, push or merge. Last, run python3 .claude/scripts/tickets/ticket_tree.py handoff --ticket ${ID} --task ${t.id} ` +
     `(again after any later change), and report your decisions (choice, alternatives, trade-off, file:line) for IMPLEMENTATION.md.`
 }
 
@@ -183,7 +183,7 @@ async function integrate(results, label) {
   if (!ids.length) return null
   const merge = await agent(inHome(
     `Ticket ${ID}: integrate the hand-offs of these tasks into the main checkout, in this order: ` +
-    `python3 .claude/scripts/ticket_tree.py integrate --ticket ${ID} ${ids.map(id => `--task ${JSON.stringify(id)}`).join(' ')}. ` +
+    `python3 .claude/scripts/tickets/ticket_tree.py integrate --ticket ${ID} ${ids.map(id => `--task ${JSON.stringify(id)}`).join(' ')}. ` +
     `Then run the quick checks for what they changed (ruff check, cargo check or tsc as relevant). Commit nothing (TKT-5).`),
     { agentType: 'integrator', schema: MERGE, phase: label, label: `integrator ${label}` },
   )
@@ -253,12 +253,12 @@ async function fixRound(items, label) {
 
 // Gate ---------------------------------------------------------------------------------------------------------
 phase('Gate')
-const WHERE = `Work in the ticket's home: python3 .claude/scripts/ticket_tree.py home --ticket ${ID} prints it (the main checkout, or a worktree for a ticket started before TKT-16); run every command from there. `
+const WHERE = `Work in the ticket's home: python3 .claude/scripts/tickets/ticket_tree.py home --ticket ${ID} prints it (the main checkout, or a worktree for a ticket started before TKT-16); run every command from there. `
 const gate = await agent(
   WHERE + `Read docs/tickets/${ID}/PLAN.md. approved is true only if its status line is exactly "**Plan:** 🟢 Approved". ` +
-  `Return the status line, and in tasks the JSON array printed by python3 .claude/scripts/plan.py outline --ticket ${ID}, exactly, without changing anything ` +
+  `Return the status line, and in tasks the JSON array printed by python3 .claude/scripts/tickets/plan.py outline --ticket ${ID}, exactly, without changing anything ` +
   `(the briefs are not part of it: each worker reads its own from the plan). ` +
-  `Return in done_tasks the list "integrated" printed by python3 .claude/scripts/ticket_tree.py status --ticket ${ID} ` +
+  `Return in done_tasks the list "integrated" printed by python3 .claude/scripts/tickets/ticket_tree.py status --ticket ${ID} ` +
   `(the tasks already integrated, uncommitted, by an earlier run, TKT-11). ` +
   `Return in push_status the line of PLAN.md that starts with "**Push:**" (empty if there is none), and push_approved true only if that line is exactly "${PUSH_APPROVED}" (TKT-18).`,
   { agentType: 'scribe', schema: GATE, label: `gate ${ID}` },
@@ -277,7 +277,7 @@ if (!planCheck || !planCheck.passed) {
 // before its campaign. --force (the person's choice) logs the problems and goes on. TKT-23: a ticket already done
 // (merged, or its issue closed) or already finished (its pull request open) is refused even with --force.
 const startRule = await agent(
-  `Run exactly python3 .claude/scripts/tickets.py check --ticket ${ID}${FORCE ? ' --force' : ''} and report. ` +
+  `Run exactly python3 .claude/scripts/tickets/tickets.py check --ticket ${ID}${FORCE ? ' --force' : ''} and report. ` +
   `passed is true only if it exits 0; problems lists every line it prints.`,
   { agentType: 'verifier', schema: CHECK, label: `start rule ${ID}` },
 )
@@ -299,9 +299,9 @@ if (pushOnly) {
 }
 const waveCount = Math.max(...tasks.map(t => t.wave))
 const prepared = await agent(
-  `Ticket ${ID}: run python3 .claude/scripts/ticket_tree.py prepare --ticket ${ID} from the main checkout: it puts the main checkout on ` +
+  `Ticket ${ID}: run python3 .claude/scripts/tickets/ticket_tree.py prepare --ticket ${ID} from the main checkout: it puts the main checkout on ` +
   `feature/tickets, the branch every running ticket shares (from origin/develop when no other ticket runs), and records the ticket's own files (TKT-16). ` +
-  `Return its "home" in home and its "tree" in tree. Then run python3 .claude/scripts/board.py move --ticket ${ID} --status running; ` +
+  `Return its "home" in home and its "tree" in tree. Then run python3 .claude/scripts/github/board.py move --ticket ${ID} --status running; ` +
   `if board.py fails (gh missing or offline), say so in conflicts_resolved and go on. If prepare refuses, put its reason in blocked and change nothing.`,
   { agentType: 'integrator', schema: MERGE, label: `integrator prepare ${ID}` },
 )
@@ -368,7 +368,7 @@ for (let w = 1; w <= waveCount; w++) {
 phase('Verify')
 let verdict = null
 for (let round = 0; round <= MAX_FIX_ROUNDS; round++) {
-  verdict = await agent(inHome(`Verify ticket ${ID}: python3 .claude/scripts/checks.py --ticket ${ID} checks only its own files.`), { agentType: 'verifier', schema: VERDICT, phase: 'Verify', label: `verifier round ${round + 1}` })
+  verdict = await agent(inHome(`Verify ticket ${ID}: python3 .claude/scripts/tickets/checks.py --ticket ${ID} checks only its own files.`), { agentType: 'verifier', schema: VERDICT, phase: 'Verify', label: `verifier round ${round + 1}` })
   note(`Verify ${round + 1}${verdict && verdict.not_applicable && verdict.not_applicable.length ? ` (${verdict.not_applicable.length} not applicable)` : ''}`, 'verifier', verdict && verdict.passed ? '✅ passed' : `❌ ${verdict ? verdict.failures.length : '?'} failures`)
   if (!verdict || verdict.passed || round === MAX_FIX_ROUNDS) break
   // TKT-6: a missing tool or module is the environment's fault; fixers cannot repair it, so stop at once.
@@ -397,12 +397,12 @@ if (verdict && verdict.passed && !pushOnly) {
   let reviewedTree = null
   for (let round = 0; round <= MAX_FIX_ROUNDS; round++) {
     const prompt = inHome(round === 0
-      ? `Review ticket ${ID} (mode: full review): its uncommitted work, python3 .claude/scripts/ticket_tree.py diff --ticket ${ID}, against docs/tickets/${ID}/TICKET.md. ` +
+      ? `Review ticket ${ID} (mode: full review): its uncommitted work, python3 .claude/scripts/tickets/ticket_tree.py diff --ticket ${ID}, against docs/tickets/${ID}/TICKET.md. ` +
         `Assumptions reported by the agents: ${JSON.stringify(assumptions)}. ` +
         `Decisions reported by the agents: ${JSON.stringify(decisions)}. ` +
         `Return in note the short review note, following .claude/skills/ticket/templates/REVIEW.md.`
       : `Review ticket ${ID} (mode: confirm fixes, round ${round + 1}). Previous blocking findings: ${JSON.stringify(blocking)}. ` +
-        `The fixes are in python3 .claude/scripts/ticket_tree.py diff --ticket ${ID} --from ${reviewedTree}. Report, as blocking, only (a) a previous blocking finding that is not resolved, ` +
+        `The fixes are in python3 .claude/scripts/tickets/ticket_tree.py diff --ticket ${ID} --from ${reviewedTree}. Report, as blocking, only (a) a previous blocking finding that is not resolved, ` +
         `and (b) a blocking defect introduced by that diff. Anything else is a follow-up. List in resolved the previous findings now fixed. ` +
         `Return in note the short review note, following .claude/skills/ticket/templates/REVIEW.md.`)
     review = await agent(prompt, { agentType: 'reviewer', schema: REVIEW, phase: 'Review', label: `reviewer round ${round + 1}` })
@@ -413,7 +413,7 @@ if (verdict && verdict.passed && !pushOnly) {
     if (!blocking.length || round === MAX_FIX_ROUNDS) break
     reviewedTree = currentTree
     await fixRound(blocking.map(f => ({ file: f.file, check: f.rule, detail: f.change })), 'Review')
-    verdict = await agent(inHome(`Verify ticket ${ID}: python3 .claude/scripts/checks.py --ticket ${ID} checks only its own files.`), { agentType: 'verifier', schema: VERDICT, phase: 'Review', label: `verifier after review ${round + 1}` })
+    verdict = await agent(inHome(`Verify ticket ${ID}: python3 .claude/scripts/tickets/checks.py --ticket ${ID} checks only its own files.`), { agentType: 'verifier', schema: VERDICT, phase: 'Review', label: `verifier after review ${round + 1}` })
     if (!verdict || !verdict.passed) break
   }
 }
@@ -451,7 +451,7 @@ if (done) {
     await Promise.all([
       scribeWork,
       agent(inHome(
-        `Ticket ${ID} is done; its work is uncommitted in the main checkout on feature/tickets (python3 .claude/scripts/ticket_tree.py diff --ticket ${ID} shows only its own files). Write docs/tickets/${ID}/EXPLAIN.md and ` +
+        `Ticket ${ID} is done; its work is uncommitted in the main checkout on feature/tickets (python3 .claude/scripts/tickets/ticket_tree.py diff --ticket ${ID} shows only its own files). Write docs/tickets/${ID}/EXPLAIN.md and ` +
         `docs/tickets/${ID}/IMPLEMENTATION.md following your instructions and the templates of .claude/skills/ticket/templates/. ` +
         `Decisions reported by the agents: ${JSON.stringify(decisions)}. ` +
         `Assumptions accepted by the reviewer: ${JSON.stringify(review.assumptions_accepted)}. ` +
@@ -466,7 +466,7 @@ if (done) {
   // the person's review it runs again, because a change they made can leave the table of changes out of date.
   for (let round = 0; round <= 1; round++) {
     const docsCheck = await agent(inHome(
-      `Run exactly python3 .claude/scripts/ticket_tree.py docs --ticket ${ID} and report. passed is true only if it exits 0 and prints nothing; problems lists its output lines.`),
+      `Run exactly python3 .claude/scripts/tickets/ticket_tree.py docs --ticket ${ID} and report. passed is true only if it exits 0 and prints nothing; problems lists its output lines.`),
       { agentType: 'verifier', schema: CHECK, phase: 'Finish', label: `docs check ${ID} ${round + 1}` },
     )
     log(`Documents check ${round + 1}: ${docsCheck && docsCheck.passed ? 'passed' : `${docsCheck ? docsCheck.problems.length : '?'} problem(s)`}`)
@@ -474,7 +474,7 @@ if (done) {
     await agent(inHome(
       `Ticket ${ID}: fix only these problems of docs/tickets/${ID}/EXPLAIN.md and IMPLEMENTATION.md, so that every file and line ` +
       `they mention is a clickable link that opens it (TKT-14); when the table of changes is out of date, rewrite it with ` +
-      `python3 .claude/scripts/ticket_tree.py changes --ticket ${ID} --write. Then run python3 .claude/scripts/ticket_tree.py docs --ticket ${ID} until it prints nothing: ` +
+      `python3 .claude/scripts/tickets/ticket_tree.py changes --ticket ${ID} --write. Then run python3 .claude/scripts/tickets/ticket_tree.py docs --ticket ${ID} until it prints nothing: ` +
       `${JSON.stringify(docsCheck.problems)}`),
       { agentType: 'explainer', phase: 'Finish', label: `explainer ${ID} (fix links)` },
     )
@@ -482,7 +482,7 @@ if (done) {
   if (pushOnly) {
     finished = await agent(inHome(
       `Ticket ${ID} is done and the person reviewed its code and approved the push (TKT-18). First run ${TIMINGS}, ` +
-      `then python3 .claude/scripts/ticket_tree.py finish --ticket ${ID}: the ticket's single commit on feature/tickets, holding only its own files ` +
+      `then python3 .claude/scripts/tickets/ticket_tree.py finish --ticket ${ID}: the ticket's single commit on feature/tickets, holding only its own files ` +
       `(the other running tickets stay uncommitted), pushed, with the pull request of feature/tickets to develop opened or updated (Closes its issue, ` +
       `label automerge); GitHub merges it once CI passes (TKT-15). ` +
       `Never push or merge yourself. Put anything that stops it in blocked, the commit in tree, and the pull request's URL in pull_request.`),
@@ -517,11 +517,11 @@ return {
   awaitingReview,
   next: awaitingReview
     ? `Review the code before anything is committed or pushed (TKT-18): it is uncommitted in ${HOME} on feature/tickets ` +
-      `(python3 .claude/scripts/ticket_tree.py diff --ticket ${ID} shows only this ticket's files; VS Code's Source Control shows every running ticket), explained file by file in ` +
+      `(python3 .claude/scripts/tickets/ticket_tree.py diff --ticket ${ID} shows only this ticket's files; VS Code's Source Control shows every running ticket), explained file by file in ` +
       `${HOME}/docs/tickets/${ID}/EXPLAIN.md. When it suits you, change "${PUSH_AWAITING}" to "${PUSH_APPROVED}" in ` +
       `${HOME}/docs/tickets/${ID}/PLAN.md and run /ticket-run ${ID}: it checks the code again, then commits and pushes it with its pull request.`
     : merged ? (pullRequest
-      ? `Pull request ${pullRequest}: GitHub merges it into develop once CI passes, the issue closes and the card moves to 🏁 Done. Once every running ticket is merged, python3 .claude/scripts/tickets.py prune puts the main checkout back on develop.`
+      ? `Pull request ${pullRequest}: GitHub merges it into develop once CI passes, the issue closes and the card moves to 🏁 Done. Once every running ticket is merged, python3 .claude/scripts/tickets/tickets.py prune puts the main checkout back on develop.`
       : `One commit on feature/tickets, merged into develop locally (no remote).`)
     : done ? `The documents are written but the commit or the merge stopped: ${finished ? finished.blocked.join('; ') : 'the integrator did not report'}`
     : environmentFailure ? `Fix the environment (see the failing checks in ${HOME}/docs/tickets/${ID}/PROGRESS.md), then run /ticket-run ${ID} again. The work stays uncommitted in ${HOME}.`

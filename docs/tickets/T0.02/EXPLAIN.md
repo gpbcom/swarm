@@ -20,7 +20,7 @@ The person's only gate is the plan approval. The review note is short, so that o
   - PostToolUse runs `.claude/hooks/format_edited.py`, which formats only the edited file, using `.claude/hooks/formatters.json`.
   - SubagentStop runs `.claude/hooks/check_touched.py`, which runs the checks of the touched layer in a worker's worktree, using `.claude/hooks/layer-checks.json`. It sends a failing task back at most twice, skips tests on test-only changes, and treats a missing tool as a note, not a failure (TKT-13).
 - **Rules and agents:** `.claude/rules/tickets.md` gains TKT-13 and the reviewer's note is written to `REVIEW.md` (TKT-1 and TKT-6). `.claude/agents/` gets one line per worker about the hooks, and the ticket-writer and verifier are updated.
-- **Scripts:** `.claude/scripts/plan.py` gains the `outline` and `task` commands.
+- **Scripts:** `.claude/scripts/tickets/plan.py` gains the `outline` and `task` commands.
 - **Tests:** `tests/harness/` covers the checkers, the hooks and the wiring of the agents and workflows.
 - **Ticket folder:** `docs/tickets/README.md` describes the three steps and links the template.
 

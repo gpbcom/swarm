@@ -11,14 +11,14 @@ import tempfile
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "skills" / "ticket" / "scripts"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "skills" / "ticket" / "scripts"))
 
 from check_ticket import has_no_screen_reason, screens_of, screens_section, touches_front_end
 
 USAGE = """Run every applicable check of a ticket deterministically, save the evidence, and print the verdict as JSON.
 
 Usage, from the repository root, on the ticket branch:
-    python3 .claude/scripts/checks.py --ticket T0.01 [--base develop]
+    python3 .claude/scripts/tickets/checks.py --ticket T0.01 [--base develop]
 
 Which checks apply is decided here, never by a model (TKT-6): a check whose target does not exist yet (a Cargo
 workspace with no member crate, no TypeScript workspace package, no Python source for mypy) is reported under
@@ -35,7 +35,7 @@ ticket has recorded its own files, every check runs in a clean temporary worktre
 ticket's own changes (TKT-6), removed afterwards; the evidence is still written to the ticket's folder.
 """
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 PROJECT_PREFIXES = ("services/", "packages/", "frontends/", "tests/", "deploy/")
 TIMEOUT_S = 900
 # A failure whose output holds one of these is caused by the environment (a missing tool or module), not by the
@@ -350,10 +350,10 @@ def run_checks(
         checks.passed.append("screens captured")
     checks.check("specs check", ["python3", ".claude/skills/write-specs/scripts/specs.py", "check"], "docs/specs")
     folder = f"docs/tickets/{ticket}"
-    checks.check("ticket refs", ["python3", ".claude/scripts/ticket_refs.py", "check", "--ticket", ticket], folder)
+    checks.check("ticket refs", ["python3", ".claude/scripts/tickets/ticket_refs.py", "check", "--ticket", ticket], folder)
     if (root / folder / "PLAN.md").is_file():
         checks.check(
-            "plan view", ["python3", ".claude/scripts/plan.py", "check", "--ticket", ticket], f"{folder}/PLAN.md"
+            "plan view", ["python3", ".claude/scripts/tickets/plan.py", "check", "--ticket", ticket], f"{folder}/PLAN.md"
         )
     return {
         "passed": not checks.failures,

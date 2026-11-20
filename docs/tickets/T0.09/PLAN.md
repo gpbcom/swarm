@@ -7,7 +7,7 @@
 <!-- ticket:specs -->
 ## 📚 Specifications
 
-The technical pages, features, use cases and business rules of [TICKET.md](TICKET.md), copied by `python3 .claude/scripts/ticket_refs.py sync`.
+The technical pages, features, use cases and business rules of [TICKET.md](TICKET.md), copied by `python3 .claude/scripts/tickets/ticket_refs.py sync`.
 
 - [🔲 Architecture: cells and the global layer](../../specs/technical/01-architecture.md#cells)
 - [🗄️ Storage: overview](../../specs/technical/03-storage.md#overview)
@@ -107,7 +107,7 @@ T0.09 is split into 35 tasks over 7 waves. It adds two things: a NATS cluster of
 <!-- plan:graph -->
 
 > [!NOTE]
-> Generated from the json block at the end of this page by `python3 .claude/scripts/plan.py render`.
+> Generated from the json block at the end of this page by `python3 .claude/scripts/tickets/plan.py render`.
 > To change a task, edit the json block, then render again: never edit this view by hand.
 
 ## Waves

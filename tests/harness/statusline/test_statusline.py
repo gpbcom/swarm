@@ -12,7 +12,7 @@ GIT_ENV = {
     "GIT_COMMITTER_NAME": "T",
     "GIT_COMMITTER_EMAIL": "t@example.com",
 }
-SCRIPT = Path(__file__).resolve().parents[3] / ".claude" / "scripts" / "statusline.py"
+SCRIPT = Path(__file__).resolve().parents[3] / ".claude" / "scripts" / "reports" / "statusline.py"
 BOARD = {"status": {"T9.01": "running", "T9.02": "review", "T9.03": "done", "T9.04": "ready", "P9": "running"}}
 
 

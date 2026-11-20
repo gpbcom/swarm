@@ -106,7 +106,7 @@ this page keeps what happened, so that each problem is closed once and never met
   `PROGRESS.md` outside the ticket's real folder.
 - **Cause:** the script did not know the main checkout from a worktree.
 - **Fix:** `main_checkout()`, `ticket_folder()` and `project_dir()` in
-  [`progress.py`](../../.claude/scripts/progress.py) always resolve to the main checkout.
+  [`progress.py`](../../.claude/scripts/reports/progress.py) always resolve to the main checkout.
 - **Rule:** [TKT-10](../../.claude/rules/tickets.md#tkt-10). No test proves the worktree case yet.
 
 ### <a id="l-06"></a>L-06: `automerge` refused a pull request that changes `.github/workflows/`
@@ -142,7 +142,7 @@ this page keeps what happened, so that each problem is closed once and never met
 - **Seen:** `/issue-plan P0`.
 - **What happened:** the 2-minute reports of [TKT-9](../../.claude/rules/tickets.md#tkt-9) stopped as soon as they
   started, while 11 plans were being written.
-- **Cause:** `report()` in [`tickets.py`](../../.claude/scripts/tickets.py) ends the watch when no ticket is running
+- **Cause:** `report()` in [`tickets.py`](../../.claude/scripts/tickets/tickets.py) ends the watch when no ticket is running
   or in review; a ticket being planned is neither.
 - **Fix:** to do. A ticket whose plan is being written must keep the watch alive.
 - **Rule:** [TKT-9](../../.claude/rules/tickets.md#tkt-9), [TKT-20](../../.claude/rules/tickets.md#tkt-20).
@@ -300,7 +300,7 @@ this page keeps what happened, so that each problem is closed once and never met
   verifier's `checks.py` picks the checks from the ticket's own files, but the tools themselves (`uv`, `pnpm -r`) read
   the whole workspace, other tickets' uncommitted work included. Tests come first
   ([TKT-4](../../.claude/rules/tickets.md#tkt-4)), so another ticket is red by design for most of its run.
-- **Fix:** [`checks.py`](../../.claude/scripts/checks.py) runs every check in a clean temporary worktree of the shared
+- **Fix:** [`checks.py`](../../.claude/scripts/tickets/checks.py) runs every check in a clean temporary worktree of the shared
   branch's commit, into which it copies only the ticket's own changes (and deletes the files the ticket deleted),
   then removes it; Cargo shares the main checkout's build folder. Run on T0.10's real work beside the three other
   tickets, the same 51 files passed all 15 checks that had failed 7 times in the shared checkout. The test
@@ -330,7 +330,7 @@ this page keeps what happened, so that each problem is closed once and never met
   their prerequisites. It does not show what a running ticket is doing (which wave, checks, review, documents) or how far
   it is, and a report where nothing changed looks the same as one where a ticket moved. The person asked for a
   colourised, synthetic update.
-- **Cause:** `report()` in [`tickets.py`](../../.claude/scripts/tickets.py) prints the board (states, areas,
+- **Cause:** `report()` in [`tickets.py`](../../.claude/scripts/tickets/tickets.py) prints the board (states, areas,
   prerequisites), not the runs. The run's phase is in the events of each ticket's `PROGRESS.md` and in the run's
   journal, which the watch does not read. The count of tasks is also wrong ([L-21](#l-21)).
 - **Fix:** to do. **The update MUST be colourised with icons, and MUST tell more about what each ticket is doing
@@ -476,7 +476,7 @@ this page keeps what happened, so that each problem is closed once and never met
   fix them, and every re-run would have stopped the same way.
 - **Cause:** `checks.py` flagged any output holding `ModuleNotFoundError` or `No module named` as the environment's
   fault, whatever the module.
-- **Fix:** [`checks.py`](../../.claude/scripts/checks.py) flags a missing module as the environment's only when it is
+- **Fix:** [`checks.py`](../../.claude/scripts/tickets/checks.py) flags a missing module as the environment's only when it is
   not the project's own code (`tests`, `conftest`, a folder of the repository, a package of `services/*/src` or
   `packages/python/*/src`). The parametrised test
   `test_a_missing_module_of_the_project_is_the_code_s_fault_not_the_environment_s` of

@@ -1,5 +1,5 @@
 {
- "about": "Ticket graph of the roadmap, read by .claude/scripts/roadmap_gantt.py. deps: the tickets whose merged output a ticket needs before it can be built and tested. external: the items its acceptance needs (G regulatory, H hardware, P partners, C campaigns). field: a ticket whose work only exists once that campaign or milestone has happened. size: S, M or L. Read from the ticket rows of the phase pages on 19 Nov 2026: an estimate, to correct when a ticket is planned.",
+ "about": "Ticket graph of the roadmap, read by .claude/scripts/reports/roadmap_gantt.py. deps: the tickets whose merged output a ticket needs before it can be built and tested. external: the items its acceptance needs (G regulatory, H hardware, P partners, C campaigns). field: a ticket whose work only exists once that campaign or milestone has happened. size: S, M or L. Read from the ticket rows of the phase pages on 19 Nov 2026: an estimate, to correct when a ticket is planned.",
  "hours": {
   "agent": {
    "S": 0.4,

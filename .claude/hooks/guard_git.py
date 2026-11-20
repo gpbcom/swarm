@@ -23,7 +23,7 @@ FORCE = re.compile(r"(?:^|\s)(?:--force(?:-with-lease)?(?:=\S*)?|-f|--delete|-d)
 REWRITE_REASON = (
     "{target} is never rebased, reset, force-pushed or deleted (TKT-25): develop changes through pull requests, "
     "master through a release or a hotfix pull request (TKT-15). Only a live branch is rebased onto develop: "
-    "`python3 .claude/scripts/tickets.py branches` says which."
+    "`python3 .claude/scripts/tickets/tickets.py branches` says which."
 )
 PUSH_PROTECTED = re.compile(r"\bgit\s+(?:-C\s+\S+\s+)*push\b[^|;&]*?(?:\s|:)(develop|master|main)\b")
 
@@ -84,7 +84,7 @@ def decide(command: str, cwd: str) -> Optional[Tuple[str, str]]:
     if context and write:
         return "deny", (
             f"`{write.group(0)}` is not run by hand in a ticket's or a worker's worktree (TKT-5): "
-            "workers hand off with `python3 .claude/scripts/ticket_tree.py handoff`, the integrator integrates with "
+            "workers hand off with `python3 .claude/scripts/tickets/ticket_tree.py handoff`, the integrator integrates with "
             "`ticket_tree.py integrate`, and only `ticket_tree.py finish` commits, pushes and opens the pull request."
         )
     if APPROVE.search(command):
