@@ -108,6 +108,16 @@ function computeWaves(tasks) {
 }
 
 phase('Ticket')
+// TKT-23: a ticket already done (merged, or its issue closed on GitHub) or finished (its pull request open) is never
+// planned again: tickets.py holds the one definition of done.
+const notDone = await agent(
+  `Run exactly python3 .claude/scripts/tickets.py done --ticket ${ID} and report. passed is true only if it exits 1 ` +
+  `and prints nothing (the ticket still needs work); problems lists every line it prints.`,
+  { agentType: 'verifier', schema: CHECK, label: `done check ${ID}` },
+)
+if (!notDone || !notDone.passed) {
+  return { ticket: ID, stopped: (notDone && notDone.problems.join(' ')) || 'tickets.py done did not report', next: 'Nothing to plan.' }
+}
 const ticket = await agent(
   `Open ticket ${ID} of the Swarm roadmap: write docs/tickets/${ID}/TICKET.md and PROGRESS.md, keeping them if they already exist and are complete. ` +
   `TICKET.md must link at least one technical page, feature, use case or business rule (TKT-2); return those links in specs.`,

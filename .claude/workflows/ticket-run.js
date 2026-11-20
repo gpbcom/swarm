@@ -274,7 +274,8 @@ if (!planCheck || !planCheck.passed) {
   return { ticket: ID, stopped: 'PLAN.md fails check_plan.py', problems: planCheck ? planCheck.problems : ['check_plan.py did not report'] }
 }
 // TKT-16: the start rule. Every prerequisite merged on develop, no open ticket on the same areas, no field ticket
-// before its campaign. --force (the person's choice) logs the problems and goes on.
+// before its campaign. --force (the person's choice) logs the problems and goes on. TKT-23: a ticket already done
+// (merged, or its issue closed) or already finished (its pull request open) is refused even with --force.
 const startRule = await agent(
   `Run exactly python3 .claude/scripts/tickets.py check --ticket ${ID}${FORCE ? ' --force' : ''} and report. ` +
   `passed is true only if it exits 0; problems lists every line it prints.`,

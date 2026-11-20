@@ -273,6 +273,33 @@ def closed_issues(main: Path, state: Dict[str, object]) -> Set[int]:
     return {int(n) for n in result.stdout.split() if n.isdigit()} if result.returncode == 0 else set()
 
 
+def done_tickets(main: Path, fetch: bool = False) -> Dict[str, str]:
+    """Return every ticket that needs no more work, with why: THE definition of done of the harness (TKT-23).
+
+    A ticket is done when it is merged on ``origin/develop`` (its ``EXPLAIN.md`` is there, TKT-14) or when its issue is
+    closed on GitHub (done another way, or not planned). Every command that acts on tickets skips these.
+    """
+    state = github_state(main)
+    found = {
+        ticket: f"merged on {develop_ref(main, fetch)}" for ticket in merged_tickets(main, develop_ref(main, fetch))
+    }
+    closed = closed_issues(main, state)
+    for ticket, issue in state.get("issues", {}).items():  # type: ignore[union-attr]
+        if TICKET_ID.match(ticket) and isinstance(issue, dict) and issue.get("number") in closed:
+            found.setdefault(ticket, f"its issue #{issue['number']} is closed on GitHub")
+    return found
+
+
+def finished_reason(main: Path, ticket: str) -> str:
+    """Return why a ticket needs no more work (done, or finished with its pull request open), or an empty string."""
+    done = done_tickets(main, fetch=True)
+    if ticket in done:
+        return f"{ticket} is already done ({done[ticket]}): there is nothing to plan or run."
+    if ticket in finished_tickets(main, develop_ref(main)):
+        return f"{ticket} is already finished: its commit waits in the pull request of {SHARED_BRANCH}."
+    return ""
+
+
 def resolve(main: Path, refs: List[str]) -> List[str]:
     """Return the tickets of a group, merged ones left out, every prerequisite before the tickets that need it."""
     state = github_state(main)
@@ -292,10 +319,7 @@ def resolve(main: Path, refs: List[str]) -> List[str]:
         if not found:
             raise SystemExit(f"{ref} ({ident}) holds no ticket: run python3 .claude/scripts/board.py bootstrap first.")
         wanted.extend(ticket for ticket in found if ticket not in wanted)
-    merged = merged_tickets(main, develop_ref(main))
-    closed = closed_issues(main, state)
-    numbers = {k: int(v["number"]) for k, v in issues.items() if isinstance(v, dict) and "number" in v}  # type: ignore[union-attr]
-    done = merged | {ticket for ticket in wanted if numbers.get(ticket) in closed}
+    done = done_tickets(main)
     left = sorted((ticket for ticket in wanted if ticket not in done), key=key)
     ordered: List[str] = []
     while left:
@@ -542,6 +566,8 @@ def setup(main: Path) -> None:
 def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     sub = parser.add_subparsers(dest="command", required=True)
+    done_command = sub.add_parser("done")
+    done_command.add_argument("--ticket", required=True)
     check = sub.add_parser("check")
     check.add_argument("--ticket", required=True)
     check.add_argument("--force", action="store_true")
@@ -559,7 +585,16 @@ def main(argv: Optional[List[str]] = None) -> int:
     args = parser.parse_args(argv)
     top = Path(git(Path.cwd(), "rev-parse", "--show-toplevel")[1])
     main_dir = main_checkout(top)
+    if args.command == "done":
+        reason = finished_reason(main_dir, args.ticket)
+        if reason:
+            print(reason)
+        return 0 if reason else 1
     if args.command == "check":
+        reason = finished_reason(main_dir, args.ticket)
+        if reason:
+            print(reason)
+            return 1
         found = problems(main_dir, args.ticket)
         for problem in found:
             print(problem)
