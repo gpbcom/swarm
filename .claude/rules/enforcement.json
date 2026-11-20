@@ -422,6 +422,11 @@
     "kind": "test",
     "path": "tests/harness/ticket_tree/test_ticket_tree.py",
     "what": "two tickets in one checkout"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/wiring/test_ticket_workflows.py",
+    "what": "the start rule is run by the runner agent and decided by its exit code, never judged by the verifier"
    }
   ],
   "TKT-17": [
