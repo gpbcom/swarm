@@ -33,7 +33,7 @@ class TestDevEnvironment:
         ("keda-http-add-on.yaml", "keda-add-ons-http", "https://kedacore.github.io/charts", "keda"),
     ]
     SERVICES: ClassVar[List[str]] = ["missions", "fleet", "processing", "evidence", "notifier"]
-    ALLOWED_TOP_KEYS: ClassVar[List[str]] = ["global", "database", "valkey", "objectStorage", "vaultConfig"]
+    ALLOWED_TOP_KEYS: ClassVar[List[str]] = ["global", "database", "valkey", "objectStorage", "vaultConfig", "nats"]
     FORBIDDEN_KEYS: ClassVar[List[str]] = [
         "password",
         "rootpassword",
@@ -42,7 +42,11 @@ class TestDevEnvironment:
         "devroottoken",
         "secretkey",
         "accesskey",
+        "seed",
+        "nkey",
+        "creds",
     ]
+    NATS_JWT_KEYS: ClassVar[List[str]] = ["operatorJwt", "systemAccount", "systemAccountJwt"]
 
     def load(self, path: Path) -> Dict[str, JsonValue]:
         loaded = yaml.safe_load(path.read_text(encoding=self.ENCODING))
@@ -112,3 +116,15 @@ class TestDevEnvironment:
             for document in yaml.safe_load_all(file.read_text(encoding=self.ENCODING)):
                 found = {key.lower() for key in self.keys_of(document)} & set(self.FORBIDDEN_KEYS)
                 assert not found, f"{file} holds {found}"
+
+    def test_the_dev_values_hold_a_nats_section_with_a_jetstream_file_storage_size(self) -> None:
+        nats = self.section(self.load(self.VALUES), "nats")
+        file_storage = self.section(self.section(nats, "jetstream"), "fileStorage")
+        size = file_storage["size"]
+        assert isinstance(size, str)
+        assert size.strip()
+
+    def test_the_dev_values_leave_the_nats_operator_jwts_to_terraform(self) -> None:
+        keys = self.keys_of(self.load(self.VALUES))
+        for key in self.NATS_JWT_KEYS:
+            assert key not in keys

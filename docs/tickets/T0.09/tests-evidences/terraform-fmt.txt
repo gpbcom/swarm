@@ -1,0 +1,4 @@
+$ terraform fmt -check -recursive deploy/terraform
+(cwd .)
+
+

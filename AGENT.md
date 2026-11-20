@@ -125,8 +125,12 @@ imports the functions from a wheel it builds.
 
 The packages of `packages/python/` are `swarm-lifecycle` (`swarm_lifecycle`), with Runnable, AsyncRunnable and the
 abstract factories; `swarm-logging` (`swarm_logging`), with the logging configuration; and `swarm-catalog`
-(`swarm_catalog`), with YamlCatalog. Inside a package, Pydantic models, enums and exceptions sit in `src/<module>/models/`,
-as in a service.
+(`swarm_catalog`), with YamlCatalog; and `swarm-nats` (`swarm_nats`), the shared async NATS client: the connector,
+request-reply with deadlines and idempotency keys, the JetStream admin, the event publisher, and the AsyncRunnable
+responder and durable consumer with their factories, together with the issuers of the NATS operator, of the per-Operator
+accounts and of the credentials (service, edge, simulated, system). Its NATS tests need a nats-server binary on PATH and
+skip without it, and CI installs a pinned one. Inside a package, Pydantic models, enums and exceptions sit in
+`src/<module>/models/`, as in a service.
 
 The Python rules in this file apply to `services/` and `packages/python/`. The front ends use React and TypeScript
 with a Tauri desktop shell, images go to GHCR, and Argo CD deploys them; see `docs/specs/technical/`.

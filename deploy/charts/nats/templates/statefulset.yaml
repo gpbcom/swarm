@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: nats
+  labels:
+    app.kubernetes.io/name: nats
+spec:
+  serviceName: nats-headless
+  replicas: {{ .Values.replicas }}
+  podManagementPolicy: Parallel
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: nats
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: nats
+    spec:
+      containers:
+        - name: nats
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - "--config"
+            - "/etc/nats-config/nats.conf"
+          env:
+            - name: SERVER_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          ports:
+            - name: client
+              containerPort: {{ .Values.ports.client }}
+            - name: cluster
+              containerPort: {{ .Values.ports.cluster }}
+            - name: monitor
+              containerPort: {{ .Values.ports.monitor }}
+            {{- if .Values.leafnodes.enabled }}
+            - name: leafnodes
+              containerPort: {{ .Values.ports.leafnodes }}
+            {{- end }}
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: monitor
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: monitor
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: config
+              mountPath: /etc/nats-config
+            - name: data
+              mountPath: /data
+            {{- if .Values.leafnodes.enabled }}
+            - name: leafnodes-tls
+              mountPath: /etc/nats-leafnodes-tls
+              readOnly: true
+            {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: nats-config
+        {{- if .Values.leafnodes.enabled }}
+        - name: leafnodes-tls
+          secret:
+            secretName: {{ .Values.leafnodes.tls.secretName }}
+        {{- end }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: {{ .Values.jetstream.fileStorage.size }}

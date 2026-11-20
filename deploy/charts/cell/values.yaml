@@ -9,3 +9,5 @@ objectStorage:
   enabled: true
 vaultConfig:
   enabled: true
+nats:
+  enabled: true

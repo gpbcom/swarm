@@ -1,3 +1,13 @@
+# The operator JWT, the system account key and its JWT are public. The operator and account seeds never enter Terraform.
+locals {
+  cell_parameters = {
+    "database.imageName"         = var.database_image
+    "nats.auth.operatorJwt"      = var.nats_operator_jwt
+    "nats.auth.systemAccount"    = var.nats_system_account
+    "nats.auth.systemAccountJwt" = var.nats_system_account_jwt
+  }
+}
+
 module "cell" {
   source = "../../modules/self-hosted/cell"
 
@@ -24,7 +34,7 @@ module "cell_application" {
   target_revision    = var.branch
   chart_path         = "deploy/charts/cell"
   values_files       = ["../../environments/dev/values.yaml"]
-  parameters         = { "database.imageName" = var.database_image }
+  parameters         = local.cell_parameters
   apps_chart_version = var.argocd_apps_chart_version
 
   depends_on = [module.vault]

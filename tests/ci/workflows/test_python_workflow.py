@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from typing import ClassVar, Dict, List, Union
 
@@ -10,6 +11,8 @@ from pydantic import JsonValue
 
 class TestPythonWorkflow:
     READ_ONLY_PERMISSIONS: ClassVar[Dict[str, str]] = {"contents": "read"}
+    NATS_VERSION_KEY: ClassVar[str] = "NATS_SERVER_VERSION"
+    VERSION_PATTERN: ClassVar[str] = r"\d+\.\d+\.\d+"
 
     def root(self) -> Path:
         return Path(__file__).resolve().parents[3]
@@ -182,3 +185,25 @@ class TestPythonWorkflow:
 
     def test_the_packages_job_never_expands_an_expression_inside_a_run(self) -> None:
         assert all("${{" not in run for run in self.runs("packages"))
+
+    def test_the_repository_job_never_expands_an_expression_inside_a_run(self) -> None:
+        assert all("${{" not in run for run in self.runs("repository"))
+
+    @pytest.mark.parametrize("name", ["packages", "repository"])
+    def test_the_job_pins_the_nats_server_version(self, name: str) -> None:
+        env = self.job(name).get("env")
+        assert isinstance(env, dict)
+        assert re.fullmatch(self.VERSION_PATTERN, str(env.get(self.NATS_VERSION_KEY)))
+
+    @pytest.mark.parametrize("name", ["packages", "repository"])
+    def test_the_job_installs_nats_server_after_the_sync_and_before_the_tests(self, name: str) -> None:
+        install = self.run_index(name, "nats-server")
+        assert self.run_index(name, "uv sync --locked") < install
+        assert install < self.run_index(name, "uv run pytest")
+
+    @pytest.mark.parametrize("name", ["packages", "repository"])
+    def test_the_nats_server_download_is_checked(self, name: str) -> None:
+        run = self.run_with(name, "nats-server")
+        assert "sha256sum" in run
+        assert "$NATS_SERVER_VERSION" in run
+        assert '"$GITHUB_PATH"' in run

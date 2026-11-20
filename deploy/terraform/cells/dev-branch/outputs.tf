@@ -12,3 +12,8 @@ output "vault_address" {
   description = "The in-cluster address of the vault of the cell."
   value       = module.vault.address
 }
+
+output "cell_parameter_names" {
+  description = "The sorted names of the Helm parameters passed to the cell. Their values are not shown."
+  value       = sort(keys(local.cell_parameters))
+}

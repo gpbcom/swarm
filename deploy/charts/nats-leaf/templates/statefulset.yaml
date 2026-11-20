@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: nats-leaf
+  labels:
+    app.kubernetes.io/name: nats-leaf
+spec:
+  serviceName: nats-leaf
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: nats-leaf
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: nats-leaf
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+    spec:
+      containers:
+        - name: nats-leaf
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args: ["--config", "/etc/nats-leaf-config/nats.conf"]
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          ports:
+            - name: client
+              containerPort: {{ .Values.ports.client }}
+            - name: monitor
+              containerPort: {{ .Values.ports.monitor }}
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: monitor
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: monitor
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: config
+              mountPath: /etc/nats-leaf-config
+              readOnly: true
+            - name: credentials
+              mountPath: /etc/nats-leaf-credentials
+              readOnly: true
+            - name: tls
+              mountPath: /etc/nats-leaf-tls
+              readOnly: true
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: config
+          configMap:
+            name: nats-leaf-config
+        - name: credentials
+          secret:
+            secretName: {{ .Values.remote.credentialsSecret }}
+        - name: tls
+          secret:
+            secretName: {{ .Values.remote.tlsSecret }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: {{ .Values.jetstream.fileStorage.size }}

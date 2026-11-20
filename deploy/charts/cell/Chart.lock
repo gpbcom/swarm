@@ -11,5 +11,8 @@ dependencies:
 - name: vault-config
   repository: file://../vault-config
   version: 0.1.0
-digest: sha256:bec0bd7c5963bbc7151a371fb6b790b82ecca20d49df5f015f7000f54e081325
+- name: nats
+  repository: file://../nats
+  version: 0.1.0
+digest: sha256:df2da7abf90d431ab8ca95702c53be730081d4d035ac6e843e25440fbdb3515a
 generated: "2026-11-19T00:00:00.0000000+00:00"

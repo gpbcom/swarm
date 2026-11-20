@@ -1,0 +1,32 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: nats
+  labels:
+    app.kubernetes.io/name: nats
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: nats
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector: {}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.ports.client }}
+        - protocol: TCP
+          port: {{ .Values.ports.monitor }}
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: nats
+      ports:
+        - protocol: TCP
+          port: {{ .Values.ports.cluster }}
+    {{- if .Values.leafnodes.enabled }}
+    - ports:
+        - protocol: TCP
+          port: {{ .Values.ports.leafnodes }}
+    {{- end }}
