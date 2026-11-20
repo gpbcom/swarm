@@ -34,7 +34,8 @@ from typing import Dict, List, Optional, Tuple, Union
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from roadmap_gantt import GRAPH, ROADMAP, cells, expand, key, merged, short
-from ticket_tree import find_home, main_checkout
+from ticket_tree import find_home, main_checkout, open_states
+from tickets import develop_ref, finished_tickets
 
 Json = Union[None, bool, int, float, str, List["Json"], Dict[str, "Json"]]
 
@@ -273,6 +274,8 @@ class Board:
         self.phases, self.epics, self.tickets = roadmap()
         self.graph = json.loads(GRAPH.read_text(encoding="utf-8"))
         self.done, _ = merged()
+        self.finished = finished_tickets(MAIN, develop_ref(MAIN))
+        self.open = set(open_states(MAIN))
         self.by_id = {t["id"]: t for t in self.tickets}
         self.external = {item[0]: item for items in self.graph["external_items"].values() for item in items}
         self.critical = self.critical_path()
@@ -293,11 +296,11 @@ class Board:
         home = find_home(ROOT, ticket)
         folder = (home or MAIN) / "docs" / "tickets" / ticket
         progress = (folder / "PROGRESS.md").read_text(encoding="utf-8") if (folder / "PROGRESS.md").is_file() else ""
-        if re.search(r"In review|Pull request", progress):
+        if ticket in self.finished or re.search(r"In review|Pull request", progress):
             return "review"
         if home is not None and git_ahead(home):
             return "review"
-        if home is not None or re.search(r"\*\*Status:\*\* 🔄", progress):
+        if ticket in self.open or home is not None or re.search(r"\*\*Status:\*\* 🔄", progress):
             return "running"
         plan = folder / "PLAN.md"
         if plan.is_file() and "Awaiting approval" in plan.read_text(encoding="utf-8"):

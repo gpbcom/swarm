@@ -9,7 +9,8 @@ Usage (by git, through ``.githooks/``; turned on per clone by ``python3 .claude/
 - ``develop`` and ``master`` change only through pull requests: no commit on them and no push to them.
 - Branches follow GitFlow: ``feature/<name>`` (a ticket is ``feature/<ID>``), ``release/<version>``,
   ``hotfix/<name>``, ``bugfix/<name>``, ``support/<name>``. The workers' ``worktree-*`` branches never commit (TKT-5).
-- A commit on a ticket's branch starts with its ID: ``T0.09: NATS JetStream and Operator accounts``.
+- A commit on a ticket's branch, or on the tickets' shared branch ``feature/tickets``, starts with a ticket ID:
+  ``T0.09: NATS JetStream and Operator accounts``.
 
 ``SWARM_GITFLOW_BYPASS=1`` lets the person step outside these rules on purpose (a first push, a release tag).
 Each refusal prints its reason and the way out on stderr, and exits 1.
@@ -30,6 +31,8 @@ GITFLOW = re.compile(r"^(feature|bugfix|hotfix|support)/[A-Za-z0-9._-]+$|^releas
 WORKER = re.compile(r"^worktree-")
 LEGACY = re.compile(r"^ticket/T\d+\.\d{2}$")
 TICKET_BRANCH = re.compile(r"^feature/(T\d+\.\d{2})$")
+SHARED_BRANCH = "feature/tickets"
+ANY_TICKET = re.compile(r"^T\d+\.\d{2}[: ]")
 ZERO = "0" * 40
 
 
@@ -81,6 +84,11 @@ def commit_msg(path: str) -> int:
     subject = next((line for line in Path(path).read_text(encoding="utf-8").splitlines() if line.strip()), "")
     if subject.startswith(("Merge ", "Revert ", "fixup! ", "squash! ")):
         return 0
+    if branch() == SHARED_BRANCH and not ANY_TICKET.match(subject):
+        return refuse(
+            f"a commit on {SHARED_BRANCH} is one ticket's commit and starts with its ID.",
+            '"T0.10: <title of TICKET.md>" (python3 .claude/scripts/ticket_tree.py finish writes it).',
+        )
     ticket = TICKET_BRANCH.match(branch())
     if ticket and not re.match(rf"^{re.escape(ticket.group(1))}[: ]", subject):
         return refuse(

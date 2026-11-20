@@ -37,9 +37,10 @@ approved brief or check is approved again and recorded in 📝 Events before the
 - **Gate:** `check_plan.py` runs again, then the start rule `tickets.py check` (TKT-16): every prerequisite merged on
   `origin/develop`, no open ticket on the same areas, no field ticket before its campaign. `/ticket-run <ID> --force`
   starts anyway on the person's decision.
-- **Its own worktree (TKT-16):** `ticket_tree.py prepare` gives the ticket its home `<repository>-tickets/<ID>/` on
-  `feature/<ID>`, from `origin/develop`, and moves `docs/tickets/<ID>/` into it. The main checkout stays on `develop`,
-  so several tickets run at once. The card moves to 🔄 Running (TKT-17).
+- **One checkout for every ticket (TKT-16):** `ticket_tree.py prepare` puts the main checkout on `feature/tickets`,
+  the branch every running ticket shares (from `origin/develop` when no other ticket runs), and records the ticket's
+  own files, starting with `docs/tickets/<ID>/`. Several tickets run at once, each touching only its own files. The
+  card moves to 🔄 Running (TKT-17).
 - **No intermediate commit (TKT-5):** the ticket's work stays uncommitted in its home until the ticket is done.
 - **Waves:** each task runs in its own git worktree. It starts with `ticket_tree.py start` (moves to the ticket's
   commit and copies the uncommitted work in) and ends with `ticket_tree.py handoff` (saves its own changes as a patch).
@@ -53,18 +54,25 @@ approved brief or check is approved again and recorded in 📝 Events before the
   the fixers (TKT-12). The note is written to `REVIEW.md`.
 - **Explainer:** writes `EXPLAIN.md` (how it works, files and lines changed) and `IMPLEMENTATION.md` (each choice
   against its alternatives, with the trade-off) from the workers' decisions and the diff (TKT-14), beside the scribe.
-- **Commit and pull request (TKT-15):** the integrator runs `ticket_tree.py finish`: one commit on `feature/<ID>`,
-  rebased on `origin/develop` if it moved, pushed, with its pull request to `develop` (`Closes #<issue>`, label
-  `automerge`). The card moves to 👀 In review. GitHub merges it once CI passes, the issue closes and the card moves
-  to 🏁 Done. `python3 .claude/scripts/tickets.py prune` then removes the home.
+- **Code review by the person (TKT-18):** the run stops before any commit, with `**Push:** 🟡 Awaiting code review`
+  in `PLAN.md`. The person reviews the uncommitted code in the ticket's home, changes the line to
+  `**Push:** 🟢 Approved` and runs `/ticket-run <ID>` again: the checks run again, then the commit and the push.
+- **Commit and pull request (TKT-15):** after the person's code review (TKT-18), the integrator runs `ticket_tree.py
+  finish`: one commit on `feature/tickets` holding **only this ticket's files**, pushed, with the pull request of
+  `feature/tickets` to `develop` opened or updated (one `Closes #<issue>` per ticket, label `automerge`). The card moves
+  to 👀 In review. GitHub merges it once CI passes, the issue closes and the card moves to 🏁 Done.
 
-### Several tickets at once
+### Several tickets at once, and groups of issues (TKT-16, TKT-20)
 
 | Command | Does |
 | --- | --- |
-| `python3 .claude/scripts/tickets.py list [--remote]` | Every open ticket: state, tasks integrated, areas, worktree, pull request |
-| `python3 .claude/scripts/tickets.py workspace` | `swarm.code-workspace`: `develop` and every open ticket side by side in VS Code |
-| `python3 .claude/scripts/tickets.py prune` | Removes the worktrees of merged tickets, fast-forwards `develop` |
+| `/issue-plan <refs>` | Plans every ticket of an issue with its child issues, or of a group: `#12` (a ticket, an epic or a phase issue), `T0.10`, `E0.4`, `P1`, several at once |
+| `python3 .claude/scripts/tickets.py approve <refs>` | The person's approval of every plan of the group that passes `check_plan.py` (Claude asks first) |
+| `/issue-run <refs>` | Runs the approved tickets of the group, every one the start rule allows at once, the others as soon as they may |
+| `python3 .claude/scripts/tickets.py resolve <refs>` | The tickets of a group, in order, with their state and what they wait for |
+| `python3 .claude/scripts/tickets.py watch <refs>` | The group's report every 2 minutes, with `▶️ CAN START <ID>` lines |
+| `python3 .claude/scripts/tickets.py list` | Every open ticket: the files it owns and its areas |
+| `python3 .claude/scripts/tickets.py prune` | Once everything is merged, puts the main checkout back on `develop` |
 | `python3 .claude/scripts/board.py show` or `/board` | The Kanban board in the terminal (TKT-17) |
 
 ## Templates

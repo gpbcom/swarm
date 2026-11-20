@@ -11,19 +11,21 @@ from tests.harness.ticket_tree.helpers import (
     INTEGRATED_KEY,
     LEGACY_BRANCH,
     MERGE_KEY,
+    OTHER,
     PUSHED_KEY,
     REMAINING_KEY,
+    SHARED_BRANCH,
     TICKET,
-    TICKET_BRANCH,
     TICKET_FOLDER,
     TICKET_TITLE,
     TREE_KEY,
+    add_ticket,
     add_worktree,
     commit_count,
     documents_problems,
     git,
-    home,
     integrated_repo,
+    legacy_home,
     make_repo,
     run,
     run_json,
@@ -31,43 +33,61 @@ from tests.harness.ticket_tree.helpers import (
     worker_writes,
 )
 
+PATHS_KEY = "paths"
+
+
+def two_tickets(tmp_path: Path) -> Path:
+    """Prepare two tickets in the same checkout; each integrates one file of its own."""
+    main = make_repo(tmp_path)
+    add_ticket(main, OTHER)
+    run_json(main, "prepare")
+    assert run(main, "prepare", ticket=OTHER).returncode == 0
+    worker_writes(main, "w1", "K01", {"src/mine.py": "x = 1\n"})
+    run_json(main, "integrate", "--task", "K01")
+    worker_writes(main, "w2", "K01", {"src/theirs.py": "y = 2\n"}, ticket=OTHER)
+    assert run(main, "integrate", "--task", "K01", ticket=OTHER).returncode == 0
+    return main
+
+
+def with_remote(tmp_path: Path, main: Path) -> Path:
+    remote = tmp_path / "remote.git"
+    git(tmp_path, "init", "--bare", "-b", "develop", str(remote))
+    git(main, "remote", "add", "origin", str(remote))
+    git(main, "push", "origin", "develop")
+    return remote
+
 
 class TestTicketTree:
-    def test_prepare_gives_the_ticket_its_own_worktree_and_leaves_the_main_checkout_on_develop(
-        self, tmp_path: Path
-    ) -> None:
+    def test_prepare_puts_the_main_checkout_on_the_shared_branch(self, tmp_path: Path) -> None:
         main = make_repo(tmp_path)
         (main / "stray.txt").write_text("the person's own work\n", encoding="utf-8")
         result = run_json(main, "prepare")
-        assert result[HOME_KEY] == str(home(main))
-        assert git(main, "branch", "--show-current") == "develop"
-        assert git(home(main), "branch", "--show-current") == TICKET_BRANCH
+        assert result[HOME_KEY] == str(main)
+        assert git(main, "branch", "--show-current") == SHARED_BRANCH
+        assert (main / TICKET_FOLDER / "TICKET.md").is_file()
         assert (main / "stray.txt").is_file()
-        assert not (home(main) / "stray.txt").exists()
+        assert not legacy_home(main).exists()
 
-    def test_prepare_moves_the_ticket_folder_into_the_ticket_worktree(self, tmp_path: Path) -> None:
+    def test_prepare_refuses_a_checkout_on_another_branch(self, tmp_path: Path) -> None:
         main = make_repo(tmp_path)
-        run_json(main, "prepare")
-        assert (home(main) / TICKET_FOLDER / "TICKET.md").is_file()
-        assert not (main / TICKET_FOLDER).exists()
-        assert commit_count(main, TICKET_BRANCH) == 1
+        git(main, "checkout", "-b", "feature/something-else")
+        result = run(main, "prepare")
+        assert result.returncode == 1
+        assert SHARED_BRANCH in result.stderr
 
-    def test_prepare_run_again_keeps_the_same_worktree(self, tmp_path: Path) -> None:
+    def test_two_tickets_share_the_checkout_and_the_branch(self, tmp_path: Path) -> None:
         main = make_repo(tmp_path)
-        run_json(main, "prepare")
-        assert run_json(main, "prepare")[HOME_KEY] == str(home(main))
-        assert run_json(home(main), "prepare")[HOME_KEY] == str(home(main))
-
-    def test_two_tickets_get_two_worktrees(self, tmp_path: Path) -> None:
-        main = make_repo(tmp_path)
-        other = main / "docs" / "tickets" / "T9.02"
-        other.mkdir(parents=True)
-        (other / "TICKET.md").write_text("# T9.02: Second ticket\n", encoding="utf-8")
-        run_json(main, "prepare")
-        second = run(main, "prepare", ticket="T9.02")
+        add_ticket(main, OTHER)
+        first = run_json(main, "prepare")
+        second = run(main, "prepare", ticket=OTHER)
         assert second.returncode == 0, second.stderr
-        assert git(main, "branch", "--show-current") == "develop"
-        assert (home(main).parent / "T9.02" / "docs" / "tickets" / "T9.02" / "TICKET.md").is_file()
+        assert first[HOME_KEY] == str(main)
+        assert git(main, "branch", "--show-current") == SHARED_BRANCH
+        assert (main / "docs" / "tickets" / OTHER / "TICKET.md").is_file()
+
+    def test_prepare_run_again_keeps_the_ticket_s_state(self, tmp_path: Path) -> None:
+        main = integrated_repo(tmp_path)
+        assert run_json(main, "prepare")[INTEGRATED_KEY] == ["K01"]
 
     def test_status_without_a_run_lists_no_task(self, tmp_path: Path) -> None:
         main = make_repo(tmp_path)
@@ -84,29 +104,27 @@ class TestTicketTree:
     def test_start_copies_the_uncommitted_work_into_a_worker(self, tmp_path: Path) -> None:
         main = make_repo(tmp_path)
         run_json(main, "prepare")
-        (home(main) / "earlier.txt").write_text("integrated earlier\n", encoding="utf-8")
+        (main / "earlier.txt").write_text("integrated earlier\n", encoding="utf-8")
         worker = add_worktree(main, "w1")
         run_json(worker, "start")
         assert (worker / "earlier.txt").read_text(encoding="utf-8") == "integrated earlier\n"
         assert (worker / TICKET_FOLDER / "TICKET.md").is_file()
 
-    def test_start_refuses_the_main_checkout_and_the_ticket_worktree(self, tmp_path: Path) -> None:
+    def test_start_refuses_the_main_checkout(self, tmp_path: Path) -> None:
         main = make_repo(tmp_path)
         run_json(main, "prepare")
         assert run(main, "start").returncode == 1
-        assert run(home(main), "start").returncode == 1
 
     def test_a_worker_created_from_another_commit_moves_to_the_ticket_base(self, tmp_path: Path) -> None:
         main = make_repo(tmp_path)
         run_json(main, "prepare")
-        (main / "later.txt").write_text("merged by another ticket\n", encoding="utf-8")
+        (main / "later.txt").write_text("committed by an earlier ticket\n", encoding="utf-8")
         git(main, "add", "later.txt")
-        git(main, "commit", "-m", "another ticket")
-        worker = add_worktree(main, "w1")
+        git(main, "commit", "-m", "T9.00: an earlier ticket")
+        worker = add_worktree(main, "w1", "develop")
         run_json(worker, "start")
-        assert git(worker, "rev-parse", "HEAD") == git(home(main), "rev-parse", "HEAD")
-        assert not (worker / "later.txt").exists()
-        assert (worker / TICKET_FOLDER / "TICKET.md").is_file()
+        assert git(worker, "rev-parse", "HEAD") == git(main, "rev-parse", "HEAD")
+        assert (worker / "later.txt").is_file()
 
     def test_a_wave_is_integrated_in_order_without_any_commit(self, tmp_path: Path) -> None:
         main = make_repo(tmp_path)
@@ -116,12 +134,29 @@ class TestTicketTree:
         result = run_json(main, "integrate", *task_args(["K01", "K02"]))
         assert result[INTEGRATED_KEY] == ["K01", "K02"]
         assert result[CONFLICTS_KEY] == []
-        assert (home(main) / "a.txt").read_text(encoding="utf-8") == "a\nB\nc\n"
-        assert (home(main) / "src" / "new.py").is_file()
-        assert (main / "a.txt").read_text(encoding="utf-8") == "a\nb\nc\n"
-        assert commit_count(main, TICKET_BRANCH) == 1
+        assert (main / "a.txt").read_text(encoding="utf-8") == "a\nB\nc\n"
+        assert (main / "src" / "new.py").is_file()
+        assert commit_count(main, SHARED_BRANCH) == 1
         assert not first.exists()
         assert run_json(main, "status")[INTEGRATED_KEY] == ["K01", "K02"]
+
+    def test_integrate_records_the_ticket_s_own_files(self, tmp_path: Path) -> None:
+        main = two_tickets(tmp_path)
+        mine = run_json(main, "status")[PATHS_KEY]
+        assert isinstance(mine, list)
+        assert "src/mine.py" in mine
+        assert f"{TICKET_FOLDER}/" in mine
+        assert "src/theirs.py" not in mine
+
+    def test_diff_and_changes_show_only_the_ticket_s_own_files(self, tmp_path: Path) -> None:
+        main = two_tickets(tmp_path)
+        names = run(main, "diff", "--name-only").stdout
+        assert "src/mine.py" in names
+        assert "src/theirs.py" not in names
+        assert OTHER not in names
+        table = run(main, "changes").stdout
+        assert "src/mine.py" in table
+        assert "src/theirs.py" not in table
 
     def test_the_next_wave_starts_from_the_integrated_work(self, tmp_path: Path) -> None:
         main = make_repo(tmp_path)
@@ -139,9 +174,9 @@ class TestTicketTree:
         worker_writes(main, "w2", "K02", {"a.txt": "a\nY\nc\n"})
         result = run(main, "integrate", *task_args(["K01", "K02"]))
         assert result.returncode == 1
-        assert (home(main) / "a.txt.rej").is_file()
+        assert (main / "a.txt.rej").is_file()
         assert run(main, "integrate", "--task", "K02", "--resolved").returncode == 1
-        (home(main) / "a.txt.rej").unlink()
+        (main / "a.txt.rej").unlink()
         resolved = run_json(main, "integrate", "--task", "K02", "--resolved")
         assert resolved[INTEGRATED_KEY] == ["K02"]
         assert resolved[REMAINING_KEY] == []
@@ -164,7 +199,6 @@ class TestTicketTree:
         run_json(main, "integrate", "--task", "K01")
         table = run(main, "changes").stdout
         assert "| [`a.txt`](../../../a.txt) | Modified | [2](../../../a.txt#L2), [4](../../../a.txt#L4) |" in table
-
         assert TICKET_FOLDER not in table
         assert run(main, "changes", "--check").returncode == 1
         assert run(main, "changes", "--write").returncode == 0
@@ -215,9 +249,27 @@ class TestTicketTree:
         result = run(main, "finish")
         assert result.returncode == 1
         assert "not clickable" in result.stderr
-        assert commit_count(main, TICKET_BRANCH) == 1
+        assert commit_count(main, SHARED_BRANCH) == 1
 
-    def test_finish_without_a_remote_makes_one_commit_and_merges_it_into_develop(self, tmp_path: Path) -> None:
+    def test_finish_commits_only_the_ticket_s_files_and_leaves_the_other_ticket_uncommitted(
+        self, tmp_path: Path
+    ) -> None:
+        main = two_tickets(tmp_path)
+        assert documents_problems(main, "In [`src/mine.py:1`](../../../src/mine.py#L1).", "") == ""
+        result = run_json(main, "finish")
+        commit = str(result[COMMIT_KEY])
+        committed = git(main, "show", "--name-only", "--format=", commit).splitlines()
+        assert "src/mine.py" in committed
+        assert f"{TICKET_FOLDER}/EXPLAIN.md" in committed
+        assert "src/theirs.py" not in committed
+        assert not any(name.startswith(f"docs/tickets/{OTHER}") for name in committed)
+        assert git(main, "log", "-1", "--format=%s", commit) == TICKET_TITLE
+        assert (main / "src" / "theirs.py").is_file()
+        assert "src/theirs.py" in git(main, "status", "--porcelain")
+        assert git(main, "diff", "--cached", "--name-only") == ""
+        assert git(main, "branch", "--show-current") == SHARED_BRANCH
+
+    def test_finish_without_a_remote_merges_the_shared_branch_into_develop(self, tmp_path: Path) -> None:
         main = make_repo(tmp_path)
         run_json(main, "prepare")
         worker_writes(main, "w1", "K01", {"src/new.py": "x = 1\n"})
@@ -225,27 +277,44 @@ class TestTicketTree:
         assert documents_problems(main, "In [`src/new.py:1`](../../../src/new.py#L1).", "") == ""
         result = run_json(main, "finish")
         assert result[PUSHED_KEY] is False
-        assert git(main, "log", "-1", "--format=%s", str(result[COMMIT_KEY])) == TICKET_TITLE
-        assert commit_count(main, TICKET_BRANCH) == 2
         assert git(main, "rev-parse", "develop") == result[MERGE_KEY]
-        assert (main / "src" / "new.py").is_file()
+        assert git(main, "show", "develop:src/new.py") == "x = 1"
         assert git(main, "status", "--porcelain") == ""
         assert run_json(main, "status")[INTEGRATED_KEY] == []
 
-    def test_finish_with_a_remote_pushes_the_feature_branch_and_leaves_develop_to_the_pull_request(
+    def test_finish_with_a_remote_pushes_the_shared_branch_and_leaves_develop_to_the_pull_request(
         self, tmp_path: Path
     ) -> None:
         main = make_repo(tmp_path)
-        remote = tmp_path / "remote.git"
-        git(tmp_path, "init", "--bare", "-b", "develop", str(remote))
-        git(main, "remote", "add", "origin", str(remote))
-        git(main, "push", "origin", "develop")
+        remote = with_remote(tmp_path, main)
         run_json(main, "prepare")
         worker_writes(main, "w1", "K01", {"src/new.py": "x = 1\n"})
         run_json(main, "integrate", "--task", "K01")
         assert documents_problems(main, "In [`src/new.py:1`](../../../src/new.py#L1).", "") == ""
         result = run(main, "finish", "--no-pull-request")
         assert result.returncode == 0, result.stderr
-        assert git(remote, "rev-parse", TICKET_BRANCH) == git(home(main), "rev-parse", "HEAD")
+        assert git(remote, "rev-parse", SHARED_BRANCH) == git(main, "rev-parse", SHARED_BRANCH)
         assert git(remote, "rev-parse", "develop") == git(main, "rev-parse", "develop")
         assert commit_count(main, "develop") == 1
+
+    def test_two_finishes_give_two_commits_on_the_shared_branch(self, tmp_path: Path) -> None:
+        main = two_tickets(tmp_path)
+        with_remote(tmp_path, main)
+        assert documents_problems(main, "In [`src/mine.py:1`](../../../src/mine.py#L1).", "") == ""
+        assert run(main, "finish", "--no-pull-request").returncode == 0
+        other_explain = main / "docs" / "tickets" / OTHER / "EXPLAIN.md"
+        other_explain.write_text(
+            "# Explain\n\nIn [`src/theirs.py:1`](../../../src/theirs.py#L1).\n\n<!-- changes -->\n<!-- /changes -->\n",
+            encoding="utf-8",
+        )
+        assert run(main, "changes", "--write", ticket=OTHER).returncode == 0
+        second = run(main, "finish", "--no-pull-request", ticket=OTHER)
+        assert second.returncode == 0, second.stderr
+        subjects = git(main, "log", "--format=%s", f"develop..{SHARED_BRANCH}").splitlines()
+        assert subjects == [f"{OTHER}: Second ticket", TICKET_TITLE]
+        assert git(main, "status", "--porcelain") == ""
+
+    def test_a_ticket_started_in_its_own_worktree_before_tkt_16_keeps_it(self, tmp_path: Path) -> None:
+        main = make_repo(tmp_path)
+        git(main, "worktree", "add", "-b", f"feature/{TICKET}", str(legacy_home(main)), "develop")
+        assert run_json(main, "home")[HOME_KEY] == str(legacy_home(main))

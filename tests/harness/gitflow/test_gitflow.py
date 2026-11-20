@@ -44,6 +44,12 @@ class TestGitflowHooks:
         assert commit(main, "NATS JetStream").returncode != 0
         assert commit(main, "T0.09: NATS JetStream and Operator accounts").returncode == 0
 
+    def test_a_commit_on_the_shared_branch_starts_with_a_ticket_id(self, tmp_path: Path) -> None:
+        main = make_repo(tmp_path)
+        git(main, "checkout", "-b", "feature/tickets")
+        assert commit(main, "some work").returncode != 0
+        assert commit(main, "T0.10: Dev cell observability").returncode == 0
+
     def test_a_push_to_develop_is_refused_and_a_feature_branch_is_pushed(self, tmp_path: Path) -> None:
         main = make_repo(tmp_path)
         remote = tmp_path / "remote.git"
@@ -75,6 +81,18 @@ class TestGuardHook:
         decision = guard(command, main)
         assert decision["permissionDecision"] == "deny"
         assert "ticket_tree.py" in str(decision["permissionDecisionReason"])
+
+    def test_agents_on_the_shared_branch_leave_git_to_ticket_tree(self, tmp_path: Path) -> None:
+        main = make_repo(tmp_path)
+        git(main, "checkout", "-b", "feature/tickets")
+        assert guard("git commit -m wip", main)["permissionDecision"] == "deny"
+        assert guard("git push origin feature/tickets", main)["permissionDecision"] == "deny"
+
+    def test_approving_a_group_of_plans_asks_the_person(self, tmp_path: Path) -> None:
+        main = make_repo(tmp_path)
+        decision = guard("python3 .claude/scripts/tickets.py approve '#12'", main)
+        assert decision["permissionDecision"] == "ask"
+        assert "TKT-3" in str(decision["permissionDecisionReason"])
 
     def test_a_worker_cannot_commit_either(self, tmp_path: Path) -> None:
         main = make_repo(tmp_path)

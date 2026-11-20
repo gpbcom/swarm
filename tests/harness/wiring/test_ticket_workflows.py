@@ -82,13 +82,31 @@ class TestTicketWorkflows:
         text = read_text(self.RUN)
         assert "board.py move --ticket ${ID} --status running" in text
         assert "pull_request" in text
-        assert "feature/${ID}" in text
+        assert "feature/tickets" in text
+        assert "only its own files" in text
 
     def test_ticket_plan_moves_the_ticket_to_planned(self) -> None:
         assert "board.py move --ticket ${ID} --status planned" in read_text(self.PLAN)
 
-    @pytest.mark.parametrize("rule", ["tkt-15", "tkt-16", "tkt-17"])
+    @pytest.mark.parametrize("rule", ["tkt-15", "tkt-16", "tkt-17", "tkt-18", "tkt-19", "tkt-20"])
     def test_the_rules_hold_gitflow_parallel_tickets_and_the_board(self, rule: str) -> None:
         text = read_text(".claude/rules/tickets.md")
         assert f"[{rule.upper()}](#{rule})" in text
         assert f'<a id="{rule}"></a>' in text
+
+    @pytest.mark.parametrize(("skill", "workflow"), [("issue-plan", "ticket-plan"), ("issue-run", "ticket-run")])
+    def test_a_group_skill_runs_its_workflow_and_watches_the_group(self, skill: str, workflow: str) -> None:
+        text = read_text(f".claude/skills/{skill}/SKILL.md")
+        assert f"`{workflow}`" in text
+        assert "python3 .claude/scripts/tickets.py watch <refs> --every 120" in text
+        assert "python3 .claude/scripts/tickets.py resolve <refs>" in text
+
+    def test_only_the_person_approves_a_group(self) -> None:
+        text = read_text(".claude/skills/issue-plan/SKILL.md")
+        assert "Never run `tickets.py approve` on your own initiative" in text
+
+    def test_the_readme_explains_how_to_run_tickets_and_groups(self) -> None:
+        text = read_text("README.md")
+        assert "## 🎫 Working on tickets" in text
+        for command in ("/ticket-run", "/issue-plan", "/issue-run", "tickets.py approve", "tickets.py prune"):
+            assert command in text
