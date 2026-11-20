@@ -1,4 +1,7 @@
-"""Check a ticket's TICKET.md against the ticket template and docs/specs/ (TKT-2).
+"""Check a ticket's TICKET.md against the ticket template and docs/specs/ (TKT-2, TKT-21).
+
+A ticket that changes a front end (its area in the ticket graph) links every screen it shows under "Screens touched",
+or says ``- ➖ No screen: <why>``.
 
 Usage, from anywhere:
     python3 .claude/skills/ticket/scripts/check_ticket.py <ID> [--root <repo root>]
@@ -10,11 +13,16 @@ exits 0. A bad ID gives the usage on stderr and exit 2. The default root is the 
 
 from __future__ import annotations
 
+import json
 import os
 import re
 import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "scripts"))
+
+from roadmap_gantt import areas
 
 ID_PATTERN = re.compile(r"^T\d\.\d{2}$")
 STATUSES = ("🟡 Planned", "🔵 In progress", "✅ Done")
@@ -38,6 +46,11 @@ BUDGETS_PAGE = "docs/specs/technical/07-scalability.md"
 USAGE = "usage: check_ticket.py <ID> [--root <repo root>]"
 EM_DASH = "—"
 Section = Dict[str, str]
+GRAPH = Path("docs/specs/roadmap/gantt/ticket-graph.json")
+SCREEN_PNG = re.compile(r"(?:^|/)specs/screens/(UC-\d{3})/([a-z0-9-]+)\.png$")
+SCREEN_ROW = re.compile(r"(?:^|/)specs/functional/use-cases/(UC-\d{3})-[^#]*\.md#screen-([a-z0-9-]+)$")
+NO_SCREEN = re.compile(r"^- ➖ No screen: \S.{9,}$", re.MULTILINE)
+FRONT_END_PREFIX = "frontends/"
 
 
 def split_target(target: str) -> Tuple[str, str]:
@@ -54,6 +67,48 @@ def is_external(target: str) -> bool:
 def logical_target(ticket_id: str, path: str) -> str:
     """Return a link path as a normalised path relative to the root, with forward slashes."""
     return os.path.normpath(f"docs/tickets/{ticket_id}/{path}").replace(os.sep, "/")
+
+
+def screens_of(body: str) -> List[Tuple[str, str]]:
+    """Return the screens a "Screens touched" section links to, as (use case, node), once each (TKT-21)."""
+    found: List[Tuple[str, str]] = []
+    for _, target in LINK.findall(COMMENT.sub("", body)):
+        match = SCREEN_PNG.search(target) or SCREEN_ROW.search(target)
+        if match and not target.endswith(".dark.png") and (match.group(1), match.group(2)) not in found:
+            found.append((match.group(1), match.group(2)))
+    return found
+
+
+def has_no_screen_reason(body: str) -> bool:
+    """Tell whether a "Screens touched" section says why the ticket shows no screen (``- ➖ No screen: <why>``)."""
+    return bool(NO_SCREEN.search(COMMENT.sub("", body)))
+
+
+def touches_front_end(ticket_id: str, root: Path) -> bool:
+    """Tell whether the ticket graph says the ticket changes a front end (``frontends/``)."""
+    path = root / GRAPH
+    if not path.is_file():
+        return False
+    info = json.loads(path.read_text(encoding="utf-8")).get("tickets", {}).get(ticket_id, {})
+    return any(area.startswith(FRONT_END_PREFIX) for area in areas(str(info.get("area", ""))))
+
+
+def screens_section(text: str) -> str:
+    """Return the body of the "Screens touched" section of a TICKET.md."""
+    return sections_of(text)[1].get("Screens touched", "")
+
+
+def check_front_end(bodies: Section, ticket_id: str, root: Path) -> List[str]:
+    """A ticket that changes a front end lists the screens it shows, or says why it shows none (TKT-21)."""
+    body = bodies.get("Screens touched", "")
+    if not touches_front_end(ticket_id, root) or screens_of(body) or has_no_screen_reason(body):
+        return []
+    return [
+        (
+            "the ticket changes a front end: 'Screens touched' must link every screen it shows (its screenshots are "
+            "captured by the ticket), or say '- ➖ No screen: <why>' (TKT-21)."
+        )
+    ]
 
 
 def sections_of(text: str) -> Tuple[List[str], Section]:
@@ -231,7 +286,8 @@ def check_ticket(ticket_id: str, root: Path) -> List[str]:
     if "Roadmap" in bodies:
         problems += check_roadmap(bodies["Roadmap"], ticket_id, root)
     problems += check_ids(text, root) + check_links(text, ticket_id, root)
-    problems += check_touched(bodies, ticket_id) + check_criteria(bodies) + check_text(text)
+    problems += check_touched(bodies, ticket_id) + check_front_end(bodies, ticket_id, root)
+    problems += check_criteria(bodies) + check_text(text)
     return [f"{relative}: {problem}" for problem in problems]
 
 

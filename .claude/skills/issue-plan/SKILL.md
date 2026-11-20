@@ -9,7 +9,9 @@ The arguments are references: `#12` (a ticket issue, or an epic or phase issue w
 `E0.4`, `P1`, several separated by spaces.
 
 1. Run `python3 .claude/scripts/tickets.py resolve <refs>` and show its output to the person in full: the tickets of
-   the group in the order of their prerequisites, each with its state. A reference it refuses ends the skill: say why.
+   the group in the order of their prerequisites, each with its state. Sub-issues already done (merged on `develop`,
+   or closed on GitHub) are left out and never planned again. When it prints "nothing to do", say so and stop. A
+   reference it refuses ends the skill: say why.
 2. For every ticket of the group in state ⬜ **no plan**, call the **Workflow** tool with the saved workflow
    `ticket-plan` and the ticket ID as `args`, **all in the same message** so that they run at once. The person asked
    for this command, which allows the Workflow tool. Leave out the tickets that already have a plan.

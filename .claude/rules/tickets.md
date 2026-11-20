@@ -30,6 +30,7 @@ These rules apply to every ticket of the roadmap (`docs/specs/roadmap/`), worked
 | [TKT-18](#tkt-18) | The person reviews the code before anything is committed or pushed |
 | [TKT-19](#tkt-19) | A worker blocked by another task's file reports it, and that task's owner fixes it before the retry |
 | [TKT-20](#tkt-20) | A GitHub issue with its child issues, or a group of issues, is planned at once, approved once and run as fast as the start rule allows |
+| [TKT-21](#tkt-21) | A ticket that changes a front end lists the screens it shows and captures them as screenshots before it is done |
 
 ## <a id="tkt-1"></a>TKT-1: Roadmap tickets, one folder each
 
@@ -156,8 +157,9 @@ never edit the same checkout; parallel tickets share one, but each commits only 
    returns a short review note, written to `REVIEW.md`;
 3. `EXPLAIN.md`, `IMPLEMENTATION.md` (TKT-14), `REVIEW.md` and `PROGRESS.md` are written, with the evidence in
    `tests-evidences/`;
-4. the person has reviewed the code and approved the push (TKT-18);
-5. the work and these documents are committed once and merged into `develop` (TKT-5).
+4. a ticket that changes a front end has captured every screen it lists as `📸 Screenshot` (TKT-21);
+5. the person has reviewed the code and approved the push (TKT-18);
+6. the work and these documents are committed once and merged into `develop` (TKT-5).
 
 A failed check or a requested change goes back to the agent that owns the files, at most twice; then the ticket
 stops and the person is told. A check that fails because of the environment (a missing tool or module, flagged
@@ -457,7 +459,10 @@ logs the blockers it sends before its retry.
 - A group of tickets is named by **references**: an issue number (`#12`: a ticket issue, or an epic or a phase issue
   with every ticket under it, through the sub-issues recorded in `.claude/github.json`), a ticket ID (`T0.10`), an epic
   ID (`E0.4`) or a phase ID (`P1`), several separated by spaces. `python3 .claude/scripts/tickets.py resolve <refs>`
-  lists the tickets, merged ones left out, every prerequisite before the tickets that need it, each with its state.
+  lists the tickets, every prerequisite before the tickets that need it, each with its state. **Done sub-issues are
+  left out**: merged on `develop` (their `EXPLAIN.md` is there) or closed on GitHub. Running `/issue-plan` or
+  `/issue-run` again on the same references never plans or starts them twice; `tickets.py next` never returns a
+  ticket that is running, in review or done.
 - **`/issue-plan <refs>`** plans every ticket of the group that has no `PLAN.md` yet, all at once (one `ticket-plan`
   workflow each), then stops.
 - **One approval for the group:** the person reads the plans, then runs `python3 .claude/scripts/tickets.py approve
@@ -475,3 +480,29 @@ plan](../../docs/specs/roadmap/14-parallel-plan.md)).
 
 **Check:** the tests of `tests/harness/tickets/test_groups.py` pass; `grep -n 'tkt-20' .claude/rules/tickets.md` finds the
 summary row and the heading.
+
+## <a id="tkt-21"></a>TKT-21: Front-end tickets capture their screens
+
+**Rule:**
+
+- A ticket that changes a front end (its area in `docs/specs/roadmap/gantt/ticket-graph.json` holds `frontends/`)
+  links, under **Screens touched** of `TICKET.md`, every screen it shows: the PNG of the screen or its row on the use
+  case page. When it really shows none, it says why, on its own line: `- ➖ No screen: <why>`.
+- Its plan holds a **capture task** (`mockup-writer`) that depends on every `frontend-implementer` task and owns both
+  PNGs of every listed screen (`docs/specs/screens/<UC-ID>/<node>.png` and `<node>.dark.png`), its mock-up and its use
+  case page. The task captures each screen from the running app in light and dark mode with the screenshot pipeline of
+  T0.20, sets the screen row's source to `📸 Screenshot` and deletes the mock-up (SPEC-12).
+- The verifier fails the ticket while a listed screen is still `✏️ Mock-up`, while one of its PNGs was not captured
+  by the ticket itself, or while its mock-up is left. Until T0.20 is merged, the check is not applicable: the screens
+  stay mock-ups, and the capture task updates them to what the app shows.
+- The reviewer checks that the list is complete and that each screenshot shows the state of its use case; a weak
+  `➖ No screen` reason is a blocking finding.
+
+**Why:** a screen described only by a mock-up drifts from the app as soon as the code changes. Capturing it in the
+ticket that builds it keeps the specification's picture and the product the same, and the phases' exit criteria
+(every use case screen moved to 📸) are met as the tickets merge, not in a catch-up at the end of the phase.
+
+**Check:** `check_ticket.py` refuses a front-end ticket that lists no screen and gives no reason; `check_plan.py`
+refuses its plan without a capture task after the front-end work; `checks.py` runs "screens captured"; the tests of
+`tests/harness/check_ticket/`, `tests/harness/check_plan/test_screen_capture.py` and `tests/harness/checks/` pass.
+

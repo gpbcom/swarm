@@ -231,7 +231,11 @@ python3 .claude/scripts/tickets.py approve #12
 /issue-plan P1 T2.04 #57    a group mixing a phase, a ticket and an issue
 ```
 
-Each ticket of a group still stops for your code review before its push.
+Each ticket of a group still stops for your code review before its push. Sub-issues already done (merged, or closed
+on GitHub) are left out: running `/issue-plan` or `/issue-run` again never plans or starts them twice.
+
+A ticket that changes a front end lists every screen it shows in its `TICKET.md`, and captures them from the app as
+📸 screenshots, in light and dark mode, before it is done (rule TKT-21).
 
 ### Following the work
 

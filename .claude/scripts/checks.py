@@ -21,7 +21,11 @@ import re
 import subprocess
 import sys
 from pathlib import Path
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "skills" / "ticket" / "scripts"))
+
+from check_ticket import has_no_screen_reason, screens_of, screens_section, touches_front_end
 
 ROOT = Path(__file__).resolve().parents[2]
 PROJECT_PREFIXES = ("services/", "packages/", "frontends/", "tests/", "deploy/")
@@ -58,6 +62,60 @@ def changed_files(base: str, ticket: str = "", root: Path = ROOT) -> List[str]:
         return found
     own = [str(path) for path in paths]
     return [name for name in found if any(name == path or name.startswith(path.rstrip("/") + "/") for path in own)]
+
+
+SCREENSHOT = "📸 Screenshot"
+PIPELINE_TICKET = "T0.20"
+
+
+def screen_problems(
+    root: Path, ticket: str, changed: List[str], pipeline_ready: bool
+) -> Tuple[List[Tuple[str, str]], Optional[str]]:
+    """Return the screens of a front-end ticket that are not captured yet, as (file, detail), or why none applies.
+
+    TKT-21: a ticket that changes a front end lists the screens it shows; once the screenshot pipeline of T0.20 is
+    merged, each of them must be a 📸 Screenshot on its use case page, captured in light and dark mode by the ticket
+    itself (both PNGs among its changed files), with its mock-up deleted.
+    """
+    ticket_md = root / "docs" / "tickets" / ticket / "TICKET.md"
+    if not ticket_md.is_file() or not touches_front_end(ticket, root):
+        return [], "the ticket changes no front end"
+    body = screens_section(ticket_md.read_text(encoding="utf-8"))
+    screens = screens_of(body)
+    if not screens:
+        reason = "the ticket says '➖ No screen' in TICKET.md" if has_no_screen_reason(body) else "no screen is listed"
+        return [], reason
+    if not pipeline_ready:
+        return [], f"the screenshot pipeline of {PIPELINE_TICKET} is not merged yet: the screens stay mock-ups"
+    failures: List[Tuple[str, str]] = []
+    for use_case, node in screens:
+        light = f"docs/specs/screens/{use_case}/{node}.png"
+        dark = f"docs/specs/screens/{use_case}/{node}.dark.png"
+        pages = sorted((root / "docs" / "specs" / "functional" / "use-cases").glob(f"{use_case}-*.md"))
+        rows = [
+            line
+            for page in pages
+            for line in page.read_text(encoding="utf-8").splitlines()
+            if f'<a id="screen-{node}"></a>' in line
+        ]
+        if not rows or SCREENSHOT not in rows[0]:
+            failures.append(
+                (
+                    light,
+                    (
+                        f"{use_case} {node} is still a mock-up on its use case page: capture it from the "
+                        f"app in light and dark mode and set its source to {SCREENSHOT} (TKT-21)."
+                    ),
+                )
+            )
+            continue
+        for png in (light, dark):
+            if png not in changed:
+                failures.append((png, f"{use_case} {node}: {png} was not captured by this ticket (TKT-21)."))
+        mockup = root / "docs" / "specs" / "screens" / "mockups" / use_case / f"{node}.html"
+        if mockup.is_file():
+            failures.append((str(mockup.relative_to(root)), f"{use_case} {node} is a screenshot: delete its mock-up."))
+    return failures, None
 
 
 class Checks:
@@ -181,6 +239,16 @@ def main() -> int:
     rust_checks(checks, changed)
     typescript_checks(checks, changed)
     terraform_checks(checks, changed)
+    _, develop_files = run(["git", "ls-tree", "-r", "--name-only", base, f"docs/tickets/{PIPELINE_TICKET}"])
+    pipeline_ready = ticket == PIPELINE_TICKET or f"docs/tickets/{PIPELINE_TICKET}/EXPLAIN.md" in develop_files
+    screen_failures, screen_reason = screen_problems(ROOT, ticket, changed, pipeline_ready)
+    if screen_reason:
+        checks.skip("screens captured", screen_reason)
+    elif screen_failures:
+        for file, detail in screen_failures:
+            checks.failures.append({"check": "screens captured", "file": file, "detail": detail, "environment": False})
+    else:
+        checks.passed.append("screens captured")
     checks.check("specs check", ["python3", ".claude/skills/write-specs/scripts/specs.py", "check"], "docs/specs")
     folder = f"docs/tickets/{ticket}"
     checks.check("ticket refs", ["python3", ".claude/scripts/ticket_refs.py", "check", "--ticket", ticket], folder)

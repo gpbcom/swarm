@@ -88,7 +88,7 @@ class TestTicketWorkflows:
     def test_ticket_plan_moves_the_ticket_to_planned(self) -> None:
         assert "board.py move --ticket ${ID} --status planned" in read_text(self.PLAN)
 
-    @pytest.mark.parametrize("rule", ["tkt-15", "tkt-16", "tkt-17", "tkt-18", "tkt-19", "tkt-20"])
+    @pytest.mark.parametrize("rule", ["tkt-15", "tkt-16", "tkt-17", "tkt-18", "tkt-19", "tkt-20", "tkt-21"])
     def test_the_rules_hold_gitflow_parallel_tickets_and_the_board(self, rule: str) -> None:
         text = read_text(".claude/rules/tickets.md")
         assert f"[{rule.upper()}](#{rule})" in text
@@ -110,3 +110,12 @@ class TestTicketWorkflows:
         assert "## 🎫 Working on tickets" in text
         for command in ("/ticket-run", "/issue-plan", "/issue-run", "tickets.py approve", "tickets.py prune"):
             assert command in text
+
+    @pytest.mark.parametrize("agent", ["planner", "mockup-writer", "reviewer", "frontend-implementer"])
+    def test_the_agents_that_build_and_check_screens_know_tkt_21(self, agent: str) -> None:
+        assert "TKT-21" in read_text(f".claude/agents/{agent}.md")
+
+    def test_the_ticket_template_asks_a_front_end_ticket_for_its_screens(self) -> None:
+        text = read_text(".claude/skills/ticket/templates/TICKET.md")
+        assert "➖ No screen" in text
+        assert "TKT-21" in text

@@ -17,12 +17,19 @@ from tests.harness.tickets.helpers import (
     OTHER_AREA,
     PHASE,
     SAME_AREA,
+    finish_on_shared_branch,
     lines,
     make_repo,
     open_ticket,
     run,
     write_plan,
 )
+
+
+def resolved_closed(main: Path, closed: str, *refs: str) -> List[str]:
+    result = run(main, "resolve", "--json", *refs, closed=closed)
+    assert result.returncode == 0, result.stderr
+    return [row["ticket"] for row in json.loads(result.stdout)]
 
 
 def resolved(main: Path, *refs: str) -> List[str]:
@@ -56,6 +63,38 @@ class TestGroups:
         result = run(make_repo(tmp_path), "resolve", "#999")
         assert result.returncode == 1
         assert "#999" in result.stderr
+
+    def test_a_group_whose_tickets_are_all_done_does_nothing(self, tmp_path: Path) -> None:
+        main = make_repo(tmp_path)
+        result = run(main, "resolve", DONE)
+        assert result.returncode == 0
+        assert "nothing to do" in result.stdout
+        assert lines(run(main, "next", DONE)) == []
+        report = run(main, "watch", DONE, "--once").stdout
+        assert "Every ticket of the group is merged" in report
+
+    def test_an_issue_closed_on_github_counts_as_done(self, tmp_path: Path) -> None:
+        main = make_repo(tmp_path)
+        closed = f"{ISSUES[NEXT]},{ISSUES[SAME_AREA]}"
+        assert resolved_closed(main, closed, f"#{ISSUES[PHASE]}") == [OTHER_AREA]
+
+    def test_next_never_starts_a_ticket_running_in_review_or_merged(self, tmp_path: Path) -> None:
+        main = make_repo(tmp_path)
+        for ticket in (NEXT, SAME_AREA, OTHER_AREA):
+            write_plan(main, ticket, APPROVED)
+        open_ticket(main, SAME_AREA)
+        finish_on_shared_branch(main, NEXT)
+        assert lines(run(main, "next", PHASE)) == [OTHER_AREA]
+
+    def test_plans_already_approved_or_of_finished_tickets_are_left_alone(self, tmp_path: Path) -> None:
+        main = make_repo(tmp_path)
+        approved = write_plan(main, NEXT, APPROVED)
+        finished = write_plan(main, OTHER_AREA, AWAITING)
+        finish_on_shared_branch(main, OTHER_AREA)
+        before = approved.read_text(encoding="utf-8")
+        assert run(main, "approve", EPIC).returncode == 0
+        assert approved.read_text(encoding="utf-8") == before
+        assert AWAITING in finished.read_text(encoding="utf-8")
 
     def test_resolve_shows_each_ticket_s_state(self, tmp_path: Path) -> None:
         main = make_repo(tmp_path)

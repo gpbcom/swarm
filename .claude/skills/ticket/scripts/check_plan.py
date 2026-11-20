@@ -1,4 +1,7 @@
-"""Check the task graph of a ticket's PLAN.md (TKT-3, TKT-4).
+"""Check the task graph of a ticket's PLAN.md (TKT-3, TKT-4, TKT-21).
+
+A ticket that changes a front end and lists screens in its TICKET.md needs a ``mockup-writer`` task that owns both
+PNGs of every listed screen and depends on every ``frontend-implementer`` task: it captures them as screenshots.
 
 Usage, from anywhere:
     python3 .claude/skills/ticket/scripts/check_plan.py <ID> [--root <repo root>] [--min-parallel N]
@@ -17,6 +20,10 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Set
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from check_ticket import screens_of, screens_section, touches_front_end
+
 ID_PATTERN = re.compile(r"^T\d\.\d{2}$")
 TASK_ID_PATTERN = re.compile(r"^K\d{2}$")
 STATUS_LINES = ("**Plan:** 🟡 Awaiting approval", "**Plan:** 🟢 Approved")
@@ -30,6 +37,8 @@ AGENTS = (
     "doc-writer",
 )
 IMPLEMENTERS = ("implementer", "rust-implementer", "frontend-implementer")
+FRONT_END_AGENT = "frontend-implementer"
+CAPTURE_AGENT = "mockup-writer"
 USAGE = "usage: check_plan.py <ID> [--root <repo root>] [--min-parallel N]"
 Task = Dict[str, object]
 
@@ -188,6 +197,41 @@ def check_plan(path: Path, min_parallel: int) -> List[str]:
         problems.append("the json block must be an array of objects.")
         return problems
     problems.extend(check_graph(data, min_parallel))
+    problems.extend(check_capture(path, data))
+    return problems
+
+
+def check_capture(path: Path, tasks: List[Task]) -> List[str]:
+    """A ticket that changes a front end captures every screen it lists, after its front-end work (TKT-21)."""
+    ticket_id, root = path.parent.name, path.parents[3]
+    ticket = path.parent / "TICKET.md"
+    if not ticket.is_file() or not touches_front_end(ticket_id, root):
+        return []
+    screens = screens_of(screens_section(ticket.read_text(encoding="utf-8")))
+    graph = {str(t.get("id")): [str(d) for d in t.get("depends_on") or []] for t in tasks}  # type: ignore[union-attr]
+    front = sorted(str(t.get("id")) for t in tasks if t.get("agent") == FRONT_END_AGENT)
+    problems: List[str] = []
+    capturing: Set[str] = set()
+    for use_case, node in screens:
+        for path_of in (f"docs/specs/screens/{use_case}/{node}.png", f"docs/specs/screens/{use_case}/{node}.dark.png"):
+            owners = [
+                str(t.get("id"))
+                for t in tasks
+                if t.get("agent") == CAPTURE_AGENT and path_of in (t.get("files") or [])  # type: ignore[operator]
+            ]
+            if owners:
+                capturing.update(owners)
+            else:
+                problems.append(
+                    f"no {CAPTURE_AGENT} task captures {use_case} {node} ({path_of}) after the front-end work: the "
+                    f"ticket lists it under 'Screens touched' (TKT-21)."
+                )
+    for task_id in sorted(capturing):
+        missing = [f for f in front if f not in ancestors(task_id, graph)]
+        if missing:
+            problems.append(
+                f"task {task_id} captures screens before {', '.join(missing)}: it must depend on them (TKT-21)."
+            )
     return problems
 
 

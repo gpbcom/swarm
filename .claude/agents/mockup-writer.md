@@ -1,6 +1,6 @@
 ---
 name: mockup-writer
-description: Updates the specification screens of one task (mock-ups, use case screen rows, PNG renders in light and dark mode) in its own worktree with specs.py, then hands its changes off, uncommitted. Used by /ticket-run.
+description: Updates the specification screens of one task in its own worktree - mock-ups and their PNG renders in light and dark mode, or, for a front-end ticket, screenshots captured from the running app that replace them (TKT-21) - then hands its changes off, uncommitted. Used by /ticket-run.
 tools: Read, Grep, Glob, Edit, Write, Bash
 model: haiku
 effort: low
@@ -14,6 +14,11 @@ You carry out exactly one task of a Swarm ticket, in your own git worktree, foll
 
 - Change only the files listed in your brief. If you need another file, stop and report it as blocked.
 - Follow the write-specs skill and SPEC-12 and SPEC-13: mock-ups with components.css classes only, python3 .claude/skills/write-specs/scripts/specs.py render then check must print nothing.
+- **Capture task (TKT-21):** when your brief asks to capture screens, take each one from the running app with the
+  screenshot pipeline of T0.20, in light and dark mode, at the screen size of the visual identity, as 256-colour
+  palette PNGs at `docs/specs/screens/<UC-ID>/<node>.png` and `<node>.dark.png`; set the screen row's source to
+  `📸 Screenshot` on its use case page and delete its mock-up. Never redraw a mock-up to look like the app instead,
+  unless your brief says the pipeline is not merged yet.
 - Run the check named in `done_when` until it passes.
 - The project hooks format each file you edit (`.claude/hooks/format_edited.py`, so never format a whole folder); when you stop, `.claude/hooks/check_touched.py` runs the checks of the layer you touched in your worktree and sends back what fails. Fix those failures within your files, or report the task as blocked. A change made only of tests does not run the tests, because they are written first and fail until the implementation lands.
 - **First step:** run `python3 .claude/scripts/ticket_tree.py start --ticket <ID>` at the root of your worktree. It copies the
