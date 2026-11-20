@@ -1,20 +1,4 @@
 #!/usr/bin/env python3
-"""PreToolUse hook: keep the agents' Bash commands inside GitFlow and TKT-5 (TKT-15).
-
-- Anywhere: ``--no-verify`` (skipping the git hooks of ``.githooks/``) is refused.
-- On the tickets' shared branch (``feature/tickets``), in a ticket worktree from before TKT-16 (``feature/<ID>``) or in a
-  worker's (``worktree-*``): ``git commit``, ``merge``, ``rebase``,
-  ``reset``, ``stash``, ``push``, ``cherry-pick``, ``revert`` and ``gh pr merge`` are refused: only
-  ``.claude/scripts/ticket_tree.py`` commits, publishes and merges a ticket (TKT-5).
-- Anywhere: ``develop`` and ``master`` are never rebased, ``master`` is never reset, and neither is force-pushed or
-  deleted on GitHub (TKT-25): a release or a hotfix pull request moves ``master``.
-- In any other checkout: a push to ``develop`` or ``master`` asks the person first.
-- Anywhere: ``tickets.py approve`` (a group's plans approved at once) asks the person first: the approval is theirs.
-- Anywhere: starting a release (``gh workflow run release.yml``) asks the person first: it ends on master (TKT-26).
-
-Reads the hook's JSON on stdin and prints a decision (``deny`` or ``ask``) as JSON, or nothing to let the command run.
-"""
-
 from __future__ import annotations
 
 import json

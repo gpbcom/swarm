@@ -1,4 +1,17 @@
-"""Write what a release delivers to master: changelog, release notes and test reports (TKT-26).
+from __future__ import annotations
+
+import argparse
+import re
+import shutil
+import subprocess
+import sys
+from dataclasses import dataclass, field
+from datetime import date
+from pathlib import Path
+from typing import List, Optional, Sequence, Tuple
+from xml.etree import ElementTree
+
+USAGE = """Write what a release delivers to master: changelog, release notes and test reports (TKT-26).
 
 Usage:
     python3 .github/scripts/release_notes.py version [--requested <x.y.z>] [--root <repo root>]
@@ -20,19 +33,6 @@ commit) and writes, from the repository and the CI test reports only:
 
 It exits 1, writing nothing, when ``--reports`` holds no report: a release never reaches master without its tests.
 """
-
-from __future__ import annotations
-
-import argparse
-import re
-import shutil
-import subprocess
-import sys
-from dataclasses import dataclass, field
-from datetime import date
-from pathlib import Path
-from typing import List, Optional, Sequence, Tuple
-from xml.etree import ElementTree
 
 VERSION = re.compile(r"^v?(\d+)\.(\d+)\.(\d+)$")
 TICKET = re.compile(r"^(T\d+\.\d{2})[: ]")
@@ -379,7 +379,7 @@ def write(root: Path, version: str, reports: Path, day: str) -> int:
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0] if __doc__ else None)
+    parser = argparse.ArgumentParser(description=USAGE.splitlines()[0] if USAGE else None)
     parser.add_argument("--root", type=Path, default=Path.cwd())
     sub = parser.add_subparsers(dest="command", required=True)
     pick = sub.add_parser("version")

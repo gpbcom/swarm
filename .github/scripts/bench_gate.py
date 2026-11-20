@@ -1,17 +1,3 @@
-"""Fail the build when a criterion benchmark regressed by more than a threshold (T0.07, benchmark gate).
-
-Usage:
-    python3 .github/scripts/bench_gate.py --criterion-dir <dir> [--threshold <fraction>]
-
-It walks ``<dir>`` for every ``change/estimates.json`` that criterion writes when it compares a run with a baseline.
-The benchmark id is the POSIX path of the folder holding ``change``, relative to ``<dir>``, and the change is
-``mean.point_estimate``, a fraction (``0.06`` is 6 % slower). The default threshold is ``0.05``.
-
-It prints one line per benchmark, sorted by id, then a last line, and exits 0 when the gate passes or 1 when a change is
-strictly above the threshold. An unknown argument, a missing ``--criterion-dir``, a bad threshold, a folder that does
-not exist or a malformed file prints a message on stderr and exits 2.
-"""
-
 from __future__ import annotations
 
 import json

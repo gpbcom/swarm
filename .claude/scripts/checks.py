@@ -1,5 +1,21 @@
 #!/usr/bin/env python3
-"""Run every applicable check of a ticket deterministically, save the evidence, and print the verdict as JSON.
+from __future__ import annotations
+
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple, Union
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "skills" / "ticket" / "scripts"))
+
+from check_ticket import has_no_screen_reason, screens_of, screens_section, touches_front_end
+
+USAGE = """Run every applicable check of a ticket deterministically, save the evidence, and print the verdict as JSON.
 
 Usage, from the repository root, on the ticket branch:
     python3 .claude/scripts/checks.py --ticket T0.01 [--base develop]
@@ -18,22 +34,6 @@ Several tickets share the main checkout (TKT-16), and the AGENT.md tools read a 
 ticket has recorded its own files, every check runs in a clean temporary worktree of ``HEAD`` holding only the
 ticket's own changes (TKT-6), removed afterwards; the evidence is still written to the ticket's folder.
 """
-
-from __future__ import annotations
-
-import json
-import os
-import re
-import shutil
-import subprocess
-import sys
-import tempfile
-from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Union
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "skills" / "ticket" / "scripts"))
-
-from check_ticket import has_no_screen_reason, screens_of, screens_section, touches_front_end
 
 ROOT = Path(__file__).resolve().parents[2]
 PROJECT_PREFIXES = ("services/", "packages/", "frontends/", "tests/", "deploy/")
@@ -313,7 +313,7 @@ def main() -> int:
     ticket = args[args.index("--ticket") + 1] if "--ticket" in args else ""
     base = args[args.index("--base") + 1] if "--base" in args else "develop"
     if not re.fullmatch(r"T\d\.\d\d", ticket):
-        print(__doc__, file=sys.stderr)
+        print(USAGE, file=sys.stderr)
         return 2
     changed = changed_files(base, ticket)
     tree = isolated_tree(changed) if own_paths(ticket) is not None else ROOT

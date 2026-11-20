@@ -1,19 +1,4 @@
 #!/usr/bin/env python3
-"""Keep the specification references of a ticket in its TICKET.md, PLAN.md and PROGRESS.md (TKT-2).
-
-Usage, from the repository root:
-    python3 .claude/scripts/ticket_refs.py sync --ticket T0.02
-    python3 .claude/scripts/ticket_refs.py check --ticket T0.02
-
-A specification reference is a relative link to a technical page (``docs/specs/technical/<page>.md``, its overview
-excepted) or to a feature, a use case or a business rule (``docs/specs/functional/{features,use-cases,
-business-rules}/``). ``TICKET.md`` is their only source and must hold at least one, each resolving to an existing
-page and anchor. ``sync`` copies them, in order and without duplicates, into a generated ``## 📚 Specifications``
-section of ``PLAN.md`` and ``PROGRESS.md``, between the ``<!-- ticket:specs -->`` markers, just under the status line.
-``check`` prints one line per problem (no reference, a broken link, a missing or stale section) and exits 1, or
-prints nothing.
-"""
-
 from __future__ import annotations
 
 import argparse

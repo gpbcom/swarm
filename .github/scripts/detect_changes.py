@@ -1,20 +1,3 @@
-"""Detect which parts of the repository a change touches (T0.04, step 1 of the CI/CD).
-
-Usage:
-    python3 .github/scripts/detect_changes.py [--root <repo root>] [--all]
-
-The changed paths are read from stdin, one POSIX path per line, relative to the root. ``--all`` does not read stdin and
-selects everything that applies. It prints exactly five lines, then exits 0:
-
-    services=<JSON array of service names>
-    typescript=<JSON array of front end and TypeScript package folders>
-    rust=<true|false>
-    repository=<true|false>
-    specs=<true|false>
-
-An unknown argument, or ``--root`` without a value, prints a usage line on stderr and exits 2.
-"""
-
 from __future__ import annotations
 
 import json

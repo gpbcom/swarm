@@ -4,7 +4,7 @@ from __future__ import annotations
 import asyncio
 import re
 from datetime import UTC, datetime
-from logging import Logger
+from logging import Logger, getLogger
 from typing import Awaitable, Callable, ClassVar, Dict, Optional, Pattern, Type
 
 # Third-party imports
@@ -72,7 +72,8 @@ class NatsResponder[Q: BaseModel, R: BaseModel](AsyncRunnable):
             handler (Callable[[Q], Awaitable[R]]): The coroutine that answers one request.
             logger (Optional[Logger]): Logger to use. A logger named after the module is used when it is ``None``.
         """
-        super().__init__(config.status_interval_s, logger)
+        super().__init__(config.status_interval_s)
+        self.logger = logger if logger else getLogger(__name__)
         self.connection = connection
         self.config = config
         self.request_type = request_type

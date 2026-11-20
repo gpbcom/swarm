@@ -10,21 +10,21 @@ from tests.conventions.rules.service_tree import ServiceTree
 
 
 class NoLoggerArgument(ConventionRule):
-    """Code that creates an object never hands it a logger: the object falls back to its own module logger.
+    """No call hands a logger on: neither to a new object nor to ``super().__init__``.
 
     Attributes:
         NAME (str): The short name of the rule.
         LOGGER (str): The name of the optional logger parameter, and of the attribute that holds a logger.
         GET_LOGGER (str): The function that returns a named logger.
         INIT (str): The constructor name, called through ``super()`` by a subclass.
+        SUPER (str): The built-in that reaches the base class.
         CLS (str): The first argument of a ``@classmethod``, which creates an object of its class.
 
     Notes:
-        - A call creates an object when it names a class (a capitalised name or attribute) or ``cls``.
+        - A call is checked when it creates an object (it names a class, a capitalised name or attribute, or ``cls``)
+          or calls ``super().__init__``. A subclass sets its own ``self.logger`` after ``super().__init__``.
         - It hands a logger when it passes ``logger=``, or an argument that is ``logger``, ``<anything>.logger`` or a
           ``getLogger(...)`` call.
-        - ``super().__init__(..., logger)`` creates nothing: a subclass still hands its logger to its base class
-          (AGENT.md, Lifecycle and factories).
         - Only ``src/`` is checked: a test may pass a logger to test that parameter, or to capture the logs.
     """
 
@@ -33,6 +33,7 @@ class NoLoggerArgument(ConventionRule):
     GET_LOGGER: ClassVar[str] = "getLogger"
     INIT: ClassVar[str] = "__init__"
     CLS: ClassVar[str] = "cls"
+    SUPER: ClassVar[str] = "super"
 
     ############################
     # Internal Helpers Methods #
@@ -45,11 +46,14 @@ class NoLoggerArgument(ConventionRule):
             call (ast.Call): The call to read.
 
         Returns:
-            bool: True for ``Name(...)``, ``module.Name(...)`` and ``cls(...)``, False for ``__init__`` and the rest.
+            bool: True for ``Name(...)``, ``module.Name(...)``, ``cls(...)`` and ``super().__init__(...)``.
         """
         function = call.func
+        if isinstance(function, ast.Attribute) and function.attr == self.INIT:
+            base = function.value
+            return isinstance(base, ast.Call) and getattr(base.func, "id", "") == self.SUPER
         if isinstance(function, ast.Attribute):
-            return function.attr != self.INIT and function.attr[:1].isupper()
+            return function.attr[:1].isupper()
         if isinstance(function, ast.Name):
             return function.id == self.CLS or function.id[:1].isupper()
         return False
@@ -91,7 +95,7 @@ class NoLoggerArgument(ConventionRule):
     ############################
 
     def violations(self, service: ServiceTree) -> List[str]:
-        """List the calls of a service's ``src/`` that create an object and hand it a logger.
+        """List the calls of a service's ``src/`` that hand a logger to a new object or to ``super().__init__``.
 
         Args:
             service (ServiceTree): The service to check.
@@ -105,7 +109,5 @@ class NoLoggerArgument(ConventionRule):
                 continue
             for node in ast.walk(self.parse(path)):
                 if isinstance(node, ast.Call) and self._creates(node) and self._hands_a_logger(node):
-                    messages.append(
-                        self.violation(service, path, node.lineno, "A logger is handed to a new object: leave it out.")
-                    )
+                    messages.append(self.violation(service, path, node.lineno, "A logger is handed on: leave it out."))
         return messages

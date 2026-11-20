@@ -1,5 +1,17 @@
 #!/usr/bin/env python3
-"""Build the parallel plan of the roadmap: which tickets can run at the same time, and their Gantt charts.
+from __future__ import annotations
+
+import argparse
+import datetime as dt
+import heapq
+import json
+import re
+import subprocess
+import sys
+from pathlib import Path
+from typing import Dict, List, Optional, Set, Tuple, Union
+
+USAGE = """Build the parallel plan of the roadmap: which tickets can run at the same time, and their Gantt charts.
 
 Usage, from the repository root:
     python3 .claude/scripts/roadmap_gantt.py build
@@ -21,18 +33,6 @@ approves and reviews the tickets one after another. The ticket with the most wor
 this script) and the text between the ``<!-- gantt:plan -->`` markers of ``docs/specs/roadmap/14-parallel-plan.md``;
 run ``specs.py build`` after it. ``check`` prints one line per stale output and exits 1, or prints nothing.
 """
-
-from __future__ import annotations
-
-import argparse
-import datetime as dt
-import heapq
-import json
-import re
-import subprocess
-import sys
-from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple, Union
 
 ROOT = Path(__file__).resolve().parents[2]
 ROADMAP = ROOT / "docs" / "specs" / "roadmap"
@@ -551,7 +551,7 @@ def with_block(page: str, block: str) -> str:
 
 
 def main(argv: Optional[List[str]] = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser = argparse.ArgumentParser(description=USAGE.splitlines()[0])
     parser.add_argument("command", choices=["build", "check"])
     args = parser.parse_args(argv)
     plan = Plan()

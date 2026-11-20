@@ -189,7 +189,7 @@ Since T0.03, `tests/conventions/services/test_service_conventions.py` runs these
 under `services/`. The rules checked are: more than one top-level class in a file; more than five Python files in a
 folder; a nested function; `Any`; an import that Layout does not allow, checked in `src/` only; the lifecycle rule
 (`start` or `stop`, or `run` without a lifecycle base class); a Pydantic model outside `src/models/`; a module
-docstring; and a logger handed to a new object, checked in `src/` only. `@staticmethod`,
+docstring; and a logger handed to a new object or to `super().__init__`, checked in `src/` only. `@staticmethod`,
 attributes starting with an underscore and the node rules are not tested yet. Each rule is one class in
 `tests/conventions/rules/`. The environment variable `SWARM_CONVENTIONS_SERVICES_ROOT` runs the tests against another
 folder of services. `tests/conventions/packages/test_package_conventions.py` runs the same rules against every package of
@@ -208,7 +208,8 @@ definitions of `Runnable` and `AsyncRunnable` themselves.
 - A class outside `src/models/` with `start` or `stop`, or with `run` but no lifecycle base class.
 - A node without `__call__`, or with `run`.
 - A file that starts with a docstring (a module docstring).
-- A call in `src/` that creates an object and hands it a logger (`logger=`, `self.logger`, `getLogger(...)`).
+- A call in `src/` that hands a logger to a new object or to `super().__init__` (`logger=`, `self.logger`,
+  `getLogger(...)`).
 
 ## File shape
 
@@ -279,8 +280,8 @@ Every runnable class except the nodes subclasses `Runnable` or `AsyncRunnable`, 
   sub-folders: `ServiceFactory` in `service/factories/`, and `CommandFactory` in `api/factories/`. Do not call a
   runnable's constructor in `src/` outside a factory.
 - The base classes are `swarm_lifecycle.runnables.runnable.Runnable` and `swarm_lifecycle.runnables.async_runnable.AsyncRunnable`.
-  A subclass passes its logger to `super().__init__(logger)`, and an `AsyncRunnable` subclass passes its status
-  interval first: `super().__init__(config.status_interval_s, logger)`.
+  A subclass calls `super().__init__()`, or `super().__init__(config.status_interval_s)` for an `AsyncRunnable`, with
+  no logger, then sets its own `self.logger = logger if logger else getLogger(__name__)`.
 - An abstract factory of a layer subclasses `swarm_lifecycle.factories.runnable_factory.RunnableFactory[...]` or
   `swarm_lifecycle.factories.async_runnable_factory.AsyncRunnableFactory[...]`. A concrete factory implements `_build()`,
   and callers call `create()`.
@@ -412,9 +413,9 @@ def __init__(self, config: DatabaseConfig, logger: Optional[Logger] = None) -> N
 
 **NEVER hand a logger to a new object.** The logger parameter keeps its `None` default, and code that creates the
 object leaves it out, so that each class logs under its own module's name: `DurableConsumer(connection, config)`, never
-`DurableConsumer(connection, config, self.logger)` or `GreetingCommand(logger=self.logger)`. A subclass still hands its
-logger to its base class with `super().__init__(logger)`, which creates nothing. Tests may pass a logger, to test that
-parameter or to capture the logs.
+`DurableConsumer(connection, config, self.logger)` or `GreetingCommand(logger=self.logger)`. **Nor does a subclass hand
+it to its base class:** it calls `super().__init__()` without it, then sets its own `self.logger`. Tests may pass a
+logger to an object they test, to test that parameter or to capture the logs.
 
 - Use lazy arguments, never an f-string: `self.logger.info("Created customer %s in %d ms.", name, duration_ms)`.
 - Use the levels this way:

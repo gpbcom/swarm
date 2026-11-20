@@ -12,9 +12,9 @@ Nine rules of [AGENT.md](AGENT.md) hold for people and agents alike, in `src/` a
 - **No file docstring.** No module starts with a docstring, `__init__.py` included: `from __future__ import
   annotations` comes first, and the docstring of the file's one class says what it is for (AGENT.md, Docstrings and
   comments).
-- **Never hand a logger to a new object.** A constructor keeps `logger: Optional[Logger] = None`, and code that
-  creates the object leaves it out: `MyClass(config)`, never `MyClass(config, self.logger)`. Only
-  `super().__init__(logger)` passes one on (AGENT.md, Logging).
+- **Never hand a logger on.** A constructor keeps `logger: Optional[Logger] = None`, and code that creates the
+  object leaves it out: `MyClass(config)`, never `MyClass(config, self.logger)`. A subclass calls `super().__init__()`
+  without it and sets its own `self.logger` (AGENT.md, Logging).
 - **Every `try` has an `except`, even if only to log.** A `try` with only a `finally` is forbidden: the `except` logs at
   `ERROR` and raises again with a bare `raise` when it cannot handle the error (AGENT.md, Exceptions).
 - **No dict with hard-coded keys inside a method or function.** A fixed dict is an `UPPER_CASE` `ClassVar`; when its

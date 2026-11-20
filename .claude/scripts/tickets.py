@@ -1,5 +1,39 @@
 #!/usr/bin/env python3
-"""Run several roadmap tickets at once in the main checkout, alone or as a group of issues (TKT-16, TKT-20).
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import re
+import shlex
+import subprocess
+import sys
+import time
+from datetime import datetime
+from pathlib import Path
+from typing import Dict, List, Optional, Set, Tuple
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+import branches
+from roadmap_gantt import areas, key, roadmap_rows
+from ticket_tree import (
+    BRANCH_PREFIX,
+    DEVELOP,
+    REMOTE,
+    SHARED_BRANCH,
+    TICKET_SUBJECT,
+    git,
+    has_remote,
+    is_clean,
+    load_state,
+    main_checkout,
+    open_states,
+    ticket_paths,
+    worktrees,
+)
+
+USAGE = """Run several roadmap tickets at once in the main checkout, alone or as a group of issues (TKT-16, TKT-20).
 
 Usage, from the main checkout:
     python3 .claude/scripts/tickets.py check --ticket T0.10 [--force]     (prints nothing when the ticket may start)
@@ -40,40 +74,6 @@ its own worktree on ``feature/<ID>`` until ``prune`` removes it once merged.
   included, to a bundle in ``.git/swarm/backups/`` (TKT-25). ``--dry-run`` only says what it would delete.
 - ``setup`` turns on the GitFlow git hooks of ``.githooks/`` for this clone (TKT-15).
 """
-
-from __future__ import annotations
-
-import argparse
-import json
-import os
-import re
-import shlex
-import subprocess
-import sys
-import time
-from datetime import datetime
-from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
-
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-
-import branches
-from roadmap_gantt import areas, key, roadmap_rows
-from ticket_tree import (
-    BRANCH_PREFIX,
-    DEVELOP,
-    REMOTE,
-    SHARED_BRANCH,
-    TICKET_SUBJECT,
-    git,
-    has_remote,
-    is_clean,
-    load_state,
-    main_checkout,
-    open_states,
-    ticket_paths,
-    worktrees,
-)
 
 SCRIPTS = Path(__file__).resolve().parent
 REPOSITORY = SCRIPTS.parents[1]
@@ -585,7 +585,7 @@ def setup(main: Path) -> None:
 
 
 def main(argv: Optional[List[str]] = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser = argparse.ArgumentParser(description=USAGE.splitlines()[0])
     sub = parser.add_subparsers(dest="command", required=True)
     done_command = sub.add_parser("done")
     done_command.add_argument("--ticket", required=True)

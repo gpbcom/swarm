@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 # Standard library imports
-from logging import Logger
+from logging import Logger, getLogger
 from typing import Awaitable, Callable, List, Optional, Type
 
 # Third-party imports
@@ -55,7 +55,8 @@ class DurableConsumer[M: BaseModel](AsyncRunnable):
             handler (Callable[[M], Awaitable[None]]): What is done with each decoded message.
             logger (Optional[Logger]): Logger to use. A logger named after the module is used when it is ``None``.
         """
-        super().__init__(config.status_interval_s, logger)
+        super().__init__(config.status_interval_s)
+        self.logger = logger if logger else getLogger(__name__)
         self.connection = connection
         self.config = config
         self.message_type = message_type

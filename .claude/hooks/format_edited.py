@@ -1,11 +1,4 @@
 #!/usr/bin/env python3
-"""PostToolUse hook: format only the file that Edit, Write or MultiEdit just changed.
-
-The hook reads the PostToolUse JSON on stdin. The first formatter of ``formatters.json`` whose ``match`` finds the
-file's path (relative to the git top level) runs on that one file. It exits 0 when there is nothing to do, and 2 when
-the formatter fails, so that the output reaches the agent.
-"""
-
 from __future__ import annotations
 
 import json

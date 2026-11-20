@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 # Standard library imports
-from logging import Logger
+from logging import Logger, getLogger
 from typing import List, Optional
 
 # First-party imports
@@ -12,7 +12,8 @@ class RecordingRunnable(Runnable):
     """Stand-in runnable that records the lifecycle methods called, and can fail in one of them."""
 
     def __init__(self, fail_in: Optional[str] = None, logger: Optional[Logger] = None) -> None:
-        super().__init__(logger)
+        super().__init__()
+        self.logger = logger if logger else getLogger(__name__)
         self.fail_in = fail_in
         self.calls: List[str] = []
 

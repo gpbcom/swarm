@@ -1,5 +1,19 @@
 #!/usr/bin/env python3
-"""Carry the uncommitted work of a ticket between worktrees, and commit it once, when the ticket is done (TKT-5, TKT-16).
+from __future__ import annotations
+
+import argparse
+import fcntl
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple, Union
+
+USAGE = """Carry the uncommitted work of a ticket between worktrees, and commit it once, when the ticket is done (TKT-5, TKT-16).
 
 Usage (any command but start and handoff may run from the main checkout or from the ticket's worktree):
     python3 .claude/scripts/ticket_tree.py prepare   --ticket T0.07
@@ -43,20 +57,6 @@ the script uses git *trees* (``git write-tree`` on a temporary index), which nev
 
 Each command prints JSON (or the diff or table asked for) on stdout, and a failure on stderr with exit code 1.
 """
-
-from __future__ import annotations
-
-import argparse
-import fcntl
-import json
-import os
-import re
-import shutil
-import subprocess
-import sys
-import tempfile
-from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Union
 
 JsonData = Union[str, int, bool, None, List["JsonData"], Dict[str, "JsonData"]]
 
@@ -930,7 +930,7 @@ def finish(top: Path, ticket: str, open_pull_request: bool = True) -> Dict[str, 
 
 def parser() -> argparse.ArgumentParser:
     """Return the command line parser."""
-    root = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    root = argparse.ArgumentParser(description=USAGE, formatter_class=argparse.RawDescriptionHelpFormatter)
     commands = root.add_subparsers(dest="command", required=True)
     for name in ("prepare", "home", "status", "start", "handoff", "integrate", "diff", "changes", "docs", "finish"):
         command = commands.add_parser(name)
