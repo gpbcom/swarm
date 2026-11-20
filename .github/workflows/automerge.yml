@@ -77,6 +77,11 @@ jobs:
             fi
             GH_TOKEN="$RELEASE_TOKEN" gh release create "v$version" -R "$REPO" --target "$sha" \
               --title "Swarm v$version" --notes-file "$RUNNER_TEMP/notes.md"
+            # GitHub deletes the head branch of a merge made with a person's token: bring it back at the released commit.
+            if ! gh api "repos/$REPO/git/ref/heads/$HEAD_BRANCH" > /dev/null 2>&1; then
+              GH_TOKEN="$RELEASE_TOKEN" gh api -X POST "repos/$REPO/git/refs" -f "ref=refs/heads/$HEAD_BRANCH" -f "sha=$HEAD_SHA" --silent
+              echo "Recreated $HEAD_BRANCH at $HEAD_SHA for its way back to develop."
+            fi
             GH_TOKEN="$RELEASE_TOKEN" gh pr create -R "$REPO" --base develop --head "$HEAD_BRANCH" --label automerge \
               --title "Release v$version: back to develop" \
               --body "Brings the changelog, the release notes and the test reports of v$version (#$pr) back to develop (TKT-26)."

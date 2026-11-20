@@ -24,6 +24,7 @@ RUST_LOG = (
     "test result: ok. 7 passed; 0 failed; 2 ignored; 0 measured\ntest result: ok. 3 passed; 0 failed; 0 ignored\n"
 )
 VITEST_LOG = " Test Files  2 passed (2)\n      Tests  12 passed (12)\n"
+NODE_TEST_LOG = "ok 1 - generated models\n1..1\n# tests 9\n# suites 1\n# pass 8\n# fail 0\n# skipped 1\n# todo 0\n"
 
 
 def repo_root() -> Path:
@@ -94,6 +95,8 @@ def write_reports(base: Path, errors: int = 0) -> Path:
         ("test-report-rust", "rust-cargo-test.log", RUST_LOG),
         ("test-report-ts-frontends-ground-control", "typescript.log", VITEST_LOG),
         ("test-report-specs", "specs-check.log", ""),
+        ("test-report-ts-packages-ts-live", "packages-ts-live.log", NODE_TEST_LOG),
+        ("test-report-ts-packages-ts-config", "packages-ts-config.log", ""),
     ):
         (reports / folder).mkdir(parents=True)
         (reports / folder / name).write_text(text, encoding="utf-8")

@@ -44,6 +44,9 @@ elif "/files" in text:
 elif text.startswith("api repos/") and "/labels" in text and "-X" not in args:
     answer([{"name": n} for n in scenario.get("labels", [])])
 elif "git/ref/heads/" in text and "-X" not in args:
+    if scenario.get("branch_gone"):
+        print("gh: Not Found (HTTP 404)", file=sys.stderr)
+        sys.exit(1)
     answer({"object": {"sha": scenario["ref_sha"]}})
 elif "/contents/" in text:
     answer("# Swarm notes from the repository")

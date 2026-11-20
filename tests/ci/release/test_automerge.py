@@ -33,6 +33,20 @@ class TestAutomerge:
         assert calls.index(merge) < calls.index(release) < calls.index(back)
         assert not [call for call in calls if "DELETE" in argv(call)]
 
+    def test_a_release_branch_deleted_by_github_on_merge_is_recreated_for_the_way_back(self, tmp_path: Path) -> None:
+        case = scenario("release/0.1.0", "master", [], self.GREEN)
+        case["branch_gone"] = True
+        calls = run_automerge(tmp_path, case)
+        [recreate] = [call for call in calls if "git/refs" in argv(call) and "POST" in argv(call)]
+        assert f"ref=refs/heads/release/0.1.0 -f sha={HEAD_SHA}" in argv(recreate)
+        assert recreate["token"] == RELEASE_TOKEN
+        [back] = calls_to(calls, "pr", "create")
+        assert calls.index(recreate) < calls.index(back)
+
+    def test_a_release_branch_still_there_is_left_as_it_is(self, tmp_path: Path) -> None:
+        calls = run_automerge(tmp_path, scenario("release/0.1.0", "master", [], self.GREEN))
+        assert not [call for call in calls if "git/refs" in argv(call) and "POST" in argv(call)]
+
     def test_no_release_reaches_master_without_the_release_token(self, tmp_path: Path) -> None:
         calls = run_automerge(tmp_path, scenario("release/0.1.0", "master", [], self.GREEN), release_token="")
         assert not calls_to(calls, "pr", "merge")

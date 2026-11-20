@@ -40,6 +40,7 @@ PULL_REQUEST = re.compile(r"\(#(\d+)\)\s*$")
 SPEC_LINK = re.compile(r"\[((?:📘 FS|🎬 UC|📏 BR)-\d{3}: [^\]]+)\]")
 RUST_RESULT = re.compile(r"test result: \w+\. (\d+) passed; (\d+) failed; (\d+) ignored")
 VITEST_RESULT = re.compile(r"Tests\s+(?:(\d+) failed \| )?(\d+) passed(?: \| (\d+) skipped)?")
+TAP_COUNT = re.compile(r"^# (pass|fail|skipped|todo) (\d+)$", re.MULTILINE)
 MERGE_PREFIX = re.compile(r"^(?P<kind>[^:]+): merge (?P<branch>\S+) into develop")
 GROUPS: List[Tuple[str, str]] = [
     ("ticket", "🎫 Tickets"),
@@ -193,7 +194,7 @@ def junit_suite(path: Path, name: str) -> Suite:
 
 
 def log_suite(path: Path, name: str) -> Suite:
-    """Read a test log: cargo test, Vitest, or the output of ``specs.py check`` (empty means passed)."""
+    """Read a test log: cargo test, Vitest, Node's test runner (TAP), or the output of ``specs.py check``."""
     suite = Suite(name, path.name)
     text = path.read_text(encoding="utf-8", errors="replace")
     for passed, failed, ignored in RUST_RESULT.findall(text):
@@ -204,6 +205,13 @@ def log_suite(path: Path, name: str) -> Suite:
         suite.passed += int(passed)
         suite.failed += int(failed or 0)
         suite.skipped += int(skipped or 0)
+    for kind, count in TAP_COUNT.findall(text):
+        if kind == "pass":
+            suite.passed += int(count)
+        elif kind == "fail":
+            suite.failed += int(count)
+        else:
+            suite.skipped += int(count)
     if name.startswith("specs"):
         if text.strip() and text.strip() != SPECS_CLEAN:
             suite.failed += 1
@@ -211,6 +219,8 @@ def log_suite(path: Path, name: str) -> Suite:
         else:
             suite.passed += 1
             suite.notes.append("specs.py check printed nothing")
+    elif suite.passed + suite.failed + suite.skipped == 0:
+        suite.notes.append("no test ran")
     return suite
 
 
@@ -267,7 +277,7 @@ def write_changelog(root: Path, section: str) -> None:
 def test_table(suites: List[Suite]) -> List[str]:
     lines = ["| Suite | ✅ Passed | ❌ Failed | ⏭️ Skipped | ⏱️ Time | Report |", "| --- | --- | --- | --- | --- | --- |"]
     for suite in suites:
-        icon = "❌" if suite.failed else "✅"
+        icon = "❌" if suite.failed else ("➖" if suite.passed + suite.skipped == 0 else "✅")
         notes = f" ({'; '.join(suite.notes)})" if suite.notes else ""
         lines.append(
             f"| {icon} {suite.name}{notes} | {suite.passed} | {suite.failed} | {suite.skipped} | "

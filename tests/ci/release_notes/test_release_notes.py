@@ -77,6 +77,8 @@ class TestWrite:
         assert "| ✅ rust/rust-cargo-test | 10 | 0 | 2 |" in report
         assert "| ✅ ts-frontends-ground-control/typescript | 12 | 0 | 0 |" in report
         assert "specs.py check printed nothing" in report
+        assert "| ✅ ts-packages-ts-live/packages-ts-live | 8 | 0 | 1 |" in report
+        assert "| ➖ ts-packages-ts-config/packages-ts-config (no test ran) | 0 | 0 | 0 |" in report
         assert (root / FOLDER / "tests" / "test-report-rust" / "rust-cargo-test.log").is_file()
 
     def test_a_failed_test_shows_in_the_report(self, tmp_path: Path) -> None:
