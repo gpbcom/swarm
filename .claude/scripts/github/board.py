@@ -11,7 +11,7 @@ import time
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path[:0] = [str(Path(__file__).resolve().parents[1] / group) for group in ("tickets", "github", "reports")]
 
 from roadmap_gantt import GRAPH, ROADMAP, cells, expand, key, short
 from ticket_tree import find_home, main_checkout, open_states
@@ -20,10 +20,10 @@ from tickets import develop_ref, done_tickets, finished_tickets
 USAGE = """Mirror the roadmap on GitHub: issues, sub-issues, "blocked by" links and the Kanban project (TKT-15).
 
 Usage, from the repository root:
-    python3 .claude/scripts/board.py bootstrap [--dry-run]
-    python3 .claude/scripts/board.py move --ticket T0.09 --status running
-    python3 .claude/scripts/board.py sync
-    python3 .claude/scripts/board.py show [--all]
+    python3 .claude/scripts/github/board.py bootstrap [--dry-run]
+    python3 .claude/scripts/github/board.py move --ticket T0.09 --status running
+    python3 .claude/scripts/github/board.py sync
+    python3 .claude/scripts/github/board.py show [--all]
 
 ``bootstrap`` creates, once and in this order, what does not exist yet: the labels, one milestone per phase, the
 project "Swarm roadmap" with its Status columns and views, one issue per phase, epic and ticket, the sub-issue tree
@@ -39,7 +39,7 @@ Columns: 📥 Backlog (prerequisites open), ✅ Ready (every prerequisite merged
 
 Json = Union[None, bool, int, float, str, List["Json"], Dict[str, "Json"]]
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 MAIN = main_checkout(ROOT)
 STATE = MAIN / ".claude" / "github.json"
 CACHE_DIR = (
@@ -679,7 +679,7 @@ class Board:
 def show(include_all: bool) -> None:
     """Print the board from the local cache: counts per phase, then the tickets that move."""
     if not CACHE.is_file():
-        raise SystemExit("No board cache yet: run python3 .claude/scripts/board.py sync")
+        raise SystemExit("No board cache yet: run python3 .claude/scripts/github/board.py sync")
     cache = json.loads(CACHE.read_text(encoding="utf-8"))
     status, numbers, titles = cache["status"], cache["numbers"], cache["titles"]
     tickets = sorted([t for t in status if re.match(r"^T\d+\.\d+$", t)], key=key)

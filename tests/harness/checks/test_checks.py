@@ -25,7 +25,7 @@ def git(cwd: Path, *args: str) -> None:
 
 def changed(repo: Path) -> List[str]:
     code = (
-        f"import sys; sys.path.insert(0, {str(ROOT / '.claude' / 'scripts')!r}); import checks; "
+        f"import sys; sys.path.insert(0, {str(ROOT / '.claude' / 'scripts' / 'tickets')!r}); import checks; "
         f"print('\\n'.join(checks.changed_files('develop', {TICKET!r}, __import__('pathlib').Path({str(repo)!r}))))"
     )
     result = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, check=True)
@@ -38,7 +38,7 @@ SCREEN_ROW = '| <a id="screen-a1"></a>A1: Enter the Operator | ➖ | ➖ | {sour
 
 def screen_verdict(root: Path, changed: List[str], pipeline_ready: bool) -> Dict[str, object]:
     code = (
-        f"import sys, json; sys.path.insert(0, {str(ROOT / '.claude' / 'scripts')!r}); import checks; "
+        f"import sys, json; sys.path.insert(0, {str(ROOT / '.claude' / 'scripts' / 'tickets')!r}); import checks; "
         f"from pathlib import Path; failures, reason = checks.screen_problems(Path({str(root)!r}), {FRONT_END!r}, "
         f"{changed!r}, {pipeline_ready!r}); print(json.dumps({{'failures': failures, 'reason': reason}}))"
     )
@@ -93,7 +93,7 @@ def two_tickets_at_work(tmp_path: Path, paths: object) -> Path:
 
 def clean_tree(repo: Path) -> Dict[str, object]:
     code = (
-        f"import sys, json; sys.path.insert(0, {str(ROOT / '.claude' / 'scripts')!r}); import checks; "
+        f"import sys, json; sys.path.insert(0, {str(ROOT / '.claude' / 'scripts' / 'tickets')!r}); import checks; "
         f"from pathlib import Path; repo = Path({str(repo)!r}); "
         f"tree = checks.isolated_tree(checks.changed_files('develop', {TICKET!r}, repo), repo); "
         f"files = sorted(str(p.relative_to(tree)) for p in tree.rglob('*') if p.is_file() and '.git' not in p.parts); "
@@ -187,7 +187,7 @@ class TestChecks:
         (tmp_path / "tests").mkdir()
         (tmp_path / "packages/python/swarm-rest/src/swarm_rest").mkdir(parents=True)
         script = (
-            f"import sys; sys.path.insert(0, {str(ROOT / '.claude' / 'scripts')!r}); import checks; "
+            f"import sys; sys.path.insert(0, {str(ROOT / '.claude' / 'scripts' / 'tickets')!r}); import checks; "
             f"from pathlib import Path; print(checks.environment_failure({code!r}, {out!r}, Path({str(tmp_path)!r})))"
         )
         result = subprocess.run([sys.executable, "-c", script], capture_output=True, text=True, check=True)
@@ -208,7 +208,7 @@ class TestChecks:
             "Found 2 errors.\n"
         )
         script = (
-            f"import sys, json; sys.path.insert(0, {str(ROOT / '.claude' / 'scripts')!r}); import checks; "
+            f"import sys, json; sys.path.insert(0, {str(ROOT / '.claude' / 'scripts' / 'tickets')!r}); import checks; "
             f"print(json.dumps(checks.failing_files({out!r}, {changed!r})))"
         )
         result = subprocess.run([sys.executable, "-c", script], capture_output=True, text=True, check=True)

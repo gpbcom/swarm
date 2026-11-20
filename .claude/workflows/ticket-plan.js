@@ -111,7 +111,7 @@ phase('Ticket')
 // TKT-23: a ticket already done (merged, or its issue closed on GitHub) or finished (its pull request open) is never
 // planned again: tickets.py holds the one definition of done.
 const notDone = await agent(
-  `Run exactly python3 .claude/scripts/tickets.py done --ticket ${ID} and report. passed is true only if it exits 1 ` +
+  `Run exactly python3 .claude/scripts/tickets/tickets.py done --ticket ${ID} and report. passed is true only if it exits 1 ` +
   `and prints nothing (the ticket still needs work); problems lists every line it prints.`,
   { agentType: 'verifier', schema: CHECK, label: `done check ${ID}` },
 )
@@ -175,13 +175,13 @@ const written = await agent(
   `Write docs/tickets/${ID}/PLAN.md for ticket ${ID} (${ticket.title}) with the status line "**Plan:** 🟡 Awaiting approval", ` +
   `this summary: ${JSON.stringify(plan.summary)}, the assumptions ${JSON.stringify([...ticket.assumptions, ...plan.assumptions])}, ` +
   `then a "## Task graph" heading and this task graph in a json block, exactly: ${JSON.stringify(graph)}. ` +
-  `Then run python3 .claude/scripts/plan.py render --ticket ${ID}, which pretty-prints the json block and writes from it the waves table, ` +
+  `Then run python3 .claude/scripts/tickets/plan.py render --ticket ${ID}, which pretty-prints the json block and writes from it the waves table, ` +
   `the dependency graph and one section per task for the person; it must print nothing. Then append to the Events table of docs/tickets/${ID}/PROGRESS.md: "Plan written: ${graph.length} tasks, ${waves} waves" (⏳ Awaiting approval), ` +
-  `Then run python3 .claude/scripts/ticket_refs.py sync --ticket ${ID}, which copies the specification references of TICKET.md into PLAN.md and PROGRESS.md, ` +
-  `and python3 .claude/scripts/progress.py timings --ticket ${ID} --write. ` +
-  `Then run python3 .claude/scripts/board.py move --ticket ${ID} --status planned, which moves its card to 📝 Planned on the GitHub board (TKT-17); ` +
+  `Then run python3 .claude/scripts/tickets/ticket_refs.py sync --ticket ${ID}, which copies the specification references of TICKET.md into PLAN.md and PROGRESS.md, ` +
+  `and python3 .claude/scripts/reports/progress.py timings --ticket ${ID} --write. ` +
+  `Then run python3 .claude/scripts/github/board.py move --ticket ${ID} --status planned, which moves its card to 📝 Planned on the GitHub board (TKT-17); ` +
   `if it fails because gh is missing or offline, go on. ` +
-  `Last, run python3 .claude/scripts/ticket_refs.py check --ticket ${ID} and python3 .claude/scripts/plan.py check --ticket ${ID}, ` +
+  `Last, run python3 .claude/scripts/tickets/ticket_refs.py check --ticket ${ID} and python3 .claude/scripts/tickets/plan.py check --ticket ${ID}, ` +
   `and return in problems every line they print (none when all is well).`,
   { agentType: 'scribe', schema: WRITE_SCHEMA, label: `scribe ${ID}` },
 )

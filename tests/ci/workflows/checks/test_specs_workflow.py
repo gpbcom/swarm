@@ -14,7 +14,7 @@ class TestSpecsWorkflow:
     CHECK_COMMAND = "uv run python .claude/skills/write-specs/scripts/specs.py check"
 
     def workflow(self) -> Dict[Union[str, bool], JsonValue]:
-        root = Path(__file__).resolve().parents[3]
+        root = Path(__file__).resolve().parents[4]
         with open(root / ".github" / "workflows" / "specs.yml", encoding="utf-8") as handle:
             data = yaml.safe_load(handle)
         assert isinstance(data, dict)

@@ -5,7 +5,7 @@
 <!-- ticket:specs -->
 ## 📚 Specifications
 
-The technical pages, features, use cases and business rules of [TICKET.md](TICKET.md), copied by `python3 .claude/scripts/ticket_refs.py sync`.
+The technical pages, features, use cases and business rules of [TICKET.md](TICKET.md), copied by `python3 .claude/scripts/tickets/ticket_refs.py sync`.
 
 - [🧱 Data models: conventions](../../specs/technical/02-data-models.md#conventions)
 - [🧱 Data models: events](../../specs/technical/02-data-models.md#events)
@@ -124,7 +124,7 @@ Specifications applied:
 <!-- plan:graph -->
 
 > [!NOTE]
-> Generated from the json block at the end of this page by `python3 .claude/scripts/plan.py render`.
+> Generated from the json block at the end of this page by `python3 .claude/scripts/tickets/plan.py render`.
 > To change a task, edit the json block, then render again: never edit this view by hand.
 
 ## Waves

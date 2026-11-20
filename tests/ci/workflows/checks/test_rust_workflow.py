@@ -12,7 +12,7 @@ class TestRustWorkflow:
     READ_ONLY_PERMISSIONS: ClassVar[Dict[str, str]] = {"contents": "read"}
 
     def workflow(self) -> Dict[Union[str, bool], JsonValue]:
-        root = Path(__file__).resolve().parents[3]
+        root = Path(__file__).resolve().parents[4]
         path = root / ".github" / "workflows" / "rust.yml"
         data = yaml.safe_load(path.read_text(encoding="utf-8"))
         assert isinstance(data, dict)

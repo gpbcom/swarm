@@ -5,7 +5,7 @@
 <!-- ticket:specs -->
 ## 📚 Specifications
 
-The technical pages, features, use cases and business rules of [TICKET.md](TICKET.md), copied by `python3 .claude/scripts/ticket_refs.py sync`.
+The technical pages, features, use cases and business rules of [TICKET.md](TICKET.md), copied by `python3 .claude/scripts/tickets/ticket_refs.py sync`.
 
 - [🧰 Deployment: CI/CD](../../specs/technical/09-deployment.md#ci)
 - [🗂️ Architecture: mono-repo](../../specs/technical/01-architecture.md#mono-repo)
@@ -58,7 +58,7 @@ No two tasks of the same wave share a file.
 <!-- plan:graph -->
 
 > [!NOTE]
-> Generated from the json block at the end of this page by `python3 .claude/scripts/plan.py render`.
+> Generated from the json block at the end of this page by `python3 .claude/scripts/tickets/plan.py render`.
 > To change a task, edit the json block, then render again: never edit this view by hand.
 
 ## Waves

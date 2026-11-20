@@ -104,7 +104,7 @@ class TestGuardHook:
 
     def test_approving_a_group_of_plans_asks_the_person(self, tmp_path: Path) -> None:
         main = make_repo(tmp_path)
-        decision = guard("python3 .claude/scripts/tickets.py approve '#12'", main)
+        decision = guard("python3 .claude/scripts/tickets/tickets.py approve '#12'", main)
         assert decision["permissionDecision"] == "ask"
         assert "TKT-3" in str(decision["permissionDecisionReason"])
 
@@ -124,7 +124,7 @@ class TestGuardHook:
         [
             "git status",
             "git diff develop",
-            "python3 .claude/scripts/ticket_tree.py finish --ticket T0.09",
+            "python3 .claude/scripts/tickets/ticket_tree.py finish --ticket T0.09",
             "git log --oneline",
         ],
     )

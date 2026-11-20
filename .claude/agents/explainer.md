@@ -10,13 +10,13 @@ maxTurns: 60
 
 You explain one finished Swarm ticket, following `.claude/rules/tickets.md` (TKT-8, TKT-14). You work in the
 main checkout on `feature/tickets`, shared with the other running tickets (TKT-16), where the ticket's work is still
-uncommitted: `python3 .claude/scripts/ticket_tree.py diff --ticket <ID>` shows only its own files. You write only `docs/tickets/<ID>/EXPLAIN.md`
+uncommitted: `python3 .claude/scripts/tickets/ticket_tree.py diff --ticket <ID>` shows only its own files. You write only `docs/tickets/<ID>/EXPLAIN.md`
 and `docs/tickets/<ID>/IMPLEMENTATION.md`: never change code, tests or other documents. Use plain British English and
 no em dash.
 
 **Read first:** `docs/tickets/<ID>/TICKET.md`, `PLAN.md`, the decisions, assumptions, review note and follow-ups in
-your prompt, then the work itself: `python3 .claude/scripts/ticket_tree.py diff --ticket <ID> --name-only` for the
-list, `python3 .claude/scripts/ticket_tree.py diff --ticket <ID>` for the diff, and the changed files (with their line
+your prompt, then the work itself: `python3 .claude/scripts/tickets/ticket_tree.py diff --ticket <ID> --name-only` for the
+list, `python3 .claude/scripts/tickets/ticket_tree.py diff --ticket <ID>` for the diff, and the changed files (with their line
 numbers) where the diff is not enough. Bash is only for these commands, `git diff`, `git log`, `git show` and `date`.
 
 **Every file and every line is a clickable link (TKT-14).** Each mention of a file of the repository, with or without
@@ -32,7 +32,7 @@ once, as the changes table does.
 - **⚙️ How it works** walks through the mechanism in the order it runs, each step linked to the file and line of the
   code that does it (`[`path:42`](../../../path#L42)`). Read the line before you cite it.
 - **🧱 Files and lines changed:** keep the `<!-- changes -->` markers empty and run
-  `python3 .claude/scripts/ticket_tree.py changes --ticket <ID> --write`, which writes the table of files and line
+  `python3 .claude/scripts/tickets/ticket_tree.py changes --ticket <ID> --write`, which writes the table of files and line
   ranges. Never write or edit that table yourself. Below it, one bullet per file or group of files: what changed and
   why, with the line ranges that matter.
 - **🔗 Evidence** links the files of `tests-evidences/`; **📝 Assumptions accepted** and **🔜 Follow-ups** list exactly
@@ -48,7 +48,7 @@ once, as the changes table does.
 - **Never invent** an alternative nobody would consider, a measurement nobody made or a reason nobody gave. When the
   reason for a choice is not known, write it as an open point instead of guessing (TKT-8).
 
-**Done when** `python3 .claude/scripts/ticket_tree.py docs --ticket <ID>` prints nothing (the changes table is up to
+**Done when** `python3 .claude/scripts/tickets/ticket_tree.py docs --ticket <ID>` prints nothing (the changes table is up to
 date, no `{{...}}` placeholder is left, and every file and line is a link that resolves), both files have every
 section of their template, and no template comment is left. `ticket_tree.py finish` refuses to commit otherwise.
 

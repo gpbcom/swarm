@@ -5,7 +5,7 @@
 <!-- ticket:specs -->
 ## 📚 Specifications
 
-The technical pages, features, use cases and business rules of [TICKET.md](TICKET.md), copied by `python3 .claude/scripts/ticket_refs.py sync`.
+The technical pages, features, use cases and business rules of [TICKET.md](TICKET.md), copied by `python3 .claude/scripts/tickets/ticket_refs.py sync`.
 
 - [🚢 Deployment: delivery](../../specs/technical/09-deployment.md#delivery)
 - [🚢 Deployment: providers](../../specs/technical/09-deployment.md#providers)
@@ -76,7 +76,7 @@ T0.08 is split into 32 tasks over 4 waves. The dev cell of T0.01 is a shared k3s
 <!-- plan:graph -->
 
 > [!NOTE]
-> Generated from the json block at the end of this page by `python3 .claude/scripts/plan.py render`.
+> Generated from the json block at the end of this page by `python3 .claude/scripts/tickets/plan.py render`.
 > To change a task, edit the json block, then render again: never edit this view by hand.
 
 ## Waves

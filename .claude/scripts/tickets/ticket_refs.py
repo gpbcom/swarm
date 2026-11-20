@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 from typing import List, Optional, Tuple
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 SPECS = ROOT / "docs" / "specs"
 START = "<!-- ticket:specs -->"
 END = "<!-- /ticket:specs -->"
@@ -62,7 +62,7 @@ def section(found: List[Tuple[str, str]]) -> str:
         "",
         (
             "The technical pages, features, use cases and business rules of [TICKET.md](TICKET.md), copied by "
-            "`python3 .claude/scripts/ticket_refs.py sync`."
+            "`python3 .claude/scripts/tickets/ticket_refs.py sync`."
         ),
         "",
     ]

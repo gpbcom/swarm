@@ -4,11 +4,15 @@
 
 ## Code rules never to break
 
-Nine rules of [AGENT.md](AGENT.md) hold for people and agents alike, in `src/` and `tests/`:
+Ten rules of [AGENT.md](AGENT.md) hold for people and agents alike, in `src/` and `tests/`:
 
 - **No `Any` and no `object` as a type.** Both are too generic. Write the real type: `JsonValue` for parsed JSON, YAML
   or TOML, a `Union` for several known types, a `Callable[...]` with its signature, a generic with its real parameter
   (AGENT.md, Typing).
+- **Never more than five code files in a folder.** Python, JavaScript, TypeScript and Rust files together, in every
+  folder of the repository, the harness included: past five, create sub-folders by entity type or theme. Entry files
+  (`__init__.py`, `conftest.py`, `index.ts`, `index.js`, `lib.rs`, `main.rs`, `mod.rs`) do not count (AGENT.md, File
+  shape).
 - **No file docstring.** No module starts with a docstring, `__init__.py` included: `from __future__ import
   annotations` comes first, and the docstring of the file's one class says what it is for (AGENT.md, Docstrings and
   comments).
@@ -60,7 +64,7 @@ This repository is a proof of concept for mastering the Claude Code harness; dro
 - **Several tickets at once** (TKT-16): every running ticket works in the main checkout, on the shared branch
   `feature/tickets`, with its files in `docs/tickets/<ID>/`; each commits only its own files when it finishes.
   `/ticket-run` checks the start rule first (prerequisites done, no open ticket on the same areas).
-  `python3 .claude/scripts/tickets.py list|prune` shows the open tickets and, once all is merged, goes back to `develop`.
+  `python3 .claude/scripts/tickets/tickets.py list|prune` shows the open tickets and, once all is merged, goes back to `develop`.
 - **Branches** (TKT-25): `tickets.py branches` gives every branch its verdict. Only a 🌱 live branch is rebased onto
   `develop`; a merged, integrated or superseded one is deleted by `tickets.py prune`, after a backup bundle in
   `.git/swarm/backups/`. `develop` and `master` are never rebased, reset, force-pushed or deleted.
@@ -68,7 +72,7 @@ This repository is a proof of concept for mastering the Claude Code harness; dro
   changelog, release notes and test reports are written on `release/<version>`, and `automerge.yml` merges it into
   `master`, tags it, publishes it and brings it back to `develop`. No commit or merge by hand.
 - **Issues and groups** (TKT-20): `/issue-plan <refs>` plans an issue with its child issues, or a group (`#12`,
-  `T0.10`, `E0.4`, `P1`), the person approves the group with `python3 .claude/scripts/tickets.py approve <refs>`, and
+  `T0.10`, `E0.4`, `P1`), the person approves the group with `python3 .claude/scripts/tickets/tickets.py approve <refs>`, and
   `/issue-run <refs>` runs it as fast as the start rule allows, with `tickets.py watch` reports every 2 minutes. The
   README's "Working on tickets" explains it all.
 - **Rules that hold** (TKT-21 to TKT-24): a front-end ticket captures its screens as screenshots; every SPEC and TKT
@@ -78,16 +82,16 @@ This repository is a proof of concept for mastering the Claude Code harness; dro
 - **Agents:** `.claude/agents/` (planner and reviewer on opus, workers on sonnet, mechanical work on haiku, TKT-7);
   workflows in `.claude/workflows/`.
 - **Progress every 2 minutes** (TKT-9): when a ticket workflow starts, arm the Monitor tool with
-  `python3 .claude/scripts/progress.py watch --every 120 --run <run id>` and relay each exhaustive report to the
+  `python3 .claude/scripts/reports/progress.py watch --every 120 --run <run id>` and relay each exhaustive report to the
   person in full, with its colour icons (phases, every agent with model, duration, tokens and result, tokens by model).
 - **Commits and GitFlow** (TKT-5, TKT-15): the repository is `gpbcom/swarm` on GitHub. `develop` and `master` change
   only through pull requests; work happens on `feature/`, `bugfix/`, `release/` and `hotfix/` branches. A ticket's work
-  stays uncommitted in its worktree while it runs, carried between worktrees by `.claude/scripts/ticket_tree.py`, and
+  stays uncommitted in its worktree while it runs, carried between worktrees by `.claude/scripts/tickets/ticket_tree.py`, and
   is committed once, when the ticket is done and the person has reviewed the code (TKT-18), then pushed with its
   pull request. The git hooks of `.githooks/`
-  (`python3 .claude/scripts/tickets.py setup`, once per clone) and `.claude/hooks/guard_git.py` enforce it. No commit
+  (`python3 .claude/scripts/tickets/tickets.py setup`, once per clone) and `.claude/hooks/guard_git.py` enforce it. No commit
   or push is made outside the harness unless the person asks.
 - **Board** (TKT-17): the GitHub project **Swarm roadmap** holds one issue per phase, epic and ticket, in columns 📥
   Backlog, ✅ Ready, 📝 Planned, 🔄 Running, 👀 In review, 🏁 Done. The workflows move the cards; `/board` or
-  `python3 .claude/scripts/board.py show` prints it, and the status line shows the branch, the open tickets and the
+  `python3 .claude/scripts/github/board.py show` prints it, and the status line shows the branch, the open tickets and the
   counts.

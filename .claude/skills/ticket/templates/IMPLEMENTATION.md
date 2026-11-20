@@ -5,7 +5,7 @@
 <!-- never a straw man. A pro or con is a fact about this repository (a rule, a budget, a file), not a slogan. -->
 <!-- EVERY file and line is a clickable relative link, never a bare path (TKT-14): -->
 <!-- [`path/file.py:42`](../../../path/file.py#L42), [`path/file.py:42-50`](../../../path/file.py#L42-L50), -->
-<!-- [`path/file.py`](../../../path/file.py). Check: python3 .claude/scripts/ticket_tree.py docs --ticket {{ID}} -->
+<!-- [`path/file.py`](../../../path/file.py). Check: python3 .claude/scripts/tickets/ticket_tree.py docs --ticket {{ID}} -->
 
 # {{ID}}: Implementation choices
 

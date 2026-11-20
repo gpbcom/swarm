@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 START = "<!-- plan:graph -->"
 END = "<!-- /plan:graph -->"
 JSON_BLOCK = re.compile(r"^```json[ \t]*\n(.*?)\n```[ \t]*$", re.DOTALL | re.MULTILINE)
@@ -109,7 +109,7 @@ def render_view(graph: List[Task]) -> str:
     lines: List[str] = [START, ""]
     lines += [
         "> [!NOTE]",
-        "> Generated from the json block at the end of this page by `python3 .claude/scripts/plan.py render`.",
+        "> Generated from the json block at the end of this page by `python3 .claude/scripts/tickets/plan.py render`.",
         "> To change a task, edit the json block, then render again: never edit this view by hand.",
         "",
         "## Waves",

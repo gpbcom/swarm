@@ -13,7 +13,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path[:0] = [str(Path(__file__).resolve().parents[1] / group) for group in ("tickets", "github", "reports")]
 
 import branches
 from roadmap_gantt import areas, key, roadmap_rows
@@ -36,15 +36,15 @@ from ticket_tree import (
 USAGE = """Run several roadmap tickets at once in the main checkout, alone or as a group of issues (TKT-16, TKT-20).
 
 Usage, from the main checkout:
-    python3 .claude/scripts/tickets.py check --ticket T0.10 [--force]     (prints nothing when the ticket may start)
-    python3 .claude/scripts/tickets.py list
-    python3 .claude/scripts/tickets.py resolve [--json] <refs>
-    python3 .claude/scripts/tickets.py approve <refs>                      (the person's approval of a group's plans)
-    python3 .claude/scripts/tickets.py next [--json] <refs>
-    python3 .claude/scripts/tickets.py watch <refs> [--every 120] [--once]
-    python3 .claude/scripts/tickets.py branches
-    python3 .claude/scripts/tickets.py prune [--dry-run]
-    python3 .claude/scripts/tickets.py setup
+    python3 .claude/scripts/tickets/tickets.py check --ticket T0.10 [--force]     (prints nothing when the ticket may start)
+    python3 .claude/scripts/tickets/tickets.py list
+    python3 .claude/scripts/tickets/tickets.py resolve [--json] <refs>
+    python3 .claude/scripts/tickets/tickets.py approve <refs>                      (the person's approval of a group's plans)
+    python3 .claude/scripts/tickets/tickets.py next [--json] <refs>
+    python3 .claude/scripts/tickets/tickets.py watch <refs> [--every 120] [--once]
+    python3 .claude/scripts/tickets/tickets.py branches
+    python3 .claude/scripts/tickets/tickets.py prune [--dry-run]
+    python3 .claude/scripts/tickets/tickets.py setup
 
 Every running ticket shares the main checkout and the branch ``feature/tickets``; its files live in
 ``docs/tickets/<ID>/`` and its state in ``.git/swarm/<ID>/``. A ticket started before TKT-16 shared the checkout keeps
@@ -76,7 +76,7 @@ its own worktree on ``feature/<ID>`` until ``prune`` removes it once merged.
 """
 
 SCRIPTS = Path(__file__).resolve().parent
-REPOSITORY = SCRIPTS.parents[1]
+REPOSITORY = SCRIPTS.parents[2]
 GRAPH_ENV = "SWARM_TICKET_GRAPH"
 CHECK_PLAN_ENV = "SWARM_CHECK_PLAN"
 CLOSED_ENV = "SWARM_CLOSED_ISSUES"
@@ -324,7 +324,7 @@ def resolve(main: Path, refs: List[str]) -> List[str]:
             raise SystemExit(f"Unknown reference {ref}: use #<issue>, T0.10, E0.4 or P1.")
         found = expand(ident, children)
         if not found:
-            raise SystemExit(f"{ref} ({ident}) holds no ticket: run python3 .claude/scripts/board.py bootstrap first.")
+            raise SystemExit(f"{ref} ({ident}) holds no ticket: run python3 .claude/scripts/github/board.py bootstrap first.")
         wanted.extend(ticket for ticket in found if ticket not in wanted)
     done = done_tickets(main)
     left = sorted((ticket for ticket in wanted if ticket not in done), key=key)
@@ -419,7 +419,7 @@ def approve(main: Path, group: List[str]) -> int:
             progress.write_text(text, encoding="utf-8")
         if main.resolve() == REPOSITORY.resolve():
             subprocess.run(
-                [sys.executable, str(SCRIPTS / "board.py"), "move", "--ticket", ticket, "--status", "planned"],
+                [sys.executable, str(SCRIPTS.parent / "github" / "board.py"), "move", "--ticket", ticket, "--status", "planned"],
                 cwd=main,
                 capture_output=True,
                 check=False,
