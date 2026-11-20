@@ -25,6 +25,11 @@ run "creates_the_empty_cell" {
   }
 
   assert {
+    condition     = kubernetes_namespace_v1.cell.metadata[0].labels["policy.sigstore.dev/include"] == "true"
+    error_message = "Expected the namespace to opt in to the policy controller."
+  }
+
+  assert {
     condition     = kubernetes_namespace_v1.cell.metadata[0].annotations["swarm-branch"] == "feature/x"
     error_message = "Expected the swarm-branch annotation to be the branch."
   }

@@ -7,6 +7,7 @@ from typing import Dict, List
 import pytest
 
 from tests.ci.detect_changes.helpers import (
+    IMAGES_KEY,
     REPOSITORY_KEY,
     SERVICES_KEY,
     SPECS_KEY,
@@ -22,6 +23,7 @@ NOTHING: Dict[str, str] = {
     "rust": "false",
     "repository": "false",
     "specs": "false",
+    "images": "[]",
 }
 
 
@@ -32,14 +34,15 @@ class TestDetectChanges:
         assert result.returncode == 0, result.stderr
         return outputs(result)
 
-    def test_the_output_is_five_lines_in_the_contract_order(self, tmp_path: Path) -> None:
+    def test_the_output_is_six_lines_in_the_contract_order(self, tmp_path: Path) -> None:
         write_repo(tmp_path)
         result = run_detector(tmp_path, ["services/alpha/x.py"])
         keys = [line.split("=", 1)[0] for line in result.stdout.splitlines()]
-        assert keys == ["services", "typescript", "rust", "repository", "specs"]
+        assert keys == ["services", "typescript", "rust", "repository", "specs", "images"]
         values = outputs(result)
         assert isinstance(json.loads(values["services"]), list)
         assert isinstance(json.loads(values["typescript"]), list)
+        assert isinstance(json.loads(values["images"]), list)
         assert {values["rust"], values["repository"], values["specs"]} <= {"true", "false"}
 
     def test_no_changed_path_selects_nothing(self, tmp_path: Path) -> None:
@@ -51,11 +54,19 @@ class TestDetectChanges:
             "services/alpha/tests/test_main.py",
             "services/alpha/pyproject.toml",
         ]
-        assert self.detect(tmp_path, changed) == {**NOTHING, SERVICES_KEY: '["alpha"]'}
+        assert self.detect(tmp_path, changed) == {
+            **NOTHING,
+            SERVICES_KEY: '["alpha"]',
+            IMAGES_KEY: '["services/alpha"]',
+        }
 
     def test_two_services_are_selected_sorted_and_once_each(self, tmp_path: Path) -> None:
         changed = ["services/beta/a.py", "services/alpha/a.py", "services/beta/b.py"]
-        assert self.detect(tmp_path, changed) == {**NOTHING, SERVICES_KEY: '["alpha","beta"]'}
+        assert self.detect(tmp_path, changed) == {
+            **NOTHING,
+            SERVICES_KEY: '["alpha","beta"]',
+            IMAGES_KEY: '["services/alpha"]',
+        }
 
     @pytest.mark.parametrize(
         "path",
@@ -66,10 +77,14 @@ class TestDetectChanges:
 
     def test_a_front_end_with_a_package_is_selected(self, tmp_path: Path) -> None:
         values = self.detect(tmp_path, ["frontends/ground-control/src/main.ts"])
-        assert values == {**NOTHING, TYPESCRIPT_KEY: '["frontends/ground-control"]'}
+        assert values == {
+            **NOTHING,
+            TYPESCRIPT_KEY: '["frontends/ground-control"]',
+            IMAGES_KEY: '["frontends/ground-control"]',
+        }
 
-    def test_a_front_end_without_a_package_selects_nothing(self, tmp_path: Path) -> None:
-        assert self.detect(tmp_path, ["frontends/notes/x.ts"]) == NOTHING
+    def test_a_front_end_without_a_package_selects_only_its_image(self, tmp_path: Path) -> None:
+        assert self.detect(tmp_path, ["frontends/notes/x.ts"]) == {**NOTHING, IMAGES_KEY: '["frontends/notes"]'}
 
     @pytest.mark.parametrize("path", ["tests/conventions/x.py", ".claude/hooks/x.py"])
     def test_tests_and_harness_set_only_the_repository_flag(self, tmp_path: Path, path: str) -> None:
@@ -97,7 +112,7 @@ class TestDetectChanges:
 
     def test_blank_lines_and_surrounding_spaces_are_ignored(self, tmp_path: Path) -> None:
         values = self.detect(tmp_path, ["", "  services/alpha/x.py  ", "   ", ""])
-        assert values == {**NOTHING, SERVICES_KEY: '["alpha"]'}
+        assert values == {**NOTHING, SERVICES_KEY: '["alpha"]', IMAGES_KEY: '["services/alpha"]'}
 
     def test_an_unknown_argument_exits_with_two_and_a_usage_line(self, tmp_path: Path) -> None:
         write_repo(tmp_path)
