@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nats-leaf
+  labels:
+    app.kubernetes.io/name: nats-leaf
+spec:
+  selector:
+    app.kubernetes.io/name: nats-leaf
+  ports:
+    - name: client
+      port: {{ .Values.ports.client }}
+      targetPort: client

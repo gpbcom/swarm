@@ -175,8 +175,8 @@ uv run ruff check services packages tests
 uv run mypy services/gateway/src
 uv run pytest services/gateway/tests -n 2
 uv run pytest tests/conventions
-uv run mypy packages/python/swarm-lifecycle/src packages/python/swarm-catalog/src packages/python/swarm-logging/src
-uv run pytest packages/python/swarm-lifecycle/tests packages/python/swarm-catalog/tests packages/python/swarm-logging/tests
+uv run mypy packages/python/swarm-lifecycle/src packages/python/swarm-catalog/src packages/python/swarm-logging/src packages/python/swarm-nats/src
+uv run pytest packages/python/swarm-lifecycle/tests packages/python/swarm-catalog/tests packages/python/swarm-logging/tests packages/python/swarm-nats/tests
 pnpm turbo run build
 ```
 

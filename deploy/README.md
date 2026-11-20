@@ -26,6 +26,8 @@ credentials, and what the workflow needs. The decisions behind it are in
 | `charts/database` | The CloudNativePG `Cluster` and the PgBouncer `Pooler` in transaction mode, with one role per service |
 | `charts/valkey` | Valkey, the cache of the cell |
 | `charts/object-storage` | MinIO, the object storage of the cell |
+| `charts/nats` | The NATS cluster of the cell: 3 servers, the JetStream domain `cell`, the Operator trust, and the leaf node listener, off until it is enabled |
+| `charts/nats-leaf` | The NATS leaf node of one edge: its JetStream domain, unique to the edge, and its link to the core over mTLS |
 | `charts/vault-config` | The job that configures the vault: the database connection, one role and one Kubernetes login per service |
 | `environments/dev/platform` | The Argo CD Applications of the cluster-wide operators: CloudNativePG, KEDA and the KEDA HTTP add-on |
 | `environments/dev/values.yaml` | The values of every dev cell: the services, the sizes of the volumes, one instance of each part |
@@ -127,6 +129,7 @@ cell and the name of its Argo CD Application.
 - **A PgBouncer pooler** `database-pooler-rw` in transaction mode, in front of the primary.
 - **Valkey**, the cache.
 - **MinIO**, the object storage, with a 1 GiB volume.
+- **A NATS cluster** of 3 servers, from `charts/nats`, described in [The NATS of a cell](#the-nats-of-a-cell).
 
 The Argo CD Application of the cell follows the branch (`target_revision` is the branch) and the chart
 `deploy/charts/cell`, with the values of `environments/dev/values.yaml`.
@@ -182,6 +185,75 @@ check on a dev cell only.
 > is a `PostSync` hook that reruns on every sync. Staging and production need a persistent and sealed mode, which is
 > not in this folder.
 
+## The NATS of a cell
+
+Each cell runs its own NATS cluster, from `charts/nats`, as the [cells](../docs/specs/technical/01-architecture.md#cells)
+and the [storage overview](../docs/specs/technical/03-storage.md#overview) describe. The chart is the `nats` sub-chart of
+`charts/cell`, and `environments/dev/values.yaml` sets its JetStream file storage to 1Gi for the dev cells.
+
+- **A cluster of 3 servers** (`replicas: 3`), with the JetStream domain `cell`. The clients create each stream with 3
+  replicas, so a stream survives the loss of one server.
+- **Operator mode with the full resolver.** The servers trust the dev Operator through `auth.operatorJwt`, and keep the
+  accounts in their resolver. The chart holds public values only.
+- **One account per Operator**, limited to the subjects `op.<operator_id>.…`. A service acting for one Operator cannot
+  publish or subscribe on another Operator's subjects. See
+  [BR-008: Operator isolation](../docs/specs/functional/business-rules/BR-008-operator-isolation.md) and
+  [roles and Operator isolation](../docs/specs/technical/06-security.md#authorisation).
+- **Service, edge and simulated credentials are kept apart.** `CredentialIssuer` issues each kind on its own: `service`,
+  `edge` and `simulated`. A simulated Squad uses its own credentials, never those of a real one, as the
+  [simulator](../docs/specs/technical/04-engine.md#simulator) and
+  [BR-014: Simulation isolation](../docs/specs/functional/business-rules/BR-014-simulation-isolation.md) require. A
+  system credential is never issued for an Operator.
+- **The leaf node listener over mTLS.** Port `7422` is open only when `leafnodes.enabled` is `true` and the Secret named
+  by `leafnodes.tls.secretName`, `nats-leafnodes-tls`, exists. It stays off until both are true.
+
+## Create the dev operator once
+
+The person creates the dev Operator and its SYS account once, outside the charts and the repository. For example, with
+`nsc`:
+
+```bash
+nsc add operator --generate-signing-key --sys --name swarm-dev
+```
+
+Then:
+
+1. Copy the operator JWT, the public key of the SYS account and the SYS account JWT.
+2. Put them in the three Terraform variables of the dev-branch variables file: `nats_operator_jwt`,
+   `nats_system_account` and `nats_system_account_jwt`. They are passed to the chart as `nats.auth.operatorJwt`,
+   `nats.auth.systemAccount` and `nats.auth.systemAccountJwt`.
+3. Keep the seeds in the vault, never in the repository.
+
+> [!CAUTION]
+> The seeds are private keys. Never write a seed in the repository, in a variables file of the repository, in a chart
+> value, in a log or in a ticket. Keep them in the vault only. Anyone with a seed can sign accounts for the Operator.
+
+The Operator accounts are not in the charts. At run time, `swarm_nats` issues each account with `AccountIssuer`, and
+pushes it to the servers with `AccountResolverClient`.
+
+## Leaf node of an edge
+
+The leaf node of an edge runs from `charts/nats-leaf`. It connects the edge to the cell's NATS over mTLS, as the
+[edge and core](../docs/specs/technical/01-architecture.md#edge-and-core) and the
+[links](../docs/specs/technical/06-security.md#links) pages describe. Its values are:
+
+- `remote.url`, the `tls://` address of the cell's leaf node listener. It is required, and rendering fails without it.
+- `jetstream.domain`, the JetStream domain of the edge. It is required, must be unique per edge, and must not be `cell`.
+- `jetstream.fileStorage.size`, 5Gi by default. The edge buffers its messages here while the core is unreachable.
+- `remote.credentialsSecret` and `remote.tlsSecret`, the names of the two Secrets below.
+
+Create the two Secrets in the namespace of the edge before the chart starts:
+
+- **`nats-leaf-credentials`**, with the key `edge.creds`. `CredentialIssuer` issues it with the kind `edge`, for the
+  account of the Operator.
+- **`nats-leaf-tls`**, with the keys `tls.crt`, `tls.key` and `ca.crt`, the certificate of the edge and the CA of the
+  cell.
+
+Each edge has its own credential, so one can be revoked without cutting the others. To revoke it, `AccountIssuer.revoke`
+takes the public key of the edge's user, and returns the account with that key revoked. The new account is then pushed
+with `AccountResolverClient`. The
+revoked credential is then refused, and the other edges still connect.
+
 ## The workflow's secrets and variables
 
 The `dev-cell` workflow reads these settings from the repository's settings. None of them is written in the repository.
@@ -222,3 +294,18 @@ The ticket's acceptance criteria are checked as follows. The criteria are in
 
 The `--dry-run` output and the Terraform tests of `cells/dev-branch/tests` check the commands and the variables without
 creating anything.
+
+### The NATS criteria of T0.09
+
+The three acceptance criteria of [T0.09](../docs/tickets/T0.09/TICKET.md#acceptance-criteria) are checked by these tests.
+Run each with `uv run pytest`, from the root of the repository:
+
+1. **An Operator's account refuses a publication on another Operator's subject.**
+   `uv run pytest tests/deploy/nats/test_operator_isolation.py`, for [BR-008](../docs/specs/functional/business-rules/BR-008-operator-isolation.md).
+2. **A leaf node cut for one minute replays its messages in order.**
+   `uv run pytest tests/deploy/nats/leaf`, for [BR-008](../docs/specs/functional/business-rules/BR-008-operator-isolation.md).
+3. **Simulated Squads use credentials separate from those of real Squads.**
+   `uv run pytest tests/deploy/nats/test_simulated_credentials.py`, for [BR-014](../docs/specs/functional/business-rules/BR-014-simulation-isolation.md).
+
+These tests start real `nats-server` processes. They need `nats-server` on `PATH`, and they skip when it is missing. CI
+installs a pinned `nats-server` before it runs them.

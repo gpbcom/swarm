@@ -37,8 +37,13 @@ class TestCellChart:
             "repository": "file://../vault-config",
             "condition": "vaultConfig.enabled",
         },
+        {
+            "name": "nats",
+            "repository": "file://../nats",
+            "condition": "nats.enabled",
+        },
     ]
-    TOGGLES: ClassVar[List[str]] = ["database", "valkey", "objectStorage", "vaultConfig"]
+    TOGGLES: ClassVar[List[str]] = ["database", "valkey", "objectStorage", "vaultConfig", "nats"]
     EXPECTED_RESOURCES: ClassVar[List[Tuple[str, str, str]]] = [
         ("postgresql.cnpg.io/v1", "Cluster", "database"),
         ("postgresql.cnpg.io/v1", "Pooler", "database-pooler-rw"),
@@ -47,7 +52,16 @@ class TestCellChart:
         ("batch/v1", "Job", "vault-config"),
         ("networking.k8s.io/v1", "NetworkPolicy", "valkey"),
         ("networking.k8s.io/v1", "NetworkPolicy", "object-storage"),
+        ("apps/v1", "StatefulSet", "nats"),
+        ("v1", "ConfigMap", "nats-config"),
+        ("v1", "Service", "nats"),
+        ("v1", "Service", "nats-headless"),
+        ("policy/v1", "PodDisruptionBudget", "nats"),
+        ("networking.k8s.io/v1", "NetworkPolicy", "nats"),
     ]
+    FAKE_JWT: ClassVar[str] = "aGVhZGVy.cGF5bG9hZA.c2lnbmF0dXJl"
+    FAKE_ACCOUNT: ClassVar[str] = "A" + "B" * 55
+    NATS_LEAF: ClassVar[str] = "nats-leaf"
     SEMVER: ClassVar[str] = r"^\d+\.\d+\.\d+([-+].+)?$"
     API_VERSION_KEY: ClassVar[str] = "apiVersion"
     KIND_KEY: ClassVar[str] = "kind"
@@ -73,9 +87,16 @@ class TestCellChart:
         assert isinstance(version, str)
         assert re.match(self.SEMVER, version)
 
-    def test_the_dependencies_are_exactly_the_four_sub_charts(self) -> None:
+    def test_the_dependencies_are_exactly_the_five_sub_charts(self) -> None:
         chart = self.load(self.CHART_DIR / "Chart.yaml")
         assert chart[self.DEPENDENCIES_KEY] == self.EXPECTED_DEPENDENCIES
+
+    def test_no_dependency_is_named_nats_leaf(self) -> None:
+        chart = self.load(self.CHART_DIR / "Chart.yaml")
+        dependencies = chart[self.DEPENDENCIES_KEY]
+        assert isinstance(dependencies, list)
+        names = [str(dependency[self.NAME_KEY]) for dependency in dependencies if isinstance(dependency, dict)]
+        assert self.NATS_LEAF not in names
 
     @pytest.mark.parametrize("toggle", TOGGLES)
     def test_every_sub_chart_is_enabled_by_default(self, toggle: str) -> None:
@@ -90,7 +111,7 @@ class TestCellChart:
         assert isinstance(global_values, dict)
         assert global_values[self.SERVICES_KEY] == []
 
-    def test_the_lock_file_names_the_four_dependencies(self) -> None:
+    def test_the_lock_file_names_the_five_dependencies(self) -> None:
         lock = self.load(self.CHART_DIR / "Chart.lock")
         dependencies = lock[self.DEPENDENCIES_KEY]
         assert isinstance(dependencies, list)
@@ -116,6 +137,12 @@ class TestCellChart:
                 str(tmp_path / "environments" / "dev" / "values.yaml"),
                 "--set",
                 "database.imageName=registry.example.org/swarm-postgres:16",
+                "--set",
+                f"nats.auth.operatorJwt={self.FAKE_JWT}",
+                "--set",
+                f"nats.auth.systemAccount={self.FAKE_ACCOUNT}",
+                "--set",
+                f"nats.auth.systemAccountJwt={self.FAKE_JWT}",
             ],
             check=True,
             capture_output=True,

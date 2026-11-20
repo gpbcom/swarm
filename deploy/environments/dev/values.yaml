@@ -20,3 +20,8 @@ valkey:
 objectStorage:
   persistence:
     size: 1Gi
+
+nats:
+  jetstream:
+    fileStorage:
+      size: 1Gi
