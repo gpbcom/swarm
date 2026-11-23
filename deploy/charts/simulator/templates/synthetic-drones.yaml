@@ -1,0 +1,60 @@
+{{- include "simulator.validate" . -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: synthetic-drones
+  labels:
+    app.kubernetes.io/name: synthetic-drones
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: synthetic-drones
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: synthetic-drones
+    spec:
+      containers:
+        - name: synthetic-drones
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - swarm-synthetic-drones
+          args:
+            - --count
+            - {{ .Values.syntheticDrones.count | quote }}
+            - --bind
+            - 0.0.0.0
+            - --base-port
+            - {{ .Values.syntheticDrones.basePort | quote }}
+            - --speed-m-s
+            - {{ .Values.syntheticDrones.speedMS | quote }}
+            - --tick-ms
+            - {{ .Values.syntheticDrones.tickMs | quote }}
+          ports:
+            {{- range $index := until (int .Values.syntheticDrones.count) }}
+            - containerPort: {{ add (int $.Values.syntheticDrones.basePort) $index }}
+              protocol: UDP
+            {{- end }}
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: synthetic-drones
+  labels:
+    app.kubernetes.io/name: synthetic-drones
+spec:
+  selector:
+    app.kubernetes.io/name: synthetic-drones
+  ports:
+    {{- range $index := until (int .Values.syntheticDrones.count) }}
+    - name: drone-{{ $index }}
+      port: {{ add (int $.Values.syntheticDrones.basePort) $index }}
+      targetPort: {{ add (int $.Values.syntheticDrones.basePort) $index }}
+      protocol: UDP
+    {{- end }}

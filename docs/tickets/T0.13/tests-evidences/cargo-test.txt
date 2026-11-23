@@ -1,0 +1,212 @@
+$ cargo test --workspace
+(cwd packages/rust, on the ticket's own files only)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 4 tests
+test an_empty_slice_encodes_to_zero ... ok
+test one_two_three_encodes_to_six ... ok
+test the_sum_wraps_instead_of_panicking ... ok
+test two_calls_on_the_same_values_give_the_same_sum ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 4 tests
+test a_sum_that_overflows_wraps_to_zero_and_never_panics ... ok
+test an_empty_slice_gives_zero ... ok
+test one_two_and_three_give_six ... ok
+test two_calls_on_the_same_thousand_values_agree_with_the_plain_sum ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 4 tests
+test an_empty_slice_gives_zero ... ok
+test a_sum_that_overflows_wraps_instead_of_panicking ... ok
+test one_two_three_gives_six ... ok
+test two_calls_on_the_same_values_give_the_sum_of_the_range ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 7 tests
+test a_command_is_deserialised ... ok
+test a_command_round_trips_to_the_same_value ... ok
+test a_telemetry_frame_is_deserialised ... ok
+test a_squad_frame_holds_its_frames ... ok
+test a_telemetry_frame_with_an_unknown_key_is_refused ... ok
+test a_telemetry_frame_round_trips_to_the_same_value ... ok
+test a_telemetry_frame_with_an_unknown_state_is_refused ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 1 test
+test the_generated_structs_are_current ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 11 tests
+test a_missing_schema_is_an_error ... ok
+test rendering_text_that_is_not_json_fails ... ok
+test the_default_paths_point_into_the_models_crate ... ok
+test a_date_time_becomes_a_jiff_timestamp_never_chrono ... ok
+test every_definition_becomes_a_type ... ok
+test rendering_the_fixture_succeeds ... ok
+test a_missing_output_is_stale ... ok
+test the_first_line_is_the_header ... ok
+test an_edited_output_is_stale_again ... ok
+test two_renders_are_equal ... ok
+test a_written_output_is_fresh_and_equals_the_render ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+
+running 5 tests
+test link::tests::a_count_of_zero_is_refused ... ok
+test link::tests::a_speed_that_is_not_positive_is_refused ... ok
+test link::tests::an_error_says_which_argument_is_wrong ... ok
+test link::tests::system_ids_and_ports_must_fit_for_every_drone ... ok
+test link::tests::the_default_configuration_is_valid ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 4 tests
+test tests::help_asks_for_the_usage ... ok
+test tests::every_flag_sets_its_field ... ok
+test tests::bad_arguments_are_refused ... ok
+test tests::no_argument_runs_the_defaults ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 17 tests
+test a_full_upload_is_requested_item_by_item_then_accepted ... ok
+test a_flying_drone_emits_a_position_each_tick ... ok
+test a_land_command_lands_then_the_state_is_landed ... ok
+test a_message_for_another_system_gives_no_output ... ok
+test a_mission_start_when_armed_with_a_mission_is_accepted_and_flies ... ok
+test a_mission_start_when_not_armed_is_denied ... ok
+test a_mission_count_gives_the_request_of_item_zero ... ok
+test a_mission_start_without_a_mission_is_denied ... ok
+test a_new_drone_is_landed_at_home_with_its_system_id ... ok
+test a_pause_holds_the_position_and_a_continue_resumes ... ok
+test an_unknown_command_is_unsupported ... ok
+test a_return_to_launch_returns_then_lands_at_home ... ok
+test an_unsupported_item_command_is_refused ... ok
+test arming_is_accepted_and_the_state_becomes_armed ... ok
+test the_heartbeat_is_a_quadrotor_and_flags_the_armed_state ... ok
+test the_takeoff_is_reached_when_the_altitude_is_within_tolerance ... ok
+test the_items_are_reached_in_order_then_the_drone_lands_and_is_disarmed ... ok
+
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 6 tests
+test a_square_route_reaches_every_waypoint_in_order_then_completes ... ok
+test a_step_between_waypoints_returns_none ... ok
+test an_empty_route_is_complete_at_once ... ok
+test offset_and_distance_agree_within_half_a_percent ... ok
+test the_elapsed_time_is_the_path_length_over_the_speed ... ok
+test the_final_position_is_within_the_tolerance_of_the_last_waypoint ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 3 tests
+test a_count_of_zero_is_refused_with_a_message ... ok
+test each_drone_answers_with_its_own_system_id ... ok
+test each_drone_flies_a_square_mission_and_reports_every_item ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 8.30s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Compiling swarm-core-mavlink v0.1.0 (/tmp/swarm-checks-cx4f0u38/packages/rust/swarm-core/mavlink)
+   Compiling swarm-core-planner v0.1.0 (/tmp/swarm-checks-cx4f0u38/packages/rust/swarm-core/planner)
+   Compiling swarm-core-safety v0.1.0 (/tmp/swarm-checks-cx4f0u38/packages/rust/swarm-core/safety)
+   Compiling swarm-models v0.1.0 (/tmp/swarm-checks-cx4f0u38/packages/rust/swarm-models)
+   Compiling swarm-models-codegen v0.1.0 (/tmp/swarm-checks-cx4f0u38/packages/rust/swarm-models-codegen)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.67s
+     Running unittests src/lib.rs (/home/guillaume/Documents/Projects/PoC/swarm/packages/rust/target/debug/build/swarm-core-mavlink/b7b9b54d75b9c605/out/swarm_core_mavlink-b7b9b54d75b9c605)
+     Running tests/encode.rs (/home/guillaume/Documents/Projects/PoC/swarm/packages/rust/target/debug/build/swarm-core-mavlink/d9c2a82c6c9af8b8/out/encode-d9c2a82c6c9af8b8)
+     Running unittests src/lib.rs (/home/guillaume/Documents/Projects/PoC/swarm/packages/rust/target/debug/build/swarm-core-planner/4455a702959fab2a/out/swarm_core_planner-4455a702959fab2a)
+     Running tests/plan.rs (/home/guillaume/Documents/Projects/PoC/swarm/packages/rust/target/debug/build/swarm-core-planner/7e0956c99cbff991/out/plan-7e0956c99cbff991)
+     Running unittests src/lib.rs (/home/guillaume/Documents/Projects/PoC/swarm/packages/rust/target/debug/build/swarm-core-safety/522690328a4c5ccf/out/swarm_core_safety-522690328a4c5ccf)
+     Running tests/tick.rs (/home/guillaume/Documents/Projects/PoC/swarm/packages/rust/target/debug/build/swarm-core-safety/ad0954a7bc1c88b4/out/tick-ad0954a7bc1c88b4)
+     Running unittests src/lib.rs (/home/guillaume/Documents/Projects/PoC/swarm/packages/rust/target/debug/build/swarm-models/3b687e3e4e57fcbc/out/swarm_models-3b687e3e4e57fcbc)
+     Running tests/deserialise.rs (/home/guillaume/Documents/Projects/PoC/swarm/packages/rust/target/debug/build/swarm-models/cdb296be54eeda38/out/deserialise-cdb296be54eeda38)
+     Running tests/generated_is_current.rs (/home/guillaume/Documents/Projects/PoC/swarm/packages/rust/target/debug/build/swarm-models/ced0ead385e2116c/out/generated_is_current-ced0ead385e2116c)
+     Running unittests src/lib.rs (/home/guillaume/Documents/Projects/PoC/swarm/packages/rust/target/debug/build/swarm-models-codegen/a19ad9b83e74b9d4/out/swarm_models_codegen-a19ad9b83e74b9d4)
+     Running unittests src/main.rs (/home/guillaume/Documents/Projects/PoC/swarm/packages/rust/target/debug/build/swarm-models-codegen/9b9322a37d0cf0a4/out/swarm_models_codegen-9b9322a37d0cf0a4)
+     Running tests/render.rs (/home/guillaume/Documents/Projects/PoC/swarm/packages/rust/target/debug/build/swarm-models-codegen/9af84c23d6596218/out/render-9af84c23d6596218)
+     Running unittests src/lib.rs (/home/guillaume/Documents/Projects/PoC/swarm/packages/rust/target/debug/build/swarm-synthetic-drones/59b9c41b1e14793a/out/swarm_synthetic_drones-59b9c41b1e14793a)
+     Running unittests src/main.rs (/home/guillaume/Documents/Projects/PoC/swarm/packages/rust/target/debug/build/swarm-synthetic-drones/68816db152bb1260/out/swarm_synthetic_drones-68816db152bb1260)
+     Running tests/drone.rs (/home/guillaume/Documents/Projects/PoC/swarm/packages/rust/target/debug/build/swarm-synthetic-drones/3f0cede4c2efed95/out/drone-3f0cede4c2efed95)
+     Running tests/route.rs (/home/guillaume/Documents/Projects/PoC/swarm/packages/rust/target/debug/build/swarm-synthetic-drones/a1a7955fb21ca4b0/out/route-a1a7955fb21ca4b0)
+     Running tests/udp.rs (/home/guillaume/Documents/Projects/PoC/swarm/packages/rust/target/debug/build/swarm-synthetic-drones/5af2c6693bdba5a0/out/udp-5af2c6693bdba5a0)
+   Doc-tests swarm_core_mavlink
+   Doc-tests swarm_core_planner
+   Doc-tests swarm_core_safety
+   Doc-tests swarm_models
+   Doc-tests swarm_models_codegen
+   Doc-tests swarm_synthetic_drones

@@ -7,12 +7,20 @@ requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.164.0",
     "pydantic>=2.14.3",
+    "pyyaml>=6.0",
     "swarm-lifecycle",
     "swarm-logging",
+    "swarm-catalog",
+    "swarm-models",
+    "swarm-storage",
+    "swarm-rest",
 ]
 
 [project.scripts]
 swarm-gateway = "gateway.api.cli.main:main"
+swarm-gateway-serve = "gateway.api.cli.serve_main:main"
+swarm-gateway-openapi = "gateway.api.cli.openapi_main:main"
+swarm-gateway-migrate = "gateway.api.cli.migrate_main:main"
 
 [tool.uv.build-backend]
 module-name = "gateway"
@@ -20,6 +28,10 @@ module-name = "gateway"
 [tool.uv.sources]
 swarm-lifecycle = { workspace = true }
 swarm-logging = { workspace = true }
+swarm-catalog = { workspace = true }
+swarm-models = { workspace = true }
+swarm-storage = { workspace = true }
+swarm-rest = { workspace = true }
 
 [build-system]
 requires = ["uv_build>=0.12.21,<0.13.0"]

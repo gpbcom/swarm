@@ -1,0 +1,9 @@
+$ pnpm -r --if-present lint
+(cwd ., on the ticket's own files only)
+
+packages/ts/config lint$ eslint .
+packages/ts/config lint: Done
+packages/ts/e2e lint$ eslint .
+packages/ts/live lint$ eslint .
+packages/ts/live lint: Done
+packages/ts/e2e lint: Done

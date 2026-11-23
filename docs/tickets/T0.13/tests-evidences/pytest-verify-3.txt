@@ -1,0 +1,4 @@
+Verifier check pytest on tests (environment: false)
+FAILED tests/conventions/imports/test_root_import_sections.py::TestRootImportSections::test_every_module_of_the_root_tests_folder_has_its_import_sections
+FAILED tests/conventions/services/test_service_conventions.py::TestServiceConventions::test_every_rule_holds_for_every_service[simulator-import_sections]
+2 failed, 3109 passed, 1 skipped, 1 warning in 229.76s (0:03:49)

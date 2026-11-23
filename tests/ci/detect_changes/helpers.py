@@ -8,21 +8,26 @@ from typing import Dict, List
 
 ALL_SERVICES = '["alpha","beta"]'
 ALL_TYPESCRIPT = '["frontends/ground-control","packages/ts/config"]'
+ALL_IMAGES = '["frontends/ground-control","frontends/notes","services/alpha"]'
 SERVICES_KEY = "services"
 TYPESCRIPT_KEY = "typescript"
 RUST_KEY = "rust"
 REPOSITORY_KEY = "repository"
 SPECS_KEY = "specs"
+IMAGES_KEY = "images"
 RUST_WORKSPACE_PATH = "packages/rust/Cargo.toml"
 RUST_CORE_PATH = "packages/rust/core/Cargo.toml"
 REPO_FILES: Dict[str, str] = {
     "services/alpha/pyproject.toml": "[project]\nname = 'alpha'\n",
+    "services/alpha/Dockerfile": "FROM scratch\n",
     "services/beta/pyproject.toml": "[project]\nname = 'beta'\n",
     "services/_template/pyproject.toml": "[project]\nname = 'template'\n",
     "services/.hidden/pyproject.toml": "[project]\nname = 'hidden'\n",
     "services/README.md": "Services.\n",
     "frontends/ground-control/package.json": "{}\n",
+    "frontends/ground-control/Dockerfile": "FROM scratch\n",
     "frontends/notes/README.md": "Notes.\n",
+    "frontends/notes/Dockerfile": "FROM scratch\n",
     "packages/ts/config/package.json": "{}\n",
     "packages/python/.gitkeep": "",
 }

@@ -1,0 +1,215 @@
+name: Images
+
+# Steps 3 to 6 of the CI/CD pipeline (docs/specs/technical/09-deployment.md#ci): build, scan, SBOM, sign, end-to-end
+# tests with Playwright, then the commit SHA tag. Reusable only: ci.yml calls it.
+on:
+  workflow_call:
+    inputs:
+      images:
+        description: JSON array of the folders to build, such as ["services/gateway"].
+        type: string
+        required: true
+      publish:
+        description: Add the commit SHA tag to the images once the end-to-end tests pass.
+        type: boolean
+        required: false
+        default: false
+
+permissions:
+  contents: read
+
+env:
+  RUN_TAG: run-${{ github.run_id }}-${{ github.run_attempt }}
+
+jobs:
+  scan-dependencies:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - name: Scan the lock files with OSV-Scanner
+        run: |
+          docker run --rm --volume "$PWD:/src:ro" --workdir /src ghcr.io/google/osv-scanner:v2.2.2 scan source \
+            --lockfile=uv.lock \
+            --lockfile=pnpm-lock.yaml \
+            --lockfile=packages/rust/Cargo.lock
+
+  image:
+    needs: scan-dependencies
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    strategy:
+      fail-fast: false
+      matrix:
+        folder: ${{ fromJSON(inputs.images) }}
+    env:
+      FOLDER: ${{ matrix.folder }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Name the image
+        env:
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          repository="ghcr.io/${GITHUB_REPOSITORY,,}"
+          name="${FOLDER##*/}"
+          {
+            echo "RUN_TAG=run-${RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+            echo "NAME=${name}"
+            echo "IMAGE=${repository}/${name}"
+          } >> "$GITHUB_ENV"
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build the image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.folder }}/Dockerfile
+          load: true
+          tags: ${{ env.IMAGE }}:${{ env.RUN_TAG }}
+          cache-from: type=gha,scope=${{ env.NAME }}
+          cache-to: type=gha,scope=${{ env.NAME }},mode=max
+      - uses: aquasecurity/setup-trivy@81e514348e19b6112ce2a7e3ecbafe19c1e1f567 # v0.3.1
+        with:
+          version: v0.76.2
+      - name: Scan the image with Trivy
+        run: |
+          trivy image \
+            --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 "${IMAGE}:${RUN_TAG}"
+      - name: Write the CycloneDX SBOM
+        run: |
+          mkdir -p sbom
+          trivy image --format cyclonedx --output "sbom/${NAME}.cdx.json" "${IMAGE}:${RUN_TAG}"
+      - name: Keep the SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-${{ env.NAME }}
+          path: sbom/${{ env.NAME }}.cdx.json
+      - name: Push the run tag and read back the digest
+        run: |
+          docker push "${IMAGE}:${RUN_TAG}"
+          digest="$(docker inspect --format '{{range .RepoDigests}}{{println .}}{{end}}' "${IMAGE}:${RUN_TAG}" \
+            | grep "^${IMAGE}@" | head -n 1 | cut -d@ -f2)"
+          test -n "$digest"
+          echo "DIGEST=${digest}" >> "$GITHUB_ENV"
+      - uses: sigstore/cosign-installer@v3
+      - name: Sign the image
+        run: cosign sign --yes "${IMAGE}@${DIGEST}"
+      - name: Attach the SBOM
+        run: cosign attest --yes --type cyclonedx --predicate "sbom/${NAME}.cdx.json" "${IMAGE}@${DIGEST}"
+      - name: Verify the signature
+        run: |
+          cosign verify \
+            --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+            --certificate-identity-regexp '^https://github\.com/gpbcom/swarm/\.github/workflows/images\.yml@' \
+            "${IMAGE}@${DIGEST}"
+
+  e2e:
+    needs: image
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      packages: read
+    env:
+      IMAGES: ${{ inputs.images }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Name the registry
+        run: |
+          {
+            echo "SWARM_IMAGE_TAG=${RUN_TAG}"
+            echo "SWARM_IMAGE_REGISTRY=ghcr.io/${GITHUB_REPOSITORY,,}"
+          } >> "$GITHUB_ENV"
+      - uses: docker/setup-buildx-action@v3
+      - uses: crazy-max/ghaction-github-runtime@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build the services this run did not build
+        run: |
+          built="$(echo "$IMAGES" | jq -r '.[] | split("/") | last')"
+          for name in $(docker compose -f compose.e2e.yaml config --services); do
+            if echo "$built" | grep -qx "$name"; then
+              continue
+            fi
+            folder="$(ls -d "services/${name}" "frontends/${name}" 2>/dev/null | head -n 1)"
+            docker buildx build --load \
+              --file "${folder}/Dockerfile" \
+              --tag "${SWARM_IMAGE_REGISTRY}/${name}:${SWARM_IMAGE_TAG}" \
+              --cache-from "type=gha,scope=${name}" \
+              --cache-to "type=gha,scope=${name},mode=max" \
+              .
+          done
+      - name: Pull the images this run built
+        run: |
+          for folder in $(echo "$IMAGES" | jq -r '.[]'); do
+            docker pull "${SWARM_IMAGE_REGISTRY}/${folder##*/}:${SWARM_IMAGE_TAG}"
+          done
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Install Playwright Chromium
+        run: pnpm --filter ./packages/ts/e2e exec playwright install --with-deps chromium
+      - name: Run Playwright
+        run: pnpm --filter ./packages/ts/e2e run e2e
+      - name: Keep the Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: packages/ts/e2e/playwright-report/
+      - name: Stop the stack
+        if: always()
+        run: docker compose -f compose.e2e.yaml down --volumes
+
+  publish:
+    needs: e2e
+    if: inputs.publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    strategy:
+      fail-fast: false
+      matrix:
+        folder: ${{ fromJSON(inputs.images) }}
+    env:
+      FOLDER: ${{ matrix.folder }}
+      RUN_TAG: run-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: sigstore/cosign-installer@v3
+      - name: Add the commit SHA tag to the same digest
+        run: |
+          image="ghcr.io/${GITHUB_REPOSITORY,,}/${FOLDER##*/}"
+          docker buildx imagetools create --tag "${image}:${GITHUB_SHA}" "${image}:${RUN_TAG}"
+          before="$(docker buildx imagetools inspect "${image}:${RUN_TAG}" --format '{{.Manifest.Digest}}')"
+          after="$(docker buildx imagetools inspect "${image}:${GITHUB_SHA}" --format '{{.Manifest.Digest}}')"
+          test "$before" = "$after"
+          echo "IMAGE=${image}" >> "$GITHUB_ENV"
+      - name: Verify the signature of the SHA tag
+        run: |
+          cosign verify \
+            --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+            --certificate-identity-regexp '^https://github\.com/gpbcom/swarm/\.github/workflows/images\.yml@' \
+            "${IMAGE}:${GITHUB_SHA}"

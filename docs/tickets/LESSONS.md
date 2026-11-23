@@ -57,6 +57,9 @@ this page keeps what happened, so that each problem is closed once and never met
 | [L-32](#l-32) | 2026-11-20 | A failing check was sent to the owner of the first file it was given, not of the file it failed on | 🟢 Closed |
 | [L-27](#l-27) | 2026-11-20 | The updates of a ticket run name the files and lines they change without linking to them | 🔴 Open |
 | [L-33](#l-33) | 2026-11-20 | `automerge` gave up when another merge moved `develop` at the same moment | 🔴 Open |
+| [L-34](#l-34) | 2026-11-23 | A fix round of one ticket changed another running ticket's files, and took them as its own | 🔴 Open |
+| [L-35](#l-35) | 2026-11-23 | The runner `cd`-ed into the JSON that `ticket_tree.py home` prints, and failed the plan check | 🔴 Open |
+| [L-36](#l-36) | 2026-11-23 | `finish` pushed the commit, then failed on `gh pr edit` and left the ticket open | 🔴 Open |
 
 ## <a id="lessons"></a>📋 Lessons
 
@@ -587,6 +590,63 @@ this page keeps what happened, so that each problem is closed once and never met
   pause when GitHub answers that the base branch was modified, with a test under `tests/ci/release/` using the
   stand-in `gh`.
 - **Rule:** [TKT-15](../../.claude/rules/tickets.md#tkt-15) (merged by GitHub once CI passes).
+
+### <a id="l-34"></a>L-34: A fix round of one ticket changed another running ticket's files, and took them as its own
+
+- **Seen:** T0.12, run `wf_86814e91-ecb`, 2026-11-23 at 13:23, with T0.13 running beside it.
+- **What happened:** the import-groups rule (#395) failed T0.12's checks on the root `tests/` folder. The fix brief
+  said "Files you may change: tests", so the fix agent also regrouped the imports of five test files of T0.13
+  (`tests/simulator/test_command_isolation.py`, `tests/deploy/images/test_simulator_image.py`, ...). The integrator
+  added them to T0.12's own files. T0.12's clean check tree then held a simulator test without the simulator service
+  or its helpers: pytest could not collect it, the failure was flagged `environment`, and the run stopped.
+- **Cause:** the fix brief names a folder (`tests`), not files, and `ticket_tree.py integrate` adds every file of a
+  hand-off to the ticket's own files without checking that another open ticket already owns it. The collection error
+  of a project module was also taken for a missing tool (TKT-6 says it is not).
+- **Fix:** worked around by removing the five files from `.git/swarm/T0.12/state.json` (they stay T0.13's) and
+  running T0.12 again. To do: `integrate` refuses a file another open ticket owns, the fix brief lists files and
+  never another ticket's, and `checks.py` does not flag a collection error of a repository module as `environment`,
+  each with its test under `tests/harness/`.
+- **Seen again:** the same day, T0.13's failures (import groups in `services/simulator`) were reported against the
+  folder `tests` pytest was given, so the fix went to a task allowed to change `tests/` only: it reported `blocked`
+  twice and the run stopped. T0.12's review fixes were blocked three rounds running because the tests the reviewer
+  asked for were outside each fix task's files, and a blocked fix is never integrated. Worked around: the main
+  session regrouped the simulator imports on the person's decision, T0.12 got a new task K33 owning every file of
+  the fix, and the import-only changes to T0.10's and T0.14's committed files went into a commit of their own.
+  To do as well: a failure names the files it failed on (from the test ids or messages), never only the folder given
+  to the tool, and a review finding whose fix needs files of several tasks becomes one fix task owning all of them.
+- **Rule:** [TKT-16](../../.claude/rules/tickets.md#tkt-16) (each ticket touches only its own files) and
+  [TKT-6](../../.claude/rules/tickets.md#tkt-6) (a missing project module is not the environment).
+
+### <a id="l-35"></a>L-35: The runner `cd`-ed into the JSON that `ticket_tree.py home` prints
+
+- **Seen:** T0.12, run `wf_bf707eb0-e5b`, 2026-11-23 at 14:31.
+- **What happened:** the plan check stopped the run with `cd: {"home": "/home/.../swarm"}: No such file or
+  directory`. `check_plan.py T0.12` itself prints nothing and exits 0.
+- **Cause:** `runExactly` in [`ticket-run.js`](../../.claude/workflows/ticket-run.js) puts the `WHERE` prefix ("run
+  `ticket_tree.py home`, then work from there") in front of the one command the haiku runner must run. The runner
+  ran two commands, and `home` prints JSON, not a bare path, so it `cd`-ed into the JSON text.
+- **Fix:** running it again failed the same way (`wf_3c322a8f-137`): the `runner` agent, new with #394, does it every
+  time. Worked around in this session's copy of the script only: the plan check runs with no prefix, as the start
+  rule already does (`wf_e1adbb8b-cbf`). To do: `ticket-run.js` gives the runner `cd <path> && <command>` as its one
+  command and never the `WHERE` prefix, with a test in `tests/harness/wiring/`.
+- **Rule:** [TKT-6](../../.claude/rules/tickets.md#tkt-6) (checks are run by scripts, not judged by a model).
+
+### <a id="l-36"></a>L-36: `finish` pushed the commit, then failed on `gh pr edit` and left the ticket open
+
+- **Seen:** T0.12, run `wf_87d5bcc7-3a2`, 2026-11-23 at 15:19; most likely T0.14 on 2026-11-20 too, whose
+  `.git/swarm/T0.14/` was still there three days after its commit.
+- **What happened:** the commit `T0.12: Service skeletons with row-level security` was pushed, then
+  `gh pr edit` failed with "GraphQL: Projects (classic) is being deprecated (repository.pullRequest.projectCards)".
+  Pull request #388 kept the title "Tickets T0.10, T0.14" and no `Closes` line for T0.12, and `finish` stopped before
+  removing the ticket's state, so `tickets.py list` still shows the ticket as open.
+- **Cause:** `pull_request()` in [`ticket_tree.py`](../../.claude/scripts/tickets/ticket_tree.py) updates the pull
+  request with `gh pr edit`, whose GraphQL query reads the deprecated classic project cards and fails on this
+  repository. The ticket's state is removed only after that step.
+- **Fix:** worked around by setting the title and the body with `gh api -X PATCH repos/gpbcom/swarm/pulls/388` once
+  T0.13 was pushed too. To do: `pull_request()` updates through the REST API (`gh api -X PATCH`, labels through
+  `gh api .../issues/<n>/labels`), and `finish` removes the ticket's state once the commit is pushed, whatever the
+  pull request step does, with tests under `tests/harness/ticket_tree/` using a stand-in `gh` that fails `pr edit`.
+- **Rule:** [TKT-5](../../.claude/rules/tickets.md#tkt-5) and [TKT-15](../../.claude/rules/tickets.md#tkt-15).
 
 ## <a id="already-ruled"></a>📜 Lessons already turned into rules
 

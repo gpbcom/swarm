@@ -9,7 +9,16 @@ from typing import ClassVar, Dict, List
 import pytest
 
 # First-party imports
-from tests.ci.detect_changes.helpers import ALL_SERVICES, ALL_TYPESCRIPT, RUST_KEY, outputs, run_detector, write_repo
+from tests.ci.detect_changes.helpers import (
+    ALL_IMAGES,
+    ALL_SERVICES,
+    ALL_TYPESCRIPT,
+    IMAGES_KEY,
+    RUST_KEY,
+    outputs,
+    run_detector,
+    write_repo,
+)
 
 
 class TestSharedChanges:
@@ -19,6 +28,7 @@ class TestSharedChanges:
         "rust": "true",
         "repository": "true",
         "specs": "true",
+        "images": ALL_IMAGES,
     }
 
     @pytest.mark.parametrize(
@@ -40,6 +50,9 @@ class TestSharedChanges:
             ".github/workflows/typescript.yml",
             ".github/workflows/specs.yml",
             ".github/scripts/detect_changes.py",
+            ".github/workflows/images.yml",
+            "compose.e2e.yaml",
+            ".dockerignore",
         ],
     )
     def test_a_shared_path_alone_runs_everything(self, tmp_path: Path, path: str) -> None:
@@ -78,3 +91,4 @@ class TestSharedChanges:
         assert values["services"] == "[]"
         assert values["typescript"] == "[]"
         assert values["rust"] == "false"
+        assert values[IMAGES_KEY] == "[]"

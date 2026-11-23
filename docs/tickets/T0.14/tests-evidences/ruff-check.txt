@@ -1,0 +1,23 @@
+$ uv run ruff check tests/ci/workflows/test_desktop_workflow.py tests/ci/workflows/test_gitflow_workflows.py tests/conventions/mono_repo/test_desktop_shell.py tests/conventions/mono_repo/test_frontend_workspace.py tests/harness/write_specs/helpers.py tests/harness/write_specs/test_tokens_package.py
+(cwd ., on the ticket's own files only)
+
+All checks passed!
+warning: `VIRTUAL_ENV=/home/guillaume/Documents/Projects/PoC/swarm/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead
+Using CPython 3.12.14
+Creating virtual environment at: .venv
+   Building swarm-catalog @ file:///tmp/swarm-checks-_4n8akir/packages/python/swarm-catalog
+   Building swarm-gateway @ file:///tmp/swarm-checks-_4n8akir/services/gateway
+   Building swarm-lifecycle @ file:///tmp/swarm-checks-_4n8akir/packages/python/swarm-lifecycle
+   Building swarm-logging @ file:///tmp/swarm-checks-_4n8akir/packages/python/swarm-logging
+   Building swarm-nats @ file:///tmp/swarm-checks-_4n8akir/packages/python/swarm-nats
+   Building swarm-models @ file:///tmp/swarm-checks-_4n8akir/packages/python/swarm-models
+      Built swarm-models @ file:///tmp/swarm-checks-_4n8akir/packages/python/swarm-models
+      Built swarm-lifecycle @ file:///tmp/swarm-checks-_4n8akir/packages/python/swarm-lifecycle
+      Built swarm-gateway @ file:///tmp/swarm-checks-_4n8akir/services/gateway
+      Built swarm-catalog @ file:///tmp/swarm-checks-_4n8akir/packages/python/swarm-catalog
+      Built swarm-logging @ file:///tmp/swarm-checks-_4n8akir/packages/python/swarm-logging
+      Built swarm-nats @ file:///tmp/swarm-checks-_4n8akir/packages/python/swarm-nats
+warning: Failed to hardlink files; falling back to full copy. This may lead to degraded performance.
+         If the cache and target directories are on different filesystems, hardlinking may not be supported.
+         If this is intentional, set `export UV_LINK_MODE=copy` or use `--link-mode=copy` to suppress this warning.
+Installed 40 packages in 58ms

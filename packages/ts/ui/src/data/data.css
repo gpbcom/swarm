@@ -1,0 +1,29 @@
+/* Data components: cards, tables, lists, panels, kpis and conversation. Tokens only. */
+
+.card {
+  background: var(--color-surface); border: 1px solid var(--color-border);
+  border-radius: var(--radius-m); box-shadow: var(--shadow-card); padding: var(--space-4);
+}
+
+.table { width: 100%; border-collapse: collapse; }
+.table th { text-align: left; color: var(--color-muted); font-size: var(--size-small); font-weight: 600;
+  padding: var(--space-2); border-bottom: 1px solid var(--color-border); }
+.table td { padding: var(--space-2); border-bottom: 1px solid var(--color-border); }
+
+.split { display: grid; grid-template-columns: 1fr 340px; gap: var(--space-4); flex: 1; min-height: 0; }
+.panel { display: flex; flex-direction: column; gap: var(--space-3); min-height: 0; overflow: hidden; }
+.kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-4); }
+.kpi { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-m);
+  padding: var(--space-3) var(--space-4); }
+.kpi .value { font-size: var(--size-title); font-weight: 600; }
+.kpi .label { color: var(--color-muted); font-size: var(--size-small); }
+
+.list { display: flex; flex-direction: column; }
+.list-item { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--color-border); }
+
+.conversation { display: flex; flex-direction: column; gap: var(--space-3); }
+.message { max-width: 75%; padding: var(--space-3) var(--space-4); border-radius: var(--radius-m); border: 1px solid; }
+.message.person { align-self: flex-end; background: var(--color-surface); border-color: var(--color-border); }
+.message.agent { align-self: flex-start; background: var(--color-system-soft); color: var(--color-system-ink);
+  border-color: var(--color-system); }

@@ -44,6 +44,11 @@ class TestCellChart:
             "repository": "file://../nats",
             "condition": "nats.enabled",
         },
+        {
+            "name": "simulator",
+            "repository": "file://../simulator",
+            "condition": "simulator.enabled",
+        },
     ]
     TOGGLES: ClassVar[List[str]] = ["database", "valkey", "objectStorage", "vaultConfig", "nats"]
     EXPECTED_RESOURCES: ClassVar[List[Tuple[str, str, str]]] = [
@@ -89,7 +94,7 @@ class TestCellChart:
         assert isinstance(version, str)
         assert re.match(self.SEMVER, version)
 
-    def test_the_dependencies_are_exactly_the_five_sub_charts(self) -> None:
+    def test_the_dependencies_are_exactly_the_expected_sub_charts(self) -> None:
         chart = self.load(self.CHART_DIR / "Chart.yaml")
         assert chart[self.DEPENDENCIES_KEY] == self.EXPECTED_DEPENDENCIES
 
@@ -107,13 +112,19 @@ class TestCellChart:
         assert isinstance(section, dict)
         assert section[self.ENABLED_KEY] is True
 
+    def test_the_simulator_is_disabled_by_default(self) -> None:
+        values = self.load(self.CHART_DIR / "values.yaml")
+        section = values["simulator"]
+        assert isinstance(section, dict)
+        assert section[self.ENABLED_KEY] is False
+
     def test_the_default_services_are_empty(self) -> None:
         values = self.load(self.CHART_DIR / "values.yaml")
         global_values = values[self.GLOBAL_KEY]
         assert isinstance(global_values, dict)
         assert global_values[self.SERVICES_KEY] == []
 
-    def test_the_lock_file_names_the_five_dependencies(self) -> None:
+    def test_the_lock_file_names_every_dependency(self) -> None:
         lock = self.load(self.CHART_DIR / "Chart.lock")
         dependencies = lock[self.DEPENDENCIES_KEY]
         assert isinstance(dependencies, list)

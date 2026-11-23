@@ -15,11 +15,19 @@ from pydantic import JsonValue
 class TestCiWorkflow:
     READ_ONLY_PERMISSIONS: ClassVar[Dict[str, str]] = {"contents": "read"}
     ROOT: ClassVar[Path] = Path(__file__).resolve().parents[3]
-    OUTPUT_KEYS: ClassVar[Set[str]] = {"services", "typescript", "rust", "repository", "specs"}
-    JOBS: ClassVar[Set[str]] = {"changes", "python", "rust", "typescript", "specs", "result"}
+    OUTPUT_KEYS: ClassVar[Set[str]] = {"services", "typescript", "rust", "repository", "specs", "images"}
+    JOBS: ClassVar[Set[str]] = {"changes", "python", "rust", "typescript", "specs", "images", "result"}
     GITFLOW_PUSH_BRANCHES: ClassVar[List[str]] = ["master", "develop", "release/**", "hotfix/**"]
     PULL_REQUEST_BASES: ClassVar[List[str]] = ["develop", "master", "release/**"]
     CHECK_JOBS: ClassVar[Set[str]] = {"changes", "python", "rust", "typescript", "specs"}
+    RESULT_NEEDS: ClassVar[Set[str]] = CHECK_JOBS | {"images"}
+    IMAGES_PERMISSIONS: ClassVar[Dict[str, str]] = {"contents": "read", "packages": "write", "id-token": "write"}
+    IMAGES_CONDITIONS: ClassVar[List[str]] = [
+        "!cancelled()",
+        "!contains(needs.*.result, 'failure')",
+        "needs.changes.outputs.images != '[]'",
+    ]
+    PUBLISH_CONDITIONS: ClassVar[List[str]] = ["github.event_name == 'push'", "refs/heads/develop", "refs/heads/master"]
 
     def load(self) -> Dict[Union[str, bool], JsonValue]:
         path = self.ROOT / ".github" / "workflows" / "ci.yml"
@@ -68,7 +76,7 @@ class TestCiWorkflow:
 
     def test_the_result_job_waits_for_every_check(self) -> None:
         result = self.jobs()["result"]
-        assert set(cast(List[str], result["needs"])) == self.CHECK_JOBS
+        assert set(cast(List[str], result["needs"])) == self.RESULT_NEEDS
         assert "always()" in str(result["if"])
 
     def test_the_result_job_fails_when_a_check_failed_or_was_cancelled(self) -> None:
@@ -152,10 +160,28 @@ class TestCiWorkflow:
         for run in self.all_runs():
             assert "${{ github.event" not in run
 
-    @pytest.mark.parametrize("word", ["docker", "cosign", "trivy", "playwright"])
-    def test_steps_three_to_six_are_not_built_yet(self, word: str) -> None:
-        for run in self.all_runs():
-            assert word not in run.lower()
+    def test_the_images_job_calls_the_images_workflow(self) -> None:
+        assert self.jobs()["images"]["uses"] == "./.github/workflows/images.yml"
+
+    def test_the_images_job_waits_for_every_check(self) -> None:
+        needs = self.jobs()["images"]["needs"]
+        assert set(cast(List[str], needs)) >= self.CHECK_JOBS
+
+    def test_the_images_job_runs_only_when_no_check_failed_and_images_changed(self) -> None:
+        condition = str(self.jobs()["images"]["if"]).replace(" ", "")
+        for expected in self.IMAGES_CONDITIONS:
+            assert expected.replace(" ", "") in condition
+
+    def test_the_images_job_receives_the_images_to_build(self) -> None:
+        assert self.with_of("images")["images"] == "${{ needs.changes.outputs.images }}"
+
+    def test_images_are_published_from_develop_and_master_pushes_only(self) -> None:
+        publish = str(self.with_of("images")["publish"])
+        for expected in self.PUBLISH_CONDITIONS:
+            assert expected in publish
+
+    def test_the_images_job_may_write_packages_and_sign(self) -> None:
+        assert self.jobs()["images"]["permissions"] == self.IMAGES_PERMISSIONS
 
     def test_no_step_uses_a_docker_action(self) -> None:
         for job in self.jobs():

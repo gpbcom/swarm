@@ -1,0 +1,18 @@
+$ pnpm install --frozen-lockfile
+(cwd ., on the ticket's own files only)
+
+Scope: all 4 workspace projects
+[WARN] The store at /home/guillaume/.local/share/pnpm/store/v11 is not used because packages cannot be hard linked from it into this project. Using the store at /tmp/.pnpm-store/v11 instead. Set storeDir to choose the store.
+✓ Lockfile passes supply-chain policies (verified 17m ago)
+Lockfile is up to date, resolution step is skipped
+Packages are hard linked from the content-addressable store to the virtual store.
+  Content-addressable store is at: /tmp/.pnpm-store/v11
+  Virtual store is at:             node_modules/.pnpm
+Packages: +116
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Progress: resolved 116, reused 116, downloaded 0, added 116, done
+
+devDependencies:
++ turbo 2.11.11
+
+Done in 43ms using pnpm v12.21.0

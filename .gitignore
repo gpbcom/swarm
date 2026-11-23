@@ -41,3 +41,6 @@ logs/
 # Helm dependencies are packaged on build and never committed
 deploy/charts/*/charts/
 .VSCodeCounter
+
+# Front-end build output
+frontends/desktop/src-tauri/target/

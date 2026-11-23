@@ -1,0 +1,138 @@
+$ pnpm -r --if-present test
+(cwd ., on the ticket's own files only)
+
+Scope: 3 of 4 workspace projects
+packages/ts/live test$ node --experimental-strip-types --test test/*.test.ts && node --experimental-strip-types scripts/generate.ts --check
+packages/ts/e2e test$ node --experimental-strip-types --test test/*.test.ts
+packages/ts/e2e test: TAP version 13
+packages/ts/live test: TAP version 13
+packages/ts/live test: # (node:789919) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+packages/ts/live test: # (Use `node --trace-warnings ...` to show where the warning was created)
+packages/ts/e2e test: # (node:789918) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+packages/ts/e2e test: # (Use `node --trace-warnings ...` to show where the warning was created)
+packages/ts/live test: # Subtest: the live models generator
+packages/ts/live test:     # Subtest: starts the render with the banner
+packages/ts/live test:     ok 1 - starts the render with the banner
+packages/ts/live test:       ---
+packages/ts/live test:       duration_ms: 74.239942
+packages/ts/live test:       type: 'test'
+packages/ts/live test:       ...
+packages/ts/live test:     # Subtest: renders one exported type per definition
+packages/ts/live test:     ok 2 - renders one exported type per definition
+packages/ts/live test:       ---
+packages/ts/live test:       duration_ms: 9.463913
+packages/ts/live test:       type: 'test'
+packages/ts/live test:       ...
+packages/ts/live test:     # Subtest: renders the same text twice
+packages/ts/live test:     ok 3 - renders the same text twice
+packages/ts/live test:       ---
+packages/ts/live test:       duration_ms: 11.188805
+packages/ts/live test:       type: 'test'
+packages/ts/live test:       ...
+packages/ts/live test:     # Subtest: rejects invalid JSON
+packages/ts/live test:     ok 4 - rejects invalid JSON
+packages/ts/live test:       ---
+packages/ts/live test:       duration_ms: 0.427337
+packages/ts/live test:       type: 'test'
+packages/ts/live test:       ...
+packages/ts/live test:     # Subtest: is stale when the output is missing
+packages/ts/live test:     ok 5 - is stale when the output is missing
+packages/ts/live test:       ---
+packages/ts/live test:       duration_ms: 8.766251
+packages/ts/live test:       type: 'test'
+packages/ts/live test:       ...
+packages/ts/live test:     # Subtest: writes into missing folders and is then fresh
+packages/ts/live test:     ok 6 - writes into missing folders and is then fresh
+packages/ts/live test:       ---
+packages/ts/live test:       duration_ms: 9.415106
+packages/ts/live test:       type: 'test'
+packages/ts/live test:       ...
+packages/ts/live test:     # Subtest: is stale again after the output is edited
+packages/ts/live test:     ok 7 - is stale again after the output is edited
+packages/ts/live test:       ---
+packages/ts/live test:       duration_ms: 8.980202
+packages/ts/live test:       type: 'test'
+packages/ts/live test:       ...
+packages/ts/live test:     # Subtest: points at the schema and the generated file
+packages/ts/live test:     ok 8 - points at the schema and the generated file
+packages/ts/live test:       ---
+packages/ts/live test:       duration_ms: 0.224274
+packages/ts/live test:       type: 'test'
+packages/ts/live test:       ...
+packages/ts/live test:     1..8
+packages/ts/live test: ok 1 - the live models generator
+packages/ts/live test:   ---
+packages/ts/live test:   duration_ms: 127.664154
+packages/ts/live test:   type: 'suite'
+packages/ts/live test:   ...
+packages/ts/live test: 1..1
+packages/ts/live test: # tests 8
+packages/ts/live test: # suites 1
+packages/ts/live test: # pass 8
+packages/ts/live test: # fail 0
+packages/ts/live test: # cancelled 0
+packages/ts/live test: # skipped 0
+packages/ts/live test: # todo 0
+packages/ts/live test: # duration_ms 248.056823
+packages/ts/e2e test: # Subtest: the shared Playwright configuration
+packages/ts/e2e test:     # Subtest: keeps the test folder, has no web server and writes an html report
+packages/ts/e2e test:     ok 1 - keeps the test folder, has no web server and writes an html report
+packages/ts/e2e test:       ---
+packages/ts/e2e test:       duration_ms: 0.936143
+packages/ts/e2e test:       type: 'test'
+packages/ts/e2e test:       ...
+packages/ts/e2e test:     # Subtest: uses the base URL of the environment when it is set
+packages/ts/e2e test:     ok 2 - uses the base URL of the environment when it is set
+packages/ts/e2e test:       ---
+packages/ts/e2e test:       duration_ms: 0.108523
+packages/ts/e2e test:       type: 'test'
+packages/ts/e2e test:       ...
+packages/ts/e2e test:     # Subtest: has no base URL when the environment has none
+packages/ts/e2e test:     ok 3 - has no base URL when the environment has none
+packages/ts/e2e test:       ---
+packages/ts/e2e test:       duration_ms: 0.124099
+packages/ts/e2e test:       type: 'test'
+packages/ts/e2e test:       ...
+packages/ts/e2e test:     # Subtest: refuses a missing image tag
+packages/ts/e2e test:     ok 4 - refuses a missing image tag
+packages/ts/e2e test:       ---
+packages/ts/e2e test:       duration_ms: 0.316627
+packages/ts/e2e test:       type: 'test'
+packages/ts/e2e test:       ...
+packages/ts/e2e test:     # Subtest: refuses a blank image tag
+packages/ts/e2e test:     ok 5 - refuses a blank image tag
+packages/ts/e2e test:       ---
+packages/ts/e2e test:       duration_ms: 0.094132
+packages/ts/e2e test:       type: 'test'
+packages/ts/e2e test:       ...
+packages/ts/e2e test:     # Subtest: refuses a development server
+packages/ts/e2e test:     ok 6 - refuses a development server
+packages/ts/e2e test:       ---
+packages/ts/e2e test:       duration_ms: 0.178502
+packages/ts/e2e test:       type: 'test'
+packages/ts/e2e test:       ...
+packages/ts/e2e test:     # Subtest: forbids test.only on CI
+packages/ts/e2e test:     ok 7 - forbids test.only on CI
+packages/ts/e2e test:       ---
+packages/ts/e2e test:       duration_ms: 0.083894
+packages/ts/e2e test:       type: 'test'
+packages/ts/e2e test:       ...
+packages/ts/e2e test:     1..7
+packages/ts/e2e test: ok 1 - the shared Playwright configuration
+packages/ts/e2e test:   ---
+packages/ts/e2e test:   duration_ms: 2.501485
+packages/ts/e2e test:   type: 'suite'
+packages/ts/e2e test:   ...
+packages/ts/e2e test: 1..1
+packages/ts/e2e test: # tests 7
+packages/ts/e2e test: # suites 1
+packages/ts/e2e test: # pass 7
+packages/ts/e2e test: # fail 0
+packages/ts/e2e test: # cancelled 0
+packages/ts/e2e test: # skipped 0
+packages/ts/e2e test: # todo 0
+packages/ts/e2e test: # duration_ms 294.50223
+packages/ts/e2e test: Done
+packages/ts/live test: (node:789940) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+packages/ts/live test: (Use `node --trace-warnings ...` to show where the warning was created)
+packages/ts/live test: Done

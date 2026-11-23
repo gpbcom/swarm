@@ -16,6 +16,24 @@ uv run mypy packages/python/<package>/src
 uv run pytest packages/python/<package>/tests -n 2
 ```
 
+For a front end or a TypeScript package, run its scripts from the root with the pnpm filter of its name,
+`pnpm --filter @swarm/<project> test|lint|typecheck|build`, for example `pnpm --filter @swarm/ground-control test`. The
+desktop shell is built from the root with `pnpm --filter @swarm/desktop tauri build --no-bundle`. In
+`frontends/desktop/src-tauri`, which is its own Cargo workspace, run `cargo fmt --check` and
+`cargo clippy --all-targets --locked -- -D warnings`.
+
+To build the image of a service locally, run this from the repository root, because the build context is the root:
+
+```bash
+docker build -f services/<service>/Dockerfile -t <name>:local .
+```
+
+To run the Playwright scaffold against the images of a pipeline run, give the tag of those images:
+
+```bash
+SWARM_IMAGE_TAG=<tag> pnpm --filter ./packages/ts/e2e run e2e
+```
+
 For Rust (`packages/rust`, a Cargo workspace whose crates opt in to the workspace lints with `[lints] workspace = true`)
 and TypeScript (`packages/ts`, a pnpm workspace), run these from their workspace folder:
 
@@ -49,9 +67,24 @@ pnpm --filter ./packages/ts/live run generate
 - `cargo run -p swarm-models-codegen`, run in `packages/rust`, writes `packages/rust/swarm-models/src/generated.rs`.
 - `pnpm --filter ./packages/ts/live run generate` writes `packages/ts/live/src/generated/models.ts`.
 
+After any change to the routes of a service, regenerate the REST contract from the repository root:
+
+```bash
+uv run swarm-<service>-openapi
+pnpm --filter ./packages/ts/api-client run generate
+```
+
+- `uv run swarm-<service>-openapi` runs for each service whose routes changed, and writes
+  `packages/ts/api-client/openapi/<service>.json`.
+- `pnpm --filter ./packages/ts/api-client run generate` then writes the TypeScript client from those documents.
+- CI checks both: each service's pytest compares its published document with its app, and the `test` script of
+  `packages/ts/api-client` runs `generate.ts --check`.
+- `uv run swarm-<service>-migrate` applies a service's migrations. Its DSN is read from the environment entry
+  `SWARM_<SERVICE>_POSTGRES_DSN`.
+
 - `.github/workflows/ci.yml` runs on every push and pull request.
 - Its first job runs `.github/scripts/detect_changes.py`, which selects the services, front ends and packages that
-  changed.
+  changed. It prints six lines, including `images`, the JSON array of the image folders to build.
 - Then the reusable workflows `python.yml`, `rust.yml`, `typescript.yml` and `specs.yml` run the checks of this section
   for what was selected:
   - for each selected service: `ruff check`, `ruff format --check`, `mypy services/<service>/src`,
@@ -64,6 +97,14 @@ pnpm --filter ./packages/ts/live run generate
       the build when a benchmark's mean is more than 5 % slower;
   - for each TypeScript project: its `lint`, `typecheck` and `test` scripts;
   - `specs.py check`.
+- After step 2, `.github/workflows/images.yml` runs for the selected images, and each step must pass before the next:
+  - OSV-Scanner scans the lock files `uv.lock`, `pnpm-lock.yaml` and `packages/rust/Cargo.lock`;
+  - the image is built from its `Dockerfile` with the gha remote cache, under the run tag `run-<id>-<attempt>`;
+  - Trivy fails the build on a fixable HIGH or CRITICAL vulnerability, then writes the CycloneDX SBOM, kept as an artifact;
+  - the run tag is pushed to `ghcr.io/gpbcom/swarm/<name>`;
+  - the image is signed with keyless cosign, its SBOM is attached as an attestation, and the signature is verified;
+  - Playwright runs through `compose.e2e.yaml` against those images, and the HTML report is uploaded when a test fails;
+  - the commit SHA tag is added only on pushes to `develop` and `master`, to the same digest, and its signature is verified.
 - All of them must pass.
 - `.github/workflows/terraform.yml` still checks `deploy/terraform/` on its own. `.github/workflows/dev-cell.yml` creates
   a branch's dev cell on demand and destroys it when the branch is deleted.
@@ -96,8 +137,10 @@ Swarm is meant to become a mono-repo of backend and front-end micro-services, ea
 `src/` has moved to `services/gateway` (ticket T0.01), so the `services/<service>/src/<service>/` reading of `src/`
 applies everywhere. The tests in `tests/conventions/mono_repo/` enforce part of this section: the uv workspace, the
 Cargo and pnpm workspaces, and the Terraform layout. The CI/CD change detection and check workflows are tested by
-`tests/ci/`. The Docker and front-end rules are not tested yet. `tests/deploy/` checks the charts, the dev environment, the
-PostgreSQL image and the dev-cell script, and `tests/ci/dev_cell/` checks the dev-cell workflow.
+`tests/ci/`. The Dockerfiles are tested by `tests/deploy/images/test_service_images.py`, and `compose.e2e.yaml` by
+`tests/ci/e2e/`. `tests/conventions/mono_repo/test_frontend_workspace.py` and `test_desktop_shell.py` check the front-end
+workspace layout and the desktop shell, and the Docker rules of the front ends are not tested yet. `tests/deploy/` checks the charts, the dev environment, the PostgreSQL image and the dev-cell script,
+and `tests/ci/dev_cell/` checks the dev-cell workflow.
 
 | Path | Holds |
 | --- | --- |
@@ -117,11 +160,31 @@ PostgreSQL image and the dev-cell script, and `tests/ci/dev_cell/` checks the de
 
 `packages/rust/` is a Cargo workspace and `packages/ts/` a pnpm workspace.
 
+The front-end packages of `packages/ts/` are `packages/ts/tokens` (`@swarm/tokens`), whose `src/tokens.css` is generated by
+`specs.py build` from `docs/specs/visual-identity.md` and never edited by hand; and `packages/ts/ui` (`@swarm/ui`), the components on
+Radix primitives, styled with `var(--...)` tokens only and using the class names of the mock-ups' `components.css`. The
+frames of each part of Swarm sit in `packages/ts/ui/src/frames/`, and their words in `packages/ts/ui/src/frames/parts.ts`.
+The four app shells are `frontends/ground-control`, `frontends/mission-studio`, `frontends/back-office` and
+`frontends/client-portal`. `frontends/desktop` (`@swarm/desktop`) is the Tauri 2 shell that wraps Ground control and
+Mission studio. Its Rust code is in `src-tauri/`, a Cargo workspace of its own, and `.github/workflows/desktop.yml`
+builds it on Windows, macOS and Linux.
+
 The Rust core is `packages/rust/swarm-core/`. It holds the crates `safety`, `planner` and `mavlink` (`swarm-core-safety`,
 `swarm-core-planner`, `swarm-core-mavlink`), each with its criterion benchmark in `benches/`. It also holds the PyO3
 bindings `swarm-core/python` (Python module `swarm_core`, which releases the GIL), built as a wheel by maturin. The
 bindings are not a uv workspace member, so `uv sync` never builds Rust. `tests/rust/swarm_core/` checks the layout and
 imports the functions from a wheel it builds.
+
+`packages/rust/swarm-synthetic-drones/` is a workspace crate outside `swarm-core`. It is a library (the route follower and
+the MAVLink state machine) and a binary, `swarm-synthetic-drones`, which flies up to 255 synthetic Drones per process
+over UDP MAVLink 2, for example `cargo run -p swarm-synthetic-drones -- --count 10`. Its criterion benchmark is `step`.
+
+`services/simulator/` is the simulator service. `swarm-simulator fly --config conf/app.yaml --mission-id <uuid7>` flies
+the Squad of `conf/catalogs/simulated_squad.yaml` on a square route. `swarm-simulator serve` answers Commands on NATS,
+and refuses to start without simulated credentials. Its adapter registry holds only simulated Drones, and its Flight log,
+in SQLite, is marked simulated ([📏 BR-014](docs/specs/functional/business-rules/BR-014-simulation-isolation.md)).
+Its acceptance tests are in `tests/simulator/`. They need cargo and `nats-server`, and for PX4, docker with the image built
+by `docker build -f deploy/images/px4-sitl/Dockerfile -t swarm-px4-sitl:local .`. They skip without them.
 
 The packages of `packages/python/` are `swarm-lifecycle` (`swarm_lifecycle`), with Runnable, AsyncRunnable and the
 abstract factories; `swarm-logging` (`swarm_logging`), with the logging configuration; and `swarm-catalog`
@@ -131,6 +194,18 @@ responder and durable consumer with their factories, together with the issuers o
 accounts and of the credentials (service, edge, simulated, system). Its NATS tests need a nats-server binary on PATH and
 skip without it, and CI installs a pinned one. Inside a package, Pydantic models, enums and exceptions sit in
 `src/<module>/models/`, as in a service.
+
+The packages `swarm-storage` (`swarm_storage`) and `swarm-rest` (`swarm_rest`) were added by ticket T0.12.
+`swarm-storage` holds the PostgreSQL pool, the unit of work that sets `swarm.operator_id` on each transaction for
+row-level security, the `PostgresRepository` base and the outbox repository, the row-level security and outbox DDL,
+and the Alembic migrator. `swarm-rest` holds the REST conventions of every `/v1` app: `problem+json` errors, the
+`Idempotency-Key` middleware, `ETag` and `If-Match`, the app builder, the uvicorn server runnable, the OpenAPI export
+command, and the runner that drives an `AsyncRunnable` from a console script. The services `gateway`, `missions` and
+`fleet` each have their own PostgreSQL schema and their Alembic migrations in `services/<service>/migrations/`, outside
+`src/` because Alembic needs module-level functions.
+
+Each service's console scripts are `swarm-<service>-serve` (run the service), `swarm-<service>-openapi` (export its
+OpenAPI document) and `swarm-<service>-migrate` (apply its migrations). `swarm-gateway` still runs the greeting command.
 
 The Python rules in this file apply to `services/` and `packages/python/`. The front ends use React and TypeScript
 with a Tauri desktop shell, images go to GHCR, and Argo CD deploys them; see `docs/specs/technical/`.
@@ -160,12 +235,17 @@ with a Tauri desktop shell, images go to GHCR, and Argo CD deploys them; see `do
 
 - Each service and front end has exactly one image, built by a multi-stage `Dockerfile` in its own folder.
 - The build context is the repository root, because the shared `uv.lock` is there.
+- Images are pushed to `ghcr.io/gpbcom/swarm/<name>`, and each one is signed with keyless cosign.
+- The dev cell refuses an unsigned `ghcr.io/gpbcom/swarm/**` image: the Sigstore policy-controller admits only images
+  signed by the `images.yml` workflow, and `deploy/scripts/dev-cell.sh up` checks that it refuses an unsigned image.
 
 **Front-end tests**
 
 - Front-end tests use Playwright, and live in `frontends/<frontend>/e2e/`.
 - They run against the real images started by `compose.e2e.yaml`, never a development server, so that they test what
   ships.
+- The shared Playwright configuration is `@swarm/e2e` in `packages/ts/e2e`. It refuses a `webServer`, and it needs
+  `SWARM_IMAGE_TAG`, the tag of the images to test.
 
 **CI/CD**
 
@@ -532,6 +612,12 @@ class DatabaseConfig(BaseModel):
 - Use `pytest.mark.parametrize` for cases of the same behaviour.
 - Async tests need no marker, because `asyncio_mode` is `auto`.
 - Prefer real things to mocks. `unittest.mock` is not used: tests use real services, such as a local test server.
+- PostgreSQL tests: the fixtures `postgres_server` and `postgres_dsn` of the root `conftest.py` start a throwaway server
+  from the local PostgreSQL binaries (`pg_ctl`, `initdb` and `psql`), found on `PATH`, in `SWARM_POSTGRES_BIN_DIR` or in
+  `/usr/lib/postgresql/*/bin`. The tests connect as the role `swarm_app`, which is neither superuser nor `BYPASSRLS`, so
+  that row-level security applies. They skip when the binaries are missing, as the NATS tests do.
+- Test file names are unique across the whole uv workspace, because pytest imports test modules by their base name, so
+  a service's tests carry its name.
 
 Every model gets this set of tests:
 

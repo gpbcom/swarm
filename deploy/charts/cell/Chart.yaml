@@ -21,3 +21,6 @@ dependencies:
   - name: nats
     repository: file://../nats
     condition: nats.enabled
+  - name: simulator
+    repository: file://../simulator
+    condition: simulator.enabled

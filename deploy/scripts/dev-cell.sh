@@ -7,6 +7,7 @@
 #   DEV_CELL_BACKEND_CONFIG  Path of the Terraform backend configuration file (required, kept outside the repository).
 #   DEV_CELL_VAR_FILE        Path of the dev-branch variables file (required, kept outside the repository).
 #   DEV_CELL_TIMEOUT         Wait timeout for Argo CD (default 15m).
+#   DEV_CELL_UNSIGNED_IMAGE  Image the cell must refuse, as it is not signed (default under ghcr.io/gpbcom/swarm/, never signed).
 #   KUBECONFIG               Used by kubectl.
 #
 # Terraform is made non-interactive and reconfiguring through TF_INPUT and TF_CLI_ARGS_init, so that the printed
@@ -20,6 +21,8 @@ readonly BAD_USAGE=2
 readonly NAMESPACE="argocd"
 readonly SYNC_PATH="{.status.sync.status}=Synced"
 readonly HEALTH_PATH="{.status.health.status}=Healthy"
+readonly DEFAULT_UNSIGNED_IMAGE="ghcr.io/gpbcom/swarm/unsigned-probe:never-signed"
+readonly PROBE_NAME="swarm-unsigned-probe"
 
 usage() {
   printf 'Usage: %s [--dry-run] up|down <branch>\n' "$(basename "$0")" >&2
@@ -100,6 +103,18 @@ wait_for() {
   run kubectl wait --namespace "${NAMESPACE}" "--for=jsonpath=$1" "application/${CELL}" "--timeout=${TIMEOUT}"
 }
 
+check_unsigned_image_refused() {
+  local image="${DEV_CELL_UNSIGNED_IMAGE:-${DEFAULT_UNSIGNED_IMAGE}}"
+  if [[ "${DRY_RUN}" -eq 1 ]]; then
+    run kubectl run "${PROBE_NAME}" --namespace "${CELL}" "--image=${image}" --restart=Never --dry-run=server
+  elif kubectl run "${PROBE_NAME}" --namespace "${CELL}" "--image=${image}" --restart=Never --dry-run=server; then
+    printf 'Cell %s accepted an unsigned image: %s.\n' "${CELL}" "${image}" >&2
+    exit 1
+  else
+    printf 'Cell %s refused the unsigned image %s.\n' "${CELL}" "${image}"
+  fi
+}
+
 case "${ACTION}" in
   up)
     START="${SECONDS}"
@@ -107,6 +122,7 @@ case "${ACTION}" in
     terraform_verb apply
     wait_for "${SYNC_PATH}"
     wait_for "${HEALTH_PATH}"
+    check_unsigned_image_refused
     printf 'Cell %s is ready after %d seconds.\n' "${CELL}" "$((SECONDS - START))"
     ;;
   down)

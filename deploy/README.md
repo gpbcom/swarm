@@ -207,6 +207,29 @@ and the [storage overview](../docs/specs/technical/03-storage.md#overview) descr
 - **The leaf node listener over mTLS.** Port `7422` is open only when `leafnodes.enabled` is `true` and the Secret named
   by `leafnodes.tls.secretName`, `nats-leafnodes-tls`, exists. It stays off until both are true.
 
+## The Simulator of a cell
+
+The simulator runs in a cell from `charts/simulator`, a sub-chart of `charts/cell`. It is disabled by default, and
+`simulator.enabled` turns it on. It flies only simulated Squads, as the
+[simulator](../docs/specs/technical/04-engine.md#simulator) and
+[BR-014: Simulation isolation](../docs/specs/functional/business-rules/BR-014-simulation-isolation.md) require.
+
+When enabling it, give:
+
+- `simulator.operatorId`, the Operator whose simulated Squads it flies;
+- the image tags of the simulator and of the synthetic Drones;
+- the Secret `simulator-nats-credentials`, holding a creds file of kind `simulated`, issued by `CredentialIssuer`. The
+  Secret is created in the cluster and is never written in the repository.
+
+The chart starts three kinds of workloads:
+
+- the simulator itself;
+- 10 synthetic Drones, written in Rust;
+- one PX4 SITL Drone.
+
+A NetworkPolicy lets only the simulator reach the synthetic and PX4 Drones. No other workload of the cell can address
+them, so a simulated Drone never receives a command meant for a real one.
+
 ## Create the dev operator once
 
 The person creates the dev Operator and its SYS account once, outside the charts and the repository. For example, with
