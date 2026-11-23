@@ -9,7 +9,7 @@ description = "Synthetic Drones of the Swarm simulator: they speak MAVLink over 
 workspace = true
 
 [dependencies]
-mavlink = { version = "=0.16.2", default-features = false, features = ["std", "common", "udp", "emit-extensions"] }
+mavlink = { version = "=0.21.0", default-features = false, features = ["std", "dialect-common", "transport-udp", "mav2-message-extensions"] }
 
 [dev-dependencies]
 criterion.workspace = true

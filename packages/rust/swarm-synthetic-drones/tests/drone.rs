@@ -3,7 +3,7 @@
 // The Mission upload frame is the deprecated INT variant on purpose: it is the frame a real autopilot receives.
 #![allow(deprecated)]
 
-use mavlink::common::{
+use mavlink::dialects::common::{
     MavCmd, MavFrame, MavMessage, MavMissionResult, MavModeFlag, MavResult, MavType, COMMAND_LONG_DATA,
     MISSION_COUNT_DATA, MISSION_ITEM_INT_DATA,
 };

@@ -18,9 +18,8 @@ use std::net::{IpAddr, Ipv4Addr, SocketAddr, UdpSocket};
 use std::thread;
 use std::time::{Duration, Instant};
 
-use mavlink::common::{MavComponent, MavMessage};
-use mavlink::peek_reader::PeekReader;
-use mavlink::{read_v2_msg, MAVLinkV2MessageRaw, MavHeader};
+use mavlink::dialects::common::{MavComponent, MavMessage};
+use mavlink::{MAVLinkV2MessageRaw, MavHeader, MavlinkReader, MavlinkVersion};
 
 use crate::drone::{DroneConfig, SyntheticDrone};
 use crate::route::{offset, Position};
@@ -227,9 +226,9 @@ impl Slot {
             match self.socket.recv_from(&mut scratch.datagram) {
                 Ok((length, from)) => {
                     let length = length.min(DATAGRAM_BYTES);
-                    let mut reader = PeekReader::new(&scratch.datagram[..length]);
+                    let mut reader = MavlinkReader::new(&scratch.datagram[..length]);
                     let mut understood = false;
-                    while let Ok((_, message)) = read_v2_msg::<MavMessage, _>(&mut reader) {
+                    while let Ok((_, message)) = reader.read_message::<MavMessage>(MavlinkVersion::V2) {
                         understood = true;
                         self.drone.handle(&message, &mut scratch.out);
                     }
@@ -260,7 +259,7 @@ impl Slot {
         if let Some(peer) = self.peer {
             for message in &scratch.out {
                 let header = MavHeader {
-                    system_id: self.drone.system_id(),
+                    system_id: u32::from(self.drone.system_id()),
                     component_id: MavComponent::MAV_COMP_ID_AUTOPILOT1 as u8,
                     sequence: self.sequence,
                 };

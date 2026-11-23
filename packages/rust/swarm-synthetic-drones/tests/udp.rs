@@ -12,7 +12,7 @@ use std::net::UdpSocket;
 use std::process::{Child, Command, Stdio};
 use std::time::{Duration, Instant};
 
-use mavlink::common::{
+use mavlink::dialects::common::{
     MavAutopilot, MavCmd, MavComponent, MavFrame, MavMessage, MavMissionType, MavModeFlag, MavState, MavType,
     COMMAND_LONG_DATA, HEARTBEAT_DATA, MISSION_COUNT_DATA, MISSION_ITEM_INT_DATA,
 };
@@ -97,7 +97,7 @@ fn start_fleet() -> Fleet {
 }
 
 fn connect(port: u16) -> Link {
-    mavlink::connect::<MavMessage>(&format!("udpout:127.0.0.1:{port}")).expect("udpout connects")
+    Box::new(mavlink::connect::<MavMessage>(&format!("udpout:127.0.0.1:{port}")).expect("udpout connects"))
 }
 
 fn gcs_header() -> MavHeader {
@@ -237,7 +237,7 @@ fn each_drone_answers_with_its_own_system_id() {
         send(&link, &gcs_heartbeat());
         let expected = SYSTEM_ID_BASE + i;
         let seen = recv_until(&link, RECV_TIMEOUT, |header, message| match message {
-            MavMessage::HEARTBEAT(_) if header.system_id == expected => Some(()),
+            MavMessage::HEARTBEAT(_) if header.system_id == u32::from(expected) => Some(()),
             _ => None,
         });
         assert!(seen.is_some(), "no heartbeat from system {expected}");
@@ -252,7 +252,7 @@ fn each_drone_flies_a_square_mission_and_reports_every_item() {
         let link = connect(fleet.base_port + i as u16);
         send(&link, &gcs_heartbeat());
         let first = recv_until(&link, RECV_TIMEOUT, |header, message| match message {
-            MavMessage::HEARTBEAT(_) if header.system_id == system => Some(()),
+            MavMessage::HEARTBEAT(_) if header.system_id == u32::from(system) => Some(()),
             _ => None,
         });
         assert!(first.is_some(), "no heartbeat from system {system}");
