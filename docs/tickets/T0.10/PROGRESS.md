@@ -44,6 +44,7 @@ The technical pages, features, use cases and business rules of [TICKET.md](TICKE
 | 2026-11-20 15:02 | Waiting for the person's code review: nothing is committed or pushed until PLAN.md says **Push:** 🟢 Approved (TKT-18) | - | 👀 |
 | 2026-11-20 15:33 | Code reviewed by the person, push approved (TKT-18) | person | 🟢 Approved |
 | 2026-11-23 16:10 | Pull request #388: every image job failed at `aquasecurity/setup-trivy@v0.2.3`, a tag deleted upstream, as is Trivy v0.67.2. On the person's decision, images.yml pins setup-trivy to the commit of v0.3.1 (81e5143) and installs Trivy v0.76.2 | person | 🟢 Approved |
+| 2026-11-23 16:30 | Pull request #388: Trivy failed the gateway, fleet, missions and simulator images on 52 fixable HIGH and CRITICAL findings, all in the Debian 12.9 packages of python:3.12.8-slim-bookworm. On the person's decision, every Dockerfile moves to python:3.12.16-slim-bookworm (Debian 12.15), which Trivy scans with no HIGH or CRITICAL finding (same settings as images.yml) | person | 🟢 Approved |
 
 ## 🔜 Follow-ups
 

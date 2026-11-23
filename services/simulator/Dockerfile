@@ -9,7 +9,7 @@ COPY packages/rust /workspace/packages/rust
 
 RUN cargo build --release --locked -p swarm-synthetic-drones
 
-FROM python:3.12.8-slim-bookworm AS python
+FROM python:3.12.16-slim-bookworm AS python
 
 COPY --from=ghcr.io/astral-sh/uv:0.12.21 /uv /usr/local/bin/uv
 
@@ -27,7 +27,7 @@ COPY services/simulator services/simulator
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev --no-editable --package swarm-simulator
 
-FROM python:3.12.8-slim-bookworm AS runtime
+FROM python:3.12.16-slim-bookworm AS runtime
 
 ENV PATH="/opt/venv/bin:$PATH" \
     PYTHONUNBUFFERED=1

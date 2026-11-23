@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.7
 # Build context: the repository root, because the shared uv.lock is there.
 
-FROM python:3.12.8-slim-bookworm AS build
+FROM python:3.12.16-slim-bookworm AS build
 
 COPY --from=ghcr.io/astral-sh/uv:0.12.21 /uv /usr/local/bin/uv
 
@@ -32,7 +32,7 @@ COPY packages/python packages/python
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev --no-editable --package swarm-missions
 
-FROM python:3.12.8-slim-bookworm AS runtime
+FROM python:3.12.16-slim-bookworm AS runtime
 
 ENV PATH="/opt/venv/bin:$PATH" \
     PYTHONUNBUFFERED=1 \

@@ -78,6 +78,7 @@ The technical pages, features, use cases and business rules of [TICKET.md](TICKE
 | 2026-11-23 15:23 | Push approved after the code review | 👤 person | 🟢 Approved |
 | 2026-11-23 15:23 | Verify 1 (3 not applicable) | verifier | ✅ passed |
 | 2026-11-23 15:45 | Pull request #388 blocked by the dependency scan: quick-xml 0.38.4 (RUSTSEC-2026-0194, RUSTSEC-2026-0195, HIGH), a build dependency of mavlink 0.16.2. On the person's decision, swarm-synthetic-drones moves to mavlink 0.21.0 (quick-xml 0.41.0): dialect-common, transport-udp and mav2-message-extensions features, mavlink::dialects::common, MavlinkReader in place of PeekReader and read_v2_msg (it allocates its frame buffer once per datagram), a u32 system_id in MavHeader. cargo fmt, clippy -D warnings, 66 workspace tests, the step benchmark, tests/rust/swarm_synthetic_drones and tests/simulator pass, and OSV-Scanner finds nothing | person | 🟢 Approved |
+| 2026-11-23 16:30 | Pull request #388: Trivy failed the gateway, fleet, missions and simulator images on 52 fixable HIGH and CRITICAL findings, all in the Debian 12.9 packages of python:3.12.8-slim-bookworm. On the person's decision, every Dockerfile moves to python:3.12.16-slim-bookworm (Debian 12.15), which Trivy scans with no HIGH or CRITICAL finding (same settings as images.yml) | person | 🟢 Approved |
 
 ## 🔜 Follow-ups
 

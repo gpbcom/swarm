@@ -78,6 +78,7 @@ The technical pages, features, use cases and business rules of [TICKET.md](TICKE
 | 2026-11-23 14:12 | Plan change approved by the person: task K33 (wave 9) gives missions and fleet the gateway's SWARM_<SERVICE>_HOME fallback, sets it to /app in the three Dockerfiles, and adds the tests the reviewer asked for, because every fix task was blocked by tests outside its files | person | 🟢 Approved |
 | 2026-11-23 14:12 | Ten import-only changes to files committed by T0.10 and T0.14 (tests/ci, tests/conventions/mono_repo, tests/deploy, tests/harness/write_specs) taken out of the ticket's files, to be committed on their own after the develop merge (L-34) | harness | ⚠️ |
 | 2026-11-23 15:05 | Code reviewed and push approved by the person (TKT-18), to be pushed right after T0.13, which shares pyproject.toml and uv.lock | person | 🟢 Approved |
+| 2026-11-23 16:30 | Pull request #388: Trivy failed the gateway, fleet, missions and simulator images on 52 fixable HIGH and CRITICAL findings, all in the Debian 12.9 packages of python:3.12.8-slim-bookworm. On the person's decision, every Dockerfile moves to python:3.12.16-slim-bookworm (Debian 12.15), which Trivy scans with no HIGH or CRITICAL finding (same settings as images.yml) | person | 🟢 Approved |
 
 ## 🔜 Follow-ups
 
