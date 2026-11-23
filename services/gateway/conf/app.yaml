@@ -1,0 +1,13 @@
+schema_name: gateway
+postgres:
+  dsn_key: SWARM_GATEWAY_POSTGRES_DSN
+  pool_min_size: 1
+  pool_max_size: 5
+  command_timeout_s: 5.0
+  status_interval_s: 5.0
+rest:
+  host: 0.0.0.0
+  port: 8000
+  status_interval_s: 5.0
+  idempotency_ttl_s: 86400.0
+  idempotency_max_entries: 10000

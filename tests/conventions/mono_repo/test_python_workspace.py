@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 # Standard library imports
+import re
 import tomllib
-from typing import Dict, List
+from pathlib import Path
+from typing import ClassVar, Dict, List
 
 # Third-party imports
 import pytest
@@ -13,6 +15,53 @@ from tests.conventions.mono_repo.helpers import SERVICE_LAYERS, repo_root
 
 
 class TestPythonWorkspace:
+    NEW_SERVICES: ClassVar[List[str]] = ["missions", "fleet"]
+    ALL_SERVICES: ClassVar[List[str]] = ["gateway", "missions", "fleet"]
+    NEW_PACKAGES: ClassVar[List[str]] = ["swarm-storage", "swarm-rest"]
+    SCRIPT_ENTRIES: ClassVar[List[str]] = ["serve", "openapi", "migrate"]
+    LAYERS: ClassVar[List[str]] = ["api", "service", "storage", "clients", "models"]
+    GATEWAY_SCRIPT: ClassVar[str] = "gateway.api.cli.main:main"
+    STORAGE_DEPENDENCIES: ClassVar[List[str]] = ["asyncpg", "alembic", "sqlalchemy", "swarm-models"]
+    REST_DEPENDENCIES: ClassVar[List[str]] = ["fastapi", "uvicorn"]
+    SHARED_DEPENDENCIES: ClassVar[List[str]] = ["swarm-storage", "swarm-rest"]
+    FIRST_PARTY: ClassVar[List[str]] = ["missions", "fleet", "swarm_storage", "swarm_rest"]
+    TEST_PATHS: ClassVar[List[str]] = [
+        "services/missions/tests",
+        "services/fleet/tests",
+        "packages/python/swarm-storage/tests",
+        "packages/python/swarm-rest/tests",
+    ]
+    MYPY_FILES: ClassVar[List[str]] = [
+        "services/missions/src",
+        "services/fleet/src",
+        "packages/python/swarm-storage/src",
+        "packages/python/swarm-rest/src",
+    ]
+    DISTRIBUTION_SEPARATORS: ClassVar[str] = r"[\[<>=!~;@ ]"
+
+    def load_toml(self, path: Path) -> Dict[str, JsonValue]:
+        assert path.is_file(), f"{path} is missing."
+        return tomllib.loads(path.read_text(encoding="utf-8"))
+
+    def table(self, data: Dict[str, JsonValue], *keys: str) -> Dict[str, JsonValue]:
+        current: JsonValue = data
+        for key in keys:
+            assert isinstance(current, dict), f"{key} is not under a table."
+            current = current.get(key, {})
+        assert isinstance(current, dict)
+        return current
+
+    def distribution_names(self, items: JsonValue) -> List[str]:
+        assert isinstance(items, list)
+        return [re.split(self.DISTRIBUTION_SEPARATORS, str(item), maxsplit=1)[0].strip() for item in items]
+
+    def project_file(self, kind: str, name: str) -> Path:
+        return repo_root() / kind / name / "pyproject.toml"
+
+    def dependencies_of(self, path: Path) -> List[str]:
+        project = self.table(self.load_toml(path), "project")
+        return self.distribution_names(project.get("dependencies", []))
+
     def load_root(self) -> Dict[str, JsonValue]:
         path = repo_root() / "pyproject.toml"
         assert path.is_file(), "The root pyproject.toml is missing."
@@ -70,3 +119,57 @@ class TestPythonWorkspace:
         ]
         assert offenders == []
         assert list((repo_root() / "services").glob("*/src/gateway")), "No service source package was found."
+
+    @pytest.mark.parametrize("service", NEW_SERVICES)
+    def test_a_new_service_declares_its_name_and_module(self, service: str) -> None:
+        data = self.load_toml(self.project_file("services", service))
+        assert self.table(data, "project")["name"] == f"swarm-{service}"
+        assert self.table(data, "tool", "uv", "build-backend")["module-name"] == service
+
+    @pytest.mark.parametrize("package", NEW_PACKAGES)
+    def test_a_new_package_declares_its_name_and_module(self, package: str) -> None:
+        data = self.load_toml(self.project_file("packages/python", package))
+        assert self.table(data, "project")["name"] == package
+        assert self.table(data, "tool", "uv", "build-backend")["module-name"] == package.replace("-", "_")
+
+    @pytest.mark.parametrize("service", ALL_SERVICES)
+    @pytest.mark.parametrize("entry", SCRIPT_ENTRIES)
+    def test_a_service_declares_its_console_scripts(self, service: str, entry: str) -> None:
+        scripts = self.table(self.load_toml(self.project_file("services", service)), "project", "scripts")
+        assert scripts[f"swarm-{service}-{entry}"] == f"{service}.api.cli.{entry}_main:main"
+
+    def test_the_gateway_keeps_its_console_script(self) -> None:
+        scripts = self.table(self.load_toml(self.project_file("services", "gateway")), "project", "scripts")
+        assert scripts["swarm-gateway"] == self.GATEWAY_SCRIPT
+
+    @pytest.mark.parametrize("service", NEW_SERVICES)
+    @pytest.mark.parametrize("layer", LAYERS)
+    def test_a_new_service_has_the_layer_package(self, service: str, layer: str) -> None:
+        assert (repo_root() / "services" / service / "src" / service / layer / "__init__.py").is_file()
+
+    @pytest.mark.parametrize("dependency", STORAGE_DEPENDENCIES)
+    def test_swarm_storage_depends_on(self, dependency: str) -> None:
+        assert dependency in self.dependencies_of(self.project_file("packages/python", "swarm-storage"))
+
+    @pytest.mark.parametrize("dependency", REST_DEPENDENCIES)
+    def test_swarm_rest_depends_on(self, dependency: str) -> None:
+        assert dependency in self.dependencies_of(self.project_file("packages/python", "swarm-rest"))
+
+    @pytest.mark.parametrize("service", ALL_SERVICES)
+    @pytest.mark.parametrize("dependency", SHARED_DEPENDENCIES)
+    def test_a_service_depends_on_the_shared_package(self, service: str, dependency: str) -> None:
+        assert dependency in self.dependencies_of(self.project_file("services", service))
+
+    @pytest.mark.parametrize("name", FIRST_PARTY)
+    def test_the_root_lists_the_first_party_module(self, name: str) -> None:
+        isort = self.table(self.load_root(), "tool", "ruff", "lint", "isort")
+        assert name in isort["known-first-party"]
+
+    @pytest.mark.parametrize("path", TEST_PATHS)
+    def test_the_root_lists_the_test_path(self, path: str) -> None:
+        options = self.table(self.load_root(), "tool", "pytest", "ini_options")
+        assert path in options["testpaths"]
+
+    @pytest.mark.parametrize("path", MYPY_FILES)
+    def test_the_root_lists_the_mypy_files(self, path: str) -> None:
+        assert path in self.table(self.load_root(), "tool", "mypy")["files"]

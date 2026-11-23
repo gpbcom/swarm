@@ -3,7 +3,7 @@ from __future__ import annotations
 # Standard library imports
 import re
 from pathlib import Path
-from typing import ClassVar, List, Tuple
+from typing import ClassVar, List, Optional, Tuple
 
 # Third-party imports
 import pytest
@@ -20,6 +20,13 @@ class TestServiceImages:
         [*(Path(__file__).resolve().parents[3] / "services").glob("*/Dockerfile")]
         + [*(Path(__file__).resolve().parents[3] / "frontends").glob("*/Dockerfile")]
     )
+    SERVICE_DOCKERFILES: ClassVar[List[Path]] = sorted(
+        (Path(__file__).resolve().parents[3] / "services").glob("*/Dockerfile")
+    )
+    ENV: ClassVar[str] = "ENV"
+    HOME_KEY: ClassVar[str] = "SWARM_{service}_HOME"
+    COPY_FROM_BUILD: ClassVar[str] = "--from=build"
+    CONF_SUFFIX: ClassVar[str] = "/conf"
     DOCKERIGNORE: ClassVar[Path] = ROOT / ".dockerignore"
     GATEWAY: ClassVar[Path] = ROOT / "services" / "gateway" / "Dockerfile"
     GATEWAY_COMMAND: ClassVar[str] = "swarm-gateway"
@@ -53,6 +60,24 @@ class TestServiceImages:
             words = [word for word in arguments.split() if not word.startswith("--")]
             sources.extend(words[:-1])
         return sources
+
+    def _conf_destination(self, dockerfile: Path) -> Optional[str]:
+        for arguments in self._instructions(self._final_stage(dockerfile), self.COPY):
+            words = [word for word in arguments.split() if not word.startswith("--")]
+            if self.COPY_FROM_BUILD in arguments and words[0].endswith(self.CONF_SUFFIX):
+                return words[-1][: -len(self.CONF_SUFFIX)]
+        return None
+
+    @pytest.mark.parametrize("dockerfile", SERVICE_DOCKERFILES, ids=lambda path: str(path.parent.name))
+    def test_the_runtime_stage_names_the_folder_its_conf_is_copied_to(self, dockerfile: Path) -> None:
+        destination = self._conf_destination(dockerfile)
+        if destination is None:
+            pytest.skip("This image does not copy its conf folder from the build stage.")
+        key = self.HOME_KEY.format(service=dockerfile.parent.name.upper())
+        entries: List[str] = []
+        for arguments in self._instructions(self._final_stage(dockerfile), self.ENV):
+            entries.extend(re.findall(r"(\w+)=(\S+)", arguments))
+        assert (key, destination) in entries
 
     @pytest.mark.parametrize("service", SERVICES, ids=lambda path: path.name)
     def test_every_service_has_a_dockerfile(self, service: Path) -> None:

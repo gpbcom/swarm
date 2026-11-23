@@ -1,0 +1,25 @@
+[project]
+name = "swarm-storage"
+version = "0.1.0"
+description = "The shared PostgreSQL storage of Swarm services: pool, unit of work, row-level security and migrations."
+readme = "../../../README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "asyncpg>=0.30.0",
+    "sqlalchemy[asyncio]>=2.0.36",
+    "alembic>=1.14.0",
+    "pydantic>=2.14.3",
+    "swarm-lifecycle",
+    "swarm-models",
+]
+
+[tool.uv.sources]
+swarm-lifecycle = { workspace = true }
+swarm-models = { workspace = true }
+
+[tool.uv.build-backend]
+module-name = "swarm_storage"
+
+[build-system]
+requires = ["uv_build>=0.12.21,<0.13.0"]
+build-backend = "uv_build"

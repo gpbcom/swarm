@@ -1,0 +1,66 @@
+{
+  "components": {
+    "schemas": {
+      "Problem": {
+        "additionalProperties": false,
+        "description": "A problem document, as RFC 9457 defines it, answered as ``application/problem+json``.\n\nAttributes:\n    model_config (ConfigDict): Forbids unknown keys and freezes the document.\n    MEDIA_TYPE (ClassVar[str]): The media type of the document.\n    TYPE_FIELD (ClassVar[str]): The name of the ``type`` field.\n    TITLE_FIELD (ClassVar[str]): The name of the ``title`` field.\n    STATUS_FIELD (ClassVar[str]): The name of the ``status`` field.\n    DETAIL_FIELD (ClassVar[str]): The name of the ``detail`` field.\n    INSTANCE_FIELD (ClassVar[str]): The name of the ``instance`` field.\n    DEFAULT_TYPE (ClassVar[str]): The ``type`` of a problem with no more meaning than its status.\n    STATUS_MIN (ClassVar[int]): The lowest status of an error.\n    STATUS_MAX (ClassVar[int]): The highest status of an error.\n    BEFORE (ClassVar[Literal[\"before\"]]): The mode of the validators.\n    type (str): A URI reference that identifies the kind of problem.\n    title (str): A short, human-readable summary of the kind of problem.\n    status (int): The HTTP status of the answer.\n    detail (Optional[str]): A human-readable explanation of this occurrence.\n    instance (Optional[str]): A URI reference that identifies this occurrence.\n\nNotes:\n    - ``None`` for ``detail`` and ``instance`` means the member is left out of the document.\n    - A built problem never changes, so it can be shared between handlers.",
+        "properties": {
+          "detail": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "A human-readable explanation of this occurrence.",
+            "title": "Detail"
+          },
+          "instance": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "A URI reference that identifies this occurrence.",
+            "title": "Instance"
+          },
+          "status": {
+            "description": "The HTTP status of the answer.",
+            "title": "Status",
+            "type": "integer"
+          },
+          "title": {
+            "description": "A short, human-readable summary of the kind of problem.",
+            "title": "Title",
+            "type": "string"
+          },
+          "type": {
+            "default": "about:blank",
+            "description": "A URI reference that identifies the kind of problem.",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "status"
+        ],
+        "title": "Problem",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "Swarm gateway",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {}
+}

@@ -19,6 +19,8 @@ COPY packages/python/swarm-lifecycle/pyproject.toml packages/python/swarm-lifecy
 COPY packages/python/swarm-logging/pyproject.toml packages/python/swarm-logging/pyproject.toml
 COPY packages/python/swarm-models/pyproject.toml packages/python/swarm-models/pyproject.toml
 COPY packages/python/swarm-nats/pyproject.toml packages/python/swarm-nats/pyproject.toml
+COPY packages/python/swarm-storage/pyproject.toml packages/python/swarm-storage/pyproject.toml
+COPY packages/python/swarm-rest/pyproject.toml packages/python/swarm-rest/pyproject.toml
 
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev --no-editable --no-install-workspace --package swarm-gateway
@@ -33,7 +35,8 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 FROM python:3.12.8-slim-bookworm AS runtime
 
 ENV PATH="/opt/venv/bin:$PATH" \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    SWARM_GATEWAY_HOME=/app
 
 RUN groupadd --system --gid 10001 swarm \
     && useradd --system --uid 10001 --gid swarm --home-dir /app --shell /usr/sbin/nologin swarm \
@@ -41,8 +44,10 @@ RUN groupadd --system --gid 10001 swarm \
     && chown swarm:swarm /app
 
 COPY --from=build /opt/venv /opt/venv
+COPY --from=build --chown=swarm:swarm /workspace/services/gateway/conf /app/conf
+COPY --from=build --chown=swarm:swarm /workspace/services/gateway/migrations /app/migrations
 
 WORKDIR /app
 USER 10001:10001
 
-ENTRYPOINT ["swarm-gateway"]
+ENTRYPOINT ["swarm-gateway-serve"]
