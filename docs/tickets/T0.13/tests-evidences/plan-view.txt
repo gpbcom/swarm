@@ -1,0 +1,4 @@
+$ python3 .claude/scripts/tickets/plan.py check --ticket T0.13
+(cwd ., on the ticket's own files only)
+
+

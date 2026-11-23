@@ -7,6 +7,7 @@ members = [
     "swarm-core/safety",
     "swarm-models",
     "swarm-models-codegen",
+    "swarm-synthetic-drones",
 ]
 
 [workspace.package]

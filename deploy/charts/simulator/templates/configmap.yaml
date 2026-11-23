@@ -1,0 +1,28 @@
+{{- include "simulator.validate" . -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: simulator-config
+  labels:
+    app.kubernetes.io/name: simulator
+data:
+  app.yaml: |
+    operator_id: {{ .Values.operatorId | quote }}
+    nats:
+      servers:
+        {{- range .Values.nats.servers }}
+        - {{ . | quote }}
+        {{- end }}
+      credentials_path: /etc/simulator/nats/creds
+    responder:
+      subject: "op.{{ .Values.operatorId }}.mission.*.command"
+      queue_group: simulator
+      replicas: 3
+    registry:
+      squad_catalog_path: conf/catalogs/simulated_squad.yaml
+      command_mapping_path: conf/catalogs/command_mapping.yaml
+      simulated_hosts:
+        - synthetic-drones
+        - px4-sitl
+        - 127.0.0.1
+        - localhost

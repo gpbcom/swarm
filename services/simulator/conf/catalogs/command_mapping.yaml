@@ -1,0 +1,6 @@
+commands:
+  hold:
+    command_id: 193
+    param1: 0.0
+  return_home:
+    command_id: 20

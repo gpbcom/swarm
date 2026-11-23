@@ -1,0 +1,20 @@
+image:
+  repository: ghcr.io/gpbcom/swarm/simulator
+  tag: ""
+  pullPolicy: IfNotPresent
+px4Sitl:
+  image:
+    repository: px4io/px4-sitl
+    tag: ""
+  port: 18570
+syntheticDrones:
+  count: 10
+  basePort: 14600
+  speedMS: 10
+  tickMs: 50
+operatorId: ""
+nats:
+  servers:
+    - nats://nats:4222
+  credentialsSecretName: simulator-nats-credentials
+resources: {}
