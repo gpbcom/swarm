@@ -43,6 +43,7 @@ The technical pages, features, use cases and business rules of [TICKET.md](TICKE
 | 2026-11-20 15:02 | Review 1 (full) | reviewer | ✅ 0 blocking, 8 follow-ups |
 | 2026-11-20 15:02 | Waiting for the person's code review: nothing is committed or pushed until PLAN.md says **Push:** 🟢 Approved (TKT-18) | - | 👀 |
 | 2026-11-20 15:33 | Code reviewed by the person, push approved (TKT-18) | person | 🟢 Approved |
+| 2026-11-23 16:10 | Pull request #388: every image job failed at `aquasecurity/setup-trivy@v0.2.3`, a tag deleted upstream, as is Trivy v0.67.2. On the person's decision, images.yml pins setup-trivy to the commit of v0.3.1 (81e5143) and installs Trivy v0.76.2 | person | 🟢 Approved |
 
 ## 🔜 Follow-ups
 
