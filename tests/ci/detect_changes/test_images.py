@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+# Standard library imports
 from pathlib import Path
 from typing import ClassVar, List
 
+# Third-party imports
 import pytest
 
+# First-party imports
 from tests.ci.detect_changes.helpers import ALL_IMAGES, IMAGES_KEY, SERVICES_KEY, outputs, run_detector, write_repo
 
 

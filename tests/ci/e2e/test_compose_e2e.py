@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+# Standard library imports
 import re
 from pathlib import Path
 from typing import ClassVar, Dict, List, cast
 
+# Third-party imports
 import yaml
 from pydantic import JsonValue
 
