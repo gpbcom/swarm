@@ -79,6 +79,7 @@ The technical pages, features, use cases and business rules of [TICKET.md](TICKE
 | 2026-11-23 14:12 | Ten import-only changes to files committed by T0.10 and T0.14 (tests/ci, tests/conventions/mono_repo, tests/deploy, tests/harness/write_specs) taken out of the ticket's files, to be committed on their own after the develop merge (L-34) | harness | ⚠️ |
 | 2026-11-23 15:05 | Code reviewed and push approved by the person (TKT-18), to be pushed right after T0.13, which shares pyproject.toml and uv.lock | person | 🟢 Approved |
 | 2026-11-23 16:30 | Pull request #388: Trivy failed the gateway, fleet, missions and simulator images on 52 fixable HIGH and CRITICAL findings, all in the Debian 12.9 packages of python:3.12.8-slim-bookworm. On the person's decision, every Dockerfile moves to python:3.12.16-slim-bookworm (Debian 12.15), which Trivy scans with no HIGH or CRITICAL finding (same settings as images.yml) | person | 🟢 Approved |
+| 2026-11-23 17:25 | Pull request #388: images / e2e hung 44 minutes until the job's 45-minute limit cancelled it. The test "the gateway runs and exits cleanly" ran the image's entry point, which T0.12 changed from the greeting to swarm-gateway-serve, a server that never exits, through a spawnSync without a timeout. On the person's decision, the test runs the gateway's command line swarm-gateway (the greeting, exit 0) with --entrypoint, and every docker compose call times out after 120 s; eslint, tsc and the package's unit tests pass | person | 🟢 Approved |
 
 ## 🔜 Follow-ups
 

@@ -6,6 +6,10 @@ import { expect, test } from "@playwright/test";
 
 const REPOSITORY_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..", "..");
 const COMPOSE_FILE = "compose.e2e.yaml";
+// A container that never exits fails its test instead of holding the job until GitHub cancels it.
+const COMPOSE_TIMEOUT_MS = 120_000;
+// The gateway's command line: it prints the greeting and exits, where the image's entry point serves until stopped.
+const GATEWAY_COMMAND = "swarm-gateway";
 
 interface ComposeService {
   image?: string;
@@ -20,6 +24,7 @@ function compose(args: string[]): { status: number | null; stdout: string; stder
   const result = spawnSync("docker", ["compose", "-f", COMPOSE_FILE, ...args], {
     cwd: REPOSITORY_ROOT,
     encoding: "utf8",
+    timeout: COMPOSE_TIMEOUT_MS,
   });
   return { status: result.status, stdout: result.stdout, stderr: result.stderr };
 }
@@ -36,8 +41,8 @@ test.describe("the real images", () => {
     }
   });
 
-  test("start: the gateway runs and exits cleanly", () => {
-    const result = compose(["run", "--rm", "--no-deps", "gateway"]);
+  test("start: the gateway's command line runs and exits cleanly", () => {
+    const result = compose(["run", "--rm", "--no-deps", "--entrypoint", GATEWAY_COMMAND, "gateway"]);
     expect(result.status, result.stderr).toBe(0);
   });
 });
