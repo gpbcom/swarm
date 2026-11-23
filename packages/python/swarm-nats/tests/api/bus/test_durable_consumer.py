@@ -1,13 +1,16 @@
 from __future__ import annotations
 
+# Standard library imports
 import asyncio
 from datetime import UTC, datetime
 from typing import ClassVar, Dict, List, Set
 from uuid import UUID
 
+# Third-party imports
 from nats.aio.client import Client
 from nats.js.api import StreamConfig
 
+# First-party imports
 from swarm_lifecycle.models.enums import RunnableStatus
 from swarm_models.models.events.actor import Actor
 from swarm_models.models.events.enums import ActorKind

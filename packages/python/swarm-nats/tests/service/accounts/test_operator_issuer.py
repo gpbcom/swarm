@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+# Standard library imports
 from typing import ClassVar, Dict, cast
 
+# Third-party imports
 import pytest
 from pydantic import JsonValue
 
+# First-party imports
 from swarm_nats.models.accounts.exceptions import SEIssuedOperatorInvalidName
 from swarm_nats.models.accounts.issued_operator import IssuedOperator
 from swarm_nats.models.enums import NatsClaimType

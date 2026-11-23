@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+# Standard library imports
 import re
 from pathlib import Path
 from typing import ClassVar, List
 
+# Third-party imports
 import pytest
 
+# First-party imports
 from tests.conventions.helpers import run_convention_tests
 from tests.conventions.rules.convention_rules import ConventionRules
 from tests.conventions.rules.service_tree import ServiceTree
@@ -23,9 +26,10 @@ class TestBrokenService:
         "pydantic_models_in_models",
         "no_module_docstring",
         "no_logger_argument",
+        "import_sections",
     ]
 
-    def test_the_rules_are_the_nine_of_agent_md(self) -> None:
+    def test_the_rules_are_the_ten_of_agent_md(self) -> None:
         assert [rule.NAME for rule in ConventionRules.all()] == self.NAMES
 
     @pytest.mark.parametrize(
@@ -40,6 +44,7 @@ class TestBrokenService:
             ("pydantic_models_in_models", "customer.py"),
             ("no_module_docstring", "documented.py"),
             ("no_logger_argument", "handing.py"),
+            ("import_sections", "unsectioned.py"),
         ],
     )
     def test_each_rule_reports_exactly_one_violation(self, tmp_path: Path, name: str, expected: str) -> None:
@@ -55,7 +60,7 @@ class TestBrokenService:
         result = run_convention_tests(services_root)
         output = result.stdout + result.stderr
         assert result.returncode != 0
-        assert re.search(r"\b9 failed\b", output)
+        assert re.search(r"\b10 failed\b", output)
         assert not re.search(r"\b[1-9]\d* passed\b", output)
         for name in self.NAMES:
             assert len(re.findall(rf"FAILED .*\[broken-{name}\]", output)) == 1

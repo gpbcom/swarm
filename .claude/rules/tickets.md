@@ -195,7 +195,7 @@ tree.
 | planner, reviewer | opus | high | Errors here cost the most: a bad plan or a missed defect wastes whole waves |
 | implementer, test-writer, frontend-implementer, integrator, ticket-writer, explainer | sonnet | medium | Most coding work, at a fraction of opus's cost; explaining the work and its trade-offs needs to read code, which haiku does poorly |
 | rust-implementer | sonnet | high | Hot path with strict budgets |
-| mockup-writer, doc-writer, scribe, verifier | haiku | low | Mechanical work: documents, screens, running checks |
+| mockup-writer, doc-writer, scribe, verifier, runner | haiku | low | Mechanical work: documents, screens, running checks; the runner runs one given command and reports its exit code |
 
 - Workers of one wave share the same tools and folder, so their prompt prefix is cached across the wave.
 - Agents read only what their brief names, and report in a few lines (the schema of the workflow).
@@ -389,7 +389,8 @@ the work in progress. A private repository of a free account has no branch prote
     tickets of the same checkout from changing the same files;
   - a field ticket (the fixes of a campaign) starts once its campaign has flown.
 
-  `/ticket-run <ID> --force` starts anyway, on the person's decision, and logs the problems in `PROGRESS.md`.
+  `/ticket-run <ID> --force` starts anyway, on the person's decision, and logs the problems in `PROGRESS.md`. The verdict is the
+  exit code of `tickets.py check`, reported unchanged by the `runner` agent: no agent judges the start rule (L-31).
 - `python3 .claude/scripts/tickets/tickets.py list` shows the open tickets and the files each owns; `prune` removes the
   worktrees of tickets started before this rule once they are merged, and puts the main checkout back on `develop`
   once no ticket is open and `feature/tickets` is merged. VS Code's Source Control shows the uncommitted work of every

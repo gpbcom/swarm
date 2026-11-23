@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+# Standard library imports
 from itertools import product
 from pathlib import Path
 from typing import ClassVar, Dict
 
+# Third-party imports
 import pytest
 
+# First-party imports
 from tests.conventions.helpers import packages_root, write_files
 from tests.conventions.rules.convention_rule import ConventionRule
 from tests.conventions.rules.convention_rules import ConventionRules

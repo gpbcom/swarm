@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+# Standard library imports
 from typing import Dict
 from uuid import UUID
 
+# Third-party imports
 import pytest
 from pydantic import JsonValue, ValidationError
 
+# First-party imports
 from swarm_models.models.operators.exceptions import (
     SEInvalidOperatorException,
     SEOperatorInvalidId,

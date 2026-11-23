@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+# Standard library imports
 from typing import ClassVar, Dict, List, Union
 from uuid import UUID
 
+# Third-party imports
 import pytest
 from pydantic import JsonValue, ValidationError
 
+# First-party imports
 from swarm_models.models.telemetry.enums import DroneState
 from swarm_models.models.telemetry.exceptions import (
     SEInvalidTelemetryFrameException,

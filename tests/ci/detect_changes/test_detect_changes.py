@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+# Standard library imports
 import json
 from pathlib import Path
 from typing import Dict, List
 
+# Third-party imports
 import pytest
 
+# First-party imports
 from tests.ci.detect_changes.helpers import (
     IMAGES_KEY,
     REPOSITORY_KEY,

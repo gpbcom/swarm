@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+# Standard library imports
 import json
 import logging
 import sys
 from datetime import datetime, timedelta
 from typing import Dict
 
+# First-party imports
 from swarm_logging.formatters.json_formatter import JsonFormatter
 
 

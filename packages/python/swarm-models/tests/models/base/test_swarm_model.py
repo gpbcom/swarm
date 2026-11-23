@@ -1,12 +1,15 @@
 from __future__ import annotations
 
+# Standard library imports
 from datetime import UTC, datetime, timedelta, timezone
 from typing import ClassVar, List, Tuple
 from uuid import UUID
 
+# Third-party imports
 import pytest
 from pydantic import BaseModel
 
+# First-party imports
 from swarm_models.models.base.swarm_model import SwarmModel
 
 

@@ -1,13 +1,16 @@
 from __future__ import annotations
 
+# Standard library imports
 import asyncio
 from datetime import UTC, datetime, timedelta
 from typing import ClassVar, Dict, List, Optional
 
+# Third-party imports
 import pytest
 from nats.aio.client import Client
 from nats.aio.msg import Msg
 
+# First-party imports
 from swarm_nats.clients.nats_requester import NatsRequester
 from swarm_nats.models.bus.exceptions import (
     SENatsInvalidDeadlineError,

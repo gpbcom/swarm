@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+# Standard library imports
 import zipfile
 from pathlib import Path
 from typing import ClassVar, Tuple
 
+# Third-party imports
 import pytest
 
+# First-party imports
 from tests.rust.swarm_core.helpers import build_wheel, install, make_venv, run_python
 
 

@@ -1,13 +1,16 @@
 from __future__ import annotations
 
+# Standard library imports
 import logging
 import logging.handlers
 from importlib.metadata import entry_points
 from pathlib import Path
 from typing import Iterator
 
+# Third-party imports
 import pytest
 
+# First-party imports
 from gateway.api.cli.main import main
 
 

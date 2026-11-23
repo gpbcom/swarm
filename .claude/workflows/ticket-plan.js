@@ -32,6 +32,23 @@ const CHECK = {
   properties: { passed: { type: 'boolean' }, problems: { type: 'array', items: { type: 'string' } } },
   required: ['passed', 'problems'],
 }
+// L-31: a step that runs one deterministic command goes to the runner agent, which only runs that command and reports
+// its exit code and output. The workflow decides from them, never from an agent's reading: the verifier, whose own job
+// is running checks.py, once returned the ticket's test failures as a refusal of the start rule.
+const RUN = {
+  type: 'object',
+  properties: { exit_code: { type: 'integer' }, output: { type: 'array', items: { type: 'string' } } },
+  required: ['exit_code', 'output'],
+}
+async function runExactly(prefix, command, expect, opts) {
+  const ran = await agent(
+    `${prefix}Run exactly this one command, and nothing else: ${command}\nReport its exit code and every line it printed.`,
+    { agentType: 'runner', schema: RUN, ...opts },
+  )
+  if (!ran) return null
+  const passed = ran.exit_code === expect.exit && (!expect.quiet || ran.output.length === 0)
+  return { passed, problems: ran.output, exit_code: ran.exit_code }
+}
 
 const WRITE_SCHEMA = {
   type: 'object',
@@ -110,10 +127,8 @@ function computeWaves(tasks) {
 phase('Ticket')
 // TKT-23: a ticket already done (merged, or its issue closed on GitHub) or finished (its pull request open) is never
 // planned again: tickets.py holds the one definition of done.
-const notDone = await agent(
-  `Run exactly python3 .claude/scripts/tickets/tickets.py done --ticket ${ID} and report. passed is true only if it exits 1 ` +
-  `and prints nothing (the ticket still needs work); problems lists every line it prints.`,
-  { agentType: 'verifier', schema: CHECK, label: `done check ${ID}` },
+const notDone = await runExactly('', `python3 .claude/scripts/tickets/tickets.py done --ticket ${ID}`, { exit: 1, quiet: true },
+  { label: `done check ${ID}` },
 )
 if (!notDone || !notDone.passed) {
   return { ticket: ID, stopped: (notDone && notDone.problems.join(' ')) || 'tickets.py done did not report', next: 'Nothing to plan.' }
@@ -134,10 +149,8 @@ if (!ticket.specs.length) {
 log(`TICKET.md refers to ${ticket.specs.length} specification page(s)`)
 
 phase('Check')
-const checkTicket = () => agent(
-  `From the repository root, run exactly: python3 .claude/skills/ticket/scripts/check_ticket.py ${ID}. ` +
-  `Return passed (true when it exits 0 and prints nothing) and, in problems, every line it printed.`,
-  { agentType: 'verifier', schema: CHECK, label: `check TICKET.md ${ID}` },
+const checkTicket = () => runExactly('From the repository root: ', `python3 .claude/skills/ticket/scripts/check_ticket.py ${ID}`,
+  { exit: 0, quiet: true }, { label: `check TICKET.md ${ID}` },
 )
 let ticketCheck = await checkTicket()
 if (!ticketCheck || !ticketCheck.passed) {
@@ -188,10 +201,8 @@ const written = await agent(
 const problems = (written && written.problems) || ['the scribe returned no result']
 if (problems.length) log(`PLAN.md, PROGRESS.md or TICKET.md fails its checks: ${problems.join(' | ')}`)
 
-const planVerdict = await agent(
-  `From the repository root, run exactly: python3 .claude/skills/ticket/scripts/check_plan.py ${ID}. ` +
-  `Return passed (true when it exits 0 and prints nothing) and, in problems, every line it printed.`,
-  { agentType: 'verifier', schema: CHECK, label: `check PLAN.md ${ID}` },
+const planVerdict = await runExactly('From the repository root: ', `python3 .claude/skills/ticket/scripts/check_plan.py ${ID}`,
+  { exit: 0, quiet: true }, { label: `check PLAN.md ${ID}` },
 )
 let planCheck = 'passed'
 if (!planVerdict || !planVerdict.passed) {

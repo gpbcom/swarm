@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+# Standard library imports
 import copy
 import json
 import subprocess
@@ -7,6 +8,7 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Optional
 
+# Third-party imports
 from pydantic import JsonValue
 
 GIT_IDENTITY = ["-c", "user.name=Test", "-c", "user.email=test@example.com"]

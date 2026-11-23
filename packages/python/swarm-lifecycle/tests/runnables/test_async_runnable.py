@@ -1,13 +1,16 @@
 from __future__ import annotations
 
+# Standard library imports
 import asyncio
 import logging
 from logging import Logger, getLogger
 from typing import Awaitable, Callable, Dict, List
 
+# Third-party imports
 import pytest
 from lifecycle_recording_async_runnable import RecordingAsyncRunnable
 
+# First-party imports
 from swarm_lifecycle.models.enums import RunnableStatus
 from swarm_lifecycle.models.exceptions import SEAsyncRunnableInvalidStatusIntervalError
 from swarm_lifecycle.runnables.async_runnable import AsyncRunnable

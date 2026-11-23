@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+# Third-party imports
 import pytest
 
+# First-party imports
 from gateway.api.cli.commands.command import Command
 from gateway.api.cli.commands.greeting_command import GreetingCommand
 from swarm_lifecycle.runnables.runnable import Runnable

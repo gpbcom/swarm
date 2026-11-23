@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+# Standard library imports
 import json
 from pathlib import Path
 from typing import List
 
+# Third-party imports
 import pytest
 
+# First-party imports
 from tests.harness.tickets.helpers import (
     APPROVED,
     AWAITING,

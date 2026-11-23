@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+# Standard library imports
 from typing import ClassVar, Dict
 
+# Third-party imports
 import pytest
 
+# First-party imports
 from tests.harness.wiring.helpers import agent_body, agent_files, agent_frontmatter, agent_path, read_text
 
 
@@ -110,3 +113,10 @@ class TestAgentDefinitions:
         body = agent_body(agent_path("verifier"))
         assert "check_ticket.py" in body
         assert "check_plan.py" in body
+
+    def test_the_runner_runs_one_command_and_only_has_bash(self) -> None:
+        fields = agent_frontmatter(agent_path("runner"))
+        assert fields.get("tools") == "Bash"
+        body = agent_body(agent_path("runner"))
+        assert "exactly one command" in body
+        assert "exit_code" in body

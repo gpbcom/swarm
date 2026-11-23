@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+# Standard library imports
 from typing import List
 
+# Third-party imports
 import pytest
 
+# First-party imports
 from swarm_models.models.telemetry.enums import DroneState
 
 

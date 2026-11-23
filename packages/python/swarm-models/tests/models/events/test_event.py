@@ -1,12 +1,15 @@
 from __future__ import annotations
 
+# Standard library imports
 from datetime import UTC, datetime, timedelta
 from typing import ClassVar, Dict
 from uuid import UUID
 
+# Third-party imports
 import pytest
 from pydantic import JsonValue, ValidationError
 
+# First-party imports
 from swarm_models.models.events.actor import Actor
 from swarm_models.models.events.enums import ActorKind
 from swarm_models.models.events.event import Event

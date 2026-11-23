@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+# Standard library imports
 import shutil
 from pathlib import Path
 from typing import ClassVar, Dict, List
 
+# Third-party imports
 import pytest
 
+# First-party imports
 from tests.ci.detect_changes.helpers import (
     ALL_IMAGES,
     ALL_SERVICES,
