@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 
 import { expect, test } from "@playwright/test";
 
-const REPOSITORY_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..", "..");
+const REPOSITORY_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 const COMPOSE_FILE = "infra/compose/e2e.yaml";
 // A container that never exits fails its test instead of holding the job until GitHub cancels it.
 const COMPOSE_TIMEOUT_MS = 120_000;
