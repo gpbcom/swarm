@@ -23,7 +23,7 @@ Usage, from the repository root, on the ticket branch:
 Which checks apply is decided here, never by a model (TKT-6): a check whose target does not exist yet (a Cargo
 workspace with no member crate, no TypeScript workspace package, no Python source for mypy) is reported under
 ``not_applicable`` with its reason. Only project code is checked with the AGENT.md tools (``services/``, ``packages/``,
-``frontends/``, ``tests/``, ``deploy/``); ``.claude/`` and ``docs/`` are covered by ``specs.py check``, which always
+``frontends/``, ``tests/``, ``infra/``); ``.claude/`` and ``docs/`` are covered by ``specs.py check``, which always
 runs, with ``ticket_refs.py check`` (TICKET.md, PLAN.md and PROGRESS.md refer to the specification, TKT-2) and
 ``plan.py check`` (the readable view of PLAN.md is up to date). Each check's output is saved to ``docs/tickets/<ID>/tests-evidences/<check>.txt``. The last line printed is
 the JSON verdict: ``{"passed": bool, "failures": [{"check", "file", "detail", "environment"}], "not_applicable": [...], "passed_checks": [...]}``.
@@ -36,7 +36,7 @@ ticket's own changes (TKT-6), removed afterwards; the evidence is still written 
 """
 
 ROOT = Path(__file__).resolve().parents[3]
-PROJECT_PREFIXES = ("services/", "packages/", "frontends/", "tests/", "deploy/")
+PROJECT_PREFIXES = ("services/", "packages/", "frontends/", "tests/", "infra/")
 TIMEOUT_S = 900
 # A failure whose output holds one of these is caused by the environment (a missing tool or module), not by the
 # ticket's code: fixer agents cannot repair it, so the run stops and the person fixes the environment (TKT-6).
@@ -381,11 +381,11 @@ def typescript_checks(checks: Checks, changed: List[str]) -> None:
 
 
 def terraform_checks(checks: Checks, changed: List[str]) -> None:
-    tf = [f for f in changed if f.startswith("deploy/terraform/") and f.endswith((".tf", ".tftest.hcl"))]
+    tf = [f for f in changed if f.startswith("infra/terraform/") and f.endswith((".tf", ".tftest.hcl"))]
     if not tf:
         checks.skip("terraform", "no Terraform change")
         return
-    checks.check("terraform fmt", ["terraform", "fmt", "-check", "-recursive", "deploy/terraform"], "deploy/terraform")
+    checks.check("terraform fmt", ["terraform", "fmt", "-check", "-recursive", "infra/terraform"], "infra/terraform")
     folders = sorted({str(Path(f).parent) if not f.endswith(".tftest.hcl") else str(Path(f).parent.parent) for f in tf})
     for folder in folders:
         path = checks.root / folder

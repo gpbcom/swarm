@@ -184,7 +184,7 @@ pnpm turbo run build
 ### Provision a cell
 
 Terraform creates a cell's machines, network and k3s cluster. Follow
-[deploy/terraform/README.md](deploy/terraform/README.md).
+[infra/terraform/README.md](infra/terraform/README.md).
 
 ## 🎫 Working on tickets
 
@@ -285,7 +285,7 @@ Nobody commits or merges by hand. The repository needs, once, the secret `RELEAS
 | [services/](services/) | The backend services, one folder and one Docker image each, starting with the [gateway](services/gateway/) |
 | [packages/](packages/) | Shared code: `python/` (uv), `rust/` (Cargo and PyO3) and `ts/` (pnpm) |
 | [frontends/](frontends/) | The front ends, one folder and one image each, with their Playwright tests, and [desktop/](frontends/desktop/), the Tauri 2 shell that wraps Ground control and Mission studio |
-| [deploy/terraform/](deploy/terraform/README.md) | One module per building block, one root per cell |
+| [infra/terraform/](infra/terraform/README.md) | One module per building block, one root per cell |
 | [tests/](tests/) | The convention tests, run against every service and every Python package |
 | [docs/](docs/) | The specifications, the research and the tickets |
 

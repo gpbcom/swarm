@@ -221,7 +221,7 @@ async function integrate(results, label) {
 }
 
 // Fix loop: send each failure or finding to every task that owns one of its files, each fixer only its own problems
-const ROOTS = ['services/', 'packages/', 'frontends/', 'tests/', 'deploy/', 'docs/', '.claude/', '.github/']
+const ROOTS = ['services/', 'packages/', 'frontends/', 'tests/', 'infra/', 'docs/', '.claude/', '.github/']
 function normalise(file) {
   let f = String(file || '').trim().replace(/:\d+(-\d+)?$/, '')
   for (const r of ROOTS) {

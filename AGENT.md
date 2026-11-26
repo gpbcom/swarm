@@ -111,10 +111,10 @@ pnpm --filter ./packages/ts/api-client run generate
   - Trivy fails the build on a fixable HIGH or CRITICAL vulnerability, then writes the CycloneDX SBOM, kept as an artifact;
   - the run tag is pushed to `ghcr.io/gpbcom/swarm/<name>`;
   - the image is signed with keyless cosign, its SBOM is attached as an attestation, and the signature is verified;
-  - Playwright runs through `compose.e2e.yaml` against those images, and the HTML report is uploaded when a test fails;
+  - Playwright runs through `infra/compose/e2e.yaml` against those images, and the HTML report is uploaded when a test fails;
   - the commit SHA tag is added only on pushes to `develop` and `master`, to the same digest, and its signature is verified.
 - All of them must pass.
-- `.github/workflows/terraform.yml` still checks `deploy/terraform/` on its own. `.github/workflows/dev-cell.yml` creates
+- `.github/workflows/terraform.yml` still checks `infra/terraform/` on its own. `.github/workflows/dev-cell.yml` creates
   a branch's dev cell on demand and destroys it when the branch is deleted.
 - Run tests one file or one folder at a time.
 - Format only the files you edited, never a whole folder.
@@ -145,9 +145,9 @@ Swarm is meant to become a mono-repo of backend and front-end micro-services, ea
 `src/` has moved to `services/gateway` (ticket T0.01), so the `services/<service>/src/<service>/` reading of `src/`
 applies everywhere. The tests in `tests/conventions/mono_repo/` enforce part of this section: the uv workspace, the
 Cargo and pnpm workspaces, and the Terraform layout. The CI/CD change detection and check workflows are tested by
-`tests/ci/`. The Dockerfiles are tested by `tests/deploy/images/test_service_images.py`, and `compose.e2e.yaml` by
+`tests/ci/`. The Dockerfiles are tested by `tests/infra/images/test_service_images.py`, and `infra/compose/e2e.yaml` by
 `tests/ci/e2e/`. `tests/conventions/mono_repo/test_frontend_workspace.py` and `test_desktop_shell.py` check the front-end
-workspace layout and the desktop shell, and the Docker rules of the front ends are not tested yet. `tests/deploy/` checks the charts, the dev environment, the PostgreSQL image and the dev-cell script,
+workspace layout and the desktop shell, and the Docker rules of the front ends are not tested yet. `tests/infra/` checks the charts, the dev environment, the PostgreSQL image and the dev-cell script,
 and `tests/ci/dev_cell/` checks the dev-cell workflow.
 
 | Path | Holds |
@@ -156,13 +156,13 @@ and `tests/ci/dev_cell/` checks the dev-cell workflow.
 | `services/<service>/` | One backend service: its `Dockerfile`, `pyproject.toml`, `conf/`, `src/<service>/`, `tests/` |
 | `frontends/<frontend>/` | One front end: its `Dockerfile`, `src/`, and its Playwright tests in `e2e/` |
 | `packages/` | Shared code: `python/` (lifecycle base classes, logging, models), `rust/` (PyO3 crates of the hot path), `ts/` (front-end packages) |
-| `deploy/terraform/` | The Terraform modules per provider and building block, and one root per cell |
-| `deploy/charts/` | The Helm charts, one per building block of a cell, and the `cell` umbrella chart |
-| `deploy/environments/` | The desired state of each environment that Argo CD applies |
-| `deploy/images/` | The images that are not a service or a front end, such as the PostgreSQL image |
-| `deploy/scripts/` | The scripts that request and close a branch's dev cell |
+| `infra/terraform/` | The Terraform modules per provider and building block, and one root per cell |
+| `infra/charts/` | The Helm charts, one per building block of a cell, and the `cell` umbrella chart |
+| `infra/environments/` | The desired state of each environment that Argo CD applies |
+| `infra/images/` | The images that are not a service or a front end, such as the PostgreSQL image |
+| `infra/scripts/` | The scripts that request and close a branch's dev cell |
 | `tests/conventions/` | The [rules a test enforces](#rules-a-test-enforces), run against every service |
-| `compose.e2e.yaml` | Starts the real images for Playwright |
+| `infra/compose/e2e.yaml` | Starts the real images for Playwright |
 | `.github/workflows/` | The CI/CD pipeline |
 | `.github/scripts/` | The scripts the pipeline runs, such as change detection |
 
@@ -192,7 +192,7 @@ the Squad of `conf/catalogs/simulated_squad.yaml` on a square route. `swarm-simu
 and refuses to start without simulated credentials. Its adapter registry holds only simulated Drones, and its Flight log,
 in SQLite, is marked simulated ([📏 BR-014](docs/specs/functional/business-rules/BR-014-simulation-isolation.md)).
 Its acceptance tests are in `tests/simulator/`. They need cargo and `nats-server`, and for PX4, docker with the image built
-by `docker build -f deploy/images/px4-sitl/Dockerfile -t swarm-px4-sitl:local .`. They skip without them.
+by `docker build -f infra/images/px4-sitl/Dockerfile -t swarm-px4-sitl:local .`. They skip without them.
 
 The packages of `packages/python/` are `swarm-lifecycle` (`swarm_lifecycle`), with Runnable, AsyncRunnable and the
 abstract factories; `swarm-logging` (`swarm_logging`), with the logging configuration; and `swarm-catalog`
@@ -263,12 +263,12 @@ with a Tauri desktop shell, images go to GHCR, and Argo CD deploys them; see `do
 - The build context is the repository root, because the shared `uv.lock` is there.
 - Images are pushed to `ghcr.io/gpbcom/swarm/<name>`, and each one is signed with keyless cosign.
 - The dev cell refuses an unsigned `ghcr.io/gpbcom/swarm/**` image: the Sigstore policy-controller admits only images
-  signed by the `images.yml` workflow, and `deploy/scripts/dev-cell.sh up` checks that it refuses an unsigned image.
+  signed by the `images.yml` workflow, and `infra/scripts/dev-cell.sh up` checks that it refuses an unsigned image.
 
 **Front-end tests**
 
 - Front-end tests use Playwright, and live in `frontends/<frontend>/e2e/`.
-- They run against the real images started by `compose.e2e.yaml`, never a development server, so that they test what
+- They run against the real images started by `infra/compose/e2e.yaml`, never a development server, so that they test what
   ships.
 - The shared Playwright configuration is `@swarm/e2e` in `packages/ts/e2e`. It refuses a `webServer`, and it needs
   `SWARM_IMAGE_TAG`, the tag of the images to test.

@@ -7,7 +7,7 @@ on:
       - master
       - "release/**"
     paths:
-      - "deploy/terraform/**"
+      - "infra/terraform/**"
       - ".github/workflows/terraform.yml"
   push:
     branches:
@@ -16,7 +16,7 @@ on:
       - "release/**"
       - "hotfix/**"
     paths:
-      - "deploy/terraform/**"
+      - "infra/terraform/**"
       - ".github/workflows/terraform.yml"
 
 permissions:
@@ -29,17 +29,17 @@ jobs:
       fail-fast: false
       matrix:
         folder:
-          - deploy/terraform/modules/self-hosted/machines
-          - deploy/terraform/modules/self-hosted/network
-          - deploy/terraform/modules/self-hosted/k3s
-          - deploy/terraform/modules/self-hosted/object-storage
-          - deploy/terraform/modules/self-hosted/dns
-          - deploy/terraform/modules/self-hosted/argocd
-          - deploy/terraform/modules/self-hosted/vault
-          - deploy/terraform/modules/self-hosted/cell
-          - deploy/terraform/modules/self-hosted/cell-application
-          - deploy/terraform/cells/dev
-          - deploy/terraform/cells/dev-branch
+          - infra/terraform/modules/self-hosted/machines
+          - infra/terraform/modules/self-hosted/network
+          - infra/terraform/modules/self-hosted/k3s
+          - infra/terraform/modules/self-hosted/object-storage
+          - infra/terraform/modules/self-hosted/dns
+          - infra/terraform/modules/self-hosted/argocd
+          - infra/terraform/modules/self-hosted/vault
+          - infra/terraform/modules/self-hosted/cell
+          - infra/terraform/modules/self-hosted/cell-application
+          - infra/terraform/cells/dev
+          - infra/terraform/cells/dev-branch
     steps:
       - uses: actions/checkout@v7
       - uses: hashicorp/setup-terraform@v4
@@ -47,7 +47,7 @@ jobs:
           terraform_version: ">= 1.10"
           terraform_wrapper: false
       - name: Check the format
-        run: terraform fmt -check -recursive deploy/terraform
+        run: terraform fmt -check -recursive infra/terraform
       - name: Initialise
         working-directory: ${{ matrix.folder }}
         run: terraform init -backend=false -input=false
@@ -64,7 +64,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: deploy/terraform/cells/dev
+        working-directory: infra/terraform/cells/dev
     env:
       TF_BACKEND_CONFIG: ${{ secrets.TF_BACKEND_CONFIG }}
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}

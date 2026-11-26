@@ -7,6 +7,6 @@
 *.env
 logs
 .claude
-deploy/terraform/**/.terraform
+infra/terraform/**/.terraform
 dist
 playwright-report

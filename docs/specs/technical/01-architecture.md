@@ -48,7 +48,7 @@ swarm/
 │   ├── python/                shared Python: models, lifecycle, logging, NATS client
 │   ├── rust/                  swarm-core crates (safety, planner, mavlink) with PyO3
 │   └── ts/                    shared TypeScript: ui, live, tokens, i18n, api-client
-├── deploy/                    Helm charts, Argo CD apps, k3s bundle, edge appliance
+├── infra/                     Helm charts, Argo CD apps, k3s bundle, edge appliance
 ├── tests/                     conventions, load (k6, simulated fleets), chaos
 └── docs/                      specifications and research
 ```

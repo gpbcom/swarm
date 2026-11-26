@@ -12,7 +12,7 @@ from pydantic import JsonValue
 
 class TestComposeE2e:
     ROOT: ClassVar[Path] = Path(__file__).resolve().parents[3]
-    COMPOSE: ClassVar[str] = "compose.e2e.yaml"
+    COMPOSE: ClassVar[str] = "infra/compose/e2e.yaml"
     ENCODING: ClassVar[str] = "utf-8"
     SERVICES_KEY: ClassVar[str] = "services"
     BUILD_KEY: ClassVar[str] = "build"

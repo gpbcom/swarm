@@ -31,7 +31,7 @@ from swarm_nats.clients.nats_requester import NatsRequester
 from swarm_nats.models.bus.exceptions import SENatsNoResponderError, SENatsRequestDeadlineExceededError
 from swarm_nats.models.config.nats_client_config import NatsClientConfig
 from swarm_nats.models.subjects.operator_subjects import OperatorSubjects
-from tests.deploy.nats.helpers import connz_users
+from tests.infra.nats.helpers import connz_users
 
 Cell = Tuple[str, int, Path, Path]
 Served = Tuple[subprocess.Popen[bytes], str, Path]

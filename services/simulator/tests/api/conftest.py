@@ -14,8 +14,8 @@ import pytest
 from services.simulator.tests.helpers import OPERATOR_ID
 from simulator.models.registry.registered_drone import RegisteredDrone
 from swarm_nats.models.enums import CredentialKind
-from tests.deploy.nats.helpers import free_port, issuers, operator_mode_config, write_creds
-from tests.deploy.nats.nats_server_process import NatsServerProcess
+from tests.infra.nats.helpers import free_port, issuers, operator_mode_config, write_creds
+from tests.infra.nats.nats_server_process import NatsServerProcess
 
 Cell = Tuple[str, int, Path, Path]
 

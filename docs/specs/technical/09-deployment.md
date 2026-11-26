@@ -37,15 +37,15 @@
 ## <a id="iac"></a>🧰 Infrastructure as code
 
 - **Terraform** (decision T43) provisions every cell and the global layer: Kubernetes clusters (OVHcloud Managed Kubernetes, Scaleway Kapsule, k3s on self-hosted machines), node pools including GPU, networks, load balancers, object storage buckets, DNS, and the vault.
-- One Terraform module per building block in `deploy/terraform/modules/`, one root per cell in `deploy/terraform/cells/<cell>/`; state kept remotely in the object storage of the global layer, with locking.
+- One Terraform module per building block in `infra/terraform/modules/`, one root per cell in `infra/terraform/cells/<cell>/`; state kept remotely in the object storage of the global layer, with locking.
 - Terraform creates the empty cell; Helm and Argo CD then deploy Swarm on it. A new cell is a new root and a pull request.
-- `terraform plan` runs in CI on every change under `deploy/terraform/`; `apply` is manual, after review.
+- `terraform plan` runs in CI on every change under `infra/terraform/`; `apply` is manual, after review.
 
 ## <a id="delivery"></a>🚢 Delivery
 
-- **Helm charts** per service in `deploy/charts`, one umbrella chart per cell; values per provider and environment.
+- **Helm charts** per service in `infra/charts`, one umbrella chart per cell; values per provider and environment.
 - **KEDA** is installed in every cell (and in the on-premises bundle) with its NATS JetStream and Prometheus scalers and the HTTP add-on; each chart ships its `ScaledObject`. The `agents` chart deploys `agents-mcp`, `agents-a2a` and `agents-worker`, each with its Kubernetes Service and `ScaledObject`.
-- **GitOps with Argo CD:** the desired state of every cell lives in `deploy/environments`; a release is a pull request that bumps image tags.
+- **GitOps with Argo CD:** the desired state of every cell lives in `infra/environments`; a release is a pull request that bumps image tags.
 - **Waves:** a canary cell first, then the other cells of the region in waves; an SLO burn during a wave stops it and rolls back.
 - **Migrations:** expand and contract; the expand step runs before the new pods, the contract step one release later.
 
@@ -69,7 +69,7 @@ GitHub Actions, following the steps of AGENT.md, each step passing before the ne
 2. **Check:** ruff, mypy, pytest (Python); cargo fmt, clippy, tests and benchmarks (Rust); eslint, tsc, Vitest (TypeScript); generated types and the specifications (`specs.py check`) up to date.
 3. **Build** one image per changed service and front end (multi-stage, repository root as context), with remote caches (uv, Cargo, Turborepo).
 4. **Scan and sign:** Trivy and OSV-Scanner, SBOM, cosign signature; push to GHCR.
-5. **Test the images:** Playwright against the real images started by `compose.e2e.yaml`; visual comparison with the specification mock-ups.
+5. **Test the images:** Playwright against the real images started by `infra/compose/e2e.yaml`; visual comparison with the specification mock-ups.
 6. **Publish** images tagged with the commit SHA, from `develop` and `master` only (GitFlow); Argo CD takes it from there.
 
 ## <a id="environments"></a>🌱 Environments

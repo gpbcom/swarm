@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { expect, test } from "@playwright/test";
 
 const REPOSITORY_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..", "..");
-const COMPOSE_FILE = "compose.e2e.yaml";
+const COMPOSE_FILE = "infra/compose/e2e.yaml";
 // A container that never exits fails its test instead of holding the job until GitHub cancels it.
 const COMPOSE_TIMEOUT_MS = 120_000;
 // The gateway's command line: it prints the greeting and exits, where the image's entry point serves until stopped.

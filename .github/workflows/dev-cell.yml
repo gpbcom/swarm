@@ -66,4 +66,4 @@ jobs:
           DEV_CELL_BACKEND_CONFIG: ${{ runner.temp }}/backend.hcl
           DEV_CELL_VAR_FILE: ${{ runner.temp }}/dev-cell.tfvars
           KUBECONFIG: ${{ runner.temp }}/kubeconfig
-        run: bash deploy/scripts/dev-cell.sh "$ACTION" "$BRANCH"
+        run: bash infra/scripts/dev-cell.sh "$ACTION" "$BRANCH"

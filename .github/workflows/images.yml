@@ -138,7 +138,7 @@ jobs:
       - name: Build the services this run did not build
         run: |
           built="$(echo "$IMAGES" | jq -r '.[] | split("/") | last')"
-          for name in $(docker compose -f compose.e2e.yaml config --services); do
+          for name in $(docker compose -f infra/compose/e2e.yaml config --services); do
             if echo "$built" | grep -qx "$name"; then
               continue
             fi
@@ -173,7 +173,7 @@ jobs:
           path: packages/ts/e2e/playwright-report/
       - name: Stop the stack
         if: always()
-        run: docker compose -f compose.e2e.yaml down --volumes
+        run: docker compose -f infra/compose/e2e.yaml down --volumes
 
   publish:
     needs: e2e

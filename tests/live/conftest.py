@@ -22,8 +22,8 @@ from gateway.models.live.live_config import LiveConfig
 from gateway.service.factories.live.live_feed_factory import LiveFeedFactory
 from swarm_live.models.config.live_session_config import LiveSessionConfig
 from swarm_nats.models.config.nats_client_config import NatsClientConfig
-from tests.deploy.nats.helpers import free_port
-from tests.deploy.nats.nats_server_process import NatsServerProcess
+from tests.infra.nats.helpers import free_port
+from tests.infra.nats.nats_server_process import NatsServerProcess
 from tests.live.helpers import (
     CELL_CONFIG_TEMPLATE,
     HOST,

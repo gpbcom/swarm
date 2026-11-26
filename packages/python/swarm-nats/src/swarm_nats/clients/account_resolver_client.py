@@ -29,7 +29,7 @@ class AccountResolverClient:
 
     Notes:
         - **The connection must use the system account**, otherwise nothing answers the claims update subject.
-        - It works against the full resolver the chart ``deploy/charts/nats`` configures, which stores the JWT and
+        - It works against the full resolver the chart ``infra/charts/nats`` configures, which stores the JWT and
           shares it with the other servers of the cell.
         - A revocation is a new JWT of the same account, pushed the same way.
         - **The JWT is never logged**, only the name and the public key of the account.
