@@ -195,8 +195,8 @@ class TestImagesWorkflow:
         assert "SWARM_IMAGE_TAG" in self.job_text("e2e")
 
     def test_e2e_runs_playwright_through_pnpm(self) -> None:
-        runs = [run for run in self.runs("e2e") if "pnpm" in run and "./packages/ts/e2e" in run]
-        assert any("e2e" in run.split("./packages/ts/e2e")[1] for run in runs)
+        runs = [run for run in self.runs("e2e") if "pnpm" in run and "./qa/e2e" in run]
+        assert any("e2e" in run.split("./qa/e2e")[1] for run in runs)
 
     def test_e2e_uploads_the_report_on_failure(self) -> None:
         upload = self.uses_step("e2e", "actions/upload-artifact")

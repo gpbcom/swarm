@@ -34,7 +34,7 @@ class GatewayRestApp:
 
     TITLE: ClassVar[str] = "Swarm gateway"
     DISTRIBUTION: ClassVar[str] = "swarm-gateway"
-    OPENAPI_OUTPUT: ClassVar[str] = "packages/ts/api-client/openapi/gateway.json"
+    OPENAPI_OUTPUT: ClassVar[str] = "frontend/packages/api-client/openapi/gateway.json"
 
     def __init__(self, config: GatewayConfig, logger: Optional[Logger] = None) -> None:
         """Initialise the builder.

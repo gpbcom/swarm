@@ -447,7 +447,7 @@ this page keeps what happened, so that each problem is closed once and never met
 - **What happened:** K26 (the `MAVLink` state machine of the synthetic Drone) was finished twice: its 17 drone tests
   and 6 route tests passed, and clippy was clean on its own targets. Its `done_when` asks for
   `cargo clippy --workspace --all-targets -- -D warnings`, which compiles
-  [`tests/udp.rs`](../../packages/rust/swarm-synthetic-drones/tests/udp.rs). That test reads
+  [`tests/udp.rs`](../../rust/swarm-synthetic-drones/tests/udp.rs). That test reads
   `env!("CARGO_BIN_EXE_swarm-synthetic-drones")`, and the binary comes from K31, three waves later. K26 reported
   `blocked`, the retry met the same wall, and the run stopped.
 - **Cause:** `check_plan.py` checks the graph, the waves and the file ownership, not that a task's `done_when` can pass
@@ -622,7 +622,7 @@ this page keeps what happened, so that each problem is closed once and never met
   the fix, and the import-only changes to T0.10's and T0.14's committed files went into a commit of their own.
   To do as well: a failure names the files it failed on (from the test ids or messages), never only the folder given
   to the tool, and a review finding whose fix needs files of several tasks becomes one fix task owning all of them.
-- **Closed:** 2026-11-26, refactor phase 1. Enforced by [`test_ticket_tree.py`](../../tests/harness/ticket_tree/test_ticket_tree.py) (`integrate` refuses another open ticket's file), [`test_checks_environment.py`](../../tests/harness/checks/test_checks_environment.py), [`test_checks_failing_files.py`](../../tests/harness/checks/test_checks_failing_files.py) and [`test_ticket_workflows.py`](../../tests/harness/wiring/test_ticket_workflows.py) (no fix task from a folder, one fix task for several owners).
+- **Closed:** 2026-11-26, refactor phase 1. Enforced by [`test_ticket_tree.py`](../../tests/harness/ticket_tree/test_ticket_tree.py) (`integrate` refuses another open ticket's file), [`test_checks_environment.py`](../../tests/harness/checks/failures/test_checks_environment.py), [`test_checks_failing_files.py`](../../tests/harness/checks/failures/test_checks_failing_files.py) and [`test_ticket_workflows.py`](../../tests/harness/wiring/test_ticket_workflows.py) (no fix task from a folder, one fix task for several owners).
 - **Rule:** [TKT-16](../../.claude/rules/tickets.md#tkt-16) (each ticket touches only its own files) and
   [TKT-6](../../.claude/rules/tickets.md#tkt-6) (a missing project module is not the environment).
 
@@ -704,7 +704,7 @@ this page keeps what happened, so that each problem is closed once and never met
   - `uv run` made a fresh `.venv` there, and four flight-engine test modules failed to import with
     `No module named 'swarm_core'`. The failure was rightly flagged `environment`, so the run stopped without a fix round.
   - The same stop held back a real failure: `cargo clippy` refuses the dead code of `LiveSubscription` in the
-    generated [`generated.rs`](../../packages/rust/swarm-models/src/generated.rs).
+    generated [`generated.rs`](../../rust/swarm-models/src/generated.rs).
 - **Cause:**
   - `swarm_core` is a PyO3 wheel built by maturin, deliberately outside the uv workspace (AGENT.md, Mono-repo), so
     `uv sync` never builds it.
@@ -723,7 +723,7 @@ this page keeps what happened, so that each problem is closed once and never met
     `swarm-core-mavlink` built a little earlier from `develop`'s sources.
   - Fixed in the main checkout's `checks.py` (uncommitted): `shutil.copy`, so every copied file is newer than any
     artifact.
-- **Closed:** 2026-11-26, refactor phase 1. Enforced by [`test_checks_swarm_core.py`](../../tests/harness/checks/test_checks_swarm_core.py), and `rust.yml`'s bench job touches the pull request's sources ([`test_rust_workflow.py`](../../tests/ci/workflows/checks/test_rust_workflow.py)).
+- **Closed:** 2026-11-26, refactor phase 1. Enforced by [`test_checks_swarm_core.py`](../../tests/harness/checks/runs/test_checks_swarm_core.py), and `rust.yml`'s bench job touches the pull request's sources ([`test_rust_workflow.py`](../../tests/ci/workflows/checks/test_rust_workflow.py)).
 - **Rule:** [TKT-6](../../.claude/rules/tickets.md#tkt-6) (checks run in a clean tree; an environment failure goes to no
   agent).
 
@@ -787,7 +787,7 @@ this page keeps what happened, so that each problem is closed once and never met
 - **Fix:**
   - Fixed in the test (`0f67ac9`, the person's go-ahead): fixed UUIDs.
   - To do: `checks.py` runs pytest with `-n 2` as AGENT.md and CI do, with a test in `tests/harness/checks/`.
-- **Closed:** 2026-11-26, refactor phase 1. Enforced by [`test_checks_python.py`](../../tests/harness/checks/test_checks_python.py): pytest runs with `-n 2`.
+- **Closed:** 2026-11-26, refactor phase 1. Enforced by [`test_checks_python.py`](../../tests/harness/checks/runs/test_checks_python.py): pytest runs with `-n 2`.
 - **Rule:** [TKT-6](../../.claude/rules/tickets.md#tkt-6) (the verifier runs the AGENT.md tools, as CI does).
 
 ## <a id="already-ruled"></a>📜 Lessons already turned into rules

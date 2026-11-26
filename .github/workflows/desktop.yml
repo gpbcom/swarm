@@ -7,10 +7,10 @@ on:
       - master
       - "release/**"
     paths:
-      - "frontends/desktop/**"
-      - "frontends/ground-control/**"
-      - "frontends/mission-studio/**"
-      - "packages/ts/**"
+      - "frontend/apps/desktop/**"
+      - "frontend/apps/ground-control/**"
+      - "frontend/apps/mission-studio/**"
+      - "frontend/packages/**"
       - "pnpm-lock.yaml"
       - ".github/workflows/desktop.yml"
   push:
@@ -20,10 +20,10 @@ on:
       - "release/**"
       - "hotfix/**"
     paths:
-      - "frontends/desktop/**"
-      - "frontends/ground-control/**"
-      - "frontends/mission-studio/**"
-      - "packages/ts/**"
+      - "frontend/apps/desktop/**"
+      - "frontend/apps/ground-control/**"
+      - "frontend/apps/mission-studio/**"
+      - "frontend/packages/**"
       - "pnpm-lock.yaml"
       - ".github/workflows/desktop.yml"
 
@@ -45,13 +45,13 @@ jobs:
           node-version: 22
           cache: pnpm
       - name: Install the toolchain of rust-toolchain.toml
-        working-directory: frontends/desktop/src-tauri
+        working-directory: frontend/apps/desktop/src-tauri
         run: |
           rustup toolchain install
           rustup show active-toolchain
       - uses: Swatinem/rust-cache@v2
         with:
-          workspaces: frontends/desktop/src-tauri
+          workspaces: frontend/apps/desktop/src-tauri
       - name: Install the Linux libraries of Tauri
         if: matrix.os == 'ubuntu-latest'
         run: sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.1-dev librsvg2-dev patchelf
@@ -61,9 +61,9 @@ jobs:
         run: pnpm --filter @swarm/desktop tauri build --no-bundle
       - name: Check the format
         if: matrix.os == 'ubuntu-latest'
-        working-directory: frontends/desktop/src-tauri
+        working-directory: frontend/apps/desktop/src-tauri
         run: cargo fmt --check
       - name: Run clippy
         if: matrix.os == 'ubuntu-latest'
-        working-directory: frontends/desktop/src-tauri
+        working-directory: frontend/apps/desktop/src-tauri
         run: cargo clippy --all-targets --locked -- -D warnings

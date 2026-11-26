@@ -284,14 +284,14 @@ Nobody commits or merges by hand. The repository needs, once, the secret `RELEAS
 | --- | --- |
 | [services/](services/) | The backend services, one folder and one Docker image each, starting with the [gateway](services/gateway/) |
 | [packages/](packages/) | Shared code: `python/` (uv), `rust/` (Cargo and PyO3) and `ts/` (pnpm) |
-| [frontends/](frontends/) | The front ends, one folder and one image each, with their Playwright tests, and [desktop/](frontends/desktop/), the Tauri 2 shell that wraps Ground control and Mission studio |
+| [frontend/apps/](frontend/apps/) | The front ends, one folder and one image each, with their Playwright tests, and [desktop/](frontend/apps/desktop/), the Tauri 2 shell that wraps Ground control and Mission studio |
 | [infra/terraform/](infra/terraform/README.md) | One module per building block, one root per cell |
 | [tests/](tests/) | The convention tests, run against every service and every Python package |
 | [docs/](docs/) | The specifications, the research and the tickets |
 
-The front-end workspace is `packages/ts/`, a pnpm workspace: `packages/ts/tokens` (`@swarm/tokens`) holds the CSS
-variables generated from the [visual identity](docs/specs/visual-identity.md), and `packages/ts/ui` (`@swarm/ui`) the
-components and the frames of each part of Swarm. The desktop shell, `frontends/desktop`, is built on Windows, macOS and
+The front-end workspace is `frontend/packages/`, a pnpm workspace: `frontend/packages/tokens` (`@swarm/tokens`) holds the CSS
+variables generated from the [visual identity](docs/specs/visual-identity.md), and `frontend/packages/ui` (`@swarm/ui`) the
+components and the frames of each part of Swarm. The desktop shell, `frontend/apps/desktop`, is built on Windows, macOS and
 Linux by `.github/workflows/desktop.yml`.
 
 ## 🤝 How we build Swarm

@@ -24,12 +24,12 @@ class FleetRestApp:
 
     Notes:
         - No router is added yet: the routes of the fleet come with their own tickets.
-        - ``packages/ts/api-client`` is generated from the published document.
+        - ``frontend/packages/api-client`` is generated from the published document.
     """
 
     TITLE: ClassVar[str] = "Swarm fleet"
     VERSION: ClassVar[str] = "0.1.0"
-    OPENAPI_OUTPUT: ClassVar[str] = "packages/ts/api-client/openapi/fleet.json"
+    OPENAPI_OUTPUT: ClassVar[str] = "frontend/packages/api-client/openapi/fleet.json"
 
     def __init__(self, config: FleetConfig, logger: Optional[Logger] = None) -> None:
         """Initialise the application.

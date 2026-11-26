@@ -280,22 +280,22 @@
    },
    {
     "kind": "test",
-    "path": "tests/harness/checks/test_checks_environment.py",
+    "path": "tests/harness/checks/failures/test_checks_environment.py",
     "what": "a missing module of the project, even absent from the clean tree, is never flagged environment (L-34)"
    },
    {
     "kind": "test",
-    "path": "tests/harness/checks/test_checks_failing_files.py",
+    "path": "tests/harness/checks/failures/test_checks_failing_files.py",
     "what": "a failure goes to the changed file whose path the tool prints, even relative to a service root (L-34)"
    },
    {
     "kind": "test",
-    "path": "tests/harness/checks/test_checks_swarm_core.py",
+    "path": "tests/harness/checks/runs/test_checks_swarm_core.py",
     "what": "the clean tree gets the swarm_core wheel when code imports it, and fresh modification times (L-39)"
    },
    {
     "kind": "test",
-    "path": "tests/harness/checks/test_checks_python.py",
+    "path": "tests/harness/checks/runs/test_checks_python.py",
     "what": "pytest runs with -n 2 as CI does, and mypy is never skipped silently (L-43)"
    },
    {

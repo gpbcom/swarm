@@ -3,8 +3,10 @@ from __future__ import annotations
 # Standard library imports
 import json
 import re
+import shutil
+import subprocess
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Iterator
 
 # Third-party imports
 import pytest
@@ -15,7 +17,7 @@ from tests.conventions.helpers import repo_root
 
 
 class TestTypescriptSettings:
-    PACKAGE: str = "packages/ts/config"
+    PACKAGE: str = "frontend/packages/config"
 
     def path(self, name: str) -> Path:
         return repo_root() / self.PACKAGE / name
@@ -95,3 +97,75 @@ class TestTypescriptSettings:
         path = repo_root() / "pnpm-lock.yaml"
         assert path.is_file(), "pnpm-lock.yaml is missing."
         assert f"{self.PACKAGE}:" in path.read_text(encoding="utf-8")
+
+
+class TestFeatureSliceBoundaries:
+    APP: str = "frontend/apps/ground-control"
+    ROOT: str = "src/zz_boundaries_probe"
+    RULE: str = "no-restricted-imports"
+
+    @pytest.fixture
+    def probe(self) -> Iterator[Path]:
+        if shutil.which("pnpm") is None:
+            pytest.skip("pnpm is not installed.")
+        app = repo_root() / self.APP
+        if not (app / "node_modules").is_dir():
+            pytest.skip("The front-end dependencies are not installed.")
+        src = app / "src"
+        created = [src / name for name in ("features", "stores", "app") if not (src / name).exists()]
+        try:
+            yield app
+        finally:
+            shutil.rmtree(app / self.ROOT, ignore_errors=True)
+            for folder in created:
+                shutil.rmtree(folder, ignore_errors=True)
+
+    def lint(self, app: Path, relative: str, text: str) -> str:
+        path = app / "src" / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(text, encoding="utf-8")
+        try:
+            result = subprocess.run(
+                ["pnpm", "exec", "eslint", f"src/{relative}"],
+                cwd=app,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+        finally:
+            path.unlink()
+        return result.stdout + result.stderr
+
+    def test_a_feature_importing_another_feature_is_refused(self, probe: Path) -> None:
+        output = self.lint(
+            probe, "features/alpha/alpha.ts", 'import { beta } from "../beta/beta";\nexport const alpha = beta;\n'
+        )
+        assert self.RULE in output
+
+    def test_a_feature_importing_the_app_is_refused(self, probe: Path) -> None:
+        output = self.lint(
+            probe, "features/alpha/alpha.ts", 'import { shell } from "../../app/shell";\nexport const alpha = shell;\n'
+        )
+        assert self.RULE in output
+
+    def test_a_store_importing_a_feature_is_refused(self, probe: Path) -> None:
+        output = self.lint(
+            probe,
+            "stores/mission_store.ts",
+            'import { alpha } from "../features/alpha/alpha";\nexport const store = alpha;\n',
+        )
+        assert self.RULE in output
+
+    def test_the_app_importing_the_testing_helpers_is_refused(self, probe: Path) -> None:
+        output = self.lint(
+            probe, "app/shell.ts", 'import { helper } from "../testing/helper";\nexport const shell = helper;\n'
+        )
+        assert self.RULE in output
+
+    def test_a_feature_importing_a_store_is_allowed(self, probe: Path) -> None:
+        output = self.lint(
+            probe,
+            "features/alpha/alpha.ts",
+            'import { store } from "../../stores/mission_store";\nexport const alpha = store;\n',
+        )
+        assert self.RULE not in output

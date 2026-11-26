@@ -38,7 +38,7 @@ swarm/
 │   ├── evidence/              signing, chaining, Anchoring
 │   ├── notifier/              in-app, e-mail and push Notifications
 │   └── simulator/             simulated Squads for tests, training and adapter tests
-├── frontends/                 React and TypeScript apps (pnpm workspace)
+├── frontend/apps/                 React and TypeScript apps (pnpm workspace)
 │   ├── ground-control/        Pilot: flight, Focus view, Debrief (web, tablet, desktop)
 │   ├── mission-studio/        Mission planner: design, simulation, Mission assistant
 │   ├── back-office/           Fleet, Authorisations, Deliverables, Evidence, people

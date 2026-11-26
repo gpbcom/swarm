@@ -19,7 +19,7 @@ uv run pytest packages/python/<package>/tests -n 2
 For a front end or a TypeScript package, run its scripts from the root with the pnpm filter of its name,
 `pnpm --filter @swarm/<project> test|lint|typecheck|build`, for example `pnpm --filter @swarm/ground-control test`. The
 desktop shell is built from the root with `pnpm --filter @swarm/desktop tauri build --no-bundle`. In
-`frontends/desktop/src-tauri`, which is its own Cargo workspace, run `cargo fmt --check` and
+`frontend/apps/desktop/src-tauri`, which is its own Cargo workspace, run `cargo fmt --check` and
 `cargo clippy --all-targets --locked -- -D warnings`.
 
 To build the image of a service locally, run this from the repository root, because the build context is the root:
@@ -31,11 +31,11 @@ docker build -f services/<service>/Dockerfile -t <name>:local .
 To run the Playwright scaffold against the images of a pipeline run, give the tag of those images:
 
 ```bash
-SWARM_IMAGE_TAG=<tag> pnpm --filter ./packages/ts/e2e run e2e
+SWARM_IMAGE_TAG=<tag> pnpm --filter ./qa/e2e run e2e
 ```
 
 For Rust (`rust/`, a Cargo workspace whose crates opt in to the workspace lints with `[lints] workspace = true`)
-and TypeScript (`packages/ts`, a pnpm workspace), run these from their workspace folder:
+and TypeScript (`frontend/packages`, a pnpm workspace), run these from their workspace folder:
 
 ```bash
 cargo fmt --all --check
@@ -46,8 +46,8 @@ pnpm -r --if-present typecheck
 ```
 
 `uv run swarm-i18n-check` fails when a Python message lacks one of the four languages (English, French, German and
-Spanish), and `pnpm --filter ./packages/ts/i18n run check-messages` does the same for the FormatJS messages of
-`packages/ts/i18n/src/messages/`.
+Spanish), and `pnpm --filter ./frontend/packages/i18n run check-messages` does the same for the FormatJS messages of
+`frontend/packages/i18n/src/messages/`.
 
 Run `cargo bench --workspace --bench '*'` from `rust/` to run the criterion benchmarks, and build the
 `swarm_core` wheel with:
@@ -56,7 +56,7 @@ Run `cargo bench --workspace --bench '*'` from `rust/` to run the criterion benc
 uv run maturin build --release --manifest-path rust/swarm-core/python/Cargo.toml --out dist
 ```
 
-TypeScript packages and front ends extend `@swarm/config` (`packages/ts/config`), which holds the strict
+TypeScript packages and front ends extend `@swarm/config` (`frontend/packages/config`), which holds the strict
 `tsconfig.base.json` and the eslint configuration.
 
 After any change to a shared model of `packages/python/swarm-models`, regenerate the generated types in this order:
@@ -64,25 +64,25 @@ After any change to a shared model of `packages/python/swarm-models`, regenerate
 ```bash
 uv run swarm-models-schemas
 cargo run -p swarm-models-codegen
-pnpm --filter ./packages/ts/live run generate
+pnpm --filter ./frontend/packages/live run generate
 ```
 
 - `swarm-models-schemas` writes `packages/python/swarm-models/schemas/swarm_models.schema.json`.
 - `cargo run -p swarm-models-codegen`, run in `rust/`, writes `rust/swarm-models/src/generated.rs`.
-- `pnpm --filter ./packages/ts/live run generate` writes `packages/ts/live/src/generated/models.ts`.
+- `pnpm --filter ./frontend/packages/live run generate` writes `frontend/packages/live/src/generated/models.ts`.
 
 After any change to the routes of a service, regenerate the REST contract from the repository root:
 
 ```bash
 uv run swarm-<service>-openapi
-pnpm --filter ./packages/ts/api-client run generate
+pnpm --filter ./frontend/packages/api-client run generate
 ```
 
 - `uv run swarm-<service>-openapi` runs for each service whose routes changed, and writes
-  `packages/ts/api-client/openapi/<service>.json`.
-- `pnpm --filter ./packages/ts/api-client run generate` then writes the TypeScript client from those documents.
+  `frontend/packages/api-client/openapi/<service>.json`.
+- `pnpm --filter ./frontend/packages/api-client run generate` then writes the TypeScript client from those documents.
 - CI checks both: each service's pytest compares its published document with its app, and the `test` script of
-  `packages/ts/api-client` runs `generate.ts --check`.
+  `frontend/packages/api-client` runs `generate.ts --check`.
 - `uv run swarm-<service>-migrate` applies a service's migrations. Its DSN is read from the environment entry
   `SWARM_<SERVICE>_POSTGRES_DSN`.
 
@@ -146,7 +146,7 @@ Swarm is meant to become a mono-repo of backend and front-end micro-services, ea
 applies everywhere. The tests in `tests/conventions/mono_repo/` enforce part of this section: the uv workspace, the
 Cargo and pnpm workspaces, and the Terraform layout. The CI/CD change detection and check workflows are tested by
 `tests/ci/`. The Dockerfiles are tested by `tests/infra/images/test_service_images.py`, and `infra/compose/e2e.yaml` by
-`tests/ci/e2e/`. `tests/conventions/mono_repo/test_frontend_workspace.py` and `test_desktop_shell.py` check the front-end
+`tests/ci/e2e/`. `tests/conventions/mono_repo/frontend/test_frontend_workspace.py` and `test_desktop_shell.py` check the front-end
 workspace layout and the desktop shell, and the Docker rules of the front ends are not tested yet. `tests/infra/` checks the charts, the dev environment, the PostgreSQL image and the dev-cell script,
 and `tests/ci/dev_cell/` checks the dev-cell workflow.
 
@@ -154,7 +154,7 @@ and `tests/ci/dev_cell/` checks the dev-cell workflow.
 | --- | --- |
 | `pyproject.toml` | The uv workspace root, with one `uv.lock` for the whole repository |
 | `services/<service>/` | One backend service: its `Dockerfile`, `pyproject.toml`, `conf/`, `src/<service>/`, `tests/` |
-| `frontends/<frontend>/` | One front end: its `Dockerfile`, `src/`, and its Playwright tests in `e2e/` |
+| `frontend/apps/<frontend>/` | One front end: its `Dockerfile`, `src/`, and its Playwright tests in `e2e/` |
 | `packages/` | Shared code: `python/` (lifecycle base classes, logging, models), `rust/` (PyO3 crates of the hot path), `ts/` (front-end packages) |
 | `infra/terraform/` | The Terraform modules per provider and building block, and one root per cell |
 | `infra/charts/` | The Helm charts, one per building block of a cell, and the `cell` umbrella chart |
@@ -166,14 +166,14 @@ and `tests/ci/dev_cell/` checks the dev-cell workflow.
 | `.github/workflows/` | The CI/CD pipeline |
 | `.github/scripts/` | The scripts the pipeline runs, such as change detection |
 
-`rust/` is a Cargo workspace and `packages/ts/` a pnpm workspace.
+`rust/` is a Cargo workspace and `frontend/packages/` a pnpm workspace.
 
-The front-end packages of `packages/ts/` are `packages/ts/tokens` (`@swarm/tokens`), whose `src/tokens.css` is generated by
-`specs.py build` from `docs/specs/visual-identity.md` and never edited by hand; and `packages/ts/ui` (`@swarm/ui`), the components on
+The front-end packages of `frontend/packages/` are `frontend/packages/tokens` (`@swarm/tokens`), whose `src/tokens.css` is generated by
+`specs.py build` from `docs/specs/visual-identity.md` and never edited by hand; and `frontend/packages/ui` (`@swarm/ui`), the components on
 Radix primitives, styled with `var(--...)` tokens only and using the class names of the mock-ups' `components.css`. The
-frames of each part of Swarm sit in `packages/ts/ui/src/frames/`, and `packages/ts/ui/src/frames/parts.ts` holds their message ids, whose words are in the catalogues of `@swarm/i18n`.
-The four app shells are `frontends/ground-control`, `frontends/mission-studio`, `frontends/back-office` and
-`frontends/client-portal`. `frontends/desktop` (`@swarm/desktop`) is the Tauri 2 shell that wraps Ground control and
+frames of each part of Swarm sit in `frontend/packages/ui/src/frames/`, and `frontend/packages/ui/src/frames/parts.ts` holds their message ids, whose words are in the catalogues of `@swarm/i18n`.
+The four app shells are `frontend/apps/ground-control`, `frontend/apps/mission-studio`, `frontend/apps/back-office` and
+`frontend/apps/client-portal`. `frontend/apps/desktop` (`@swarm/desktop`) is the Tauri 2 shell that wraps Ground control and
 Mission studio. Its Rust code is in `src-tauri/`, a Cargo workspace of its own, and `.github/workflows/desktop.yml`
 builds it on Windows, macOS and Linux.
 
@@ -245,7 +245,7 @@ with a Tauri desktop shell, images go to GHCR, and Argo CD deploys them; see `do
 - **The CI checks:** CI fails when one of them is stale. Three checks enforce it:
   - the `packages` job of `python.yml` runs `swarm-models-schemas --check`;
   - `cargo test` runs `generated_is_current` in `rust/swarm-models`;
-  - the `test` script of `packages/ts/live` runs `generate.ts --check`.
+  - the `test` script of `frontend/packages/live` runs `generate.ts --check`.
 
 **Services**
 
@@ -267,10 +267,10 @@ with a Tauri desktop shell, images go to GHCR, and Argo CD deploys them; see `do
 
 **Front-end tests**
 
-- Front-end tests use Playwright, and live in `frontends/<frontend>/e2e/`.
+- Front-end tests use Playwright, and live in `frontend/apps/<frontend>/e2e/`.
 - They run against the real images started by `infra/compose/e2e.yaml`, never a development server, so that they test what
   ships.
-- The shared Playwright configuration is `@swarm/e2e` in `packages/ts/e2e`. It refuses a `webServer`, and it needs
+- The shared Playwright configuration is `@swarm/e2e` in `qa/e2e`. It refuses a `webServer`, and it needs
   `SWARM_IMAGE_TAG`, the tag of the images to test.
 
 **CI/CD**
@@ -362,7 +362,8 @@ layer (`OneClassPerEntity`). `SWARM_CONVENTIONS_BACKEND_ROOT` points it at anoth
 
 - More than one top-level class in a file, whatever the kind of class, except several enums in an `enums.py`.
 - More than five Python files in a folder, not counting `__init__.py` and `conftest.py`. The rule of [File shape](#file-shape)
-  also counts JavaScript, TypeScript and Rust files, in every folder of the repository.
+  also counts JavaScript, TypeScript and Rust files, in every folder of the repository, checked by
+  `tests/conventions/repository/test_five_code_files.py`.
 - A nested function.
 - `@staticmethod`. Use an instance method or a `@classmethod`.
 - `Any`. See [Typing](#typing).
@@ -393,7 +394,7 @@ methods only happen to share a name and mean different things, rename one instea
 together (`.py`, `.js`, `.jsx`, `.mjs`, `.cjs`, `.ts`, `.tsx`, `.rs`). When a folder would go past five, create sub-folders
 and dispatch its files by entity type or by theme: `storage/customers/repositories/` for the repositories,
 `models/customers/exceptions/` for the exceptions, `.claude/scripts/tickets/` for the ticket scripts. This applies to every
-folder of the repository: `src/` and `tests/` of the services and packages, `frontends/`, `packages/ts/`, `rust/`,
+folder of the repository: `src/` and `tests/` of the services and packages, `frontend/apps/`, `frontend/packages/`, `rust/`,
 the harness under `.claude/` and the CI scripts, including `exceptions/` folders. The entry files of a folder do not count
 towards the five: `__init__.py` and `conftest.py`, `index.ts` and `index.js`, and Rust's `lib.rs`, `main.rs` and `mod.rs`.
 

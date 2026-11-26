@@ -60,7 +60,7 @@ def front_end_ticket(
         "docs/specs/screens/mockups/UC-029",
     ):
         (root / folder).mkdir(parents=True, exist_ok=True)
-    graph = {"tickets": {FRONT_END: {"deps": [], "external": [], "area": "frontends/back-office", "size": "M"}}}
+    graph = {"tickets": {FRONT_END: {"deps": [], "external": [], "area": "frontend/apps/back-office", "size": "M"}}}
     (root / "docs/specs/roadmap/gantt/ticket-graph.json").write_text(json.dumps(graph), encoding="utf-8")
     (root / "docs/specs/functional/use-cases/UC-029-create-an-operator.md").write_text(
         f"# UC-029\n\n{SCREEN_ROW.format(source=source)}\n", encoding="utf-8"

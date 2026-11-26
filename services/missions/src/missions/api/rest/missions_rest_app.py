@@ -32,7 +32,7 @@ class MissionsRestApp:
 
     TITLE: ClassVar[str] = "Swarm missions"
     VERSION: ClassVar[str] = "0.1.0"
-    OPENAPI_OUTPUT: ClassVar[str] = "packages/ts/api-client/openapi/missions.json"
+    OPENAPI_OUTPUT: ClassVar[str] = "frontend/packages/api-client/openapi/missions.json"
     REPOSITORY_ROOT_LEVEL: ClassVar[int] = 6
 
     def __init__(self, config: MissionsConfig, logger: Optional[Logger] = None) -> None:

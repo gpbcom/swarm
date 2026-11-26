@@ -43,7 +43,7 @@
 - **Conventions:** cursor pagination (`?after=`), `ETag` and `If-Match` on updates, `Idempotency-Key` on every POST, errors as `application/problem+json` with the message rules of AGENT.md, field selection (`?fields=`) for heavy lists.
 - **Performance:** responses serialised by Pydantic in Rust (`model_dump_json`), gzip or Brotli, read endpoints on replicas, short-lived cache in Valkey for lists that many people read (Fleet, Missions of the day).
 - **Budget:** p95 under 100 ms for reads and under 250 ms for writes inside a cell.
-- **Contract:** the OpenAPI document is generated and published; the TypeScript client in `packages/ts/api-client` is generated from it in CI.
+- **Contract:** the OpenAPI document is generated and published; the TypeScript client in `frontend/packages/api-client` is generated from it in CI.
 
 ## <a id="live"></a>📨 Live data over WebSocket
 

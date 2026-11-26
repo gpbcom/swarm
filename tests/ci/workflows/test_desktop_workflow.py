@@ -12,14 +12,14 @@ from pydantic import JsonValue
 
 class TestDesktopWorkflow:
     READ_ONLY_PERMISSIONS: ClassVar[Dict[str, str]] = {"contents": "read"}
-    SHELL: ClassVar[str] = "frontends/desktop/src-tauri"
+    SHELL: ClassVar[str] = "frontend/apps/desktop/src-tauri"
     PULL_REQUEST_BRANCHES: ClassVar[List[str]] = ["develop", "master", "release/**"]
     PUSH_BRANCHES: ClassVar[List[str]] = ["master", "develop", "release/**", "hotfix/**"]
     PATHS: ClassVar[List[str]] = [
-        "frontends/desktop/**",
-        "frontends/ground-control/**",
-        "frontends/mission-studio/**",
-        "packages/ts/**",
+        "frontend/apps/desktop/**",
+        "frontend/apps/ground-control/**",
+        "frontend/apps/mission-studio/**",
+        "frontend/packages/**",
         "pnpm-lock.yaml",
         ".github/workflows/desktop.yml",
     ]

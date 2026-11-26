@@ -19,7 +19,7 @@ class TestMissionsRestApp:
     OPENAPI_PATH: ClassVar[str] = "/v1/openapi.json"
     UNKNOWN_PATH: ClassVar[str] = "/v1/nothing"
     PROBLEM_SCHEMA: ClassVar[str] = "Problem"
-    OPENAPI_OUTPUT: ClassVar[str] = "packages/ts/api-client/openapi/missions.json"
+    OPENAPI_OUTPUT: ClassVar[str] = "frontend/packages/api-client/openapi/missions.json"
     REPOSITORY_ROOT_DEPTH: ClassVar[int] = 5
 
     @pytest.fixture

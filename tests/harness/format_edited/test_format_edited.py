@@ -124,7 +124,7 @@ class TestFormatEdited:
         assert matching
         assert matching[0]["run"] == expected
 
-    @pytest.mark.parametrize("path", [".claude/hooks/x.py", "docs/specs/README.md", "frontends/app/src/a.ts"])
+    @pytest.mark.parametrize("path", [".claude/hooks/x.py", "docs/specs/README.md", "frontend/apps/app/src/a.ts"])
     def test_the_repository_catalogue_leaves_other_files_alone(self, path: str) -> None:
         formatters = json.loads((repo_root() / CATALOGUE_RELATIVE).read_text(encoding="utf-8"))["formatters"]
         assert not [item for item in formatters if re.search(item["match"], path)]
