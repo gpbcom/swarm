@@ -25,10 +25,15 @@ OTHER_AREA = "T9.03"
 FIELD = "T9.04"
 GRAPH: Dict[str, Dict[str, Dict[str, object]]] = {
     "tickets": {
-        DONE: {"deps": [], "external": [], "area": "services/missions", "size": "S"},
-        NEXT: {"deps": [DONE], "external": [], "area": "services/missions", "size": "M"},
-        SAME_AREA: {"deps": [], "external": [], "area": "services/missions, frontends/back-office", "size": "M"},
-        OTHER_AREA: {"deps": [NEXT], "external": [], "area": "packages/rust", "size": "L"},
+        DONE: {"deps": [], "external": [], "area": "backend/apps/missions", "size": "S"},
+        NEXT: {"deps": [DONE], "external": [], "area": "backend/apps/missions", "size": "M"},
+        SAME_AREA: {
+            "deps": [],
+            "external": [],
+            "area": "backend/apps/missions, frontend/apps/back-office",
+            "size": "M",
+        },
+        OTHER_AREA: {"deps": [NEXT], "external": [], "area": "rust", "size": "L"},
         FIELD: {
             "deps": [],
             "external": ["C-01"],

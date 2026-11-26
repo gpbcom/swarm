@@ -34,10 +34,12 @@ class TestSharedChanges:
     @pytest.mark.parametrize(
         "path",
         [
-            "packages/python/lifecycle/src/lifecycle/runnable.py",
-            "packages/ts/config/eslint.config.js",
-            "packages/rust/core/src/lib.rs",
-            "packages/rust/Cargo.lock",
+            "backend/libs/swarm-lifecycle/src/swarm_lifecycle/runnables/runnable.py",
+            "frontend/packages/config/eslint.config.js",
+            "qa/e2e/playwright.config.ts",
+            "scripts/src/swarm_scripts/openapi/export.py",
+            "rust/core/src/lib.rs",
+            "rust/Cargo.lock",
             "uv.lock",
             "pnpm-lock.yaml",
             "pyproject.toml",
@@ -51,7 +53,7 @@ class TestSharedChanges:
             ".github/workflows/specs.yml",
             ".github/scripts/detect_changes.py",
             ".github/workflows/images.yml",
-            "compose.e2e.yaml",
+            "infra/compose/e2e.yaml",
             ".dockerignore",
         ],
     )
@@ -69,18 +71,18 @@ class TestSharedChanges:
 
     def test_an_empty_rust_workspace_is_not_applicable(self, tmp_path: Path) -> None:
         write_repo(tmp_path, rust_members=False)
-        result = run_detector(tmp_path, ["packages/rust/Cargo.toml"])
+        result = run_detector(tmp_path, ["rust/Cargo.toml"])
         assert outputs(result) == {**self.EVERYTHING, RUST_KEY: "false"}
 
-    def test_a_shared_path_with_a_service_path_lists_each_service_once(self, tmp_path: Path) -> None:
+    def test_a_shared_path_with_an_app_path_lists_each_app_once(self, tmp_path: Path) -> None:
         write_repo(tmp_path)
-        changed: List[str] = ["uv.lock", "services/alpha/src/alpha/main.py"]
+        changed: List[str] = ["uv.lock", "backend/apps/alpha/src/swarm_alpha/main.py"]
         result = run_detector(tmp_path, changed)
         assert outputs(result)["services"] == ALL_SERVICES
 
-    def test_a_repository_without_services_gives_an_empty_list(self, tmp_path: Path) -> None:
+    def test_a_repository_without_apps_gives_an_empty_list(self, tmp_path: Path) -> None:
         write_repo(tmp_path)
-        shutil.rmtree(tmp_path / "services")
+        shutil.rmtree(tmp_path / "backend" / "apps")
         result = run_detector(tmp_path, ["uv.lock"])
         assert outputs(result)["services"] == "[]"
 

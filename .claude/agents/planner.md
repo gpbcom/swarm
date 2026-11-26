@@ -17,7 +17,7 @@ Read `TICKET.md`, the linked specifications, and the parts of the repository the
   app per task. Prefer more small tasks over fewer big ones.
 - **Tests first:** a `test-writer` task per behaviour in the first wave; each implementation task depends on its
   tests.
-- **Agents:** `test-writer`, `implementer` (Python services and packages), `rust-implementer`
+- **Agents:** `test-writer`, `implementer` (Python: `backend/` and `scripts/`), `rust-implementer`
   (`rust/`), `frontend-implementer` (`frontend/apps/`, `frontend/packages`), `mockup-writer` (specification screens and
   mock-ups), `doc-writer` (documentation and specification pages).
 - **Files:** list the exact files each task may create or change; two tasks of the same wave never share a file.

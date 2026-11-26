@@ -84,7 +84,7 @@ def two_tickets_at_work(tmp_path: Path, paths: object) -> Path:
     (tmp_path / "base.txt").write_text("base\n", encoding="utf-8")
     git(tmp_path, "add", "-A")
     git(tmp_path, "commit", "-m", "base")
-    for name in ("services/mine/a.py", "services/theirs/b.py", f"docs/tickets/{TICKET}/TICKET.md"):
+    for name in ("scripts/mine/a.py", "scripts/theirs/b.py", f"docs/tickets/{TICKET}/TICKET.md"):
         (tmp_path / name).parent.mkdir(parents=True, exist_ok=True)
         (tmp_path / name).write_text("x = 1\n", encoding="utf-8")
     state = tmp_path / ".git" / "swarm" / TICKET
@@ -110,12 +110,12 @@ def clean_tree(repo: Path) -> Dict[str, object]:
 
 class TestChecks:
     def test_a_ticket_is_checked_on_its_own_files_only(self, tmp_path: Path) -> None:
-        repo = two_tickets_at_work(tmp_path, ["services/mine/a.py", f"docs/tickets/{TICKET}/"])
-        assert changed(repo) == [f"docs/tickets/{TICKET}/TICKET.md", "services/mine/a.py"]
+        repo = two_tickets_at_work(tmp_path, ["scripts/mine/a.py", f"docs/tickets/{TICKET}/"])
+        assert changed(repo) == [f"docs/tickets/{TICKET}/TICKET.md", "scripts/mine/a.py"]
 
     def test_a_ticket_without_recorded_files_is_checked_on_every_change(self, tmp_path: Path) -> None:
         repo = two_tickets_at_work(tmp_path, None)
-        assert "services/theirs/b.py" in changed(repo)
+        assert "scripts/theirs/b.py" in changed(repo)
 
     def test_screens_are_not_checked_before_the_screenshot_pipeline_exists(self, tmp_path: Path) -> None:
         verdict = screen_verdict(front_end_ticket(tmp_path, "✏️ Mock-up"), [], False)
@@ -149,7 +149,7 @@ class TestChecks:
         assert "No screen" in str(verdict["reason"])
 
     def test_the_checks_run_on_a_clean_tree_of_the_ticket_s_own_work_only(self, tmp_path: Path) -> None:
-        repo = two_tickets_at_work(tmp_path, ["services/mine/", "base.txt", "gone.txt", f"docs/tickets/{TICKET}/"])
+        repo = two_tickets_at_work(tmp_path, ["scripts/mine/", "base.txt", "gone.txt", f"docs/tickets/{TICKET}/"])
         (repo / "gone.txt").write_text("old\n", encoding="utf-8")
         (repo / "shared.txt").write_text("committed\n", encoding="utf-8")
         git(repo, "add", "gone.txt", "shared.txt")
@@ -161,7 +161,7 @@ class TestChecks:
         assert verdict["files"] == [
             "base.txt",
             f"docs/tickets/{TICKET}/TICKET.md",
-            "services/mine/a.py",
+            "scripts/mine/a.py",
             "shared.txt",
         ]
         texts = verdict["texts"]
@@ -187,7 +187,7 @@ class TestChecks:
         self, tmp_path: Path, code: int, out: str, environment: bool
     ) -> None:
         (tmp_path / "tests").mkdir()
-        (tmp_path / "packages/python/swarm-rest/src/swarm_rest").mkdir(parents=True)
+        (tmp_path / "backend/libs/swarm-rest/src/swarm_rest").mkdir(parents=True)
         script = (
             f"import sys; sys.path.insert(0, {str(ROOT / '.claude' / 'scripts' / 'tickets')!r}); import checks; "
             f"from pathlib import Path; print(checks.environment_failure({code!r}, {out!r}, Path({str(tmp_path)!r})))"
@@ -197,16 +197,16 @@ class TestChecks:
 
     def test_a_failure_goes_to_the_file_the_tool_names_not_to_the_first_file_it_was_given(self) -> None:
         changed = [
-            "packages/python/swarm-rest/src/swarm_rest/__init__.py",
-            "services/missions/tests/api/cli/test_missions_console_scripts.py",
-            "services/fleet/tests/api/cli/test_fleet_console_scripts.py",
+            "backend/swarm-service/src/swarm_service/__init__.py",
+            "tests/swarm_service/missions/test_missions_service.py",
+            "tests/swarm_service/fleet/test_fleet_service.py",
         ]
         out = (
             f"$ uv run ruff check {' '.join(changed)}\n"
             "PLW1510 `subprocess.run` without explicit `check` argument\n"
-            "  --> services/missions/tests/api/cli/test_missions_console_scripts.py:27:18\n"
+            "  --> tests/swarm_service/missions/test_missions_service.py:27:18\n"
             "PLW1510 `subprocess.run` without explicit `check` argument\n"
-            "  --> /tmp/swarm-checks-x/services/fleet/tests/api/cli/test_fleet_console_scripts.py:27:18\n"
+            "  --> /tmp/swarm-checks-x/tests/swarm_service/fleet/test_fleet_service.py:27:18\n"
             "Found 2 errors.\n"
         )
         script = (

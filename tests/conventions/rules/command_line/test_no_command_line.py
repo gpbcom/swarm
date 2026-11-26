@@ -25,8 +25,12 @@ class TestNoCommandLine:
     def test_the_rule_is_named_no_command_line(self) -> None:
         assert NoCommandLine.NAME == "no_command_line"
 
-    def test_a_repository_without_backend_or_scripts_has_no_violation(self, tmp_path: Path) -> None:
-        assert self.violations(tmp_path, {"services/a/src/a/cli/main.py": "import argparse\n"}) == []
+    def test_the_harness_and_ci_keep_their_command_lines(self, tmp_path: Path) -> None:
+        files = {
+            ".claude/scripts/cli/main.py": "import argparse\n",
+            ".github/scripts/commands.py": "import sys\nprint(sys.argv)\n",
+        }
+        assert self.violations(tmp_path, files) == []
 
     def test_clean_code_has_no_violation(self, tmp_path: Path) -> None:
         files = {self.BACKEND_PATH: "import os\n", self.SCRIPT_PATH: "import sys\nsys.exit(0)\n"}

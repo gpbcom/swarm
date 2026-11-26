@@ -3,7 +3,7 @@
   "rules": [
     {
       "name": "ruff check",
-      "match": "^(?:services|packages/python|backend|scripts|tests)/.+\\.py$",
+      "match": "^(?:backend|scripts|tests)/.+\\.py$",
       "run": [
         "uv",
         "run",
@@ -14,7 +14,7 @@
     },
     {
       "name": "ruff format",
-      "match": "^(?:services|packages/python|backend|scripts|tests)/.+\\.py$",
+      "match": "^(?:backend|scripts|tests)/.+\\.py$",
       "run": [
         "uv",
         "run",
@@ -22,16 +22,6 @@
         "format",
         "--check",
         "{files}"
-      ]
-    },
-    {
-      "name": "mypy {1}",
-      "match": "^services/([^/]+)/src/.+\\.py$",
-      "run": [
-        "uv",
-        "run",
-        "mypy",
-        "services/{1}/src"
       ]
     },
     {
@@ -45,55 +35,41 @@
       ]
     },
     {
-      "name": "mypy {1}",
-      "match": "^packages/python/([^/]+)/src/.+\\.py$",
+      "name": "mypy scripts",
+      "match": "^scripts/src/.+\\.py$",
       "run": [
         "uv",
         "run",
         "mypy",
-        "packages/python/{1}/src"
+        "scripts/src"
       ]
     },
     {
       "name": "pytest {1}/{2}",
-      "match": "^services/([^/]+)/src/[^/]+/(.+)/[^/]+\\.py$",
+      "match": "^backend/(?:swarm-[^/]+|libs/[^/]+|apps/[^/]+)/src/([^/]+)/(.+)/[^/]+\\.py$",
       "run": [
         "uv",
         "run",
         "pytest",
-        "services/{1}/tests/{2}",
+        "tests/{1}/{2}",
         "-n",
         "2"
       ],
-      "needs": "services/{1}/tests/{2}",
+      "needs": "tests/{1}/{2}",
       "skip_when_only_tests": true
     },
     {
-      "name": "pytest {1}/{2}",
-      "match": "^packages/python/([^/]+)/src/[^/]+/(.+)/[^/]+\\.py$",
+      "name": "pytest scripts/{1}",
+      "match": "^scripts/src/swarm_scripts/(.+)/[^/]+\\.py$",
       "run": [
         "uv",
         "run",
         "pytest",
-        "packages/python/{1}/tests/{2}",
+        "tests/scripts/{1}",
         "-n",
         "2"
       ],
-      "needs": "packages/python/{1}/tests/{2}",
-      "skip_when_only_tests": true
-    },
-    {
-      "name": "pytest {1}/{2}",
-      "match": "^backend/(swarm-[^/]+|libs/[^/]+|apps/[^/]+)/src/[^/]+/(.+)/[^/]+\\.py$",
-      "run": [
-        "uv",
-        "run",
-        "pytest",
-        "backend/{1}/tests/{2}",
-        "-n",
-        "2"
-      ],
-      "needs": "backend/{1}/tests/{2}",
+      "needs": "tests/scripts/{1}",
       "skip_when_only_tests": true
     },
     {
@@ -112,19 +88,6 @@
     },
     {
       "name": "cargo fmt {1}",
-      "match": "^packages/rust/([^/]+)/",
-      "run": [
-        "cargo",
-        "fmt",
-        "--check",
-        "--manifest-path",
-        "packages/rust/{1}/Cargo.toml"
-      ],
-      "needs": "packages/rust/{1}/Cargo.toml",
-      "skip_when_only_tests": true
-    },
-    {
-      "name": "cargo fmt {1}",
       "match": "^rust/([^/]+)/",
       "run": [
         "cargo",
@@ -134,22 +97,6 @@
         "rust/{1}/Cargo.toml"
       ],
       "needs": "rust/{1}/Cargo.toml",
-      "skip_when_only_tests": true
-    },
-    {
-      "name": "cargo clippy {1}",
-      "match": "^packages/rust/([^/]+)/",
-      "run": [
-        "cargo",
-        "clippy",
-        "--manifest-path",
-        "packages/rust/{1}/Cargo.toml",
-        "--all-targets",
-        "--",
-        "-D",
-        "warnings"
-      ],
-      "needs": "packages/rust/{1}/Cargo.toml",
       "skip_when_only_tests": true
     },
     {
@@ -170,18 +117,6 @@
     },
     {
       "name": "cargo test {1}",
-      "match": "^packages/rust/([^/]+)/",
-      "run": [
-        "cargo",
-        "test",
-        "--manifest-path",
-        "packages/rust/{1}/Cargo.toml"
-      ],
-      "needs": "packages/rust/{1}/Cargo.toml",
-      "skip_when_only_tests": true
-    },
-    {
-      "name": "cargo test {1}",
       "match": "^rust/([^/]+)/",
       "run": [
         "cargo",
@@ -194,7 +129,7 @@
     },
     {
       "name": "pnpm lint {1}/{2}",
-      "match": "^(frontends|packages/ts|frontend/apps|frontend/packages)/([^/]+)/",
+      "match": "^(frontend/apps|frontend/packages)/([^/]+)/",
       "run": [
         "pnpm",
         "--filter",
@@ -207,7 +142,7 @@
     },
     {
       "name": "pnpm typecheck {1}/{2}",
-      "match": "^(frontends|packages/ts|frontend/apps|frontend/packages)/([^/]+)/",
+      "match": "^(frontend/apps|frontend/packages)/([^/]+)/",
       "run": [
         "pnpm",
         "--filter",
@@ -220,7 +155,7 @@
     },
     {
       "name": "pnpm test {1}/{2}",
-      "match": "^(frontends|packages/ts|frontend/apps|frontend/packages)/([^/]+)/",
+      "match": "^(frontend/apps|frontend/packages)/([^/]+)/",
       "run": [
         "pnpm",
         "--filter",
@@ -234,7 +169,7 @@
     },
     {
       "name": "terraform fmt {1}",
-      "match": "^((?:deploy|infra)/terraform/.+?)(?:/tests)?/[^/]+\\.(?:tf|tftest\\.hcl)$",
+      "match": "^(infra/terraform/.+?)(?:/tests)?/[^/]+\\.(?:tf|tftest\\.hcl)$",
       "run": [
         "terraform",
         "fmt",
@@ -245,7 +180,7 @@
     },
     {
       "name": "terraform init {1}",
-      "match": "^((?:deploy|infra)/terraform/.+?)(?:/tests)?/[^/]+\\.(?:tf|tftest\\.hcl)$",
+      "match": "^(infra/terraform/.+?)(?:/tests)?/[^/]+\\.(?:tf|tftest\\.hcl)$",
       "run": [
         "terraform",
         "-chdir={1}",
@@ -257,7 +192,7 @@
     },
     {
       "name": "terraform validate {1}",
-      "match": "^((?:deploy|infra)/terraform/.+?)(?:/tests)?/[^/]+\\.(?:tf|tftest\\.hcl)$",
+      "match": "^(infra/terraform/.+?)(?:/tests)?/[^/]+\\.(?:tf|tftest\\.hcl)$",
       "run": [
         "terraform",
         "-chdir={1}",
@@ -267,7 +202,7 @@
     },
     {
       "name": "terraform test {1}",
-      "match": "^((?:deploy|infra)/terraform/.+?)(?:/tests)?/[^/]+\\.(?:tf|tftest\\.hcl)$",
+      "match": "^(infra/terraform/.+?)(?:/tests)?/[^/]+\\.(?:tf|tftest\\.hcl)$",
       "run": [
         "terraform",
         "-chdir={1}",

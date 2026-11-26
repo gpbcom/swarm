@@ -1,14 +1,12 @@
 from __future__ import annotations
 
 import json
-import re
 import sys
 import tomllib
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
 
 SHARED_PREFIXES = (
-    "packages/",
     ".github/scripts/",
     "rust/",
     "scripts/",
@@ -29,7 +27,6 @@ SHARED_FILES = frozenset(
         ".github/workflows/typescript.yml",
         ".github/workflows/specs.yml",
         ".github/workflows/images.yml",
-        "compose.e2e.yaml",
         "infra/compose/e2e.yaml",
         ".dockerignore",
     }
@@ -41,16 +38,7 @@ SHARED_DOMAIN = "shared"
 API_PACKAGE = "swarm-api"
 API_VERSION = "v1"
 API_SHARED_DOMAINS = frozenset({"live"})
-DISTRIBUTION_NAME = re.compile(r"[\[<>=!~;@ ]")
 USAGE = "usage: detect_changes.py [--root <repo root>] [--all]"
-
-
-def discover_services(root: Path) -> List[str]:
-    """List the services: direct sub-folders of ``services`` not starting with ``.`` or ``_``."""
-    folder = root / "services"
-    if not folder.is_dir():
-        return []
-    return sorted(p.name for p in folder.iterdir() if p.is_dir() and not p.name.startswith((".", "_")))
 
 
 def discover_apps(root: Path) -> Dict[str, List[str]]:
@@ -96,28 +84,10 @@ def apps_of_layer_path(parts: List[str], apps: Dict[str, List[str]]) -> Optional
     return {name for name, domains in apps.items() if domain in domains}
 
 
-def services_depending_on(root: Path, distribution: str) -> Set[str]:
-    """Return the services of ``services/`` whose pyproject.toml depends on ``distribution``.
-
-    While the backend moves, the services of the old layout import the layer packages of ``backend/``: a change to
-    one of them must check those services too, not only the apps that own its domain.
-    """
-    found: Set[str] = set()
-    for name in discover_services(root):
-        manifest = root / "services" / name / "pyproject.toml"
-        dependencies = tomllib.loads(manifest.read_text(encoding="utf-8")).get("project", {}).get("dependencies", [])
-        if any(
-            DISTRIBUTION_NAME.split(str(dependency), maxsplit=1)[0].strip() == distribution
-            for dependency in dependencies
-        ):
-            found.add(name)
-    return found
-
-
 def discover_typescript(root: Path) -> List[str]:
     """List the front-end app and package folders holding a ``package.json``."""
     found: List[str] = []
-    for parent in ("frontends", "packages/ts", "frontend/apps", "frontend/packages"):
+    for parent in ("frontend/apps", "frontend/packages"):
         folder = root / parent
         if not folder.is_dir():
             continue
@@ -128,9 +98,9 @@ def discover_typescript(root: Path) -> List[str]:
 
 
 def discover_images(root: Path) -> List[str]:
-    """List the image folders (services, apps and front ends) holding a ``Dockerfile``."""
+    """List the image folders (backend apps and front-end apps) holding a ``Dockerfile``."""
     found: List[str] = []
-    for parent in ("services", "frontends", "backend/apps", "frontend/apps"):
+    for parent in ("backend/apps", "frontend/apps"):
         folder = root / parent
         if not folder.is_dir():
             continue
@@ -141,12 +111,8 @@ def discover_images(root: Path) -> List[str]:
 
 
 def rust_applies(root: Path) -> bool:
-    """Tell whether the Rust workspace exists and has at least one member."""
-    return any(rust_workspace_has_members(root / folder / "Cargo.toml") for folder in ("packages/rust", "rust"))
-
-
-def rust_workspace_has_members(manifest: Path) -> bool:
-    """Tell whether one Cargo workspace manifest exists and lists members."""
+    """Tell whether the Rust workspace ``rust/`` exists and has at least one member."""
+    manifest = root / "rust" / "Cargo.toml"
     if not manifest.is_file():
         return False
     try:
@@ -196,7 +162,6 @@ def main(argv: Optional[List[str]] = None) -> int:
         print(USAGE, file=sys.stderr)
         return 2
     root, select_all = parsed
-    all_services = discover_services(root)
     all_typescript = discover_typescript(root)
     all_images = discover_images(root)
     apps = discover_apps(root)
@@ -214,30 +179,22 @@ def main(argv: Optional[List[str]] = None) -> int:
         parts = path.split("/")
         owners = apps_of_layer_path(parts, apps)
         if owners is not None:
-            dependents = services_depending_on(root, parts[1])
-            services |= owners | dependents
+            services |= owners
             images |= {f"backend/apps/{name}" for name in owners if f"backend/apps/{name}" in all_images}
-            images |= {f"services/{name}" for name in dependents if f"services/{name}" in all_images}
             repository = True
             continue
         if parts[0] == "backend" and len(parts) > 3 and parts[1] == "apps" and parts[2] in apps:
             services.add(parts[2])
         elif parts[0] == "frontend" and len(parts) > 3 and f"frontend/{parts[1]}/{parts[2]}" in all_typescript:
             typescript.add(f"frontend/{parts[1]}/{parts[2]}")
-        elif parts[0] == "services" and len(parts) > 2 and parts[1] in all_services:
-            services.add(parts[1])
-        elif parts[0] == "frontends" and len(parts) > 2 and f"frontends/{parts[1]}" in all_typescript:
-            typescript.add(f"frontends/{parts[1]}")
-        if len(parts) > 2 and f"{parts[0]}/{parts[1]}" in all_images:
-            images.add(f"{parts[0]}/{parts[1]}")
-        elif len(parts) > 3 and f"{parts[0]}/{parts[1]}/{parts[2]}" in all_images:
+        if len(parts) > 3 and f"{parts[0]}/{parts[1]}/{parts[2]}" in all_images:
             images.add(f"{parts[0]}/{parts[1]}/{parts[2]}")
         if path.startswith(REPOSITORY_PREFIXES):
             repository = True
         if path.startswith(SPECS_PREFIXES):
             specs = True
     if everything:
-        services = set(all_services) | set(apps)
+        services = set(apps)
         typescript = set(all_typescript)
         images = set(all_images)
         rust = rust_applies(root)

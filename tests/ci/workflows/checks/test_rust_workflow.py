@@ -158,10 +158,9 @@ class TestRustWorkflow:
         relative = gate.split("python3 ", 1)[1].split(" ", 1)[0]
         assert (Path(__file__).resolve().parents[4] / workdir / relative).resolve().is_file()
 
-    def test_the_base_commit_is_benchmarked_from_either_layout(self) -> None:
+    def test_the_base_commit_is_benchmarked_from_its_rust_workspace(self) -> None:
         base = next(run for run in self.bench_runs() if "--save-baseline pr-base" in run)
-        assert "base/rust" in base
-        assert "base/packages/rust" in base
+        assert 'base="$RUNNER_TEMP/base/rust"' in base
 
     def test_the_bench_job_knows_the_base_commit(self) -> None:
         assert self.bench_env().get("BASE_SHA") == "${{ github.event.pull_request.base.sha }}"

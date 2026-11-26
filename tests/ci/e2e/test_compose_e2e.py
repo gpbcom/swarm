@@ -23,11 +23,9 @@ class TestComposeE2e:
     ENTRYPOINT_KEY: ClassVar[str] = "entrypoint"
     GATEWAY: ClassVar[str] = "gateway"
     DOCKERFILE: ClassVar[str] = "Dockerfile"
-    SERVICES_FOLDER: ClassVar[str] = "services"
-    FRONTENDS_FOLDER: ClassVar[str] = "frontends"
     APPS_FOLDER: ClassVar[str] = "backend/apps"
     FRONTEND_APPS_FOLDER: ClassVar[str] = "frontend/apps"
-    SOURCE_FOLDERS: ClassVar[List[str]] = ["services", "frontends", "packages", "backend", "frontend"]
+    SOURCE_FOLDERS: ClassVar[List[str]] = ["backend", "frontend", "scripts", "rust", "qa"]
     IMAGE_PATTERN: ClassVar[str] = (
         r"^\$\{SWARM_IMAGE_REGISTRY:-ghcr\.io/gpbcom/swarm\}/%s:\$\{SWARM_IMAGE_TAG:\?[^}]+\}$"
     )
@@ -65,9 +63,9 @@ class TestComposeE2e:
             image = str(service.get(self.IMAGE_KEY, ""))
             assert re.match(self.IMAGE_PATTERN % re.escape(name), image), name
 
-    def test_every_image_name_is_a_service_an_app_or_a_front_end_with_a_dockerfile(self) -> None:
+    def test_every_image_name_is_an_app_or_a_front_end_with_a_dockerfile(self) -> None:
         for name in self.services():
-            parents = [self.SERVICES_FOLDER, self.APPS_FOLDER, self.FRONTENDS_FOLDER, self.FRONTEND_APPS_FOLDER]
+            parents = [self.APPS_FOLDER, self.FRONTEND_APPS_FOLDER]
             folders = [self.ROOT / parent / name for parent in parents]
             assert any((folder / self.DOCKERFILE).is_file() for folder in folders), name
 

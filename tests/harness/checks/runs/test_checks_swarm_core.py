@@ -17,14 +17,14 @@ GIT_ENV = {
 
 
 class TestChecksSwarmCore:
-    def test_a_service_importing_swarm_core_is_detected(self, tmp_path: Path) -> None:
-        source = tmp_path / "services" / "engine" / "src" / "engine"
+    def test_a_layer_package_importing_swarm_core_is_detected(self, tmp_path: Path) -> None:
+        source = tmp_path / "backend" / "swarm-service" / "src" / "swarm_service" / "flight"
         source.mkdir(parents=True)
         (source / "core.py").write_text("from swarm_core import plan\n", encoding="utf-8")
         assert call(f"checks.imports_swarm_core(Path({str(tmp_path)!r}))") is True
 
     def test_a_tree_without_the_import_is_not_detected(self, tmp_path: Path) -> None:
-        source = tmp_path / "services" / "engine" / "src" / "engine"
+        source = tmp_path / "backend" / "swarm-service" / "src" / "swarm_service" / "flight"
         source.mkdir(parents=True)
         (source / "core.py").write_text("import os\n", encoding="utf-8")
         assert call(f"checks.imports_swarm_core(Path({str(tmp_path)!r}))") is False

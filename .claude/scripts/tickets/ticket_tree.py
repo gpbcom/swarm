@@ -332,7 +332,7 @@ def integrated_ids(state: Dict[str, JsonData]) -> List[str]:
 
 
 def slug(task: str) -> str:
-    """Return a file name for a task id, which may hold a path (``FIX-services/a.py``)."""
+    """Return a file name for a task id, which may hold a path (``FIX-backend/a.py``)."""
     return re.sub(r"[^A-Za-z0-9._-]+", "_", task)
 
 
