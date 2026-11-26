@@ -27,11 +27,11 @@
 
 ## <a id="d1"></a>D1: Where the language lives
 
-**Chosen:** `Language` in [`enums.py:8-21`](../../../packages/python/swarm-models/src/swarm_models/models/enums.py#L8-L21) and `Person.language` ([`person.py:48`](../../../packages/python/swarm-models/src/swarm_models/models/people/person.py#L48)) · **Source:** K09, [PLAN.md](PLAN.md)
+**Chosen:** `Language` in [`enums.py:8-21`](https://github.com/gpbcom/swarm/blob/a2e43f7e74d65cc12a43507ec33f673fd2bc62e3/packages/python/swarm-models/src/swarm_models/models/enums.py#L8-L21) and `Person.language` ([`person.py:48`](../../../backend/swarm-models/src/swarm_models/people/person.py#L48)) · **Source:** K09, [PLAN.md](PLAN.md)
 
 | Option | For | Against |
 | --- | --- | --- |
-| ✅ Shared enum and a field on `Person` | AGENT.md puts shared models in swarm-models and generates the schema, Rust and TypeScript from them ([`generated.rs:430`](../../../packages/rust/swarm-models/src/generated.rs#L430)); `swarm-i18n` imports the same `Language` | The shared schema and two generated files change |
+| ✅ Shared enum and a field on `Person` | AGENT.md puts shared models in swarm-models and generates the schema, Rust and TypeScript from them ([`generated.rs:430`](../../../rust/swarm-models/src/generated.rs#L430)); `swarm-i18n` imports the same `Language` | The shared schema and two generated files change |
 | A language type in each package | No change to swarm-models | Four languages written several times, against the single source rule |
 
 **Trade-off:** one field on a shared model buys one definition of the four languages. Its default is English, and storing it in a database, Keycloak or a gateway endpoint is outside the ticket's area.
@@ -40,24 +40,24 @@
 
 ## <a id="d2"></a>D2: How Python catalogues are read
 
-**Chosen:** `read_po` on the `.po` files ([`po_catalog_store.py:95`](../../../packages/python/swarm-i18n/src/swarm_i18n/storage/catalogs/po_catalog_store.py#L95)) · **Source:** K15, [PLAN.md](PLAN.md)
+**Chosen:** `read_po` on the `.po` files ([`po_catalog_store.py:95`](../../../backend/swarm-storage/src/swarm_storage/shared/i18n/po_catalog_store.py#L95)) · **Source:** K15, [PLAN.md](PLAN.md)
 
 | Option | For | Against |
 | --- | --- | --- |
 | ✅ Read `.po` with Babel | No compiled `.mo` binary is committed ([PLAN.md](PLAN.md), Assumptions); the checker sees fuzzy and empty entries, which `.mo` hides | Parsed at run time |
 | Compiled `.mo` | The usual gettext form | A binary in the repository, and a build step to keep in step |
 
-**Trade-off:** parsing cost for readable, diffable catalogues. Each catalogue is read once and kept ([`translator.py:43-57`](../../../packages/python/swarm-i18n/src/swarm_i18n/service/translations/translator.py#L43-L57)).
+**Trade-off:** parsing cost for readable, diffable catalogues. Each catalogue is read once and kept ([`translator.py:43-57`](../../../backend/swarm-service/src/swarm_service/shared/i18n/translator.py#L43-L57)).
 
 **Revisit when:** start-up time of a service is shown to depend on reading catalogues. No measurement was made.
 
 ## <a id="d3"></a>D3: Where front-end messages live
 
-**Chosen:** `packages/ts/i18n/src/messages/<lang>.json` ([`catalogues.ts:9`](../../../packages/ts/i18n/src/catalogues.ts#L9)), used through react-intl ([`i18n-provider.tsx:36`](../../../packages/ts/i18n/src/i18n-provider.tsx#L36)) · **Source:** K10, K11, [PLAN.md](PLAN.md)
+**Chosen:** `packages/ts/i18n/src/messages/<lang>.json` ([`catalogues.ts:9`](../../../frontend/packages/i18n/src/catalogues.ts#L9)), used through react-intl ([`i18n-provider.tsx:36`](../../../frontend/packages/i18n/src/i18n-provider.tsx#L36)) · **Source:** K10, K11, [PLAN.md](PLAN.md)
 
 | Option | For | Against |
 | --- | --- | --- |
-| ✅ One central package | One `check-messages` covers every front end ([`check-messages.ts`](../../../packages/ts/i18n/scripts/check-messages.ts)); the frames of `packages/ts/ui` share the words | Every shell depends on it |
+| ✅ One central package | One `check-messages` covers every front end ([`check-messages.ts`](../../../frontend/packages/i18n/scripts/check-messages.ts)); the frames of `packages/ts/ui` share the words | Every shell depends on it |
 | Messages inside each front end | Each shell is self-contained | One check per shell, and the shared frames cannot own their words |
 
 **Trade-off:** coupling of the shells to one package for one check and one set of words.
@@ -79,7 +79,7 @@
 
 ## <a id="d5"></a>D5: An empty Python translation
 
-**Chosen:** fall back to English with a WARNING, and raise `SECatalogUnknownMessageError` for an id not in the template ([`translator.py:93-104`](../../../packages/python/swarm-i18n/src/swarm_i18n/service/translations/translator.py#L93-L104)) · **Source:** K16, [PLAN.md](PLAN.md)
+**Chosen:** fall back to English with a WARNING, and raise `SECatalogUnknownMessageError` for an id not in the template ([`translator.py:93-104`](../../../backend/swarm-service/src/swarm_service/shared/i18n/translator.py#L93-L104)) · **Source:** K16, [PLAN.md](PLAN.md)
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -92,7 +92,7 @@
 
 ## <a id="d6"></a>D6: Proof of the language switch
 
-**Chosen:** the Vitest test of `I18nProvider` ([`i18n-provider.test.tsx:58-74`](../../../packages/ts/i18n/test/i18n-provider.test.tsx#L58-L74)); the shells are wired but get no language control · **Source:** K11, K18, [PLAN.md](PLAN.md)
+**Chosen:** the Vitest test of `I18nProvider` ([`i18n-provider.test.tsx:58-74`](../../../frontend/packages/i18n/test/i18n-provider.test.tsx#L58-L74)); the shells are wired but get no language control · **Source:** K11, K18, [PLAN.md](PLAN.md)
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -105,11 +105,11 @@
 
 ## <a id="d7"></a>D7: Where the frames get their words
 
-**Chosen:** `parts.ts` holds `messageId`s ([`parts.ts:21-24`](../../../packages/ts/ui/src/frames/parts.ts#L21-L24)) and the frames call `intl.formatMessage` ([`SideBar.tsx:26`](../../../packages/ts/ui/src/frames/SideBar.tsx#L26)) · **Source:** K18, K20, read from the diff
+**Chosen:** `parts.ts` holds `messageId`s ([`parts.ts:21-24`](../../../frontend/packages/ui/src/frames/parts.ts#L21-L24)) and the frames call `intl.formatMessage` ([`SideBar.tsx:26`](../../../frontend/packages/ui/src/frames/shell/SideBar.tsx#L26)) · **Source:** K18, K20, read from the diff
 
 | Option | For | Against |
 | --- | --- | --- |
-| ✅ Frames translate their ids | Each shell changes only its root and status bar | `packages/ts/ui` needs react-intl ([`package.json`](../../../packages/ts/ui/package.json)) and an `IntlProvider` above it |
+| ✅ Frames translate their ids | Each shell changes only its root and status bar | `packages/ts/ui` needs react-intl ([`package.json`](../../../frontend/packages/ui/package.json)) and an `IntlProvider` above it |
 | Shells pass translated labels | The frames stay free of react-intl | Every shell repeats the same lookups |
 
 **Trade-off:** the reason was not recorded by the workers. The diff shows the first option; treat it as an open point.
@@ -118,7 +118,7 @@
 
 ## <a id="d8"></a>D8: Where `Language` is declared
 
-**Chosen:** a new `models/enums.py` in swarm-models ([`enums.py`](../../../packages/python/swarm-models/src/swarm_models/models/enums.py)) · **Source:** [PLAN.md](PLAN.md)
+**Chosen:** a new `models/enums.py` in swarm-models ([`enums.py`](https://github.com/gpbcom/swarm/blob/a2e43f7e74d65cc12a43507ec33f673fd2bc62e3/packages/python/swarm-models/src/swarm_models/models/enums.py)) · **Source:** [PLAN.md](PLAN.md)
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -131,14 +131,14 @@
 
 ## <a id="d9"></a>D9: Malformed `.po` lines
 
-**Chosen:** `LINE_PATTERN` checked before `read_po` ([`po_catalog_store.py:47`](../../../packages/python/swarm-i18n/src/swarm_i18n/storage/catalogs/po_catalog_store.py#L47), [`po_catalog_store.py:57-74`](../../../packages/python/swarm-i18n/src/swarm_i18n/storage/catalogs/po_catalog_store.py#L57-L74)) · **Source:** K15, read from the diff
+**Chosen:** `LINE_PATTERN` checked before `read_po` ([`po_catalog_store.py:47`](../../../backend/swarm-storage/src/swarm_storage/shared/i18n/po_catalog_store.py#L47), [`po_catalog_store.py:57-74`](../../../backend/swarm-storage/src/swarm_storage/shared/i18n/po_catalog_store.py#L57-L74)) · **Source:** K15, read from the diff
 
 | Option | For | Against |
 | --- | --- | --- |
 | ✅ Pre-check lines | The code's own note says Babel accepts an unterminated string without a word, so a broken catalogue would pass the check | A regular expression to keep in step with the `.po` syntax |
 | Trust Babel | Less code | A silently accepted malformed file |
 
-**Trade-off:** a small pattern for an exit code 2 on a bad catalogue ([`check_catalogs.py:30-32`](../../../packages/python/swarm-i18n/src/swarm_i18n/api/cli/check_catalogs.py#L30-L32)).
+**Trade-off:** a small pattern for an exit code 2 on a bad catalogue ([`check_catalogs.py:30-32`](https://github.com/gpbcom/swarm/blob/a2e43f7e74d65cc12a43507ec33f673fd2bc62e3/packages/python/swarm-i18n/src/swarm_i18n/api/cli/check_catalogs.py#L30-L32)).
 
 **Revisit when:** Babel rejects such lines itself.
 

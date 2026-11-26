@@ -7,7 +7,7 @@
 - A token changed on the visual identity page reaches the apps and the mock-ups in one build (criterion 1 of [TICKET.md](TICKET.md)).
 - The four shells open in light and dark mode, and the Tauri 2 shell builds on three systems (criteria 2 and 3 of [TICKET.md](TICKET.md)).
 - Components use the tokens only, never a value of their own (design system section of the technical page, quoted in [TICKET.md](TICKET.md)).
-- TypeScript is strict, and eslint forbids non-null assertions (the strict `@swarm/config` base, [`frontends/back-office/src/main.tsx:8`](../../../frontends/back-office/src/main.tsx#L8)).
+- TypeScript is strict, and eslint forbids non-null assertions (the strict `@swarm/config` base, [`frontend/apps/back-office/src/main.tsx:8`](../../../frontend/apps/back-office/src/main.tsx#L8)).
 - The ticket owns its own files only, and no language support yet: that is T0.15 ([TICKET.md](TICKET.md), out of scope).
 
 ## ⚖️ Choices at a glance
@@ -31,7 +31,7 @@
 
 ## <a id="d1"></a>D1: Where words on screen live
 
-**Chosen:** all on-screen words as `as const satisfies readonly NavItem[]` data · **Where:** [`packages/ts/ui/src/frames/parts.ts:1`](../../../packages/ts/ui/src/frames/parts.ts#L1) · **Source:** K16
+**Chosen:** all on-screen words as `as const satisfies readonly NavItem[]` data · **Where:** [`frontend/packages/ui/src/frames/parts.ts:1`](../../../frontend/packages/ui/src/frames/parts.ts#L1) · **Source:** K16
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -43,7 +43,7 @@
 
 ## <a id="d2"></a>D2: Strict CSP of the desktop shell
 
-**Chosen:** `'self'` only, no `'unsafe-inline'` · **Where:** [`frontends/desktop/src-tauri/tauri.conf.json:28`](../../../frontends/desktop/src-tauri/tauri.conf.json#L28) · **Source:** K21
+**Chosen:** `'self'` only, no `'unsafe-inline'` · **Where:** [`frontend/apps/desktop/src-tauri/tauri.conf.json:28`](../../../frontend/apps/desktop/src-tauri/tauri.conf.json#L28) · **Source:** K21
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -55,7 +55,7 @@
 
 ## <a id="d3"></a>D3: Tauri and tauri-build versions
 
-**Chosen:** `tauri` `=2.12.6` (the CLI's version) and `tauri-build` `=2.7.6` · **Where:** [`frontends/desktop/src-tauri/Cargo.toml:15`](../../../frontends/desktop/src-tauri/Cargo.toml#L15) · **Source:** K21
+**Chosen:** `tauri` `=2.12.6` (the CLI's version) and `tauri-build` `=2.7.6` · **Where:** [`frontend/apps/desktop/src-tauri/Cargo.toml:15`](../../../frontend/apps/desktop/src-tauri/Cargo.toml#L15) · **Source:** K21
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -67,7 +67,7 @@
 
 ## <a id="d4"></a>D4: Assembling the desktop pages
 
-**Chosen:** a script using only `node:fs`, checking each `dist/index.html` before deleting the old `dist` · **Where:** [`frontends/desktop/scripts/assemble.ts:10-20`](../../../frontends/desktop/scripts/assemble.ts#L10-L20) · **Source:** K21
+**Chosen:** a script using only `node:fs`, checking each `dist/index.html` before deleting the old `dist` · **Where:** [`frontend/apps/desktop/scripts/assemble.ts:10-20`](../../../frontend/apps/desktop/scripts/assemble.ts#L10-L20) · **Source:** K21
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -79,7 +79,7 @@
 
 ## <a id="d5"></a>D5: A missing `#root`
 
-**Chosen:** `querySelector` then throw an `Error` · **Where:** [`frontends/mission-studio/src/main.tsx:8`](../../../frontends/mission-studio/src/main.tsx#L8), [`back-office`](../../../frontends/back-office/src/main.tsx#L8), [`client-portal`](../../../frontends/client-portal/src/main.tsx#L7), [`ground-control`](../../../frontends/ground-control/src/main.tsx#L9) · **Source:** K17 to K20
+**Chosen:** `querySelector` then throw an `Error` · **Where:** [`frontend/apps/mission-studio/src/main.tsx:8`](../../../frontend/apps/mission-studio/src/main.tsx#L8), [`back-office`](../../../frontend/apps/back-office/src/main.tsx#L8), [`client-portal`](../../../frontend/apps/client-portal/src/main.tsx#L7), [`ground-control`](../../../frontend/apps/ground-control/src/main.tsx#L9) · **Source:** K17 to K20
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -93,7 +93,7 @@ For Ground control, the K08 test checks that the source contains `#root`, so `qu
 
 ## <a id="d6"></a>D6: Side bar items
 
-**Chosen:** `<button type="button">` with `nav-item` and `aria-current` · **Where:** [`packages/ts/ui/src/frames/SideBar.tsx:17-25`](../../../packages/ts/ui/src/frames/SideBar.tsx#L17-L25) · **Source:** K16
+**Chosen:** `<button type="button">` with `nav-item` and `aria-current` · **Where:** [`frontend/packages/ui/src/frames/shell/SideBar.tsx:17-25`](../../../frontend/packages/ui/src/frames/shell/SideBar.tsx#L17-L25) · **Source:** K16
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -105,7 +105,7 @@ For Ground control, the K08 test checks that the source contains `#root`, so `qu
 
 ## <a id="d7"></a>D7: Optional props typing
 
-**Chosen:** `T | undefined` written explicitly · **Where:** [`packages/ts/ui/src/frames/SideBar.tsx:8`](../../../packages/ts/ui/src/frames/SideBar.tsx#L8) · **Source:** K16
+**Chosen:** `T | undefined` written explicitly · **Where:** [`frontend/packages/ui/src/frames/shell/SideBar.tsx:8`](../../../frontend/packages/ui/src/frames/shell/SideBar.tsx#L8) · **Source:** K16
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -117,7 +117,7 @@ For Ground control, the K08 test checks that the source contains `#root`, so `qu
 
 ## <a id="d8"></a>D8: Title bar separators
 
-**Chosen:** a `trail` array joined with " · " text nodes · **Where:** [`packages/ts/ui/src/frames/TitleBar.tsx:14-23`](../../../packages/ts/ui/src/frames/TitleBar.tsx#L14-L23) · **Source:** K16
+**Chosen:** a `trail` array joined with " · " text nodes · **Where:** [`frontend/packages/ui/src/frames/shell/TitleBar.tsx:14-23`](../../../frontend/packages/ui/src/frames/shell/TitleBar.tsx#L14-L23) · **Source:** K16
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -129,7 +129,7 @@ For Ground control, the K08 test checks that the source contains `#root`, so `qu
 
 ## <a id="d9"></a>D9: Client portal Alarms item
 
-**Chosen:** one list filtered by `siteAgentOnly`, `isSiteAgent` default false · **Where:** [`packages/ts/ui/src/frames/ClientPortalFrame.tsx:28-30`](../../../packages/ts/ui/src/frames/ClientPortalFrame.tsx#L28-L30) · **Source:** K16
+**Chosen:** one list filtered by `siteAgentOnly`, `isSiteAgent` default false · **Where:** [`frontend/packages/ui/src/frames/apps/ClientPortalFrame.tsx:28-30`](../../../frontend/packages/ui/src/frames/apps/ClientPortalFrame.tsx#L28-L30) · **Source:** K16
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -152,18 +152,18 @@ For Ground control, the K08 test checks that the source contains `#root`, so `qu
 
 ## <a id="d11"></a>D11: Clippy lints of the desktop crate
 
-**Chosen:** `all = "deny"`, `pedantic = "warn"` as plain strings · **Where:** [`frontends/desktop/src-tauri/Cargo.toml:23`](../../../frontends/desktop/src-tauri/Cargo.toml#L23) · **Source:** K21
+**Chosen:** `all = "deny"`, `pedantic = "warn"` as plain strings · **Where:** [`frontend/apps/desktop/src-tauri/Cargo.toml:23`](../../../frontend/apps/desktop/src-tauri/Cargo.toml#L23) · **Source:** K21
 
 | Option | For | Against |
 | --- | --- | --- |
-| ✅ Plain strings | The K03 test compares the lints to exactly these values. No overrides, so no priority conflict | Differs from the style of [`packages/rust/Cargo.toml`](../../../packages/rust/Cargo.toml) |
+| ✅ Plain strings | The K03 test compares the lints to exactly these values. No overrides, so no priority conflict | Differs from the style of [`rust/Cargo.toml`](../../../rust/Cargo.toml) |
 | Tables with `priority = -1` | Same style as the workspace | Would fail the test |
 
 **Trade-off:** same behaviour, different spelling. **Revisit when:** the crate needs a lint override.
 
 ## <a id="d12"></a>D12: Tauri icon
 
-**Chosen:** a flat `#4338ca` square (token `color.primary`), extra generated icons deleted · **Where:** [`frontends/desktop/src-tauri/icons/icon.png`](../../../frontends/desktop/src-tauri/icons/icon.png) · **Source:** K21
+**Chosen:** a flat `#4338ca` square (token `color.primary`), extra generated icons deleted · **Where:** [`frontend/apps/desktop/src-tauri/icons/icon.png`](../../../frontend/apps/desktop/src-tauri/icons/icon.png) · **Source:** K21
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -187,7 +187,7 @@ For Ground control, the K08 test checks that the source contains `#root`, so `qu
 
 ## <a id="d14"></a>D14: Vite types and test casts
 
-**Chosen:** `"vite/client"` in `compilerOptions.types` of each app · **Where:** [`frontends/mission-studio/tsconfig.json:8`](../../../frontends/mission-studio/tsconfig.json#L8) · **Source:** K10. In the tests (K08) the `?? ''` was dropped for `active[0]?.textContent.trim()` ([`frontends/ground-control/test/app.test.tsx`](../../../frontends/ground-control/test/app.test.tsx)); the guard in [`packages/ts/ui/test/frames.test.tsx:205-207`](../../../packages/ts/ui/test/frames.test.tsx#L205-L207) throws a clear error when a button is missing (K07).
+**Chosen:** `"vite/client"` in `compilerOptions.types` of each app · **Where:** [`frontend/apps/mission-studio/tsconfig.json:8`](../../../frontend/apps/mission-studio/tsconfig.json#L8) · **Source:** K10. In the tests (K08) the `?? ''` was dropped for `active[0]?.textContent.trim()` ([`frontend/apps/ground-control/test/app.test.tsx`](../../../frontend/apps/ground-control/test/app.test.tsx)); the guard in [`frontend/packages/ui/test/frames.test.tsx:205-207`](../../../frontend/packages/ui/test/frames.test.tsx#L205-L207) throws a clear error when a button is missing (K07).
 
 | Option | For | Against |
 | --- | --- | --- |

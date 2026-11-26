@@ -47,7 +47,7 @@ python3 .claude/skills/write-specs/scripts/specs.py check
 ```
 
 For Terraform, each module and the dev cell run `terraform init`, `terraform validate` and `terraform test`, as recorded
-in the evidence files. A real `terraform plan` needs the CI variables of [deploy/terraform/README.md](../../../deploy/terraform/README.md).
+in the evidence files. A real `terraform plan` needs the CI variables of [infra/terraform/README.md](../../../infra/terraform/README.md).
 
 > [!WARNING]
 > The Terraform tests use mock providers. They do not prove that a real `terraform plan` or `apply` succeeds against

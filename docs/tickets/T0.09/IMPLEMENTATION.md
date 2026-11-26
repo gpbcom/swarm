@@ -6,7 +6,7 @@
 
 - A publication on another Operator's subject must be refused, and credentials of simulated Squads must be separate from real ones (acceptance criteria of [TICKET.md](TICKET.md), BR-008 and BR-014).
 - An edge's messages must be replayed in order after a one minute cut ([TICKET.md](TICKET.md)).
-- Seeds never reach configuration or logs: the chart and Terraform hold public values only ([`deploy/terraform/cells/dev-branch/variables.tf:57-85`](../../../deploy/terraform/cells/dev-branch/variables.tf#L57-L85)).
+- Seeds never reach configuration or logs: the chart and Terraform hold public values only ([`infra/terraform/cells/dev-branch/variables.tf:57-85`](../../../infra/terraform/cells/dev-branch/variables.tf#L57-L85)).
 - Long-running async work is an `AsyncRunnable`, every branch logs, no `Any`, one class per file ([AGENT.md](../../../AGENT.md)).
 - Operators are created at run time, and edge credentials must be revocable ([PLAN.md](PLAN.md) assumptions).
 
@@ -26,11 +26,11 @@
 
 ## <a id="d1"></a>D1: How accounts are created
 
-**Chosen:** operator mode with a `full` resolver ([`deploy/charts/nats/templates/configmap.yaml:34-40`](../../../deploy/charts/nats/templates/configmap.yaml#L34-L40)), accounts and credentials issued by [`AccountIssuer`](../../../packages/python/swarm-nats/src/swarm_nats/service/accounts/account_issuer.py#L110) and pushed by [`AccountResolverClient`](../../../packages/python/swarm-nats/src/swarm_nats/clients/account_resolver_client.py#L58) · **Source:** PLAN.md
+**Chosen:** operator mode with a `full` resolver ([`infra/charts/nats/templates/configmap.yaml:34-40`](../../../infra/charts/nats/templates/configmap.yaml#L34-L40)), accounts and credentials issued by [`AccountIssuer`](../../../backend/swarm-service/src/swarm_service/shared/accounts/account_issuer.py#L110) and pushed by [`AccountResolverClient`](../../../backend/swarm-clients/src/swarm_clients/shared/nats/account_resolver_client.py#L58) · **Source:** PLAN.md
 
 | Option | For | Against |
 | --- | --- | --- |
-| ✅ Decentralised JWT with the full resolver | Operators are created at run time, so no restart; edge credentials can be revoked by pushing the account again | No Python library issues NATS JWTs, so [`NatsJwtSigner`](../../../packages/python/swarm-nats/src/swarm_nats/service/accounts/nats_jwt_signer.py#L174) writes the encoding by hand |
+| ✅ Decentralised JWT with the full resolver | Operators are created at run time, so no restart; edge credentials can be revoked by pushing the account again | No Python library issues NATS JWTs, so [`NatsJwtSigner`](../../../backend/swarm-service/src/swarm_service/shared/accounts/nats_jwt_signer.py#L174) writes the encoding by hand |
 | Static accounts in the server configuration | Simple | Each new Operator would need a restart, and credentials could not be revoked at run time |
 
 **Trade-off:** the encoding is ours to maintain, and the acceptance tests against a real `nats-server` are what prove it.
@@ -39,7 +39,7 @@
 
 ## <a id="d2"></a>D2: What the refused-push test proves
 
-**Chosen:** a test that credentials of an account signed by another operator never connect after the push, in [`tests/deploy/nats/resolver/test_account_registration.py:65`](../../../tests/deploy/nats/resolver/test_account_registration.py#L65) · **Source:** K14
+**Chosen:** a test that credentials of an account signed by another operator never connect after the push, in [`tests/infra/nats/resolver/test_account_registration.py:65`](../../../tests/infra/nats/resolver/test_account_registration.py#L65) · **Source:** K14
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -53,7 +53,7 @@
 
 ## <a id="d3"></a>D3: How a refused push is detected
 
-**Chosen:** the `error` key of the reply, held in `ERROR_KEY`, in [`account_resolver_client.py:90`](../../../packages/python/swarm-nats/src/swarm_nats/clients/account_resolver_client.py#L90) · **Source:** K33
+**Chosen:** the `error` key of the reply, held in `ERROR_KEY`, in [`account_resolver_client.py:90`](../../../backend/swarm-clients/src/swarm_clients/shared/nats/account_resolver_client.py#L90) · **Source:** K33
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -67,12 +67,12 @@
 
 ## <a id="d4"></a>D4: How the resolver client sends
 
-**Chosen:** `connection.request` with the JWT as body and `timeout_s`, in [`account_resolver_client.py:70`](../../../packages/python/swarm-nats/src/swarm_nats/clients/account_resolver_client.py#L70) · **Source:** K33
+**Chosen:** `connection.request` with the JWT as body and `timeout_s`, in [`account_resolver_client.py:70`](../../../backend/swarm-clients/src/swarm_clients/shared/nats/account_resolver_client.py#L70) · **Source:** K33
 
 | Option | For | Against |
 | --- | --- | --- |
 | ✅ Direct request | The claims update subject takes neither idempotency headers nor a typed reply; the clients layer stays free of cross-client imports | Timeout and error handling are written in this class |
-| Reuse [`NatsRequester`](../../../packages/python/swarm-nats/src/swarm_nats/clients/nats_requester.py#L95) | One request path | It requires an idempotency key and a model reply |
+| Reuse [`NatsRequester`](../../../backend/swarm-clients/src/swarm_clients/shared/nats/nats_requester.py#L95) | One request path | It requires an idempotency key and a model reply |
 
 **Trade-off:** a small amount of duplicated handling for a clean layer.
 
@@ -80,7 +80,7 @@
 
 ## <a id="d5"></a>D5: How simulated credentials are separated
 
-**Chosen:** an ordinary user credential with its own key, tagged `simulated`, in the Operator's account ([`credential_issuer.py:160`](../../../packages/python/swarm-nats/src/swarm_nats/service/accounts/credential_issuer.py#L160)) · **Source:** PLAN.md and review
+**Chosen:** an ordinary user credential with its own key, tagged `simulated`, in the Operator's account ([`credential_issuer.py:160`](../../../backend/swarm-service/src/swarm_service/shared/accounts/credential_issuer.py#L160)) · **Source:** PLAN.md and review
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -93,7 +93,7 @@
 
 ## <a id="d6"></a>D6: Where the T0.09 criteria go in the deploy README
 
-**Chosen:** a `###` subsection, in [`deploy/README.md:298`](../../../deploy/README.md#L298) · **Source:** K34
+**Chosen:** a `###` subsection, in [`infra/README.md:298`](../../../infra/README.md#L298) · **Source:** K34
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -107,7 +107,7 @@
 
 ## <a id="d7"></a>D7: How the new charts are documented
 
-**Chosen:** rows for `charts/nats` and `charts/nats-leaf` in the Layout table and a line in "What a cell holds", as well as the new sections · **Where:** [`deploy/README.md:29-30`](../../../deploy/README.md#L29-L30) · **Source:** K34
+**Chosen:** rows for `charts/nats` and `charts/nats-leaf` in the Layout table and a line in "What a cell holds", as well as the new sections · **Where:** [`infra/README.md:29-30`](../../../infra/README.md#L29-L30) · **Source:** K34
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -133,7 +133,7 @@
 
 ## <a id="d9"></a>D9: How the edge leaf node is packaged
 
-**Chosen:** the separate chart [`deploy/charts/nats-leaf/templates/configmap.yaml:16-24`](../../../deploy/charts/nats-leaf/templates/configmap.yaml#L16-L24), and a core listener that is off by default and requires client certificates ([`deploy/charts/nats/templates/configmap.yaml:43-51`](../../../deploy/charts/nats/templates/configmap.yaml#L43-L51)) · **Source:** PLAN.md
+**Chosen:** the separate chart [`infra/charts/nats-leaf/templates/configmap.yaml:16-24`](../../../infra/charts/nats-leaf/templates/configmap.yaml#L16-L24), and a core listener that is off by default and requires client certificates ([`infra/charts/nats/templates/configmap.yaml:43-51`](../../../infra/charts/nats/templates/configmap.yaml#L43-L51)) · **Source:** PLAN.md
 
 | Option | For | Against |
 | --- | --- | --- |

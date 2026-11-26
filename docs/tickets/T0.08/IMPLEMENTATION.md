@@ -29,7 +29,7 @@
 
 ## <a id="d1"></a>D1: What a branch cell is
 
-**Chosen:** a namespace on the shared k3s cluster · **Where:** [`deploy/terraform/modules/self-hosted/cell/main.tf:1-14`](../../../deploy/terraform/modules/self-hosted/cell/main.tf#L1-L14) · **Source:** [PLAN.md](PLAN.md)
+**Chosen:** a namespace on the shared k3s cluster · **Where:** [`infra/terraform/modules/self-hosted/cell/main.tf:1-14`](../../../infra/terraform/modules/self-hosted/cell/main.tf#L1-L14) · **Source:** [PLAN.md](PLAN.md)
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -42,7 +42,7 @@
 
 ## <a id="d2"></a>D2: The auth-delegator binding of the vault
 
-**Chosen:** disable the chart's binding and create `kubernetes_cluster_role_binding_v1.auth_delegator`, named `<namespace>-openbao-auth-delegator` · **Where:** [`deploy/terraform/modules/self-hosted/vault/main.tf:35-37`](../../../deploy/terraform/modules/self-hosted/vault/main.tf#L35-L37) and [`deploy/terraform/modules/self-hosted/vault/main.tf:62-78`](../../../deploy/terraform/modules/self-hosted/vault/main.tf#L62-L78) · **Source:** K15, found by the review of round 1
+**Chosen:** disable the chart's binding and create `kubernetes_cluster_role_binding_v1.auth_delegator`, named `<namespace>-openbao-auth-delegator` · **Where:** [`infra/terraform/modules/self-hosted/vault/main.tf:35-37`](../../../infra/terraform/modules/self-hosted/vault/main.tf#L35-L37) and [`infra/terraform/modules/self-hosted/vault/main.tf:62-78`](../../../infra/terraform/modules/self-hosted/vault/main.tf#L62-L78) · **Source:** K15, found by the review of round 1
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -56,11 +56,11 @@
 
 ## <a id="d3"></a>D3: The ServiceAccount name of the vault
 
-**Chosen:** `server.serviceAccount.name = var.release_name` · **Where:** [`deploy/terraform/modules/self-hosted/vault/main.tf:38-40`](../../../deploy/terraform/modules/self-hosted/vault/main.tf#L38-L40) · **Source:** K15
+**Chosen:** `server.serviceAccount.name = var.release_name` · **Where:** [`infra/terraform/modules/self-hosted/vault/main.tf:38-40`](../../../infra/terraform/modules/self-hosted/vault/main.tf#L38-L40) · **Source:** K15
 
 | Option | For | Against |
 | --- | --- | --- |
-| ✅ Pin it to the release name | The subject of the binding ([`main.tf:73-77`](../../../deploy/terraform/modules/self-hosted/vault/main.tf#L73-L77)) is right for any release name | One extra chart value |
+| ✅ Pin it to the release name | The subject of the binding ([`main.tf:73-77`](../../../infra/terraform/modules/self-hosted/vault/main.tf#L73-L77)) is right for any release name | One extra chart value |
 | Hard-code `openbao` | Simple | Wrong as soon as `release_name` is overridden |
 | Rely on the chart's computed fullname | No extra value | The binding would depend on how the chart computes the name |
 
@@ -70,11 +70,11 @@
 
 ## <a id="d4"></a>D4: Terraform roots for branch cells
 
-**Chosen:** one root, `cells/dev-branch`, with one state per branch (key `dev-branch/<cell>.tfstate`) · **Where:** [`deploy/terraform/cells/dev-branch/versions.tf:19-21`](../../../deploy/terraform/cells/dev-branch/versions.tf#L19-L21) · **Source:** [PLAN.md](PLAN.md)
+**Chosen:** one root, `cells/dev-branch`, with one state per branch (key `dev-branch/<cell>.tfstate`) · **Where:** [`infra/terraform/cells/dev-branch/versions.tf:19-21`](../../../infra/terraform/cells/dev-branch/versions.tf#L19-L21) · **Source:** [PLAN.md](PLAN.md)
 
 | Option | For | Against |
 | --- | --- | --- |
-| ✅ One root, one state per branch | A cell for a new branch needs no pull request; destroying a cell removes only its state | The key is passed by [`deploy/scripts/dev-cell.sh:91-93`](../../../deploy/scripts/dev-cell.sh#L91-L93), so running `terraform` by hand needs the same key |
+| ✅ One root, one state per branch | A cell for a new branch needs no pull request; destroying a cell removes only its state | The key is passed by [`infra/scripts/dev-cell.sh:91-93`](../../../infra/scripts/dev-cell.sh#L91-L93), so running `terraform` by hand needs the same key |
 | One root per cell (the rule "a new cell is a new root and a pull request") | Matches the documented layout | The plan records that it cannot apply to cells created on demand |
 
 **Trade-off:** the layout rule is bent for on-demand cells, and recorded in [`AGENT.md`](../../../AGENT.md).
@@ -90,13 +90,13 @@
 | ✅ On demand, destroyed on branch deletion | The roadmap says "on demand"; the specifications do not fix a trigger, so this is the most conservative | Each cell must be asked for |
 | Automatic creation on push, or a pull request label | Fewer manual steps | No page of the specifications asks for it, and a cell costs cluster resources |
 
-**Trade-off:** the dispatch workflow applies and destroys with `-auto-approve` ([`deploy/scripts/dev-cell.sh:96`](../../../deploy/scripts/dev-cell.sh#L96)), so there is no review of a plan.
+**Trade-off:** the dispatch workflow applies and destroys with `-auto-approve` ([`infra/scripts/dev-cell.sh:96`](../../../infra/scripts/dev-cell.sh#L96)), so there is no review of a plan.
 
 **Revisit when:** the product owner states how cells are requested.
 
 ## <a id="d6"></a>D6: The cell name
 
-**Chosen:** `cell-` + branch slug cut to 30 characters + `-` + 8 hex of sha256 of the branch · **Where:** [`deploy/scripts/dev-cell.sh:42-50`](../../../deploy/scripts/dev-cell.sh#L42-L50) · **Source:** [PLAN.md](PLAN.md)
+**Chosen:** `cell-` + branch slug cut to 30 characters + `-` + 8 hex of sha256 of the branch · **Where:** [`infra/scripts/dev-cell.sh:42-50`](../../../infra/scripts/dev-cell.sh#L42-L50) · **Source:** [PLAN.md](PLAN.md)
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -107,7 +107,7 @@
 
 ## <a id="d7"></a>D7: The vault
 
-**Chosen:** OpenBao, in dev server mode with a random root token kept in a Kubernetes secret · **Where:** [`deploy/terraform/modules/self-hosted/vault/main.tf:6-57`](../../../deploy/terraform/modules/self-hosted/vault/main.tf#L6-L57) · **Source:** [PLAN.md](PLAN.md), the module header ([`main.tf:1-4`](../../../deploy/terraform/modules/self-hosted/vault/main.tf#L1-L4))
+**Chosen:** OpenBao, in dev server mode with a random root token kept in a Kubernetes secret · **Where:** [`infra/terraform/modules/self-hosted/vault/main.tf:6-57`](../../../infra/terraform/modules/self-hosted/vault/main.tf#L6-L57) · **Source:** [PLAN.md](PLAN.md), the module header ([`main.tf:1-4`](../../../infra/terraform/modules/self-hosted/vault/main.tf#L1-L4))
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -119,7 +119,7 @@
 
 ## <a id="d8"></a>D8: The vault configuration
 
-**Chosen:** an Argo CD PostSync Job that runs an idempotent shell script · **Where:** [`deploy/charts/vault-config/templates/job.yaml:8-10`](../../../deploy/charts/vault-config/templates/job.yaml#L8-L10) and [`deploy/charts/vault-config/templates/configmap.yaml:9-78`](../../../deploy/charts/vault-config/templates/configmap.yaml#L9-L78) · **Source:** [PLAN.md](PLAN.md)
+**Chosen:** an Argo CD PostSync Job that runs an idempotent shell script · **Where:** [`infra/charts/vault-config/templates/job.yaml:8-10`](../../../infra/charts/vault-config/templates/job.yaml#L8-L10) and [`infra/charts/vault-config/templates/configmap.yaml:9-78`](../../../infra/charts/vault-config/templates/configmap.yaml#L9-L78) · **Source:** [PLAN.md](PLAN.md)
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -130,7 +130,7 @@
 
 ## <a id="d9"></a>D9: The object name in `vault-config`
 
-**Chosen:** the literal `vault-config` · **Where:** [`deploy/charts/vault-config/templates/_helpers.tpl:1-4`](../../../deploy/charts/vault-config/templates/_helpers.tpl#L1-L4) · **Source:** fix after round 1, read from the diff
+**Chosen:** the literal `vault-config` · **Where:** [`infra/charts/vault-config/templates/_helpers.tpl:1-4`](../../../infra/charts/vault-config/templates/_helpers.tpl#L1-L4) · **Source:** fix after round 1, read from the diff
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -141,18 +141,18 @@
 
 ## <a id="d10"></a>D10: Argo CD and the operators
 
-**Chosen:** installed once per cluster by the dev root behind `platform_enabled`, with a root Application for the operators · **Where:** [`deploy/terraform/cells/dev/main.tf:51-61`](../../../deploy/terraform/cells/dev/main.tf#L51-L61) · **Source:** [PLAN.md](PLAN.md)
+**Chosen:** installed once per cluster by the dev root behind `platform_enabled`, with a root Application for the operators · **Where:** [`infra/terraform/cells/dev/main.tf:51-61`](../../../infra/terraform/cells/dev/main.tf#L51-L61) · **Source:** [PLAN.md](PLAN.md)
 
 | Option | For | Against |
 | --- | --- | --- |
-| ✅ Once per cluster | The operators and CRDs are cluster-wide, so a second installation per cell would collide | Needs a second apply, once the first has built the cluster and written the kubeconfig ([`deploy/terraform/cells/dev/variables.tf:77-81`](../../../deploy/terraform/cells/dev/variables.tf#L77-L81)) |
+| ✅ Once per cluster | The operators and CRDs are cluster-wide, so a second installation per cell would collide | Needs a second apply, once the first has built the cluster and written the kubeconfig ([`infra/terraform/cells/dev/variables.tf:77-81`](../../../infra/terraform/cells/dev/variables.tf#L77-L81)) |
 | In every cell | Self-contained cells | Cluster-scoped objects shared by all cells |
 
 **Trade-off:** a bootstrap step by the person. **Revisit when:** the cluster is created with the platform in one apply.
 
 ## <a id="d11"></a>D11: PgBouncer
 
-**Chosen:** a CloudNativePG `Pooler` in transaction mode · **Where:** [`deploy/charts/database/templates/pooler.yaml:7-13`](../../../deploy/charts/database/templates/pooler.yaml#L7-L13) · **Source:** [PLAN.md](PLAN.md)
+**Chosen:** a CloudNativePG `Pooler` in transaction mode · **Where:** [`infra/charts/database/templates/pooler.yaml:7-13`](../../../infra/charts/database/templates/pooler.yaml#L7-L13) · **Source:** [PLAN.md](PLAN.md)
 
 | Option | For | Against |
 | --- | --- | --- |

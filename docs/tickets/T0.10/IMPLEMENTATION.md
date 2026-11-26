@@ -21,7 +21,7 @@
 
 ## <a id="d1"></a>D1: How the dev cell refuses unsigned images
 
-**Chosen:** Sigstore policy-controller with a ClusterImagePolicy in enforce mode on `ghcr.io/gpbcom/swarm/**`, keyless identities from `images.yml` only, the `policy.sigstore.dev/include` namespace label, and a server-side dry-run probe · **Where:** [`deploy/environments/dev/platform/cluster-image-policy.yaml:9-17`](../../../deploy/environments/dev/platform/cluster-image-policy.yaml#L9-L17), [`deploy/terraform/modules/self-hosted/cell/main.tf:8`](../../../deploy/terraform/modules/self-hosted/cell/main.tf#L8), [`deploy/scripts/dev-cell.sh:106`](../../../deploy/scripts/dev-cell.sh#L106) · **Source:** PLAN.md assumption, read from the diff
+**Chosen:** Sigstore policy-controller with a ClusterImagePolicy in enforce mode on `ghcr.io/gpbcom/swarm/**`, keyless identities from `images.yml` only, the `policy.sigstore.dev/include` namespace label, and a server-side dry-run probe · **Where:** [`infra/environments/dev/platform/cluster-image-policy.yaml:9-17`](../../../infra/environments/dev/platform/cluster-image-policy.yaml#L9-L17), [`infra/terraform/modules/self-hosted/cell/main.tf:8`](../../../infra/terraform/modules/self-hosted/cell/main.tf#L8), [`infra/scripts/dev-cell.sh:106`](../../../infra/scripts/dev-cell.sh#L106) · **Source:** PLAN.md assumption, read from the diff
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -54,17 +54,17 @@
 | ✅ Reusable workflow | Matches `python.yml`, `rust.yml`, `typescript.yml` and `specs.yml` | The signing subject is `images.yml@refs/...`, which the policy and verify step must match |
 | Steps inside `ci.yml` | Not recorded | Open point |
 
-**Trade-off:** the identity in [`deploy/environments/dev/platform/cluster-image-policy.yaml:17`](../../../deploy/environments/dev/platform/cluster-image-policy.yaml#L17) must change if the workflow is renamed.
+**Trade-off:** the identity in [`infra/environments/dev/platform/cluster-image-policy.yaml:17`](../../../infra/environments/dev/platform/cluster-image-policy.yaml#L17) must change if the workflow is renamed.
 
 **Revisit when:** the workflow is renamed or split.
 
 ## <a id="d4"></a>D4: How Playwright refuses a development server
 
-**Chosen:** `defineE2eConfig` throws on a `webServer` and requires `SWARM_IMAGE_TAG` · **Where:** [`packages/ts/e2e/src/define-e2e-config.ts:22`](../../../packages/ts/e2e/src/define-e2e-config.ts#L22) · **Source:** read from the diff
+**Chosen:** `defineE2eConfig` throws on a `webServer` and requires `SWARM_IMAGE_TAG` · **Where:** [`qa/e2e/src/define-e2e-config.ts:22`](../../../qa/e2e/src/define-e2e-config.ts#L22) · **Source:** read from the diff
 
 | Option | For | Against |
 | --- | --- | --- |
-| ✅ A shared config that refuses it | The AGENT.md rule "never a development server" is enforced in code and tested | The smoke spec sits in the shared package until a front end exists ([`packages/ts/e2e/e2e/images.spec.ts:1`](../../../packages/ts/e2e/e2e/images.spec.ts#L1)) |
+| ✅ A shared config that refuses it | The AGENT.md rule "never a development server" is enforced in code and tested | The smoke spec sits in the shared package until a front end exists ([`qa/e2e/e2e/images.spec.ts:1`](../../../qa/e2e/e2e/images.spec.ts#L1)) |
 | Convention in AGENT.md only | Less code | Unenforced; not recorded as considered |
 
 **Trade-off:** specs must later move to each front end.
