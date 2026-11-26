@@ -40,14 +40,23 @@ const RUN = {
   properties: { exit_code: { type: 'integer' }, output: { type: 'array', items: { type: 'string' } } },
   required: ['exit_code', 'output'],
 }
-async function runExactly(prefix, command, expect, opts) {
+// L-35: the runner gets one command, with its folder as a cd in front, never a sentence asking it to find the folder.
+// L-40: the Bash tool shows no exit code when a command succeeds, so the runner guessed 1 from a warning. The command
+// prints its own exit code as its last line, and that number decides, never the runner's reading.
+const EXIT_MARK = 'SWARM_EXIT_CODE='
+async function runExactly(dir, command, expect, opts) {
+  const line = `${dir ? `cd ${JSON.stringify(dir)} && ` : ''}${command}; echo "${EXIT_MARK}$?"`
   const ran = await agent(
-    `${prefix}Run exactly this one command, and nothing else: ${command}\nReport its exit code and every line it printed.`,
+    `Run exactly this one command, and nothing else: ${line}\nReport every line it printed, the last one included, and in exit_code the number after ${EXIT_MARK}.`,
     { agentType: 'runner', schema: RUN, ...opts },
   )
   if (!ran) return null
-  const passed = ran.exit_code === expect.exit && (!expect.quiet || ran.output.length === 0)
-  return { passed, problems: ran.output, exit_code: ran.exit_code }
+  const marked = ran.output.map(l => String(l).match(/SWARM_EXIT_CODE=(\d+)/)).filter(Boolean).pop()
+  const exit = marked ? Number(marked[1]) : ran.exit_code
+  const output = ran.output.filter(l => !String(l).includes(EXIT_MARK))
+  if (marked && exit !== ran.exit_code) log(`Runner reported exit ${ran.exit_code}, the command printed ${exit}: ${exit} decides (L-40)`)
+  const passed = exit === expect.exit && (!expect.quiet || output.length === 0)
+  return { passed, problems: output, exit_code: exit }
 }
 
 const WRITE_SCHEMA = {
@@ -149,7 +158,7 @@ if (!ticket.specs.length) {
 log(`TICKET.md refers to ${ticket.specs.length} specification page(s)`)
 
 phase('Check')
-const checkTicket = () => runExactly('From the repository root: ', `python3 .claude/skills/ticket/scripts/check_ticket.py ${ID}`,
+const checkTicket = () => runExactly('', `python3 .claude/skills/ticket/scripts/check_ticket.py ${ID}`,
   { exit: 0, quiet: true }, { label: `check TICKET.md ${ID}` },
 )
 let ticketCheck = await checkTicket()
@@ -201,7 +210,7 @@ const written = await agent(
 const problems = (written && written.problems) || ['the scribe returned no result']
 if (problems.length) log(`PLAN.md, PROGRESS.md or TICKET.md fails its checks: ${problems.join(' | ')}`)
 
-const planVerdict = await runExactly('From the repository root: ', `python3 .claude/skills/ticket/scripts/check_plan.py ${ID}`,
+const planVerdict = await runExactly('', `python3 .claude/skills/ticket/scripts/check_plan.py ${ID}`,
   { exit: 0, quiet: true }, { label: `check PLAN.md ${ID}` },
 )
 let planCheck = 'passed'

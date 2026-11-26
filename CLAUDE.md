@@ -4,7 +4,7 @@
 
 ## Code rules never to break
 
-Eleven rules of [AGENT.md](AGENT.md) hold for people and agents alike, in `src/` and `tests/`:
+Fifteen rules of [AGENT.md](AGENT.md) hold for people and agents alike, in `src/` and `tests/`:
 
 - **No `Any` and no `object` as a type.** Both are too generic. Write the real type: `JsonValue` for parsed JSON, YAML
   or TOML, a `Union` for several known types, a `Callable[...]` with its signature, a generic with its real parameter
@@ -42,6 +42,17 @@ Eleven rules of [AGENT.md](AGENT.md) hold for people and agents alike, in `src/`
   return, a skip or a default at `DEBUG`, a raise at `ERROR` first. A conditional expression that chooses what the code
   does becomes an `if`/`else`. Only the constructor's `logger if logger else getLogger(__name__)` and the code the
   logging system calls (formatters, handlers) stay silent (AGENT.md, Logging).
+- **The api layer holds ONLY endpoints.** FastAPI endpoints and their versioned routers (`/v1/...`), their `Depends`,
+  the middlewares, the exception handlers and the `/v1/live` WebSocket. A command, a factory, a runnable, a bus handler,
+  the server runner or the app builder belongs to the service layer or the kernel (AGENT.md, Target layout).
+- **NO command line in the product.** `backend/` and `scripts/` never import `argparse`, `click` or `typer`, never read
+  `sys.argv`, and hold no `cli` or `commands` module: an app's `main()` reads its configuration. Only the harness and
+  CI keep command lines (AGENT.md, Target layout).
+- **The operations are scripts.** OpenAPI generation, migrations and the schema export are argument-free Python scripts
+  in `scripts/<area>/`, run with `uv run` (AGENT.md, Target layout).
+- **ONE class per entity per layer.** One `<Entity>Repository`, `<Entity>Client`, `<Entity>Service` or
+  `<Entity>Router` per entity in its layer; classes that split one entity's work in a layer are merged. Factories and
+  exceptions are exempt (AGENT.md, Target layout).
 
 
 ## The harness

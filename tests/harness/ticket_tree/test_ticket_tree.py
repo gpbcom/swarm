@@ -14,8 +14,12 @@ from tests.harness.ticket_tree.helpers import (
     INTEGRATED_KEY,
     LEGACY_BRANCH,
     MERGE_KEY,
+    OPEN_PULL_REQUEST,
     OTHER,
+    PULL_REQUEST_ERROR_KEY,
+    PULL_REQUEST_KEY,
     PUSHED_KEY,
+    REFUSED_KEY,
     REMAINING_KEY,
     SHARED_BRANCH,
     TICKET,
@@ -26,6 +30,8 @@ from tests.harness.ticket_tree.helpers import (
     add_worktree,
     commit_count,
     documents_problems,
+    fake_gh,
+    gh_calls,
     git,
     integrated_repo,
     legacy_home,
@@ -316,6 +322,53 @@ class TestTicketTree:
         subjects = git(main, "log", "--format=%s", f"develop..{SHARED_BRANCH}").splitlines()
         assert subjects == [f"{OTHER}: Second ticket", TICKET_TITLE]
         assert git(main, "status", "--porcelain") == ""
+
+    def test_integrate_refuses_a_file_another_open_ticket_owns(self, tmp_path: Path) -> None:
+        main = two_tickets(tmp_path)
+        worker_writes(main, "w3", "K02", {"src/theirs.py": "y = 3\n", "src/mine2.py": "z = 1\n"})
+        result = run_json(main, "integrate", "--task", "K02")
+        assert result[REFUSED_KEY] == [{"task": "K02", "file": "src/theirs.py", "owner": OTHER}]
+        assert result[INTEGRATED_KEY] == ["K02"]
+        assert (main / "src" / "theirs.py").read_text(encoding="utf-8") == "y = 2\n"
+        assert (main / "src" / "mine2.py").is_file()
+        mine = run_json(main, "status")[PATHS_KEY]
+        assert isinstance(mine, list)
+        assert "src/mine2.py" in mine
+        assert "src/theirs.py" not in mine
+
+    def test_finish_updates_an_open_pull_request_through_the_rest_api_never_gh_pr_edit(self, tmp_path: Path) -> None:
+        main = make_repo(tmp_path)
+        with_remote(tmp_path, main)
+        run_json(main, "prepare")
+        worker_writes(main, "w1", "K01", {"src/new.py": "x = 1\n"})
+        run_json(main, "integrate", "--task", "K01")
+        assert documents_problems(main, "In [`src/new.py:1`](../../../src/new.py#L1).", "") == ""
+        bin_folder = tmp_path / "bin"
+        result = run(main, "finish", env=fake_gh(bin_folder, open_pull_request=True, api_fails=False))
+        assert result.returncode == 0, result.stderr
+        assert '"' + PULL_REQUEST_KEY + '": "' + OPEN_PULL_REQUEST + '"' in result.stdout
+        calls = gh_calls(bin_folder)
+        assert not [call for call in calls if call[:2] == ["pr", "edit"]]
+        patch = [call for call in calls if call[:3] == ["api", "-X", "PATCH"]]
+        assert patch and patch[0][3] == "repos/{owner}/{repo}/pulls/7"
+        assert f"title={TICKET_TITLE}" in patch[0]
+        assert ["api", "-X", "POST", "repos/{owner}/{repo}/issues/7/labels", "-f", "labels[]=automerge"] in calls
+
+    def test_finish_removes_the_ticket_s_state_once_pushed_even_when_the_pull_request_fails(
+        self, tmp_path: Path
+    ) -> None:
+        main = make_repo(tmp_path)
+        remote = with_remote(tmp_path, main)
+        run_json(main, "prepare")
+        worker_writes(main, "w1", "K01", {"src/new.py": "x = 1\n"})
+        run_json(main, "integrate", "--task", "K01")
+        assert documents_problems(main, "In [`src/new.py:1`](../../../src/new.py#L1).", "") == ""
+        result = run(main, "finish", env=fake_gh(tmp_path / "bin", open_pull_request=True, api_fails=True))
+        assert result.returncode == 1
+        assert PULL_REQUEST_ERROR_KEY in result.stdout
+        assert "Committed and pushed" in result.stderr
+        assert git(remote, "rev-parse", SHARED_BRANCH) == git(main, "rev-parse", SHARED_BRANCH)
+        assert run_json(main, "status")[INTEGRATED_KEY] == []
 
     def test_a_ticket_started_in_its_own_worktree_before_tkt_16_keeps_it(self, tmp_path: Path) -> None:
         main = make_repo(tmp_path)

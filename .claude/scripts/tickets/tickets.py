@@ -193,6 +193,11 @@ def plan_state(main: Path, ticket: str) -> str:
 ##############
 
 
+def shared_areas(mine: Set[str], theirs: Set[str]) -> List[str]:
+    """Return the areas two tickets both change (``*`` overlaps every area), sorted."""
+    return sorted((mine & theirs) or (mine | theirs if "*" in mine or "*" in theirs else set()))
+
+
 def problems(main: Path, ticket: str, done: Optional[Set[str]] = None) -> List[str]:
     """Return why a ticket may not start yet (TKT-16), one sentence each."""
     tickets = graph(main)
@@ -215,11 +220,14 @@ def problems(main: Path, ticket: str, done: Optional[Set[str]] = None) -> List[s
             f"{ticket} fixes what {field.get('after')} finds: it starts once that has flown ({field.get('start')})."
         )
     mine = areas(str(info.get("area", "")))
-    for other, home in open_tickets(main).items():
-        if other == ticket or other in done:
+    running = open_tickets(main)
+    if ticket in running:
+        return found
+    for other, home in running.items():
+        if other in done:
             continue
         theirs = areas(str(tickets.get(other, {}).get("area", "")))
-        shared = sorted((mine & theirs) or (mine | theirs if "*" in mine or "*" in theirs else set()))
+        shared = shared_areas(mine, theirs)
         if shared:
             found.append(f"{other} is open in {home} and changes {', '.join(shared)}: wait for it (area lock).")
     return found
@@ -324,7 +332,9 @@ def resolve(main: Path, refs: List[str]) -> List[str]:
             raise SystemExit(f"Unknown reference {ref}: use #<issue>, T0.10, E0.4 or P1.")
         found = expand(ident, children)
         if not found:
-            raise SystemExit(f"{ref} ({ident}) holds no ticket: run python3 .claude/scripts/github/board.py bootstrap first.")
+            raise SystemExit(
+                f"{ref} ({ident}) holds no ticket: run python3 .claude/scripts/github/board.py bootstrap first."
+            )
         wanted.extend(ticket for ticket in found if ticket not in wanted)
     done = done_tickets(main)
     left = sorted((ticket for ticket in wanted if ticket not in done), key=key)
@@ -335,6 +345,20 @@ def resolve(main: Path, refs: List[str]) -> List[str]:
         ordered.append(step)
         left.remove(step)
     return ordered
+
+
+def without_overlaps(main: Path, startable: List[str]) -> List[str]:
+    """Keep, in order, the tickets whose areas overlap no earlier kept one: the others wait for the next call."""
+    tickets = graph(main)
+    kept: List[str] = []
+    for ticket in startable:
+        mine = areas(str(tickets.get(ticket, {}).get("area", "")))
+        clash = [o for o in kept if shared_areas(mine, areas(str(tickets.get(o, {}).get("area", ""))))]
+        if clash:
+            print(f"note: {ticket} waits for {clash[0]}, which starts now and changes the same area.", file=sys.stderr)
+            continue
+        kept.append(ticket)
+    return kept
 
 
 def rows(main: Path, group: List[str]) -> List[Dict[str, object]]:
@@ -419,7 +443,15 @@ def approve(main: Path, group: List[str]) -> int:
             progress.write_text(text, encoding="utf-8")
         if main.resolve() == REPOSITORY.resolve():
             subprocess.run(
-                [sys.executable, str(SCRIPTS.parent / "github" / "board.py"), "move", "--ticket", ticket, "--status", "planned"],
+                [
+                    sys.executable,
+                    str(SCRIPTS.parent / "github" / "board.py"),
+                    "move",
+                    "--ticket",
+                    ticket,
+                    "--status",
+                    "planned",
+                ],
                 cwd=main,
                 capture_output=True,
                 check=False,
@@ -631,6 +663,7 @@ def main(argv: Optional[List[str]] = None) -> int:
             show_rows(found)
     elif args.command == "next":
         startable = [str(r["ticket"]) for r in rows(main_dir, resolve(main_dir, args.refs)) if r["can_start"]]
+        startable = without_overlaps(main_dir, startable)
         print(json.dumps(startable)) if args.json else print("\n".join(startable))
     elif args.command == "approve":
         return approve(main_dir, resolve(main_dir, args.refs))

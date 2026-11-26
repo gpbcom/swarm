@@ -6,7 +6,7 @@ import os
 import subprocess
 import sys
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 # Third-party imports
 from pydantic import JsonValue
@@ -33,6 +33,34 @@ COMMIT_KEY = "commit"
 MERGE_KEY = "merge"
 HOME_KEY = "home"
 PUSHED_KEY = "pushed"
+REFUSED_KEY = "refused"
+PULL_REQUEST_KEY = "pull_request"
+PULL_REQUEST_ERROR_KEY = "pull_request_error"
+PATH_KEY = "PATH"
+GH_LOG_KEY = "FAKE_GH_LOG"
+GH_OPEN_KEY = "FAKE_GH_OPEN"
+GH_API_FAILS_KEY = "FAKE_GH_API_FAILS"
+OPEN_PULL_REQUEST = "https://example.com/pull/7"
+# A stand-in for gh: it logs every call, fails ``pr edit`` as GitHub does since Projects (classic) is deprecated (L-30,
+# L-36), lists one open pull request when FAKE_GH_OPEN is set, and fails ``gh api`` when FAKE_GH_API_FAILS is set.
+FAKE_GH = f"""#!{sys.executable}
+import json, os, sys
+args = sys.argv[1:]
+with open(os.environ["{GH_LOG_KEY}"], "a", encoding="utf-8") as log:
+    log.write(json.dumps(args) + "\\n")
+if args[:2] == ["pr", "edit"]:
+    print("GraphQL: Projects (classic) is being deprecated", file=sys.stderr)
+    sys.exit(1)
+if args[:2] == ["pr", "list"]:
+    print(json.dumps([{{"number": 7, "url": "{OPEN_PULL_REQUEST}"}}] if os.environ.get("{GH_OPEN_KEY}") else []))
+    sys.exit(0)
+if args[:1] == ["api"] and os.environ.get("{GH_API_FAILS_KEY}"):
+    print("HTTP 502: Bad Gateway", file=sys.stderr)
+    sys.exit(1)
+if args[:2] == ["pr", "create"]:
+    print("https://example.com/pull/8")
+sys.exit(0)
+"""
 
 
 def repo_root() -> Path:
@@ -54,7 +82,9 @@ def git(cwd: Path, *args: str) -> str:
     return result.stdout.strip()
 
 
-def run(cwd: Path, *args: str, ticket: str = TICKET) -> subprocess.CompletedProcess[str]:
+def run(
+    cwd: Path, *args: str, ticket: str = TICKET, env: Optional[Dict[str, str]] = None
+) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         [sys.executable, str(script_path()), *args, "--ticket", ticket],
         cwd=cwd,
@@ -62,7 +92,7 @@ def run(cwd: Path, *args: str, ticket: str = TICKET) -> subprocess.CompletedProc
         capture_output=True,
         text=True,
         encoding="utf-8",
-        env=environment(),
+        env=env if env else environment(),
         timeout=120,
     )
 
@@ -77,6 +107,11 @@ def run_json(cwd: Path, *args: str) -> Dict[str, JsonValue]:
 def legacy_home(main: Path) -> Path:
     """Return where a ticket started before TKT-16 kept its own worktree, beside the main checkout."""
     return main.parent / f"{main.name}-tickets" / TICKET
+
+
+def state_path(main: Path, ticket: str) -> Path:
+    """Return the file that records a ticket's own files, in the shared git directory."""
+    return main / ".git" / "swarm" / ticket / "state.json"
 
 
 def add_ticket(main: Path, ticket: str) -> None:
@@ -154,3 +189,25 @@ def task_args(tasks: List[str]) -> List[str]:
     for task in tasks:
         args.extend(["--task", task])
     return args
+
+
+def fake_gh(folder: Path, open_pull_request: bool, api_fails: bool) -> Dict[str, str]:
+    """Install the stand-in ``gh`` in ``folder`` and return the environment that puts it first on the PATH."""
+    folder.mkdir(parents=True, exist_ok=True)
+    script = folder / "gh"
+    script.write_text(FAKE_GH, encoding="utf-8")
+    script.chmod(0o755)
+    env = {**environment(), PATH_KEY: f"{folder}{os.pathsep}{os.environ[PATH_KEY]}", GH_LOG_KEY: str(folder / "log")}
+    if open_pull_request:
+        env[GH_OPEN_KEY] = "1"
+    if api_fails:
+        env[GH_API_FAILS_KEY] = "1"
+    return env
+
+
+def gh_calls(folder: Path) -> List[List[str]]:
+    """Return every call the stand-in ``gh`` received, oldest first."""
+    log = folder / "log"
+    if not log.is_file():
+        return []
+    return [json.loads(line) for line in log.read_text(encoding="utf-8").splitlines() if line]

@@ -287,6 +287,56 @@ Each step must pass before the next one starts:
 4. Run Playwright against those images, and upload the HTML report if a test fails.
 5. Publish the images tagged with the commit SHA, from `develop` or `master` only.
 
+## Target layout
+
+Swarm is moving, phase by phase, to the layout of the approved refactor plan: layers as packages, thin apps, and the
+operations in `scripts/`. Until a phase moves a part, that part keeps the layout above; new code in `backend/` and
+`scripts/` follows this section from the start, and `tests/conventions/` checks both layouts while they coexist.
+
+| Path | Holds |
+| --- | --- |
+| `backend/libs/<lib>/` | The kernel: `swarm-lifecycle`, `swarm-logging`, `swarm-catalog`, `swarm-nats` (the connector), `swarm-web` (the app builder, the server runnable, the entity tags) |
+| `backend/swarm-models/` | Layer 0: every Pydantic model, enum and exception, by concept, and each app's configuration in `config/<app>/` |
+| `backend/swarm-storage/`, `backend/swarm-clients/` | Layer 1: one repository per entity, one client per remote system, a folder per domain and a `shared/` folder |
+| `backend/swarm-service/` | Layer 2: the business rules and every runnable (bus responders and consumers included), a folder per domain |
+| `backend/swarm-api/` | Layer 3: the FastAPI endpoints only (see below) |
+| `backend/apps/<app>/` | Layer 4: one image each, with its `Dockerfile`, `conf/`, `migrations/` and a `main()`; `[tool.swarm] domains` lists the domains it owns |
+| `scripts/<area>/` | The operations, run with `uv run`: OpenAPI export and check, migrations, schema export and check |
+| `tests/swarm_<module>/` | The Python tests, mirroring each package's import path |
+
+**The api layer holds only endpoints.** `swarm_api` holds FastAPI endpoints and their versioned routers (`/v1/...`),
+their `Depends` providers, the middlewares, the exception handlers and the `/v1/live` WebSocket endpoint. Anything else
+that sits in `api` and exposes no endpoint (a command, a factory, a runnable, a bus handler, the server runner, the app
+builder) moves to the service layer or to the kernel.
+
+**No command line in the product.** `backend/` and `scripts/` never import `argparse`, `click` or `typer`, never read
+`sys.argv`, and hold no folder or module named `cli` or `commands`. An app's `main()` reads its `conf/app.yaml` and its
+environment, then runs. Only the harness (`.claude/`) and CI (`.github/`) keep command lines.
+
+**`scripts/` holds the operations.** OpenAPI generation and checking, migrations and the schema export are Python
+scripts in `scripts/<area>/`, exposed as `uv run swarm-<area>-<action>`, taking no arguments: a script covers every app,
+or the one named by the environment entry `SWARM_APP`.
+
+**One class per entity per layer.** Within a layer, an entity has exactly one responsible class: one `<Entity>Repository`
+in storage, one `<Entity>Client` in clients, one `<Entity>Service` in service, one `<Entity>Router` in api. Classes that
+split one entity's work in the same layer are merged. Factories and exceptions keep their own files.
+
+**Package imports.** Each package imports only these first-party packages:
+
+| Package | May import |
+| --- | --- |
+| The kernel (`backend/libs/`) | The kernel only |
+| `swarm_models` | Itself, `swarm_catalog` and `swarm_lifecycle`. Never `swarm_logging` |
+| `swarm_storage`, `swarm_clients` | Itself, `swarm_models` and the kernel |
+| `swarm_service` | Itself, `swarm_storage`, `swarm_clients`, `swarm_models` and the kernel |
+| `swarm_api` | Itself, `swarm_service`, `swarm_models`, `swarm_web` and the rest of the kernel |
+| `swarm_<app>` | `swarm_api`, `swarm_service`, `swarm_web`, `swarm_models.config.<app>` and `swarm_logging` |
+| `scripts/` | `swarm_service`, `swarm_api`, `swarm_web`, `swarm_models` and the kernel |
+
+Inside these rules, domains are owned: `swarm_service.<d>` uses only `swarm_storage.<d>`, `swarm_clients.<d>` or the
+`shared` folders, each domain has exactly one owning app, and an app wires only the domains of its `[tool.swarm]
+domains`.
+
 ## Rules a test enforces
 
 `tests/conventions/` fails on any of these, in `src/` and `tests/` unless stated:
@@ -302,6 +352,13 @@ attributes starting with an underscore and the node rules are not tested yet. Ea
 folder of services. `tests/conventions/packages/test_package_conventions.py` runs the same rules against every package of
 `packages/python/`, and `SWARM_CONVENTIONS_PACKAGES_ROOT` points it at another folder. The lifecycle rule accepts the
 definitions of `Runnable` and `AsyncRunnable` themselves.
+
+Since the refactor's phase 1, `tests/conventions/backend/` checks the [Target layout](#target-layout) in `backend/`
+and `scripts/`, and skips while they do not exist: the package import table (`PackageImports`), the dependencies each
+layer package declares (`PackageDependencies`), domain ownership (`DomainOwnership`), thin apps (`ThinApp`), the tests
+mirror (`TestsMirror`), unique test base names, no `Path(__file__).parents[N]` lookup (`NoFileDepthPath`), the api
+layer holding only endpoints (`ApiOnlyEndpoints`), no command line (`NoCommandLine`) and one class per entity per
+layer (`OneClassPerEntity`). `SWARM_CONVENTIONS_BACKEND_ROOT` points it at another repository root.
 
 - More than one top-level class in a file, whatever the kind of class, except several enums in an `enums.py`.
 - More than five Python files in a folder, not counting `__init__.py` and `conftest.py`. The rule of [File shape](#file-shape)

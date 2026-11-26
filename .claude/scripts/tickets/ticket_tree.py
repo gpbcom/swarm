@@ -42,7 +42,9 @@ the script uses git *trees* (``git write-tree`` on a temporary index), which nev
   ``<git common dir>/swarm/<ID>/pending/``. Run it again after any later change.
 - ``integrate`` applies the hand-offs to the home in the order given, stops at the first conflict (with ``.rej``
   files to resolve by hand, then ``--resolved``), removes the integrated worktrees, and records the task ids (TKT-11).
-  It prints the tree of the integrated work, which ``diff --from`` compares with later.
+  It prints the tree of the integrated work, which ``diff --from`` compares with later. A file that another open
+  ticket already owns is never applied nor taken as this ticket's own (TKT-16, L-34): it is listed under ``refused``
+  with its owner, and the rest of the hand-off is integrated.
 - ``changes`` writes the table of changed files and line ranges between ``<!-- changes -->`` markers of
   ``EXPLAIN.md`` (TKT-14), leaving out the ticket's own folder. Every file and every line range in it is a link.
 - ``docs`` checks ``EXPLAIN.md`` and ``IMPLEMENTATION.md`` (TKT-14): the changes table is up to date, no placeholder
@@ -51,8 +53,11 @@ the script uses git *trees* (``git write-tree`` on a temporary index), which nev
   problem per line, and nothing when all is well. ``finish`` refuses to commit while it finds a problem.
 - ``finish`` makes the one commit on ``feature/<ID>``. With a remote ``origin``, it rebases that commit on
   ``origin/develop`` when ``develop`` moved, pushes the branch and opens its pull request to ``develop`` (``Closes #n``,
-  label ``automerge``): GitHub merges it once CI passes (TKT-15). Without a remote, it merges the branch into
-  ``develop`` in the main checkout with ``--no-ff``. Then it removes the state; the home stays until
+  label ``automerge``): GitHub merges it once CI passes (TKT-15). An open pull request is updated through the REST
+  API, never ``gh pr edit``, whose GraphQL query fails on the deprecated Projects (classic) (L-30, L-36). Without a
+  remote, it merges the branch into ``develop`` in the main checkout with ``--no-ff``. Once the commit is pushed or
+  merged, it removes the state whatever the pull request step did: a failed pull request step is reported under
+  ``pull_request_error`` and in the exit code, for the person to finish by hand. The home stays until
   ``tickets.py prune`` finds the branch merged.
 
 Each command prints JSON (or the diff or table asked for) on stdout, and a failure on stderr with exit code 1.
@@ -69,9 +74,14 @@ LEGACY_PREFIX = "ticket/"
 TICKETS_SUFFIX = "-tickets"
 SHARED_BRANCH = "feature/tickets"
 FINISH_LOCK = "finish.lock"
+PULL_REQUEST_ERROR = "pull_request_error"
 PATHS_KEY = "paths"
 TICKET_SUBJECT = re.compile(r"^(T\d+\.\d{2})[: ]")
 AUTOMERGE_LABEL = "automerge"
+# L-30, L-36: ``gh pr edit`` reads the deprecated Projects (classic) and fails; the REST API does not. ``gh api`` fills in
+# ``{owner}`` and ``{repo}`` from the checkout's remote.
+PULLS_API = "repos/{owner}/{repo}/pulls"
+ISSUES_API = "repos/{owner}/{repo}/issues"
 GITHUB_STATE = ".claude/github.json"
 STATE_FOLDER = "swarm"
 STATE_FILE = "state.json"
@@ -210,6 +220,27 @@ def ticket_paths(state: Dict[str, JsonData], ticket: str) -> List[str]:
     if not isinstance(recorded, list):
         return ["."]
     return sorted({str(path) for path in recorded} | {ticket_folder(ticket)})
+
+
+def owners_of_files(top: Path, ticket: str) -> Dict[str, str]:
+    """Return every file or folder another open ticket owns, with that ticket (TKT-16), ``"."`` states left out."""
+    owners: Dict[str, str] = {}
+    for other in open_states(top):
+        if other == ticket:
+            continue
+        state = load_state(top, other)
+        if isinstance(state.get(PATHS_KEY), list):
+            for path in ticket_paths(state, other):
+                owners.setdefault(path, other)
+    return owners
+
+
+def owner_of(name: str, owners: Dict[str, str]) -> Optional[str]:
+    """Return the open ticket that owns ``name``, a file it changed or a file under a folder it owns, or None."""
+    for path, ticket in owners.items():
+        if name == path.rstrip("/") or name.startswith(path.rstrip("/") + "/"):
+            return ticket
+    return None
 
 
 def tickets_root(top: Path) -> Path:
@@ -476,8 +507,10 @@ def integrate(top: Path, ticket: str, tasks: List[str], resolved: bool) -> Tuple
         raise TicketTreeError(f"Resolve and delete these .rej files first: {', '.join(left)}.")
     folder = state_dir(top, ticket)
     state = load_state(top, ticket)
+    owners = owners_of_files(top, ticket)
     done: List[JsonData] = []
     conflicts: List[JsonData] = []
+    refused: List[JsonData] = []
     remaining = list(tasks)
     while remaining:
         task = remaining[0]
@@ -485,14 +518,21 @@ def integrate(top: Path, ticket: str, tasks: List[str], resolved: bool) -> Tuple
         meta_path = patch.with_suffix(".json")
         if not patch.is_file():
             raise TicketTreeError(f"No hand-off for {task}: the worker must run handoff --task {task}.")
+        meta: Dict[str, JsonData] = json.loads(meta_path.read_text(encoding="utf-8")) if meta_path.is_file() else {}
+        changed = [line.split("\t")[1:] for line in meta.get("files") or [] if isinstance(line, str)]
+        names = sorted({name for names in changed for name in names})
+        foreign = {name: owner for name in names if (owner := owner_of(name, owners))}
+        excluded = [f"--exclude={name}" for name in foreign]
         if not resolved and patch.stat().st_size:
-            code, _ = git(top, "apply", "--check", "--binary", "--whitespace=nowarn", str(patch), check=False)
+            apply = ["apply", "--binary", "--whitespace=nowarn", *excluded]
+            code, _ = git(top, *apply, "--check", str(patch), check=False)
             if code != 0:
-                git(top, "apply", "--binary", "--whitespace=nowarn", "--reject", str(patch), check=False)
+                git(top, *apply, "--reject", str(patch), check=False)
                 conflicts.append({"task": task, "rejects": rejects(top), "patch": str(patch)})
                 break
-            git(top, "apply", "--binary", "--whitespace=nowarn", str(patch))
-        meta: Dict[str, JsonData] = json.loads(meta_path.read_text(encoding="utf-8")) if meta_path.is_file() else {}
+            git(top, *apply, str(patch))
+        for name, owner in sorted(foreign.items()):
+            refused.append({"task": task, "file": name, "owner": owner})
         applied = folder / APPLIED
         applied.mkdir(parents=True, exist_ok=True)
         number = len(list(applied.glob("*.patch"))) + 1
@@ -502,8 +542,7 @@ def integrate(top: Path, ticket: str, tasks: List[str], resolved: bool) -> Tuple
         integrated = state.get("integrated")
         state["integrated"] = [*(integrated if isinstance(integrated, list) else []), task]
         if isinstance(state.get(PATHS_KEY), list):
-            changed = [line.split("\t")[1:] for line in meta.get("files") or [] if isinstance(line, str)]
-            state[PATHS_KEY] = sorted({*state[PATHS_KEY], *(name for names in changed for name in names)})
+            state[PATHS_KEY] = sorted({*state[PATHS_KEY], *(name for name in names if name not in foreign)})
         remove_worktree(top, meta)
         done.append(task)
         remaining.pop(0)
@@ -515,6 +554,7 @@ def integrate(top: Path, ticket: str, tasks: List[str], resolved: bool) -> Tuple
     result: Dict[str, JsonData] = {
         "integrated": done,
         "conflicts": conflicts,
+        "refused": refused,
         "remaining": remaining,
         "tree": state.get("tree") or "",
     }
@@ -795,16 +835,22 @@ def pull_request(home: Path, branch: str) -> str:
         "--description",
         "Merged into develop once CI passes",
     )
-    code, found = run_tool(
-        home, "gh", "pr", "list", "--head", branch, "--state", "open", "--json", "url", "--jq", ".[0].url // empty"
-    )
-    if code == 0 and found:
-        code, output = run_tool(
-            home, "gh", "pr", "edit", found, "--title", title, "--body", body, "--add-label", AUTOMERGE_LABEL
+    code, listed = run_tool(home, "gh", "pr", "list", "--head", branch, "--state", "open", "--json", "number,url")
+    try:
+        found = json.loads(listed) if code == 0 and listed else []
+    except json.JSONDecodeError:
+        found = []
+    if isinstance(found, list) and found and isinstance(found[0], dict):
+        number, url = found[0].get("number"), str(found[0].get("url") or "")
+        updates = (
+            ("api", "-X", "PATCH", f"{PULLS_API}/{number}", "-f", f"title={title}", "-f", f"body={body}"),
+            ("api", "-X", "POST", f"{ISSUES_API}/{number}/labels", "-f", f"labels[]={AUTOMERGE_LABEL}"),
         )
-        if code != 0:
-            raise TicketTreeError(f"The branch is pushed but its pull request could not be updated: {output}")
-        return found
+        for update in updates:
+            code, output = run_tool(home, "gh", *update)
+            if code != 0:
+                raise TicketTreeError(f"The branch is pushed but its pull request could not be updated: {output}")
+        return url
     code, url = run_tool(
         home,
         "gh",
@@ -836,7 +882,12 @@ def publish(home: Path, ticket: str, open_pull_request: bool) -> Dict[str, JsonD
         raise TicketTreeError(f"git push {REMOTE} {branch} failed: {output}")
     result: Dict[str, JsonData] = {"pushed": True, "branch": branch}
     if open_pull_request:
-        result["pull_request"] = pull_request(home, branch)
+        try:
+            result["pull_request"] = pull_request(home, branch)
+        except TicketTreeError as error:
+            print(f"note: the pull request step failed after the push ({type(error).__name__}).", file=sys.stderr)
+            result[PULL_REQUEST_ERROR] = str(error)
+            return result
         board = home / ".claude" / "scripts" / "github" / "board.py"
         if board.is_file():
             run_tool(home, sys.executable, str(board), "move", "--ticket", ticket, "--status", "review")
@@ -891,6 +942,13 @@ def commit_paths(home: Path, paths: List[str], title: str, body: str) -> str:
     return commit
 
 
+def regenerate_changes_table(top: Path, ticket: str) -> None:
+    """Rewrite the changes table of ``EXPLAIN.md`` when it has its markers, so that no other commit stales it (L-42)."""
+    explain = top / ticket_folder(ticket) / "EXPLAIN.md"
+    if explain.is_file() and CHANGES_START in explain.read_text(encoding="utf-8"):
+        changes(top, ticket, "write")
+
+
 def finish(top: Path, ticket: str, open_pull_request: bool = True) -> Dict[str, JsonData]:
     """Commit the ticket's own files once on the shared branch, then publish it (TKT-15) or merge it locally."""
     home = require_home(top, ticket)
@@ -905,6 +963,7 @@ def finish(top: Path, ticket: str, open_pull_request: bool = True) -> Dict[str, 
         paths = ticket_paths(state, ticket)
         if not git(home, "diff", "--name-only", "HEAD", snapshot(home), "--", *paths)[1]:
             raise TicketTreeError("There is nothing to commit for this ticket.")
+        regenerate_changes_table(home, ticket)
         problems = document_problems(home, ticket)
         if problems:
             raise TicketTreeError("Fix the ticket's documents before its commit (TKT-14):\n" + "\n".join(problems))
@@ -980,7 +1039,11 @@ def main() -> int:
         elif args.command == "docs":
             output, code = documents(top, args.ticket)
         else:
-            output = finish(top, args.ticket, not args.no_pull_request)
+            finished = finish(top, args.ticket, not args.no_pull_request)
+            output = finished
+            if finished.get(PULL_REQUEST_ERROR):
+                print(f"❌ Committed and pushed, but {finished[PULL_REQUEST_ERROR]}", file=sys.stderr)
+                code = 1
     except TicketTreeError as error:
         print(f"❌ {error}", file=sys.stderr)
         return 1
