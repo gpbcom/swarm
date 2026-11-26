@@ -70,6 +70,10 @@ jobs:
             echo "The base commit has no benchmark: nothing to compare."
           fi
       - name: Benchmark the pull request
-        run: cargo bench --workspace --locked --bench '*' -- --baseline-lenient pr-base
+        # The base build shares CARGO_TARGET_DIR and its sources were written last: touch the pull request's own
+        # sources so that cargo rebuilds them instead of reusing the base commit's crates (L-39).
+        run: |
+          find . -path ./target -prune -o \( -name '*.rs' -o -name Cargo.toml \) -print0 | xargs -0 touch
+          cargo bench --workspace --locked --bench '*' -- --baseline-lenient pr-base
       - name: Run the 5 % gate
         run: python3 ../../.github/scripts/bench_gate.py --criterion-dir "$CARGO_TARGET_DIR/criterion"
