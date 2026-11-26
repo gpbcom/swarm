@@ -942,6 +942,13 @@ def commit_paths(home: Path, paths: List[str], title: str, body: str) -> str:
     return commit
 
 
+def regenerate_changes_table(top: Path, ticket: str) -> None:
+    """Rewrite the changes table of ``EXPLAIN.md`` when it has its markers, so that no other commit stales it (L-42)."""
+    explain = top / ticket_folder(ticket) / "EXPLAIN.md"
+    if explain.is_file() and CHANGES_START in explain.read_text(encoding="utf-8"):
+        changes(top, ticket, "write")
+
+
 def finish(top: Path, ticket: str, open_pull_request: bool = True) -> Dict[str, JsonData]:
     """Commit the ticket's own files once on the shared branch, then publish it (TKT-15) or merge it locally."""
     home = require_home(top, ticket)
@@ -956,6 +963,7 @@ def finish(top: Path, ticket: str, open_pull_request: bool = True) -> Dict[str, 
         paths = ticket_paths(state, ticket)
         if not git(home, "diff", "--name-only", "HEAD", snapshot(home), "--", *paths)[1]:
             raise TicketTreeError("There is nothing to commit for this ticket.")
+        regenerate_changes_table(home, ticket)
         problems = document_problems(home, ticket)
         if problems:
             raise TicketTreeError("Fix the ticket's documents before its commit (TKT-14):\n" + "\n".join(problems))

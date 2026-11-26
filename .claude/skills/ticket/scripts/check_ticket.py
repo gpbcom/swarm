@@ -37,7 +37,7 @@ GRAPH = Path("docs/specs/roadmap/gantt/ticket-graph.json")
 SCREEN_PNG = re.compile(r"(?:^|/)specs/screens/(UC-\d{3})/([a-z0-9-]+)\.png$")
 SCREEN_ROW = re.compile(r"(?:^|/)specs/functional/use-cases/(UC-\d{3})-[^#]*\.md#screen-([a-z0-9-]+)$")
 NO_SCREEN = re.compile(r"^- ➖ No screen: \S.{9,}$", re.MULTILINE)
-FRONT_END_PREFIX = "frontends/"
+FRONT_END_PREFIXES = ("frontends/", "frontend/apps/")
 
 
 def split_target(target: str) -> Tuple[str, str]:
@@ -72,12 +72,12 @@ def has_no_screen_reason(body: str) -> bool:
 
 
 def touches_front_end(ticket_id: str, root: Path) -> bool:
-    """Tell whether the ticket graph says the ticket changes a front end (``frontends/``)."""
+    """Tell whether the ticket graph says the ticket changes a front end (``frontends/`` or ``frontend/apps/``)."""
     path = root / GRAPH
     if not path.is_file():
         return False
     info = json.loads(path.read_text(encoding="utf-8")).get("tickets", {}).get(ticket_id, {})
-    return any(area.startswith(FRONT_END_PREFIX) for area in areas(str(info.get("area", ""))))
+    return any(area.startswith(FRONT_END_PREFIXES) for area in areas(str(info.get("area", ""))))
 
 
 def screens_section(text: str) -> str:

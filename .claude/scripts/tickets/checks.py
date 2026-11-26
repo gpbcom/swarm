@@ -77,7 +77,9 @@ def environment_failure(code: int, out: str, root: Path = ROOT) -> bool:
     if code == 127 or any(marker in out for marker in ENVIRONMENT_MARKERS):
         return True
     missing = MISSING_MODULE.findall(out)
-    return bool(missing) and not any(first_party(name, root) for name in missing)
+    # L-34 c: the clean tree holds only the ticket's files, so a module of the project that exists in the main
+    # checkout is a wrong import or a missing file of the ticket, never the environment.
+    return bool(missing) and not any(first_party(name, root) or first_party(name, ROOT) for name in missing)
 
 
 def own_paths(ticket: str, root: Path = ROOT) -> Optional[List[str]]:
@@ -193,8 +195,10 @@ def screen_problems(
 FAILING_FILES_MAX = 10
 # L-39: ``swarm_core`` is a PyO3 wheel built by maturin, outside the uv workspace, so ``uv run`` never puts it in the
 # clean tree's fresh environment. When Python code of the tree imports it, the checks build the wheel and install it there.
-SWARM_CORE_IMPORT = re.compile(r"^\s*(?:from|import)\s+swarm_core\b", re.M)
+SWARM_CORE_IMPORT = re.compile(r"^\s*(?:from|import)\s+swarm_core\b", re.MULTILINE)
 SWARM_CORE_MANIFEST = "packages/rust/swarm-core/python/Cargo.toml"
+PRINTED_PATH = re.compile(r"[\w.\-]+(?:/[\w.\-]+)+")
+MYPY_SOURCE_GLOBS = ("services/*/src", "packages/python/*/src", "backend/**/src")
 PYTHON_GLOBS = ("services/*/src/**/*.py", "services/*/tests/**/*.py", "tests/**/*.py")
 
 
@@ -207,7 +211,7 @@ def imports_swarm_core(root: Path) -> bool:
     return False
 
 
-def install_swarm_core(checks: "Checks") -> None:
+def install_swarm_core(checks: Checks) -> None:
     """Build the ``swarm_core`` wheel from the tree's Rust sources and install it in the tree's own environment (L-39)."""
     root = checks.root
     if not (root / SWARM_CORE_MANIFEST).is_file() or not imports_swarm_core(root):
@@ -226,11 +230,30 @@ def install_swarm_core(checks: "Checks") -> None:
         if built and wheels:
             checks.check(
                 "swarm_core install",
-                ["uv", "pip", "install", "--no-deps", "--python", str(root / ".venv" / "bin" / "python"), str(wheels[-1])],
+                [
+                    "uv",
+                    "pip",
+                    "install",
+                    "--no-deps",
+                    "--python",
+                    str(root / ".venv" / "bin" / "python"),
+                    str(wheels[-1]),
+                ],
                 SWARM_CORE_MANIFEST,
             )
     finally:
         shutil.rmtree(dist, ignore_errors=True)
+
+
+def names_file(line: str, name: str) -> bool:
+    """Tell whether an output line names a changed file (L-34 d).
+
+    The line holds the whole path, or a path printed from a service or package root: a printed path of at least two
+    components that the changed file's path ends with (``tests/api/test_x.py`` names ``services/a/tests/api/test_x.py``).
+    """
+    if name in line:
+        return True
+    return any(name.endswith("/" + printed) for printed in PRINTED_PATH.findall(line))
 
 
 def failing_files(out: str, changed: List[str]) -> List[Tuple[str, str]]:
@@ -240,10 +263,10 @@ def failing_files(out: str, changed: List[str]) -> List[Tuple[str, str]]:
     file it was given: the failure goes to the owner of the file named, so that the right task fixes it.
     """
     # A line naming many of the ticket's files is a list (an echoed command, a list of files checked), not a failure.
-    lines = [line for line in out.splitlines() if sum(name in line for name in changed) <= 2]
+    lines = [line for line in out.splitlines() if sum(names_file(line, name) for name in changed) <= 2]
     found: List[Tuple[str, str]] = []
     for name in sorted(changed, key=len, reverse=True):
-        hits = [line for line in lines if name in line]
+        hits = [line for line in lines if names_file(line, name)]
         if hits and not any(name in other for other, _ in found):
             found.append((name, "\n".join(hits[:12])))
     order = {name: index for index, name in enumerate(changed)}
@@ -299,14 +322,12 @@ def python_checks(checks: Checks, changed: List[str]) -> None:
     checks.check("ruff check", ["uv", "run", "ruff", "check", *files], files[0])
     checks.check("ruff format", ["uv", "run", "ruff", "format", "--check", *files], files[0])
     install_swarm_core(checks)
-    sources = sorted(
-        str(p.relative_to(root)) for pattern in ("services/*/src", "packages/python/*/src") for p in root.glob(pattern)
-    )
+    sources = sorted(str(p.relative_to(root)) for pattern in MYPY_SOURCE_GLOBS for p in root.glob(pattern))
     if sources:
         checks.check("mypy", ["uv", "run", "mypy", *sources], sources[0])
     else:
-        checks.skip("mypy", "no services/*/src or packages/python/*/src yet")
-    checks.check("pytest", ["uv", "run", "pytest", "-q"], "tests")
+        checks.skip("mypy", f"not run, no source folder in the tree ({', '.join(MYPY_SOURCE_GLOBS)})")
+    checks.check("pytest", ["uv", "run", "pytest", "-q", "-n", "2"], "tests")
 
 
 def rust_checks(checks: Checks, changed: List[str]) -> None:
@@ -322,7 +343,7 @@ def rust_checks(checks: Checks, changed: List[str]) -> None:
         "packages/rust/Cargo.toml",
         env=target,
     )
-    members = re.search(r"members\s*=\s*\[(.*?)\]", manifest.read_text(encoding="utf-8"), re.S)
+    members = re.search(r"members\s*=\s*\[(.*?)\]", manifest.read_text(encoding="utf-8"), re.DOTALL)
     if not members or not members.group(1).strip():
         for name in ("cargo fmt", "cargo clippy", "cargo test"):
             checks.skip(name, "the Cargo workspace has no member crate yet")
@@ -421,10 +442,14 @@ def run_checks(
         checks.passed.append("screens captured")
     checks.check("specs check", ["python3", ".claude/skills/write-specs/scripts/specs.py", "check"], "docs/specs")
     folder = f"docs/tickets/{ticket}"
-    checks.check("ticket refs", ["python3", ".claude/scripts/tickets/ticket_refs.py", "check", "--ticket", ticket], folder)
+    checks.check(
+        "ticket refs", ["python3", ".claude/scripts/tickets/ticket_refs.py", "check", "--ticket", ticket], folder
+    )
     if (root / folder / "PLAN.md").is_file():
         checks.check(
-            "plan view", ["python3", ".claude/scripts/tickets/plan.py", "check", "--ticket", ticket], f"{folder}/PLAN.md"
+            "plan view",
+            ["python3", ".claude/scripts/tickets/plan.py", "check", "--ticket", ticket],
+            f"{folder}/PLAN.md",
         )
     return {
         "passed": not checks.failures,

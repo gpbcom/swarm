@@ -148,7 +148,7 @@ class TestTicketWorkflows:
     def test_a_command_run_exactly_goes_to_the_runner_and_the_exit_code_decides(self, workflow: str) -> None:
         text = read_text(workflow)
         assert "agentType: 'runner'" in text
-        assert "ran.exit_code === expect.exit" in text
+        assert "exit === expect.exit" in text
         for call in text.split("agentType: 'verifier'")[1:]:
             assert "VERDICT" in call.split("}")[0], "the verifier only runs checks.py and returns a VERDICT"
 
@@ -158,3 +158,74 @@ class TestTicketWorkflows:
         assert step.lstrip().startswith("await runExactly(")
         assert "tickets/tickets.py check --ticket" in step
         assert "verifier" not in step
+
+    @pytest.mark.parametrize("path", [PLAN, RUN])
+    def test_the_runner_gets_one_command_with_its_folder_as_a_cd_and_never_a_sentence(self, path: str) -> None:
+        text = read_text(path)
+        assert "async function runExactly(dir, command, expect, opts)" in text
+        assert "cd ${JSON.stringify(dir)} && " in text
+        assert "work from there" not in text
+        assert "From the repository root" not in text
+
+    @pytest.mark.parametrize("path", [PLAN, RUN])
+    def test_the_exit_code_is_the_one_the_command_prints(self, path: str) -> None:
+        text = read_text(path)
+        assert '; echo "${EXIT_MARK}$?"' in text
+        assert "const EXIT_MARK = 'SWARM_EXIT_CODE='" in text
+        assert "const exit = marked ? Number(marked[1]) : ran.exit_code" in text
+        assert "const passed = exit === expect.exit" in text
+        assert "ran.output.filter(l => !String(l).includes(EXIT_MARK))" in text
+
+    def test_ticket_run_does_not_hand_the_where_prefix_to_the_runner(self) -> None:
+        text = read_text(self.RUN)
+        assert "runExactly(WHERE" not in text
+        assert "runExactly(HOME, `python3 .claude/scripts/tickets/ticket_tree.py docs" in text
+        assert "runExactly('', `python3 .claude/skills/ticket/scripts/check_plan.py" in text
+
+    def test_a_task_blocked_only_by_files_of_later_waves_counts_as_done(self) -> None:
+        text = read_text(self.RUN)
+        assert "function laterOnly(r, w)" in text
+        assert "o.every(t => Number.isInteger(t.wave) && t.wave > w)" in text
+        assert "(await runTasks(waveTasks, 'Waves')).map(r => laterOnly(r, w))" in text
+        assert "concat(again.map(r => laterOnly(r, w)))" in text
+        assert "does not block you" in text
+
+    def test_a_bare_folder_gets_no_owner_and_the_verify_loop_stops_without_one(self) -> None:
+        text = read_text(self.RUN)
+        assert "if (!/\\.[A-Za-z0-9]+$/.test(f)) return []" in text
+        assert "const owned = fixable.filter(f => ownersOf(f).length > 0)" in text
+        assert "no failure has an owner" in text
+        assert "await fixRound(owned, 'Verify')" in text
+
+    def test_environment_failures_do_not_stop_the_fix_of_the_other_failures(self) -> None:
+        text = read_text(self.RUN)
+        assert "const fixable = verdict.failures.filter(f => !f.environment)" in text
+        assert "if (!fixable.length)" in text
+        assert "verdict.failures.some(f => f.environment)) {" not in text
+
+    def test_a_finding_with_several_owners_becomes_one_fix_task_owning_all_their_files(self) -> None:
+        text = read_text(self.RUN)
+        assert "function mergeTasks(list)" in text
+        assert "files: [...new Set(uniq.flatMap(t => t.files))]" in text
+        assert "agent: uniq[0].agent" in text
+        assert "function groupFixes(items)" in text
+        assert "a.files.some(f => b.files.includes(f))" in text
+        assert "const groups = groupFixes(items)" in text
+
+    def test_the_reviewer_names_every_file_the_fix_must_change(self) -> None:
+        text = read_text(self.RUN)
+        assert text.count("name every file the fix must change, tests included") == 2
+
+    def test_findings_on_ticket_md_and_plan_md_go_to_the_ticket_writer_and_the_scribe(self) -> None:
+        text = read_text(self.RUN)
+        assert "const DOC_OWNERS = { 'TICKET.md': 'ticket-writer', 'PLAN.md': 'scribe' }" in text
+        assert "docs\\/tickets\\/[^/]+\\/(TICKET\\.md|PLAN\\.md)$" in text
+        assert "const doc = docOwnerOf(item)" in text
+        assert "if (doc) return [doc]" in text
+        assert "if (g.task.direct)" in text
+
+    def test_the_integrator_puts_the_refused_files_in_blocked_and_the_workflow_logs_them(self) -> None:
+        text = read_text(self.RUN)
+        assert 'a list "refused"' in text
+        assert "Put every entry of it in blocked" in text
+        assert "blocked or refused:" in text

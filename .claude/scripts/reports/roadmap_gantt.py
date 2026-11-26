@@ -100,8 +100,18 @@ APPS = {
 }
 AREA = re.compile(
     r"(services/[\w-]+|frontends/[\w-]+|packages/\w+/[\w-]+|packages/\w+|deploy/[\w-]+|tests/[\w-]+"
-    r"|\.github|\.claude)"
+    r"|\.github|\.claude|backend/(?:apps|libs)/[\w-]+|frontend/(?:apps|packages)/[\w-]+|rust/[\w-]+"
+    r"|infra/[\w-]+|qa/e2e)"
 )
+AREA_ALIASES = {
+    "backend/apps/": "services/",
+    "backend/libs/": "packages/python/",
+    "frontend/apps/": "frontends/",
+    "frontend/packages/": "packages/ts/",
+    "qa/e2e": "packages/ts/e2e",
+    "rust/": "packages/rust/",
+    "infra/": "deploy/",
+}
 TICKET_ID = re.compile(r"T(\d+)\.(\d+)")
 
 
@@ -206,9 +216,39 @@ def measured(done: Set[str]) -> Tuple[float, float]:
     return (sum(minutes) / len(minutes) if minutes else 0.0, sum(tokens) / len(tokens) if tokens else 0.0)
 
 
+def swap_prefix(area: str, source: str, target: str) -> Optional[str]:
+    """Return ``area`` with the folder ``source`` replaced by ``target``, or None when it is not under ``source``."""
+    head = source.rstrip("/")
+    if area == head:
+        return target.rstrip("/")
+    if area.startswith(head + "/"):
+        return target.rstrip("/") + area[len(head) :]
+    return None
+
+
+def canonical_area(area: str) -> str:
+    """Return an area in the layout of the ticket graph, so that both layouts name one area (``AREA_ALIASES``)."""
+    for new, old in AREA_ALIASES.items():
+        swapped = swap_prefix(area, new, old)
+        if swapped is not None:
+            return swapped
+    return area
+
+
+def equivalent_areas(area: str) -> Set[str]:
+    """Return the area in both layouts: the one given, its graph form and the new-layout form of that."""
+    graph = canonical_area(area)
+    found = {area, graph}
+    for new, old in AREA_ALIASES.items():
+        swapped = swap_prefix(graph, old, new)
+        if swapped is not None:
+            found.add(swapped)
+    return found
+
+
 def areas(text: str) -> Set[str]:
     """Return the areas a ticket changes; ``*`` when it may change any of them."""
-    found = {area.rstrip("/") for area in AREA.findall(text)}
+    found = {canonical_area(area.rstrip("/")) for area in AREA.findall(text)}
     found |= {f"services/{name}" for name in SERVICES if re.search(rf"(?<![/\w-]){name}\b", text)}
     found |= {path for name, path in APPS.items() if name in text.lower()}
     if "mavlink" in text:

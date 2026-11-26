@@ -109,6 +109,11 @@ def legacy_home(main: Path) -> Path:
     return main.parent / f"{main.name}-tickets" / TICKET
 
 
+def state_path(main: Path, ticket: str) -> Path:
+    """Return the file that records a ticket's own files, in the shared git directory."""
+    return main / ".git" / "swarm" / ticket / "state.json"
+
+
 def add_ticket(main: Path, ticket: str) -> None:
     """Write a second ticket's folder, uncommitted, as /ticket-plan does."""
     folder = main / "docs" / "tickets" / ticket

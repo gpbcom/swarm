@@ -3,7 +3,7 @@
   "rules": [
     {
       "name": "ruff check",
-      "match": "^(?:services|packages/python|tests)/.+\\.py$",
+      "match": "^(?:services|packages/python|backend|scripts|tests)/.+\\.py$",
       "run": [
         "uv",
         "run",
@@ -14,7 +14,7 @@
     },
     {
       "name": "ruff format",
-      "match": "^(?:services|packages/python|tests)/.+\\.py$",
+      "match": "^(?:services|packages/python|backend|scripts|tests)/.+\\.py$",
       "run": [
         "uv",
         "run",
@@ -32,6 +32,16 @@
         "run",
         "mypy",
         "services/{1}/src"
+      ]
+    },
+    {
+      "name": "mypy {1}",
+      "match": "^backend/(swarm-[^/]+|libs/[^/]+|apps/[^/]+)/src/.+\\.py$",
+      "run": [
+        "uv",
+        "run",
+        "mypy",
+        "backend/{1}/src"
       ]
     },
     {
@@ -73,6 +83,20 @@
       "skip_when_only_tests": true
     },
     {
+      "name": "pytest {1}/{2}",
+      "match": "^backend/(swarm-[^/]+|libs/[^/]+|apps/[^/]+)/src/[^/]+/(.+)/[^/]+\\.py$",
+      "run": [
+        "uv",
+        "run",
+        "pytest",
+        "backend/{1}/tests/{2}",
+        "-n",
+        "2"
+      ],
+      "needs": "backend/{1}/tests/{2}",
+      "skip_when_only_tests": true
+    },
+    {
       "name": "pytest harness {1}",
       "match": "^\\.claude/(?:hooks|scripts|skills/[^/]+/scripts)/([^/]+)\\.py$",
       "run": [
@@ -100,6 +124,19 @@
       "skip_when_only_tests": true
     },
     {
+      "name": "cargo fmt {1}",
+      "match": "^rust/([^/]+)/",
+      "run": [
+        "cargo",
+        "fmt",
+        "--check",
+        "--manifest-path",
+        "rust/{1}/Cargo.toml"
+      ],
+      "needs": "rust/{1}/Cargo.toml",
+      "skip_when_only_tests": true
+    },
+    {
       "name": "cargo clippy {1}",
       "match": "^packages/rust/([^/]+)/",
       "run": [
@@ -116,6 +153,22 @@
       "skip_when_only_tests": true
     },
     {
+      "name": "cargo clippy {1}",
+      "match": "^rust/([^/]+)/",
+      "run": [
+        "cargo",
+        "clippy",
+        "--manifest-path",
+        "rust/{1}/Cargo.toml",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "needs": "rust/{1}/Cargo.toml",
+      "skip_when_only_tests": true
+    },
+    {
       "name": "cargo test {1}",
       "match": "^packages/rust/([^/]+)/",
       "run": [
@@ -128,8 +181,20 @@
       "skip_when_only_tests": true
     },
     {
+      "name": "cargo test {1}",
+      "match": "^rust/([^/]+)/",
+      "run": [
+        "cargo",
+        "test",
+        "--manifest-path",
+        "rust/{1}/Cargo.toml"
+      ],
+      "needs": "rust/{1}/Cargo.toml",
+      "skip_when_only_tests": true
+    },
+    {
       "name": "pnpm lint {1}/{2}",
-      "match": "^(frontends|packages/ts)/([^/]+)/",
+      "match": "^(frontends|packages/ts|frontend/apps|frontend/packages)/([^/]+)/",
       "run": [
         "pnpm",
         "--filter",
@@ -142,7 +207,7 @@
     },
     {
       "name": "pnpm typecheck {1}/{2}",
-      "match": "^(frontends|packages/ts)/([^/]+)/",
+      "match": "^(frontends|packages/ts|frontend/apps|frontend/packages)/([^/]+)/",
       "run": [
         "pnpm",
         "--filter",
@@ -155,7 +220,7 @@
     },
     {
       "name": "pnpm test {1}/{2}",
-      "match": "^(frontends|packages/ts)/([^/]+)/",
+      "match": "^(frontends|packages/ts|frontend/apps|frontend/packages)/([^/]+)/",
       "run": [
         "pnpm",
         "--filter",
@@ -169,7 +234,7 @@
     },
     {
       "name": "terraform fmt {1}",
-      "match": "^(deploy/terraform/.+?)(?:/tests)?/[^/]+\\.(?:tf|tftest\\.hcl)$",
+      "match": "^((?:deploy|infra)/terraform/.+?)(?:/tests)?/[^/]+\\.(?:tf|tftest\\.hcl)$",
       "run": [
         "terraform",
         "fmt",
@@ -180,7 +245,7 @@
     },
     {
       "name": "terraform init {1}",
-      "match": "^(deploy/terraform/.+?)(?:/tests)?/[^/]+\\.(?:tf|tftest\\.hcl)$",
+      "match": "^((?:deploy|infra)/terraform/.+?)(?:/tests)?/[^/]+\\.(?:tf|tftest\\.hcl)$",
       "run": [
         "terraform",
         "-chdir={1}",
@@ -192,7 +257,7 @@
     },
     {
       "name": "terraform validate {1}",
-      "match": "^(deploy/terraform/.+?)(?:/tests)?/[^/]+\\.(?:tf|tftest\\.hcl)$",
+      "match": "^((?:deploy|infra)/terraform/.+?)(?:/tests)?/[^/]+\\.(?:tf|tftest\\.hcl)$",
       "run": [
         "terraform",
         "-chdir={1}",
@@ -202,7 +267,7 @@
     },
     {
       "name": "terraform test {1}",
-      "match": "^(deploy/terraform/.+?)(?:/tests)?/[^/]+\\.(?:tf|tftest\\.hcl)$",
+      "match": "^((?:deploy|infra)/terraform/.+?)(?:/tests)?/[^/]+\\.(?:tf|tftest\\.hcl)$",
       "run": [
         "terraform",
         "-chdir={1}",

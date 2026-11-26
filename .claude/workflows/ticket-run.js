@@ -113,14 +113,23 @@ const RUN = {
   properties: { exit_code: { type: 'integer' }, output: { type: 'array', items: { type: 'string' } } },
   required: ['exit_code', 'output'],
 }
-async function runExactly(prefix, command, expect, opts) {
+// L-35: the runner gets one command, with its folder as a cd in front, never a sentence asking it to find the folder.
+// L-40: the Bash tool shows no exit code when a command succeeds, so the runner guessed 1 from a warning. The command
+// prints its own exit code as its last line, and that number decides, never the runner's reading.
+const EXIT_MARK = 'SWARM_EXIT_CODE='
+async function runExactly(dir, command, expect, opts) {
+  const line = `${dir ? `cd ${JSON.stringify(dir)} && ` : ''}${command}; echo "${EXIT_MARK}$?"`
   const ran = await agent(
-    `${prefix}Run exactly this one command, and nothing else: ${command}\nReport its exit code and every line it printed.`,
+    `Run exactly this one command, and nothing else: ${line}\nReport every line it printed, the last one included, and in exit_code the number after ${EXIT_MARK}.`,
     { agentType: 'runner', schema: RUN, ...opts },
   )
   if (!ran) return null
-  const passed = ran.exit_code === expect.exit && (!expect.quiet || ran.output.length === 0)
-  return { passed, problems: ran.output, exit_code: ran.exit_code }
+  const marked = ran.output.map(l => String(l).match(/SWARM_EXIT_CODE=(\d+)/)).filter(Boolean).pop()
+  const exit = marked ? Number(marked[1]) : ran.exit_code
+  const output = ran.output.filter(l => !String(l).includes(EXIT_MARK))
+  if (marked && exit !== ran.exit_code) log(`Runner reported exit ${ran.exit_code}, the command printed ${exit}: ${exit} decides (L-40)`)
+  const passed = exit === expect.exit && (!expect.quiet || output.length === 0)
+  return { passed, problems: output, exit_code: exit }
 }
 const REVIEW = {
   type: 'object',
@@ -201,9 +210,11 @@ async function integrate(results, label) {
   const merge = await agent(inHome(
     `Ticket ${ID}: integrate the hand-offs of these tasks into the main checkout, in this order: ` +
     `python3 .claude/scripts/tickets/ticket_tree.py integrate --ticket ${ID} ${ids.map(id => `--task ${JSON.stringify(id)}`).join(' ')}. ` +
+    `ticket_tree.py prints a list "refused": the files another open ticket owns, never applied (TKT-16). Put every entry of it in blocked, as "<file> (owned by <owner>)". ` +
     `Then run the quick checks for what they changed (ruff check, cargo check or tsc as relevant). Commit nothing (TKT-5).`),
     { agentType: 'integrator', schema: MERGE, phase: label, label: `integrator ${label}` },
   )
+  if (merge && merge.blocked.length) log(`Integrate (${label}): blocked or refused: ${merge.blocked.join(', ')}`)
   note(`Integrate (${label})`, 'integrator', merge ? `✅ ${merge.integrated.length} integrated, ${merge.blocked.length} blocked, not committed` : '❌ failed')
   if (merge && /^[0-9a-f]{7,40}$/.test(merge.tree)) currentTree = merge.tree
   return merge
@@ -236,7 +247,18 @@ function pathsOf(item) {
 // ("Owners: K21 and K22"). A finding that spans two tasks goes to both, each fixing its own files; sending it to the
 // first owner only left the other half unfixed (T0.08). The change text is read for task IDs only when nothing else
 // names an owner, because it often mentions other tasks in passing.
+const DOC_OWNERS = { 'TICKET.md': 'ticket-writer', 'PLAN.md': 'scribe' }
+// L-41: the ticket's own TICKET.md and PLAN.md belong to no task of the plan: the ticket-writer and the scribe write them.
+function docOwnerOf(item) {
+  for (const f of pathsOf(item)) {
+    const m = f.match(/^docs\/tickets\/[^/]+\/(TICKET\.md|PLAN\.md)$/)
+    if (m) return { id: `DOC-${m[1]}`, title: `Fix ${f}`, agent: DOC_OWNERS[m[1]], files: [f], direct: true }
+  }
+  return null
+}
 function ownersOf(item) {
+  const doc = docOwnerOf(item)
+  if (doc) return [doc]
   const byId = ids => ids.map(id => tasks.find(t => t.id === id)).filter(Boolean)
   const owners = []
   const add = t => { if (t && !owners.includes(t)) owners.push(t) }
@@ -249,23 +271,59 @@ function ownersOf(item) {
   if (!owners.length) byId(String(item.detail || '').match(/\bK\d{2}\b/g) || []).forEach(add)
   if (owners.length) return owners
   const f = files[0] || normalise(item.file) || 'unknown'
+  // L-34 b: a bare folder (no file extension, such as "tests") names no file to fix: no owner, never a FIX task.
+  if (!/\.[A-Za-z0-9]+$/.test(f)) return []
   return [{ id: `FIX-${f}`, title: `Fix ${f}`, agent: agentFor(f), files: files.length ? files : [f], brief: '', done_when: 'the verifier passes' }]
 }
-async function fixRound(items, label) {
-  const groups = {}
+// L-34 e: one finding owned by several tasks is ONE fix task owning the union of their files (the first owner's agent),
+// and fix groups that share a file are merged, so that two fixers never change the same file in one round.
+function mergeTasks(list) {
+  const uniq = list.filter((t, i) => list.findIndex(x => x.id === t.id) === i)
+  if (uniq.length === 1) return uniq[0]
+  return {
+    id: `FIX-${uniq.map(t => t.id).join('+')}`, title: `Fix for ${uniq.map(t => t.id).join(' and ')}`, agent: uniq[0].agent,
+    files: [...new Set(uniq.flatMap(t => t.files))],
+    brief: `You own the files of the tasks ${uniq.map(t => t.id).join(' and ')}: fix the problems below in them.`, done_when: 'the verifier passes',
+  }
+}
+function groupFixes(items) {
+  let groups = []
   for (const it of items) {
-    for (const owner of ownersOf(it)) {
-      groups[owner.id] = groups[owner.id] || { task: owner, items: [] }
-      groups[owner.id].items.push(it)
+    const owners = ownersOf(it)
+    if (!owners.length) { log(`No owner for ${it.file || it.check}: not sent to a fixer`); continue }
+    groups.push({ tasks: owners, items: [it] })
+  }
+  const shares = (x, y) => x.tasks.some(a => y.tasks.some(b => a.id === b.id || a.files.some(f => b.files.includes(f))))
+  for (let merged = true; merged;) {
+    merged = false
+    for (let i = 0; i < groups.length && !merged; i++) {
+      for (let j = i + 1; j < groups.length && !merged; j++) {
+        if (!shares(groups[i], groups[j])) continue
+        groups[i] = { tasks: groups[i].tasks.concat(groups[j].tasks), items: groups[i].items.concat(groups[j].items) }
+        groups.splice(j, 1)
+        merged = true
+      }
     }
   }
-  log(`${label}: ${items.length} problem(s) sent to ${Object.keys(groups).length} fixer(s): ${Object.keys(groups).join(', ')}`)
-  const results = await limited(Object.values(groups), MAX_PARALLEL, g =>
-    agent(workerPrompt(g.task, `Fix only these problems, within your files: ${JSON.stringify(g.items)}`), {
+  return groups.map(g => ({ task: mergeTasks(g.tasks), items: g.items }))
+}
+async function fixRound(items, label) {
+  const groups = groupFixes(items)
+  log(`${label}: ${items.length} problem(s) sent to ${groups.length} fixer(s): ${groups.map(g => g.task.id).join(', ')}`)
+  const results = await limited(groups, MAX_PARALLEL, g => {
+    if (g.task.direct) {
+      // The ticket's own documents are in the main checkout, uncommitted: no worktree and no hand-off.
+      return agent(inHome(`Fix only these problems in ${g.task.files.join(', ')}, and change no other file: ${JSON.stringify(g.items)}`), {
+        agentType: g.task.agent, phase: label, label: `${g.task.id} ${g.task.agent} (fix)`,
+      }).then(r => ({ task: g.task, result: r ? { status: 'done', blocked_by: [], assumptions: [], decisions: [] } : null, direct: true }))
+    }
+    return agent(workerPrompt(g.task, `Fix only these problems, within your files: ${JSON.stringify(g.items)}`), {
       agentType: g.task.agent, isolation: 'worktree', schema: RESULT, phase: label, label: `${g.task.id} ${g.task.agent} (fix)`,
-    }).then(r => ({ task: g.task, result: r })))
-  collect(results)
-  await integrate(results, label)
+    }).then(r => ({ task: g.task, result: r }))
+  })
+  const handed = results.filter(r => !r.direct)
+  collect(handed)
+  await integrate(handed, label)
 }
 
 // Gate ---------------------------------------------------------------------------------------------------------
@@ -283,7 +341,7 @@ const gate = await agent(
 if (!gate || !gate.approved) {
   return { ticket: ID, stopped: `Plan not approved (${gate ? gate.status : 'PLAN.md unreadable'}). Approve it in docs/tickets/${ID}/PLAN.md first.` }
 }
-const planCheck = await runExactly(WHERE, `python3 .claude/skills/ticket/scripts/check_plan.py ${ID}`, { exit: 0, quiet: true },
+const planCheck = await runExactly('', `python3 .claude/skills/ticket/scripts/check_plan.py ${ID}`, { exit: 0, quiet: true },
   { label: `plan check ${ID}` },
 )
 if (!planCheck || !planCheck.passed) {
@@ -337,11 +395,24 @@ function collect(results) {
     decisions.push(...(r.result.decisions || []).map(d => ({ task: r.task.id, ...d })))
   })
 }
+// L-37: a task blocked only by files that a later wave of the plan writes did its own work: those files are missing,
+// not wrong (TKT-19). It counts as done instead of stopping the ticket.
+function laterOnly(r, w) {
+  const b = (r.result && r.result.status === 'blocked' && r.result.blocked_by) || []
+  const later = b.length > 0 && b.every(x => {
+    const o = ownersOf({ file: x.file })
+    return o.length > 0 && o.every(t => Number.isInteger(t.wave) && t.wave > w)
+  })
+  if (!later) return r
+  log(`${r.task.id}: blocked only by files of later waves (${b.map(x => x.file).join(', ')}), counted as done (L-37)`)
+  note(`${r.task.id}: blocked only by files later waves write, counted as done`, 'workers', '✅')
+  return { task: r.task, result: { ...r.result, status: 'done' } }
+}
 for (let w = 1; w <= waveCount; w++) {
   const waveTasks = tasks.filter(t => t.wave === w && !alreadyDone.has(t.id))
   if (!waveTasks.length) { log(`Wave ${w}/${waveCount}: nothing left`); continue }
   log(`Wave ${w}/${waveCount}: ${waveTasks.length} tasks`)
-  let results = await runTasks(waveTasks, 'Waves')
+  let results = (await runTasks(waveTasks, 'Waves')).map(r => laterOnly(r, w))
   const retry = results.filter(r => !r.result || r.result.status !== 'done')
   if (retry.length) {
     // TKT-19: a task blocked by another task's file (most often a wrong test of wave 1) cannot fix it itself. Its owner
@@ -362,8 +433,9 @@ for (let w = 1; w <= waveCount; w++) {
     }
     log(`Wave ${w}: retrying ${retry.length} task(s) once`)
     const again = await runTasks(retry.map(r => r.task), 'Waves',
-      `A first attempt did not finish: ${retry.map(r => (r.result && r.result.note) || 'no result').join(' | ')}`)
-    results = results.filter(r => r.result && r.result.status === 'done').concat(again)
+      `A first attempt did not finish: ${retry.map(r => (r.result && r.result.note) || 'no result').join(' | ')}. ` +
+      `A failure that comes from a file a later wave of the plan writes does not block you: that file is missing, not wrong. Finish your own work and report done (L-37).`)
+    results = results.filter(r => r.result && r.result.status === 'done').concat(again.map(r => laterOnly(r, w)))
   }
   collect(results)
   const okCount = results.filter(r => r.result && r.result.status === 'done').length
@@ -386,11 +458,20 @@ for (let round = 0; round <= MAX_FIX_ROUNDS; round++) {
   note(`Verify ${round + 1}${verdict && verdict.not_applicable && verdict.not_applicable.length ? ` (${verdict.not_applicable.length} not applicable)` : ''}`, 'verifier', verdict && verdict.passed ? '✅ passed' : `❌ ${verdict ? verdict.failures.length : '?'} failures`)
   if (!verdict || verdict.passed || round === MAX_FIX_ROUNDS) break
   // TKT-6: a missing tool or module is the environment's fault; fixers cannot repair it, so stop at once.
-  if (verdict.failures.some(f => f.environment)) {
-    log(`Environment failure (${verdict.failures.filter(f => f.environment).map(f => f.check).join(', ')}): no fix round, the person fixes the environment`)
+  // Environment failures are left to the person; the other failures still go to their owners.
+  const fixable = verdict.failures.filter(f => !f.environment)
+  if (!fixable.length) {
+    log(`Environment failure (${verdict.failures.map(f => f.check).join(', ')}): no fix round, the person fixes the environment`)
     break
   }
-  await fixRound(verdict.failures, 'Verify')
+  if (fixable.length < verdict.failures.length) log(`Environment failures left to the person; the ${fixable.length} other failure(s) go to their owners`)
+  // L-34 b: a failure that names no file has no owner; a fix round for it would be spent for nothing.
+  const owned = fixable.filter(f => ownersOf(f).length > 0)
+  if (!owned.length) {
+    log(`Verify: no failure has an owner (${fixable.map(f => f.file || f.check).join(', ')}): no fix round, the person decides`)
+    break
+  }
+  await fixRound(owned, 'Verify')
 }
 const environmentFailure = Boolean(verdict && !verdict.passed && verdict.failures.some(f => f.environment))
 
@@ -414,10 +495,12 @@ if (verdict && verdict.passed && !pushOnly) {
       ? `Review ticket ${ID} (mode: full review): its uncommitted work, python3 .claude/scripts/tickets/ticket_tree.py diff --ticket ${ID}, against docs/tickets/${ID}/TICKET.md. ` +
         `Assumptions reported by the agents: ${JSON.stringify(assumptions)}. ` +
         `Decisions reported by the agents: ${JSON.stringify(decisions)}. ` +
+        `In file of each finding name every file the fix must change, tests included, separated by spaces (L-34). ` +
         `Return in note the short review note, following .claude/skills/ticket/templates/REVIEW.md.`
       : `Review ticket ${ID} (mode: confirm fixes, round ${round + 1}). Previous blocking findings: ${JSON.stringify(blocking)}. ` +
         `The fixes are in python3 .claude/scripts/tickets/ticket_tree.py diff --ticket ${ID} --from ${reviewedTree}. Report, as blocking, only (a) a previous blocking finding that is not resolved, ` +
         `and (b) a blocking defect introduced by that diff. Anything else is a follow-up. List in resolved the previous findings now fixed. ` +
+        `In file of each finding name every file the fix must change, tests included, separated by spaces (L-34). ` +
         `Return in note the short review note, following .claude/skills/ticket/templates/REVIEW.md.`)
     review = await agent(prompt, { agentType: 'reviewer', schema: REVIEW, phase: 'Review', label: `reviewer round ${round + 1}` })
     if (!review) break
@@ -479,7 +562,7 @@ if (done) {
   // checks it deterministically; the explainer fixes what it reports once, and finish refuses to commit otherwise. After
   // the person's review it runs again, because a change they made can leave the table of changes out of date.
   for (let round = 0; round <= 1; round++) {
-    const docsCheck = await runExactly(inHome(''), `python3 .claude/scripts/tickets/ticket_tree.py docs --ticket ${ID}`,
+    const docsCheck = await runExactly(HOME, `python3 .claude/scripts/tickets/ticket_tree.py docs --ticket ${ID}`,
       { exit: 0, quiet: true }, { phase: 'Finish', label: `docs check ${ID} ${round + 1}` },
     )
     log(`Documents check ${round + 1}: ${docsCheck && docsCheck.passed ? 'passed' : `${docsCheck ? docsCheck.problems.length : '?'} problem(s)`}`)

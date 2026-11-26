@@ -4,9 +4,17 @@ import json
 import sys
 import tomllib
 from pathlib import Path
-from typing import List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 
-SHARED_PREFIXES = ("packages/", ".github/scripts/")
+SHARED_PREFIXES = (
+    "packages/",
+    ".github/scripts/",
+    "rust/",
+    "scripts/",
+    "frontend/packages/",
+    "qa/e2e/",
+    "backend/libs/",
+)
 SHARED_NAMES = frozenset({"uv.lock", "pnpm-lock.yaml", "Cargo.lock"})
 SHARED_FILES = frozenset(
     {
@@ -21,11 +29,14 @@ SHARED_FILES = frozenset(
         ".github/workflows/specs.yml",
         ".github/workflows/images.yml",
         "compose.e2e.yaml",
+        "infra/compose/e2e.yaml",
         ".dockerignore",
     }
 )
 REPOSITORY_PREFIXES = ("tests/", ".claude/")
 SPECS_PREFIXES = ("docs/specs/", ".claude/skills/write-specs/")
+LAYER_PACKAGES = frozenset({"swarm-models", "swarm-storage", "swarm-clients", "swarm-service", "swarm-api"})
+SHARED_DOMAIN = "shared"
 USAGE = "usage: detect_changes.py [--root <repo root>] [--all]"
 
 
@@ -37,10 +48,45 @@ def discover_services(root: Path) -> List[str]:
     return sorted(p.name for p in folder.iterdir() if p.is_dir() and not p.name.startswith((".", "_")))
 
 
+def discover_apps(root: Path) -> Dict[str, List[str]]:
+    """Map each ``backend/apps/<app>`` to the domains of its ``[tool.swarm] domains``."""
+    folder = root / "backend" / "apps"
+    found: Dict[str, List[str]] = {}
+    if not folder.is_dir():
+        return found
+    for child in sorted(folder.iterdir()):
+        manifest = child / "pyproject.toml"
+        if not child.is_dir() or child.name.startswith((".", "_")) or not manifest.is_file():
+            continue
+        try:
+            with manifest.open("rb") as handle:
+                data = tomllib.load(handle)
+        except (OSError, tomllib.TOMLDecodeError):
+            data = {}
+        domains = data.get("tool", {}).get("swarm", {}).get("domains", [])
+        found[child.name] = [d for d in domains if isinstance(d, str)] if isinstance(domains, list) else []
+    return found
+
+
+def apps_of_layer_path(parts: List[str], apps: Dict[str, List[str]]) -> Optional[Set[str]]:
+    """Return the apps a ``backend/swarm-<layer>/...`` path selects, or None when it is no such path."""
+    if len(parts) < 3 or parts[0] != "backend" or parts[1] not in LAYER_PACKAGES:
+        return None
+    if parts[2] == "src" and len(parts) > 4:
+        domain = parts[4]
+    elif parts[2] == "tests" and len(parts) > 4:
+        domain = parts[3]
+    else:
+        return set(apps)
+    if domain == SHARED_DOMAIN:
+        return set(apps)
+    return {name for name, domains in apps.items() if domain in domains}
+
+
 def discover_typescript(root: Path) -> List[str]:
-    """List the ``frontends/<name>`` and ``packages/ts/<name>`` folders holding a ``package.json``."""
+    """List the front-end app and package folders holding a ``package.json``."""
     found: List[str] = []
-    for parent in ("frontends", "packages/ts"):
+    for parent in ("frontends", "packages/ts", "frontend/apps", "frontend/packages"):
         folder = root / parent
         if not folder.is_dir():
             continue
@@ -51,9 +97,9 @@ def discover_typescript(root: Path) -> List[str]:
 
 
 def discover_images(root: Path) -> List[str]:
-    """List the image folders: ``services/<service>`` and ``frontends/<name>`` holding a ``Dockerfile``."""
+    """List the image folders (services, apps and front ends) holding a ``Dockerfile``."""
     found: List[str] = []
-    for parent in ("services", "frontends"):
+    for parent in ("services", "frontends", "backend/apps", "frontend/apps"):
         folder = root / parent
         if not folder.is_dir():
             continue
@@ -65,7 +111,11 @@ def discover_images(root: Path) -> List[str]:
 
 def rust_applies(root: Path) -> bool:
     """Tell whether the Rust workspace exists and has at least one member."""
-    manifest = root / "packages" / "rust" / "Cargo.toml"
+    return any(rust_workspace_has_members(root / folder / "Cargo.toml") for folder in ("packages/rust", "rust"))
+
+
+def rust_workspace_has_members(manifest: Path) -> bool:
+    """Tell whether one Cargo workspace manifest exists and lists members."""
     if not manifest.is_file():
         return False
     try:
@@ -118,6 +168,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     all_services = discover_services(root)
     all_typescript = discover_typescript(root)
     all_images = discover_images(root)
+    apps = discover_apps(root)
 
     services: Set[str] = set()
     typescript: Set[str] = set()
@@ -130,18 +181,29 @@ def main(argv: Optional[List[str]] = None) -> int:
             everything = True
             continue
         parts = path.split("/")
-        if parts[0] == "services" and len(parts) > 2 and parts[1] in all_services:
+        owners = apps_of_layer_path(parts, apps)
+        if owners is not None:
+            services |= owners
+            images |= {f"backend/apps/{name}" for name in owners if f"backend/apps/{name}" in all_images}
+            continue
+        if parts[0] == "backend" and len(parts) > 3 and parts[1] == "apps" and parts[2] in apps:
+            services.add(parts[2])
+        elif parts[0] == "frontend" and len(parts) > 3 and f"frontend/{parts[1]}/{parts[2]}" in all_typescript:
+            typescript.add(f"frontend/{parts[1]}/{parts[2]}")
+        elif parts[0] == "services" and len(parts) > 2 and parts[1] in all_services:
             services.add(parts[1])
         elif parts[0] == "frontends" and len(parts) > 2 and f"frontends/{parts[1]}" in all_typescript:
             typescript.add(f"frontends/{parts[1]}")
         if len(parts) > 2 and f"{parts[0]}/{parts[1]}" in all_images:
             images.add(f"{parts[0]}/{parts[1]}")
+        elif len(parts) > 3 and f"{parts[0]}/{parts[1]}/{parts[2]}" in all_images:
+            images.add(f"{parts[0]}/{parts[1]}/{parts[2]}")
         if path.startswith(REPOSITORY_PREFIXES):
             repository = True
         if path.startswith(SPECS_PREFIXES):
             specs = True
     if everything:
-        services = set(all_services)
+        services = set(all_services) | set(apps)
         typescript = set(all_typescript)
         images = set(all_images)
         rust = rust_applies(root)

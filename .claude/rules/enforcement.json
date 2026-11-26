@@ -250,6 +250,11 @@
     "kind": "test",
     "path": "tests/harness/ticket_tree/test_ticket_tree.py",
     "what": "hand-offs, integration and finish"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/ticket_tree/test_ticket_tree.py",
+    "what": "integrate never applies a file another open ticket owns, and lists it under refused (L-34)"
    }
   ],
   "TKT-6": [
@@ -272,6 +277,31 @@
     "kind": "agent",
     "path": ".claude/agents/reviewer.md",
     "what": "the reviewer approves the diff"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/checks/test_checks_environment.py",
+    "what": "a missing module of the project, even absent from the clean tree, is never flagged environment (L-34)"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/checks/test_checks_failing_files.py",
+    "what": "a failure goes to the changed file whose path the tool prints, even relative to a service root (L-34)"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/checks/test_checks_swarm_core.py",
+    "what": "the clean tree gets the swarm_core wheel when code imports it, and fresh modification times (L-39)"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/checks/test_checks_python.py",
+    "what": "pytest runs with -n 2 as CI does, and mypy is never skipped silently (L-43)"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/wiring/test_ticket_workflows.py",
+    "what": "the runner gets one command and the exit code it prints decides; environment failures do not hold back the others (L-35, L-40)"
    }
   ],
   "TKT-7": [
@@ -339,6 +369,11 @@
     "kind": "test",
     "path": "tests/harness/wiring/test_ticket_workflows.py",
     "what": "the review returns a note and its rounds"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/wiring/test_ticket_workflows.py",
+    "what": "a finding owned by several tasks becomes one fix task; findings on TICKET.md and PLAN.md go to the ticket-writer and the scribe (L-34, L-41)"
    }
   ],
   "TKT-13": [
@@ -373,6 +408,11 @@
     "kind": "test",
     "path": "tests/harness/ticket_tree/test_ticket_tree.py",
     "what": "the documents check"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/ticket_tree/test_ticket_tree_finish_documents.py",
+    "what": "finish rewrites a changes table another ticket's commit made stale, and still refuses a broken link (L-42)"
    }
   ],
   "TKT-15": [
@@ -405,6 +445,11 @@
     "kind": "test",
     "path": "tests/ci/workflows/test_gitflow_workflows.py",
     "what": "the GitFlow workflows"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/ticket_tree/test_ticket_tree.py",
+    "what": "finish updates an open pull request through the REST API, never gh pr edit, and removes the state once pushed (L-30, L-36)"
    }
   ],
   "TKT-16": [
@@ -432,6 +477,16 @@
     "kind": "test",
     "path": "tests/harness/wiring/test_ticket_workflows.py",
     "what": "the start rule is run by the runner agent and decided by its exit code, never judged by the verifier"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/tickets/test_tickets_area_lock.py",
+    "what": "an open ticket continuing its run passes the area lock, and next never starts two overlapping tickets (L-38)"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/roadmap_gantt/test_roadmap_gantt_areas.py",
+    "what": "an area of the old layout and its new-layout path are the same area for the lock and the board"
    }
   ],
   "TKT-17": [
@@ -473,6 +528,11 @@
     "kind": "workflow",
     "path": ".claude/workflows/ticket-run.js",
     "what": "blocking files go to their owner before the retry"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/wiring/test_ticket_workflows.py",
+    "what": "a task blocked only by files later waves write counts as done (L-37); a bare folder gets no fix task (L-34)"
    }
   ],
   "TKT-20": [
