@@ -9,11 +9,11 @@ from uuid import UUID, uuid4
 import pytest
 
 # First-party imports
-from gateway.models.access.exceptions import SEAccessError, SEAccessMissingRoleError, SEAccessWrongOperatorError
-from gateway.models.auth.caller import Caller
-from gateway.models.enums import AccessRefusal
-from gateway.service.auth.access_guard import AccessGuard
+from swarm_models.access.exceptions import SEAccessError, SEAccessMissingRoleError, SEAccessWrongOperatorError
+from swarm_models.auth.caller import Caller
+from swarm_models.enums import AccessRefusal
 from swarm_models.people.enums import RoleName
+from swarm_service.gateway.auth.access_guard import AccessGuard
 
 
 class TestAccessGuard:

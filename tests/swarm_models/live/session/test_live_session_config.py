@@ -8,8 +8,8 @@ import pytest
 from pydantic import JsonValue, ValidationError
 
 # First-party imports
-from swarm_live.models.config.exceptions import SELiveSessionConfigInvalidStatusInterval  # isort: skip
-from swarm_live.models.config.live_session_config import LiveSessionConfig  # isort: skip
+from swarm_models.live.session.exceptions import SELiveSessionConfigInvalidStatusInterval  # isort: skip
+from swarm_models.live.session.live_session_config import LiveSessionConfig  # isort: skip
 
 
 class TestLiveSessionConfig:

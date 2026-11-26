@@ -1,18 +1,31 @@
 [project]
 name = "swarm-scripts"
 version = "0.1.0"
-description = "The operations of Swarm, run with uv run and taking no arguments: schema export and check."
+description = "The operations of Swarm, run with uv run and taking no arguments: schemas, OpenAPI documents and migrations."
 readme = "../README.md"
 requires-python = ">=3.12"
-dependencies = ["swarm-models", "swarm-service"]
+dependencies = [
+    "fastapi>=0.164.0",
+    "swarm-api",
+    "swarm-logging",
+    "swarm-models",
+    "swarm-service",
+    "swarm-web",
+]
 
 [project.scripts]
 swarm-schemas-export = "swarm_scripts.schemas.export:main"
 swarm-schemas-check = "swarm_scripts.schemas.check:main"
+swarm-openapi-export = "swarm_scripts.openapi.export:main"
+swarm-openapi-check = "swarm_scripts.openapi.check:main"
+swarm-migrations-migrate = "swarm_scripts.migrations.migrate:main"
 
 [tool.uv.sources]
+swarm-api = { workspace = true }
+swarm-logging = { workspace = true }
 swarm-models = { workspace = true }
 swarm-service = { workspace = true }
+swarm-web = { workspace = true }
 
 [tool.uv.build-backend]
 module-name = "swarm_scripts"

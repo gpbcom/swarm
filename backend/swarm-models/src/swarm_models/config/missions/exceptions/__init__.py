@@ -1,18 +1,18 @@
 from __future__ import annotations
 
-from missions.models.config.exceptions.se_invalid_missions_config_exception import (
+from swarm_models.config.missions.exceptions.se_invalid_missions_config_exception import (
     SEInvalidMissionsConfigException,
 )
-from missions.models.config.exceptions.se_missions_config_invalid_postgres import (
+from swarm_models.config.missions.exceptions.se_missions_config_invalid_postgres import (
     SEMissionsConfigInvalidPostgres,
 )
-from missions.models.config.exceptions.se_missions_config_invalid_rest import (
+from swarm_models.config.missions.exceptions.se_missions_config_invalid_rest import (
     SEMissionsConfigInvalidRest,
 )
-from missions.models.config.exceptions.se_missions_config_invalid_schema_name import (
+from swarm_models.config.missions.exceptions.se_missions_config_invalid_schema_name import (
     SEMissionsConfigInvalidSchemaName,
 )
-from missions.models.config.exceptions.se_missions_config_unreadable import (
+from swarm_models.config.missions.exceptions.se_missions_config_unreadable import (
     SEMissionsConfigUnreadable,
 )
 

@@ -12,20 +12,20 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from pydantic import JsonValue
 
 # First-party imports
-from gateway.clients.keycloak.keycloak_jwks_client import KeycloakJwksClient  # isort: skip
-from gateway.models.access.exceptions import (  # isort: skip
+from swarm_clients.gateway.keycloak.keycloak_jwks_client import KeycloakJwksClient  # isort: skip
+from swarm_models.access.exceptions import (  # isort: skip
     SEAccessExpiredTokenError,
     SEAccessInvalidTokenError,
     SEAccessMissingTokenError,
 )
-from gateway.models.auth.auth_config import AuthConfig  # isort: skip
-from gateway.models.auth.caller import Caller  # isort: skip
-from gateway.models.enums import TokenClaim  # isort: skip
-from gateway.models.keycloak.exceptions import SEKeycloakUnreachableError  # isort: skip
-from gateway.service.auth.token_verifier import TokenVerifier  # isort: skip
+from swarm_models.auth.auth_config import AuthConfig  # isort: skip
+from swarm_models.auth.caller import Caller  # isort: skip
+from swarm_models.enums import TokenClaim  # isort: skip
+from swarm_models.keycloak.exceptions import SEKeycloakUnreachableError  # isort: skip
+from swarm_service.gateway.auth.token_verifier import TokenVerifier  # isort: skip
 from swarm_models.people.enums import RoleName  # isort: skip
-from services.gateway.tests.support.keycloak.helpers import AUDIENCE, claims_for  # isort: skip
-from services.gateway.tests.support.keycloak.keycloak_stand_in import KeycloakStandIn  # isort: skip
+from tests.fakes.keycloak.helpers import AUDIENCE, claims_for  # isort: skip
+from tests.fakes.keycloak.keycloak_stand_in import KeycloakStandIn  # isort: skip
 
 
 class TestTokenVerifier:

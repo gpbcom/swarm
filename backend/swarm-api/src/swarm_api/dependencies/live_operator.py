@@ -9,11 +9,11 @@ from uuid import UUID
 from fastapi import WebSocket, WebSocketException
 
 # First-party imports
-from gateway.api.rest.auth.access_installer import AccessInstaller
-from gateway.api.rest.auth.route_access import RouteAccess
-from gateway.models.access.exceptions import SEAccessError
-from gateway.service.auth.access_service import AccessService
+from swarm_api.dependencies.route_access import RouteAccess
+from swarm_api.handlers.access_handlers import AccessHandlers
+from swarm_models.access.exceptions import SEAccessError
 from swarm_models.people.enums import RoleName
+from swarm_service.gateway.auth.access_service import AccessService
 
 
 class LiveOperator:
@@ -80,7 +80,7 @@ class LiveOperator:
         Raises:
             WebSocketException: With code 1008 if the connection carries no verified Operator.
         """
-        service: Optional[AccessService] = getattr(websocket.app.state, AccessInstaller.ACCESS_SERVICE_STATE, None)
+        service: Optional[AccessService] = getattr(websocket.app.state, AccessHandlers.ACCESS_SERVICE_STATE, None)
         if service is None:
             self.logger.warning("A live connection was refused: no access check is installed.")
             raise WebSocketException(code=self.POLICY_VIOLATION)

@@ -9,11 +9,11 @@ from swarm_storage.shared.postgres.migrations.alembic_migrator import AlembicMig
 
 
 class SchemaService:
-    """Moves the PostgreSQL schema of the gateway between revisions.
+    """Moves the PostgreSQL schema of an app between revisions.
 
     Attributes:
         BASE (str): The revision that means no migration applied.
-        migrator (AlembicMigrator): The migrator of the gateway's schema.
+        migrator (AlembicMigrator): The migrator of the app's schema.
         logger (Logger): Logger instance.
 
     Notes:
@@ -26,7 +26,7 @@ class SchemaService:
         """Prepare the service.
 
         Args:
-            migrator (AlembicMigrator): The migrator of the gateway's schema.
+            migrator (AlembicMigrator): The migrator of the app's schema.
             logger (Optional[Logger]): Logger instance.
         """
         self.migrator = migrator

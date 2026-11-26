@@ -2,22 +2,22 @@ from __future__ import annotations
 
 # Standard library imports
 from pathlib import Path
-from typing import ClassVar, Dict, List, Optional
+from typing import ClassVar, Dict, List
 
 # Third-party imports
 import pytest
 from pydantic import JsonValue, ValidationError
 
 # First-party imports
-from gateway.models.config.exceptions import (
+from swarm_catalog.models.yaml_catalog import YamlCatalog
+from swarm_models.config.gateway.exceptions import (
     SEGatewayConfigInvalidPostgres,
     SEGatewayConfigInvalidRest,
     SEGatewayConfigInvalidSchemaName,
     SEGatewayConfigUnreadable,
     SEInvalidGatewayConfigException,
 )
-from gateway.models.config.gateway_config import GatewayConfig
-from swarm_catalog.models.yaml_catalog import YamlCatalog
+from swarm_models.config.gateway.gateway_config import GatewayConfig
 from swarm_models.config.postgres.exceptions import SEPostgresConfigInvalidDsnKey
 from swarm_models.config.postgres.postgres_config import PostgresConfig
 from swarm_web.models.config.exceptions import SERestConfigInvalidPort
@@ -25,6 +25,7 @@ from swarm_web.models.config.rest_config import RestConfig
 
 
 class TestGatewayConfig:
+    APP_FOLDER: ClassVar[Path] = Path(__file__).resolve().parents[4] / "backend" / "apps" / "gateway"
     FIELD_ERRORS: ClassVar[List[type[Exception]]] = [
         SEGatewayConfigInvalidSchemaName,
         SEGatewayConfigInvalidPostgres,
@@ -110,30 +111,20 @@ class TestGatewayConfig:
         assert GatewayConfig.LOGGER_FILE == "logger.yaml"
         assert GatewayConfig.DSN_KEY == "SWARM_GATEWAY_POSTGRES_DSN"
 
-    def test_the_home_entry_moves_the_conf_and_migrations_folders(
+    def test_the_app_root_entry_moves_the_conf_and_migrations_folders(
         self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
     ) -> None:
-        monkeypatch.setenv(GatewayConfig.HOME_KEY, str(tmp_path))
+        monkeypatch.setenv(GatewayConfig.APP_ROOT_KEY, str(tmp_path))
         assert GatewayConfig.conf_folder() == tmp_path / GatewayConfig.CONF_FOLDER
         assert GatewayConfig.migrations_folder() == tmp_path / GatewayConfig.MIGRATIONS_FOLDER
 
-    @pytest.mark.parametrize("home", [None, "", "   "])
-    def test_an_unset_or_blank_home_entry_leaves_the_folders_of_the_repository(
-        self, monkeypatch: pytest.MonkeyPatch, home: Optional[str]
-    ) -> None:
-        if home is None:
-            monkeypatch.delenv(GatewayConfig.HOME_KEY, raising=False)
-        else:
-            monkeypatch.setenv(GatewayConfig.HOME_KEY, home)
-        service_folder = Path(__file__).resolve().parents[3]
-        assert GatewayConfig.conf_folder().resolve() == service_folder / GatewayConfig.CONF_FOLDER
-        assert GatewayConfig.migrations_folder().resolve() == service_folder / GatewayConfig.MIGRATIONS_FOLDER
-
-    def test_the_conf_folder_is_the_one_of_the_service(self) -> None:
-        assert GatewayConfig.conf_folder() == Path(__file__).resolve().parents[3] / "conf"
+    def test_the_app_folder_holds_the_conf_and_migrations_folders(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setenv(GatewayConfig.APP_ROOT_KEY, str(self.APP_FOLDER))
+        assert GatewayConfig.conf_folder().is_dir()
+        assert GatewayConfig.migrations_folder().is_dir()
 
     def test_app_yaml_writes_every_default_out(self) -> None:
-        path = GatewayConfig.conf_folder() / GatewayConfig.APP_FILE
+        path = self.APP_FOLDER / GatewayConfig.CONF_FOLDER / GatewayConfig.APP_FILE
         assert GatewayConfig.load(path) == GatewayConfig()
 
     def test_an_unreadable_file_is_refused(self, tmp_path: Path) -> None:

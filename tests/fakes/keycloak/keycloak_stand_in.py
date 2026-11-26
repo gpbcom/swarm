@@ -17,8 +17,8 @@ from jwt.algorithms import RSAAlgorithm
 from pydantic import JsonValue
 
 # First-party imports
-from services.gateway.tests.support.keycloak.certs_request_handler import CertsRequestHandler
-from services.gateway.tests.support.keycloak.helpers import REALM_PATH
+from tests.fakes.keycloak.certs_request_handler import CertsRequestHandler
+from tests.fakes.keycloak.helpers import REALM_PATH
 
 
 class KeycloakStandIn:

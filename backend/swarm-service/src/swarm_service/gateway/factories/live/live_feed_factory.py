@@ -5,10 +5,10 @@ from logging import Logger, getLogger
 from typing import Optional
 
 # First-party imports
-from gateway.models.live.live_config import LiveConfig
-from gateway.service.factories.live_service_factory import LiveServiceFactory
-from gateway.service.live.live_feed import LiveFeed
+from swarm_models.live.feed.live_config import LiveConfig
 from swarm_nats.clients.nats_connector import NatsConnector
+from swarm_service.gateway.factories.live_service_factory import LiveServiceFactory
+from swarm_service.gateway.live.live_feed import LiveFeed
 
 from swarm_live.service.live_hub import LiveHub  # isort: skip
 

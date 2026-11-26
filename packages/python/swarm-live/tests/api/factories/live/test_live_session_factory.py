@@ -13,7 +13,7 @@ from swarm_lifecycle.factories.async_runnable_factory import AsyncRunnableFactor
 from swarm_live.api.factories.live.live_session_factory import LiveSessionFactory  # isort: skip
 from swarm_live.api.factories.live_runnable_factory import LiveRunnableFactory  # isort: skip
 from swarm_live.api.live.live_session import LiveSession  # isort: skip
-from swarm_live.models.config.live_session_config import LiveSessionConfig  # isort: skip
+from swarm_models.live.session.live_session_config import LiveSessionConfig  # isort: skip
 from swarm_live.service.hub_live_source import HubLiveSource  # isort: skip
 from swarm_live.service.live_codec import LiveCodec  # isort: skip
 from swarm_live.service.live_hub import LiveHub  # isort: skip

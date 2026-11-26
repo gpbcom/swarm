@@ -9,8 +9,8 @@ import pytest
 from pydantic import JsonValue, ValidationError
 
 # First-party imports
-from gateway.models.auth.caller import Caller
-from gateway.models.auth.exceptions import (
+from swarm_models.auth.caller import Caller
+from swarm_models.auth.exceptions import (
     SECallerInvalidOperatorId,
     SECallerInvalidPersonId,
     SECallerInvalidRoles,

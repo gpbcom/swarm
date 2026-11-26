@@ -18,6 +18,7 @@ class TestPackageImports:
         "backend/libs/swarm-logging/src/swarm_logging/a.py": "",
         "backend/libs/swarm-catalog/src/swarm_catalog/a.py": "",
         "backend/libs/swarm-web/src/swarm_web/a.py": "",
+        "backend/libs/swarm-nats/src/swarm_nats/a.py": "",
         "backend/swarm-models/src/swarm_models/a.py": "",
         "backend/swarm-storage/src/swarm_storage/a.py": "",
         "backend/swarm-clients/src/swarm_clients/a.py": "",
@@ -42,6 +43,10 @@ class TestPackageImports:
             (
                 "backend/swarm-models/src/swarm_models/a.py",
                 "from swarm_catalog.m import Y\nfrom swarm_models.b import Z\n",
+            ),
+            (
+                "backend/swarm-models/src/swarm_models/a.py",
+                "from swarm_web.models.rest import R\nfrom swarm_nats.models.config import N\n",
             ),
             (
                 "backend/swarm-storage/src/swarm_storage/a.py",
@@ -73,6 +78,8 @@ class TestPackageImports:
             ("backend/libs/swarm-web/src/swarm_web/a.py", "from swarm_models.x import Y\n"),
             ("backend/swarm-models/src/swarm_models/a.py", "from swarm_logging.x import Y\n"),
             ("backend/swarm-models/src/swarm_models/a.py", "from swarm_service.x import Y\n"),
+            ("backend/swarm-models/src/swarm_models/a.py", "from swarm_web.servers.x import Y\n"),
+            ("backend/swarm-models/src/swarm_models/a.py", "from swarm_nats.clients.x import Y\n"),
             ("backend/swarm-storage/src/swarm_storage/a.py", "from swarm_clients.x import Y\n"),
             ("backend/swarm-clients/src/swarm_clients/a.py", "from swarm_storage.x import Y\n"),
             ("backend/swarm-service/src/swarm_service/a.py", "from swarm_api.x import Y\n"),

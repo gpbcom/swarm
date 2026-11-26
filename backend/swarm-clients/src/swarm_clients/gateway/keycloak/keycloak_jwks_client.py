@@ -10,8 +10,8 @@ import httpx
 from pydantic import JsonValue
 
 # First-party imports
-from gateway.models.auth.auth_config import AuthConfig
-from gateway.models.keycloak.exceptions import SEKeycloakUnknownKeyError, SEKeycloakUnreachableError
+from swarm_models.auth.auth_config import AuthConfig
+from swarm_models.keycloak.exceptions import SEKeycloakUnknownKeyError, SEKeycloakUnreachableError
 
 
 class KeycloakJwksClient:

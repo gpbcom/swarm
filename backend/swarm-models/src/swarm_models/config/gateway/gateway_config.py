@@ -1,30 +1,28 @@
 from __future__ import annotations
 
 # Standard library imports
-import os
 import re
-from pathlib import Path
 from typing import ClassVar, Dict, Literal, Pattern, Type, Union
 
 # Third-party imports
 from pydantic import ConfigDict, Field, JsonValue, field_validator
 
 # First-party imports
-from gateway.models.auth.auth_config import AuthConfig
-from gateway.models.config.exceptions import (
+from swarm_models.auth.auth_config import AuthConfig
+from swarm_models.config.app_config import AppConfig
+from swarm_models.config.gateway.exceptions import (
     SEGatewayConfigInvalidPostgres,
     SEGatewayConfigInvalidRest,
     SEGatewayConfigInvalidSchemaName,
     SEGatewayConfigUnreadable,
 )
-from gateway.models.live.live_config import LiveConfig
-from swarm_catalog.models.yaml_catalog import YamlCatalog
 from swarm_models.config.postgres.postgres_config import PostgresConfig
+from swarm_models.live.feed.live_config import LiveConfig
 from swarm_web.models.config.rest_config import RestConfig
 
 
-class GatewayConfig(YamlCatalog):
-    """The configuration of the gateway service.
+class GatewayConfig(AppConfig):
+    """The configuration of the gateway app.
 
     Attributes:
         schema_name (str): The PostgreSQL schema the gateway reads and writes, and no other.
@@ -33,10 +31,6 @@ class GatewayConfig(YamlCatalog):
         auth (AuthConfig): The check of the tokens the gateway receives.
         live (LiveConfig): The live feed and the client sessions of ``/v1/live``.
         UNREADABLE (type[Exception]): The exception raised when the file cannot be read.
-        APP_FILE (str): The name of the configuration file.
-        LOGGER_FILE (str): The name of the logging configuration file.
-        CONF_FOLDER (str): The name of the folder of the configuration files, in the service folder.
-        MIGRATIONS_FOLDER (str): The name of the folder of the migrations, in the service folder.
         DSN_KEY (str): The environment entry that holds the DSN of the gateway.
         DEFAULT_SCHEMA_NAME (str): The default schema.
         SCHEMA_NAME_FIELD (str): The name of the ``schema_name`` field.
@@ -46,25 +40,17 @@ class GatewayConfig(YamlCatalog):
         LIVE_FIELD (str): The name of the ``live`` field.
         DEFAULT_ISSUER_URL (str): The issuer of the tokens when ``auth`` is not configured.
         SCHEMA_NAME_PATTERN (Pattern[str]): Lower case letters, digits and underscores, starting with a letter.
-        HOME_KEY (str): The environment entry that names the service folder when the package is installed.
-        SERVICE_FOLDER_DEPTH (int): How many folders separate this file from the service folder.
         BEFORE (str): The validator mode that runs before Pydantic's own validation.
 
     Notes:
         - **The DSN is never here**: ``postgres.dsn_key`` only names the environment entry that holds it.
         - A ``postgres`` mapping without ``dsn_key`` takes ``DSN_KEY``, so that the gateway never reads the entry of
           another service.
-        - **An installed package has no source tree**: the images run ``uv sync --no-editable``, so the path of this
-          file no longer leads to the service folder. ``HOME_KEY`` then names it, and each Dockerfile sets it to the
-          folder its ``COPY`` fills.
+        - The folders of the app come from ``AppConfig``, whose ``APP_ROOT_KEY`` each image sets.
         - The nested sections are validated by their own models, and their errors are raised unchanged.
     """
 
     UNREADABLE: ClassVar[Type[Exception]] = SEGatewayConfigUnreadable
-    APP_FILE: ClassVar[str] = "app.yaml"
-    LOGGER_FILE: ClassVar[str] = "logger.yaml"
-    CONF_FOLDER: ClassVar[str] = "conf"
-    MIGRATIONS_FOLDER: ClassVar[str] = "migrations"
     DSN_KEY: ClassVar[str] = "SWARM_GATEWAY_POSTGRES_DSN"
     DEFAULT_SCHEMA_NAME: ClassVar[str] = "gateway"
     SCHEMA_NAME_FIELD: ClassVar[str] = "schema_name"
@@ -74,8 +60,6 @@ class GatewayConfig(YamlCatalog):
     LIVE_FIELD: ClassVar[str] = "live"
     DEFAULT_ISSUER_URL: ClassVar[str] = "http://keycloak.global.svc.cluster.local:8080/realms/swarm"
     SCHEMA_NAME_PATTERN: ClassVar[Pattern[str]] = re.compile(r"^[a-z][a-z0-9_]*$")
-    HOME_KEY: ClassVar[str] = "SWARM_GATEWAY_HOME"
-    SERVICE_FOLDER_DEPTH: ClassVar[int] = 4
     BEFORE: ClassVar[Literal["before"]] = "before"
 
     model_config = ConfigDict(extra="forbid", frozen=True, validate_default=True)
@@ -190,38 +174,3 @@ class GatewayConfig(YamlCatalog):
         if value is None:
             return cls.model_fields[cls.LIVE_FIELD].get_default(call_default_factory=True)
         return value
-
-    ############################
-    # Publicly Exposed Methods #
-    ############################
-
-    @classmethod
-    def service_folder(cls) -> Path:
-        """Return the folder of the gateway service.
-
-        Returns:
-            Path: The folder named by ``HOME_KEY`` when it is set, else ``services/gateway``, found from this module's
-                path.
-        """
-        home = os.environ.get(cls.HOME_KEY)
-        if home and home.strip():
-            return Path(home.strip())
-        return Path(__file__).resolve().parents[cls.SERVICE_FOLDER_DEPTH]
-
-    @classmethod
-    def conf_folder(cls) -> Path:
-        """Return the folder of the configuration files.
-
-        Returns:
-            Path: ``services/gateway/conf``.
-        """
-        return cls.service_folder() / cls.CONF_FOLDER
-
-    @classmethod
-    def migrations_folder(cls) -> Path:
-        """Return the folder of the Alembic migrations.
-
-        Returns:
-            Path: ``services/gateway/migrations``.
-        """
-        return cls.service_folder() / cls.MIGRATIONS_FOLDER

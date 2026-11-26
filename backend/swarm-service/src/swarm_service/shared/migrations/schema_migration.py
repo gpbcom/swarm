@@ -5,14 +5,14 @@ from logging import Logger, getLogger
 from typing import AsyncIterator, Optional
 
 # First-party imports
-from gateway.service.schema.schema_service import SchemaService
 from swarm_lifecycle.models.enums import RunnableStatus
 from swarm_lifecycle.runnables.async_runnable import AsyncRunnable
 from swarm_models.storage.exceptions import SEStorageError
+from swarm_service.shared.migrations.schema_service import SchemaService
 
 
-class MigrateCommand(AsyncRunnable):
-    """Command that upgrades the PostgreSQL schema of the gateway to its latest revision.
+class SchemaMigration(AsyncRunnable):
+    """The migration that upgrades the PostgreSQL schema of an app to its latest revision.
 
     Attributes:
         service (SchemaService): The service that applies the migrations.
@@ -21,11 +21,11 @@ class MigrateCommand(AsyncRunnable):
 
     Notes:
         - **A storage error never escapes ``execute``**: it is logged, gives ``exit_code`` 1 and ends the statuses
-          without ``EXECUTED``, so that the pre-deploy step fails by its exit code.
+          without ``EXECUTED``, so that the migration job fails by its exit code.
     """
 
     def __init__(self, service: SchemaService, status_interval_s: float, logger: Optional[Logger] = None) -> None:
-        """Prepare the command.
+        """Prepare the migration.
 
         Args:
             service (SchemaService): The service that applies the migrations.

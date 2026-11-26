@@ -7,14 +7,13 @@ from typing import ClassVar, Literal, Union
 from pydantic import BaseModel, ConfigDict, Field, JsonValue, field_validator
 
 # First-party imports
-from gateway.models.live.exceptions import (
+from swarm_models.live.feed.exceptions import (
     SELiveConfigInvalidNats,
     SELiveConfigInvalidSession,
     SELiveConfigInvalidStatusInterval,
 )
+from swarm_models.live.session.live_session_config import LiveSessionConfig
 from swarm_nats.models.config.nats_client_config import NatsClientConfig
-
-from swarm_live.models.config.live_session_config import LiveSessionConfig  # isort: skip
 
 
 class LiveConfig(BaseModel):

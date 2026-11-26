@@ -68,6 +68,19 @@ class TestApiOnlyEndpoints:
         )
         assert self.violations(tmp_path, {self.PATH: source}) == []
 
+    @pytest.mark.parametrize("connection", ["Request", "WebSocket"])
+    def test_a_provider_class_called_with_the_connection_is_allowed_in_its_own_module(
+        self, tmp_path: Path, connection: str
+    ) -> None:
+        source = f"class RouteAccess:\n    async def __call__(self, connection: {connection}) -> None:\n        pass\n"
+        assert self.violations(tmp_path, {self.PATH: source}) == []
+
+    def test_a_class_whose_call_takes_no_connection_is_still_reported(self, tmp_path: Path) -> None:
+        source = "class RouteAccess:\n    async def __call__(self, token: str) -> None:\n        pass\n"
+        found = self.violations(tmp_path, {self.PATH: source})
+        assert len(found) == 1
+        assert "'RouteAccess'" in found[0]
+
     def test_exception_handlers_are_allowed_by_name_or_registration(self, tmp_path: Path) -> None:
         source = (
             "async def problem_handler(request, error) -> None:\n    pass\n\n"

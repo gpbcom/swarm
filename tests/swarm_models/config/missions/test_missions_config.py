@@ -2,27 +2,27 @@ from __future__ import annotations
 
 # Standard library imports
 from pathlib import Path
-from typing import ClassVar, Dict, List, Optional
+from typing import ClassVar, Dict, List
 
 # Third-party imports
 import pytest
 from pydantic import JsonValue, ValidationError
 
 # First-party imports
-from missions.models.config.exceptions import (
+from swarm_models.config.missions.exceptions import (
     SEInvalidMissionsConfigException,
     SEMissionsConfigInvalidPostgres,
     SEMissionsConfigInvalidRest,
     SEMissionsConfigInvalidSchemaName,
     SEMissionsConfigUnreadable,
 )
-from missions.models.config.missions_config import MissionsConfig
+from swarm_models.config.missions.missions_config import MissionsConfig
 from swarm_models.config.postgres.postgres_config import PostgresConfig
 from swarm_web.models.config.rest_config import RestConfig
 
 
 class TestMissionsConfig:
-    CONF_FOLDER: ClassVar[Path] = Path(__file__).resolve().parents[3] / "conf"
+    APP_FOLDER: ClassVar[Path] = Path(__file__).resolve().parents[4] / "backend" / "apps" / "missions"
     FIELD_ERRORS: ClassVar[List[type[Exception]]] = [
         SEMissionsConfigInvalidSchemaName,
         SEMissionsConfigInvalidPostgres,
@@ -110,30 +110,20 @@ class TestMissionsConfig:
     def test_the_unreadable_error_is_not_a_value_error(self) -> None:
         assert not issubclass(SEMissionsConfigUnreadable, ValueError)
 
-    def test_the_home_entry_moves_the_conf_and_migrations_folders(
+    def test_the_app_root_entry_moves_the_conf_and_migrations_folders(
         self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
     ) -> None:
-        monkeypatch.setenv(MissionsConfig.HOME_KEY, str(tmp_path))
-        assert MissionsConfig.conf_folder() == tmp_path / MissionsConfig.CONF_FOLDER_NAME
-        assert MissionsConfig.migrations_folder() == tmp_path / MissionsConfig.MIGRATIONS_FOLDER_NAME
+        monkeypatch.setenv(MissionsConfig.APP_ROOT_KEY, str(tmp_path))
+        assert MissionsConfig.conf_folder() == tmp_path / MissionsConfig.CONF_FOLDER
+        assert MissionsConfig.migrations_folder() == tmp_path / MissionsConfig.MIGRATIONS_FOLDER
 
-    @pytest.mark.parametrize("home", [None, "", "   "])
-    def test_an_unset_or_blank_home_entry_leaves_the_folders_of_the_repository(
-        self, monkeypatch: pytest.MonkeyPatch, home: Optional[str]
-    ) -> None:
-        if home is None:
-            monkeypatch.delenv(MissionsConfig.HOME_KEY, raising=False)
-        else:
-            monkeypatch.setenv(MissionsConfig.HOME_KEY, home)
-        service_folder = Path(__file__).resolve().parents[3]
-        assert MissionsConfig.conf_folder().resolve() == service_folder / MissionsConfig.CONF_FOLDER_NAME
-        assert MissionsConfig.migrations_folder().resolve() == service_folder / MissionsConfig.MIGRATIONS_FOLDER_NAME
-
-    def test_the_conf_folder_is_the_one_of_the_service(self) -> None:
-        assert MissionsConfig.conf_folder().resolve() == self.CONF_FOLDER
+    def test_the_app_folder_holds_the_conf_and_migrations_folders(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setenv(MissionsConfig.APP_ROOT_KEY, str(self.APP_FOLDER))
+        assert MissionsConfig.conf_folder().is_dir()
+        assert MissionsConfig.migrations_folder().is_dir()
 
     def test_the_app_file_writes_every_default_out(self) -> None:
-        loaded = MissionsConfig.load(MissionsConfig.conf_folder() / MissionsConfig.APP_FILE)
+        loaded = MissionsConfig.load(self.APP_FOLDER / MissionsConfig.CONF_FOLDER / MissionsConfig.APP_FILE)
         assert loaded == MissionsConfig()
 
     def test_a_missing_file_is_unreadable(self, tmp_path: Path) -> None:

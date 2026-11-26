@@ -9,11 +9,11 @@ import jwt
 import pytest
 
 # First-party imports
-from gateway.clients.keycloak.keycloak_jwks_client import KeycloakJwksClient
-from gateway.models.auth.auth_config import AuthConfig
-from gateway.models.keycloak.exceptions import SEKeycloakUnknownKeyError, SEKeycloakUnreachableError
+from swarm_clients.gateway.keycloak.keycloak_jwks_client import KeycloakJwksClient
+from swarm_models.auth.auth_config import AuthConfig
+from swarm_models.keycloak.exceptions import SEKeycloakUnknownKeyError, SEKeycloakUnreachableError
 
-from services.gateway.tests.support.keycloak.keycloak_stand_in import KeycloakStandIn  # isort: skip
+from tests.fakes.keycloak.keycloak_stand_in import KeycloakStandIn  # isort: skip
 
 
 class TestKeycloakJwksClient:

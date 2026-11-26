@@ -1,12 +1,10 @@
 from __future__ import annotations
 
-# Third-party imports
-from samples.sample_job import SampleJob
-
 # First-party imports
 from swarm_lifecycle.factories.runnable_factory import RunnableFactory
-from swarm_rest.api.cli.async_runnable_runner import AsyncRunnableRunner
-from swarm_rest.api.factories.async_runnable_runner_factory import AsyncRunnableRunnerFactory
+from swarm_web.factories.async_runnable_runner_factory import AsyncRunnableRunnerFactory
+from swarm_web.runners.async_runnable_runner import AsyncRunnableRunner
+from tests.swarm_web.runners.sample_job import SampleJob
 
 
 class TestAsyncRunnableRunnerFactory:

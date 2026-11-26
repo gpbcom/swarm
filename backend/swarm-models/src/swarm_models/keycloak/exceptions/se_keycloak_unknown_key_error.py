@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 # First-party imports
-from gateway.models.keycloak.exceptions.se_keycloak_error import SEKeycloakError
+from swarm_models.keycloak.exceptions.se_keycloak_error import SEKeycloakError
 
 
 class SEKeycloakUnknownKeyError(SEKeycloakError):

@@ -8,8 +8,9 @@ const REPOSITORY_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", ".."
 const COMPOSE_FILE = "infra/compose/e2e.yaml";
 // A container that never exits fails its test instead of holding the job until GitHub cancels it.
 const COMPOSE_TIMEOUT_MS = 120_000;
-// The gateway's command line: it prints the greeting and exits, where the image's entry point serves until stopped.
-const GATEWAY_COMMAND = "swarm-gateway";
+// The gateway image serves until stopped, so its start is checked by importing its app's main() and exiting.
+const GATEWAY_COMMAND = "python";
+const GATEWAY_IMPORT = ["-c", "import swarm_gateway.main"];
 
 interface ComposeService {
   image?: string;
@@ -41,8 +42,9 @@ test.describe("the real images", () => {
     }
   });
 
-  test("start: the gateway's command line runs and exits cleanly", () => {
-    const result = compose(["run", "--rm", "--no-deps", "--entrypoint", GATEWAY_COMMAND, "gateway"]);
+  test("start: the gateway's app imports and exits cleanly", () => {
+    const entrypoint = ["--entrypoint", GATEWAY_COMMAND];
+    const result = compose(["run", "--rm", "--no-deps", ...entrypoint, "gateway", ...GATEWAY_IMPORT]);
     expect(result.status, result.stderr).toBe(0);
   });
 });

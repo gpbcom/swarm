@@ -6,20 +6,23 @@ from logging import Logger, getLogger
 from typing import ClassVar, Dict, Optional
 
 # Third-party imports
-from fastapi import Request
+from fastapi import FastAPI, Request
 from fastapi.responses import Response
 
 # First-party imports
-from gateway.models.access.exceptions import SEAccessError
-from gateway.models.enums import AccessRefusal
-from gateway.models.keycloak.exceptions import SEKeycloakError
 from swarm_api.handlers.problem_handlers import ProblemHandlers
+from swarm_models.access.exceptions import SEAccessError
+from swarm_models.auth.auth_config import AuthConfig
+from swarm_models.enums import AccessRefusal
+from swarm_models.keycloak.exceptions import SEKeycloakError
+from swarm_service.gateway.auth.access_service import AccessService
 
 
-class AccessErrorHandler:
-    """Answers a refused call as an ``application/problem+json`` document.
+class AccessHandlers:
+    """Installs the access check on an application, and answers each refusal as a problem document.
 
     Attributes:
+        ACCESS_SERVICE_STATE (ClassVar[str]): The name of the app state entry that holds the access service.
         STATUS_OF_REFUSAL (ClassVar[Dict[AccessRefusal, HTTPStatus]]): The status of each refusal.
         WWW_AUTHENTICATE (ClassVar[str]): The name of the header that tells how to authenticate.
         BEARER (ClassVar[str]): The authentication scheme to use.
@@ -30,7 +33,11 @@ class AccessErrorHandler:
         - A wrong Operator is answered ``404``, so that nobody learns another Operator's resources exist (BR-008).
         - The handler takes an ``Exception``, because Starlette types an exception handler that way. It narrows it to
           ``SEAccessError`` or ``SEKeycloakError`` and raises any other error again.
+        - The installer and the handler of the refusals are one class, so that the access check has one class in the
+          api layer.
     """
+
+    ACCESS_SERVICE_STATE: ClassVar[str] = "access_service"
 
     STATUS_OF_REFUSAL: ClassVar[Dict[AccessRefusal, HTTPStatus]] = {
         AccessRefusal.MISSING_TOKEN: HTTPStatus.UNAUTHORIZED,
@@ -44,7 +51,7 @@ class AccessErrorHandler:
     BEARER: ClassVar[str] = "Bearer"
 
     def __init__(self, logger: Optional[Logger] = None) -> None:
-        """Initialise the handler.
+        """Initialise the handlers.
 
         Args:
             logger (Optional[Logger]): Logger instance.
@@ -55,7 +62,19 @@ class AccessErrorHandler:
     # Publicly Exposed Methods #
     ############################
 
-    async def __call__(self, request: Request, error: Exception) -> Response:
+    def install(self, app: FastAPI, config: AuthConfig) -> None:
+        """Set the access service on the app state and register the handler of the refusals.
+
+        Args:
+            app (FastAPI): The application to install the access check on.
+            config (AuthConfig): The configuration of the check of the tokens.
+        """
+        setattr(app.state, self.ACCESS_SERVICE_STATE, AccessService.from_config(config))
+        for error_type in (SEAccessError, SEKeycloakError):
+            app.add_exception_handler(error_type, self.handle)
+        self.logger.debug("The access check is installed.")
+
+    async def handle(self, request: Request, error: Exception) -> Response:
         """Answer one refusal.
 
         Args:

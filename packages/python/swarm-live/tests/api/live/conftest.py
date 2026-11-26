@@ -5,7 +5,7 @@ import pytest
 from live_stand_in_socket import LiveStandInSocket
 
 # First-party imports
-from swarm_live.models.config.live_session_config import LiveSessionConfig  # isort: skip
+from swarm_models.live.session.live_session_config import LiveSessionConfig  # isort: skip
 from swarm_live.service.hub_live_source import HubLiveSource  # isort: skip
 from swarm_live.service.live_codec import LiveCodec  # isort: skip
 from swarm_live.service.live_hub import LiveHub  # isort: skip

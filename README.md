@@ -172,9 +172,9 @@ Each command installs one workspace: uv for Python (one `uv.lock`), Cargo for Ru
 ### Run the checks
 
 ```bash
-uv run ruff check services packages tests
-uv run mypy services/gateway/src
-uv run pytest services/gateway/tests -n 2
+uv run ruff check services packages backend scripts tests
+uv run mypy backend/apps/gateway/src
+uv run pytest tests/swarm_gateway tests/swarm_api tests/swarm_service -n 2
 uv run pytest tests/conventions
 uv run mypy backend/libs/swarm-lifecycle/src backend/libs/swarm-catalog/src backend/libs/swarm-logging/src backend/libs/swarm-nats/src backend/libs/swarm-web/src
 uv run pytest tests/swarm_lifecycle tests/swarm_catalog tests/swarm_logging tests/swarm_nats tests/swarm_web
@@ -282,7 +282,8 @@ Nobody commits or merges by hand. The repository needs, once, the secret `RELEAS
 
 | Path | Holds |
 | --- | --- |
-| [services/](services/) | The backend services, one folder and one Docker image each, starting with the [gateway](services/gateway/) |
+| [backend/apps/](backend/apps/) | The backend apps, one folder and one Docker image each, starting with the [gateway](backend/apps/gateway/) |
+| [services/](services/) | The backend services not moved to `backend/` yet, one folder and one Docker image each |
 | [packages/](packages/) | Shared code: `python/` (uv), `rust/` (Cargo and PyO3) and `ts/` (pnpm) |
 | [frontend/apps/](frontend/apps/) | The front ends, one folder and one image each, with their Playwright tests, and [desktop/](frontend/apps/desktop/), the Tauri 2 shell that wraps Ground control and Mission studio |
 | [infra/terraform/](infra/terraform/README.md) | One module per building block, one root per cell |

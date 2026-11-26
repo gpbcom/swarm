@@ -23,6 +23,8 @@ class PackageImports(BackendRule):
     Notes:
         - Only imports of a package found in the repository are checked: a third-party import is never refused.
         - Every import is checked, ``TYPE_CHECKING`` blocks included.
+        - ``swarm_models`` may import the models of the kernel's ``swarm_web`` and ``swarm_nats`` (``RestConfig``,
+          ``NatsClientConfig``), which the apps' configurations embed, and nothing else of them.
     """
 
     NAME: ClassVar[str] = "package_imports"
@@ -31,7 +33,7 @@ class PackageImports(BackendRule):
     APP: ClassVar[str] = "{app}"
     ALLOWED: ClassVar[Dict[str, Tuple[str, ...]]] = {
         "kernel": ("{kernel}",),
-        "models": ("{self}", "swarm_catalog", "swarm_lifecycle"),
+        "models": ("{self}", "swarm_catalog", "swarm_lifecycle", "swarm_web.models", "swarm_nats.models"),
         "storage": ("{self}", "swarm_models", "{kernel}"),
         "clients": ("{self}", "swarm_models", "{kernel}"),
         "service": ("{self}", "swarm_storage", "swarm_clients", "swarm_models", "{kernel}"),

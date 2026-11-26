@@ -15,28 +15,36 @@ from tests.conventions.mono_repo.helpers import SERVICE_LAYERS, repo_root
 
 
 class TestPythonWorkspace:
-    NEW_SERVICES: ClassVar[List[str]] = ["missions", "fleet"]
-    ALL_SERVICES: ClassVar[List[str]] = ["gateway", "missions", "fleet"]
-    NEW_PACKAGES: ClassVar[List[str]] = ["swarm-storage", "swarm-rest", "swarm-web", "swarm-nats"]
-    SCRIPT_ENTRIES: ClassVar[List[str]] = ["serve", "openapi", "migrate"]
-    LAYERS: ClassVar[List[str]] = ["api", "service", "storage", "clients", "models"]
-    GATEWAY_SCRIPT: ClassVar[str] = "gateway.api.cli.main:main"
+    APPS: ClassVar[List[str]] = ["gateway", "missions", "fleet"]
+    NEW_PACKAGES: ClassVar[List[str]] = ["swarm-storage", "swarm-api", "swarm-web", "swarm-nats"]
+    SERVE_ENTRY: ClassVar[str] = "serve"
+    APP_FILES: ClassVar[List[str]] = ["__init__.py", "main.py"]
     STORAGE_DEPENDENCIES: ClassVar[List[str]] = ["asyncpg", "alembic", "sqlalchemy", "swarm-models"]
     WEB_DEPENDENCIES: ClassVar[List[str]] = ["fastapi", "uvicorn"]
-    SHARED_DEPENDENCIES: ClassVar[List[str]] = ["swarm-storage", "swarm-rest"]
-    FIRST_PARTY: ClassVar[List[str]] = ["missions", "fleet", "swarm_storage", "swarm_rest", "swarm_web"]
-    TEST_PATHS: ClassVar[List[str]] = [
-        "services/missions/tests",
-        "services/fleet/tests",
-        "packages/python/swarm-rest/tests",
+    APP_DEPENDENCIES: ClassVar[List[str]] = ["swarm-api", "swarm-logging", "swarm-models", "swarm-web"]
+    FIRST_PARTY: ClassVar[List[str]] = [
+        "swarm_gateway",
+        "swarm_missions",
+        "swarm_fleet",
+        "swarm_storage",
+        "swarm_web",
+        "swarm_scripts",
     ]
+    TEST_PATHS: ClassVar[List[str]] = ["tests"]
     MYPY_FILES: ClassVar[List[str]] = [
-        "services/missions/src",
-        "services/fleet/src",
+        "backend/apps/gateway/src",
+        "backend/apps/missions/src",
+        "backend/apps/fleet/src",
         "backend/swarm-storage/src",
-        "packages/python/swarm-rest/src",
         "backend/libs/swarm-web/src",
         "backend/libs/swarm-nats/src",
+        "scripts/src",
+    ]
+    GONE: ClassVar[List[str]] = [
+        "services/gateway",
+        "services/missions",
+        "services/fleet",
+        "packages/python/swarm-rest",
     ]
     DISTRIBUTION_SEPARATORS: ClassVar[str] = r"[\[<>=!~;@ ]"
 
@@ -79,7 +87,7 @@ class TestPythonWorkspace:
         assert "project" not in self.load_root()
 
     @pytest.mark.parametrize(
-        "member", ["services/*", "packages/python/*", "backend/libs/*", "backend/swarm-*", "scripts"]
+        "member", ["services/*", "packages/python/*", "backend/libs/*", "backend/swarm-*", "backend/apps/*", "scripts"]
     )
     def test_the_uv_workspace_lists_its_members(self, member: str) -> None:
         tool = self.load_root().get("tool", {})
@@ -104,20 +112,17 @@ class TestPythonWorkspace:
         assert (root / "uv.lock").is_file()
         assert not list((root / "services").rglob("uv.lock"))
         assert not list((root / "packages").rglob("uv.lock"))
+        assert not list((root / "backend").rglob("uv.lock"))
 
     def test_the_python_packages_folder_exists(self) -> None:
         assert (repo_root() / "packages" / "python").is_dir()
 
-    def test_the_gateway_declares_its_name_and_console_script(self) -> None:
-        path = repo_root() / "services" / "gateway" / "pyproject.toml"
-        assert path.is_file(), "The gateway pyproject.toml is missing."
-        data = tomllib.loads(path.read_text(encoding="utf-8"))
-        assert data["project"]["name"] == "swarm-gateway"
-        assert data["project"]["scripts"]["swarm-gateway"] == "gateway.api.cli.main:main"
+    def app_folder(self, app: str) -> Path:
+        return repo_root() / "backend" / "apps" / app
 
-    @pytest.mark.parametrize("layer", ["api", "service", "storage", "clients", "models"])
-    def test_the_gateway_has_the_layer_package(self, layer: str) -> None:
-        assert (repo_root() / "services" / "gateway" / "src" / "gateway" / layer / "__init__.py").is_file()
+    @pytest.mark.parametrize("path", GONE)
+    def test_the_old_services_and_swarm_rest_are_gone(self, path: str) -> None:
+        assert not (repo_root() / path).exists()
 
     def test_no_service_has_a_top_level_layer_package(self) -> None:
         offenders = [
@@ -128,13 +133,14 @@ class TestPythonWorkspace:
             if path.exists()
         ]
         assert offenders == []
-        assert list((repo_root() / "services").glob("*/src/gateway")), "No service source package was found."
+        assert list((repo_root() / "backend" / "apps").glob("*/src/swarm_*")), "No app source package was found."
 
-    @pytest.mark.parametrize("service", NEW_SERVICES)
-    def test_a_new_service_declares_its_name_and_module(self, service: str) -> None:
-        data = self.load_toml(self.project_file("services", service))
-        assert self.table(data, "project")["name"] == f"swarm-{service}"
-        assert self.table(data, "tool", "uv", "build-backend")["module-name"] == service
+    @pytest.mark.parametrize("app", APPS)
+    def test_an_app_declares_its_name_its_module_and_its_domain(self, app: str) -> None:
+        data = self.load_toml(self.app_folder(app) / "pyproject.toml")
+        assert self.table(data, "project")["name"] == f"swarm-{app}"
+        assert self.table(data, "tool", "uv", "build-backend")["module-name"] == f"swarm_{app}"
+        assert self.table(data, "tool", "swarm")["domains"] == [app]
 
     @pytest.mark.parametrize("package", NEW_PACKAGES)
     def test_a_new_package_declares_its_name_and_module(self, package: str) -> None:
@@ -142,20 +148,20 @@ class TestPythonWorkspace:
         assert self.table(data, "project")["name"] == package
         assert self.table(data, "tool", "uv", "build-backend")["module-name"] == package.replace("-", "_")
 
-    @pytest.mark.parametrize("service", ALL_SERVICES)
-    @pytest.mark.parametrize("entry", SCRIPT_ENTRIES)
-    def test_a_service_declares_its_console_scripts(self, service: str, entry: str) -> None:
-        scripts = self.table(self.load_toml(self.project_file("services", service)), "project", "scripts")
-        assert scripts[f"swarm-{service}-{entry}"] == f"{service}.api.cli.{entry}_main:main"
+    @pytest.mark.parametrize("app", APPS)
+    def test_an_app_declares_only_its_serve_script(self, app: str) -> None:
+        scripts = self.table(self.load_toml(self.app_folder(app) / "pyproject.toml"), "project", "scripts")
+        assert scripts == {f"swarm-{app}-{self.SERVE_ENTRY}": f"swarm_{app}.main:main"}
 
-    def test_the_gateway_keeps_its_console_script(self) -> None:
-        scripts = self.table(self.load_toml(self.project_file("services", "gateway")), "project", "scripts")
-        assert scripts["swarm-gateway"] == self.GATEWAY_SCRIPT
+    @pytest.mark.parametrize("app", APPS)
+    def test_an_app_holds_only_its_main(self, app: str) -> None:
+        module = self.app_folder(app) / "src" / f"swarm_{app}"
+        assert sorted(path.name for path in module.glob("*.py")) == self.APP_FILES
 
-    @pytest.mark.parametrize("service", NEW_SERVICES)
-    @pytest.mark.parametrize("layer", LAYERS)
-    def test_a_new_service_has_the_layer_package(self, service: str, layer: str) -> None:
-        assert (repo_root() / "services" / service / "src" / service / layer / "__init__.py").is_file()
+    @pytest.mark.parametrize("app", APPS)
+    def test_the_domain_of_an_app_has_its_versioned_router(self, app: str) -> None:
+        router = repo_root() / "backend" / "swarm-api" / "src" / "swarm_api" / "v1" / app / f"{app}_router.py"
+        assert router.is_file()
 
     @pytest.mark.parametrize("dependency", STORAGE_DEPENDENCIES)
     def test_swarm_storage_depends_on(self, dependency: str) -> None:
@@ -165,10 +171,10 @@ class TestPythonWorkspace:
     def test_swarm_web_depends_on(self, dependency: str) -> None:
         assert dependency in self.dependencies_of(self.package_file("swarm-web"))
 
-    @pytest.mark.parametrize("service", ALL_SERVICES)
-    @pytest.mark.parametrize("dependency", SHARED_DEPENDENCIES)
-    def test_a_service_depends_on_the_shared_package(self, service: str, dependency: str) -> None:
-        assert dependency in self.dependencies_of(self.project_file("services", service))
+    @pytest.mark.parametrize("app", APPS)
+    @pytest.mark.parametrize("dependency", APP_DEPENDENCIES)
+    def test_an_app_depends_on_the_layer_package(self, app: str, dependency: str) -> None:
+        assert dependency in self.dependencies_of(self.app_folder(app) / "pyproject.toml")
 
     @pytest.mark.parametrize("name", FIRST_PARTY)
     def test_the_root_lists_the_first_party_module(self, name: str) -> None:

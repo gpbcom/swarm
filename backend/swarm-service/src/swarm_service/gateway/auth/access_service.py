@@ -6,12 +6,12 @@ from typing import List, Optional
 from uuid import UUID
 
 # First-party imports
-from gateway.clients.keycloak.keycloak_jwks_client import KeycloakJwksClient
-from gateway.models.auth.auth_config import AuthConfig
-from gateway.models.auth.caller import Caller
-from gateway.service.auth.access_guard import AccessGuard
-from gateway.service.auth.token_verifier import TokenVerifier
+from swarm_clients.gateway.keycloak.keycloak_jwks_client import KeycloakJwksClient
+from swarm_models.auth.auth_config import AuthConfig
+from swarm_models.auth.caller import Caller
 from swarm_models.people.enums import RoleName
+from swarm_service.gateway.auth.access_guard import AccessGuard
+from swarm_service.gateway.auth.token_verifier import TokenVerifier
 
 
 class AccessService:

@@ -9,24 +9,25 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, WebSocket
 
 # First-party imports
-from gateway.api.live.live_operator import LiveOperator
+from swarm_api.dependencies.live_operator import LiveOperator
 from swarm_live.api.factories.live.live_session_factory import LiveSessionFactory
-from swarm_live.models.config.live_session_config import LiveSessionConfig
 from swarm_live.service.live_codec import LiveCodec
 from swarm_live.service.live_source import LiveSource
+from swarm_models.live.session.live_session_config import LiveSessionConfig
 
 
-class LiveRouter:
+class LiveRouter(APIRouter):
     """Serves the ``/v1/live`` WebSocket: one socket per client, many subscriptions.
 
     Attributes:
         PATH (ClassVar[str]): The path of the socket.
         operator (ClassVar[LiveOperator]): The dependency that tells the Operator of a connection.
         source_for (Callable[[UUID], LiveSource]): Gives the live source of one Operator.
-        config (LiveSessionConfig): The settings of each client session.
+        session_config (LiveSessionConfig): The settings of each client session.
         logger (Logger): Logger instance.
 
     Notes:
+        - The router is built with its socket, and the gateway includes it as it is.
         - Compression is left to the WebSocket implementation of the server (permessage-deflate).
         - The handler holds no rule: the session of ``swarm_live`` does the work.
     """
@@ -44,9 +45,12 @@ class LiveRouter:
             config (LiveSessionConfig): The settings of each client session.
             logger (Optional[Logger]): Logger instance.
         """
+        super().__init__()
         self.logger = logger if logger else getLogger(__name__)
         self.source_for = source_for
-        self.config = config
+        self.session_config = config
+        self.add_api_websocket_route(self.PATH, self._serve)
+        self.logger.debug("The live socket is served on %s.", self.PATH)
 
     ############################
     # Internal Helpers Methods #
@@ -61,20 +65,6 @@ class LiveRouter:
         """
         await websocket.accept()
         self.logger.debug("A live socket is accepted.")
-        session = LiveSessionFactory(websocket, self.source_for(operator_id), LiveCodec(), self.config).create()
+        session = LiveSessionFactory(websocket, self.source_for(operator_id), LiveCodec(), self.session_config).create()
         async for status in session.execute():
             self.logger.debug("The live session is %s.", status)
-
-    ############################
-    # Publicly Exposed Methods #
-    ############################
-
-    def build(self) -> APIRouter:
-        """Build the router.
-
-        Returns:
-            APIRouter: A router with the live WebSocket.
-        """
-        router = APIRouter()
-        router.add_api_websocket_route(self.PATH, self._serve)
-        return router

@@ -10,13 +10,13 @@ from uuid import UUID
 from nats.aio.client import Client
 
 # First-party imports
-from gateway.clients.nats.mission_feed_client import MissionFeedClient
-from gateway.models.live.exceptions import SELiveFeedNotReadyError
-from gateway.models.live.live_config import LiveConfig
-from gateway.service.live.live_fan_out import LiveFanOut
-from gateway.service.live.operator_live_source import OperatorLiveSource
+from swarm_clients.gateway.nats.mission_feed_client import MissionFeedClient
 from swarm_lifecycle.runnables.async_runnable import AsyncRunnable
+from swarm_models.live.feed.exceptions import SELiveFeedNotReadyError
+from swarm_models.live.feed.live_config import LiveConfig
 from swarm_nats.clients.nats_connector import NatsConnector
+from swarm_service.gateway.live.live_fan_out import LiveFanOut
+from swarm_service.gateway.live.operator_live_source import OperatorLiveSource
 
 from swarm_live.service.live_hub import LiveHub  # isort: skip
 

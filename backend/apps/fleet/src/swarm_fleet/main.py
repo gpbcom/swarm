@@ -1,23 +1,27 @@
 from __future__ import annotations
 
+# Standard library imports
+from logging import getLogger
+
 # First-party imports
-from fleet.api.rest.fleet_rest_app import FleetRestApp
-from fleet.models.config.fleet_config import FleetConfig
+from swarm_api.v1.fleet.fleet_router import FleetRouter
 from swarm_logging.configurators.logging_configurator import LoggingConfigurator
 from swarm_logging.models.logging_config import LoggingConfig
-from swarm_rest.api.factories.async_runnable_runner_factory import AsyncRunnableRunnerFactory
+from swarm_models.config.fleet.fleet_config import FleetConfig
+from swarm_web.factories.async_runnable_runner_factory import AsyncRunnableRunnerFactory
 from swarm_web.factories.rest_server_factory import RestServerFactory
 
 
 def main() -> None:
-    """Configure logging once, then serve the application until it is stopped.
+    """Read the configuration of the fleet app, configure logging, then serve the app until it is stopped.
 
     Notes:
+        - The app's folder is ``SWARM_APP_ROOT``, which the image sets, or the current folder.
         - Logging is configured once, here at the entry point.
     """
     folder = FleetConfig.conf_folder()
     config = FleetConfig.load(folder / FleetConfig.APP_FILE)
     LoggingConfigurator(LoggingConfig(path=str(folder / FleetConfig.LOGGER_FILE))).configure()
-    app = FleetRestApp(config).build()
-    server = RestServerFactory(app, config.rest).create()
+    getLogger(__name__).info("Serving the fleet app on port %d.", config.rest.port)
+    server = RestServerFactory(FleetRouter(config).application(), config.rest).create()
     AsyncRunnableRunnerFactory(server).create().execute()

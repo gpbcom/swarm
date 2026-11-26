@@ -1,61 +1,36 @@
 from __future__ import annotations
 
 # Standard library imports
-import os
-import subprocess
-import sys
+from importlib.metadata import entry_points
+from inspect import signature
 from pathlib import Path
-from typing import ClassVar, Dict, Optional
+from typing import ClassVar
 
 # Third-party imports
-import pytest
+import httpx
 
 # First-party imports
-from gateway.api.rest.gateway_rest_app import GatewayRestApp
-from gateway.models.config.gateway_config import GatewayConfig
+from swarm_api.v1.gateway.gateway_router import GatewayRouter
+from swarm_gateway.main import main
+from tests.fakes.apps.app_server import AppServer
 
 
-class TestGatewayConsoleScripts:
-    OPENAPI_SCRIPT: ClassVar[str] = "swarm-gateway-openapi"
-    MIGRATE_SCRIPT: ClassVar[str] = "swarm-gateway-migrate"
-    CHECK_FLAG: ClassVar[str] = "--check"
-    OUTPUT_FLAG: ClassVar[str] = "--output"
-    OUTPUT_FILE: ClassVar[str] = "gateway.json"
-    ENCODING: ClassVar[str] = "utf-8"
-    ROOT_PARENT_INDEX: ClassVar[int] = 5
-    TIMEOUT_S: ClassVar[int] = 120
+class TestSwarmGatewayMain:
+    SCRIPT: ClassVar[str] = "swarm-gateway-serve"
+    TARGET: ClassVar[str] = "swarm_gateway.main:main"
+    APP_FOLDER: ClassVar[Path] = Path(__file__).resolve().parents[2] / "backend" / "apps" / "gateway"
+    INFO_KEY: ClassVar[str] = "info"
+    TITLE_KEY: ClassVar[str] = "title"
 
-    @pytest.fixture
-    def root(self) -> Path:
-        return Path(__file__).resolve().parents[self.ROOT_PARENT_INDEX]
+    def test_the_console_script_points_to_main(self) -> None:
+        assert entry_points(group="console_scripts")[self.SCRIPT].value == self.TARGET
 
-    def run_script(self, name: str, root: Path, *arguments: str, env: Optional[Dict[str, str]] = None) -> int:
-        result = subprocess.run(
-            [str(Path(sys.executable).parent / name), *arguments],
-            check=False,
-            cwd=root,
-            env=env,
-            capture_output=True,
-            text=True,
-            encoding=self.ENCODING,
-            timeout=self.TIMEOUT_S,
-        )
-        return result.returncode
+    def test_main_takes_no_argument(self) -> None:
+        assert not signature(main).parameters
 
-    def test_the_openapi_check_passes_on_the_published_document(self, root: Path) -> None:
-        assert self.run_script(self.OPENAPI_SCRIPT, root, self.CHECK_FLAG) == 0
+    def test_the_app_serves_its_api_from_the_folder_the_entry_names(self, tmp_path: Path) -> None:
+        with AppServer(self.SCRIPT, self.APP_FOLDER, tmp_path) as server:
+            response = server.get_openapi()
 
-    def test_the_openapi_output_equals_the_published_document(self, root: Path, tmp_path: Path) -> None:
-        output = tmp_path / self.OUTPUT_FILE
-
-        code = self.run_script(self.OPENAPI_SCRIPT, root, self.OUTPUT_FLAG, str(output))
-
-        assert code == 0
-        published = root / GatewayRestApp.OPENAPI_OUTPUT
-        assert output.read_text(encoding=self.ENCODING) == published.read_text(encoding=self.ENCODING)
-
-    def test_the_migrate_script_exits_with_zero(self, root: Path, postgres_dsn: str) -> None:
-        environment = os.environ.copy()
-        environment[GatewayConfig.DSN_KEY] = postgres_dsn
-
-        assert self.run_script(self.MIGRATE_SCRIPT, root, env=environment) == 0
+        assert response.status_code == httpx.codes.OK
+        assert response.json()[self.INFO_KEY][self.TITLE_KEY] == GatewayRouter.TITLE

@@ -4,8 +4,17 @@ version = "0.1.0"
 description = "The shared Pydantic models of Swarm, and the JSON Schema they export."
 readme = "../../README.md"
 requires-python = ">=3.12"
-dependencies = ["pydantic>=2.14.3"]
+dependencies = [
+    "pydantic>=2.14.3",
+    "swarm-catalog",
+    "swarm-nats",
+    "swarm-web",
+]
 
+[tool.uv.sources]
+swarm-catalog = { workspace = true }
+swarm-nats = { workspace = true }
+swarm-web = { workspace = true }
 
 [tool.uv.build-backend]
 module-name = "swarm_models"

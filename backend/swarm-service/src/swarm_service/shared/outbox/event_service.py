@@ -12,7 +12,7 @@ from swarm_storage.shared.postgres.repositories.outbox_repository import OutboxR
 
 
 class EventService:
-    """Records the events of the gateway in its outbox, and reads the ones waiting to be published.
+    """Records the events of an app in its outbox, and reads the ones waiting to be published.
 
     Attributes:
         pool (PostgresPool): The pool the units of work come from.

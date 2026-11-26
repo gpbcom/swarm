@@ -2,6 +2,7 @@ from __future__ import annotations
 
 # Standard library imports
 from datetime import UTC, datetime
+from pathlib import Path
 from typing import AsyncIterator, ClassVar, List, Optional
 from uuid import UUID
 
@@ -9,16 +10,17 @@ from uuid import UUID
 import pytest
 
 # First-party imports
-from gateway.models.config.gateway_config import GatewayConfig
-from gateway.service.events.event_service import EventService
-from gateway.service.factories.event_service_factory import EventServiceFactory
-from gateway.service.factories.schema_service_factory import SchemaServiceFactory
+from swarm_models.config.gateway.gateway_config import GatewayConfig
 from swarm_models.events.actor import Actor
 from swarm_models.events.enums import ActorKind
 from swarm_models.events.event import Event
+from swarm_service.shared.migrations.factories.schema_service_factory import SchemaServiceFactory
+from swarm_service.shared.outbox.event_service import EventService
+from swarm_service.shared.outbox.factories.event_service_factory import EventServiceFactory
 
 
-class TestGatewayEventService:
+class TestEventService:
+    MIGRATIONS: ClassVar[Path] = Path(__file__).resolve().parents[4] / "backend" / "apps" / "gateway" / "migrations"
     OPERATOR_A: ClassVar[UUID] = UUID("01943c5e-8a4b-7c2d-9e1f-0a1b2c3d4e60")
     OPERATOR_B: ClassVar[UUID] = UUID("01943c5e-8a4b-7c2d-9e1f-0a1b2c3d4e61")
     PERSON_ID: ClassVar[UUID] = UUID("01943c5e-8a4b-7c2d-9e1f-0a1b2c3d4e62")
@@ -44,8 +46,8 @@ class TestGatewayEventService:
     async def service(self, postgres_dsn: str, monkeypatch: pytest.MonkeyPatch) -> AsyncIterator[EventService]:
         monkeypatch.setenv(GatewayConfig.DSN_KEY, postgres_dsn)
         config = GatewayConfig()
-        await SchemaServiceFactory(config).create().upgrade()
-        event_service = EventServiceFactory(config).create()
+        await SchemaServiceFactory(config.postgres, config.schema_name, self.MIGRATIONS).create().upgrade()
+        event_service = EventServiceFactory(config.postgres, config.schema_name).create()
         await event_service.open()
         for event in (
             self.an_event(self.EVENT_A1, self.OPERATOR_A),

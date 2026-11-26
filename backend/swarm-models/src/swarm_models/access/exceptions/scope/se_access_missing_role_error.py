@@ -4,8 +4,8 @@ from __future__ import annotations
 from typing import ClassVar
 
 # First-party imports
-from gateway.models.access.exceptions.se_access_error import SEAccessError
-from gateway.models.enums import AccessRefusal
+from swarm_models.access.exceptions.se_access_error import SEAccessError
+from swarm_models.enums import AccessRefusal
 
 
 class SEAccessMissingRoleError(SEAccessError):

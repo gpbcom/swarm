@@ -19,8 +19,8 @@ class TestEmptyService:
     def root(self, request: pytest.FixtureRequest, tmp_path: Path) -> Path:
         services = tmp_path / "services"
         shutil.copytree(
-            repo_root() / "services" / "gateway",
-            services / "gateway",
+            repo_root() / "services" / "simulator",
+            services / "simulator",
             ignore=shutil.ignore_patterns("__pycache__"),
         )
         empty = services / "empty"
@@ -38,7 +38,7 @@ class TestEmptyService:
 
     def test_discovery_finds_both_services(self, root: Path) -> None:
         names = sorted(service.name for service in ServiceTree.discover(root))
-        assert names == ["empty", "gateway"]
+        assert names == ["empty", "simulator"]
 
     def test_every_rule_holds_for_the_empty_service(self, root: Path) -> None:
         empty = next(service for service in ServiceTree.discover(root) if service.name == "empty")

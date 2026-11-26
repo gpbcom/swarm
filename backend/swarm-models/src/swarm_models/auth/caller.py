@@ -8,7 +8,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, JsonValue, field_validator, model_validator
 
 # First-party imports
-from gateway.models.auth.exceptions import (
+from swarm_models.auth.exceptions import (
     SECallerInvalidOperatorId,
     SECallerInvalidPersonId,
     SECallerInvalidRoles,

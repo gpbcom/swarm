@@ -38,6 +38,9 @@ REPOSITORY_PREFIXES = ("tests/", ".claude/")
 SPECS_PREFIXES = ("docs/specs/", ".claude/skills/write-specs/")
 LAYER_PACKAGES = frozenset({"swarm-models", "swarm-storage", "swarm-clients", "swarm-service", "swarm-api"})
 SHARED_DOMAIN = "shared"
+API_PACKAGE = "swarm-api"
+API_VERSION = "v1"
+API_SHARED_DOMAINS = frozenset({"live"})
 DISTRIBUTION_NAME = re.compile(r"[\[<>=!~;@ ]")
 USAGE = "usage: detect_changes.py [--root <repo root>] [--all]"
 
@@ -71,10 +74,18 @@ def discover_apps(root: Path) -> Dict[str, List[str]]:
 
 
 def apps_of_layer_path(parts: List[str], apps: Dict[str, List[str]]) -> Optional[Set[str]]:
-    """Return the apps a ``backend/swarm-<layer>/...`` path selects, or None when it is no such path."""
+    """Return the apps a ``backend/swarm-<layer>/...`` path selects, or None when it is no such path.
+
+    In ``swarm-api``, the domain is the folder under ``v1/``; its other folders (handlers, middlewares, ``Depends``
+    providers) and the shared ``v1/live`` serve every app.
+    """
     if len(parts) < 3 or parts[0] != "backend" or parts[1] not in LAYER_PACKAGES:
         return None
-    if parts[2] == "src" and len(parts) > 4:
+    if parts[1] == API_PACKAGE and parts[2] == "src" and len(parts) > 5:
+        if parts[4] != API_VERSION or parts[5] in API_SHARED_DOMAINS:
+            return set(apps)
+        domain = parts[5]
+    elif parts[2] == "src" and len(parts) > 4:
         domain = parts[4]
     elif parts[2] == "tests" and len(parts) > 4:
         domain = parts[3]

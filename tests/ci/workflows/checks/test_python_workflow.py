@@ -117,14 +117,35 @@ class TestPythonWorkflow:
     @pytest.mark.parametrize(
         "command, path",
         [
-            ("uv run ruff check", "services/$SERVICE"),
-            ("uv run ruff format --check", "services/$SERVICE"),
-            ("uv run mypy", "services/$SERVICE/src"),
-            ("uv run pytest", "services/$SERVICE/tests"),
+            ("uv run ruff check", "$FOLDER"),
+            ("uv run ruff format --check", "$FOLDER"),
+            ("uv run mypy", "$FOLDER/src"),
+            ("uv run pytest", "$TESTS"),
         ],
     )
-    def test_each_tool_targets_the_service_folder(self, command: str, path: str) -> None:
+    def test_each_tool_targets_the_folder_of_the_service_or_the_app(self, command: str, path: str) -> None:
         assert path in self.run_with("services", command)
+
+    @pytest.mark.parametrize(
+        "fragment",
+        [
+            "FOLDER=services/$SERVICE",
+            "TESTS=services/$SERVICE/tests",
+            "FOLDER=backend/apps/$SERVICE",
+            "tests/swarm_${SERVICE//-/_}",
+            "backend/apps/$SERVICE/pyproject.toml",
+            "tests/swarm_api/v1/",
+        ],
+    )
+    def test_the_services_job_finds_the_folder_of_a_service_or_of_an_app_and_its_domains(self, fragment: str) -> None:
+        assert fragment in self.run_with("services", "FOLDER=")
+
+    def test_the_folder_is_found_before_the_tools_run(self) -> None:
+        assert self.run_index("services", "FOLDER=") < self.run_index("services", "uv run ruff check")
+
+    def test_the_service_convention_tests_skip_an_app(self) -> None:
+        run = self.run_with("services", "tests/conventions/services/test_service_conventions.py")
+        assert 'if [ ! -d "services/$SERVICE" ]' in run
 
     def test_the_services_job_runs_only_its_slice_of_the_convention_tests(self) -> None:
         run = self.run_with("services", "tests/conventions/services/test_service_conventions.py")
@@ -192,6 +213,9 @@ class TestPythonWorkflow:
         assert "backend" in run
         assert "scripts" in run
 
+    def test_the_packages_job_type_checks_the_apps(self) -> None:
+        assert "backend/apps/*/src" in self.run_with("packages", "uv run mypy")
+
     def test_the_packages_job_runs_the_tests_on_two_workers(self) -> None:
         assert "-n 2" in self.run_with("packages", "uv run pytest")
 
@@ -225,7 +249,7 @@ class TestPythonWorkflow:
         assert "rust/swarm-core/python/Cargo.toml" in run
         assert "uv pip install" in run
         assert "swarm_core" in run
-        assert "services/$SERVICE/src" in run
+        assert "$FOLDER/src" in run
 
     def test_the_services_job_installs_the_wheel_after_the_sync_and_before_the_tests(self) -> None:
         build = self.run_index("services", "maturin build")

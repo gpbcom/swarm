@@ -9,11 +9,11 @@ from uuid import UUID
 from fastapi import Request
 
 # First-party imports
-from gateway.api.rest.auth.access_installer import AccessInstaller
-from gateway.models.access.exceptions import SEAccessWrongOperatorError
-from gateway.models.auth.caller import Caller
-from gateway.service.auth.access_service import AccessService
+from swarm_api.handlers.access_handlers import AccessHandlers
+from swarm_models.access.exceptions import SEAccessWrongOperatorError
+from swarm_models.auth.caller import Caller
 from swarm_models.people.enums import RoleName
+from swarm_service.gateway.auth.access_service import AccessService
 
 
 class RouteAccess:
@@ -109,7 +109,7 @@ class RouteAccess:
         """
         token = self._token(request)
         operator_id = self._operator_id(request)
-        service: AccessService = getattr(request.app.state, AccessInstaller.ACCESS_SERVICE_STATE)
+        service: AccessService = getattr(request.app.state, AccessHandlers.ACCESS_SERVICE_STATE)
         caller = await service.authorise(token, self.roles, operator_id)
         self.logger.debug("The call to %s is authorised.", request.url.path)
         return caller

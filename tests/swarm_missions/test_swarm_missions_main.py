@@ -1,58 +1,36 @@
 from __future__ import annotations
 
 # Standard library imports
-import os
-import subprocess
-import sys
+from importlib.metadata import entry_points
+from inspect import signature
 from pathlib import Path
-from typing import ClassVar, Dict, List, Optional
+from typing import ClassVar
 
 # Third-party imports
-import pytest
+import httpx
 
 # First-party imports
-from missions.api.rest.missions_rest_app import MissionsRestApp
-from missions.models.config.missions_config import MissionsConfig
+from swarm_api.v1.missions.missions_router import MissionsRouter
+from swarm_missions.main import main
+from tests.fakes.apps.app_server import AppServer
 
 
-class TestMissionsConsoleScripts:
-    OPENAPI_SCRIPT: ClassVar[str] = "swarm-missions-openapi"
-    MIGRATE_SCRIPT: ClassVar[str] = "swarm-missions-migrate"
-    CHECK_FLAG: ClassVar[str] = "--check"
-    OUTPUT_FLAG: ClassVar[str] = "--output"
-    OUTPUT_NAME: ClassVar[str] = "missions.json"
-    REPOSITORY_ROOT_DEPTH: ClassVar[int] = 5
-    TIMEOUT_S: ClassVar[int] = 120
+class TestSwarmMissionsMain:
+    SCRIPT: ClassVar[str] = "swarm-missions-serve"
+    TARGET: ClassVar[str] = "swarm_missions.main:main"
+    APP_FOLDER: ClassVar[Path] = Path(__file__).resolve().parents[2] / "backend" / "apps" / "missions"
+    INFO_KEY: ClassVar[str] = "info"
+    TITLE_KEY: ClassVar[str] = "title"
 
-    def run_script(self, name: str, arguments: List[str], environment: Optional[Dict[str, str]] = None) -> int:
-        root = Path(__file__).resolve().parents[self.REPOSITORY_ROOT_DEPTH]
-        script = Path(sys.executable).parent / name
-        result = subprocess.run(
-            [str(script), *arguments],
-            check=False,
-            cwd=root,
-            env=environment,
-            capture_output=True,
-            timeout=self.TIMEOUT_S,
-        )
-        return result.returncode
+    def test_the_console_script_points_to_main(self) -> None:
+        assert entry_points(group="console_scripts")[self.SCRIPT].value == self.TARGET
 
-    def test_the_openapi_script_checks_the_published_document(self) -> None:
-        assert self.run_script(self.OPENAPI_SCRIPT, [self.CHECK_FLAG]) == 0
+    def test_main_takes_no_argument(self) -> None:
+        assert not signature(main).parameters
 
-    def test_the_openapi_script_writes_the_published_document(self, tmp_path: Path) -> None:
-        root = Path(__file__).resolve().parents[self.REPOSITORY_ROOT_DEPTH]
-        output = tmp_path / self.OUTPUT_NAME
+    def test_the_app_serves_its_api_from_the_folder_the_entry_names(self, tmp_path: Path) -> None:
+        with AppServer(self.SCRIPT, self.APP_FOLDER, tmp_path) as server:
+            response = server.get_openapi()
 
-        code = self.run_script(self.OPENAPI_SCRIPT, [self.OUTPUT_FLAG, str(output)])
-
-        assert code == 0
-        published = root / MissionsRestApp.OPENAPI_OUTPUT
-        assert output.read_text(encoding="utf-8") == published.read_text(encoding="utf-8")
-
-    def test_the_migrate_script_succeeds_with_the_dsn_set(
-        self, monkeypatch: pytest.MonkeyPatch, postgres_dsn: str
-    ) -> None:
-        monkeypatch.setenv(MissionsConfig.DSN_KEY, postgres_dsn)
-
-        assert self.run_script(self.MIGRATE_SCRIPT, [], dict(os.environ)) == 0
+        assert response.status_code == httpx.codes.OK
+        assert response.json()[self.INFO_KEY][self.TITLE_KEY] == MissionsRouter.TITLE

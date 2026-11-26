@@ -10,50 +10,56 @@ from typing import ClassVar, Optional
 from fastapi import FastAPI
 
 # First-party imports
-from swarm_lifecycle.runnables.runnable import Runnable
+from swarm_storage.shared.schemas.schema_folder import SchemaFolder
 
 
-class OpenApiExportCommand(Runnable):
-    """Writes the OpenAPI document of an application to a file, or checks that the file is up to date.
+class OpenApiExporter:
+    """Render the OpenAPI document of an application, write it and detect a stale one.
 
     Attributes:
-        ENCODING (ClassVar[str]): The encoding of the file.
-        EXIT_OK (ClassVar[int]): The exit code when the work succeeded.
-        EXIT_DIFFERENT (ClassVar[int]): The exit code when ``check`` finds the file missing or different.
+        SUFFIX (ClassVar[str]): The suffix of the document file.
         INDENT (ClassVar[int]): The indentation of the document.
         app (FastAPI): The application whose document is exported.
-        path (Path): The file written or checked.
-        check (bool): Whether to compare instead of writing.
-        exit_code (int): The exit code, read after ``execute``.
+        name (str): The name of the document, the app's name, without its suffix.
+        folder (SchemaFolder): The folder the document lives in.
+        logger (Logger): Logger instance.
 
     Notes:
-        - The document is sorted and indented, and ends with a newline, so that it only changes with the API.
+        - The document is sorted and indented, and ends with a newline, so that it only changes with the API and a
+          stale file is detected by a plain comparison.
+        - Storage errors propagate unchanged.
     """
 
-    ENCODING: ClassVar[str] = "utf-8"
-    EXIT_OK: ClassVar[int] = 0
-    EXIT_DIFFERENT: ClassVar[int] = 1
+    SUFFIX: ClassVar[str] = ".json"
     INDENT: ClassVar[int] = 2
 
-    def __init__(self, app: FastAPI, path: Path, check: bool, logger: Optional[Logger] = None) -> None:
-        """Initialise the command.
+    def __init__(self, app: FastAPI, root: Path, name: str, logger: Optional[Logger] = None) -> None:
+        """Create an exporter.
 
         Args:
             app (FastAPI): The application whose document is exported.
-            path (Path): The file written or checked.
-            check (bool): Whether to compare instead of writing.
-            logger (Optional[Logger]): Logger to use. A logger named after the module is used when it is ``None``.
+            root (Path): The folder of the documents, ``frontend/packages/api-client/openapi`` in the repository.
+            name (str): The name of the document, the app's name, without its suffix.
+            logger (Optional[Logger]): Logger instance.
         """
-        super().__init__()
         self.logger = logger if logger else getLogger(__name__)
         self.app = app
-        self.path = path
-        self.check = check
-        self.exit_code = self.EXIT_OK
+        self.name = name
+        self.folder = SchemaFolder(root)
 
     ############################
     # Publicly Exposed Methods #
     ############################
+
+    @property
+    def file_name(self) -> str:
+        """The name of the document file."""
+        return self.name + self.SUFFIX
+
+    @property
+    def path(self) -> Path:
+        """The path of the document file."""
+        return self.folder.path(self.file_name)
 
     def render(self) -> str:
         """Render the OpenAPI document.
@@ -61,34 +67,28 @@ class OpenApiExportCommand(Runnable):
         Returns:
             str: The document as indented, sorted JSON that ends with a newline.
         """
-        return json.dumps(self.app.openapi(), indent=self.INDENT, sort_keys=True, ensure_ascii=False) + "\n"
+        text = json.dumps(self.app.openapi(), indent=self.INDENT, sort_keys=True, ensure_ascii=False) + "\n"
+        self.logger.debug("Rendered the OpenAPI document %s.", self.file_name)
+        return text
 
-    def initialize(self) -> None:
-        """Acquire nothing: the command only needs its arguments."""
-        self.logger.debug("Nothing to initialise.")
+    def export(self) -> Path:
+        """Write the document.
 
-    def run(self) -> None:
-        """Write the document, or compare it with the file when ``check`` is set."""
-        rendered = self.render()
-        if self.check:
-            if not self.path.is_file():
-                self.logger.warning("The file %s is missing.", self.path)
-                print(f"{self.path} is missing.")
-                self.exit_code = self.EXIT_DIFFERENT
-            elif self.path.read_text(encoding=self.ENCODING) != rendered:
-                self.logger.warning("The file %s is out of date.", self.path)
-                print(f"{self.path} is out of date.")
-                self.exit_code = self.EXIT_DIFFERENT
-            else:
-                self.logger.info("The file %s is up to date.", self.path)
-                self.exit_code = self.EXIT_OK
-            return
-        self.path.parent.mkdir(parents=True, exist_ok=True)
-        self.path.write_text(rendered, encoding=self.ENCODING)
-        self.logger.info("Wrote %s.", self.path)
-        print(f"Wrote {self.path}.")
-        self.exit_code = self.EXIT_OK
+        Returns:
+            Path: The path written.
+        """
+        target = self.folder.write(self.file_name, self.render())
+        self.logger.info("Exported the OpenAPI document to %s.", target)
+        return target
 
-    def close(self) -> None:
-        """Release nothing: the command holds no resource."""
-        self.logger.debug("Nothing to close.")
+    def is_stale(self) -> bool:
+        """Tell whether the file on disk differs from the rendered document.
+
+        Returns:
+            bool: ``True`` when the file is missing or different.
+        """
+        if self.folder.read(self.file_name) == self.render():
+            self.logger.debug("The OpenAPI document %s is current.", self.file_name)
+            return False
+        self.logger.warning("The OpenAPI document %s is stale.", self.file_name)
+        return True

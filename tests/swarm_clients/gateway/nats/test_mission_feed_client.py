@@ -9,8 +9,8 @@ import pytest
 from nats.aio.client import Client
 
 # First-party imports
-from gateway.clients.nats.mission_feed_client import MissionFeedClient
-from gateway.models.live.exceptions import SEMissionFeedError
+from swarm_clients.gateway.nats.mission_feed_client import MissionFeedClient
+from swarm_models.live.feed.exceptions import SEMissionFeedError
 
 
 class TestMissionFeedClient:

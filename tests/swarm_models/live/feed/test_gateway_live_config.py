@@ -8,17 +8,17 @@ import pytest
 from pydantic import JsonValue, ValidationError
 
 # First-party imports
-from gateway.models.live.exceptions import (
+from swarm_models.live.feed.exceptions import (
     SEInvalidLiveConfigException,
     SELiveConfigInvalidNats,
     SELiveConfigInvalidSession,
     SELiveConfigInvalidStatusInterval,
 )
-from gateway.models.live.live_config import LiveConfig
+from swarm_models.live.feed.live_config import LiveConfig
 from swarm_nats.models.config.exceptions import SENatsClientConfigInvalidName
 from swarm_nats.models.config.nats_client_config import NatsClientConfig
 
-from swarm_live.models.config.live_session_config import LiveSessionConfig  # isort: skip
+from swarm_models.live.session.live_session_config import LiveSessionConfig  # isort: skip
 
 
 class TestGatewayLiveConfig:

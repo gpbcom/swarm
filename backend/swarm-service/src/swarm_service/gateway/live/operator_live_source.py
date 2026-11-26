@@ -12,7 +12,7 @@ from swarm_live.service.live_mailbox import LiveMailbox  # isort: skip
 from swarm_live.service.live_source import LiveSource  # isort: skip
 
 if TYPE_CHECKING:
-    from gateway.service.live.live_fan_out import LiveFanOut
+    from swarm_service.gateway.live.live_fan_out import LiveFanOut
 
 
 class OperatorLiveSource(LiveSource):

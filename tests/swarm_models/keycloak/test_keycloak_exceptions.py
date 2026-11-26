@@ -7,9 +7,9 @@ from typing import ClassVar, List
 import pytest
 
 # First-party imports
-from gateway.models.access.exceptions import SEAccessError
-from gateway.models.enums import AccessRefusal
-from gateway.models.keycloak.exceptions import (
+from swarm_models.access.exceptions import SEAccessError
+from swarm_models.enums import AccessRefusal
+from swarm_models.keycloak.exceptions import (
     SEKeycloakError,
     SEKeycloakUnknownKeyError,
     SEKeycloakUnreachableError,

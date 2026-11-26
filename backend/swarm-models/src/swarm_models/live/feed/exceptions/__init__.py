@@ -1,12 +1,12 @@
-from gateway.models.live.exceptions.config import (
+from swarm_models.live.feed.exceptions.config import (
     SEInvalidLiveConfigException,
     SELiveConfigInvalidNats,
     SELiveConfigInvalidSession,
     SELiveConfigInvalidStatusInterval,
 )
-from gateway.models.live.exceptions.se_live_error import SELiveError
-from gateway.models.live.exceptions.se_live_feed_not_ready_error import SELiveFeedNotReadyError
-from gateway.models.live.exceptions.se_mission_feed_error import SEMissionFeedError
+from swarm_models.live.feed.exceptions.se_live_error import SELiveError
+from swarm_models.live.feed.exceptions.se_live_feed_not_ready_error import SELiveFeedNotReadyError
+from swarm_models.live.feed.exceptions.se_mission_feed_error import SEMissionFeedError
 
 __all__ = [
     "SEInvalidLiveConfigException",

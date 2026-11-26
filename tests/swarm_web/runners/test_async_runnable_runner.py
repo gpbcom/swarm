@@ -2,11 +2,11 @@ from __future__ import annotations
 
 # Third-party imports
 import pytest
-from samples.sample_job import SampleJob
 
 # First-party imports
 from swarm_lifecycle.models.enums import RunnableStatus
-from swarm_rest.api.cli.async_runnable_runner import AsyncRunnableRunner
+from swarm_web.runners.async_runnable_runner import AsyncRunnableRunner
+from tests.swarm_web.runners.sample_job import SampleJob
 
 
 class TestAsyncRunnableRunner:

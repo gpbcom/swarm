@@ -12,7 +12,7 @@ from swarm_lifecycle.runnables.runnable import Runnable
 
 
 class AsyncRunnableRunner(Runnable):
-    """Runs an async runnable to its end from synchronous code, such as a console script.
+    """Runs an async runnable to its end from synchronous code, such as the main() of an app or a script.
 
     Attributes:
         runnable (AsyncRunnable): The runnable to run.

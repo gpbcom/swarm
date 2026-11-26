@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import ClassVar
 
 # First-party imports
-from gateway.models.enums import AccessRefusal
+from swarm_models.enums import AccessRefusal
 
 
 class SEKeycloakError(Exception):

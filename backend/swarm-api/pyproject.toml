@@ -6,12 +6,14 @@ readme = "../../README.md"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.164.0",
+    "swarm-live",
     "swarm-models",
     "swarm-service",
     "swarm-web",
 ]
 
 [tool.uv.sources]
+swarm-live = { workspace = true }
 swarm-models = { workspace = true }
 swarm-service = { workspace = true }
 swarm-web = { workspace = true }

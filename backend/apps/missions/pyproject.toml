@@ -1,42 +1,30 @@
 [project]
 name = "swarm-missions"
 version = "0.1.0"
-description = "The Swarm missions service."
-readme = "../../README.md"
+description = "The Swarm missions app: its main() reads conf/app.yaml and serves the missions domain."
+readme = "../../../README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "fastapi>=0.164.0",
-    "pydantic>=2.14.3",
-    "pyyaml>=6.0",
-    "swarm-lifecycle",
-    "swarm-logging",
-    "swarm-catalog",
-    "swarm-models",
-    "swarm-storage",
-    "swarm-rest",
-    "swarm-web",
     "swarm-api",
-    "swarm-service",
+    "swarm-logging",
+    "swarm-models",
+    "swarm-web",
 ]
 
 [project.scripts]
-swarm-missions-serve = "missions.api.cli.serve_main:main"
-swarm-missions-openapi = "missions.api.cli.openapi_main:main"
-swarm-missions-migrate = "missions.api.cli.migrate_main:main"
+swarm-missions-serve = "swarm_missions.main:main"
+
+[tool.swarm]
+domains = ["missions"]
 
 [tool.uv.build-backend]
-module-name = "missions"
+module-name = "swarm_missions"
 
 [tool.uv.sources]
-swarm-lifecycle = { workspace = true }
-swarm-logging = { workspace = true }
-swarm-catalog = { workspace = true }
-swarm-models = { workspace = true }
-swarm-storage = { workspace = true }
-swarm-rest = { workspace = true }
-swarm-web = { workspace = true }
 swarm-api = { workspace = true }
-swarm-service = { workspace = true }
+swarm-logging = { workspace = true }
+swarm-models = { workspace = true }
+swarm-web = { workspace = true }
 
 [build-system]
 requires = ["uv_build>=0.12.21,<0.13.0"]

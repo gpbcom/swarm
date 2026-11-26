@@ -9,19 +9,19 @@ from uuid import UUID, uuid4
 import pytest
 
 # First-party imports
-from gateway.models.access.exceptions import (
+from swarm_models.access.exceptions import (
     SEAccessExpiredTokenError,
     SEAccessInvalidTokenError,
     SEAccessMissingRoleError,
     SEAccessMissingTokenError,
     SEAccessWrongOperatorError,
 )
-from gateway.models.auth.auth_config import AuthConfig
-from gateway.models.keycloak.exceptions import SEKeycloakUnreachableError
-from gateway.service.auth.access_service import AccessService
+from swarm_models.auth.auth_config import AuthConfig
+from swarm_models.keycloak.exceptions import SEKeycloakUnreachableError
+from swarm_service.gateway.auth.access_service import AccessService
 
-from services.gateway.tests.support.keycloak.helpers import claims_for  # isort: skip
-from services.gateway.tests.support.keycloak.keycloak_stand_in import KeycloakStandIn  # isort: skip
+from tests.fakes.keycloak.helpers import claims_for  # isort: skip
+from tests.fakes.keycloak.keycloak_stand_in import KeycloakStandIn  # isort: skip
 from swarm_models.people.enums import RoleName
 
 

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 # Standard library imports
+from pathlib import Path
 from typing import ClassVar, List
 
 # Third-party imports
@@ -8,13 +9,14 @@ import asyncpg
 import pytest
 
 # First-party imports
-from gateway.models.config.gateway_config import GatewayConfig
-from gateway.service.factories.schema_service_factory import SchemaServiceFactory
-from gateway.service.schema.schema_service import SchemaService
+from swarm_models.config.gateway.gateway_config import GatewayConfig
+from swarm_service.shared.migrations.factories.schema_service_factory import SchemaServiceFactory
+from swarm_service.shared.migrations.schema_service import SchemaService
 from swarm_storage.shared.postgres.ddl.row_level_security import RowLevelSecurity
 
 
-class TestGatewaySchemaService:
+class TestSchemaService:
+    MIGRATIONS: ClassVar[Path] = Path(__file__).resolve().parents[4] / "backend" / "apps" / "gateway" / "migrations"
     REVISION: ClassVar[str] = "0001"
     TABLE_NAME: ClassVar[str] = "outbox"
     TABLE_QUERY: ClassVar[str] = (
@@ -29,7 +31,8 @@ class TestGatewaySchemaService:
     @pytest.fixture
     def service(self, postgres_dsn: str, monkeypatch: pytest.MonkeyPatch) -> SchemaService:
         monkeypatch.setenv(GatewayConfig.DSN_KEY, postgres_dsn)
-        return SchemaServiceFactory(GatewayConfig()).create()
+        config = GatewayConfig()
+        return SchemaServiceFactory(config.postgres, config.schema_name, self.MIGRATIONS).create()
 
     async def table_flags(self, dsn: str) -> List[asyncpg.Record]:
         connection = await asyncpg.connect(dsn)

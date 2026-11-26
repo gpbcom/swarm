@@ -10,7 +10,7 @@ from typing import AsyncIterator, Optional
 from fastapi import FastAPI
 
 # First-party imports
-from gateway.service.live.live_feed import LiveFeed
+from swarm_service.gateway.live.live_feed import LiveFeed
 
 
 class LiveFeedLifespan:

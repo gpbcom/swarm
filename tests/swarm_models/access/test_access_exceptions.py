@@ -7,7 +7,7 @@ from typing import ClassVar, Dict
 import pytest
 
 # First-party imports
-from gateway.models.access.exceptions import (
+from swarm_models.access.exceptions import (
     SEAccessError,
     SEAccessExpiredTokenError,
     SEAccessInvalidTokenError,
@@ -15,7 +15,7 @@ from gateway.models.access.exceptions import (
     SEAccessMissingTokenError,
     SEAccessWrongOperatorError,
 )
-from gateway.models.enums import AccessRefusal
+from swarm_models.enums import AccessRefusal
 
 
 class TestAccessErrors:

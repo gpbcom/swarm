@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 # First-party imports
-from gateway.models.live.live_config import LiveConfig
-from gateway.service.factories.live.live_feed_factory import LiveFeedFactory
-from gateway.service.factories.live_service_factory import LiveServiceFactory
-from gateway.service.live.live_feed import LiveFeed
 from swarm_lifecycle.factories.async_runnable_factory import AsyncRunnableFactory
+from swarm_models.live.feed.live_config import LiveConfig
+from swarm_service.gateway.factories.live.live_feed_factory import LiveFeedFactory
+from swarm_service.gateway.factories.live_service_factory import LiveServiceFactory
+from swarm_service.gateway.live.live_feed import LiveFeed
 
 
 class TestLiveFeedFactory:

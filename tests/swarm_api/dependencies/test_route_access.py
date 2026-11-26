@@ -11,10 +11,10 @@ import pytest
 from httpx import AsyncClient
 
 # First-party imports
-from gateway.models.enums import AccessRefusal  # isort: skip
+from swarm_models.enums import AccessRefusal  # isort: skip
 from swarm_models.people.enums import RoleName  # isort: skip
-from services.gateway.tests.support.keycloak.helpers import AUDIENCE, claims_for  # isort: skip
-from services.gateway.tests.support.keycloak.keycloak_stand_in import KeycloakStandIn  # isort: skip
+from tests.fakes.keycloak.helpers import AUDIENCE, claims_for  # isort: skip
+from tests.fakes.keycloak.keycloak_stand_in import KeycloakStandIn  # isort: skip
 
 
 class TestRouteAccess:

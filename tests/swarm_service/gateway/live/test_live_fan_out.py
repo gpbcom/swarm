@@ -10,11 +10,11 @@ import pytest
 from nats.aio.client import Client
 
 # First-party imports
-from gateway.clients.nats.mission_feed_client import MissionFeedClient
-from gateway.service.live.live_fan_out import LiveFanOut
+from swarm_clients.gateway.nats.mission_feed_client import MissionFeedClient
 from swarm_models.enums import LiveOperation, LiveTopicKind
 from swarm_models.live.live_subscription import LiveSubscription
 from swarm_models.subjects.operator_subjects import OperatorSubjects
+from swarm_service.gateway.live.live_fan_out import LiveFanOut
 
 from swarm_live.service.live_hub import LiveHub  # isort: skip
 

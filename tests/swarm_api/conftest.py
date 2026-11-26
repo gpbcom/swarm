@@ -2,19 +2,21 @@ from __future__ import annotations
 
 # Standard library imports
 import socket
-from typing import AsyncIterator, Dict
+from typing import AsyncIterator, Callable, Dict
 
 # Third-party imports
 import pytest
 from fastapi import Depends, FastAPI
+from fastapi.testclient import TestClient
 from httpx import ASGITransport, AsyncClient
 
 # First-party imports
-from gateway.api.rest.auth.access_installer import AccessInstaller
-from gateway.api.rest.auth.route_access import RouteAccess
-from gateway.models.auth.auth_config import AuthConfig
-from gateway.models.auth.caller import Caller
+from swarm_api.dependencies.route_access import RouteAccess
+from swarm_api.handlers.access_handlers import AccessHandlers
+from swarm_models.auth.auth_config import AuthConfig
+from swarm_models.auth.caller import Caller
 from swarm_models.people.enums import RoleName
+from tests.swarm_api.v1.live.gateway_stand_in_live_source import GatewayStandInLiveSource
 
 OPERATOR_PROBE_PATH = "/v1/operators/{operator_id}/probe"
 PLAIN_PROBE_PATH = "/v1/probe"
@@ -36,7 +38,7 @@ async def probe_plain(caller: Caller = PLANNER_ACCESS) -> Dict[str, str]:
 
 def build_probe_app(config: AuthConfig) -> FastAPI:
     app = FastAPI()
-    AccessInstaller().install(app, config)
+    AccessHandlers().install(app, config)
     app.add_api_route(OPERATOR_PROBE_PATH, probe_operator, methods=GET_METHODS)
     app.add_api_route(PLAIN_PROBE_PATH, probe_plain, methods=GET_METHODS)
     return app
@@ -66,3 +68,13 @@ async def unreachable_client(auth_config: AuthConfig) -> AsyncIterator[AsyncClie
     app = build_probe_app(config)
     async with AsyncClient(transport=ASGITransport(app=app), base_url=BASE_URL) as http_client:
         yield http_client
+
+
+@pytest.fixture
+def stand_in_source() -> GatewayStandInLiveSource:
+    return GatewayStandInLiveSource([GatewayStandInLiveSource.FRAME])
+
+
+@pytest.fixture
+def make_client(stand_in_source: GatewayStandInLiveSource) -> Callable[[bool], TestClient]:
+    return stand_in_source.build_client

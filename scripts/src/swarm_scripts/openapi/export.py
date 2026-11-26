@@ -2,25 +2,30 @@ from __future__ import annotations
 
 # Standard library imports
 import sys
-from logging import getLogger
-from pathlib import Path
 
 # First-party imports
-from gateway.api.rest.gateway_rest_app import GatewayRestApp
-from gateway.models.config.gateway_config import GatewayConfig
-from swarm_logging.configurators.logging_configurator import LoggingConfigurator
-from swarm_logging.models.logging_config import LoggingConfig
-from swarm_rest.api.cli.openapi_cli import OpenApiCli
+from swarm_models.schemas.exceptions import SESchemaError
+from swarm_scripts.repository_paths import RepositoryPaths
+from swarm_scripts.swarm_apps import SwarmApps
+from swarm_service.shared.openapi.openapi_exporter import OpenApiExporter
 
 
-def main() -> None:
-    """Configure logging, then write or check the OpenAPI document.
+def main() -> int:
+    """Write the OpenAPI document of every app, or of the one ``SWARM_APP`` names.
 
-    Raises:
-        SystemExit: Always, with the exit code of the command.
+    Returns:
+        int: 0 when every document is written, 2 when ``SWARM_APP`` names no app or a document cannot be written.
     """
-    config = GatewayConfig.load(GatewayConfig.conf_folder() / GatewayConfig.APP_FILE)
-    LoggingConfigurator(LoggingConfig(path=str(GatewayConfig.conf_folder() / GatewayConfig.LOGGER_FILE))).configure()
-    code = OpenApiCli(GatewayRestApp(config).build, Path(GatewayRestApp.OPENAPI_OUTPUT)).main(sys.argv[1:])
-    getLogger(__name__).debug("The OpenAPI command ended with exit code %d.", code)
-    raise SystemExit(code)
+    apps = SwarmApps()
+    selected = apps.selected()
+    if not selected:
+        print(f"{SwarmApps.APP_KEY} names no app: {apps.requested()!r}.", file=sys.stderr)
+        return 2
+    for app in selected:
+        try:
+            path = OpenApiExporter(SwarmApps.APPLICATIONS[app](), RepositoryPaths.OPENAPI, app.value).export()
+        except SESchemaError as error:
+            print(error, file=sys.stderr)
+            return 2
+        print(f"Wrote {path}.")
+    return 0

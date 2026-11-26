@@ -7,7 +7,7 @@ from typing import Optional
 # First-party imports
 from swarm_lifecycle.factories.runnable_factory import RunnableFactory
 from swarm_lifecycle.runnables.async_runnable import AsyncRunnable
-from swarm_rest.api.cli.async_runnable_runner import AsyncRunnableRunner
+from swarm_web.runners.async_runnable_runner import AsyncRunnableRunner
 
 
 class AsyncRunnableRunnerFactory(RunnableFactory[AsyncRunnableRunner]):

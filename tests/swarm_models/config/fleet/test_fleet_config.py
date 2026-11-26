@@ -2,27 +2,27 @@ from __future__ import annotations
 
 # Standard library imports
 from pathlib import Path
-from typing import ClassVar, Dict, List, Optional
+from typing import ClassVar, Dict, List
 
 # Third-party imports
 import pytest
 from pydantic import JsonValue, ValidationError
 
 # First-party imports
-from fleet.models.config.exceptions import (
+from swarm_models.config.fleet.exceptions import (
     SEFleetConfigInvalidPostgres,
     SEFleetConfigInvalidRest,
     SEFleetConfigInvalidSchemaName,
     SEFleetConfigUnreadable,
     SEInvalidFleetConfigException,
 )
-from fleet.models.config.fleet_config import FleetConfig
+from swarm_models.config.fleet.fleet_config import FleetConfig
 from swarm_models.config.postgres.postgres_config import PostgresConfig
 from swarm_web.models.config.rest_config import RestConfig
 
 
 class TestFleetConfig:
-    SERVICE_FOLDER: ClassVar[Path] = Path(__file__).resolve().parents[3]
+    APP_FOLDER: ClassVar[Path] = Path(__file__).resolve().parents[4] / "backend" / "apps" / "fleet"
     OTHER_DSN_KEY: ClassVar[str] = "SWARM_OTHER_POSTGRES_DSN"
     UNKNOWN_KEY_CONFIGURATION: ClassVar[Dict[str, JsonValue]] = {"colour": "red"}
     FIELD_ERRORS: ClassVar[List[type[Exception]]] = [
@@ -44,27 +44,17 @@ class TestFleetConfig:
         assert FleetConfig.LOGGER_FILE == "logger.yaml"
         assert FleetConfig.DSN_KEY == "SWARM_FLEET_POSTGRES_DSN"
 
-    def test_the_home_entry_moves_the_conf_and_migrations_folders(
+    def test_the_app_root_entry_moves_the_conf_and_migrations_folders(
         self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
     ) -> None:
-        monkeypatch.setenv(FleetConfig.HOME_KEY, str(tmp_path))
-        assert FleetConfig.conf_folder() == tmp_path / FleetConfig.CONF_FOLDER_NAME
-        assert FleetConfig.migrations_folder() == tmp_path / FleetConfig.MIGRATIONS_FOLDER_NAME
+        monkeypatch.setenv(FleetConfig.APP_ROOT_KEY, str(tmp_path))
+        assert FleetConfig.conf_folder() == tmp_path / FleetConfig.CONF_FOLDER
+        assert FleetConfig.migrations_folder() == tmp_path / FleetConfig.MIGRATIONS_FOLDER
 
-    @pytest.mark.parametrize("home", [None, "", "   "])
-    def test_an_unset_or_blank_home_entry_leaves_the_folders_of_the_repository(
-        self, monkeypatch: pytest.MonkeyPatch, home: Optional[str]
-    ) -> None:
-        if home is None:
-            monkeypatch.delenv(FleetConfig.HOME_KEY, raising=False)
-        else:
-            monkeypatch.setenv(FleetConfig.HOME_KEY, home)
-        service_folder = Path(__file__).resolve().parents[3]
-        assert FleetConfig.conf_folder().resolve() == service_folder / FleetConfig.CONF_FOLDER_NAME
-        assert FleetConfig.migrations_folder().resolve() == service_folder / FleetConfig.MIGRATIONS_FOLDER_NAME
-
-    def test_the_conf_folder_is_the_conf_folder_of_the_service(self) -> None:
-        assert FleetConfig.conf_folder().resolve() == self.SERVICE_FOLDER / "conf"
+    def test_the_app_folder_holds_the_conf_and_migrations_folders(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setenv(FleetConfig.APP_ROOT_KEY, str(self.APP_FOLDER))
+        assert FleetConfig.conf_folder().is_dir()
+        assert FleetConfig.migrations_folder().is_dir()
 
     def test_full_valid_construction(self) -> None:
         postgres = PostgresConfig(dsn_key=self.OTHER_DSN_KEY)
@@ -124,7 +114,7 @@ class TestFleetConfig:
         assert FleetConfig.model_validate(data) == config
 
     def test_loading_app_yaml_equals_the_defaults(self) -> None:
-        assert FleetConfig.load(FleetConfig.conf_folder() / FleetConfig.APP_FILE) == FleetConfig()
+        assert FleetConfig.load(self.APP_FOLDER / FleetConfig.CONF_FOLDER / FleetConfig.APP_FILE) == FleetConfig()
 
     def test_an_unreadable_file_raises_the_unreadable_exception(self, tmp_path: Path) -> None:
         with pytest.raises(SEFleetConfigUnreadable):

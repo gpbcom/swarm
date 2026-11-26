@@ -9,7 +9,7 @@ from typing import ClassVar, Dict, List
 import pytest
 
 # First-party imports
-from gateway.models.enums import AccessRefusal, TokenClaim
+from swarm_models.enums import AccessRefusal, TokenClaim
 
 
 class TestGatewayEnums:

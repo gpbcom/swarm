@@ -10,17 +10,17 @@ from jwt.types import Options
 from pydantic import JsonValue, ValidationError
 
 # First-party imports
-from gateway.clients.keycloak.keycloak_jwks_client import KeycloakJwksClient
-from gateway.models.access.exceptions import (
+from swarm_clients.gateway.keycloak.keycloak_jwks_client import KeycloakJwksClient
+from swarm_models.access.exceptions import (
     SEAccessExpiredTokenError,
     SEAccessInvalidTokenError,
     SEAccessMissingTokenError,
 )
-from gateway.models.auth.auth_config import AuthConfig
-from gateway.models.auth.caller import Caller
-from gateway.models.auth.exceptions import SEInvalidCallerException
-from gateway.models.enums import TokenClaim
-from gateway.models.keycloak.exceptions import SEKeycloakUnknownKeyError
+from swarm_models.auth.auth_config import AuthConfig
+from swarm_models.auth.caller import Caller
+from swarm_models.auth.exceptions import SEInvalidCallerException
+from swarm_models.enums import TokenClaim
+from swarm_models.keycloak.exceptions import SEKeycloakUnknownKeyError
 from swarm_models.people.enums import RoleName
 
 

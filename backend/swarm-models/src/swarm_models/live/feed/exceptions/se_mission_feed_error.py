@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 # First-party imports
-from gateway.models.live.exceptions.se_live_error import SELiveError
+from swarm_models.live.feed.exceptions.se_live_error import SELiveError
 
 
 class SEMissionFeedError(SELiveError):

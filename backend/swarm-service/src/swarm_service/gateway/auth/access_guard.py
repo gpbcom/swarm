@@ -6,8 +6,8 @@ from typing import List, Optional
 from uuid import UUID
 
 # First-party imports
-from gateway.models.access.exceptions import SEAccessMissingRoleError, SEAccessWrongOperatorError
-from gateway.models.auth.caller import Caller
+from swarm_models.access.exceptions import SEAccessMissingRoleError, SEAccessWrongOperatorError
+from swarm_models.auth.caller import Caller
 from swarm_models.people.enums import RoleName
 
 

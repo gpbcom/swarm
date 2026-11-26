@@ -11,7 +11,7 @@ from nats.aio.subscription import Subscription
 from nats.errors import Error as NatsError
 
 # First-party imports
-from gateway.models.live.exceptions import SEMissionFeedError
+from swarm_models.live.feed.exceptions import SEMissionFeedError
 
 
 class MissionFeedClient:

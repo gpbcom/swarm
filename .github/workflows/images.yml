@@ -6,7 +6,7 @@ on:
   workflow_call:
     inputs:
       images:
-        description: JSON array of the folders to build, such as ["services/gateway"].
+        description: JSON array of the folders to build, such as ["backend/apps/gateway"].
         type: string
         required: true
       publish:

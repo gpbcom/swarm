@@ -9,8 +9,8 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 # First-party imports
-from gateway.api.live.live_router import LiveRouter  # isort: skip
-from swarm_live.models.config.live_session_config import LiveSessionConfig  # isort: skip
+from swarm_api.v1.live.live_router import LiveRouter  # isort: skip
+from swarm_models.live.session.live_session_config import LiveSessionConfig  # isort: skip
 from swarm_live.service.live_mailbox import LiveMailbox  # isort: skip
 from swarm_live.service.live_source import LiveSource  # isort: skip
 from swarm_models.live.live_subscription import LiveSubscription  # isort: skip
@@ -65,7 +65,7 @@ class GatewayStandInLiveSource(LiveSource):
         """Build a client of an app that serves the live router over this source."""
         router = LiveRouter(self.source_for, LiveSessionConfig(status_interval_s=0.05))
         app = FastAPI()
-        app.include_router(router.build())
+        app.include_router(router)
         if with_operator:
             app.dependency_overrides[router.operator] = lambda: self.OPERATOR_ID
         return TestClient(app)

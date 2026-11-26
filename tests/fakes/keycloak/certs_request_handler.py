@@ -5,7 +5,7 @@ from http.server import BaseHTTPRequestHandler
 from typing import ClassVar
 
 # First-party imports
-from services.gateway.tests.support.keycloak.helpers import CERTS_PATH
+from tests.fakes.keycloak.helpers import CERTS_PATH
 
 
 class CertsRequestHandler(BaseHTTPRequestHandler):

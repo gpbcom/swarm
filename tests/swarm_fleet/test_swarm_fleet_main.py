@@ -1,56 +1,36 @@
 from __future__ import annotations
 
 # Standard library imports
-import os
-import subprocess
-import sys
+from importlib.metadata import entry_points
+from inspect import signature
 from pathlib import Path
-from typing import ClassVar, Dict, List
+from typing import ClassVar
+
+# Third-party imports
+import httpx
 
 # First-party imports
-from fleet.api.rest.fleet_rest_app import FleetRestApp
-from fleet.models.config.fleet_config import FleetConfig
+from swarm_api.v1.fleet.fleet_router import FleetRouter
+from swarm_fleet.main import main
+from tests.fakes.apps.app_server import AppServer
 
 
-class TestFleetConsoleScripts:
-    ROOT: ClassVar[Path] = Path(__file__).resolve().parents[5]
-    OPENAPI_SCRIPT: ClassVar[str] = "swarm-fleet-openapi"
-    MIGRATE_SCRIPT: ClassVar[str] = "swarm-fleet-migrate"
-    CHECK_FLAG: ClassVar[str] = "--check"
-    OUTPUT_FLAG: ClassVar[str] = "--output"
-    OUTPUT_NAME: ClassVar[str] = "fleet.json"
-    ENCODING: ClassVar[str] = "utf-8"
+class TestSwarmFleetMain:
+    SCRIPT: ClassVar[str] = "swarm-fleet-serve"
+    TARGET: ClassVar[str] = "swarm_fleet.main:main"
+    APP_FOLDER: ClassVar[Path] = Path(__file__).resolve().parents[2] / "backend" / "apps" / "fleet"
+    INFO_KEY: ClassVar[str] = "info"
+    TITLE_KEY: ClassVar[str] = "title"
 
-    def run_script(
-        self, name: str, arguments: List[str], environment: Dict[str, str]
-    ) -> subprocess.CompletedProcess[str]:
-        return subprocess.run(
-            [str(Path(sys.executable).parent / name), *arguments],
-            cwd=self.ROOT,
-            env=environment,
-            capture_output=True,
-            text=True,
-            check=False,
-            timeout=120,
-        )
+    def test_the_console_script_points_to_main(self) -> None:
+        assert entry_points(group="console_scripts")[self.SCRIPT].value == self.TARGET
 
-    def test_the_openapi_check_passes_on_the_published_document(self) -> None:
-        result = self.run_script(self.OPENAPI_SCRIPT, [self.CHECK_FLAG], dict(os.environ))
+    def test_main_takes_no_argument(self) -> None:
+        assert not signature(main).parameters
 
-        assert result.returncode == 0, result.stderr
+    def test_the_app_serves_its_api_from_the_folder_the_entry_names(self, tmp_path: Path) -> None:
+        with AppServer(self.SCRIPT, self.APP_FOLDER, tmp_path) as server:
+            response = server.get_openapi()
 
-    def test_the_openapi_output_writes_the_published_text(self, tmp_path: Path) -> None:
-        target = tmp_path / self.OUTPUT_NAME
-
-        result = self.run_script(self.OPENAPI_SCRIPT, [self.OUTPUT_FLAG, str(target)], dict(os.environ))
-
-        published = self.ROOT / FleetRestApp.OPENAPI_OUTPUT
-        assert result.returncode == 0, result.stderr
-        assert target.read_text(encoding=self.ENCODING) == published.read_text(encoding=self.ENCODING)
-
-    def test_the_migrate_script_returns_zero_with_the_dsn_set(self, postgres_dsn: str) -> None:
-        environment = {**os.environ, FleetConfig.DSN_KEY: postgres_dsn}
-
-        result = self.run_script(self.MIGRATE_SCRIPT, [], environment)
-
-        assert result.returncode == 0, result.stderr
+        assert response.status_code == httpx.codes.OK
+        assert response.json()[self.INFO_KEY][self.TITLE_KEY] == FleetRouter.TITLE
