@@ -23,7 +23,7 @@ crash.log
 crash.*.log
 *.tfbackend
 # Only cell roots commit their provider lock
-deploy/terraform/modules/**/.terraform.lock.hcl
+infra/terraform/modules/**/.terraform.lock.hcl
 
 # Rust build output
 packages/rust/target/
@@ -39,7 +39,7 @@ logs/
 .vscode/
 
 # Helm dependencies are packaged on build and never committed
-deploy/charts/*/charts/
+infra/charts/*/charts/
 .VSCodeCounter
 
 # Front-end build output

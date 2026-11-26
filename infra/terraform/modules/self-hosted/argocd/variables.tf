@@ -43,5 +43,5 @@ variable "target_revision" {
 variable "platform_path" {
   description = "The path in the repository of the cluster-wide operators that the platform Application deploys."
   type        = string
-  default     = "deploy/environments/dev/platform"
+  default     = "infra/environments/dev/platform"
 }

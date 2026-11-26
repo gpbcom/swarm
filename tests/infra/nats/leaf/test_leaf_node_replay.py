@@ -21,9 +21,9 @@ from swarm_nats.models.enums import CredentialKind
 from swarm_nats.models.streams.stream_source import StreamSource
 from swarm_nats.models.streams.stream_spec import StreamSpec
 from swarm_nats.models.subjects.operator_subjects import OperatorSubjects
-from tests.deploy.nats.helpers import free_port, issuers, operator_mode_config, write_creds
-from tests.deploy.nats.leaf.link_proxy import LinkProxy
-from tests.deploy.nats.nats_server_process import NatsServerProcess
+from tests.infra.nats.helpers import free_port, issuers, operator_mode_config, write_creds
+from tests.infra.nats.leaf.link_proxy import LinkProxy
+from tests.infra.nats.nats_server_process import NatsServerProcess
 
 
 @pytest.mark.skipif(shutil.which("nats-server") is None, reason="nats-server is not installed")

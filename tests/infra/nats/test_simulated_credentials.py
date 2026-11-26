@@ -14,7 +14,7 @@ from swarm_nats.models.accounts.issued_credential import IssuedCredential
 from swarm_nats.models.enums import CredentialKind
 from swarm_nats.models.subjects.operator_subjects import OperatorSubjects
 from swarm_nats.service.accounts.nats_jwt_signer import NatsJwtSigner
-from tests.deploy.nats.helpers import (
+from tests.infra.nats.helpers import (
     OPERATOR_A_ID,
     OPERATOR_B_ID,
     connz_users,
@@ -24,7 +24,7 @@ from tests.deploy.nats.helpers import (
     violation_seen,
     write_creds,
 )
-from tests.deploy.nats.nats_server_process import NatsServerProcess
+from tests.infra.nats.nats_server_process import NatsServerProcess
 
 Cell = Tuple[str, int, IssuedCredential, IssuedCredential, Path, Path]
 

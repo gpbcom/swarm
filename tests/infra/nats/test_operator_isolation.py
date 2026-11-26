@@ -13,7 +13,7 @@ from nats.errors import TimeoutError as NatsTimeoutError
 # First-party imports
 from swarm_nats.models.enums import CredentialKind
 from swarm_nats.models.subjects.operator_subjects import OperatorSubjects
-from tests.deploy.nats.helpers import (
+from tests.infra.nats.helpers import (
     OPERATOR_A_ID,
     OPERATOR_B_ID,
     free_port,
@@ -22,7 +22,7 @@ from tests.deploy.nats.helpers import (
     violation_seen,
     write_creds,
 )
-from tests.deploy.nats.nats_server_process import NatsServerProcess
+from tests.infra.nats.nats_server_process import NatsServerProcess
 
 
 @pytest.mark.skipif(shutil.which("nats-server") is None, reason="nats-server is not installed")

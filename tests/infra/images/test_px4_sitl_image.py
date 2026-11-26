@@ -8,7 +8,7 @@ from typing import ClassVar, List
 
 class TestPx4SitlImage:
     ROOT: ClassVar[Path] = Path(__file__).resolve().parents[3]
-    DOCKERFILE: ClassVar[Path] = ROOT / "deploy" / "images" / "px4-sitl" / "Dockerfile"
+    DOCKERFILE: ClassVar[Path] = ROOT / "infra" / "images" / "px4-sitl" / "Dockerfile"
     VERSION_PATTERN: ClassVar[str] = r"^v\d+\.\d+\.\d+$"
     VERSION_ARG: ClassVar[str] = "PX4_VERSION"
     MODEL: ClassVar[str] = "gz_x500"

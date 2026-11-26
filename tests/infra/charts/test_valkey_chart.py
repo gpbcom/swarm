@@ -16,7 +16,7 @@ HELM_MISSING = shutil.which("helm") is None
 
 class TestValkeyChart:
     ROOT: ClassVar[Path] = Path(__file__).resolve().parents[3]
-    CHART: ClassVar[Path] = ROOT / "deploy" / "charts" / "valkey"
+    CHART: ClassVar[Path] = ROOT / "infra" / "charts" / "valkey"
     NAMESPACE: ClassVar[str] = "cell-test"
     NAME: ClassVar[str] = "valkey"
     PORT: ClassVar[int] = 6379

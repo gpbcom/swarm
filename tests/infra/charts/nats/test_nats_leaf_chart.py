@@ -17,8 +17,8 @@ HELM_MISSING = shutil.which("helm") is None
 
 class TestNatsLeafChart:
     ROOT: ClassVar[Path] = Path(__file__).resolve().parents[4]
-    CHART: ClassVar[Path] = ROOT / "deploy" / "charts" / "nats-leaf"
-    CELL_CHART: ClassVar[Path] = ROOT / "deploy" / "charts" / "cell" / "Chart.yaml"
+    CHART: ClassVar[Path] = ROOT / "infra" / "charts" / "nats-leaf"
+    CELL_CHART: ClassVar[Path] = ROOT / "infra" / "charts" / "cell" / "Chart.yaml"
     RELEASE: ClassVar[str] = "edge"
     NAME: ClassVar[str] = "nats-leaf"
     NAMESPACE: ClassVar[str] = "edge-test"

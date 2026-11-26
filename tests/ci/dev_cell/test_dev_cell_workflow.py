@@ -22,7 +22,7 @@ class TestDevCellWorkflow:
         "AWS_ACCESS_KEY_ID",
         "AWS_SECRET_ACCESS_KEY",
     ]
-    SCRIPT_COMMAND: ClassVar[str] = 'bash deploy/scripts/dev-cell.sh "$ACTION" "$BRANCH"'
+    SCRIPT_COMMAND: ClassVar[str] = 'bash infra/scripts/dev-cell.sh "$ACTION" "$BRANCH"'
     SCRIPT_ENV: ClassVar[List[str]] = ["DEV_CELL_BACKEND_CONFIG", "DEV_CELL_VAR_FILE", "KUBECONFIG"]
     FILE_SECRETS: ClassVar[List[str]] = ["TF_BACKEND_CONFIG", "DEV_CELL_TFVARS", "DEV_CELL_KUBECONFIG"]
 

@@ -75,7 +75,7 @@ module "identity_application" {
   namespace          = module.identity[0].namespace
   repository_url     = var.repository_url
   target_revision    = var.platform_revision
-  chart_path         = "deploy/charts/keycloak"
+  chart_path         = "infra/charts/keycloak"
   values_files       = []
   apps_chart_version = var.argocd_apps_chart_version
 

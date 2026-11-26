@@ -14,7 +14,7 @@
 # commands stay short and the backend key of each branch is always taken into account.
 set -euo pipefail
 
-readonly CELL_DIR="deploy/terraform/cells/dev-branch"
+readonly CELL_DIR="infra/terraform/cells/dev-branch"
 readonly SLUG_MAX=30
 readonly HASH_LENGTH=8
 readonly BAD_USAGE=2

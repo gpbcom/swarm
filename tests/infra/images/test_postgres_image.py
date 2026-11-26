@@ -8,7 +8,7 @@ from typing import ClassVar, List
 
 class TestPostgresImage:
     ROOT: ClassVar[Path] = Path(__file__).resolve().parents[3]
-    DOCKERFILE: ClassVar[Path] = ROOT / "deploy" / "images" / "postgres" / "Dockerfile"
+    DOCKERFILE: ClassVar[Path] = ROOT / "infra" / "images" / "postgres" / "Dockerfile"
     BASE_REPOSITORY: ClassVar[str] = "ghcr.io/cloudnative-pg/postgis"
     TIMESCALE_PACKAGE: ClassVar[str] = "timescaledb-2-postgresql-16"
     POSTGRES_USER: ClassVar[str] = "26"

@@ -55,7 +55,7 @@ run "installs_argo_cd_and_the_platform_application" {
   }
 
   assert {
-    condition     = strcontains(helm_release.platform.values[0], "deploy/environments/dev/platform")
+    condition     = strcontains(helm_release.platform.values[0], "infra/environments/dev/platform")
     error_message = "Expected the platform path in the Application."
   }
 

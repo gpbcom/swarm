@@ -17,6 +17,6 @@ terraform {
   }
 
   # Partial backend: bucket, endpoint, use_path_style, use_lockfile and the rest come from a file kept outside the
-  # repository, and deploy/scripts/dev-cell.sh passes the key dev-branch/<cell>.tfstate, one state per branch.
+  # repository, and infra/scripts/dev-cell.sh passes the key dev-branch/<cell>.tfstate, one state per branch.
   backend "s3" {}
 }

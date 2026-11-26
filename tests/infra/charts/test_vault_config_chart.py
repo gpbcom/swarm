@@ -14,7 +14,7 @@ from pydantic import JsonValue
 
 class TestVaultConfigChart:
     ROOT: ClassVar[Path] = Path(__file__).resolve().parents[3]
-    CHART: ClassVar[Path] = ROOT / "deploy" / "charts" / "vault-config"
+    CHART: ClassVar[Path] = ROOT / "infra" / "charts" / "vault-config"
     ENCODING: ClassVar[str] = "utf-8"
     HELM: ClassVar[str] = "helm"
     NAME: ClassVar[str] = "vault-config"

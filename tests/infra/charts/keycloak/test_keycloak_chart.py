@@ -17,7 +17,7 @@ HELM_MISSING = shutil.which("helm") is None
 
 class TestKeycloakChart:
     ROOT: ClassVar[Path] = Path(__file__).resolve().parents[4]
-    CHART: ClassVar[Path] = ROOT / "deploy" / "charts" / "keycloak"
+    CHART: ClassVar[Path] = ROOT / "infra" / "charts" / "keycloak"
     REALM_FILE: ClassVar[Path] = CHART / "files" / "swarm-realm.json"
     NAMESPACE: ClassVar[str] = "global"
     NAME: ClassVar[str] = "keycloak"

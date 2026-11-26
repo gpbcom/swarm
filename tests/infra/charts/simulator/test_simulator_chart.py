@@ -18,7 +18,7 @@ HELM_MISSING = shutil.which("helm") is None
 
 class TestSimulatorChart:
     ROOT: ClassVar[Path] = Path(__file__).resolve().parents[4]
-    CHART: ClassVar[Path] = ROOT / "deploy" / "charts" / "simulator"
+    CHART: ClassVar[Path] = ROOT / "infra" / "charts" / "simulator"
     NAMESPACE: ClassVar[str] = "cell-test"
     NAME: ClassVar[str] = "simulator"
     CONFIG_MAP: ClassVar[str] = "simulator-config"

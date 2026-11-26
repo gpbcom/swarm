@@ -34,7 +34,7 @@ RUN apt-get update \
 
 COPY --from=builder /src/PX4-Autopilot/build/px4_sitl_default /opt/px4/build/px4_sitl_default
 COPY --from=builder /src/PX4-Autopilot/Tools/simulation/gz /opt/px4/Tools/simulation/gz
-COPY deploy/images/px4-sitl/entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY infra/images/px4-sitl/entrypoint.sh /usr/local/bin/entrypoint.sh
 
 RUN groupadd --system --gid 10001 px4 \
     && useradd --system --uid 10001 --gid px4 --home-dir /home/px4 --create-home --shell /usr/sbin/nologin px4 \

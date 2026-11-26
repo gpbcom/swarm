@@ -16,7 +16,7 @@ HELM_MISSING = shutil.which("helm") is None
 
 class TestObjectStorageChart:
     ROOT: ClassVar[Path] = Path(__file__).resolve().parents[3]
-    CHART: ClassVar[Path] = ROOT / "deploy" / "charts" / "object-storage"
+    CHART: ClassVar[Path] = ROOT / "infra" / "charts" / "object-storage"
     NAMESPACE: ClassVar[str] = "cell-test"
     NAME: ClassVar[str] = "object-storage"
     PORT: ClassVar[int] = 9000

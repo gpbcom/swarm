@@ -45,7 +45,7 @@ run "creates_the_argo_cd_application" {
   }
 
   assert {
-    condition     = strcontains(helm_release.application.values[0], "deploy/charts/cell")
+    condition     = strcontains(helm_release.application.values[0], "infra/charts/cell")
     error_message = "Expected the chart path in the values."
   }
 

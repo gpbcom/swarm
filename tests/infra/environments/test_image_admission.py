@@ -13,7 +13,7 @@ from pydantic import JsonValue
 
 class TestImageAdmission:
     ROOT: ClassVar[Path] = Path(__file__).resolve().parents[3]
-    PLATFORM: ClassVar[Path] = ROOT / "deploy" / "environments" / "dev" / "platform"
+    PLATFORM: ClassVar[Path] = ROOT / "infra" / "environments" / "dev" / "platform"
     APPLICATION: ClassVar[Path] = PLATFORM / "policy-controller.yaml"
     POLICY: ClassVar[Path] = PLATFORM / "cluster-image-policy.yaml"
 

@@ -16,22 +16,22 @@ from tests.conventions.mono_repo.helpers import repo_root
 
 class TestTerraformLayout:
     MATRIX_FOLDERS: ClassVar[List[str]] = [
-        "deploy/terraform/modules/self-hosted/machines",
-        "deploy/terraform/modules/self-hosted/network",
-        "deploy/terraform/modules/self-hosted/k3s",
-        "deploy/terraform/modules/self-hosted/object-storage",
-        "deploy/terraform/modules/self-hosted/dns",
-        "deploy/terraform/modules/self-hosted/argocd",
-        "deploy/terraform/modules/self-hosted/vault",
-        "deploy/terraform/modules/self-hosted/cell",
-        "deploy/terraform/modules/self-hosted/cell-application",
-        "deploy/terraform/cells/dev",
-        "deploy/terraform/cells/dev-branch",
+        "infra/terraform/modules/self-hosted/machines",
+        "infra/terraform/modules/self-hosted/network",
+        "infra/terraform/modules/self-hosted/k3s",
+        "infra/terraform/modules/self-hosted/object-storage",
+        "infra/terraform/modules/self-hosted/dns",
+        "infra/terraform/modules/self-hosted/argocd",
+        "infra/terraform/modules/self-hosted/vault",
+        "infra/terraform/modules/self-hosted/cell",
+        "infra/terraform/modules/self-hosted/cell-application",
+        "infra/terraform/cells/dev",
+        "infra/terraform/cells/dev-branch",
     ]
 
     def tracked_files(self) -> List[str]:
         result = subprocess.run(
-            ["git", "ls-files", "deploy/terraform"],
+            ["git", "ls-files", "infra/terraform"],
             cwd=repo_root(),
             capture_output=True,
             text=True,
@@ -45,7 +45,7 @@ class TestTerraformLayout:
     )
     @pytest.mark.parametrize("name", ["main.tf", "variables.tf", "outputs.tf", "versions.tf"])
     def test_each_module_has_its_files(self, module: str, name: str) -> None:
-        path = repo_root() / "deploy" / "terraform" / "modules" / "self-hosted" / module / name
+        path = repo_root() / "infra" / "terraform" / "modules" / "self-hosted" / module / name
         assert path.is_file()
 
     @pytest.mark.parametrize(
@@ -53,10 +53,10 @@ class TestTerraformLayout:
         ["main.tf", "variables.tf", "outputs.tf", "versions.tf", "terraform.tfvars.example", ".terraform.lock.hcl"],
     )
     def test_the_dev_cell_has_its_files(self, name: str) -> None:
-        assert (repo_root() / "deploy" / "terraform" / "cells" / "dev" / name).is_file()
+        assert (repo_root() / "infra" / "terraform" / "cells" / "dev" / name).is_file()
 
     def test_the_dev_cell_declares_an_empty_partial_backend(self) -> None:
-        path = repo_root() / "deploy" / "terraform" / "cells" / "dev" / "versions.tf"
+        path = repo_root() / "infra" / "terraform" / "cells" / "dev" / "versions.tf"
         assert path.is_file(), "cells/dev/versions.tf is missing."
         assert re.search(r'backend\s+"s3"\s*\{\s*\}', path.read_text(encoding="utf-8"))
 
@@ -73,10 +73,10 @@ class TestTerraformLayout:
         ],
     )
     def test_the_dev_branch_cell_has_its_files(self, name: str) -> None:
-        assert (repo_root() / "deploy" / "terraform" / "cells" / "dev-branch" / name).is_file()
+        assert (repo_root() / "infra" / "terraform" / "cells" / "dev-branch" / name).is_file()
 
     def test_the_dev_branch_cell_declares_an_empty_partial_backend(self) -> None:
-        path = repo_root() / "deploy" / "terraform" / "cells" / "dev-branch" / "versions.tf"
+        path = repo_root() / "infra" / "terraform" / "cells" / "dev-branch" / "versions.tf"
         assert path.is_file(), "cells/dev-branch/versions.tf is missing."
         assert re.search(r'backend\s+"s3"\s*\{\s*\}', path.read_text(encoding="utf-8"))
 
@@ -105,7 +105,7 @@ class TestTerraformLayout:
         assert forbidden == []
 
     @pytest.mark.parametrize(
-        "line", [".terraform/", "*.tfstate", "*.tfstate.*", "*.tfvars", "!*.tfvars.example", "deploy/charts/*/charts/"]
+        "line", [".terraform/", "*.tfstate", "*.tfstate.*", "*.tfvars", "!*.tfvars.example", "infra/charts/*/charts/"]
     )
     def test_gitignore_holds_the_line(self, line: str) -> None:
         lines = (repo_root() / ".gitignore").read_text(encoding="utf-8").splitlines()
@@ -116,7 +116,7 @@ class TestTerraformLayout:
         assert path.is_file(), "terraform.yml is missing."
         text = path.read_text(encoding="utf-8")
         assert "terraform plan" in text
-        assert "deploy/terraform/**" in text
+        assert "infra/terraform/**" in text
 
     def test_the_plan_waits_until_the_dev_cell_is_configured(self) -> None:
         path = repo_root() / ".github" / "workflows" / "terraform.yml"

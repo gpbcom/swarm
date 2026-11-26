@@ -15,7 +15,7 @@ from pydantic import JsonValue
 
 class TestCellChart:
     ROOT: ClassVar[Path] = Path(__file__).resolve().parents[3]
-    CHART_DIR: ClassVar[Path] = ROOT / "deploy" / "charts" / "cell"
+    CHART_DIR: ClassVar[Path] = ROOT / "infra" / "charts" / "cell"
     EXPECTED_DEPENDENCIES: ClassVar[List[Dict[str, str]]] = [
         {
             "name": "database",
@@ -134,8 +134,8 @@ class TestCellChart:
     @pytest.mark.skipif(shutil.which("helm") is None, reason="helm is not installed")
     def test_the_cell_renders_its_data_platform(self, tmp_path: Path) -> None:
         charts = tmp_path / "charts"
-        shutil.copytree(self.ROOT / "deploy" / "charts", charts)
-        shutil.copytree(self.ROOT / "deploy" / "environments", tmp_path / "environments")
+        shutil.copytree(self.ROOT / "infra" / "charts", charts)
+        shutil.copytree(self.ROOT / "infra" / "environments", tmp_path / "environments")
         cell = charts / "cell"
         subprocess.run(["helm", "dependency", "build", str(cell)], check=True, capture_output=True)
         rendered = subprocess.run(

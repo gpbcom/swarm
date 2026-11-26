@@ -1,4 +1,4 @@
-# The defaults stay in the sub-charts, and the dev values in deploy/environments/dev/values.yaml.
+# The defaults stay in the sub-charts, and the dev values in infra/environments/dev/values.yaml.
 global:
   services: []
 database:

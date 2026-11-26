@@ -13,11 +13,11 @@ from pydantic import JsonValue
 
 class TestDevEnvironment:
     ROOT: ClassVar[Path] = Path(__file__).resolve().parents[3]
-    DEV: ClassVar[Path] = ROOT / "deploy" / "environments" / "dev"
+    DEV: ClassVar[Path] = ROOT / "infra" / "environments" / "dev"
     PLATFORM: ClassVar[Path] = DEV / "platform"
     VALUES: ClassVar[Path] = DEV / "values.yaml"
-    CHARTS: ClassVar[Path] = ROOT / "deploy" / "charts"
-    ENVIRONMENTS: ClassVar[Path] = ROOT / "deploy" / "environments"
+    CHARTS: ClassVar[Path] = ROOT / "infra" / "charts"
+    ENVIRONMENTS: ClassVar[Path] = ROOT / "infra" / "environments"
 
     ENCODING: ClassVar[str] = "utf-8"
     SEMVER: ClassVar[re.Pattern[str]] = re.compile(r"^v?\d+(\.\d+)+$")

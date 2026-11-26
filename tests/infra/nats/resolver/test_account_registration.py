@@ -11,7 +11,7 @@ import pytest
 # First-party imports
 from swarm_nats.models.accounts.issued_account import IssuedAccount
 from swarm_nats.models.enums import CredentialKind
-from tests.deploy.nats.helpers import (
+from tests.infra.nats.helpers import (
     OPERATOR_A_ID,
     connects,
     free_port,
@@ -20,7 +20,7 @@ from tests.deploy.nats.helpers import (
     push_account,
     write_creds,
 )
-from tests.deploy.nats.nats_server_process import NatsServerProcess
+from tests.infra.nats.nats_server_process import NatsServerProcess
 
 Cell = Tuple[str, IssuedAccount, IssuedAccount, Path, Path, Path]
 

@@ -14,7 +14,7 @@ from pydantic import JsonValue
 
 class TestDatabaseChart:
     ROOT: ClassVar[Path] = Path(__file__).resolve().parents[3]
-    CHART: ClassVar[Path] = ROOT / "deploy" / "charts" / "database"
+    CHART: ClassVar[Path] = ROOT / "infra" / "charts" / "database"
     NAMESPACE: ClassVar[str] = "cell-test"
     IMAGE: ClassVar[str] = "registry.example.org/swarm-postgres:16"
     SERVICES: ClassVar[List[str]] = ["missions", "fleet"]

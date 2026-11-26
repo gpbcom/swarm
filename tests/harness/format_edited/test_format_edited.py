@@ -113,7 +113,7 @@ class TestFormatEdited:
             ("services/gateway/src/gateway/x.py", ["uv", "run", "ruff", "format", "{file}"]),
             ("tests/a/test_b.py", ["uv", "run", "ruff", "format", "{file}"]),
             ("packages/rust/core/src/lib.rs", ["rustfmt", "--edition", "2021", "{file}"]),
-            ("deploy/terraform/cells/dev/main.tf", ["terraform", "fmt", "{file}"]),
+            ("infra/terraform/cells/dev/main.tf", ["terraform", "fmt", "{file}"]),
         ],
     )
     def test_the_repository_catalogue_picks_the_formatter_of_each_language(

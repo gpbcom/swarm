@@ -70,7 +70,7 @@ The dev cluster is built in two applies of the `cells/dev` root, as the [Terrafo
    ```
 
 4. **Give Argo CD read access to the repository.** Argo CD must read `repository_url`. If the repository is private, the
-   credentials are added to Argo CD outside this repository, and never written in a file of `deploy/`. The files of this
+   credentials are added to Argo CD outside this repository, and never written in a file of `infra/`. The files of this
    repository do not set them, so this step is done by the person who runs the cluster.
 
 ## The PostgreSQL image
@@ -81,7 +81,7 @@ builds and pushes it,
 you do it by hand:
 
 ```bash
-docker build -t registry.example.org/swarm/database:1 deploy/images/postgres
+docker build -t registry.example.org/swarm/database:1 infra/images/postgres
 docker push registry.example.org/swarm/database:1
 ```
 
@@ -99,8 +99,8 @@ export DEV_CELL_BACKEND_CONFIG=/path/outside/repo/backend.hcl
 export DEV_CELL_VAR_FILE=/path/outside/repo/dev-branch.tfvars
 export KUBECONFIG=/path/outside/repo/dev.kubeconfig
 export DEV_CELL_TIMEOUT=15m
-bash deploy/scripts/dev-cell.sh --dry-run up my-branch
-bash deploy/scripts/dev-cell.sh up my-branch
+bash infra/scripts/dev-cell.sh --dry-run up my-branch
+bash infra/scripts/dev-cell.sh up my-branch
 ```
 
 - `DEV_CELL_BACKEND_CONFIG` is the backend configuration file. It is required.
@@ -132,14 +132,14 @@ cell and the name of its Argo CD Application.
 - **A NATS cluster** of 3 servers, from `charts/nats`, described in [The NATS of a cell](#the-nats-of-a-cell).
 
 The Argo CD Application of the cell follows the branch (`target_revision` is the branch) and the chart
-`deploy/charts/cell`, with the values of `environments/dev/values.yaml`.
+`infra/charts/cell`, with the values of `environments/dev/values.yaml`.
 
 ## Close a branch cell
 
 A cell is closed in one of two ways:
 
 - **Automatically**, when the branch is deleted: the workflow runs on the `delete` event of the branch and runs `down`.
-- **By hand**, with the script or the workflow: `bash deploy/scripts/dev-cell.sh down my-branch`.
+- **By hand**, with the script or the workflow: `bash infra/scripts/dev-cell.sh down my-branch`.
 
 `down` runs `terraform destroy` on the `cells/dev-branch` root. Terraform removes the Argo CD Application first, with
 its finalizer, so that Argo CD removes what it deployed. Then the vault and the namespace are removed.
@@ -324,11 +324,11 @@ The three acceptance criteria of [T0.09](../docs/tickets/T0.09/TICKET.md#accepta
 Run each with `uv run pytest`, from the root of the repository:
 
 1. **An Operator's account refuses a publication on another Operator's subject.**
-   `uv run pytest tests/deploy/nats/test_operator_isolation.py`, for [BR-008](../docs/specs/functional/business-rules/BR-008-operator-isolation.md).
+   `uv run pytest tests/infra/nats/test_operator_isolation.py`, for [BR-008](../docs/specs/functional/business-rules/BR-008-operator-isolation.md).
 2. **A leaf node cut for one minute replays its messages in order.**
-   `uv run pytest tests/deploy/nats/leaf`, for [BR-008](../docs/specs/functional/business-rules/BR-008-operator-isolation.md).
+   `uv run pytest tests/infra/nats/leaf`, for [BR-008](../docs/specs/functional/business-rules/BR-008-operator-isolation.md).
 3. **Simulated Squads use credentials separate from those of real Squads.**
-   `uv run pytest tests/deploy/nats/test_simulated_credentials.py`, for [BR-014](../docs/specs/functional/business-rules/BR-014-simulation-isolation.md).
+   `uv run pytest tests/infra/nats/test_simulated_credentials.py`, for [BR-014](../docs/specs/functional/business-rules/BR-014-simulation-isolation.md).
 
 These tests start real `nats-server` processes. They need `nats-server` on `PATH`, and they skip when it is missing. CI
 installs a pinned `nats-server` before it runs them.

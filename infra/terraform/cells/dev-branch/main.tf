@@ -32,7 +32,7 @@ module "cell_application" {
   argocd_namespace   = var.argocd_namespace
   repository_url     = var.repository_url
   target_revision    = var.branch
-  chart_path         = "deploy/charts/cell"
+  chart_path         = "infra/charts/cell"
   values_files       = ["../../environments/dev/values.yaml"]
   parameters         = local.cell_parameters
   apps_chart_version = var.argocd_apps_chart_version

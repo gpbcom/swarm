@@ -15,7 +15,7 @@ from swarm_models.models.people.enums import RoleName
 
 class TestSwarmRealm:
     ROOT: ClassVar[Path] = Path(__file__).resolve().parents[4]
-    REALM_FILE: ClassVar[Path] = ROOT / "deploy" / "charts" / "keycloak" / "files" / "swarm-realm.json"
+    REALM_FILE: ClassVar[Path] = ROOT / "infra" / "charts" / "keycloak" / "files" / "swarm-realm.json"
     ENCODING: ClassVar[str] = "utf-8"
     REALM_NAME: ClassVar[str] = "swarm"
     KEYCLOAK_ROLES: ClassVar[Set[str]] = {"offline_access", "uma_authorization", "default-roles-swarm"}

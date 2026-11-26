@@ -14,7 +14,7 @@ import pytest
 
 class TestDevCellScript:
     ROOT: ClassVar[Path] = Path(__file__).resolve().parents[3]
-    SCRIPT: ClassVar[str] = "deploy/scripts/dev-cell.sh"
+    SCRIPT: ClassVar[str] = "infra/scripts/dev-cell.sh"
     BASH: ClassVar[str] = "bash"
     DRY_RUN: ClassVar[str] = "--dry-run"
     UP: ClassVar[str] = "up"
@@ -24,7 +24,7 @@ class TestDevCellScript:
     TIMEOUT_VAR: ClassVar[str] = "DEV_CELL_TIMEOUT"
     BACKEND_PATH: ClassVar[str] = "/nonexistent/backend.tfbackend"
     VAR_FILE_PATH: ClassVar[str] = "/nonexistent/dev-branch.tfvars"
-    CHDIR: ClassVar[str] = "-chdir=deploy/terraform/cells/dev-branch"
+    CHDIR: ClassVar[str] = "-chdir=infra/terraform/cells/dev-branch"
     PREFIX: ClassVar[str] = "+ "
     BRANCH: ClassVar[str] = "feature/Add_Thing"
     SLUG_MAX: ClassVar[int] = 30

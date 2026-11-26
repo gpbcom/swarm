@@ -78,7 +78,7 @@ store. The file sets these keys, and you give them values:
 
 ## First apply
 
-Run these commands from `deploy/terraform/cells/dev`.
+Run these commands from `infra/terraform/cells/dev`.
 
 1. Copy the example to a file outside the repository, such as `~/.config/swarm/dev.tfvars`, and edit it:
 
@@ -200,7 +200,7 @@ Application that deploys its chart. Its variables are:
 | `argocd_namespace` | The namespace of Argo CD, `argocd` by default |
 
 The root has one state per branch, under the backend key `dev-branch/<cell>.tfstate`. The script
-[`deploy/scripts/dev-cell.sh`](../scripts/dev-cell.sh) drives it: it passes `branch`, `cell_name` and the backend key,
+[`infra/scripts/dev-cell.sh`](../scripts/dev-cell.sh) drives it: it passes `branch`, `cell_name` and the backend key,
 and it reads the paths of its backend configuration file and variables file from `DEV_CELL_BACKEND_CONFIG` and
 `DEV_CELL_VAR_FILE`. Start from
 [`cells/dev-branch/terraform.tfvars.example`](cells/dev-branch/terraform.tfvars.example), and keep the file outside the
@@ -247,11 +247,11 @@ Their credentials are never variables. Export them in the shell that runs Terraf
 
 ## Continuous integration
 
-`.github/workflows/terraform.yml` runs on every change under `deploy/terraform/` and to the workflow itself.
+`.github/workflows/terraform.yml` runs on every change under `infra/terraform/` and to the workflow itself.
 
 - **`check`**, for each module (the machines, network, k3s, object storage, DNS, Argo CD, vault, cell and cell
   application modules) and for the roots `cells/dev` and `cells/dev-branch`:
-  - `terraform fmt -check -recursive deploy/terraform`, once for the whole folder;
+  - `terraform fmt -check -recursive infra/terraform`, once for the whole folder;
   - `terraform init -backend=false`, then `terraform validate`;
   - `terraform test`, which plans with mock providers and checks the outputs and the refusal of a cell without a server.
 - **`plan`**, for `cells/dev`, after `check` passes. It writes the backend configuration from a secret, initialises

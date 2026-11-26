@@ -191,7 +191,7 @@ class TestImagesWorkflow:
         assert "github.run_id" in text or "GITHUB_RUN_ID" in text
 
     def test_e2e_starts_the_compose_stack_with_the_image_tag(self) -> None:
-        assert "compose.e2e.yaml" in " ".join(self.runs("e2e"))
+        assert "infra/compose/e2e.yaml" in " ".join(self.runs("e2e"))
         assert "SWARM_IMAGE_TAG" in self.job_text("e2e")
 
     def test_e2e_runs_playwright_through_pnpm(self) -> None:

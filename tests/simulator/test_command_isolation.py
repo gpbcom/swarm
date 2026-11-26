@@ -19,8 +19,8 @@ from swarm_models.models.commands.enums import CommandKind, CommandLane
 from swarm_nats.clients.nats_requester import NatsRequester
 from swarm_nats.models.config.nats_client_config import NatsClientConfig
 from swarm_nats.models.enums import CredentialKind
-from tests.deploy.nats.helpers import connz_users, free_port, issuers, operator_mode_config, write_creds
-from tests.deploy.nats.nats_server_process import NatsServerProcess
+from tests.infra.nats.helpers import connz_users, free_port, issuers, operator_mode_config, write_creds
+from tests.infra.nats.nats_server_process import NatsServerProcess
 from tests.simulator.helpers import (
     COMMAND_ID,
     ENCODING,

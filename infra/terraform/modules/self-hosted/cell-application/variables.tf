@@ -42,7 +42,7 @@ variable "target_revision" {
 variable "chart_path" {
   description = "The path of the umbrella chart in the repository."
   type        = string
-  default     = "deploy/charts/cell"
+  default     = "infra/charts/cell"
 }
 
 variable "values_files" {
