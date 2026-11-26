@@ -4,7 +4,7 @@
 > [🏠 Index](../README.md) · [◀️ Data models](02-data-models.md) · 📄 **Page 98 / 120** · [Engine and services ▶️](04-engine.md)
 <!-- /spec:nav-top -->
 
-**Status:** 🟢 Approved · **Updated:** 2026-11-18
+**Status:** 🟢 Approved · **Updated:** 2026-11-26
 
 > [!NOTE]
 > Where each kind of data lives, how Operators are kept apart, how long data is kept and how a cell recovers. Decisions T5 to T8, T36 and T37.
@@ -36,19 +36,19 @@
 
 ## <a id="postgresql"></a>🗄️ PostgreSQL and PostGIS
 
-- **One schema per service** (`missions`, `fleet`, `processing`, `evidence`, `notifier`); a service reads and writes only its own schema. Cross-service data comes through events.
+- **One schema per app** (`gateway`, `missions`, `fleet`, `processing`, `evidence`, `notifier`); an app reads and writes only its own schema. Cross-app data comes through events.
 - **Operator isolation:** every Operator-owned table has `operator_id`; row-level security policies compare it with the session setting `swarm.operator_id`, set by the service from the verified token on each transaction. A query that forgets the filter returns nothing instead of another Operator's rows ([📏 BR-008](../functional/business-rules/BR-008-operator-isolation.md)).
 - **Indexes:** B-tree on `(operator_id, id)` and on foreign keys; GiST on geometries (Geofences, routes, Fields, Prescription map zones, Defect positions); partial indexes on active states (`state IN ('planned','verified','flying')`).
 - **Large tables** (Defects, Notifications, Flight log entries outside TimescaleDB) are partitioned by month.
 - **Connections:** PgBouncer in transaction mode in front of each primary; services use an async client library (`asyncpg`) with small pools.
 - **Reads:** one or two streaming replicas per cell serve the Client portal, the Back office lists and the agents' read tools.
-- **Migrations:** Alembic per service, run by a pre-deploy step; expand then contract (never a breaking migration in one release).
+- **Migrations:** Alembic per app, in `backend/apps/<app>/migrations/`, applied by the argument-free script `uv run swarm-migrations-migrate` for every app or the one `SWARM_APP` names ([decision 108](../../research/interview.md)), run by a pre-deploy step from the app's own image; expand then contract (never a breaking migration in one release).
 
 ## <a id="repositories"></a>🗄️ Repositories
 
-**Every entity stored in PostgreSQL has its own repository** (decision T42), in the `storage/postgres/` module of the service that owns it, one class per file (AGENT.md), grouped in sub-packages of at most five files.
+**Every entity stored in PostgreSQL has exactly one repository** (decision T42, and [decision 109](../../research/interview.md): one class per entity per layer), in the storage layer `backend/swarm-storage`, in the folder of the domain that owns it (`swarm_storage/<domain>/`), one class per file (AGENT.md), grouped in sub-packages of at most five files. Only the service layer of the same domain uses it (AGENT.md).
 
-| Service | Repositories (`storage/postgres/…`) |
+| Domain | Repositories (`swarm_storage/<domain>/…`) |
 | --- | --- |
 | missions | `MissionRepository`, `SquadMemberRepository`, `GeofenceRepository`, `RouteRepository`, `ChoreographyRepository`, `FieldRepository`, `PrescriptionMapRepository`, `PatrolRouteRepository`, `SiteRepository`, `AlarmRepository`, `AuthorisationRepository`, `PreFlightCheckRepository`, `ReplanRepository`, `AcceptanceCriterionRepository`, `ScorecardRepository`, `WorkspaceRepository`, `PilotSettingsRepository` |
 | fleet | `DroneRepository`, `DroneModelRepository`, `PayloadRepository`, `BatteryRepository`, `DockRepository`, `FieldKitRepository`, `MaintenanceRecordRepository`, `CompatibilityTestRepository` |

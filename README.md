@@ -173,13 +173,18 @@ Each command installs one workspace: uv for Python (one `uv.lock`), Cargo for Ru
 
 ```bash
 uv run ruff check backend scripts tests
-uv run mypy backend/apps/gateway/src
-uv run pytest tests/swarm_gateway tests/swarm_api tests/swarm_service -n 2
+uv run mypy
 uv run pytest tests/conventions
-uv run mypy backend/libs/swarm-lifecycle/src backend/libs/swarm-catalog/src backend/libs/swarm-logging/src backend/libs/swarm-nats/src backend/libs/swarm-web/src
-uv run pytest tests/swarm_lifecycle tests/swarm_catalog tests/swarm_logging tests/swarm_nats tests/swarm_web
+uv run pytest tests/swarm_gateway tests/swarm_api tests/swarm_service -n 2
+uv run swarm-schemas-check
+uv run swarm-openapi-check
+uv run swarm-i18n-check
 pnpm turbo run build
 ```
+
+The `swarm-*-check` commands are argument-free scripts of [scripts/](scripts/README.md). Each app runs with its own
+console script, such as `uv run swarm-gateway-serve`, which reads `conf/app.yaml` in the folder `SWARM_APP_ROOT` names
+(the current one without it). [AGENT.md](AGENT.md#commands) lists every command.
 
 ### Provision a cell
 
@@ -282,18 +287,20 @@ Nobody commits or merges by hand. The repository needs, once, the secret `RELEAS
 
 | Path | Holds |
 | --- | --- |
-| [backend/apps/](backend/apps/) | The backend apps, one folder and one Docker image each, starting with the [gateway](backend/apps/gateway/) |
-| [backend/](backend/) | The kernel libs, the layer packages (models, storage, clients, service, api) and the apps |
-| [scripts/](scripts/) | The operations, run with `uv run` and taking no arguments: schemas, OpenAPI, migrations, message catalogues |
-| [frontend/apps/](frontend/apps/) | The front ends, one folder and one image each, with their Playwright tests, and [desktop/](frontend/apps/desktop/), the Tauri 2 shell that wraps Ground control and Mission studio |
-| [infra/terraform/](infra/terraform/README.md) | One module per building block, one root per cell |
+| [backend/](backend/README.md) | The kernel libraries, the layer packages (models, storage, clients, service, api) with a folder per domain, and the thin apps, one Docker image each, in [backend/apps/](backend/apps/) |
+| [scripts/](scripts/README.md) | The operations, run with `uv run` and taking no arguments: schemas, OpenAPI, migrations, message catalogues |
+| [frontend/apps/](frontend/apps/) | The front ends, one folder and one image each, and [desktop/](frontend/apps/desktop/), the Tauri 2 shell that wraps Ground control and Mission studio |
+| [frontend/packages/](frontend/packages/) | The shared TypeScript packages, a pnpm workspace |
+| [rust/](rust/) | The Cargo workspace: the Rust core of the hot path with its PyO3 bindings, the generated models and the synthetic Drones |
+| [qa/](qa/README.md) | The Playwright suite that runs against the real images |
+| [infra/](infra/) | Terraform ([infra/terraform/](infra/terraform/README.md)), the Helm charts, the environments, the images that are not an app, the dev-cell scripts and `infra/compose/e2e.yaml` |
 | [tests/](tests/) | Every Python test, mirroring the packages, and the convention tests of `backend/` and `scripts/` |
-| [docs/](docs/) | The specifications, the research and the tickets |
+| [docs/](docs/) | The specifications, the research, the tickets and the releases |
 
-The front-end workspace is `frontend/packages/`, a pnpm workspace: `frontend/packages/tokens` (`@swarm/tokens`) holds the CSS
-variables generated from the [visual identity](docs/specs/visual-identity.md), and `frontend/packages/ui` (`@swarm/ui`) the
-components and the frames of each part of Swarm. The desktop shell, `frontend/apps/desktop`, is built on Windows, macOS and
-Linux by `.github/workflows/desktop.yml`.
+`frontend/packages/tokens` (`@swarm/tokens`) holds the CSS variables generated from the
+[visual identity](docs/specs/visual-identity.md), and `frontend/packages/ui` (`@swarm/ui`) the components and the frames
+of each part of Swarm. The desktop shell, `frontend/apps/desktop`, is built on Windows, macOS and Linux by
+`.github/workflows/desktop.yml`.
 
 ## 🤝 How we build Swarm
 

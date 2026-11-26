@@ -35,8 +35,8 @@ Fifteen rules of [AGENT.md](AGENT.md) hold for people and agents alike, in `src/
   `StrEnum` member in `models/enums.py` or an `UPPER_CASE` `ClassVar`. Only log, exception and `print` messages,
   docstrings and the constants' own values are literal, and tests compare with the enums and constants (AGENT.md,
   Data and enums).
-- **All the enums of a module are in ONE `enums.py` at the root of its `models` module** (`src/<module>/models/enums.py`,
-  holding only enums, the one exception to one class per file), and **no enum value contains a hyphen**: values are
+- **All the enums of a module are in ONE `enums.py` at the root of its `models` module** (`swarm_models/enums.py`, or
+  `src/<module>/models/enums.py` in a kernel library, holding only enums, the one exception to one class per file), and **no enum value contains a hyphen**: values are
   lower snake case, `"not_started"` (AGENT.md, Data and enums).
 - **EVERY logical branch logs** (`if`, `elif`, `else`, each `case`, each `except`), in `src/` outside `models/`: an early
   return, a skip or a default at `DEBUG`, a raise at `ERROR` first. A conditional expression that chooses what the code
@@ -44,15 +44,16 @@ Fifteen rules of [AGENT.md](AGENT.md) hold for people and agents alike, in `src/
   logging system calls (formatters, handlers) stay silent (AGENT.md, Logging).
 - **The api layer holds ONLY endpoints.** FastAPI endpoints and their versioned routers (`/v1/...`), their `Depends`,
   the middlewares, the exception handlers and the `/v1/live` WebSocket. A command, a factory, a runnable, a bus handler,
-  the server runner or the app builder belongs to the service layer or the kernel (AGENT.md, Target layout).
+  the server runner or the app builder belongs to the service layer or the kernel (AGENT.md, Layout).
 - **NO command line in the product.** `backend/` and `scripts/` never import `argparse`, `click` or `typer`, never read
   `sys.argv`, and hold no `cli` or `commands` module: an app's `main()` reads its configuration. Only the harness and
-  CI keep command lines (AGENT.md, Target layout).
-- **The operations are scripts.** OpenAPI generation, migrations and the schema export are argument-free Python scripts
-  in `scripts/<area>/`, run with `uv run` (AGENT.md, Target layout).
+  CI keep command lines (AGENT.md, Layout).
+- **The operations are scripts.** OpenAPI generation, migrations, the schema export and the message check are
+  argument-free Python scripts in `scripts/src/swarm_scripts/<area>/`, run with `uv run swarm-<area>-<action>`
+  (AGENT.md, Layout).
 - **ONE class per entity per layer.** One `<Entity>Repository`, `<Entity>Client`, `<Entity>Service` or
   `<Entity>Router` per entity in its layer; classes that split one entity's work in a layer are merged. Factories and
-  exceptions are exempt (AGENT.md, Target layout).
+  exceptions are exempt (AGENT.md, Layout).
 
 
 ## The harness
