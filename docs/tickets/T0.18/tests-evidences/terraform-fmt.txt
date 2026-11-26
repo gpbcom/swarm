@@ -1,0 +1,4 @@
+$ terraform fmt -check -recursive deploy/terraform
+(cwd ., on the ticket's own files only)
+
+

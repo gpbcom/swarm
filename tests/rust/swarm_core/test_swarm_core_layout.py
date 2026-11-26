@@ -21,6 +21,7 @@ class TestSwarmCoreLayout:
         ("mavlink", "swarm-core-mavlink", "encode"),
     ]
     STUB_FUNCTIONS: ClassVar[List[str]] = ["safety_tick", "planner_plan", "mavlink_encode"]
+    STUB_CLASSES: ClassVar[List[str]] = ["LatestFrames", "DroneSample"]
     BINDING_DEPENDENCIES: ClassVar[List[str]] = [
         "pyo3",
         "swarm-core-safety",
@@ -132,3 +133,9 @@ class TestSwarmCoreLayout:
         assert isinstance(members, list)
         relative = self.PYTHON.relative_to(self.ROOT).as_posix()
         assert not any(fnmatch(relative, str(pattern)) for pattern in members)
+
+    @pytest.mark.parametrize("name", STUB_CLASSES)
+    def test_the_bindings_type_stub_declares_the_class(self, name: str) -> None:
+        stub = self.PYTHON / "swarm_core.pyi"
+        assert stub.is_file()
+        assert f"class {name}" in stub.read_text(encoding="utf-8")

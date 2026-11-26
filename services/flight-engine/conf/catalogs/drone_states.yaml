@@ -1,0 +1,7 @@
+# The state of a Drone for each MAVLink system_status: 3 is standby, 4 is active, 5 is critical, 6 is emergency.
+system_status_states:
+  3: ready
+  4: airborne
+  5: airborne
+  6: airborne
+default_state: grounded

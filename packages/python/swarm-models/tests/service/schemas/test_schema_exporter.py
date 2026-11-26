@@ -13,6 +13,7 @@ import pytest
 from swarm_models.models.commands.command import Command
 from swarm_models.models.events.actor import Actor
 from swarm_models.models.events.event import Event
+from swarm_models.models.live.live_subscription import LiveSubscription
 from swarm_models.models.operators.cell_assignment import CellAssignment
 from swarm_models.models.operators.operator import Operator
 from swarm_models.models.people.person import Person
@@ -39,6 +40,9 @@ class TestSchemaExporter:
         "Command",
         "CommandKind",
         "CommandLane",
+        "LiveSubscription",
+        "LiveOperation",
+        "LiveRate",
     )
     TELEMETRY_FIELDS = (
         "mission_id",
@@ -55,7 +59,7 @@ class TestSchemaExporter:
         "state",
     )
 
-    def test_the_models_are_the_nine_in_order(self) -> None:
+    def test_the_models_are_the_ten_in_order(self) -> None:
         assert SchemaExporter.MODELS == (
             Operator,
             CellAssignment,
@@ -66,6 +70,7 @@ class TestSchemaExporter:
             TelemetryFrame,
             SquadFrame,
             Command,
+            LiveSubscription,
         )
 
     def test_the_file_name_and_the_title_are_fixed(self) -> None:
@@ -88,7 +93,7 @@ class TestSchemaExporter:
         assert sorted(bundle.keys()) == ["$defs", "title"]
         assert bundle["title"] == "Swarm models"
 
-    def test_render_holds_the_fourteen_definitions(self, tmp_path: Path) -> None:
+    def test_render_holds_the_eighteen_definitions(self, tmp_path: Path) -> None:
         defs = json.loads(SchemaExporter(root=tmp_path).render())["$defs"]
         assert set(self.EXPECTED_DEFS) <= set(defs.keys())
 

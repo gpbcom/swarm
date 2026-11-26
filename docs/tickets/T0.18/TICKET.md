@@ -1,6 +1,6 @@
 # T0.18: Flight engine skeleton and live WebSocket
 
-**Status:** 🟡 Planned
+**Status:** ✅ Done
 
 ## Roadmap
 
