@@ -18,7 +18,7 @@ from fleet.models.config.exceptions import (
 )
 from fleet.models.config.fleet_config import FleetConfig
 from swarm_models.config.postgres.postgres_config import PostgresConfig
-from swarm_rest.models.config.rest_config import RestConfig
+from swarm_web.models.config.rest_config import RestConfig
 
 
 class TestFleetConfig:

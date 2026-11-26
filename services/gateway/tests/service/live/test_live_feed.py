@@ -16,9 +16,9 @@ from gateway.service.live.live_feed import LiveFeed
 from swarm_lifecycle.models.enums import RunnableStatus
 from swarm_models.enums import LiveOperation, LiveTopicKind
 from swarm_models.live.live_subscription import LiveSubscription
+from swarm_models.subjects.operator_subjects import OperatorSubjects
 from swarm_nats.clients.nats_connector import NatsConnector
 from swarm_nats.models.config.nats_client_config import NatsClientConfig
-from swarm_nats.models.subjects.operator_subjects import OperatorSubjects
 
 from swarm_live.models.config.live_session_config import LiveSessionConfig  # isort: skip
 from swarm_live.service.live_hub import LiveHub  # isort: skip

@@ -196,24 +196,40 @@ Its acceptance tests are in `tests/simulator/`. They need cargo and `nats-server
 by `docker build -f infra/images/px4-sitl/Dockerfile -t swarm-px4-sitl:local .`. They skip without them.
 
 The kernel libraries of `backend/libs/` are `swarm-lifecycle` (`swarm_lifecycle`), with Runnable, AsyncRunnable and
-the abstract factories; `swarm-logging` (`swarm_logging`), with the logging configuration; and `swarm-catalog`
-(`swarm_catalog`), with YamlCatalog. Their tests are in `tests/swarm_<module>/`. The packages still in
-`packages/python/`, until the backend split moves them, are `swarm-i18n` (`swarm_i18n`), the Babel catalogues of Python messages in English,
-French, German and Spanish, whose catalogues live in `src/swarm_i18n/locales/` (`swarm.pot` and
-`<en|fr|de|es>/LC_MESSAGES/swarm.po`), with `Translator`, which gives a message in a person's language (swarm-models
-now holds `Language` and `Person.language`); and `swarm-nats` (`swarm_nats`), the shared async NATS client: the connector,
-request-reply with deadlines and idempotency keys, the JetStream admin, the event publisher, and the AsyncRunnable
-responder and durable consumer with their factories, together with the issuers of the NATS operator, of the per-Operator
-accounts and of the credentials (service, edge, simulated, system). Its NATS tests need a nats-server binary on PATH and
-skip without it, and CI installs a pinned one. Inside a package, Pydantic models, enums and exceptions sit in
-`src/<module>/models/`, as in a service.
+the abstract factories; `swarm-logging` (`swarm_logging`), with the logging configuration; `swarm-catalog`
+(`swarm_catalog`), with YamlCatalog; `swarm-nats` (`swarm_nats`), the NATS connector with its configuration, the
+message headers and the bus errors; and `swarm-web` (`swarm_web`), the FastAPI app builder, the uvicorn server runnable,
+`ETag` and `If-Match`, with the REST configuration and the REST errors. Their tests are in `tests/swarm_<module>/`.
 
-The packages `swarm-storage` (`swarm_storage`) and `swarm-rest` (`swarm_rest`) were added by ticket T0.12.
-`swarm-storage`, now the storage layer `backend/swarm-storage`, holds in `swarm_storage/shared/postgres/` the PostgreSQL pool, the unit of work that sets `swarm.operator_id` on each transaction for
-row-level security, the `PostgresRepository` base and the outbox repository, the row-level security and outbox DDL,
-and the Alembic migrator. `swarm-rest` holds the REST conventions of every `/v1` app: `problem+json` errors, the
-`Idempotency-Key` middleware, `ETag` and `If-Match`, the app builder, the uvicorn server runnable, the OpenAPI export
-command, and the runner that drives an `AsyncRunnable` from a console script. The services `gateway`, `missions` and
+The rest of the shared NATS and REST code sits in the layer packages since the backend split (phase 5c):
+
+- the JetStream admin, the event publisher, request-reply with deadlines and idempotency keys, and the account
+  resolver client are in `swarm_clients/shared/nats/`;
+- the AsyncRunnable responder and durable consumer, with their factories, are in `swarm_service/shared/bus/`, and
+  the issuers of the NATS operator, of the per-Operator accounts and of the credentials (service, edge, simulated,
+  system) in `swarm_service/shared/accounts/`;
+- the `problem+json` handlers are in `swarm_api/handlers/` and the `Idempotency-Key` middleware in
+  `swarm_api/middleware/`, with its service in `swarm_service/shared/idempotency/` and its store in
+  `swarm_storage/shared/idempotency/`;
+- their models are in `swarm_models`: `accounts/`, `streams/`, `subjects/`, `config/nats/`, `rest/problems/` and
+  `rest/idempotency/`, and their enums in `swarm_models/enums.py`.
+
+The NATS tests need a nats-server binary on PATH and skip without it, and CI installs a pinned one; their fixtures
+are in `tests/conftest.py`. A service's REST app builds its application with `swarm_web`'s `RestAppBuilder`, then
+installs the problem handlers and the idempotency middleware of `swarm_api`.
+
+The packages still in `packages/python/`, until the backend split moves them, are `swarm-i18n` (`swarm_i18n`), the
+Babel catalogues of Python messages in English, French, German and Spanish, whose catalogues live in
+`src/swarm_i18n/locales/` (`swarm.pot` and `<en|fr|de|es>/LC_MESSAGES/swarm.po`), with `Translator`, which gives a
+message in a person's language (swarm-models now holds `Language` and `Person.language`); `swarm-live`, below; and
+`swarm-rest` (`swarm_rest`), which keeps only the OpenAPI export command and the runner that drives an `AsyncRunnable`
+from a console script, until `scripts/openapi` and the apps' `main()` replace them. Inside a package, Pydantic models,
+enums and exceptions sit in `src/<module>/models/`, as in a service.
+
+The package `swarm-storage` (`swarm_storage`) was added by ticket T0.12. `swarm-storage`, now the storage layer
+`backend/swarm-storage`, holds in `swarm_storage/shared/postgres/` the PostgreSQL pool, the unit of work that sets
+`swarm.operator_id` on each transaction for row-level security, the `PostgresRepository` base and the outbox
+repository, the row-level security and outbox DDL, and the Alembic migrator. The services `gateway`, `missions` and
 `fleet` each have their own PostgreSQL schema and their Alembic migrations in `services/<service>/migrations/`, outside
 `src/` because Alembic needs module-level functions.
 

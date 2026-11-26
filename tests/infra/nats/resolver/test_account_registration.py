@@ -9,8 +9,8 @@ from typing import Iterator, Tuple
 import pytest
 
 # First-party imports
-from swarm_nats.models.accounts.issued_account import IssuedAccount
-from swarm_nats.models.enums import CredentialKind
+from swarm_models.accounts.issued_account import IssuedAccount
+from swarm_models.enums import CredentialKind
 from tests.infra.nats.helpers import (
     OPERATOR_A_ID,
     connects,

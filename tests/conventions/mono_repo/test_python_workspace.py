@@ -17,14 +17,14 @@ from tests.conventions.mono_repo.helpers import SERVICE_LAYERS, repo_root
 class TestPythonWorkspace:
     NEW_SERVICES: ClassVar[List[str]] = ["missions", "fleet"]
     ALL_SERVICES: ClassVar[List[str]] = ["gateway", "missions", "fleet"]
-    NEW_PACKAGES: ClassVar[List[str]] = ["swarm-storage", "swarm-rest"]
+    NEW_PACKAGES: ClassVar[List[str]] = ["swarm-storage", "swarm-rest", "swarm-web", "swarm-nats"]
     SCRIPT_ENTRIES: ClassVar[List[str]] = ["serve", "openapi", "migrate"]
     LAYERS: ClassVar[List[str]] = ["api", "service", "storage", "clients", "models"]
     GATEWAY_SCRIPT: ClassVar[str] = "gateway.api.cli.main:main"
     STORAGE_DEPENDENCIES: ClassVar[List[str]] = ["asyncpg", "alembic", "sqlalchemy", "swarm-models"]
-    REST_DEPENDENCIES: ClassVar[List[str]] = ["fastapi", "uvicorn"]
+    WEB_DEPENDENCIES: ClassVar[List[str]] = ["fastapi", "uvicorn"]
     SHARED_DEPENDENCIES: ClassVar[List[str]] = ["swarm-storage", "swarm-rest"]
-    FIRST_PARTY: ClassVar[List[str]] = ["missions", "fleet", "swarm_storage", "swarm_rest"]
+    FIRST_PARTY: ClassVar[List[str]] = ["missions", "fleet", "swarm_storage", "swarm_rest", "swarm_web"]
     TEST_PATHS: ClassVar[List[str]] = [
         "services/missions/tests",
         "services/fleet/tests",
@@ -35,6 +35,8 @@ class TestPythonWorkspace:
         "services/fleet/src",
         "backend/swarm-storage/src",
         "packages/python/swarm-rest/src",
+        "backend/libs/swarm-web/src",
+        "backend/libs/swarm-nats/src",
     ]
     DISTRIBUTION_SEPARATORS: ClassVar[str] = r"[\[<>=!~;@ ]"
 
@@ -159,9 +161,9 @@ class TestPythonWorkspace:
     def test_swarm_storage_depends_on(self, dependency: str) -> None:
         assert dependency in self.dependencies_of(self.package_file("swarm-storage"))
 
-    @pytest.mark.parametrize("dependency", REST_DEPENDENCIES)
-    def test_swarm_rest_depends_on(self, dependency: str) -> None:
-        assert dependency in self.dependencies_of(self.package_file("swarm-rest"))
+    @pytest.mark.parametrize("dependency", WEB_DEPENDENCIES)
+    def test_swarm_web_depends_on(self, dependency: str) -> None:
+        assert dependency in self.dependencies_of(self.package_file("swarm-web"))
 
     @pytest.mark.parametrize("service", ALL_SERVICES)
     @pytest.mark.parametrize("dependency", SHARED_DEPENDENCIES)

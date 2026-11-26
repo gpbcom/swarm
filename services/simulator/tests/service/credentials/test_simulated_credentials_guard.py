@@ -15,13 +15,13 @@ from simulator.models.credentials.exceptions import (
     SESimulatedCredentialsUnreadableError,
 )
 from simulator.service.credentials.simulated_credentials_guard import SimulatedCredentialsGuard
-from swarm_nats.models.accounts.issued_credential import IssuedCredential
-from swarm_nats.models.enums import CredentialKind
-from swarm_nats.service.accounts.account_issuer import AccountIssuer
-from swarm_nats.service.accounts.credential_issuer import CredentialIssuer
-from swarm_nats.service.accounts.nats_jwt_signer import NatsJwtSigner
-from swarm_nats.service.accounts.nkey_factory import NkeyFactory
-from swarm_nats.service.accounts.operator_issuer import OperatorIssuer
+from swarm_models.accounts.issued_credential import IssuedCredential
+from swarm_models.enums import CredentialKind
+from swarm_service.shared.accounts.account_issuer import AccountIssuer
+from swarm_service.shared.accounts.credential_issuer import CredentialIssuer
+from swarm_service.shared.accounts.nats_jwt_signer import NatsJwtSigner
+from swarm_service.shared.accounts.nkey_factory import NkeyFactory
+from swarm_service.shared.accounts.operator_issuer import OperatorIssuer
 
 
 class TestSimulatedCredentialsGuard:

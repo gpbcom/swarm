@@ -1,0 +1,17 @@
+[project]
+name = "swarm-nats"
+version = "0.1.0"
+description = "The NATS kernel of Swarm: the connector, its configuration, the message headers and the bus errors."
+readme = "../../../README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "nats-py[nkeys]>=2.11.0",
+    "pydantic>=2.14.3",
+]
+
+[tool.uv.build-backend]
+module-name = "swarm_nats"
+
+[build-system]
+requires = ["uv_build>=0.12.21,<0.13.0"]
+build-backend = "uv_build"

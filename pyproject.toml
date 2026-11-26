@@ -29,7 +29,7 @@ ignore = ["UP006", "UP007", "UP035", "UP045"]
 # Tests are written before the code they import (TKT-4): pinning ``tests`` as first-party keeps the import order the
 # same whether or not the imported module exists yet. The code of the repository is first-party, so that the AGENT.md
 # import groups match ruff.
-known-first-party = ["tests", "gateway", "missions", "fleet", "simulator", "flight_engine", "swarm_live", "swarm_catalog", "swarm_i18n", "swarm_lifecycle", "swarm_logging", "swarm_models", "swarm_nats", "swarm_rest", "swarm_storage", "swarm_service", "swarm_clients", "swarm_api", "swarm_scripts"]
+known-first-party = ["tests", "gateway", "missions", "fleet", "simulator", "flight_engine", "swarm_live", "swarm_catalog", "swarm_i18n", "swarm_lifecycle", "swarm_logging", "swarm_models", "swarm_nats", "swarm_rest", "swarm_web", "swarm_storage", "swarm_service", "swarm_clients", "swarm_api", "swarm_scripts"]
 
 [tool.ruff.format]
 quote-style = "double"
@@ -45,7 +45,6 @@ testpaths = [
     "services/simulator/tests",
     "services/flight-engine/tests",
     "packages/python/swarm-i18n/tests",
-    "packages/python/swarm-nats/tests",
     "packages/python/swarm-rest/tests",
     "packages/python/swarm-live/tests",
 ]
@@ -62,7 +61,8 @@ files = [
     "backend/libs/swarm-catalog/src",
     "backend/libs/swarm-logging/src",
     "backend/swarm-models/src",
-    "packages/python/swarm-nats/src",
+    "backend/libs/swarm-nats/src",
+    "backend/libs/swarm-web/src",
     "backend/swarm-storage/src",
     "backend/swarm-api/src",
     "scripts/src",
@@ -83,7 +83,8 @@ mypy_path = [
     "backend/libs/swarm-catalog/src",
     "backend/libs/swarm-logging/src",
     "backend/swarm-models/src",
-    "packages/python/swarm-nats/src",
+    "backend/libs/swarm-nats/src",
+    "backend/libs/swarm-web/src",
     "backend/swarm-storage/src",
     "backend/swarm-api/src",
     "scripts/src",

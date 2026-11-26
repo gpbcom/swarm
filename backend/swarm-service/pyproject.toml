@@ -4,11 +4,23 @@ version = "0.1.0"
 description = "The service layer of Swarm: the business rules and the runnables, a folder per domain."
 readme = "../../README.md"
 requires-python = ">=3.12"
-dependencies = ["pydantic>=2.14.3", "swarm-models", "swarm-storage"]
+dependencies = [
+    "nats-py>=2.11.0",
+    "nkeys>=0.2.1",
+    "pydantic>=2.14.3",
+    "swarm-lifecycle",
+    "swarm-models",
+    "swarm-nats",
+    "swarm-storage",
+    "swarm-web",
+]
 
 [tool.uv.sources]
+swarm-lifecycle = { workspace = true }
 swarm-models = { workspace = true }
+swarm-nats = { workspace = true }
 swarm-storage = { workspace = true }
+swarm-web = { workspace = true }
 
 [tool.uv.build-backend]
 module-name = "swarm_service"

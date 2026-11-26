@@ -10,10 +10,10 @@ import nats
 import pytest
 
 # First-party imports
-from swarm_nats.models.accounts.issued_credential import IssuedCredential
-from swarm_nats.models.enums import CredentialKind
-from swarm_nats.models.subjects.operator_subjects import OperatorSubjects
-from swarm_nats.service.accounts.nats_jwt_signer import NatsJwtSigner
+from swarm_models.accounts.issued_credential import IssuedCredential
+from swarm_models.enums import CredentialKind
+from swarm_models.subjects.operator_subjects import OperatorSubjects
+from swarm_service.shared.accounts.nats_jwt_signer import NatsJwtSigner
 from tests.infra.nats.helpers import (
     OPERATOR_A_ID,
     OPERATOR_B_ID,

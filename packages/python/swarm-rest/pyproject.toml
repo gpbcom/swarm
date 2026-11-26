@@ -1,13 +1,11 @@
 [project]
 name = "swarm-rest"
 version = "0.1.0"
-description = "The shared REST layer of Swarm services: FastAPI application, server and errors."
+description = "The OpenAPI export command and the AsyncRunnable runner of the services, until scripts/openapi and the apps' main() replace them."
 readme = "../../../README.md"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.164.0",
-    "uvicorn>=0.32.0",
-    "pydantic>=2.14.3",
     "swarm-lifecycle",
 ]
 

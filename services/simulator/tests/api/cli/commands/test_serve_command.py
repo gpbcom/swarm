@@ -24,13 +24,13 @@ from simulator.api.factories.serve.serve_command_factory import ServeCommandFact
 from simulator.models.commands.command_reply import CommandReply
 from simulator.models.config.simulator_config import SimulatorConfig
 from simulator.models.enums import CommandVerdict, SimulatorCommandName
+from swarm_clients.shared.nats.nats_requester import NatsRequester
 from swarm_lifecycle.runnables.runnable import Runnable
 from swarm_models.commands.command import Command
 from swarm_models.commands.enums import CommandKind, CommandLane
-from swarm_nats.clients.nats_requester import NatsRequester
+from swarm_models.subjects.operator_subjects import OperatorSubjects
 from swarm_nats.models.bus.exceptions import SENatsNoResponderError, SENatsRequestDeadlineExceededError
 from swarm_nats.models.config.nats_client_config import NatsClientConfig
-from swarm_nats.models.subjects.operator_subjects import OperatorSubjects
 from tests.infra.nats.helpers import connz_users
 
 Cell = Tuple[str, int, Path, Path]

@@ -11,7 +11,7 @@ from fastapi.testclient import TestClient
 # First-party imports
 from fleet.api.rest.fleet_rest_app import FleetRestApp
 from fleet.models.config.fleet_config import FleetConfig
-from swarm_rest.models.problems.problem import Problem
+from swarm_models.rest.problems.problem import Problem
 
 
 class TestFleetRestApp:

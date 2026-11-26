@@ -13,7 +13,7 @@ import pytest
 # First-party imports
 from services.simulator.tests.helpers import OPERATOR_ID
 from simulator.models.registry.registered_drone import RegisteredDrone
-from swarm_nats.models.enums import CredentialKind
+from swarm_models.enums import CredentialKind
 from tests.infra.nats.helpers import free_port, issuers, operator_mode_config, write_creds
 from tests.infra.nats.nats_server_process import NatsServerProcess
 

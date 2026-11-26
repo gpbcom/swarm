@@ -251,8 +251,8 @@ Then:
 > The seeds are private keys. Never write a seed in the repository, in a variables file of the repository, in a chart
 > value, in a log or in a ticket. Keep them in the vault only. Anyone with a seed can sign accounts for the Operator.
 
-The Operator accounts are not in the charts. At run time, `swarm_nats` issues each account with `AccountIssuer`, and
-pushes it to the servers with `AccountResolverClient`.
+The Operator accounts are not in the charts. At run time, `swarm_service.shared.accounts` issues each account with `AccountIssuer`,
+and `swarm_clients.shared.nats` pushes it to the servers with `AccountResolverClient`.
 
 ## Leaf node of an edge
 

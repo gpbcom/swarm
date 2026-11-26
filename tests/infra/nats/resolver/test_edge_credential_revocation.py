@@ -9,7 +9,7 @@ from typing import Iterator, Tuple
 import pytest
 
 # First-party imports
-from swarm_nats.models.enums import CredentialKind
+from swarm_models.enums import CredentialKind
 from tests.infra.nats.helpers import (
     OPERATOR_A_ID,
     becomes_refused,

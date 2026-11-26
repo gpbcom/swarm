@@ -18,8 +18,11 @@ COPY backend/libs/swarm-catalog/pyproject.toml backend/libs/swarm-catalog/pyproj
 COPY backend/libs/swarm-lifecycle/pyproject.toml backend/libs/swarm-lifecycle/pyproject.toml
 COPY backend/libs/swarm-logging/pyproject.toml backend/libs/swarm-logging/pyproject.toml
 COPY backend/swarm-models/pyproject.toml backend/swarm-models/pyproject.toml
-COPY packages/python/swarm-nats/pyproject.toml packages/python/swarm-nats/pyproject.toml
+COPY backend/libs/swarm-nats/pyproject.toml backend/libs/swarm-nats/pyproject.toml
+COPY backend/libs/swarm-web/pyproject.toml backend/libs/swarm-web/pyproject.toml
 COPY backend/swarm-storage/pyproject.toml backend/swarm-storage/pyproject.toml
+COPY backend/swarm-service/pyproject.toml backend/swarm-service/pyproject.toml
+COPY backend/swarm-api/pyproject.toml backend/swarm-api/pyproject.toml
 COPY packages/python/swarm-rest/pyproject.toml packages/python/swarm-rest/pyproject.toml
 
 RUN --mount=type=cache,target=/root/.cache/uv \

@@ -15,15 +15,15 @@ import nats
 from nats.errors import Error as NatsError
 
 # First-party imports
-from swarm_nats.clients.account_resolver_client import AccountResolverClient
-from swarm_nats.models.accounts.issued_account import IssuedAccount
-from swarm_nats.models.accounts.issued_credential import IssuedCredential
-from swarm_nats.models.accounts.issued_operator import IssuedOperator
-from swarm_nats.service.accounts.account_issuer import AccountIssuer
-from swarm_nats.service.accounts.credential_issuer import CredentialIssuer
-from swarm_nats.service.accounts.nats_jwt_signer import NatsJwtSigner
-from swarm_nats.service.accounts.nkey_factory import NkeyFactory
-from swarm_nats.service.accounts.operator_issuer import OperatorIssuer
+from swarm_clients.shared.nats.account_resolver_client import AccountResolverClient
+from swarm_models.accounts.issued_account import IssuedAccount
+from swarm_models.accounts.issued_credential import IssuedCredential
+from swarm_models.accounts.issued_operator import IssuedOperator
+from swarm_service.shared.accounts.account_issuer import AccountIssuer
+from swarm_service.shared.accounts.credential_issuer import CredentialIssuer
+from swarm_service.shared.accounts.nats_jwt_signer import NatsJwtSigner
+from swarm_service.shared.accounts.nkey_factory import NkeyFactory
+from swarm_service.shared.accounts.operator_issuer import OperatorIssuer
 
 OPERATOR_A_ID = UUID("0190a5b2-7c3e-7d4f-8a1b-2c3d4e5f6a7b")
 OPERATOR_B_ID = UUID("0190a5b2-7c3e-7d4f-8a1b-2c3d4e5f6a7c")

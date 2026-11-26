@@ -13,7 +13,7 @@ from nats.errors import Error as NatsError
 from flight_engine.clients.leaf.frame_sink import FrameSink
 from flight_engine.models.clients.exceptions import SESquadFramePublishError
 from swarm_models.enums import LiveTopicKind
-from swarm_nats.models.subjects.operator_subjects import OperatorSubjects
+from swarm_models.subjects.operator_subjects import OperatorSubjects
 
 
 class SquadFramePublisher(FrameSink):
