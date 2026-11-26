@@ -11,18 +11,9 @@ import pytest
 
 class TestServiceImages:
     ROOT: ClassVar[Path] = Path(__file__).resolve().parents[3]
-    SERVICES: ClassVar[List[Path]] = sorted(
-        path
-        for path in (Path(__file__).resolve().parents[3] / "services").iterdir()
-        if path.is_dir() and not path.name.startswith((".", "_"))
-    )
     DOCKERFILES: ClassVar[List[Path]] = sorted(
-        [*(Path(__file__).resolve().parents[3] / "services").glob("*/Dockerfile")]
-        + [*(Path(__file__).resolve().parents[3] / "backend" / "apps").glob("*/Dockerfile")]
+        [*(Path(__file__).resolve().parents[3] / "backend" / "apps").glob("*/Dockerfile")]
         + [*(Path(__file__).resolve().parents[3] / "frontends").glob("*/Dockerfile")]
-    )
-    SERVICE_DOCKERFILES: ClassVar[List[Path]] = sorted(
-        (Path(__file__).resolve().parents[3] / "services").glob("*/Dockerfile")
     )
     APPS: ClassVar[List[Path]] = sorted(
         path for path in (Path(__file__).resolve().parents[3] / "backend" / "apps").iterdir() if path.is_dir()
@@ -41,7 +32,6 @@ class TestServiceImages:
     ]
     MIGRATIONS_SCRIPT: ClassVar[str] = "--package swarm-scripts"
     ENV: ClassVar[str] = "ENV"
-    HOME_KEY: ClassVar[str] = "SWARM_{service}_HOME"
     COPY_FROM_BUILD: ClassVar[str] = "--from=build"
     CONF_SUFFIX: ClassVar[str] = "/conf"
     DOCKERIGNORE: ClassVar[Path] = ROOT / ".dockerignore"
@@ -91,14 +81,6 @@ class TestServiceImages:
                 return words[-1][: -len(self.CONF_SUFFIX)]
         return None
 
-    @pytest.mark.parametrize("dockerfile", SERVICE_DOCKERFILES, ids=lambda path: str(path.parent.name))
-    def test_the_runtime_stage_names_the_folder_its_conf_is_copied_to(self, dockerfile: Path) -> None:
-        destination = self._conf_destination(dockerfile)
-        if destination is None:
-            pytest.skip("This image does not copy its conf folder from the build stage.")
-        key = self.HOME_KEY.format(service=dockerfile.parent.name.upper().replace("-", "_"))
-        assert (key, destination) in self._env_entries(dockerfile)
-
     @pytest.mark.parametrize("dockerfile", APP_DOCKERFILES, ids=lambda path: str(path.parent.name))
     def test_an_app_image_names_its_app_and_the_folder_its_conf_is_copied_to(self, dockerfile: Path) -> None:
         destination = self._conf_destination(dockerfile)
@@ -121,10 +103,6 @@ class TestServiceImages:
         assert f"backend/apps/{dockerfile.parent.name}/pyproject.toml" in sources
         assert all(f"{layer}/pyproject.toml" in sources for layer in self.APP_LAYERS)
         assert self.MIGRATIONS_SCRIPT in text
-
-    @pytest.mark.parametrize("service", SERVICES, ids=lambda path: path.name)
-    def test_every_service_has_a_dockerfile(self, service: Path) -> None:
-        assert (service / "Dockerfile").is_file()
 
     @pytest.mark.parametrize("dockerfile", DOCKERFILES, ids=lambda path: str(path.parent.name))
     def test_the_dockerfile_is_multi_stage(self, dockerfile: Path) -> None:
@@ -153,13 +131,8 @@ class TestServiceImages:
         stage = self._final_stage(dockerfile)
         assert self._instructions(stage, self.ENTRYPOINT) or self._instructions(stage, self.CMD)
 
-    @pytest.mark.parametrize("dockerfile", DOCKERFILES, ids=lambda path: str(path.parent.name))
-    def test_the_build_context_is_the_repository_root(self, dockerfile: Path) -> None:
-        if dockerfile.parents[1].name != self.ROOT.joinpath("services").name:
-            pytest.skip("Only service Dockerfiles are checked.")
-        sources = self._copy_sources(dockerfile)
-        assert self.LOCK_FILE in sources
-        assert any(source.startswith(f"services/{dockerfile.parent.name}") for source in sources)
+    def test_there_is_no_services_folder_left(self) -> None:
+        assert not (self.ROOT / "services").exists()
 
     def test_the_gateway_runs_swarm_gateway(self) -> None:
         stage = self._final_stage(self.GATEWAY)

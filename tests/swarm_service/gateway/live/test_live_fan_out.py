@@ -15,8 +15,7 @@ from swarm_models.enums import LiveOperation, LiveTopicKind
 from swarm_models.live.live_subscription import LiveSubscription
 from swarm_models.subjects.operator_subjects import OperatorSubjects
 from swarm_service.gateway.live.live_fan_out import LiveFanOut
-
-from swarm_live.service.live_hub import LiveHub  # isort: skip
+from swarm_service.shared.live.hub.live_hub import LiveHub
 
 
 class TestLiveFanOut:

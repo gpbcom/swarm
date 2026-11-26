@@ -168,8 +168,79 @@ class AppName(StrEnum):
         GATEWAY: The gateway, ``backend/apps/gateway``.
         FLEET: The fleet service, ``backend/apps/fleet``.
         MISSIONS: The missions service, ``backend/apps/missions``.
+        SIMULATOR: The simulator, ``backend/apps/simulator``.
+        FLIGHT_ENGINE: The flight engine of an edge, ``backend/apps/flight-engine``: a value has no hyphen, so the
+            folder writes its underscore as a hyphen.
     """
 
     GATEWAY = "gateway"
     FLEET = "fleet"
     MISSIONS = "missions"
+    SIMULATOR = "simulator"
+    FLIGHT_ENGINE = "flight_engine"
+
+
+@unique
+class SimulatedDroneKind(StrEnum):
+    """The kinds of simulated drone.
+
+    Attributes:
+        SYNTHETIC: A drone that a built-in program flies.
+        PX4_SITL: A PX4 software-in-the-loop drone.
+    """
+
+    SYNTHETIC = "synthetic"
+    PX4_SITL = "px4_sitl"
+
+
+@unique
+class FlightLogEntryKind(StrEnum):
+    """The kinds of entry of a flight log.
+
+    Attributes:
+        ROUTE_UPLOADED: A route was uploaded to the drone.
+        ARMED: The drone was armed.
+        ROUTE_STARTED: The drone started its route.
+        WAYPOINT_REACHED: The drone reached a waypoint.
+        ROUTE_COMPLETED: The drone completed its route.
+        ROUTE_FAILED: The route failed.
+        COMMAND_ACCEPTED: A command was accepted.
+        COMMAND_REFUSED: A command was refused.
+    """
+
+    ROUTE_UPLOADED = "route_uploaded"
+    ARMED = "armed"
+    ROUTE_STARTED = "route_started"
+    WAYPOINT_REACHED = "waypoint_reached"
+    ROUTE_COMPLETED = "route_completed"
+    ROUTE_FAILED = "route_failed"
+    COMMAND_ACCEPTED = "command_accepted"
+    COMMAND_REFUSED = "command_refused"
+
+
+@unique
+class CommandVerdict(StrEnum):
+    """The verdict on a command.
+
+    Attributes:
+        ACCEPTED: The drone accepted the command.
+        REFUSED: The command was refused.
+    """
+
+    ACCEPTED = "accepted"
+    REFUSED = "refused"
+
+
+@unique
+class MessageProblem(StrEnum):
+    """What is wrong with a message of a catalogue.
+
+    Attributes:
+        MISSING (str): The message has no entry in the catalogue of the language.
+        EMPTY (str): The entry exists but its translation is empty.
+        FUZZY (str): The entry is marked fuzzy, so its translation is not reviewed.
+    """
+
+    MISSING = "missing"
+    EMPTY = "empty"
+    FUZZY = "fuzzy"

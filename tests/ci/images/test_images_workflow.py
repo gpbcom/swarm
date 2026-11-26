@@ -194,6 +194,11 @@ class TestImagesWorkflow:
         assert "infra/compose/e2e.yaml" in " ".join(self.runs("e2e"))
         assert "SWARM_IMAGE_TAG" in self.job_text("e2e")
 
+    def test_e2e_builds_a_missing_image_from_the_folder_of_its_app_or_front_end(self) -> None:
+        run = next(run for run in self.runs("e2e") if "docker buildx build" in run)
+        assert 'ls -d "backend/apps/${name}" "frontend/apps/${name}"' in run
+        assert "services/" not in run
+
     def test_e2e_runs_playwright_through_pnpm(self) -> None:
         runs = [run for run in self.runs("e2e") if "pnpm" in run and "./qa/e2e" in run]
         assert any("e2e" in run.split("./qa/e2e")[1] for run in runs)

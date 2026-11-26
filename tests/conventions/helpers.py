@@ -13,50 +13,6 @@ def repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
-def services_root() -> Path:
-    """Return the folder holding the services to check.
-
-    The variable ``SWARM_CONVENTIONS_SERVICES_ROOT`` overrides the default ``services/`` folder.
-    """
-    override = os.environ.get("SWARM_CONVENTIONS_SERVICES_ROOT")
-    if override:
-        return Path(override)
-    return repo_root() / "services"
-
-
-def packages_root() -> Path:
-    """Return the folder holding the shared Python packages to check.
-
-    The variable ``SWARM_CONVENTIONS_PACKAGES_ROOT`` overrides the default ``packages/python/`` folder.
-    """
-    override = os.environ.get("SWARM_CONVENTIONS_PACKAGES_ROOT")
-    if override:
-        return Path(override)
-    return repo_root() / "packages" / "python"
-
-
-def libs_root() -> Path:
-    """Return the folder holding the kernel libraries of the target layout.
-
-    The variable ``SWARM_CONVENTIONS_LIBS_ROOT`` overrides the default ``backend/libs/`` folder.
-    """
-    override = os.environ.get("SWARM_CONVENTIONS_LIBS_ROOT")
-    if override:
-        return Path(override)
-    return repo_root() / "backend" / "libs"
-
-
-def layers_root() -> Path:
-    """Return the folder holding the layer packages of the target layout.
-
-    The variable ``SWARM_CONVENTIONS_LAYERS_ROOT`` overrides the default ``backend/`` folder.
-    """
-    override = os.environ.get("SWARM_CONVENTIONS_LAYERS_ROOT")
-    if override:
-        return Path(override)
-    return repo_root() / "backend"
-
-
 def write_files(root: Path, files: Dict[str, str]) -> None:
     """Write each relative POSIX path of ``files`` under ``root`` with its content."""
     for relative, content in files.items():
@@ -65,16 +21,18 @@ def write_files(root: Path, files: Dict[str, str]) -> None:
         target.write_text(content, encoding="utf-8")
 
 
-def run_convention_tests(services_root: Path) -> subprocess.CompletedProcess[str]:
-    """Run the convention tests against the services found under ``services_root``."""
+def run_convention_tests(root: Path) -> subprocess.CompletedProcess[str]:
+    """Run the code convention tests of the backend against the packages found under the repository ``root``."""
     env = os.environ.copy()
-    env["SWARM_CONVENTIONS_SERVICES_ROOT"] = str(services_root)
+    env["SWARM_CONVENTIONS_BACKEND_ROOT"] = str(root)
     return subprocess.run(
         [
             sys.executable,
             "-m",
             "pytest",
-            "tests/conventions/services/test_service_conventions.py",
+            "tests/conventions/backend/test_backend_conventions.py",
+            "-k",
+            "test_every_code_rule_holds_for_every_package",
             "-q",
             "-p",
             "no:cacheprovider",

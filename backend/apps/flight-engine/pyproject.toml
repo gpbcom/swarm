@@ -1,0 +1,32 @@
+[project]
+name = "swarm-flight-engine"
+version = "0.1.0"
+description = "The Swarm flight engine app: its main() reads conf/app.yaml, flies the Missions of its edge and serves their live socket."
+readme = "../../../README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "swarm-api",
+    "swarm-logging",
+    "swarm-models",
+    "swarm-web",
+    "uvloop>=0.21.0",
+]
+
+[project.scripts]
+swarm-flight-engine-serve = "swarm_flight_engine.main:main"
+
+[tool.swarm]
+domains = ["flight"]
+
+[tool.uv.build-backend]
+module-name = "swarm_flight_engine"
+
+[tool.uv.sources]
+swarm-api = { workspace = true }
+swarm-logging = { workspace = true }
+swarm-models = { workspace = true }
+swarm-web = { workspace = true }
+
+[build-system]
+requires = ["uv_build>=0.12.21,<0.13.0"]
+build-backend = "uv_build"

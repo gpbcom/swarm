@@ -1,0 +1,45 @@
+# The configuration of the simulator app, read from the folder SWARM_APP_ROOT names, with every default written out.
+# Every relative path is read in that folder.
+# The deployment gives the three values that have no default:
+#   operator_id: the Operator the simulated squad belongs to, a UUID version 7.
+#   nats.credentials_path: a credentials file of kind simulated.
+#   responder.subject: op.<operator_id>.mission.*.command
+operator_id: null
+flight_log_path: data/flight_log.sqlite3
+rest:
+  host: 0.0.0.0
+  port: 8000
+  status_interval_s: 5.0
+  idempotency_ttl_s: 86400.0
+  idempotency_max_entries: 10000
+nats:
+  servers:
+    - nats://127.0.0.1:4222
+  name: swarm
+  credentials_path: null
+  connect_timeout_s: 2.0
+  reconnect_wait_s: 2.0
+  request_deadline_s: 5.0
+responder:
+  subject: null
+  queue_group: simulator
+  idempotency_bucket: idempotency
+  idempotency_ttl_s: 86400.0
+  replicas: 3
+  status_interval_s: 5.0
+registry:
+  squad_catalog_path: conf/catalogs/simulated_squad.yaml
+  command_mapping_path: conf/catalogs/command_mapping.yaml
+  simulated_hosts:
+    - synthetic-drones
+    - px4-sitl
+    - 127.0.0.1
+    - localhost
+route:
+  side_m: 50.0
+  altitude_m: 20.0
+flight:
+  heartbeat_timeout_s: 30.0
+  arm_timeout_s: 120.0
+  route_timeout_s: 600.0
+  status_interval_s: 5.0

@@ -17,6 +17,8 @@ from nats.aio.client import Client
 from swarm_models.auth.auth_config import AuthConfig
 from tests.fakes.keycloak.helpers import AUDIENCE
 from tests.fakes.keycloak.keycloak_stand_in import KeycloakStandIn
+from tests.fakes.mavlink.stand_in_drone import StandInDrone
+from tests.fakes.mavlink.stand_in_drones import StandInDrones
 
 NATS_BINARY = "nats-server"
 LOCALHOST = "127.0.0.1"
@@ -80,3 +82,23 @@ def keycloak_stand_in() -> Iterator[KeycloakStandIn]:
 @pytest.fixture
 def auth_config(keycloak_stand_in: KeycloakStandIn) -> AuthConfig:
     return AuthConfig(issuer_url=keycloak_stand_in.issuer_url, audience=AUDIENCE)
+
+
+@pytest.fixture
+def stand_in_drones() -> Iterator[StandInDrones]:
+    drones = StandInDrones()
+    yield drones
+    drones.close_all()
+
+
+@pytest.fixture
+def stand_in_drone(stand_in_drones: StandInDrones) -> StandInDrone:
+    return stand_in_drones.make()
+
+
+@pytest.fixture
+def free_udp_port() -> int:
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as probe:
+        probe.bind((LOCALHOST, 0))
+        port: int = probe.getsockname()[1]
+    return port

@@ -78,6 +78,43 @@ class IdempotencyMiddleware:
     # Internal Helpers Methods #
     ############################
 
+    def _key_of(self, scope: Scope) -> Optional[str]:
+        """Find the ``Idempotency-Key`` header of a request.
+
+        Args:
+            scope (Scope): The ASGI scope.
+
+        Returns:
+            Optional[str]: The value of the header, or ``None`` when it is absent.
+        """
+        for name, value in scope[self.HEADERS_KEY]:
+            if name.lower() == self.HEADER_NAME:
+                return value.decode(self.ENCODING)
+        self.logger.debug("The request has no Idempotency-Key header.")
+        return None
+
+    def _stored_response(self, fingerprint: str, messages: List[Message]) -> Optional[StoredResponse]:
+        """Build the answer to keep from the messages sent.
+
+        Args:
+            fingerprint (str): The fingerprint of the request.
+            messages (List[Message]): The messages the application sent.
+
+        Returns:
+            Optional[StoredResponse]: The answer, or ``None`` when the application sent no response.
+        """
+        starts = [message for message in messages if message[self.TYPE_KEY] == self.START_MESSAGE]
+        if not starts:
+            self.logger.debug("The application sent no response.")
+            return None
+        headers = [
+            (name.decode(self.ENCODING), value.decode(self.ENCODING)) for name, value in starts[0][self.HEADERS_KEY]
+        ]
+        body = b"".join(
+            message.get(self.BODY_KEY, b"") for message in messages if message[self.TYPE_KEY] == self.BODY_MESSAGE
+        )
+        return StoredResponse(fingerprint=fingerprint, status=starts[0][self.STATUS_KEY], headers=headers, body=body)
+
     async def _read_body(self, receive: Receive) -> Optional[bytes]:
         """Read the whole body of a request.
 
@@ -98,21 +135,6 @@ class IdempotencyMiddleware:
             else:
                 self.logger.debug("The client left before the end of the body.")
                 return None
-
-    def _key_of(self, scope: Scope) -> Optional[str]:
-        """Find the ``Idempotency-Key`` header of a request.
-
-        Args:
-            scope (Scope): The ASGI scope.
-
-        Returns:
-            Optional[str]: The value of the header, or ``None`` when it is absent.
-        """
-        for name, value in scope[self.HEADERS_KEY]:
-            if name.lower() == self.HEADER_NAME:
-                return value.decode(self.ENCODING)
-        self.logger.debug("The request has no Idempotency-Key header.")
-        return None
 
     async def _replay_body(self, chunks: List[bytes], receive: Receive) -> Message:
         """Give the buffered body to the application, then whatever the client sends next.
@@ -141,28 +163,6 @@ class IdempotencyMiddleware:
         """
         messages.append(message)
         await send(message)
-
-    def _stored_response(self, fingerprint: str, messages: List[Message]) -> Optional[StoredResponse]:
-        """Build the answer to keep from the messages sent.
-
-        Args:
-            fingerprint (str): The fingerprint of the request.
-            messages (List[Message]): The messages the application sent.
-
-        Returns:
-            Optional[StoredResponse]: The answer, or ``None`` when the application sent no response.
-        """
-        starts = [message for message in messages if message[self.TYPE_KEY] == self.START_MESSAGE]
-        if not starts:
-            self.logger.debug("The application sent no response.")
-            return None
-        headers = [
-            (name.decode(self.ENCODING), value.decode(self.ENCODING)) for name, value in starts[0][self.HEADERS_KEY]
-        ]
-        body = b"".join(
-            message.get(self.BODY_KEY, b"") for message in messages if message[self.TYPE_KEY] == self.BODY_MESSAGE
-        )
-        return StoredResponse(fingerprint=fingerprint, status=starts[0][self.STATUS_KEY], headers=headers, body=body)
 
     async def _replay(self, stored: StoredResponse, send: Send) -> None:
         """Send a stored answer again.

@@ -172,7 +172,7 @@ Each command installs one workspace: uv for Python (one `uv.lock`), Cargo for Ru
 ### Run the checks
 
 ```bash
-uv run ruff check services packages backend scripts tests
+uv run ruff check backend scripts tests
 uv run mypy backend/apps/gateway/src
 uv run pytest tests/swarm_gateway tests/swarm_api tests/swarm_service -n 2
 uv run pytest tests/conventions
@@ -283,11 +283,11 @@ Nobody commits or merges by hand. The repository needs, once, the secret `RELEAS
 | Path | Holds |
 | --- | --- |
 | [backend/apps/](backend/apps/) | The backend apps, one folder and one Docker image each, starting with the [gateway](backend/apps/gateway/) |
-| [services/](services/) | The backend services not moved to `backend/` yet, one folder and one Docker image each |
-| [packages/](packages/) | Shared code: `python/` (uv), `rust/` (Cargo and PyO3) and `ts/` (pnpm) |
+| [backend/](backend/) | The kernel libs, the layer packages (models, storage, clients, service, api) and the apps |
+| [scripts/](scripts/) | The operations, run with `uv run` and taking no arguments: schemas, OpenAPI, migrations, message catalogues |
 | [frontend/apps/](frontend/apps/) | The front ends, one folder and one image each, with their Playwright tests, and [desktop/](frontend/apps/desktop/), the Tauri 2 shell that wraps Ground control and Mission studio |
 | [infra/terraform/](infra/terraform/README.md) | One module per building block, one root per cell |
-| [tests/](tests/) | The convention tests, run against every service and every Python package |
+| [tests/](tests/) | Every Python test, mirroring the packages, and the convention tests of `backend/` and `scripts/` |
 | [docs/](docs/) | The specifications, the research and the tickets |
 
 The front-end workspace is `frontend/packages/`, a pnpm workspace: `frontend/packages/tokens` (`@swarm/tokens`) holds the CSS

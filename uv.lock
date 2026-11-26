@@ -14,9 +14,7 @@ members = [
     "swarm-fleet",
     "swarm-flight-engine",
     "swarm-gateway",
-    "swarm-i18n",
     "swarm-lifecycle",
-    "swarm-live",
     "swarm-logging",
     "swarm-missions",
     "swarm-models",
@@ -1820,7 +1818,6 @@ version = "0.1.0"
 source = { editable = "backend/swarm-api" }
 dependencies = [
     { name = "fastapi" },
-    { name = "swarm-live" },
     { name = "swarm-models" },
     { name = "swarm-service" },
     { name = "swarm-web" },
@@ -1829,7 +1826,6 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "fastapi", specifier = ">=0.164.0" },
-    { name = "swarm-live", editable = "packages/python/swarm-live" },
     { name = "swarm-models", editable = "backend/swarm-models" },
     { name = "swarm-service", editable = "backend/swarm-service" },
     { name = "swarm-web", editable = "backend/libs/swarm-web" },
@@ -1858,6 +1854,7 @@ dependencies = [
     { name = "httpx" },
     { name = "nats-py" },
     { name = "pydantic" },
+    { name = "pymavlink" },
     { name = "swarm-models" },
     { name = "swarm-nats" },
 ]
@@ -1867,6 +1864,7 @@ requires-dist = [
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "nats-py", specifier = ">=2.11.0" },
     { name = "pydantic", specifier = ">=2.14.3" },
+    { name = "pymavlink", specifier = ">=2.4.49" },
     { name = "swarm-models", editable = "backend/swarm-models" },
     { name = "swarm-nats", editable = "backend/libs/swarm-nats" },
 ]
@@ -1893,37 +1891,21 @@ requires-dist = [
 [[package]]
 name = "swarm-flight-engine"
 version = "0.1.0"
-source = { editable = "services/flight-engine" }
+source = { editable = "backend/apps/flight-engine" }
 dependencies = [
-    { name = "fastapi" },
-    { name = "nats-py" },
-    { name = "ormsgpack" },
-    { name = "pydantic" },
-    { name = "pyyaml" },
-    { name = "swarm-catalog" },
-    { name = "swarm-lifecycle" },
-    { name = "swarm-live" },
+    { name = "swarm-api" },
     { name = "swarm-logging" },
     { name = "swarm-models" },
-    { name = "swarm-nats" },
-    { name = "uvicorn", extra = ["standard"] },
+    { name = "swarm-web" },
     { name = "uvloop" },
 ]
 
 [package.metadata]
 requires-dist = [
-    { name = "fastapi", specifier = ">=0.164.0" },
-    { name = "nats-py", specifier = ">=2.11.0" },
-    { name = "ormsgpack", specifier = ">=1.7.0" },
-    { name = "pydantic", specifier = ">=2.14.3" },
-    { name = "pyyaml", specifier = ">=6.0" },
-    { name = "swarm-catalog", editable = "backend/libs/swarm-catalog" },
-    { name = "swarm-lifecycle", editable = "backend/libs/swarm-lifecycle" },
-    { name = "swarm-live", editable = "packages/python/swarm-live" },
+    { name = "swarm-api", editable = "backend/swarm-api" },
     { name = "swarm-logging", editable = "backend/libs/swarm-logging" },
     { name = "swarm-models", editable = "backend/swarm-models" },
-    { name = "swarm-nats", editable = "backend/libs/swarm-nats" },
-    { name = "uvicorn", extras = ["standard"], specifier = ">=0.30.0" },
+    { name = "swarm-web", editable = "backend/libs/swarm-web" },
     { name = "uvloop", specifier = ">=0.21.0" },
 ]
 
@@ -1949,47 +1931,9 @@ requires-dist = [
 ]
 
 [[package]]
-name = "swarm-i18n"
-version = "0.1.0"
-source = { editable = "packages/python/swarm-i18n" }
-dependencies = [
-    { name = "babel" },
-    { name = "pydantic" },
-    { name = "swarm-models" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "babel", specifier = ">=2.16.0" },
-    { name = "pydantic", specifier = ">=2.14.3" },
-    { name = "swarm-models", editable = "backend/swarm-models" },
-]
-
-[[package]]
 name = "swarm-lifecycle"
 version = "0.1.0"
 source = { editable = "backend/libs/swarm-lifecycle" }
-
-[[package]]
-name = "swarm-live"
-version = "0.1.0"
-source = { editable = "packages/python/swarm-live" }
-dependencies = [
-    { name = "ormsgpack" },
-    { name = "pydantic" },
-    { name = "starlette" },
-    { name = "swarm-lifecycle" },
-    { name = "swarm-models" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "ormsgpack", specifier = ">=1.7.0" },
-    { name = "pydantic", specifier = ">=2.14.3" },
-    { name = "starlette", specifier = ">=0.40.0" },
-    { name = "swarm-lifecycle", editable = "backend/libs/swarm-lifecycle" },
-    { name = "swarm-models", editable = "backend/swarm-models" },
-]
 
 [[package]]
 name = "swarm-logging"
@@ -2087,14 +2031,15 @@ name = "swarm-service"
 version = "0.1.0"
 source = { editable = "backend/swarm-service" }
 dependencies = [
+    { name = "babel" },
     { name = "fastapi" },
     { name = "nats-py" },
     { name = "nkeys" },
+    { name = "ormsgpack" },
     { name = "pydantic" },
     { name = "pyjwt", extra = ["crypto"] },
     { name = "swarm-clients" },
     { name = "swarm-lifecycle" },
-    { name = "swarm-live" },
     { name = "swarm-models" },
     { name = "swarm-nats" },
     { name = "swarm-storage" },
@@ -2103,14 +2048,15 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "babel", specifier = ">=2.16.0" },
     { name = "fastapi", specifier = ">=0.164.0" },
     { name = "nats-py", specifier = ">=2.11.0" },
     { name = "nkeys", specifier = ">=0.2.1" },
+    { name = "ormsgpack", specifier = ">=1.7.0" },
     { name = "pydantic", specifier = ">=2.14.3" },
     { name = "pyjwt", extras = ["crypto"], specifier = ">=2.15.1" },
     { name = "swarm-clients", editable = "backend/swarm-clients" },
     { name = "swarm-lifecycle", editable = "backend/libs/swarm-lifecycle" },
-    { name = "swarm-live", editable = "packages/python/swarm-live" },
     { name = "swarm-models", editable = "backend/swarm-models" },
     { name = "swarm-nats", editable = "backend/libs/swarm-nats" },
     { name = "swarm-storage", editable = "backend/swarm-storage" },
@@ -2120,30 +2066,20 @@ requires-dist = [
 [[package]]
 name = "swarm-simulator"
 version = "0.1.0"
-source = { editable = "services/simulator" }
+source = { editable = "backend/apps/simulator" }
 dependencies = [
-    { name = "pydantic" },
-    { name = "pymavlink" },
-    { name = "pyyaml" },
-    { name = "swarm-catalog" },
-    { name = "swarm-lifecycle" },
+    { name = "swarm-api" },
     { name = "swarm-logging" },
     { name = "swarm-models" },
-    { name = "swarm-nats" },
-    { name = "swarm-service" },
+    { name = "swarm-web" },
 ]
 
 [package.metadata]
 requires-dist = [
-    { name = "pydantic", specifier = ">=2.14.3" },
-    { name = "pymavlink", specifier = ">=2.4.49" },
-    { name = "pyyaml", specifier = ">=6.0" },
-    { name = "swarm-catalog", editable = "backend/libs/swarm-catalog" },
-    { name = "swarm-lifecycle", editable = "backend/libs/swarm-lifecycle" },
+    { name = "swarm-api", editable = "backend/swarm-api" },
     { name = "swarm-logging", editable = "backend/libs/swarm-logging" },
     { name = "swarm-models", editable = "backend/swarm-models" },
-    { name = "swarm-nats", editable = "backend/libs/swarm-nats" },
-    { name = "swarm-service", editable = "backend/swarm-service" },
+    { name = "swarm-web", editable = "backend/libs/swarm-web" },
 ]
 
 [[package]]
@@ -2153,6 +2089,7 @@ source = { editable = "backend/swarm-storage" }
 dependencies = [
     { name = "alembic" },
     { name = "asyncpg" },
+    { name = "babel" },
     { name = "pydantic" },
     { name = "sqlalchemy", extra = ["asyncio"] },
     { name = "swarm-lifecycle" },
@@ -2163,6 +2100,7 @@ dependencies = [
 requires-dist = [
     { name = "alembic", specifier = ">=1.14.0" },
     { name = "asyncpg", specifier = ">=0.30.0" },
+    { name = "babel", specifier = ">=2.16.0" },
     { name = "pydantic", specifier = ">=2.14.3" },
     { name = "sqlalchemy", extras = ["asyncio"], specifier = ">=2.0.36" },
     { name = "swarm-lifecycle", editable = "backend/libs/swarm-lifecycle" },

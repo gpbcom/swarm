@@ -9,8 +9,7 @@ from swarm_models.live.feed.live_config import LiveConfig
 from swarm_nats.clients.nats_connector import NatsConnector
 from swarm_service.gateway.factories.live_service_factory import LiveServiceFactory
 from swarm_service.gateway.live.live_feed import LiveFeed
-
-from swarm_live.service.live_hub import LiveHub  # isort: skip
+from swarm_service.shared.live.hub.live_hub import LiveHub
 
 
 class LiveFeedFactory(LiveServiceFactory[LiveFeed]):

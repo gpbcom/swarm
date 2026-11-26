@@ -15,13 +15,12 @@ from swarm_models.enums import LiveOperation, LiveTopicKind
 from swarm_models.live.feed.exceptions import SELiveFeedNotReadyError
 from swarm_models.live.feed.live_config import LiveConfig
 from swarm_models.live.live_subscription import LiveSubscription
+from swarm_models.live.session.live_session_config import LiveSessionConfig
 from swarm_models.subjects.operator_subjects import OperatorSubjects
 from swarm_nats.clients.nats_connector import NatsConnector
 from swarm_nats.models.config.nats_client_config import NatsClientConfig
 from swarm_service.gateway.live.live_feed import LiveFeed
-
-from swarm_models.live.session.live_session_config import LiveSessionConfig  # isort: skip
-from swarm_live.service.live_hub import LiveHub  # isort: skip
+from swarm_service.shared.live.hub.live_hub import LiveHub
 
 
 class TestLiveFeed:

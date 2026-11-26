@@ -3,8 +3,9 @@ import createClient, { type Client, type ClientOptions } from "openapi-fetch";
 import type { paths as FleetPaths } from "./generated/fleet.ts";
 import type { components as GatewayComponents, paths as GatewayPaths } from "./generated/gateway.ts";
 import type { paths as MissionsPaths } from "./generated/missions.ts";
+import type { paths as SimulatorPaths } from "./generated/simulator.ts";
 
-export type { FleetPaths, GatewayComponents, GatewayPaths, MissionsPaths };
+export type { FleetPaths, GatewayComponents, GatewayPaths, MissionsPaths, SimulatorPaths };
 export type Problem = GatewayComponents["schemas"]["Problem"];
 
 export function createGatewayClient(options?: ClientOptions): Client<GatewayPaths> {
@@ -17,4 +18,8 @@ export function createMissionsClient(options?: ClientOptions): Client<MissionsPa
 
 export function createFleetClient(options?: ClientOptions): Client<FleetPaths> {
   return createClient<FleetPaths>(options);
+}
+
+export function createSimulatorClient(options?: ClientOptions): Client<SimulatorPaths> {
+  return createClient<SimulatorPaths>(options);
 }

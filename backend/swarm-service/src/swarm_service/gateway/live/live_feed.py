@@ -17,8 +17,7 @@ from swarm_models.live.feed.live_config import LiveConfig
 from swarm_nats.clients.nats_connector import NatsConnector
 from swarm_service.gateway.live.live_fan_out import LiveFanOut
 from swarm_service.gateway.live.operator_live_source import OperatorLiveSource
-
-from swarm_live.service.live_hub import LiveHub  # isort: skip
+from swarm_service.shared.live.hub.live_hub import LiveHub
 
 
 class LiveFeed(AsyncRunnable):

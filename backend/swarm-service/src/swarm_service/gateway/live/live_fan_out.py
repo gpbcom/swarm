@@ -11,9 +11,8 @@ from swarm_models.live.feed.exceptions import SEMissionFeedError
 from swarm_models.live.live_subscription import LiveSubscription
 from swarm_models.subjects.operator_subjects import OperatorSubjects
 from swarm_service.gateway.live.operator_live_source import OperatorLiveSource
-
-from swarm_live.service.live_hub import LiveHub  # isort: skip
-from swarm_live.service.live_mailbox import LiveMailbox  # isort: skip
+from swarm_service.shared.live.hub.live_hub import LiveHub
+from swarm_service.shared.live.hub.live_mailbox import LiveMailbox
 
 
 class LiveFanOut:

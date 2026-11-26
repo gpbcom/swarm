@@ -1,0 +1,31 @@
+[project]
+name = "swarm-simulator"
+version = "0.1.0"
+description = "The Swarm simulator app: its main() reads conf/app.yaml, serves the simulation domain and answers the Commands of the bus."
+readme = "../../../README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "swarm-api",
+    "swarm-logging",
+    "swarm-models",
+    "swarm-web",
+]
+
+[project.scripts]
+swarm-simulator-serve = "swarm_simulator.main:main"
+
+[tool.swarm]
+domains = ["simulation"]
+
+[tool.uv.build-backend]
+module-name = "swarm_simulator"
+
+[tool.uv.sources]
+swarm-api = { workspace = true }
+swarm-logging = { workspace = true }
+swarm-models = { workspace = true }
+swarm-web = { workspace = true }
+
+[build-system]
+requires = ["uv_build>=0.12.21,<0.13.0"]
+build-backend = "uv_build"

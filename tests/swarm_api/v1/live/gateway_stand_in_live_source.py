@@ -5,15 +5,15 @@ from typing import ClassVar, List, Tuple
 from uuid import UUID
 
 # Third-party imports
-from fastapi import FastAPI
+from fastapi import FastAPI, WebSocket
 from fastapi.testclient import TestClient
 
 # First-party imports
-from swarm_api.v1.live.live_router import LiveRouter  # isort: skip
-from swarm_models.live.session.live_session_config import LiveSessionConfig  # isort: skip
-from swarm_live.service.live_mailbox import LiveMailbox  # isort: skip
-from swarm_live.service.live_source import LiveSource  # isort: skip
-from swarm_models.live.live_subscription import LiveSubscription  # isort: skip
+from swarm_api.v1.live.live_router import LiveRouter
+from swarm_models.live.live_subscription import LiveSubscription
+from swarm_models.live.session.live_session_config import LiveSessionConfig
+from swarm_service.shared.live.hub.live_mailbox import LiveMailbox
+from swarm_service.shared.live.sources.live_source import LiveSource
 
 
 class GatewayStandInLiveSource(LiveSource):
@@ -61,11 +61,20 @@ class GatewayStandInLiveSource(LiveSource):
         """Record the leave."""
         self.leaves.append(subscription.topic)
 
+    async def operator(self, websocket: WebSocket) -> UUID:
+        """Give the Operator the tests connect as, for every connection."""
+        return self.OPERATOR_ID
+
     def build_client(self, with_operator: bool) -> TestClient:
-        """Build a client of an app that serves the live router over this source."""
-        router = LiveRouter(self.source_for, LiveSessionConfig(status_interval_s=0.05))
+        """Build a client of an app that serves the live router over this source.
+
+        Without ``with_operator``, the router keeps the gateway's ``LiveOperator``, which refuses every connection of
+        an app that has no access check installed.
+        """
+        if with_operator:
+            router = LiveRouter(self.source_for, LiveSessionConfig(status_interval_s=0.05), self.operator)
+        else:
+            router = LiveRouter(self.source_for, LiveSessionConfig(status_interval_s=0.05))
         app = FastAPI()
         app.include_router(router)
-        if with_operator:
-            app.dependency_overrides[router.operator] = lambda: self.OPERATOR_ID
         return TestClient(app)

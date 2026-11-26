@@ -129,28 +129,25 @@ class TestPythonWorkflow:
     @pytest.mark.parametrize(
         "fragment",
         [
-            "FOLDER=services/$SERVICE",
-            "TESTS=services/$SERVICE/tests",
             "FOLDER=backend/apps/$SERVICE",
             "tests/swarm_${SERVICE//-/_}",
             "backend/apps/$SERVICE/pyproject.toml",
             "tests/swarm_api/v1/",
+            "SOURCES=",
+            "backend/swarm-*/src/swarm_*/",
         ],
     )
-    def test_the_services_job_finds_the_folder_of_a_service_or_of_an_app_and_its_domains(self, fragment: str) -> None:
+    def test_the_services_job_finds_the_folder_of_an_app_its_domains_and_their_tests(self, fragment: str) -> None:
         assert fragment in self.run_with("services", "FOLDER=")
+
+    def test_the_services_job_knows_only_apps(self) -> None:
+        assert all("services/$SERVICE" not in run for run in self.runs("services"))
 
     def test_the_folder_is_found_before_the_tools_run(self) -> None:
         assert self.run_index("services", "FOLDER=") < self.run_index("services", "uv run ruff check")
 
-    def test_the_service_convention_tests_skip_an_app(self) -> None:
-        run = self.run_with("services", "tests/conventions/services/test_service_conventions.py")
-        assert 'if [ ! -d "services/$SERVICE" ]' in run
-
-    def test_the_services_job_runs_only_its_slice_of_the_convention_tests(self) -> None:
-        run = self.run_with("services", "tests/conventions/services/test_service_conventions.py")
-        assert "-k" in run
-        assert "$SERVICE" in run
+    def test_the_convention_tests_of_the_apps_run_in_the_repository_job_only(self) -> None:
+        assert all("tests/conventions" not in run for run in self.runs("services"))
 
     def test_the_services_job_never_expands_an_expression_inside_a_run(self) -> None:
         assert all("${{" not in run for run in self.runs("services"))
@@ -189,7 +186,6 @@ class TestPythonWorkflow:
             "uv run ruff check",
             "uv run ruff format --check",
             "uv run mypy",
-            "uv run pytest",
             "uv run swarm-schemas-check",
             "uv run swarm-i18n-check",
         ]
@@ -200,12 +196,9 @@ class TestPythonWorkflow:
     def test_the_packages_job_runs_the_message_check_without_an_expression(self) -> None:
         assert "${{" not in self.run_with("packages", "uv run swarm-i18n-check")
 
-    @pytest.mark.parametrize(
-        "command",
-        ["uv run ruff check", "uv run ruff format --check", "uv run mypy", "uv run pytest"],
-    )
-    def test_each_packages_tool_targets_the_python_packages(self, command: str) -> None:
-        assert "packages/python" in self.run_with("packages", command)
+    def test_the_packages_job_names_no_packages_python_folder_and_runs_no_tests(self) -> None:
+        assert all("packages/python" not in run for run in self.runs("packages"))
+        assert all("uv run pytest" not in run for run in self.runs("packages"))
 
     @pytest.mark.parametrize("command", ["uv run ruff check", "uv run ruff format --check", "uv run mypy"])
     def test_each_packages_tool_also_targets_the_backend_and_the_scripts(self, command: str) -> None:
@@ -216,40 +209,37 @@ class TestPythonWorkflow:
     def test_the_packages_job_type_checks_the_apps(self) -> None:
         assert "backend/apps/*/src" in self.run_with("packages", "uv run mypy")
 
-    def test_the_packages_job_runs_the_tests_on_two_workers(self) -> None:
-        assert "-n 2" in self.run_with("packages", "uv run pytest")
-
     def test_the_packages_job_never_expands_an_expression_inside_a_run(self) -> None:
         assert all("${{" not in run for run in self.runs("packages"))
 
     def test_the_repository_job_never_expands_an_expression_inside_a_run(self) -> None:
         assert all("${{" not in run for run in self.runs("repository"))
 
-    @pytest.mark.parametrize("name", ["services", "packages", "repository"])
+    @pytest.mark.parametrize("name", ["services", "repository"])
     def test_the_job_pins_the_nats_server_version(self, name: str) -> None:
         env = self.job(name).get("env")
         assert isinstance(env, dict)
         assert re.fullmatch(self.VERSION_PATTERN, str(env.get(self.NATS_VERSION_KEY)))
 
-    @pytest.mark.parametrize("name", ["services", "packages", "repository"])
+    @pytest.mark.parametrize("name", ["services", "repository"])
     def test_the_job_installs_nats_server_after_the_sync_and_before_the_tests(self, name: str) -> None:
         install = self.run_index(name, "nats-server")
         assert self.run_index(name, "uv sync --locked") < install
         assert install < self.run_index(name, "uv run pytest")
 
-    @pytest.mark.parametrize("name", ["services", "packages", "repository"])
+    @pytest.mark.parametrize("name", ["services", "repository"])
     def test_the_nats_server_download_is_checked(self, name: str) -> None:
         run = self.run_with(name, "nats-server")
         assert "sha256sum" in run
         assert "$NATS_SERVER_VERSION" in run
         assert '"$GITHUB_PATH"' in run
 
-    def test_the_services_job_builds_and_installs_the_wheel_for_the_services_that_import_it(self) -> None:
+    def test_the_services_job_builds_and_installs_the_wheel_for_the_apps_whose_code_imports_it(self) -> None:
         run = self.run_with("services", "maturin build")
         assert "rust/swarm-core/python/Cargo.toml" in run
         assert "uv pip install" in run
         assert "swarm_core" in run
-        assert "$FOLDER/src" in run
+        assert "$SOURCES" in run
 
     def test_the_services_job_installs_the_wheel_after_the_sync_and_before_the_tests(self) -> None:
         build = self.run_index("services", "maturin build")
