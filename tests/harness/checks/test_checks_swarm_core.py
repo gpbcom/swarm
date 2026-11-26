@@ -30,7 +30,7 @@ class TestChecksSwarmCore:
         assert call(f"checks.imports_swarm_core(Path({str(tmp_path)!r}))") is False
 
     def test_the_wheel_is_skipped_when_no_python_code_imports_it(self, tmp_path: Path) -> None:
-        manifest = tmp_path / "packages" / "rust" / "swarm-core" / "python"
+        manifest = tmp_path / "rust" / "swarm-core" / "python"
         manifest.mkdir(parents=True)
         (manifest / "Cargo.toml").write_text("", encoding="utf-8")
         setup = (

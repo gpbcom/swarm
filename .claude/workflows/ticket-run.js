@@ -232,7 +232,7 @@ function normalise(file) {
   return f
 }
 function agentFor(f) {
-  if (f.startsWith('packages/rust/') || f.endsWith('.rs')) return 'rust-implementer'
+  if (f.startsWith('rust/') || f.endsWith('.rs')) return 'rust-implementer'
   if (f.startsWith('frontends/') || f.startsWith('packages/ts/') || /\.(ts|tsx)$/.test(f)) return 'frontend-implementer'
   if (f.startsWith('tests/')) return 'test-writer'
   if (f.startsWith('docs/') || /\.md$/.test(f)) return 'doc-writer'

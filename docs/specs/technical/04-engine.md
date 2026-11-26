@@ -43,7 +43,7 @@ Every Python service follows AGENT.md: layers `api`, `service`, `storage`, `mode
 
 ## <a id="flight-engine"></a>🔩 Flight engine
 
-- **One asyncio process per edge** (uvloop), one **actor per Mission** holding its Squad state. CPU-heavy steps run in the Rust core (`packages/rust/swarm-core`, PyO3), which releases the GIL.
+- **One asyncio process per edge** (uvloop), one **actor per Mission** holding its Squad state. CPU-heavy steps run in the Rust core (`rust/swarm-core`, PyO3), which releases the GIL.
 - **Input:** each Drone adapter writes the latest frame of each Drone into a lock-free ring buffer in Rust; the actor never waits for a slow Drone.
 - **Output:** one `SquadFrame` per tick to Ground control (local WebSocket) and to the leaf node; Alerts; commands.
 - **Command lanes:** the safety lane (Hold the Squad, abort, Return home, manual control) is served before anything else and acknowledged per Drone; the Pilot's command reaches the adapter without crossing the core.

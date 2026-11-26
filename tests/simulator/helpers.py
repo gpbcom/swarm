@@ -29,7 +29,7 @@ FlightLogRow = Tuple[str, str, int]
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SERVICE_DIR = REPO_ROOT / "services" / "simulator"
-RUST_DIR = REPO_ROOT / "packages" / "rust"
+RUST_DIR = REPO_ROOT / "rust"
 BINARY_PATH = RUST_DIR / "target" / "debug" / "swarm-synthetic-drones"
 COMMAND_MAPPING_PATH = SERVICE_DIR / "conf" / "catalogs" / "command_mapping.yaml"
 SCRIPT_NAME = "swarm-simulator"

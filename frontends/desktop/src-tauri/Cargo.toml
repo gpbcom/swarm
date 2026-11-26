@@ -5,7 +5,7 @@ description = "The Swarm desktop shell: Ground control and Mission studio in nat
 edition = "2021"
 publish = false
 
-# The shell is built apart from `packages/rust`: it has its own empty workspace.
+# The shell is built apart from `rust`: it has its own empty workspace.
 [workspace]
 
 [lib]
@@ -18,7 +18,7 @@ tauri-build = { version = "=2.7.6", features = [] }
 [dependencies]
 tauri = { version = "=2.12.6", features = [] }
 
-# The lints of `packages/rust/Cargo.toml`.
+# The lints of `rust/Cargo.toml`.
 [lints.clippy]
 all = "deny"
 pedantic = "warn"

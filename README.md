@@ -155,7 +155,7 @@ The full plan, with the regulatory track, flight test campaigns, partners and ri
 ### Prerequisites
 
 - [uv](https://docs.astral.sh/uv/), which installs Python 3.12 for the project.
-- A stable Rust toolchain, selected by [packages/rust/rust-toolchain.toml](packages/rust/rust-toolchain.toml).
+- A stable Rust toolchain, selected by [rust/rust-toolchain.toml](rust/rust-toolchain.toml).
 - Node LTS, with [corepack](https://nodejs.org/api/corepack.html) to provide pnpm.
 - [Terraform](https://developer.hashicorp.com/terraform) 1.10 or later, only to provision a cell.
 
@@ -163,7 +163,7 @@ The full plan, with the regulatory track, flight test campaigns, partners and ri
 
 ```bash
 uv sync
-cargo fetch --manifest-path packages/rust/Cargo.toml
+cargo fetch --manifest-path rust/Cargo.toml
 corepack enable && pnpm install
 ```
 

@@ -1,6 +1,6 @@
 ---
 name: rust-implementer
-description: Implements one task in the Rust crates of packages/rust (safety loop, planner, MAVLink, PyO3 bindings) in its own worktree, within the performance budgets, then hands its changes off, uncommitted. Used by /ticket-run.
+description: Implements one task in the Rust crates of rust (safety loop, planner, MAVLink, PyO3 bindings) in its own worktree, within the performance budgets, then hands its changes off, uncommitted. Used by /ticket-run.
 tools: Read, Grep, Glob, Edit, Write, Bash
 model: sonnet
 effort: high

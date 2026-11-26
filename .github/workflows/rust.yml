@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: packages/rust
+        working-directory: rust
     steps:
       - uses: actions/checkout@v7
       - name: Install the toolchain of rust-toolchain.toml
@@ -20,7 +20,7 @@ jobs:
           rustup show active-toolchain
       - uses: Swatinem/rust-cache@v2
         with:
-          workspaces: packages/rust
+          workspaces: rust
       - name: Check the format
         run: cargo fmt --all --check
       - name: Run clippy
@@ -44,10 +44,10 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: packages/rust
+        working-directory: rust
     env:
       BASE_SHA: ${{ github.event.pull_request.base.sha }}
-      CARGO_TARGET_DIR: ${{ github.workspace }}/packages/rust/target
+      CARGO_TARGET_DIR: ${{ github.workspace }}/rust/target
     steps:
       - uses: actions/checkout@v7
         with:
@@ -58,13 +58,16 @@ jobs:
           rustup show active-toolchain
       - uses: Swatinem/rust-cache@v2
         with:
-          workspaces: packages/rust
+          workspaces: rust
       - name: Benchmark the base commit
         run: |
           git worktree add --detach "$RUNNER_TEMP/base" "$BASE_SHA"
-          if compgen -G "$RUNNER_TEMP/base/packages/rust/*/benches/*.rs" > /dev/null \
-            || compgen -G "$RUNNER_TEMP/base/packages/rust/benches/*.rs" > /dev/null; then
-            cd "$RUNNER_TEMP/base/packages/rust"
+          # A base commit from before the layout refactor keeps its Cargo workspace in packages/rust.
+          base="$RUNNER_TEMP/base/rust"
+          if [ ! -f "$base/Cargo.toml" ]; then base="$RUNNER_TEMP/base/packages/rust"; fi
+          if compgen -G "$base/*/benches/*.rs" > /dev/null \
+            || compgen -G "$base/benches/*.rs" > /dev/null; then
+            cd "$base"
             cargo bench --locked --workspace --bench '*' -- --save-baseline pr-base
           else
             echo "The base commit has no benchmark: nothing to compare."
@@ -76,4 +79,4 @@ jobs:
           find . -path ./target -prune -o \( -name '*.rs' -o -name Cargo.toml \) -print0 | xargs -0 touch
           cargo bench --workspace --locked --bench '*' -- --baseline-lenient pr-base
       - name: Run the 5 % gate
-        run: python3 ../../.github/scripts/bench_gate.py --criterion-dir "$CARGO_TARGET_DIR/criterion"
+        run: python3 ../.github/scripts/bench_gate.py --criterion-dir "$CARGO_TARGET_DIR/criterion"

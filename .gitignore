@@ -26,7 +26,7 @@ crash.*.log
 infra/terraform/modules/**/.terraform.lock.hcl
 
 # Rust build output
-packages/rust/target/
+rust/target/
 
 # Node
 node_modules/

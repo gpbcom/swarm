@@ -9,7 +9,7 @@ from typing import ClassVar, Dict, List
 
 class TestSyntheticDronesLayout:
     ROOT: ClassVar[Path] = Path(__file__).resolve().parents[3]
-    WORKSPACE: ClassVar[Path] = ROOT / "packages" / "rust"
+    WORKSPACE: ClassVar[Path] = ROOT / "rust"
     CRATE: ClassVar[Path] = WORKSPACE / "swarm-synthetic-drones"
     PACKAGE: ClassVar[str] = "swarm-synthetic-drones"
     BENCH: ClassVar[str] = "step"

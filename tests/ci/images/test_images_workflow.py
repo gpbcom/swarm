@@ -15,7 +15,7 @@ class TestImagesWorkflow:
     READ_ONLY_PERMISSIONS: ClassVar[Dict[str, str]] = {"contents": "read"}
     PUSH_PERMISSIONS: ClassVar[Dict[str, str]] = {"contents": "read", "packages": "write", "id-token": "write"}
     JOB_NAMES: ClassVar[List[str]] = ["scan-dependencies", "image", "e2e", "publish"]
-    LOCKFILES: ClassVar[List[str]] = ["uv.lock", "pnpm-lock.yaml", "packages/rust/Cargo.lock"]
+    LOCKFILES: ClassVar[List[str]] = ["uv.lock", "pnpm-lock.yaml", "rust/Cargo.lock"]
     OIDC_ISSUER: ClassVar[str] = "https://token.actions.githubusercontent.com"
     UNTRUSTED_EXPRESSIONS: ClassVar[List[str]] = ["${{ github.event", "${{ inputs.", "${{ matrix."]
     PINNED_REFERENCE: ClassVar[re.Pattern[str]] = re.compile(r"@(v\d|[0-9a-f]{40}$)")

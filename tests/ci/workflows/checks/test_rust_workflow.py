@@ -80,7 +80,7 @@ class TestRustWorkflow:
         assert self.bench_job()["runs-on"] == "ubuntu-latest"
 
     def test_it_runs_in_the_rust_workspace(self) -> None:
-        assert self.job()["defaults"]["run"]["working-directory"] == "packages/rust"
+        assert self.job()["defaults"]["run"]["working-directory"] == "rust"
 
     def test_it_checks_out_the_repository(self) -> None:
         uses = [str(step.get("uses", "")) for step in self.steps()]
@@ -129,7 +129,7 @@ class TestRustWorkflow:
         assert "github.event_name == 'pull_request'" in str(self.bench_job().get("if", ""))
 
     def test_the_bench_job_runs_in_the_rust_workspace(self) -> None:
-        assert self.bench_job()["defaults"]["run"]["working-directory"] == "packages/rust"
+        assert self.bench_job()["defaults"]["run"]["working-directory"] == "rust"
 
     def test_the_bench_job_checks_out_the_full_history(self) -> None:
         checkouts = [step for step in self.bench_steps() if str(step.get("uses", "")).startswith("actions/checkout@")]
@@ -151,6 +151,17 @@ class TestRustWorkflow:
         step = next(run for run in self.bench_runs() if "--baseline-lenient" in run)
         assert "touch" in step
         assert step.index("touch") < step.index("cargo bench")
+
+    def test_the_gate_script_is_found_from_the_bench_working_directory(self) -> None:
+        workdir = str(self.bench_job()["defaults"]["run"]["working-directory"])
+        gate = next(run for run in self.bench_runs() if "bench_gate.py" in run)
+        relative = gate.split("python3 ", 1)[1].split(" ", 1)[0]
+        assert (Path(__file__).resolve().parents[4] / workdir / relative).resolve().is_file()
+
+    def test_the_base_commit_is_benchmarked_from_either_layout(self) -> None:
+        base = next(run for run in self.bench_runs() if "--save-baseline pr-base" in run)
+        assert "base/rust" in base
+        assert "base/packages/rust" in base
 
     def test_the_bench_job_knows_the_base_commit(self) -> None:
         assert self.bench_env().get("BASE_SHA") == "${{ github.event.pull_request.base.sha }}"
