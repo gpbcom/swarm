@@ -23,11 +23,11 @@
 
 ## <a id="d1"></a>D1: How a Drone is addressed
 
-**Chosen:** an `AdapterRegistry` refusing any host outside `simulated_hosts`, with the client taking host and port from the registered Drone only · **Where:** [`adapter_registry.py:47`](../../../services/simulator/src/simulator/service/registry/adapter_registry.py#L47) · **Source:** PLAN, read from the diff
+**Chosen:** an `AdapterRegistry` refusing any host outside `simulated_hosts`, with the client taking host and port from the registered Drone only · **Where:** [`adapter_registry.py:47`](../../../backend/swarm-service/src/swarm_service/simulation/registry/adapter_registry.py#L47) · **Source:** PLAN, read from the diff
 
 | Option | For | Against |
 | --- | --- | --- |
-| ✅ Registry with allowlist | Meets "cannot address a real Drone" of the technical page; the refusal is logged ([`simulated_command_service.py:188`](../../../services/simulator/src/simulator/service/commands/simulated_command_service.py#L188)) | The list of hosts must be kept right; `127.0.0.1` and `localhost` are in the shipped [`app.yaml`](../../../services/simulator/conf/app.yaml#L25-L29) |
+| ✅ Registry with allowlist | Meets "cannot address a real Drone" of the technical page; the refusal is logged ([`simulated_command_service.py:188`](https://github.com/gpbcom/swarm/blob/a2e43f7e74d65cc12a43507ec33f673fd2bc62e3/services/simulator/src/simulator/service/commands/simulated_command_service.py#L188)) | The list of hosts must be kept right; `127.0.0.1` and `localhost` are in the shipped [`app.yaml`](../../../backend/apps/simulator/conf/app.yaml#L25-L29) |
 | Address the host a Command names | Fewer moving parts | Breaks criterion 2 and BR-014 |
 
 **Trade-off:** a configured list in exchange for a hard guarantee in code.
@@ -36,7 +36,7 @@
 
 ## <a id="d2"></a>D2: How credentials are proved simulated
 
-**Chosen:** the guard decodes only the JWT payload and requires the `simulated` tag, before anything connects · **Where:** [`simulated_credentials_guard.py:149`](../../../services/simulator/src/simulator/service/credentials/simulated_credentials_guard.py#L149) and [`serve_command.py:143`](../../../services/simulator/src/simulator/api/cli/commands/serve_command.py#L143) · **Source:** PLAN, review
+**Chosen:** the guard decodes only the JWT payload and requires the `simulated` tag, before anything connects · **Where:** [`simulated_credentials_guard.py:149`](../../../backend/swarm-service/src/swarm_service/simulation/credentials/simulated_credentials_guard.py#L149) and [`serve_command.py:143`](https://github.com/gpbcom/swarm/blob/a2e43f7e74d65cc12a43507ec33f673fd2bc62e3/services/simulator/src/simulator/api/cli/commands/serve_command.py#L143) · **Source:** PLAN, review
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -49,7 +49,7 @@
 
 ## <a id="d3"></a>D3: Where the simulated flag is enforced
 
-**Chosen:** three levels: the model default and validator, the store's check and the SQLite `CHECK (simulated = 1)` · **Where:** [`flight_log_entry.py:184`](../../../services/simulator/src/simulator/models/flight_logs/flight_log_entry.py#L184), [`flight_log_store.py:115`](../../../services/simulator/src/simulator/storage/edge/flight_log_store.py#L115), [`flight_log_store.py:43`](../../../services/simulator/src/simulator/storage/edge/flight_log_store.py#L43) · **Source:** read from the diff
+**Chosen:** three levels: the model default and validator, the store's check and the SQLite `CHECK (simulated = 1)` · **Where:** [`flight_log_entry.py:184`](../../../backend/swarm-models/src/swarm_models/simulation/flight_logs/flight_log_entry.py#L184), [`flight_log_store.py:115`](../../../backend/swarm-storage/src/swarm_storage/simulation/flight_logs/flight_log_store.py#L115), [`flight_log_store.py:43`](../../../backend/swarm-storage/src/swarm_storage/simulation/flight_logs/flight_log_store.py#L43) · **Source:** read from the diff
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -62,11 +62,11 @@
 
 ## <a id="d4"></a>D4: Operator isolation of the responder
 
-**Chosen:** `validate_deployment` refuses a subject outside `op.<operator_id>.`, and the deployment values have no default · **Where:** [`simulator_config.py:154`](../../../services/simulator/src/simulator/models/config/simulator_config.py#L154) · **Source:** reviewer note
+**Chosen:** `validate_deployment` refuses a subject outside `op.<operator_id>.`, and the deployment values have no default · **Where:** [`simulator_config.py:154`](../../../backend/swarm-models/src/swarm_models/config/simulator/simulator_config.py#L154) · **Source:** reviewer note
 
 | Option | For | Against |
 | --- | --- | --- |
-| ✅ Check in the configuration | `Command` carries no `operator_id`, so this check and the NATS account are the whole isolation | `fly` also needs NATS values, so the documented command fails with the shipped [`app.yaml`](../../../services/simulator/conf/app.yaml) |
+| ✅ Check in the configuration | `Command` carries no `operator_id`, so this check and the NATS account are the whole isolation | `fly` also needs NATS values, so the documented command fails with the shipped [`app.yaml`](../../../backend/apps/simulator/conf/app.yaml) |
 | NATS account alone | No code | A wrong subject would only be caught by the server |
 
 **Trade-off:** safer defaults, at the cost of a `fly` that needs values it does not use (follow-up).
@@ -75,11 +75,11 @@
 
 ## <a id="d5"></a>D5: Volume of synthetic Drones
 
-**Chosen:** one process flying up to 255 Drones on one thread, with at most 64 datagrams per Drone per tick and at most 5 catch-up ticks · **Where:** [`link.rs:66`](../../../packages/rust/swarm-synthetic-drones/src/link.rs#L66), [`link.rs:361`](../../../packages/rust/swarm-synthetic-drones/src/link.rs#L361) · **Source:** PLAN, read from the diff
+**Chosen:** one process flying up to 255 Drones on one thread, with at most 64 datagrams per Drone per tick and at most 5 catch-up ticks · **Where:** [`link.rs:66`](../../../rust/swarm-synthetic-drones/src/link.rs#L66), [`link.rs:361`](../../../rust/swarm-synthetic-drones/src/link.rs#L361) · **Source:** PLAN, read from the diff
 
 | Option | For | Against |
 | --- | --- | --- |
-| ✅ One thread, bounded reads | A flood to one Drone cannot starve the others; the `step` benchmark ([`step.rs:22`](../../../packages/rust/swarm-synthetic-drones/benches/step.rs#L22)) is under the 5 % gate | All Drones share one tick |
+| ✅ One thread, bounded reads | A flood to one Drone cannot starve the others; the `step` benchmark ([`step.rs:22`](../../../rust/swarm-synthetic-drones/benches/step.rs#L22)) is under the 5 % gate | All Drones share one tick |
 | One process per Drone | Isolation | Not a "volume" answer at 255 Drones |
 
 **Trade-off:** a single tick budget in exchange for bounded work.
@@ -88,11 +88,11 @@
 
 ## <a id="d6"></a>D6: Deployment
 
-**Chosen:** the `simulator` sub-chart is a condition of the cell chart, off by default, with a NetworkPolicy allowing only the simulator pod to reach the Drone pods · **Where:** [`Chart.yaml:24-26`](../../../deploy/charts/cell/Chart.yaml#L24-L26), [`values.yaml:14-15`](../../../deploy/charts/cell/values.yaml#L14-L15), [`networkpolicy.yaml:1-21`](../../../deploy/charts/simulator/templates/networkpolicy.yaml#L1-L21) · **Source:** read from the diff
+**Chosen:** the `simulator` sub-chart is a condition of the cell chart, off by default, with a NetworkPolicy allowing only the simulator pod to reach the Drone pods · **Where:** [`Chart.yaml:24-26`](../../../infra/charts/cell/Chart.yaml#L24-L26), [`values.yaml:14-15`](../../../infra/charts/cell/values.yaml#L14-L15), [`networkpolicy.yaml:1-21`](../../../infra/charts/simulator/templates/networkpolicy.yaml#L1-L21) · **Source:** read from the diff
 
 | Option | For | Against |
 | --- | --- | --- |
-| ✅ Optional, isolated | A cell without simulation runs no simulated Drone; the policy backs D1 at the network | PX4 image default is still `px4io/px4-sitl` ([`values.yaml`](../../../deploy/charts/simulator/values.yaml)); nothing publishes `deploy/images/*` |
+| ✅ Optional, isolated | A cell without simulation runs no simulated Drone; the policy backs D1 at the network | PX4 image default is still `px4io/px4-sitl` ([`values.yaml`](../../../infra/charts/simulator/values.yaml)); nothing publishes `deploy/images/*` |
 | Always on | Criterion 1 "given the dev cell" is met without a flag | A Simulator in every cell |
 
 **Trade-off:** an explicit switch and an image to set, at enabling time.

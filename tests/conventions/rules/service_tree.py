@@ -6,14 +6,15 @@ from typing import ClassVar, List, Optional, Tuple
 
 
 class ServiceTree:
-    """One service folder of the mono-repo, as the convention rules walk it.
+    """One code folder of the mono-repo, holding ``src/`` and ``tests/``, as the convention rules walk it.
 
     Attributes:
-        LAYERS (Tuple[str, ...]): The five layers a service source package holds.
-        root (Path): The service folder, such as ``services/gateway``.
+        LAYERS (Tuple[str, ...]): The five layers a source package may hold as sub-folders.
+        root (Path): The code folder, such as ``backend/swarm-service``.
 
     Notes:
-        A new service is found by ``discover`` without any change to the convention tests.
+        ``PackageTree.discover`` finds the folders of the backend and the scripts, so that a new package is checked
+        without any change to the convention tests.
     """
 
     LAYERS: ClassVar[Tuple[str, ...]] = ("api", "service", "storage", "clients", "models")
@@ -22,7 +23,7 @@ class ServiceTree:
         """Initialise the tree.
 
         Args:
-            root (Path): The service folder.
+            root (Path): The code folder.
         """
         self.root = root
 
@@ -60,41 +61,23 @@ class ServiceTree:
     # Publicly Exposed Methods #
     ############################
 
-    @classmethod
-    def discover(cls, services_root: Path) -> List[ServiceTree]:
-        """Find every service under a folder.
-
-        Args:
-            services_root (Path): The folder holding the services.
-
-        Returns:
-            List[ServiceTree]: One tree per sub-folder not starting with ``.`` or ``_``, sorted by name.
-                Empty when the folder is missing.
-        """
-        if not services_root.is_dir():
-            return []
-        folders = [
-            child for child in services_root.iterdir() if child.is_dir() and not child.name.startswith((".", "_"))
-        ]
-        return [cls(folder) for folder in sorted(folders, key=lambda folder: folder.name)]
-
     @property
     def name(self) -> str:
-        """The service name, which is its folder name."""
+        """The folder name."""
         return self.root.name
 
     @property
     def source_root(self) -> Path:
-        """The ``src`` folder of the service."""
+        """The ``src`` folder."""
         return self.root / "src"
 
     @property
     def tests_root(self) -> Path:
-        """The ``tests`` folder of the service."""
+        """The ``tests`` folder."""
         return self.root / "tests"
 
     def python_files(self) -> List[Path]:
-        """List the Python files of the service.
+        """List the Python files of the folder.
 
         Returns:
             List[Path]: Every ``*.py`` file under ``src/`` and ``tests/``, sorted, without ``__pycache__`` and
@@ -135,12 +118,12 @@ class ServiceTree:
         return parts[1] if parts[1] in self.LAYERS else None
 
     def relative(self, path: Path) -> str:
-        """Return a path relative to the service folder.
+        """Return a path relative to the code folder.
 
         Args:
             path (Path): The path to convert.
 
         Returns:
-            str: The POSIX path from the service root.
+            str: The POSIX path from the folder.
         """
         return path.relative_to(self.root).as_posix()

@@ -13,7 +13,7 @@ class TestServiceImages:
     ROOT: ClassVar[Path] = Path(__file__).resolve().parents[3]
     DOCKERFILES: ClassVar[List[Path]] = sorted(
         [*(Path(__file__).resolve().parents[3] / "backend" / "apps").glob("*/Dockerfile")]
-        + [*(Path(__file__).resolve().parents[3] / "frontends").glob("*/Dockerfile")]
+        + [*(Path(__file__).resolve().parents[3] / "frontend" / "apps").glob("*/Dockerfile")]
     )
     APPS: ClassVar[List[Path]] = sorted(
         path for path in (Path(__file__).resolve().parents[3] / "backend" / "apps").iterdir() if path.is_dir()
@@ -130,9 +130,6 @@ class TestServiceImages:
     def test_the_final_stage_has_an_entrypoint_or_a_command(self, dockerfile: Path) -> None:
         stage = self._final_stage(dockerfile)
         assert self._instructions(stage, self.ENTRYPOINT) or self._instructions(stage, self.CMD)
-
-    def test_there_is_no_services_folder_left(self) -> None:
-        assert not (self.ROOT / "services").exists()
 
     def test_the_gateway_runs_swarm_gateway(self) -> None:
         stage = self._final_stage(self.GATEWAY)

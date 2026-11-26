@@ -3,12 +3,12 @@ from __future__ import annotations
 # First-party imports
 from tests.harness.checks.helpers import call
 
-CHANGED = ["services/missions/tests/api/test_x.py", "services/missions/src/missions/api/app.py"]
+CHANGED = ["frontend/apps/ground-control/src/app.test.tsx", "frontend/apps/ground-control/src/app.tsx"]
 
 
 class TestChecksFailingFiles:
-    def test_a_path_printed_from_the_service_root_names_the_changed_file(self) -> None:
-        out = "FAILED tests/api/test_x.py::test_a - assert 1 == 2"
+    def test_a_path_printed_from_the_package_root_names_the_changed_file(self) -> None:
+        out = "FAIL src/app.test.tsx > the app > shows its title"
         found = call(f"checks.failing_files({out!r}, {CHANGED!r})")
         assert [name for name, _ in found] == [CHANGED[0]]
 
@@ -18,5 +18,5 @@ class TestChecksFailingFiles:
         assert [name for name, _ in found] == [CHANGED[1]]
 
     def test_a_bare_file_name_names_nothing(self) -> None:
-        out = "FAILED test_x.py::test_a"
+        out = "FAIL app.test.tsx > the app"
         assert call(f"checks.failing_files({out!r}, {CHANGED!r})") == []

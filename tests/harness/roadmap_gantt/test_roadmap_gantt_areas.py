@@ -26,24 +26,44 @@ class TestRoadmapGanttAreas:
     @pytest.mark.parametrize(
         ("text", "expected"),
         [
-            ("backend/apps/gateway", {"services/gateway"}),
-            ("backend/libs/swarm-nats", {"packages/python/swarm-nats"}),
-            ("frontend/apps/ground-control", {"frontends/ground-control"}),
-            ("frontend/packages/ui", {"packages/ts/ui"}),
-            ("rust/swarm-core", {"packages/rust/swarm-core"}),
-            ("infra/charts", {"deploy/charts"}),
-            ("qa/e2e", {"packages/ts/e2e"}),
-            ("services/gateway", {"services/gateway"}),
+            ("backend/apps/gateway", {"backend/apps/gateway"}),
+            ("backend/libs/swarm-nats", {"backend/libs/swarm-nats"}),
+            ("backend/swarm-models", {"backend/swarm-models"}),
+            ("frontend/apps/ground-control", {"frontend/apps/ground-control"}),
+            ("frontend/packages/ui", {"frontend/packages/ui"}),
+            ("rust/swarm-core", {"rust/swarm-core"}),
+            ("infra/charts", {"infra/charts"}),
+            ("qa/e2e", {"qa/e2e"}),
         ],
     )
-    def test_both_layouts_name_the_same_area(self, text: str, expected: Set[str]) -> None:
+    def test_a_target_layout_folder_is_its_own_area(self, text: str, expected: Set[str]) -> None:
         assert self.evaluate(f"areas({text!r})") == expected
 
-    def test_a_ticket_in_the_new_layout_conflicts_with_one_in_the_old(self) -> None:
-        old = self.evaluate("areas('services/gateway')")
-        new = self.evaluate("areas('backend/apps/gateway')")
-        assert old & new
+    @pytest.mark.parametrize(
+        ("text", "expected"),
+        [
+            ("services/gateway", {"backend/apps/gateway"}),
+            ("packages/python/swarm-models", {"backend/swarm-models"}),
+            ("packages/python (lifecycle, logging, catalog)", {"backend/libs"}),
+            ("frontends/ground-control", {"frontend/apps/ground-control"}),
+            ("packages/ts/live", {"frontend/packages/live"}),
+            ("packages/rust (safety)", {"rust"}),
+            ("deploy/charts", {"infra/charts"}),
+        ],
+    )
+    def test_a_folder_the_ticket_graph_still_names_is_read_as_its_target_layout_folder(
+        self, text: str, expected: Set[str]
+    ) -> None:
+        assert self.evaluate(f"areas({text!r})") == expected
 
-    @pytest.mark.parametrize("area", ["services/gateway", "backend/apps/gateway"])
-    def test_the_alias_table_gives_the_area_in_both_layouts(self, area: str) -> None:
-        assert self.evaluate(f"equivalent_areas({area!r})") == {"services/gateway", "backend/apps/gateway"}
+    @pytest.mark.parametrize(
+        ("text", "expected"),
+        [
+            ("gateway, notifier", {"backend/apps/gateway", "backend/apps/notifier"}),
+            ("planner, Mission studio", {"backend/apps/planner", "frontend/apps/mission-studio"}),
+            ("mavlink adapter", {"rust"}),
+            ("any service or app", {"*"}),
+        ],
+    )
+    def test_a_named_app_or_crate_is_its_target_layout_folder(self, text: str, expected: Set[str]) -> None:
+        assert self.evaluate(f"areas({text!r})") == expected

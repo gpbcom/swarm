@@ -6,7 +6,7 @@
 
 - A query that forgets the Operator filter returns nothing, in gateway, missions and fleet (criterion 1 of [TICKET.md](TICKET.md), BR-008).
 - The OpenAPI documents are published and `packages/ts/api-client` is checked in CI (criterion 2 of [TICKET.md](TICKET.md)).
-- Each service has one multi-stage image, built with `uv sync --no-editable` (AGENT.md, Docker images; [`services/gateway/Dockerfile`](../../../services/gateway/Dockerfile)).
+- Each service has one multi-stage image, built with `uv sync --no-editable` (AGENT.md, Docker images; [`backend/apps/gateway/Dockerfile`](../../../backend/apps/gateway/Dockerfile)).
 - A service never imports another service, and shared code goes in `packages/` (AGENT.md, Services).
 - No hard-coded strings, one class per file, every branch logs (CLAUDE.md code rules).
 
@@ -23,7 +23,7 @@
 
 ## <a id="d1"></a>D1: Where an installed service finds its folders
 
-**Chosen:** copy `HOME_KEY`, `service_folder()`, `conf_folder()` and `migrations_folder()` of the gateway into [`missions_config.py`](../../../services/missions/src/missions/models/config/missions_config.py) and [`fleet_config.py`](../../../services/fleet/src/fleet/models/config/fleet_config.py) · **Where:** [`gateway_config.py:153-163`](../../../services/gateway/src/gateway/models/config/gateway_config.py#L153-L163) · **Source:** K33
+**Chosen:** copy `HOME_KEY`, `service_folder()`, `conf_folder()` and `migrations_folder()` of the gateway into [`missions_config.py`](../../../backend/swarm-models/src/swarm_models/config/missions/missions_config.py) and [`fleet_config.py`](../../../backend/swarm-models/src/swarm_models/config/fleet/fleet_config.py) · **Where:** [`gateway_config.py:153-163`](../../../backend/swarm-models/src/swarm_models/config/gateway/gateway_config.py#L153-L163) · **Source:** K33
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -37,7 +37,7 @@
 
 ## <a id="d2"></a>D2: The migrations folder in the schema factory
 
-**Chosen:** the factories call `<Service>Config.migrations_folder()` · **Where:** [`schema_service_factory.py:36-43`](../../../services/gateway/src/gateway/service/factories/schema_service_factory.py#L36-L43), [missions](../../../services/missions/src/missions/service/factories/schema_service_factory.py), [fleet](../../../services/fleet/src/fleet/service/factories/schema_service_factory.py) · **Source:** K33
+**Chosen:** the factories call `<Service>Config.migrations_folder()` · **Where:** [`schema_service_factory.py:36-43`](../../../backend/swarm-service/src/swarm_service/shared/migrations/factories/schema_service_factory.py#L36-L43), [missions](../../../backend/swarm-service/src/swarm_service/shared/migrations/factories/schema_service_factory.py), [fleet](../../../backend/swarm-service/src/swarm_service/shared/migrations/factories/schema_service_factory.py) · **Source:** K33
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -51,7 +51,7 @@
 
 ## <a id="d3"></a>D3: The images test
 
-**Chosen:** parse the runtime stage for `COPY --from=build .../conf` and require `ENV SWARM_<SERVICE>_HOME` equal to the destination minus `/conf`, for each Dockerfile of `services/` · **Where:** [`test_service_images.py:64-73`](../../../tests/deploy/images/test_service_images.py#L64-L73) · **Source:** K33
+**Chosen:** parse the runtime stage for `COPY --from=build .../conf` and require `ENV SWARM_<SERVICE>_HOME` equal to the destination minus `/conf`, for each Dockerfile of `services/` · **Where:** [`test_service_images.py:64-73`](../../../tests/infra/images/test_service_images.py#L64-L73) · **Source:** K33
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -65,7 +65,7 @@
 
 ## <a id="d4"></a>D4: The runtime `ENV`
 
-**Chosen:** add `SWARM_<SERVICE>_HOME=/app` to the existing `ENV` instruction · **Where:** [`services/gateway/Dockerfile:37-39`](../../../services/gateway/Dockerfile#L37-L39), [missions](../../../services/missions/Dockerfile#L39), [fleet](../../../services/fleet/Dockerfile#L39) · **Source:** K33
+**Chosen:** add `SWARM_<SERVICE>_HOME=/app` to the existing `ENV` instruction · **Where:** [`backend/apps/gateway/Dockerfile:37-39`](../../../backend/apps/gateway/Dockerfile#L37-L39), [missions](../../../backend/apps/missions/Dockerfile#L39), [fleet](../../../backend/apps/fleet/Dockerfile#L39) · **Source:** K33
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -78,11 +78,11 @@
 
 ## <a id="d5"></a>D5: How the Operator is enforced
 
-**Chosen:** a policy on `operator_id`, forced on the owner, against a setting that a unit of work sets for each transaction · **Where:** [`row_level_security.py:41-45`](../../../packages/python/swarm-storage/src/swarm_storage/storage/postgres/ddl/row_level_security.py#L41-L45), [`unit_of_work.py:88-89`](../../../packages/python/swarm-storage/src/swarm_storage/storage/postgres/unit_of_work.py#L88-L89) · **Source:** PLAN.md and the technical page on PostgreSQL, read from the diff
+**Chosen:** a policy on `operator_id`, forced on the owner, against a setting that a unit of work sets for each transaction · **Where:** [`row_level_security.py:41-45`](../../../backend/swarm-storage/src/swarm_storage/shared/postgres/ddl/row_level_security.py#L41-L45), [`unit_of_work.py:88-89`](../../../backend/swarm-storage/src/swarm_storage/shared/postgres/unit_of_work.py#L88-L89) · **Source:** PLAN.md and the technical page on PostgreSQL, read from the diff
 
 | Option | For | Against |
 | --- | --- | --- |
-| ✅ Forced row-level security | The specification says a query that forgets the filter returns nothing. `NULLIF` makes an unset setting match no row. `FORCE` binds the table owner too. The repository adds no filter ([`postgres_repository.py:205`](../../../packages/python/swarm-storage/src/swarm_storage/storage/postgres/repositories/postgres_repository.py#L205)). | Every query must run in a unit of work. A refused write needs mapping to `SEStorageOperatorRefusedError`. |
+| ✅ Forced row-level security | The specification says a query that forgets the filter returns nothing. `NULLIF` makes an unset setting match no row. `FORCE` binds the table owner too. The repository adds no filter ([`postgres_repository.py:205`](../../../backend/swarm-storage/src/swarm_storage/shared/postgres/repositories/postgres_repository.py#L205)). | Every query must run in a unit of work. A refused write needs mapping to `SEStorageOperatorRefusedError`. |
 | An Operator filter in each query | No database setting. | A forgotten filter leaks rows, which is the failure criterion 1 forbids. |
 
 **Trade-off:** the rule lives in the database, and the code pays for it with the unit of work.
@@ -91,7 +91,7 @@
 
 ## <a id="d6"></a>D6: Idempotency store
 
-**Chosen:** a per-process memory store, keys global, body buffered whole · **Where:** [`idempotency_middleware.py:214`](../../../packages/python/swarm-rest/src/swarm_rest/api/rest/idempotency_middleware.py#L214), [`memory_idempotency_store.py`](../../../packages/python/swarm-rest/src/swarm_rest/storage/idempotency/memory_idempotency_store.py) · **Source:** read from the diff and the review
+**Chosen:** a per-process memory store, keys global, body buffered whole · **Where:** [`idempotency_middleware.py:214`](../../../backend/swarm-api/src/swarm_api/middleware/idempotency_middleware.py#L214), [`memory_idempotency_store.py`](../../../backend/swarm-storage/src/swarm_storage/shared/idempotency/memory_idempotency_store.py) · **Source:** read from the diff and the review
 
 | Option | For | Against |
 | --- | --- | --- |

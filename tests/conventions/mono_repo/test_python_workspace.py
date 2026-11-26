@@ -11,7 +11,7 @@ import pytest
 from pydantic import JsonValue
 
 # First-party imports
-from tests.conventions.mono_repo.helpers import SERVICE_LAYERS, repo_root
+from tests.conventions.mono_repo.helpers import repo_root
 
 
 class TestPythonWorkspace:
@@ -31,7 +31,6 @@ class TestPythonWorkspace:
         "flight-engine": "flight_engine_router.py",
     }
     MEMBERS: ClassVar[List[str]] = ["backend/libs/*", "backend/swarm-*", "backend/apps/*", "scripts"]
-    OLD_MEMBERS: ClassVar[List[str]] = ["services/*", "packages/python/*"]
     NEW_PACKAGES: ClassVar[List[str]] = ["swarm-storage", "swarm-api", "swarm-web", "swarm-nats"]
     SERVE_ENTRY: ClassVar[str] = "serve"
     APP_FILES: ClassVar[List[str]] = ["__init__.py", "main.py"]
@@ -60,18 +59,7 @@ class TestPythonWorkspace:
         "backend/libs/swarm-nats/src",
         "scripts/src",
     ]
-    GONE: ClassVar[List[str]] = [
-        "services/gateway",
-        "services/missions",
-        "services/fleet",
-        "packages/python/swarm-rest",
-        "services/simulator",
-        "services/flight-engine",
-        "packages/python/swarm-live",
-        "packages/python/swarm-i18n",
-        "services",
-        "packages/python",
-    ]
+    OLD_LAYOUT: ClassVar[List[str]] = ["services", "packages", "frontends", "deploy", "compose.e2e.yaml"]
     DISTRIBUTION_SEPARATORS: ClassVar[str] = r"[\[<>=!~;@ ]"
 
     def load_toml(self, path: Path) -> Dict[str, JsonValue]:
@@ -122,10 +110,6 @@ class TestPythonWorkspace:
     def test_the_uv_workspace_lists_its_members(self, member: str) -> None:
         assert member in self.members()
 
-    @pytest.mark.parametrize("member", OLD_MEMBERS)
-    def test_the_uv_workspace_no_longer_lists_the_old_layout(self, member: str) -> None:
-        assert member not in self.members()
-
     @pytest.mark.parametrize("tool_name", ["ruff", "mypy", "pytest", "pytest-xdist", "pytest-asyncio", "maturin"])
     def test_the_dev_group_lists_the_tool(self, tool_name: str) -> None:
         group = self.load_root().get("dependency-groups", {})
@@ -141,31 +125,15 @@ class TestPythonWorkspace:
     def test_there_is_exactly_one_lock_file_at_the_root(self) -> None:
         root = repo_root()
         assert (root / "uv.lock").is_file()
-        assert not list((root / "services").rglob("uv.lock"))
-        assert not list((root / "packages").rglob("uv.lock"))
         assert not list((root / "backend").rglob("uv.lock"))
-
-    def test_the_services_and_the_python_packages_folders_are_gone(self) -> None:
-        assert not (repo_root() / "services").exists()
-        assert not (repo_root() / "packages" / "python").exists()
+        assert not list((root / "scripts").rglob("uv.lock"))
 
     def app_folder(self, app: str) -> Path:
         return repo_root() / "backend" / "apps" / app
 
-    @pytest.mark.parametrize("path", GONE)
-    def test_the_old_services_and_swarm_rest_are_gone(self, path: str) -> None:
+    @pytest.mark.parametrize("path", OLD_LAYOUT)
+    def test_no_folder_of_the_layout_before_the_refactor_comes_back(self, path: str) -> None:
         assert not (repo_root() / path).exists()
-
-    def test_no_service_has_a_top_level_layer_package(self) -> None:
-        offenders = [
-            str(path)
-            for src in (repo_root() / "services").glob("*/src")
-            for layer in SERVICE_LAYERS
-            for path in [src / layer]
-            if path.exists()
-        ]
-        assert offenders == []
-        assert list((repo_root() / "backend" / "apps").glob("*/src/swarm_*")), "No app source package was found."
 
     def module_of(self, app: str) -> str:
         return "swarm_" + app.replace("-", "_")

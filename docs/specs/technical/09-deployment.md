@@ -4,7 +4,7 @@
 > [🏠 Index](../README.md) · [◀️ Observability](08-observability.md) · 📄 **Page 104 / 120** · [GUI and WebUI ▶️](10-frontends.md)
 <!-- /spec:nav-top -->
 
-**Status:** 🟢 Approved · **Updated:** 2026-11-18
+**Status:** 🟢 Approved · **Updated:** 2026-11-26
 
 > [!NOTE]
 > Where Swarm runs and how it gets there: sovereign EU providers and self-hosted k3s cells, Helm and Argo CD, rollout waves, the edge appliance, the on-premises bundle, the CI pipeline and the environments. Decisions T28 to T31, T37 and T38.
@@ -65,9 +65,9 @@
 
 GitHub Actions, following the steps of AGENT.md, each step passing before the next:
 
-1. **Detect changes** per service, front end and package; a change in `packages/` or a lock file runs everything that depends on it.
+1. **Detect changes** per app, front end and package; a change in the kernel (`backend/libs/`), `scripts/`, `rust/`, `frontend/packages/` or a lock file runs everything that depends on it, and a change in a layer package of `backend/` runs the apps that own its domain.
 2. **Check:** ruff, mypy, pytest (Python); cargo fmt, clippy, tests and benchmarks (Rust); eslint, tsc, Vitest (TypeScript); generated types and the specifications (`specs.py check`) up to date.
-3. **Build** one image per changed service and front end (multi-stage, repository root as context), with remote caches (uv, Cargo, Turborepo).
+3. **Build** one image per changed backend app and front end (multi-stage, repository root as context), with remote caches (uv, Cargo, Turborepo).
 4. **Scan and sign:** Trivy and OSV-Scanner, SBOM, cosign signature; push to GHCR.
 5. **Test the images:** Playwright against the real images started by `infra/compose/e2e.yaml`; visual comparison with the specification mock-ups.
 6. **Publish** images tagged with the commit SHA, from `develop` and `master` only (GitFlow); Argo CD takes it from there.

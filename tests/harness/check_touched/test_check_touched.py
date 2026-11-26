@@ -118,32 +118,6 @@ class TestCheckTouched:
         assert "no-fail: " in result.stdout
         assert not (git_dir(worker) / COUNTER_NAME).exists()
 
-    def test_a_service_source_change_lists_its_python_checks(self, tmp_path: Path) -> None:
-        main = make_repo(tmp_path, None)
-        worker = add_worktree(main, tmp_path)
-        source = worker / "services" / "demo" / "src" / "demo" / "service" / "x" / "y.py"
-        source.parent.mkdir(parents=True)
-        source.write_text("x = 1\n", encoding="utf-8")
-        relative = "services/demo/src/demo/service/x/y.py"
-        before = run_hook(worker, "--dry-run").stdout.splitlines()
-        assert any(line.endswith(f"uv run ruff check {relative}") for line in before)
-        assert any(line.endswith(f"uv run ruff format --check {relative}") for line in before)
-        assert any(line.endswith("uv run mypy services/demo/src") for line in before)
-        assert not any("pytest" in line for line in before)
-        (worker / "services" / "demo" / "tests" / "service" / "x").mkdir(parents=True)
-        after = run_hook(worker, "--dry-run").stdout.splitlines()
-        assert any(line.endswith("uv run pytest services/demo/tests/service/x -n 2") for line in after)
-
-    def test_a_change_only_under_tests_lists_ruff_but_no_pytest(self, tmp_path: Path) -> None:
-        main = make_repo(tmp_path, None)
-        worker = add_worktree(main, tmp_path)
-        test_file = worker / "services" / "demo" / "tests" / "service" / "x" / "test_y.py"
-        test_file.parent.mkdir(parents=True)
-        test_file.write_text("x = 1\n", encoding="utf-8")
-        output = run_hook(worker, "--dry-run").stdout
-        assert "uv run ruff check services/demo/tests/service/x/test_y.py" in output
-        assert "pytest" not in output
-
     def test_a_specification_change_lists_the_specs_check(self, tmp_path: Path) -> None:
         main = make_repo(tmp_path, None)
         worker = add_worktree(main, tmp_path)

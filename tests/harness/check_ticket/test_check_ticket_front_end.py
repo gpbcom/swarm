@@ -17,7 +17,7 @@ TICKET = "T0.16"
 GRAPH_RELATIVE = "gantt/ticket-graph.json"
 
 
-class TestCheckTicketNewLayout:
+class TestCheckTicketFrontEnd:
     def root_with_area(self, tmp_path: Path, area: str) -> Path:
         root = build_root(tmp_path, TICKET)
         specs = root / "docs" / "specs"
@@ -44,13 +44,12 @@ class TestCheckTicketNewLayout:
             check=False,
         )
 
-    @pytest.mark.parametrize("area", ["frontends/ground-control", "frontend/apps/ground-control"])
-    def test_a_front_end_ticket_of_either_layout_must_list_its_screens(self, tmp_path: Path, area: str) -> None:
-        result = self.run_script(self.root_with_area(tmp_path, area))
+    def test_a_front_end_ticket_must_list_its_screens(self, tmp_path: Path) -> None:
+        result = self.run_script(self.root_with_area(tmp_path, "frontend/apps/ground-control"))
         assert result.returncode == 1
         assert "TKT-21" in result.stdout
 
-    @pytest.mark.parametrize("area", ["backend/apps/gateway", "services/gateway"])
-    def test_a_service_ticket_of_either_layout_needs_no_screen(self, tmp_path: Path, area: str) -> None:
+    @pytest.mark.parametrize("area", ["backend/apps/gateway", "backend/swarm-service", "frontend/packages/ui"])
+    def test_a_ticket_that_changes_no_front_end_app_needs_no_screen(self, tmp_path: Path, area: str) -> None:
         result = self.run_script(self.root_with_area(tmp_path, area))
         assert "TKT-21" not in result.stdout

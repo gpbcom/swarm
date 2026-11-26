@@ -4,7 +4,7 @@
 > [🏠 Index](../README.md) · [◀️ Storage](03-storage.md) · 📄 **Page 99 / 120** · [API layer ▶️](05-api.md)
 <!-- /spec:nav-top -->
 
-**Status:** 🟢 Approved · **Updated:** 2026-11-18
+**Status:** 🟢 Approved · **Updated:** 2026-11-26
 
 > [!NOTE]
 > What each service does and how its hot paths meet their budgets: the flight engine and its safety loop, the Drone adapters, the planner, processing, the AI agents with MCP and A2A, evidence, notifications and the simulator. Decisions T2, T9 to T12.
@@ -39,7 +39,7 @@
 | notifier | Cell | Python | Pods | [📘 FS-012](../functional/features/FS-012-operators-deployment-and-languages.md) |
 | simulator | Cell and staging | Rust + PX4 SITL | Nodes | [📘 FS-010](../functional/features/FS-010-simulator-and-training.md), [📘 FS-011](../functional/features/FS-011-drone-adapters.md) |
 
-Every Python service follows AGENT.md: layers `api`, `service`, `storage`, `models`; runnables with `initialize`, `run`, `close`; factories; logging rules.
+Every Python service is a thin app of `backend/apps/<app>` built on the layer packages `swarm_api`, `swarm_service`, `swarm_storage`, `swarm_clients` and `swarm_models` ([🧅 Layers as packages](01-architecture.md#layers)) and follows AGENT.md: runnables with `initialize`, `run`, `close`; factories; logging rules.
 
 ## <a id="flight-engine"></a>🔩 Flight engine
 

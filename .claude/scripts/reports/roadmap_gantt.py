@@ -93,24 +93,26 @@ SERVICES = [
     "notifier",
 ]
 APPS = {
-    "ground control": "frontends/ground-control",
-    "mission studio": "frontends/mission-studio",
-    "back office": "frontends/back-office",
-    "client portal": "frontends/client-portal",
+    "ground control": "frontend/apps/ground-control",
+    "mission studio": "frontend/apps/mission-studio",
+    "back office": "frontend/apps/back-office",
+    "client portal": "frontend/apps/client-portal",
 }
 AREA = re.compile(
-    r"(services/[\w-]+|frontends/[\w-]+|packages/\w+/[\w-]+|packages/\w+|deploy/[\w-]+|tests/[\w-]+"
-    r"|\.github|\.claude|backend/(?:apps|libs)/[\w-]+|frontend/(?:apps|packages)/[\w-]+|rust/[\w-]+"
-    r"|infra/[\w-]+|qa/e2e)"
+    r"(?<![\w/.-])(backend/(?:apps|libs)/[\w-]+|backend/libs|backend/swarm-[\w-]+|frontend/apps/[\w-]+"
+    r"|frontend/packages(?:/[\w-]+)?|rust(?:/[\w-]+)?(?![\w-])|infra/[\w-]+|qa/e2e|tests/[\w-]+|\.github|\.claude)"
 )
-AREA_ALIASES = {
-    "backend/apps/": "services/",
-    "backend/libs/": "packages/python/",
-    "frontend/apps/": "frontends/",
-    "frontend/packages/": "packages/ts/",
-    "qa/e2e": "packages/ts/e2e",
-    "rust/": "packages/rust/",
-    "infra/": "deploy/",
+# The ticket graph still names its areas in the layout from before the refactor, until phase 7 of the refactor plan
+# rewrites it: each of those folders is read as its target-layout folder, most specific first.
+GRAPH_FOLDERS = {
+    "packages/python/swarm-models": "backend/swarm-models",
+    "packages/python": "backend/libs",
+    "packages/rust": "rust",
+    "packages/ts/e2e": "qa/e2e",
+    "packages/ts": "frontend/packages",
+    "frontends/": "frontend/apps/",
+    "services/": "backend/apps/",
+    "deploy/": "infra/",
 }
 TICKET_ID = re.compile(r"T(\d+)\.(\d+)")
 
@@ -216,43 +218,21 @@ def measured(done: Set[str]) -> Tuple[float, float]:
     return (sum(minutes) / len(minutes) if minutes else 0.0, sum(tokens) / len(tokens) if tokens else 0.0)
 
 
-def swap_prefix(area: str, source: str, target: str) -> Optional[str]:
-    """Return ``area`` with the folder ``source`` replaced by ``target``, or None when it is not under ``source``."""
-    head = source.rstrip("/")
-    if area == head:
-        return target.rstrip("/")
-    if area.startswith(head + "/"):
-        return target.rstrip("/") + area[len(head) :]
-    return None
-
-
-def canonical_area(area: str) -> str:
-    """Return an area in the layout of the ticket graph, so that both layouts name one area (``AREA_ALIASES``)."""
-    for new, old in AREA_ALIASES.items():
-        swapped = swap_prefix(area, new, old)
-        if swapped is not None:
-            return swapped
-    return area
-
-
-def equivalent_areas(area: str) -> Set[str]:
-    """Return the area in both layouts: the one given, its graph form and the new-layout form of that."""
-    graph = canonical_area(area)
-    found = {area, graph}
-    for new, old in AREA_ALIASES.items():
-        swapped = swap_prefix(graph, old, new)
-        if swapped is not None:
-            found.add(swapped)
-    return found
+def target_layout(text: str) -> str:
+    """Return a ticket's area text with the graph's folders of the old layout written as target-layout folders."""
+    for old, new in GRAPH_FOLDERS.items():
+        text = re.sub(rf"(?<![\w/.-]){re.escape(old)}", new, text)
+    return text
 
 
 def areas(text: str) -> Set[str]:
-    """Return the areas a ticket changes; ``*`` when it may change any of them."""
-    found = {canonical_area(area.rstrip("/")) for area in AREA.findall(text)}
-    found |= {f"services/{name}" for name in SERVICES if re.search(rf"(?<![/\w-]){name}\b", text)}
+    """Return the areas a ticket changes, as target-layout folders; ``*`` when it may change any of them."""
+    text = target_layout(text)
+    found = {area.rstrip("/") for area in AREA.findall(text)}
+    found |= {f"backend/apps/{name}" for name in SERVICES if re.search(rf"(?<![/\w-]){name}\b", text)}
     found |= {path for name, path in APPS.items() if name in text.lower()}
     if "mavlink" in text:
-        found.add("packages/rust")
+        found.add("rust")
     if not found or "any " in text or "every service" in text:
         return {"*"}
     return found

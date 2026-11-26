@@ -5,9 +5,9 @@
 ## 🎯 Constraints
 
 - A call without a token, with an expired token or with another Operator's identifier is refused and logged ([TICKET.md](TICKET.md), BR-008).
-- A person must not be able to change their own Operator, or BR-008 is void ([`swarm-realm.json`](../../../deploy/charts/keycloak/files/swarm-realm.json#L503-L510)).
-- The gateway keeps the layers of AGENT.md: the guard in `service`, the Keycloak call in `clients`, the route dependency in `api`, and no model logs ([`services/gateway/src/gateway/service/auth/access_guard.py`](../../../services/gateway/src/gateway/service/auth/access_guard.py)).
-- The realm file stays self-contained and secret-free, so the chart can import it as it is ([`deploy/charts/keycloak/templates/deployment.yaml:23`](../../../deploy/charts/keycloak/templates/deployment.yaml#L23)).
+- A person must not be able to change their own Operator, or BR-008 is void ([`swarm-realm.json`](../../../infra/charts/keycloak/files/swarm-realm.json#L503-L510)).
+- The gateway keeps the layers of AGENT.md: the guard in `service`, the Keycloak call in `clients`, the route dependency in `api`, and no model logs ([`backend/swarm-service/src/swarm_service/gateway/auth/access_guard.py`](../../../backend/swarm-service/src/swarm_service/gateway/auth/access_guard.py)).
+- The realm file stays self-contained and secret-free, so the chart can import it as it is ([`infra/charts/keycloak/templates/deployment.yaml:23`](../../../infra/charts/keycloak/templates/deployment.yaml#L23)).
 
 ## ⚖️ Choices at a glance
 
@@ -19,11 +19,11 @@
 
 ## <a id="d1"></a>D1: Where the Operator of a person is set
 
-**Chosen:** a declared `operator_id` attribute with view and edit for administrators only · **Where:** [`deploy/charts/keycloak/files/swarm-realm.json:503-510`](../../../deploy/charts/keycloak/files/swarm-realm.json#L503-L510) · **Source:** K16 and K10, confirmed by the reviewer
+**Chosen:** a declared `operator_id` attribute with view and edit for administrators only · **Where:** [`infra/charts/keycloak/files/swarm-realm.json:503-510`](../../../infra/charts/keycloak/files/swarm-realm.json#L503-L510) · **Source:** K16 and K10, confirmed by the reviewer
 
 | Option | For | Against |
 | --- | --- | --- |
-| ✅ Declarative user profile | Keeps the existing attribute mapper ([`swarm-realm.json:112-118`](../../../deploy/charts/keycloak/files/swarm-realm.json#L112-L118)) and the realm file self-contained. Only admins can set it. Two realm tests guard it ([`tests/deploy/charts/keycloak/test_swarm_realm.py:256-265`](../../../tests/deploy/charts/keycloak/test_swarm_realm.py#L256-L265)). | Follows the spec's "each Operator an organisation" less closely. No value validation yet. |
+| ✅ Declarative user profile | Keeps the existing attribute mapper ([`swarm-realm.json:112-118`](../../../infra/charts/keycloak/files/swarm-realm.json#L112-L118)) and the realm file self-contained. Only admins can set it. Two realm tests guard it ([`tests/infra/charts/keycloak/test_swarm_realm.py:256-265`](../../../tests/infra/charts/keycloak/test_swarm_realm.py#L256-L265)). | Follows the spec's "each Operator an organisation" less closely. No value validation yet. |
 | Derive from organisation membership | Closer to the wording of the technical page. | Needs an organisation mapper and an organisation model that carries the id, and changes the token mapper and the test contract. |
 
 **Trade-off:** the claim the gateway reads is unchanged, so the later move to organisations does not touch the gateway.
@@ -32,7 +32,7 @@
 
 ## <a id="d2"></a>D2: Unmanaged attributes
 
-**Chosen:** `unmanagedAttributePolicy` left unset · **Where:** [`deploy/charts/keycloak/files/swarm-realm.json:510`](../../../deploy/charts/keycloak/files/swarm-realm.json#L510) · **Source:** K16, test in [`test_swarm_realm.py:264`](../../../tests/deploy/charts/keycloak/test_swarm_realm.py#L264)
+**Chosen:** `unmanagedAttributePolicy` left unset · **Where:** [`infra/charts/keycloak/files/swarm-realm.json:510`](../../../infra/charts/keycloak/files/swarm-realm.json#L510) · **Source:** K16, test in [`test_swarm_realm.py:264`](../../../tests/infra/charts/keycloak/test_swarm_realm.py#L264)
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -45,7 +45,7 @@
 
 ## <a id="d3"></a>D3: Making the live feed test deterministic
 
-**Chosen:** flush the feed's NATS connection after join, before publishing · **Where:** [`services/gateway/tests/service/live/test_live_feed.py:57-59`](../../../services/gateway/tests/service/live/test_live_feed.py#L57-L59) · **Source:** FIX task (this file belongs to the shared work of T0.18, not judged as T0.11 work)
+**Chosen:** flush the feed's NATS connection after join, before publishing · **Where:** [`tests/swarm_service/gateway/live/test_live_feed.py:57-59`](../../../tests/swarm_service/gateway/live/test_live_feed.py#L57-L59) · **Source:** FIX task (this file belongs to the shared work of T0.18, not judged as T0.11 work)
 
 | Option | For | Against |
 | --- | --- | --- |

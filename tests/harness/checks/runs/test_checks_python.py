@@ -39,8 +39,8 @@ class TestChecksPython:
         assert not any("mypy" in command for command in commands)
         assert any(entry.startswith("mypy: not run") for entry in skipped)
 
-    def test_mypy_reads_services_packages_and_backend_sources(self, tmp_path: Path) -> None:
-        folders = ("services/a/src", "packages/python/b/src", "backend/c/src")
+    def test_mypy_reads_the_layers_the_libs_the_apps_and_the_scripts(self, tmp_path: Path) -> None:
+        folders = ("backend/swarm-service/src", "backend/libs/swarm-web/src", "backend/apps/gateway/src", "scripts/src")
         commands, skipped = python_run(tree(tmp_path, *folders))
         mypy = next(command for command in commands if "mypy" in command)
         assert set(folders) <= set(mypy)

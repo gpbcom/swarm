@@ -22,21 +22,23 @@ Usage, from the repository root, on the ticket branch:
 
 Which checks apply is decided here, never by a model (TKT-6): a check whose target does not exist yet (a Cargo
 workspace with no member crate, no TypeScript workspace package, no Python source for mypy) is reported under
-``not_applicable`` with its reason. Only project code is checked with the AGENT.md tools (``services/``, ``packages/``,
-``frontend/apps/``, ``tests/``, ``infra/``); ``.claude/`` and ``docs/`` are covered by ``specs.py check``, which always
-runs, with ``ticket_refs.py check`` (TICKET.md, PLAN.md and PROGRESS.md refer to the specification, TKT-2) and
+``not_applicable`` with its reason. Only project code is checked with the AGENT.md tools (``backend/``, ``scripts/``,
+``frontend/``, ``rust/``, ``tests/``, ``infra/``); ``.claude/`` and ``docs/`` are covered by ``specs.py check``, which
+always runs, with ``ticket_refs.py check`` (TICKET.md, PLAN.md and PROGRESS.md refer to the specification, TKT-2) and
 ``plan.py check`` (the readable view of PLAN.md is up to date). Each check's output is saved to ``docs/tickets/<ID>/tests-evidences/<check>.txt``. The last line printed is
 the JSON verdict: ``{"passed": bool, "failures": [{"check", "file", "detail", "environment"}], "not_applicable": [...], "passed_checks": [...]}``.
 A failure with ``environment: true`` comes from a missing tool or module, not from the code.
 
-Several tickets share the main checkout (TKT-16), and the AGENT.md tools read a whole workspace (``uv`` the
-``services/*`` glob, ``pnpm -r`` every package), so another ticket's half-built work would fail this one. When the
-ticket has recorded its own files, every check runs in a clean temporary worktree of ``HEAD`` holding only the
-ticket's own changes (TKT-6), removed afterwards; the evidence is still written to the ticket's folder.
+Several tickets share the main checkout (TKT-16), and the AGENT.md tools read a whole workspace (``uv`` every
+member of ``backend/`` and ``scripts/``, ``pnpm -r`` every package), so another ticket's half-built work would fail
+this one. When the ticket has recorded its own files, every check runs in a clean temporary worktree of ``HEAD``
+holding only the ticket's own changes (TKT-6), removed afterwards; the evidence is still written to the ticket's folder.
 """
 
 ROOT = Path(__file__).resolve().parents[3]
-PROJECT_PREFIXES = ("services/", "packages/", "frontend/apps/", "tests/", "infra/")
+PROJECT_PREFIXES = ("backend/", "scripts/", "frontend/", "rust/", "tests/", "infra/")
+# The source folders of the Python packages: the layer packages, the kernel libs, the apps and the scripts.
+MYPY_SOURCE_GLOBS = ("backend/*/src", "backend/libs/*/src", "backend/apps/*/src", "scripts/src")
 TIMEOUT_S = 900
 # A failure whose output holds one of these is caused by the environment (a missing tool or module), not by the
 # ticket's code: fixer agents cannot repair it, so the run stops and the person fixes the environment (TKT-6).
@@ -65,16 +67,11 @@ def run(command: List[str], cwd: Path = ROOT, env: Optional[Dict[str, str]] = No
 
 
 def first_party(module: str, root: Path = ROOT) -> bool:
-    """Tell whether a module name belongs to the repository: its tests, a service or a Python package."""
+    """Tell whether a module name belongs to the repository: its tests, or a package of the backend or the scripts."""
     top = module.split(".")[0]
     if top in ("tests", "conftest") or (root / top).exists():
         return True
-    return (
-        any(root.glob(f"services/*/src/{top}"))
-        or any(root.glob(f"packages/python/*/src/{top}"))
-        or any(root.glob(f"backend/libs/*/src/{top}"))
-        or any(root.glob(f"backend/*/src/{top}"))
-    )
+    return any(any(root.glob(f"{folder}/{top}")) for folder in MYPY_SOURCE_GLOBS)
 
 
 def environment_failure(code: int, out: str, root: Path = ROOT) -> bool:
@@ -203,12 +200,11 @@ FAILING_FILES_MAX = 10
 SWARM_CORE_IMPORT = re.compile(r"^\s*(?:from|import)\s+swarm_core\b", re.MULTILINE)
 SWARM_CORE_MANIFEST = "rust/swarm-core/python/Cargo.toml"
 PRINTED_PATH = re.compile(r"[\w.\-]+(?:/[\w.\-]+)+")
-MYPY_SOURCE_GLOBS = ("services/*/src", "packages/python/*/src", "backend/**/src")
-PYTHON_GLOBS = ("services/*/src/**/*.py", "services/*/tests/**/*.py", "tests/**/*.py")
+PYTHON_GLOBS = ("backend/**/*.py", "scripts/**/*.py", "tests/**/*.py")
 
 
 def imports_swarm_core(root: Path) -> bool:
-    """Tell whether a Python file of a service or of the root ``tests/`` imports the ``swarm_core`` wheel."""
+    """Tell whether a Python file of the backend, the scripts or ``tests/`` imports the ``swarm_core`` wheel."""
     for pattern in PYTHON_GLOBS:
         for path in root.glob(pattern):
             if SWARM_CORE_IMPORT.search(path.read_text(encoding="utf-8", errors="replace")):
@@ -253,8 +249,8 @@ def install_swarm_core(checks: Checks) -> None:
 def names_file(line: str, name: str) -> bool:
     """Tell whether an output line names a changed file (L-34 d).
 
-    The line holds the whole path, or a path printed from a service or package root: a printed path of at least two
-    components that the changed file's path ends with (``tests/api/test_x.py`` names ``services/a/tests/api/test_x.py``).
+    The line holds the whole path, or a path printed from a package root: a printed path of at least two components
+    that the changed file's path ends with (``src/app.tsx`` names ``frontend/apps/ground-control/src/app.tsx``).
     """
     if name in line:
         return True
@@ -264,7 +260,7 @@ def names_file(line: str, name: str) -> bool:
 def failing_files(out: str, changed: List[str]) -> List[Tuple[str, str]]:
     """Return the ticket's files a failed check's output names, each with the output lines that name it (L-32).
 
-    A tool reports the file it fails on (``services/missions/tests/api/cli/test_x.py:27:18``), which is rarely the first
+    A tool reports the file it fails on (``tests/swarm_service/missions/test_x.py:27:18``), which is rarely the first
     file it was given: the failure goes to the owner of the file named, so that the right task fixes it.
     """
     # A line naming many of the ticket's files is a list (an echoed command, a list of files checked), not a failure.
@@ -385,9 +381,9 @@ def typescript_checks(checks: Checks, changed: List[str]) -> None:
         checks.check("pnpm install", ["pnpm", "install", "--frozen-lockfile"], "pnpm-lock.yaml")
         return
     checks.check("pnpm install", ["pnpm", "install", "--frozen-lockfile"], "pnpm-lock.yaml")
-    checks.check("lint", ["pnpm", "-r", "--if-present", "lint"], "frontends")
-    checks.check("typecheck", ["pnpm", "-r", "--if-present", "typecheck"], "frontends")
-    checks.check("test", ["pnpm", "-r", "--if-present", "test"], "frontends")
+    checks.check("lint", ["pnpm", "-r", "--if-present", "lint"], "frontend")
+    checks.check("typecheck", ["pnpm", "-r", "--if-present", "typecheck"], "frontend")
+    checks.check("test", ["pnpm", "-r", "--if-present", "test"], "frontend")
 
 
 def terraform_checks(checks: Checks, changed: List[str]) -> None:

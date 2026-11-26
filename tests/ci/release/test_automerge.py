@@ -69,7 +69,7 @@ class TestAutomerge:
         assert not calls_to(calls, "pr", "merge")
 
     def test_a_ticket_is_merged_into_develop_and_its_branch_deleted(self, tmp_path: Path) -> None:
-        calls = run_automerge(tmp_path, scenario("feature/tickets", "develop", ["services/x.py"], self.GREEN))
+        calls = run_automerge(tmp_path, scenario("feature/tickets", "develop", ["backend/x.py"], self.GREEN))
         [merge] = calls_to(calls, "pr", "merge")
         assert merge["token"] == GITHUB_TOKEN
         assert "T0.10: merge feature/tickets into develop (#12)" in argv(merge)
@@ -78,7 +78,7 @@ class TestAutomerge:
         assert calls.index(merge) < calls.index(delete)
 
     def test_a_branch_that_moved_after_the_merge_is_kept(self, tmp_path: Path) -> None:
-        case = scenario("feature/tickets", "develop", ["services/x.py"], self.GREEN, ref_sha="c" * 40)
+        case = scenario("feature/tickets", "develop", ["backend/x.py"], self.GREEN, ref_sha="c" * 40)
         calls = run_automerge(tmp_path, case)
         assert calls_to(calls, "pr", "merge")
         assert not [call for call in calls if "DELETE" in argv(call)]

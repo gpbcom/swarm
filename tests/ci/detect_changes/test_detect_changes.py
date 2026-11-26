@@ -39,7 +39,7 @@ class TestDetectChanges:
 
     def test_the_output_is_six_lines_in_the_contract_order(self, tmp_path: Path) -> None:
         write_repo(tmp_path)
-        result = run_detector(tmp_path, ["services/alpha/x.py"])
+        result = run_detector(tmp_path, ["backend/apps/alpha/x.py"])
         keys = [line.split("=", 1)[0] for line in result.stdout.splitlines()]
         assert keys == ["services", "typescript", "rust", "repository", "specs", "images"]
         values = outputs(result)
@@ -51,43 +51,49 @@ class TestDetectChanges:
     def test_no_changed_path_selects_nothing(self, tmp_path: Path) -> None:
         assert self.detect(tmp_path, []) == NOTHING
 
-    def test_a_pull_request_touching_one_service_selects_only_that_service(self, tmp_path: Path) -> None:
+    def test_a_pull_request_touching_one_app_selects_only_that_app(self, tmp_path: Path) -> None:
         changed = [
-            "services/alpha/src/alpha/main.py",
-            "services/alpha/tests/test_main.py",
-            "services/alpha/pyproject.toml",
+            "backend/apps/alpha/src/swarm_alpha/main.py",
+            "backend/apps/alpha/conf/app.yaml",
+            "backend/apps/alpha/pyproject.toml",
         ]
         assert self.detect(tmp_path, changed) == {
             **NOTHING,
             SERVICES_KEY: '["alpha"]',
-            IMAGES_KEY: '["services/alpha"]',
+            IMAGES_KEY: '["backend/apps/alpha"]',
         }
 
-    def test_two_services_are_selected_sorted_and_once_each(self, tmp_path: Path) -> None:
-        changed = ["services/beta/a.py", "services/alpha/a.py", "services/beta/b.py"]
+    def test_two_apps_are_selected_sorted_and_once_each(self, tmp_path: Path) -> None:
+        changed = ["backend/apps/beta/a.py", "backend/apps/alpha/a.py", "backend/apps/beta/b.py"]
         assert self.detect(tmp_path, changed) == {
             **NOTHING,
             SERVICES_KEY: '["alpha","beta"]',
-            IMAGES_KEY: '["services/alpha"]',
+            IMAGES_KEY: '["backend/apps/alpha"]',
         }
 
     @pytest.mark.parametrize(
         "path",
-        ["services/gone/x.py", "services/_template/x.py", "services/.hidden/x.py", "services/README.md"],
+        [
+            "backend/apps/gone/x.py",
+            "backend/apps/_template/x.py",
+            "backend/apps/.hidden/x.py",
+            "backend/apps/README.md",
+        ],
     )
-    def test_a_path_of_a_service_that_is_not_discovered_selects_nothing(self, tmp_path: Path, path: str) -> None:
+    def test_a_path_of_an_app_that_is_not_discovered_selects_nothing(self, tmp_path: Path, path: str) -> None:
         assert self.detect(tmp_path, [path]) == NOTHING
 
     def test_a_front_end_with_a_package_is_selected(self, tmp_path: Path) -> None:
-        values = self.detect(tmp_path, ["frontends/ground-control/src/main.ts"])
+        values = self.detect(tmp_path, ["frontend/apps/ground-control/src/main.ts"])
         assert values == {
             **NOTHING,
-            TYPESCRIPT_KEY: '["frontends/ground-control"]',
-            IMAGES_KEY: '["frontends/ground-control"]',
+            TYPESCRIPT_KEY: '["frontend/apps/ground-control"]',
+            IMAGES_KEY: '["frontend/apps/ground-control"]',
         }
 
     def test_a_front_end_without_a_package_selects_only_its_image(self, tmp_path: Path) -> None:
-        assert self.detect(tmp_path, ["frontends/notes/x.ts"]) == {**NOTHING, IMAGES_KEY: '["frontends/notes"]'}
+        values = self.detect(tmp_path, ["frontend/apps/notes/x.ts"])
+        assert values == {**NOTHING, IMAGES_KEY: '["frontend/apps/notes"]'}
 
     @pytest.mark.parametrize("path", ["tests/conventions/x.py", ".claude/hooks/x.py"])
     def test_tests_and_harness_set_only_the_repository_flag(self, tmp_path: Path, path: str) -> None:
@@ -106,7 +112,7 @@ class TestDetectChanges:
             "docs/tickets/T0.04/TICKET.md",
             "README.md",
             "AGENT.md",
-            "deploy/terraform/cells/dev/main.tf",
+            "infra/terraform/cells/dev/main.tf",
             ".github/workflows/terraform.yml",
         ],
     )
@@ -114,8 +120,8 @@ class TestDetectChanges:
         assert self.detect(tmp_path, [path]) == NOTHING
 
     def test_blank_lines_and_surrounding_spaces_are_ignored(self, tmp_path: Path) -> None:
-        values = self.detect(tmp_path, ["", "  services/alpha/x.py  ", "   ", ""])
-        assert values == {**NOTHING, SERVICES_KEY: '["alpha"]', IMAGES_KEY: '["services/alpha"]'}
+        values = self.detect(tmp_path, ["", "  backend/apps/alpha/x.py  ", "   ", ""])
+        assert values == {**NOTHING, SERVICES_KEY: '["alpha"]', IMAGES_KEY: '["backend/apps/alpha"]'}
 
     def test_an_unknown_argument_exits_with_two_and_a_usage_line(self, tmp_path: Path) -> None:
         write_repo(tmp_path)

@@ -28,7 +28,7 @@
 
 ## <a id="d1"></a>D1: Where the live protocol lives
 
-**Chosen:** package `swarm-live` · **Where:** [`pyproject.toml`](../../../packages/python/swarm-live/pyproject.toml) · **Source:** read from the diff and the plan
+**Chosen:** package `swarm-live` · **Where:** [`pyproject.toml`](https://github.com/gpbcom/swarm/blob/a2e43f7e74d65cc12a43507ec33f673fd2bc62e3/packages/python/swarm-live/pyproject.toml) · **Source:** read from the diff and the plan
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -41,7 +41,7 @@
 
 ## <a id="d2"></a>D2: What a slow client gets
 
-**Chosen:** one-slot mailbox · **Where:** [`live_mailbox.py:40`](../../../packages/python/swarm-live/src/swarm_live/service/live_mailbox.py#L40) · **Source:** the technical page, "a slow client skips intermediate frames"
+**Chosen:** one-slot mailbox · **Where:** [`live_mailbox.py:40`](../../../backend/swarm-service/src/swarm_service/shared/live/hub/live_mailbox.py#L40) · **Source:** the technical page, "a slow client skips intermediate frames"
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -54,7 +54,7 @@
 
 ## <a id="d3"></a>D3: Where MAVLink is decoded
 
-**Chosen:** Rust in `swarm-core-mavlink`, exposed with the GIL released · **Where:** [`frame.rs:101`](../../../packages/rust/swarm-core/mavlink/src/frame.rs#L101), [`lib.rs:111`](../../../packages/rust/swarm-core/python/src/lib.rs#L111) · **Source:** [TICKET.md](TICKET.md), read from the diff
+**Chosen:** Rust in `swarm-core-mavlink`, exposed with the GIL released · **Where:** [`frame.rs:101`](../../../rust/swarm-core/mavlink/src/frame.rs#L101), [`lib.rs:111`](../../../rust/swarm-core/python/src/lib.rs#L111) · **Source:** [TICKET.md](TICKET.md), read from the diff
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -67,7 +67,7 @@
 
 ## <a id="d4"></a>D4: Tick scheduling
 
-**Chosen:** monotonic slots · **Where:** [`mission_actor.py:114`](../../../services/flight-engine/src/flight_engine/service/missions/mission_actor.py#L114) · **Source:** read from the diff
+**Chosen:** monotonic slots · **Where:** [`mission_actor.py:114`](../../../backend/swarm-service/src/swarm_service/flight/missions/mission_actor.py#L114) · **Source:** read from the diff
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -80,7 +80,7 @@
 
 ## <a id="d5"></a>D5: Order of publication
 
-**Chosen:** hub first, leaf second, leaf failure logged · **Where:** [`mission_actor.py:90`](../../../services/flight-engine/src/flight_engine/service/missions/mission_actor.py#L90) · **Source:** read from the diff, review note
+**Chosen:** hub first, leaf second, leaf failure logged · **Where:** [`mission_actor.py:90`](../../../backend/swarm-service/src/swarm_service/flight/missions/mission_actor.py#L90) · **Source:** read from the diff, review note
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -93,11 +93,11 @@
 
 ## <a id="d6"></a>D6: Operator of a live socket
 
-**Chosen:** verified token only · **Where:** [`live_operator.py:71`](../../../services/gateway/src/gateway/api/live/live_operator.py#L71) · **Source:** plan, reviewer
+**Chosen:** verified token only · **Where:** [`live_operator.py:71`](../../../backend/swarm-api/src/swarm_api/dependencies/live_operator.py#L71) · **Source:** plan, reviewer
 
 | Option | For | Against |
 | --- | --- | --- |
-| ✅ Token | Isolation cannot be forged by a message | [`tests/live/conftest.py`](../../../tests/live/conftest.py#L121) overrides the dependency, so the end-to-end test proves the fan-out, not the token |
+| ✅ Token | Isolation cannot be forged by a message | [`tests/swarm_flight_engine/main/conftest.py`](../../../tests/swarm_flight_engine/main/conftest.py#L121) overrides the dependency, so the end-to-end test proves the fan-out, not the token |
 | Operator in the message | Easy to test | A client could name another Operator |
 
 **Trade-off:** token checks are proven by unit tests, not end to end.
@@ -106,7 +106,7 @@
 
 ## <a id="d7"></a>D7: NATS subscriptions in the gateway
 
-**Chosen:** one per subject on the first watcher · **Where:** [`live_fan_out.py:95`](../../../services/gateway/src/gateway/service/live/live_fan_out.py#L95) · **Source:** the technical page "subscribes once per Mission"
+**Chosen:** one per subject on the first watcher · **Where:** [`live_fan_out.py:95`](../../../backend/swarm-service/src/swarm_service/gateway/live/live_fan_out.py#L95) · **Source:** the technical page "subscribes once per Mission"
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -119,7 +119,7 @@
 
 ## <a id="d8"></a>D8: Client message format
 
-**Chosen:** MessagePack · **Where:** [`live_codec.py:118`](../../../packages/python/swarm-live/src/swarm_live/service/live_codec.py#L118) · **Source:** [PLAN.md](PLAN.md) (decision T23)
+**Chosen:** MessagePack · **Where:** [`live_codec.py:118`](../../../backend/swarm-service/src/swarm_service/shared/live/live_codec.py#L118) · **Source:** [PLAN.md](PLAN.md) (decision T23)
 
 | Option | For | Against |
 | --- | --- | --- |

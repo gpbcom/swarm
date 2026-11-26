@@ -4,16 +4,16 @@
 > [🏠 Index](../README.md) · [◀️ Technical specifications](README.md) · 📄 **Page 96 / 120** · [Data models ▶️](02-data-models.md)
 <!-- /spec:nav-top -->
 
-**Status:** 🟢 Approved · **Updated:** 2026-11-18
+**Status:** 🟢 Approved · **Updated:** 2026-11-26
 
 > [!NOTE]
-> How Swarm is split: a mono-repo for every language, a flight engine at the edge, independent cells in the core, and the services that live in each.
+> How Swarm is split: a mono-repo for every language, a flight engine at the edge, independent cells in the core, the services that live in each, and the layers every backend app is built from.
 
 <!-- spec:summary -->
 ## <a id="summary"></a>📑 Summary
 
 1. [🗂️ Mono-repo](#mono-repo)
-2. [🧅 Layers inside each service](#layers)
+2. [🧅 Layers as packages](#layers)
 3. [🌐 Edge and core](#edge-and-core)
 4. [🔲 Cells and the global layer](#cells)
 5. [🔁 Main flows](#flows)
@@ -22,75 +22,93 @@
 
 ## <a id="mono-repo"></a>🗂️ Mono-repo
 
-One repository holds the backend, the frontends, the shared code and the deployment. Each service and each front end builds exactly one image (AGENT.md).
+One repository holds the backend, the frontends, the shared code and the deployment. Each backend app and each front end builds exactly one image (AGENT.md). The backend is made of layers, each one a package with a folder per domain inside it, a kernel of libraries, and one thin app per image ([decision 105](../../research/interview.md)).
 
 ```text
 swarm/
-├── services/                  Python services, one image each (AGENT.md layers inside)
-│   ├── flight-engine/         edge: Drone adapters, safety loop, Fail-safes, Flight log
-│   ├── video-relay/           edge: Payload video to the SFU
-│   ├── gateway/               REST, WebSocket fan-out, authentication, rate limits
-│   ├── missions/              Missions, Squads, Authorisations, Pre-flight rules, Scorecards
-│   ├── fleet/                 Drones, Drone models, Payloads, Batteries, Docks
-│   ├── planner/               coverage paths, Choreography checks, Re-plan proposals
-│   ├── processing/            photogrammetry and detection on GPU workers
-│   ├── agents/                Mission assistant, Co-pilot, Report writer, MCP server, A2A
-│   ├── evidence/              signing, chaining, Anchoring
-│   ├── notifier/              in-app, e-mail and push Notifications
-│   └── simulator/             simulated Squads for tests, training and adapter tests
-├── frontend/apps/                 React and TypeScript apps (pnpm workspace)
-│   ├── ground-control/        Pilot: flight, Focus view, Debrief (web, tablet, desktop)
-│   ├── mission-studio/        Mission planner: design, simulation, Mission assistant
-│   ├── back-office/           Fleet, Authorisations, Deliverables, Evidence, people
-│   ├── client-portal/         Clients and Site agents
-│   └── desktop/               Tauri 2 shell for Ground control and Mission studio
-├── packages/
-│   ├── python/                shared Python: models, lifecycle, logging, NATS client
-│   ├── rust/                  swarm-core crates (safety, planner, mavlink) with PyO3
-│   └── ts/                    shared TypeScript: ui, live, tokens, i18n, api-client
-├── infra/                     Helm charts, Argo CD apps, k3s bundle, edge appliance
-├── tests/                     conventions, load (k6, simulated fleets), chaos
+├── backend/                   Python, one uv workspace
+│   ├── libs/                  kernel: swarm-lifecycle, swarm-logging, swarm-catalog, swarm-nats, swarm-web
+│   ├── swarm-models/          layer 0: Pydantic models, enums, exceptions, each app's configuration
+│   ├── swarm-storage/         layer 1: repositories and the other stores, a folder per domain
+│   ├── swarm-clients/         layer 1: calls to other apps and external systems, a folder per domain
+│   ├── swarm-service/         layer 2: business rules and runnables, a folder per domain
+│   ├── swarm-api/             layer 3: endpoints only, a router folder per domain under v1/
+│   └── apps/                  layer 4: one thin app per image
+│       ├── flight-engine/     edge: Drone adapters, safety loop, Fail-safes, Flight log
+│       ├── video-relay/       edge: Payload video to the SFU
+│       ├── gateway/           REST, WebSocket fan-out, authentication, rate limits
+│       ├── missions/          Missions, Squads, Authorisations, Pre-flight rules, Scorecards
+│       ├── fleet/             Drones, Drone models, Payloads, Batteries, Docks
+│       ├── planner/           coverage paths, Choreography checks, Re-plan proposals
+│       ├── processing/        photogrammetry and detection on GPU workers
+│       ├── agents/            Mission assistant, Co-pilot, Report writer, MCP server, A2A
+│       ├── evidence/          signing, chaining, Anchoring
+│       ├── notifier/          in-app, e-mail and push Notifications
+│       └── simulator/         simulated Squads for tests, training and adapter tests
+├── scripts/                   operations: OpenAPI, migrations, schema export, message check (uv run, no arguments)
+├── frontend/
+│   ├── apps/                  React and TypeScript apps (pnpm workspace)
+│   │   ├── ground-control/    Pilot: flight, Focus view, Debrief (web, tablet, desktop)
+│   │   ├── mission-studio/    Mission planner: design, simulation, Mission assistant
+│   │   ├── back-office/       Fleet, Authorisations, Deliverables, Evidence, people
+│   │   ├── client-portal/     Clients and Site agents
+│   │   └── desktop/           Tauri 2 shell for Ground control and Mission studio
+│   └── packages/              shared TypeScript: ui, live, tokens, i18n, api-client, config
+├── rust/                      swarm-core crates (safety, planner, mavlink) with PyO3, generated models, synthetic Drones
+├── qa/e2e/                    Playwright configuration and tests against the real images
+├── infra/                     Terraform, Helm charts, Argo CD environments, images, k3s bundle, edge appliance
+├── tests/                     Python tests mirroring the packages, conventions, load (k6, simulated fleets), chaos
 └── docs/                      specifications and research
 ```
 
 | Toolchain | Workspace | Lock file |
 | --- | --- | --- |
-| Python 3.12 | uv workspace (root `pyproject.toml`) | one `uv.lock` |
+| Python 3.12 | uv workspace (root `pyproject.toml`): `backend/libs/*`, `backend/swarm-*`, `backend/apps/*`, `scripts` | one `uv.lock` |
 | Rust | Cargo workspace in `rust/`, wheels built with maturin | `Cargo.lock` |
-| TypeScript | pnpm workspace, Turborepo task cache | `pnpm-lock.yaml` |
+| TypeScript | pnpm workspace (`frontend/apps/*`, `frontend/packages/*`, `qa/e2e`), Turborepo task cache | `pnpm-lock.yaml` |
 
-## <a id="layers"></a>🧅 Layers inside each service
+## <a id="layers"></a>🧅 Layers as packages
 
-Every Python service has the same five modules under `services/<service>/src/<service>/` (decision T42). Each module only calls the ones below it, and a test in `tests/conventions/` fails on any other import.
+Every layer is one package of `backend/`, and each domain is a folder inside the layers it needs, beside a `shared/` folder for what every domain uses (decision T42, whose layout [decisions 105 to 109](../../research/interview.md) replace). Each layer only calls the ones below it, and the tests of `tests/conventions/backend/` fail on any other import.
 
 ```text
-api/        every entry point: REST endpoints, WebSocket handlers, NATS request-reply handlers,
-            event consumers, command line. Validates input, calls one service, shapes the answer.
-   │        No business rule, no storage, no client.
+swarm_api       layer 3: FastAPI endpoints and their /v1 routers, Depends providers, middlewares,
+                exception handlers, the /v1/live WebSocket. Validates input, calls one service,
+   │            shapes the answer. No business rule, no storage, no client.
    ▼
-service/    the business logic, one class per concern (MissionService, PreFlightService,
-            ReplanService, ScorecardService...). Applies the business rules, orchestrates
-   │        repositories and clients inside a unit of work, publishes events.
+swarm_service   layer 2: the business logic, one class per entity (MissionService, PreFlightService,
+                ReplanService, ScorecardService...), and every runnable: NATS responders and consumers,
+   │            flights. Applies the business rules, orchestrates repositories and clients inside
+   │            a unit of work, publishes events.
    ├──────────────────────────────┐
    ▼                              ▼
-storage/    every class that      clients/   every class that calls another service
-            stores or reads data:            (NATS request-reply) or an external system:
-            PostgreSQL repositories,         Keycloak, LLM providers, Anchoring service,
-            TimescaleDB writers, object      Weather service, U-space service, SMTP, Web
-            storage, Valkey, edge SQLite,    Push, Drone vendors' cloud APIs.
-            the event outbox.
+swarm_storage   every class that  swarm_clients  every class that calls another app
+                stores or reads                  (NATS request-reply) or an external system:
+                data: PostgreSQL                 Keycloak, LLM providers, Anchoring service,
+                repositories,                    Weather service, U-space service, SMTP, Web
+                TimescaleDB writers,             Push, Drone vendors' cloud APIs.
+                object storage, Valkey,
+                edge SQLite, the event outbox.
    │                              │
    ▼                              ▼
-models/     Pydantic models, enums, exceptions; imported by every layer, imports none.
+swarm_models    layer 0: Pydantic models, enums, exceptions; imported by every layer, imports none.
+
+backend/libs/   the kernel (lifecycle, logging, catalogs, NATS connector, web app builder), usable by every layer.
+backend/apps/   layer 4: one thin app per image, which wires the domains it owns and runs them.
 ```
 
 | Rule | Detail |
 | --- | --- |
-| API module | All endpoints live in `api/`: `api/rest/` (FastAPI routers), `api/live/` (WebSocket), `api/bus/` (NATS handlers and consumers), `api/cli/`. An endpoint never touches `storage/` or `clients/`. |
-| Service layer | All business logic lives in `service/`. A service receives repositories and clients through its constructor (built by the layer's factory, AGENT.md), never opens a connection itself, and never returns a storage object to `api/`. |
-| Storage module | All storage classes live in `storage/`, one sub-package per store: `storage/postgres/` (repositories), `storage/timescale/`, `storage/objects/`, `storage/cache/`, `storage/edge/`. Nothing outside `storage/` imports a database or object storage library. |
+| Layers are packages | `backend/swarm-models`, `swarm-storage`, `swarm-clients`, `swarm-service` and `swarm-api`, with a folder per domain inside them, a kernel of libraries in `backend/libs/`, and one app per image in `backend/apps/<app>` ([decision 105](../../research/interview.md)). |
+| API layer | `swarm_api` holds only the FastAPI endpoints and their versioned routers (`/v1/...`), their `Depends` providers, the middlewares, the exception handlers and the `/v1/live` WebSocket; everything else moves to the service layer or the kernel ([decision 106](../../research/interview.md)). A class whose `__call__` takes a request or a WebSocket counts as a `Depends` provider ([decision 113](../../research/interview.md)). An endpoint never touches `swarm_storage` or `swarm_clients`. |
+| Service layer | All business logic and every runnable live in `swarm_service`, NATS handlers and consumers included. A service receives repositories and clients through its constructor (built by its factory, AGENT.md), never opens a connection itself, and never returns a storage object to `swarm_api`. |
+| Storage layer | All storage classes live in `swarm_storage`, in the folder of their domain, and the stores every domain uses in `swarm_storage/shared/` (PostgreSQL in `shared/postgres/`). Nothing outside `swarm_storage` imports a database or object storage library. |
 | Repositories | **One repository per entity stored in PostgreSQL**, listed in [🗄️ Storage](03-storage.md#repositories). |
-| Clients module | Calls to other services and external systems live in `clients/`, one class per remote system; the service layer uses them like repositories. |
+| Clients layer | Calls to other apps and external systems live in `swarm_clients`, one class per remote system; the service layer uses them like repositories. |
+| One class per entity | Within a layer, an entity has exactly one responsible class (one repository, client, service or router); classes that split one entity's work in a layer are merged; factories and exceptions are exempt ([decision 109](../../research/interview.md)). |
+| Models | `swarm_models` may import the configuration models of the kernel (`swarm_web.models`, `swarm_nats.models`), which the apps' configurations embed ([decision 112](../../research/interview.md)). |
+| Apps | No command line in the product: no `cli` module under `swarm_api`, no argument parser in `backend/` or `scripts/`; each app's `main()` reads its configuration; only the harness and CI keep command lines ([decision 107](../../research/interview.md)). An app lists the domains it owns, and each domain has one owning app. The simulator starts a simulated flight with `POST /v1/simulations` and answers Commands on NATS in the background ([decision 111](../../research/interview.md)). |
+| Operations | OpenAPI export and check, migrations, the schema export and the message check are argument-free Python scripts in `scripts/`, run with `uv run` ([decisions 108 and 110](../../research/interview.md)). |
 
 ## <a id="edge-and-core"></a>🌐 Edge and core
 

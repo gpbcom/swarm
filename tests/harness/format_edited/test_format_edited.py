@@ -110,9 +110,11 @@ class TestFormatEdited:
     @pytest.mark.parametrize(
         ("path", "expected"),
         [
-            ("services/gateway/src/gateway/x.py", ["uv", "run", "ruff", "format", "{file}"]),
+            ("backend/swarm-service/src/swarm_service/drones/x.py", ["uv", "run", "ruff", "format", "{file}"]),
+            ("backend/libs/swarm-lifecycle/src/x.py", ["uv", "run", "ruff", "format", "{file}"]),
+            ("scripts/tool.py", ["uv", "run", "ruff", "format", "{file}"]),
             ("tests/a/test_b.py", ["uv", "run", "ruff", "format", "{file}"]),
-            ("packages/rust/core/src/lib.rs", ["rustfmt", "--edition", "2021", "{file}"]),
+            ("rust/core/src/lib.rs", ["rustfmt", "--edition", "2021", "{file}"]),
             ("infra/terraform/cells/dev/main.tf", ["terraform", "fmt", "{file}"]),
         ],
     )

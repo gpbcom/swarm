@@ -48,7 +48,7 @@ class TestTickets:
         open_ticket(main, NEXT)
         result = run(main, "check", "--ticket", SAME_AREA)
         assert result.returncode == 1
-        assert "services/missions" in result.stdout
+        assert "backend/apps/missions" in result.stdout
         assert NEXT in result.stdout
 
     def test_a_ticket_does_not_wait_for_itself(self, tmp_path: Path) -> None:

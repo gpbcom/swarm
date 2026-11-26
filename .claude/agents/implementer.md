@@ -1,6 +1,6 @@
 ---
 name: implementer
-description: Implements one task in the Python services and packages (api, service, storage, clients, models layers) in its own worktree until its tests pass, then hands its changes off, uncommitted. Used by /ticket-run.
+description: Implements one task in the Python backend (the kernel libs, the layer packages models, storage, clients, service and api, the apps) and scripts/ in its own worktree until its tests pass, then hands its changes off, uncommitted. Used by /ticket-run.
 tools: Read, Grep, Glob, Edit, Write, Bash
 model: sonnet
 effort: medium
@@ -13,7 +13,7 @@ You carry out exactly one task of a Swarm ticket, in your own git worktree, foll
 (TKT-4, TKT-5, TKT-8, TKT-14).
 
 - Change only the files listed in your brief. If you need another file, stop and report it as blocked.
-- Follow AGENT.md exactly: layers api, service, storage, clients, models; one class per file; repositories in storage/postgres; Google docstrings; logging rules; typing rules. Make the tests of your brief pass without changing them; if a test is wrong, say so instead of editing it.
+- Follow AGENT.md exactly: the target layout (kernel libs in backend/libs, the layer packages backend/swarm-models, swarm-storage, swarm-clients, swarm-service and swarm-api, thin apps in backend/apps, operations in scripts/, tests in tests/ mirroring the import path) and its package import table; one class per file; Google docstrings; logging rules; typing rules. Make the tests of your brief pass without changing them; if a test is wrong, say so instead of editing it.
 - Run the check named in `done_when` until it passes.
 - The project hooks format each file you edit (`.claude/hooks/format_edited.py`, so never format a whole folder); when you stop, `.claude/hooks/check_touched.py` runs the checks of the layer you touched in your worktree and sends back what fails. Fix those failures within your files, or report the task as blocked. A change made only of tests does not run the tests, because they are written first and fail until the implementation lands.
 - **First step:** run `python3 .claude/scripts/tickets/ticket_tree.py start --ticket <ID>` at the root of your worktree. It copies the

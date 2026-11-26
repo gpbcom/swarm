@@ -31,12 +31,12 @@
 
 ## <a id="d1"></a>D1: When maturin enables `extension-module`
 
-**Chosen:** `[tool.maturin] features` · **Where:** [`packages/rust/swarm-core/python/pyproject.toml:11-14`](../../../packages/rust/swarm-core/python/pyproject.toml#L11-L14) · **Source:** K12
+**Chosen:** `[tool.maturin] features` · **Where:** [`rust/swarm-core/python/pyproject.toml:11-14`](../../../rust/swarm-core/python/pyproject.toml#L11-L14) · **Source:** K12
 
 | Option | For | Against |
 | --- | --- | --- |
 | ✅ `[tool.maturin] features` | Workspace clippy and test never see the feature, so nothing links without libpython | A bare `cargo build` of the cdylib links libpython |
-| Feature on the pyo3 dependency in [`Cargo.toml`](../../../packages/rust/swarm-core/python/Cargo.toml) | One place | Clippy and test of the workspace then fail to link |
+| Feature on the pyo3 dependency in [`Cargo.toml`](../../../rust/swarm-core/python/Cargo.toml) | One place | Clippy and test of the workspace then fail to link |
 | A crate feature that maturin enables | Explicit name | One more feature to keep in step |
 | `PYO3_BUILD_EXTENSION_MODULE` set by recent maturin | No setting | Depends on the maturin version |
 
@@ -57,7 +57,7 @@
 
 ## <a id="d3"></a>D3: Audit of the wheel
 
-**Chosen:** `skip-auditwheel = true` · **Where:** [`packages/rust/swarm-core/python/pyproject.toml:14`](../../../packages/rust/swarm-core/python/pyproject.toml#L14) · **Source:** K12
+**Chosen:** `skip-auditwheel = true` · **Where:** [`rust/swarm-core/python/pyproject.toml:14`](../../../rust/swarm-core/python/pyproject.toml#L14) · **Source:** K12
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -69,7 +69,7 @@
 
 ## <a id="d4"></a>D4: Tests of the bindings crate
 
-**Chosen:** `test = false` and `doctest = false` · **Where:** [`packages/rust/swarm-core/python/Cargo.toml:11-16`](../../../packages/rust/swarm-core/python/Cargo.toml#L11-L16) · **Source:** K12
+**Chosen:** `test = false` and `doctest = false` · **Where:** [`rust/swarm-core/python/Cargo.toml:11-16`](../../../rust/swarm-core/python/Cargo.toml#L11-L16) · **Source:** K12
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -81,7 +81,7 @@
 
 ## <a id="d5"></a>D5: Passing data and the GIL
 
-**Chosen:** `Vec<u64>` by value, `py.detach` · **Where:** [`packages/rust/swarm-core/python/src/lib.rs:12-15`](../../../packages/rust/swarm-core/python/src/lib.rs#L12-L15) · **Source:** K12
+**Chosen:** `Vec<u64>` by value, `py.detach` · **Where:** [`rust/swarm-core/python/src/lib.rs:12-15`](../../../rust/swarm-core/python/src/lib.rs#L12-L15) · **Source:** K12
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -141,7 +141,7 @@ The existence test uses `compgen -G` over crate-level and root `benches` folders
 
 ## <a id="d10"></a>D10: Shared dependency versions and member order
 
-**Chosen:** `criterion` 0.8.2 and `pyo3` 0.30.1 in `[workspace.dependencies]`, members in alphabetical order · **Where:** [`packages/rust/Cargo.toml:3-17`](../../../packages/rust/Cargo.toml#L3-L17) · **Source:** K09, K12
+**Chosen:** `criterion` 0.8.2 and `pyo3` 0.30.1 in `[workspace.dependencies]`, members in alphabetical order · **Where:** [`rust/Cargo.toml:3-17`](../../../rust/Cargo.toml#L3-L17) · **Source:** K09, K12
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -153,14 +153,14 @@ Alphabetical members give a stable order and a larger diff on the members line. 
 
 ## <a id="d11"></a>D11: Placeholder body
 
-**Chosen:** `fold` with `wrapping_add` · **Where:** [`packages/rust/swarm-core/safety/src/lib.rs:10-12`](../../../packages/rust/swarm-core/safety/src/lib.rs#L10-L12) · **Source:** K09
+**Chosen:** `fold` with `wrapping_add` · **Where:** [`rust/swarm-core/safety/src/lib.rs:10-12`](../../../rust/swarm-core/safety/src/lib.rs#L10-L12) · **Source:** K09
 
 | Option | For | Against |
 | --- | --- | --- |
 | ✅ `fold` and `wrapping_add` | No allocation, no panic in any profile | Not explicitly vectorised |
 | `iter().sum()` | Short | Panics on overflow in debug builds |
 
-No `#![allow(missing_docs)]` was added to the benches: the `//!` line at [`safety/benches/tick.rs:1`](../../../packages/rust/swarm-core/safety/benches/tick.rs#L1) is enough for clippy. **Revisit when:** the real logic replaces the placeholder.
+No `#![allow(missing_docs)]` was added to the benches: the `//!` line at [`safety/benches/tick.rs:1`](../../../rust/swarm-core/safety/benches/tick.rs#L1) is enough for clippy. **Revisit when:** the real logic replaces the placeholder.
 
 ## <a id="d12"></a>D12: Wheel test structure
 
@@ -189,7 +189,7 @@ Both the failed unchanged run and the passing rerun are recorded, rather than ra
 
 ## <a id="d14"></a>D14: Shape of the Python tests
 
-**Chosen:** real subprocesses, sentence-named tests, module-level helpers · **Where:** [`tests/ci/bench_gate/helpers.py:10-43`](../../../tests/ci/bench_gate/helpers.py#L10-L43), [`tests/ci/bench_gate/test_bench_gate.py:87`](../../../tests/ci/bench_gate/test_bench_gate.py#L87), [`tests/ci/workflows/test_rust_workflow.py:32-63`](../../../tests/ci/workflows/test_rust_workflow.py#L32-L63) · **Source:** K04, K06, K07 (and K01 for Rust)
+**Chosen:** real subprocesses, sentence-named tests, module-level helpers · **Where:** [`tests/ci/bench_gate/helpers.py:10-43`](../../../tests/ci/bench_gate/helpers.py#L10-L43), [`tests/ci/bench_gate/test_bench_gate.py:87`](../../../tests/ci/bench_gate/test_bench_gate.py#L87), [`tests/ci/workflows/checks/test_rust_workflow.py:32-63`](../../../tests/ci/workflows/checks/test_rust_workflow.py#L32-L63) · **Source:** K04, K06, K07 (and K01 for Rust)
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -198,7 +198,7 @@ Both the failed unchanged run and the passing rerun are recorded, rather than ra
 | Parametrise existing workflow helpers by job | Less duplication | Touches the check tests |
 | One test per workflow requirement | A failure names the requirement | More methods |
 
-Smaller choices of the same kind: a `{dir}` placeholder in one parametrised exit-2 test ([`test_bench_gate.py:77`](../../../tests/ci/bench_gate/test_bench_gate.py#L77)); one parametrised test per concern with `_load`, `_table`, `_members` helpers ([`test_swarm_core_layout.py:33-45`](../../../tests/rust/swarm_core/test_swarm_core_layout.py#L33-L45)); "bindings" in every bindings test name so `-k 'not bindings'` works ([`test_swarm_core_layout.py:91-127`](../../../tests/rust/swarm_core/test_swarm_core_layout.py#L91-L127)); `fnmatch` on the uv members ([`test_swarm_core_layout.py:127-132`](../../../tests/rust/swarm_core/test_swarm_core_layout.py#L127-L132)); and one determinism test in [`safety/tests/tick.rs`](../../../packages/rust/swarm-core/safety/tests/tick.rs). **Revisit when:** the test run time grows.
+Smaller choices of the same kind: a `{dir}` placeholder in one parametrised exit-2 test ([`test_bench_gate.py:77`](../../../tests/ci/bench_gate/test_bench_gate.py#L77)); one parametrised test per concern with `_load`, `_table`, `_members` helpers ([`test_swarm_core_layout.py:33-45`](../../../tests/rust/swarm_core/test_swarm_core_layout.py#L33-L45)); "bindings" in every bindings test name so `-k 'not bindings'` works ([`test_swarm_core_layout.py:91-127`](../../../tests/rust/swarm_core/test_swarm_core_layout.py#L91-L127)); `fnmatch` on the uv members ([`test_swarm_core_layout.py:127-132`](../../../tests/rust/swarm_core/test_swarm_core_layout.py#L127-L132)); and one determinism test in [`safety/tests/tick.rs`](../../../rust/swarm-core/safety/tests/tick.rs). **Revisit when:** the test run time grows.
 
 ## 📝 Assumptions behind the choices
 

@@ -18,11 +18,12 @@ from tests.conventions.rules.logging.no_logger_argument import NoLoggerArgument
 
 
 class ConventionRules:
-    """The registry of every rule that the convention tests run on every service.
+    """The registry of every rule that the convention tests run on every Python package and on the tests.
 
     Notes:
         - **Adding a rule means adding it to ``all`` here.** Nothing else changes.
-        - Adding a service needs no change: the tests run every rule on every folder of ``services/``.
+        - Adding a package needs no change: the tests run every rule on every package ``PackageTree.discover``
+          finds in ``backend/`` and ``scripts/``, and on the central ``tests/``.
     """
 
     ############################

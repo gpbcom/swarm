@@ -78,7 +78,7 @@ class TestWrite:
         assert "✅ Every test passed" in report
         assert "| ✅ python-repository/repository | 9 | 0 | 1 | 2.5 s |" in report
         assert "| ✅ rust/rust-cargo-test | 10 | 0 | 2 |" in report
-        assert "| ✅ ts-frontends-ground-control/typescript | 12 | 0 | 0 |" in report
+        assert "| ✅ ts-frontend-apps-ground-control/typescript | 12 | 0 | 0 |" in report
         assert "specs.py check printed nothing" in report
         assert "| ✅ ts-packages-ts-live/packages-ts-live | 8 | 0 | 1 |" in report
         assert "| ➖ ts-packages-ts-config/packages-ts-config (no test ran) | 0 | 0 | 0 |" in report

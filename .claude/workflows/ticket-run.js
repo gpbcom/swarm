@@ -221,12 +221,14 @@ async function integrate(results, label) {
 }
 
 // Fix loop: send each failure or finding to every task that owns one of its files, each fixer only its own problems
-const ROOTS = ['services/', 'packages/', 'frontend/apps/', 'tests/', 'infra/', 'docs/', '.claude/', '.github/']
+const ROOTS = ['backend/', 'scripts/', 'frontend/', 'rust/', 'qa/', 'tests/', 'infra/', 'docs/', '.claude/', '.github/']
 function normalise(file) {
   let f = String(file || '').trim().replace(/:\d+(-\d+)?$/, '')
-  for (const r of ROOTS) {
-    const i = f.indexOf('/' + r)
-    if (i >= 0) { f = f.slice(i + 1); break }
+  // A path printed from another folder (the clean tree of the checks) is cut at its first root folder, so that
+  // ".claude/scripts/x.py" never becomes "scripts/x.py"; a path already relative to the root stays as it is.
+  if (!ROOTS.some(r => f.startsWith(r))) {
+    const found = ROOTS.map(r => f.indexOf('/' + r)).filter(i => i >= 0)
+    if (found.length) f = f.slice(Math.min(...found) + 1)
   }
   if (f.startsWith('/')) f = f.split('/').pop()
   return f

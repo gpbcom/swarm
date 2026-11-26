@@ -126,3 +126,22 @@ The product owner asked for an AI Assistant able to use every feature, action an
 | 102 | Simple-ERP API | Committed: ready by 25 September 2028 (S46) |
 | 103 | Interview | Closed by the product owner on 2026-11-20 |
 | 104 | Roadmap load | Correction: with P6 counted, S44 to S48 would have carried 9 to 11 tickets per sprint. The Assistant is split: its core (front door, permissions, oversight, budgets, 9 tickets) by M5b on 17 November 2028 (S44 to S48); its channels, Connectors, ERP and beta (14 tickets) in S53 to S56, in 2029, milestone M5c on 23 February 2029 |
+
+## 🧱 Repository layout (2026-11-26)
+
+The product owner asked for the repository layout of two reference projects, mega-trends and simpe-erp, and settled
+these points while it was refactored.
+
+| # | Topic | Decision |
+| --- | --- | --- |
+| 105 | Backend layout | The layers are packages and the domains folders inside them: `backend/swarm-models`, `swarm-storage`, `swarm-clients`, `swarm-service` and `swarm-api`, a kernel of libraries in `backend/libs/`, and one thin app per image in `backend/apps/<app>` |
+| 106 | API layer | It holds only FastAPI endpoints and their versioned routers (`/v1/...`), their `Depends`, the middlewares, the exception handlers and the `/v1/live` WebSocket; everything else moves to the service layer or the kernel |
+| 107 | Command line | None in the product: no `cli` module under `api`, no argument parser in `backend/` or `scripts/`; each app's `main()` reads its configuration; only the harness and CI keep command lines |
+| 108 | Operations | OpenAPI export and check, migrations, the schema export and the message check are argument-free Python scripts in `scripts/<area>/`, run with `uv run` |
+| 109 | One class per entity | Within a layer, an entity has exactly one responsible class (one repository, client, service or router); classes that split one entity's work in a layer are merged; factories and exceptions are exempt |
+| 110 | Message check | `swarm-i18n-check` becomes the argument-free script `scripts/src/swarm_scripts/i18n/check.py`, still run by CI |
+| 111 | Simulator | It keeps no command line: `POST /v1/simulations` starts a simulated flight for a Mission, and answering Commands on NATS is the app's background work; BR-014 isolation still holds |
+| 112 | Models and the kernel | `swarm_models` may import the configuration models of the kernel (`swarm_web.models`, `swarm_nats.models`), which the apps' configurations embed |
+| 113 | Depends providers | A class whose `__call__` takes a request or a WebSocket counts as a `Depends` provider of the API layer |
+| 114 | Simulator without NATS | The simulator stops with an error when NATS cannot be reached, as before, and is restarted |
+| 115 | Flight engine stop | A requested stop (`SIGINT`, `SIGTERM`) ends the flight engine with status 0, as before |

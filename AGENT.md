@@ -6,6 +6,8 @@ When you edit a file, follow these rules even where a neighbouring file does not
 
 ## Commands
 
+Run every command from the repository root unless it says otherwise.
+
 ```bash
 uv sync
 uv run ruff check backend scripts tests
@@ -13,6 +15,36 @@ uv run ruff format <the files you edited>
 uv run mypy
 uv run pytest tests/swarm_<module>/<folder> -n 2
 ```
+
+`uv run mypy` checks every `src/` folder of `backend/` and `scripts/`, listed in the root `pyproject.toml`; give it one
+folder, such as `uv run mypy backend/apps/gateway/src`, to check only that one.
+
+The operations are argument-free scripts of `scripts/` (see [Layout](#layout)):
+
+```bash
+uv run swarm-schemas-export
+uv run swarm-schemas-check
+uv run swarm-openapi-export
+uv run swarm-openapi-check
+uv run swarm-migrations-migrate
+uv run swarm-i18n-check
+```
+
+- `swarm-schemas-export` writes `backend/swarm-models/schemas/swarm_models.schema.json`, and `swarm-schemas-check`
+  checks it is current.
+- `swarm-openapi-export` writes `frontend/packages/api-client/openapi/<app>.json` for every app of `backend/apps/`, or
+  for the one the environment entry `SWARM_APP` names, and `swarm-openapi-check` checks they are current.
+- `swarm-migrations-migrate` applies the migrations of every app that owns a PostgreSQL schema, or of the one
+  `SWARM_APP` names. The DSN of an app is read from the environment entry `SWARM_<APP>_POSTGRES_DSN`. In an image,
+  `SWARM_APP` and `SWARM_APP_ROOT` already name its app and its folder, so a job runs the same image with the
+  entrypoint `swarm-migrations-migrate`.
+- `swarm-i18n-check` fails when a Python message lacks one of the four languages (English, French, German and
+  Spanish). It reads the catalogues shipped with `swarm_storage`, or the folder the environment entry
+  `SWARM_I18N_LOCALES` names. `pnpm --filter ./frontend/packages/i18n run check-messages` does the same for the
+  FormatJS messages of `frontend/packages/i18n/src/messages/`.
+
+Each app runs with its console script `swarm-<app>-serve` (`swarm-gateway-serve`, `swarm-fleet-serve`,
+`swarm-missions-serve`, `swarm-simulator-serve`, `swarm-flight-engine-serve`), which takes no argument.
 
 For a front end or a TypeScript package, run its scripts from the root with the pnpm filter of its name,
 `pnpm --filter @swarm/<project> test|lint|typecheck|build`, for example `pnpm --filter @swarm/ground-control test`. The
@@ -26,7 +58,7 @@ To build the image of an app locally, run this from the repository root, because
 docker build -f backend/apps/<app>/Dockerfile -t <name>:local .
 ```
 
-To run the Playwright scaffold against the images of a pipeline run, give the tag of those images:
+To run the Playwright suite of `qa/e2e` against the images of a pipeline run, give the tag of those images:
 
 ```bash
 SWARM_IMAGE_TAG=<tag> pnpm --filter ./qa/e2e run e2e
@@ -42,10 +74,6 @@ cargo test --workspace
 pnpm -r --if-present lint
 pnpm -r --if-present typecheck
 ```
-
-`uv run swarm-i18n-check` fails when a Python message lacks one of the four languages (English, French, German and
-Spanish), and `pnpm --filter ./frontend/packages/i18n run check-messages` does the same for the FormatJS messages of
-`frontend/packages/i18n/src/messages/`.
 
 Run `cargo bench --workspace --bench '*'` from `rust/` to run the criterion benchmarks, and build the
 `swarm_core` wheel with:
@@ -65,41 +93,36 @@ cargo run -p swarm-models-codegen
 pnpm --filter ./frontend/packages/live run generate
 ```
 
-- `swarm-schemas-export` writes `backend/swarm-models/schemas/swarm_models.schema.json`, and `uv run swarm-schemas-check`
-  checks it is current. Both are argument-free scripts of `scripts/schemas/`.
 - `cargo run -p swarm-models-codegen`, run in `rust/`, writes `rust/swarm-models/src/generated.rs`.
 - `pnpm --filter ./frontend/packages/live run generate` writes `frontend/packages/live/src/generated/models.ts`.
 
-After any change to the routes of an app, regenerate the REST contract from the repository root:
+After any change to the routes of an app, regenerate the REST contract:
 
 ```bash
 uv run swarm-openapi-export
 pnpm --filter ./frontend/packages/api-client run generate
 ```
 
-- `uv run swarm-openapi-export` writes `frontend/packages/api-client/openapi/<app>.json` for every app of
-  `backend/apps/`, or for the one the environment entry `SWARM_APP` names, and `uv run swarm-openapi-check` checks
-  they are current. Both are argument-free scripts of `scripts/openapi/`.
-- `pnpm --filter ./frontend/packages/api-client run generate` then writes the TypeScript client from those documents.
+- `pnpm --filter ./frontend/packages/api-client run generate` writes the TypeScript client from the documents of
+  `frontend/packages/api-client/openapi/`.
 - CI checks both: the tests of `tests/scripts/openapi/` compare each published document with its app, and the `test`
   script of `frontend/packages/api-client` runs `generate.ts --check`.
-- `uv run swarm-migrations-migrate` applies the migrations of every app, or of the one `SWARM_APP` names. The DSN of an
-  app is read from the environment entry `SWARM_<APP>_POSTGRES_DSN`. In an image, `SWARM_APP` and `SWARM_APP_ROOT`
-  already name its app and its folder, so a job runs the same image with the entrypoint `swarm-migrations-migrate`.
+
+CI:
 
 - `.github/workflows/ci.yml` runs on every push and pull request.
-- Its first job runs `.github/scripts/detect_changes.py`, which selects the services, front ends and packages that
+- Its first job runs `.github/scripts/detect_changes.py`, which selects the apps, front ends and packages that
   changed. It prints six lines, including `images`, the JSON array of the image folders to build.
 - Then the reusable workflows `python.yml`, `rust.yml`, `typescript.yml` and `specs.yml` run the checks of this section
   for what was selected:
   - for each selected app of `backend/apps/`: `ruff check`, `ruff format --check`, `mypy` on its `src`, and `pytest` on
     its tests and those of the domains it lists;
-  - the `services` job of `python.yml` installs the pinned nats-server, and builds and installs the `swarm_core` wheel for an
-    app whose code (its `main()` and its domains) imports it;
-  - the `repository` job of `python.yml` also builds and installs the `swarm_core` wheel, for the tests of the whole tree;
-  - the `packages` job of `python.yml` runs ruff and mypy on `backend` and `scripts`, `swarm-schemas-check` and
+  - the job of an app installs the pinned nats-server, and builds and installs the `swarm_core` wheel when the app's
+    code (its `main()` and its domains) imports it;
+  - the `repository` job of `python.yml` also builds and installs the `swarm_core` wheel, and runs every test under
+    `tests/`;
+  - another job of `python.yml` runs ruff and mypy on `backend` and `scripts`, `swarm-schemas-check` and
     `swarm-i18n-check`;
-  - the tests under `tests/`;
   - for Rust: `cargo fmt`, `clippy` and `cargo test`;
     - `rust.yml` has a `bench` job that runs only on pull requests, after `check`. It saves criterion benchmarks of the
       base commit as the baseline `pr-base`, runs them on the pull request, and `.github/scripts/bench_gate.py` fails
@@ -123,54 +146,93 @@ pnpm --filter ./frontend/packages/api-client run generate
 
 ## Layout
 
+The backend is made of layers, each one a package, with the domains as folders inside them, a kernel of libraries, and
+one thin app per image. The operations are scripts, and the tests sit in one central folder.
+
 | Path | Holds |
 | --- | --- |
-| `src/api/` | The entry points: HTTP routes and the command line. They call `service` and hold no business rules |
-| `src/service/` | The business rules, one package per concern |
-| `src/storage/` | Reading and writing data, and nothing else: one repository per PostgreSQL entity, the other stores |
-| `src/clients/` | Calls to other services and to external systems, one class per remote system |
-| `src/models/` | Pydantic models, enums and their exceptions. They only load and validate, and never log |
-| `conf/app.yaml` | The configuration, with every default written out |
-| `conf/logger.yaml` | The logging: coloured console and coloured rotating file, written to `logs/` |
-| `conf/catalogs/` | Data that would otherwise be hard-coded |
-| `tests/` | Mirrors `src/` folder by folder |
-| `docs/` | The `specs/`, `functional/` and `technical/` documentation |
+| `backend/libs/<lib>/` | The kernel: `swarm-lifecycle`, `swarm-logging`, `swarm-catalog`, `swarm-nats` (the connector), `swarm-web` (the app builder, the server runnable, the entity tags). Its models, enums and exceptions sit in each library's `models/` |
+| `backend/swarm-models/` | Layer 0, `swarm_models`: every Pydantic model, enum and exception, by concept (`swarm_models/<concept>/`), its enums in `swarm_models/enums.py`, and each app's configuration in `swarm_models/config/<app>/`. They only load and validate, and never log |
+| `backend/swarm-storage/` | Layer 1, `swarm_storage`: reading and writing data, and nothing else. One repository per entity, a folder per domain and a `shared/` folder |
+| `backend/swarm-clients/` | Layer 1, `swarm_clients`: calls to other apps and to external systems, one client per remote system, a folder per domain and a `shared/` folder |
+| `backend/swarm-service/` | Layer 2, `swarm_service`: the business rules and every runnable (bus responders and consumers included), a folder per domain and a `shared/` folder |
+| `backend/swarm-api/` | Layer 3, `swarm_api`: the FastAPI endpoints only (see below), with the routers in `swarm_api/v1/<domain>/` |
+| `backend/apps/<app>/` | Layer 4: one image each, with its `Dockerfile`, `pyproject.toml`, `conf/`, `migrations/` when it owns a PostgreSQL schema, and `src/swarm_<app>/main.py`; `[tool.swarm] domains` lists the domains it owns |
+| `backend/apps/<app>/conf/` | `app.yaml`, the configuration with every default written out; `logger.yaml`, the logging (coloured console and coloured rotating file, written to `logs/`); `catalogs/`, data that would otherwise be hard-coded |
+| `scripts/` | The operations, in `scripts/src/swarm_scripts/<area>/`, run with `uv run swarm-<area>-<action>` and taking no arguments: OpenAPI export and check, migrations, schema export and check, the message check |
+| `tests/swarm_<module>/` | The Python tests, mirroring each package's import path; `tests/scripts/` for the scripts, `tests/fakes/` for the stand-ins |
+| `docs/` | The `specs/` (functional and technical), the `research/`, the `tickets/` and the `releases/` |
 
-Each layer only calls the one below it: `api` imports `service`, and `service` imports `storage` and `clients`. All of
-them import `models`, and `models` imports none of them. `api` never imports `storage` or `clients`, `storage` and
-`clients` never import each other, and no layer imports one above it. Every endpoint lives in `api`, every business rule
-in `service`.
+In this file, `src/` means the `src/` folder of any package of `backend/` or `scripts/`, and `models` means
+`swarm_models` and the `models/` folder of a kernel library.
+
+**The layers.** Each layer only calls the ones below it: `swarm_api` calls `swarm_service`, and `swarm_service` calls
+`swarm_storage` and `swarm_clients`. All of them import `swarm_models`, which imports none of them. `swarm_api` never
+imports `swarm_storage` or `swarm_clients`, `swarm_storage` and `swarm_clients` never import each other, and no layer
+imports one above it. Every endpoint lives in `swarm_api`, every business rule in `swarm_service`.
+
+**The api layer holds only endpoints.** `swarm_api` holds FastAPI endpoints and their versioned routers (`/v1/...`),
+their `Depends` providers (`swarm_api/dependencies/`; a class whose `__call__` takes a request or a WebSocket counts as
+one), the middlewares (`swarm_api/middleware/`), the exception handlers (`swarm_api/handlers/`) and the `/v1/live`
+WebSocket endpoint (`swarm_api/v1/live/`). Anything that exposes no endpoint (a command, a factory, a runnable, a bus
+handler, the server runner, the app builder) belongs to the service layer or to the kernel.
+
+**No command line in the product.** `backend/` and `scripts/` never import `argparse`, `click` or `typer`, never read
+`sys.argv`, and hold no folder or module named `cli` or `commands`. An app's `main()` reads its `conf/app.yaml` and its
+environment, then runs. Only the harness (`.claude/`) and CI (`.github/`) keep command lines.
+
+**`scripts/` holds the operations.** OpenAPI generation and checking, migrations, the schema export and check and the
+message check are Python scripts in `scripts/src/swarm_scripts/<area>/`, exposed as `uv run swarm-<area>-<action>`,
+taking no arguments: a script covers every app, or the one named by the environment entry `SWARM_APP`.
+
+**One class per entity per layer.** Within a layer, an entity has exactly one responsible class: one `<Entity>Repository`
+in storage, one `<Entity>Client` in clients, one `<Entity>Service` in service, one `<Entity>Router` in api. Classes that
+split one entity's work in the same layer are merged. Factories and exceptions keep their own files.
+
+**Package imports.** Each package imports only these first-party packages:
+
+| Package | May import |
+| --- | --- |
+| The kernel (`backend/libs/`) | The kernel only |
+| `swarm_models` | Itself, `swarm_catalog`, `swarm_lifecycle`, and the models of `swarm_web` and `swarm_nats` (`swarm_web.models`, `swarm_nats.models`). Never `swarm_logging` |
+| `swarm_storage`, `swarm_clients` | Itself, `swarm_models` and the kernel |
+| `swarm_service` | Itself, `swarm_storage`, `swarm_clients`, `swarm_models` and the kernel |
+| `swarm_api` | Itself, `swarm_service`, `swarm_models`, `swarm_web` and the rest of the kernel |
+| `swarm_<app>` | `swarm_api`, `swarm_service`, `swarm_web`, `swarm_models.config.<app>` and `swarm_logging` |
+| `scripts/` | `swarm_service`, `swarm_api`, `swarm_web`, `swarm_models` and the kernel |
+
+**Domains are owned.** Inside these rules, `swarm_service.<d>` uses only `swarm_storage.<d>`, `swarm_clients.<d>` or
+the `shared` folders, each domain has exactly one owning app, and an app wires only the domains of its `[tool.swarm]
+domains`.
 
 ## Mono-repo
 
-Swarm is meant to become a mono-repo of backend and front-end micro-services, each with its own Docker image. The root
-`src/` moved to `services/gateway` (ticket T0.01), then to `backend/apps/gateway` and the layer packages (refactor
-phase 5d). Since phase 5e, `services/` and `packages/python/` are gone: read `src/` as the layer packages of
-[Target layout](#target-layout).
-The tests in `tests/conventions/mono_repo/` enforce part of this section: the uv workspace, the Cargo and pnpm
-workspaces, and the Terraform layout. The CI/CD change detection and check workflows are tested by
-`tests/ci/`. The Dockerfiles are tested by `tests/infra/images/test_service_images.py`, and `infra/compose/e2e.yaml` by
-`tests/ci/e2e/`. `tests/conventions/mono_repo/frontend/test_frontend_workspace.py` and `test_desktop_shell.py` check the front-end
-workspace layout and the desktop shell, and the Docker rules of the front ends are not tested yet. `tests/infra/` checks the charts, the dev environment, the PostgreSQL image and the dev-cell script,
-and `tests/ci/dev_cell/` checks the dev-cell workflow.
+Swarm is a mono-repo of backend apps and front ends, each with its own Docker image. The tests in
+`tests/conventions/mono_repo/` enforce part of this section: the uv workspace, the Cargo and pnpm workspaces, and the
+Terraform layout. The CI/CD change detection and check workflows are tested by `tests/ci/`. The Dockerfiles are tested
+by `tests/infra/images/`, and `infra/compose/e2e.yaml` by `tests/ci/e2e/`.
+`tests/conventions/mono_repo/frontend/` checks the front-end workspace layout and the desktop shell, and the Docker
+rules of the front ends are not tested yet. `tests/infra/` checks the charts, the dev environment, the PostgreSQL image
+and the dev-cell script, and `tests/ci/dev_cell/` checks the dev-cell workflow.
 
 | Path | Holds |
 | --- | --- |
-| `pyproject.toml` | The uv workspace root, with one `uv.lock` for the whole repository |
-| `backend/apps/<app>/` | One backend app: its `Dockerfile`, `pyproject.toml`, `conf/`, `src/swarm_<app>/main.py` |
+| `pyproject.toml` | The uv workspace root (`backend/libs/*`, `backend/swarm-*`, `backend/apps/*` and `scripts`), with one `uv.lock` for the whole repository |
+| `backend/` | The kernel, the layer packages and the apps of [Layout](#layout); see `backend/README.md` |
+| `scripts/` | The operations; see `scripts/README.md` |
 | `frontend/apps/<frontend>/` | One front end: its `Dockerfile`, `src/`, and its Playwright tests in `e2e/` |
-| `packages/` | Shared code: `python/` (lifecycle base classes, logging, models), `rust/` (PyO3 crates of the hot path), `ts/` (front-end packages) |
+| `frontend/packages/` | The shared TypeScript packages, a pnpm workspace |
+| `rust/` | The Cargo workspace: the Rust core and its PyO3 bindings, the generated models and the synthetic Drones |
+| `qa/e2e/` | The shared Playwright configuration and the suite that checks the images; see `qa/README.md` |
 | `infra/terraform/` | The Terraform modules per provider and building block, and one root per cell |
 | `infra/charts/` | The Helm charts, one per building block of a cell, and the `cell` umbrella chart |
 | `infra/environments/` | The desired state of each environment that Argo CD applies |
-| `infra/images/` | The images that are not a service or a front end, such as the PostgreSQL image |
+| `infra/images/` | The images that are not an app or a front end, such as the PostgreSQL image |
 | `infra/scripts/` | The scripts that request and close a branch's dev cell |
-| `tests/conventions/` | The [rules a test enforces](#rules-a-test-enforces), run against every service |
 | `infra/compose/e2e.yaml` | Starts the real images for Playwright |
+| `tests/conventions/` | The [rules a test enforces](#rules-a-test-enforces) |
 | `.github/workflows/` | The CI/CD pipeline |
 | `.github/scripts/` | The scripts the pipeline runs, such as change detection |
-
-`rust/` is a Cargo workspace and `frontend/packages/` a pnpm workspace.
 
 The front-end packages of `frontend/packages/` are `frontend/packages/tokens` (`@swarm/tokens`), whose `src/tokens.css` is generated by
 `specs.py build` from `docs/specs/visual-identity.md` and never edited by hand; and `frontend/packages/ui` (`@swarm/ui`), the components on
@@ -191,6 +253,14 @@ imports the functions from a wheel it builds.
 the MAVLink state machine) and a binary, `swarm-synthetic-drones`, which flies up to 255 synthetic Drones per process
 over UDP MAVLink 2, for example `cargo run -p swarm-synthetic-drones -- --count 10`. Its criterion benchmark is `step`.
 
+**The apps.** The apps `gateway`, `fleet`, `missions`, `simulator` and `flight-engine` sit in `backend/apps/<app>/`,
+each with one console script, `swarm-<app>-serve`, whose argument-free `main()` reads `conf/app.yaml` in the folder
+`SWARM_APP_ROOT` names (the current one without it), configures logging and serves the app; a relative path of the
+configuration is read in that folder. Their routes, services, clients and models sit in the layer packages, under the
+domain the app lists in `[tool.swarm] domains`: `simulation` for the simulator and `flight` for the flight engine, the
+others under their own name. The apps `gateway`, `missions` and `fleet` each have their own PostgreSQL schema and their
+Alembic migrations in `backend/apps/<app>/migrations/`, outside `src/` because Alembic needs module-level functions.
+
 `backend/apps/simulator/` is the simulator app, of the `simulation` domain. It has no command line: `swarm-simulator-serve`
 reads `conf/app.yaml` and serves `POST /v1/simulations`, whose body names the Mission and which answers `202 Accepted`
 with the Drones that fly, then flies the Squad of `conf/catalogs/simulated_squad.yaml` on a square route in the
@@ -201,13 +271,27 @@ Flight log, in SQLite, is marked simulated
 `tests/swarm_simulator/main/`. They need cargo and `nats-server`, and for PX4, docker with the image built by
 `docker build -f infra/images/px4-sitl/Dockerfile -t swarm-px4-sitl:local .`. They skip without them.
 
-The kernel libraries of `backend/libs/` are `swarm-lifecycle` (`swarm_lifecycle`), with Runnable, AsyncRunnable and
-the abstract factories; `swarm-logging` (`swarm_logging`), with the logging configuration; `swarm-catalog`
-(`swarm_catalog`), with YamlCatalog; `swarm-nats` (`swarm_nats`), the NATS connector with its configuration, the
-message headers and the bus errors; and `swarm-web` (`swarm_web`), the FastAPI app builder, the uvicorn server runnable,
-`ETag` and `If-Match`, with the REST configuration and the REST errors. Their tests are in `tests/swarm_<module>/`.
+The flight engine app (`backend/apps/flight-engine`, of the `flight` domain) imports `swarm_core`, through the MAVLink
+listener of `swarm_clients/flight/mavlink/`, from the wheel built from `rust/swarm-core/python`, not from the uv
+workspace. After `uv sync`, build and install it with:
 
-The rest of the shared NATS and REST code sits in the layer packages since the backend split (phase 5c):
+```bash
+uv run maturin build --release --manifest-path rust/swarm-core/python/Cargo.toml --out dist
+uv pip install --no-deps dist/swarm_core-*.whl
+```
+
+`uv sync` removes it again, so run these two commands after every sync. Tests that need the wheel skip without it, as the
+NATS tests skip without nats-server. mypy reads `rust/swarm-core/python/swarm_core.pyi` through the root
+`mypy_path`.
+
+**The kernel.** The libraries of `backend/libs/` are `swarm-lifecycle` (`swarm_lifecycle`), with Runnable,
+AsyncRunnable and the abstract factories; `swarm-logging` (`swarm_logging`), with the logging configuration;
+`swarm-catalog` (`swarm_catalog`), with YamlCatalog; `swarm-nats` (`swarm_nats`), the NATS connector with its
+configuration, the message headers and the bus errors; and `swarm-web` (`swarm_web`), the FastAPI app builder, the
+uvicorn server runnable, the runner that drives an `AsyncRunnable` from synchronous code (`swarm_web.runners`), `ETag`
+and `If-Match`, with the REST configuration and the REST errors. Their tests are in `tests/swarm_<module>/`.
+
+**Shared NATS and REST code** sits in the layer packages:
 
 - the JetStream admin, the event publisher, request-reply with deadlines and idempotency keys, and the account
   resolver client are in `swarm_clients/shared/nats/`;
@@ -225,72 +309,47 @@ are in `tests/conftest.py`. An app's router of `swarm_api/v1/<domain>/` builds i
 `ProblemHandlers.application` of `swarm_api`, which hands the problem model to `swarm_web`'s `RestAppBuilder`, then
 installs the idempotency middleware.
 
-The Babel catalogues of Python messages, in English, French, German and Spanish, are package data of the storage layer,
-in `swarm_storage/shared/i18n/locales/` (`swarm.pot` and `<en|fr|de|es>/LC_MESSAGES/swarm.po`), read by its
-`PoCatalogStore`. `swarm_service/shared/i18n/` holds `Translator`, which gives a message in a person's language, and the
-`CatalogChecker` of the argument-free script `uv run swarm-i18n-check` (`scripts/i18n/check.py`), which reads the
-folder `SWARM_I18N_LOCALES` names when it is set. Their models are in `swarm_models/i18n/`, and `Language` and
-`MessageProblem` in `swarm_models/enums.py`. `swarm-rest` is gone: the runner that drives an `AsyncRunnable` from
-synchronous code is in the kernel's `swarm_web.runners`, and `scripts/openapi` exports the OpenAPI documents.
+**Messages.** The Babel catalogues of Python messages, in English, French, German and Spanish, are package data of the
+storage layer, in `swarm_storage/shared/i18n/locales/` (`swarm.pot` and `<en|fr|de|es>/LC_MESSAGES/swarm.po`), read
+by its `PoCatalogStore`. `swarm_service/shared/i18n/` holds `Translator`, which gives a message in a person's language,
+and the `CatalogChecker` of `uv run swarm-i18n-check`. Their models are in `swarm_models/i18n/`, and `Language` and
+`MessageProblem` in `swarm_models/enums.py`.
 
-The package `swarm-storage` (`swarm_storage`) was added by ticket T0.12. `swarm-storage`, now the storage layer
-`backend/swarm-storage`, holds in `swarm_storage/shared/postgres/` the PostgreSQL pool, the unit of work that sets
+**PostgreSQL.** `swarm_storage/shared/postgres/` holds the PostgreSQL pool, the unit of work that sets
 `swarm.operator_id` on each transaction for row-level security, the `PostgresRepository` base and the outbox
-repository, the row-level security and outbox DDL, and the Alembic migrator. The apps `gateway`, `missions` and
-`fleet` each have their own PostgreSQL schema and their Alembic migrations in `backend/apps/<app>/migrations/`, outside
-`src/` because Alembic needs module-level functions.
+repository, the row-level security and outbox DDL, and the Alembic migrator.
 
-The live fan-out shared by the gateway and the flight engine is in `swarm_service/shared/live/`: the one-slot mailbox
-and the hub (`hub/`), the live sources (`sources/`), the MessagePack codec, and the `LiveSession` AsyncRunnable, built by
-its factory, behind the `/v1/live` socket of `swarm_api/v1/live/`. Its errors are in `swarm_models/live/exceptions/`.
+**Live.** The live fan-out shared by the gateway and the flight engine is in `swarm_service/shared/live/`: the one-slot
+mailbox and the hub (`hub/`), the live sources (`sources/`), the MessagePack codec, and the `LiveSession`
+AsyncRunnable, built by its factory, behind the `/v1/live` socket of `swarm_api/v1/live/`. Its errors are in
+`swarm_models/live/exceptions/`.
 
-The flight engine app (`backend/apps/flight-engine`, of the `flight` domain) imports `swarm_core`, through the MAVLink
-listener of `swarm_clients/flight/mavlink/`, from the wheel built from `rust/swarm-core/python`, not from the uv
-workspace. After `uv sync`, build and install it with:
-
-```bash
-uv run maturin build --release --manifest-path rust/swarm-core/python/Cargo.toml --out dist
-uv pip install --no-deps dist/swarm_core-*.whl
-```
-
-`uv sync` removes it again, so run these two commands after every sync. Tests that need the wheel skip without it, as the
-NATS tests skip without nats-server. mypy reads `rust/swarm-core/python/swarm_core.pyi` through the root
-`mypy_path`.
-
-The apps `gateway`, `fleet`, `missions`, `simulator` and `flight-engine` sit in `backend/apps/<app>/`, each with one
-console script, `swarm-<app>-serve`, whose argument-free `main()` reads `conf/app.yaml` in the folder `SWARM_APP_ROOT`
-names (the current one without it) and serves the app; a relative path of the configuration is read in that folder.
-Their routes, services, clients and models sit in the layer packages, under the domain the app lists in
-`[tool.swarm] domains`: `simulation` for the simulator and `flight` for the flight engine, the others under their own
-name.
-
-The Python rules in this file apply to `backend/` and `scripts/`, and to the central `tests/`. The front ends use React and TypeScript
-with a Tauri desktop shell, images go to GHCR, and Argo CD deploys them; see `docs/specs/technical/`.
+The Python rules in this file apply to `backend/` and `scripts/`, and to the central `tests/`. The front ends use React
+and TypeScript with a Tauri desktop shell, images go to GHCR, and Argo CD deploys them; see `docs/specs/technical/`.
 
 **Shared models**
 
-- **The models:** every Pydantic model shared between services lives in `backend/swarm-models`, under
-  `swarm_models/<concern>/`, and a service never redefines one.
+- **The models:** every Pydantic model lives in `backend/swarm-models`, under `swarm_models/<concept>/`, or in the
+  `models/` of a kernel library, and nothing redefines one.
 - **The single source:** the JSON Schema bundle, the Rust structs and the TypeScript types are generated from those
   models, and are never edited by hand.
 - **The CI checks:** CI fails when one of them is stale. Three checks enforce it:
-  - the `packages` job of `python.yml` runs `swarm-schemas-check`;
+  - `python.yml` runs `swarm-schemas-check`;
   - `cargo test` runs `generated_is_current` in `rust/swarm-models`;
   - the `test` script of `frontend/packages/live` runs `generate.ts --check`.
 
-**Services**
+**Apps and packages**
 
-- The layers in [Layout](#layout) are the layer packages of `backend/` since phase 5e: read `src/` as
-  `backend/swarm-<layer>/src/swarm_<layer>/<domain>/`, and `from service.customers...` as
-  `from swarm_service.<domain>.customers...`.
-- NEVER add a top-level `api`, `service`, `storage` or `models` package to a service. Services share one uv environment,
-  so they would overwrite each other.
-- A service never imports another service. Code they share goes in `packages/`, which holds no business rules.
-- Adding a service must not need a change to `tests/conventions/`, so that its rules cover new code automatically.
+- NEVER add a top-level `api`, `service`, `storage`, `clients` or `models` package. The packages share one uv
+  environment, so they would overwrite each other: the layers are `swarm_api`, `swarm_service`, `swarm_storage`,
+  `swarm_clients` and `swarm_models`.
+- An app never imports another app. The code apps share sits in the layers and the kernel, by domain or in `shared/`.
+- Adding an app or a domain must not need a change to `tests/conventions/`, so that its rules cover new code
+  automatically.
 
 **Docker images**
 
-- Each service and front end has exactly one image, built by a multi-stage `Dockerfile` in its own folder.
+- Each app and front end has exactly one image, built by a multi-stage `Dockerfile` in its own folder.
 - The build context is the repository root, because the shared `uv.lock` is there.
 - Images are pushed to `ghcr.io/gpbcom/swarm/<name>`, and each one is signed with keyless cosign.
 - The dev cell refuses an unsigned `ghcr.io/gpbcom/swarm/**` image: the Sigstore policy-controller admits only images
@@ -308,89 +367,39 @@ with a Tauri desktop shell, images go to GHCR, and Argo CD deploys them; see `do
 
 Each step must pass before the next one starts:
 
-1. Detect what changed, and run jobs only for those services, front ends and packages. A change in `packages/`, in a
-   lock file (`uv.lock`, `Cargo.lock`, `pnpm-lock.yaml`), in a root workspace file or in the pipeline itself runs all of
-   them.
-2. Run `ruff check`, `ruff format --check`, `mypy` and `pytest` for each changed service; `cargo fmt`, `clippy` and
+1. Detect what changed, and run jobs only for those apps, front ends and packages. A change in the kernel, `scripts/`,
+   `rust/`, `frontend/packages/`, `qa/e2e/`, a lock file (`uv.lock`, `Cargo.lock`, `pnpm-lock.yaml`), a root workspace
+   file or the pipeline itself runs all of them; a change in a layer package runs the apps that own its domain, and a
+   change in its `shared/` folder runs them all.
+2. Run `ruff check`, `ruff format --check`, `mypy` and `pytest` for each changed app; `cargo fmt`, `clippy` and
    `cargo test` for Rust, and `cargo bench` with the 5 % gate on pull requests; eslint, `tsc` and Vitest for
    TypeScript; and `specs.py check`.
 3. Build each changed image.
 4. Run Playwright against those images, and upload the HTML report if a test fails.
 5. Publish the images tagged with the commit SHA, from `develop` or `master` only.
 
-## Target layout
-
-Swarm is moving, phase by phase, to the layout of the approved refactor plan: layers as packages, thin apps, and the
-operations in `scripts/`. Until a phase moves a part, that part keeps the layout above; new code in `backend/` and
-`scripts/` follows this section from the start, and `tests/conventions/` checks both layouts while they coexist.
-
-| Path | Holds |
-| --- | --- |
-| `backend/libs/<lib>/` | The kernel: `swarm-lifecycle`, `swarm-logging`, `swarm-catalog`, `swarm-nats` (the connector), `swarm-web` (the app builder, the server runnable, the entity tags) |
-| `backend/swarm-models/` | Layer 0: every Pydantic model, enum and exception, by concept, and each app's configuration in `config/<app>/` |
-| `backend/swarm-storage/`, `backend/swarm-clients/` | Layer 1: one repository per entity, one client per remote system, a folder per domain and a `shared/` folder |
-| `backend/swarm-service/` | Layer 2: the business rules and every runnable (bus responders and consumers included), a folder per domain |
-| `backend/swarm-api/` | Layer 3: the FastAPI endpoints only (see below) |
-| `backend/apps/<app>/` | Layer 4: one image each, with its `Dockerfile`, `conf/`, `migrations/` and a `main()`; `[tool.swarm] domains` lists the domains it owns |
-| `scripts/<area>/` | The operations, run with `uv run`: OpenAPI export and check, migrations, schema export and check |
-| `tests/swarm_<module>/` | The Python tests, mirroring each package's import path |
-
-**The api layer holds only endpoints.** `swarm_api` holds FastAPI endpoints and their versioned routers (`/v1/...`),
-their `Depends` providers, the middlewares, the exception handlers and the `/v1/live` WebSocket endpoint. Anything else
-that sits in `api` and exposes no endpoint (a command, a factory, a runnable, a bus handler, the server runner, the app
-builder) moves to the service layer or to the kernel.
-
-**No command line in the product.** `backend/` and `scripts/` never import `argparse`, `click` or `typer`, never read
-`sys.argv`, and hold no folder or module named `cli` or `commands`. An app's `main()` reads its `conf/app.yaml` and its
-environment, then runs. Only the harness (`.claude/`) and CI (`.github/`) keep command lines.
-
-**`scripts/` holds the operations.** OpenAPI generation and checking, migrations and the schema export are Python
-scripts in `scripts/<area>/`, exposed as `uv run swarm-<area>-<action>`, taking no arguments: a script covers every app,
-or the one named by the environment entry `SWARM_APP`.
-
-**One class per entity per layer.** Within a layer, an entity has exactly one responsible class: one `<Entity>Repository`
-in storage, one `<Entity>Client` in clients, one `<Entity>Service` in service, one `<Entity>Router` in api. Classes that
-split one entity's work in the same layer are merged. Factories and exceptions keep their own files.
-
-**Package imports.** Each package imports only these first-party packages:
-
-| Package | May import |
-| --- | --- |
-| The kernel (`backend/libs/`) | The kernel only |
-| `swarm_models` | Itself, `swarm_catalog`, `swarm_lifecycle`, and the models of `swarm_web` and `swarm_nats` (`swarm_web.models`, `swarm_nats.models`). Never `swarm_logging` |
-| `swarm_storage`, `swarm_clients` | Itself, `swarm_models` and the kernel |
-| `swarm_service` | Itself, `swarm_storage`, `swarm_clients`, `swarm_models` and the kernel |
-| `swarm_api` | Itself, `swarm_service`, `swarm_models`, `swarm_web` and the rest of the kernel |
-| `swarm_<app>` | `swarm_api`, `swarm_service`, `swarm_web`, `swarm_models.config.<app>` and `swarm_logging` |
-| `scripts/` | `swarm_service`, `swarm_api`, `swarm_web`, `swarm_models` and the kernel |
-
-Inside these rules, domains are owned: `swarm_service.<d>` uses only `swarm_storage.<d>`, `swarm_clients.<d>` or the
-`shared` folders, each domain has exactly one owning app, and an app wires only the domains of its `[tool.swarm]
-domains`.
-
 ## Rules a test enforces
 
-`tests/conventions/` fails on any of these, in `src/` and `tests/` unless stated:
+`tests/conventions/` fails on any of these, in `src/` and `tests/` unless stated. Each rule is one class in
+`tests/conventions/rules/`, and the environment variable `SWARM_CONVENTIONS_BACKEND_ROOT` runs the tests against another
+repository root.
 
-`tests/conventions/backend/test_backend_conventions.py` runs these rules against every package of `backend/` and
-`scripts/` (the kernel libs, the layer packages, the apps and the scripts), and against the central tests of the
-backend (`tests/swarm_*`, `tests/scripts` and `tests/fakes`); they ran against `services/` and `packages/python/` until
-phase 5e. The rules checked are: more than one top-level class in a file; more than five Python files in a
-folder; a nested function; `Any`; an import that Layout does not allow, checked in `src/` only; the lifecycle rule
-(`start` or `stop`, or `run` without a lifecycle base class); a Pydantic model outside `src/models/`; a module
-docstring; an import outside its group (`tests/conventions/imports/` also checks the root `tests/`); and a logger
-handed to a new object or to `super().__init__`, checked in `src/` only. `@staticmethod`,
-attributes starting with an underscore and the node rules are not tested yet. Each rule is one class in
-`tests/conventions/rules/`. The environment variable `SWARM_CONVENTIONS_BACKEND_ROOT` runs the tests against another
-repository root. The lifecycle rule accepts the
-definitions of `Runnable` and `AsyncRunnable` themselves.
+`tests/conventions/backend/test_backend_conventions.py` runs the code rules against every package of `backend/` and
+`scripts/` (the kernel libraries, the layer packages, the apps and the scripts), and against the central tests of the
+backend (`tests/swarm_*`, `tests/scripts` and `tests/fakes`): more than one top-level class in a file; more than five
+Python files in a folder; a nested function; `Any`; the lifecycle rule (`start` or `stop`, or `run` without a
+lifecycle base class); a Pydantic model outside `models`; a module docstring; an import outside its group
+(`tests/conventions/imports/` also checks the root `tests/`); and a logger handed to a new object or to
+`super().__init__`, checked in `src/` only. The lifecycle rule accepts the definitions of `Runnable` and
+`AsyncRunnable` themselves. `@staticmethod`, attributes starting with an underscore and the node rules are not tested
+yet.
 
-Since the refactor's phase 1, `tests/conventions/backend/` checks the [Target layout](#target-layout) in `backend/`
-and `scripts/`, and skips while they do not exist: the package import table (`PackageImports`), the dependencies each
+The same file runs the rules of [Layout](#layout): the package import table (`PackageImports`), the dependencies each
 layer package declares (`PackageDependencies`), domain ownership (`DomainOwnership`), thin apps (`ThinApp`), the tests
-mirror (`TestsMirror`), unique test base names, no `Path(__file__).parents[N]` lookup (`NoFileDepthPath`), the api
-layer holding only endpoints (`ApiOnlyEndpoints`), no command line (`NoCommandLine`) and one class per entity per
-layer (`OneClassPerEntity`). `SWARM_CONVENTIONS_BACKEND_ROOT` points it at another repository root.
+mirror (`TestsMirror`), unique test base names (`UniqueTestBasenames`) and no `Path(__file__).parents[N]` lookup
+(`NoFileDepthPath`). `tests/conventions/backend/test_layout_rules.py` runs the api layer holding only endpoints
+(`ApiOnlyEndpoints`), no command line (`NoCommandLine`) and one class per entity per layer (`OneClassPerEntity`) on
+`backend/` and `scripts/`.
 
 - More than one top-level class in a file, whatever the kind of class, except several enums in an `enums.py`.
 - More than five Python files in a folder, not counting `__init__.py` and `conftest.py`. The rule of [File shape](#file-shape)
@@ -401,15 +410,17 @@ layer (`OneClassPerEntity`). `SWARM_CONVENTIONS_BACKEND_ROOT` points it at anoth
 - `Any`. See [Typing](#typing).
 - An attribute starting with an underscore: `self.process`, never `self._process`. Methods may start with one. The only
   exception is a name a third-party protocol owns, listed in `tests/conventions/helpers.py`.
-- An import that [Layout](#layout) does not allow.
-- A Pydantic model outside `src/models/`.
-- A class outside `src/models/` with `start` or `stop`, or with `run` but no lifecycle base class.
+- An import that the package import table of [Layout](#layout) does not allow, checked in `src/` only.
+- A Pydantic model outside `models`.
+- A class outside `models` with `start` or `stop`, or with `run` but no lifecycle base class.
 - A node without `__call__`, or with `run`.
 - A file that starts with a docstring (a module docstring).
 - An import outside the group of its kind, a group without its comment, or groups out of order (`src/` and `tests/`,
   except `__init__.py`).
 - A call in `src/` that hands a logger to a new object or to `super().__init__` (`logger=`, `self.logger`,
   `getLogger(...)`).
+- In `backend/` and `scripts/`: an endpoint-less class in `swarm_api`, a command line, or two classes for one entity in
+  one layer.
 
 ## File shape
 
@@ -424,13 +435,13 @@ methods only happen to share a name and mean different things, rename one instea
 
 **NEVER more than five code files in one folder,** whatever their language: Python, JavaScript, TypeScript and Rust
 together (`.py`, `.js`, `.jsx`, `.mjs`, `.cjs`, `.ts`, `.tsx`, `.rs`). When a folder would go past five, create sub-folders
-and dispatch its files by entity type or by theme: `storage/customers/repositories/` for the repositories,
-`models/customers/exceptions/` for the exceptions, `.claude/scripts/tickets/` for the ticket scripts. This applies to every
-folder of the repository: `src/` and `tests/` of the services and packages, `frontend/apps/`, `frontend/packages/`, `rust/`,
+and dispatch its files by entity type or by theme: `swarm_storage/customers/repositories/` for the repositories,
+`swarm_models/customers/exceptions/` for the exceptions, `.claude/scripts/tickets/` for the ticket scripts. This applies to every
+folder of the repository: `backend/`, `scripts/` and `tests/`, `frontend/apps/`, `frontend/packages/`, `rust/`,
 the harness under `.claude/` and the CI scripts, including `exceptions/` folders. The entry files of a folder do not count
 towards the five: `__init__.py` and `conftest.py`, `index.ts` and `index.js`, and Rust's `lib.rs`, `main.rs` and `mod.rs`.
 
-An `exceptions/` package's `__init__.py` re-exports everything under it, so callers keep importing from the package. Other code is imported by its full path: `from service.customers.customer_service import CustomerService`.
+An `exceptions/` package's `__init__.py` re-exports everything under it, so callers keep importing from the package. Other code is imported by its full path: `from swarm_service.customers.customer_service import CustomerService`.
 
 Nothing else sits at module level, so there are no module constants, helper functions or module-level loggers. The
 exceptions are a `main()` for a console script and `__all__`. Constants become `ClassVar` attributes in `UPPER_CASE`,
@@ -478,10 +489,10 @@ Every runnable class except the nodes subclasses `Runnable` or `AsyncRunnable`, 
 - `execute()` on the base class calls all three, and closes whatever happens. Use it unless something runs alongside.
   On an `AsyncRunnable` it is an async generator: read it with `async for status in runnable.execute()`.
 - They take no arguments. Inputs go to the constructor, and results are read from attributes afterwards, such as
-  `Command.exit_code`.
-- Runnables are created by an abstract factory in their layer's `factories/` package, with concrete ones in its
-  sub-folders: `ServiceFactory` in `service/factories/`, and `CommandFactory` in `api/factories/`. Do not call a
-  runnable's constructor in `src/` outside a factory.
+  `SchemaMigration.exit_code`.
+- Runnables are created by a factory in the `factories/` package of their domain, with sub-folders by theme:
+  `SquadFlightFactory` in `swarm_service/simulation/factories/flights/`, `RestServerFactory` in
+  `swarm_web/factories/`. Do not call a runnable's constructor in `src/` outside a factory.
 - The base classes are `swarm_lifecycle.runnables.runnable.Runnable` and `swarm_lifecycle.runnables.async_runnable.AsyncRunnable`.
   A subclass calls `super().__init__()`, or `super().__init__(config.status_interval_s)` for an `AsyncRunnable`, with
   no logger, then sets its own `self.logger = logger if logger else getLogger(__name__)`.
@@ -513,11 +524,11 @@ from typing import List, Optional
 import yaml
 
 # First-party imports
-from models.customers.exceptions import SECustomerCatalogUnreadable
+from swarm_models.customers.exceptions import SECustomerCatalogUnreadable
 ```
 
 - Imports are absolute, at the top of the file, never inside a function.
-- Import exceptions from their package (`models.customers.exceptions`), not from the file that defines them.
+- Import exceptions from their package (`swarm_models.customers.exceptions`), not from the file that defines them.
 - **Every module of `src/` and `tests/` has its groups,** exception files and test files included. Only `__init__.py`
   files, which only re-export, have none. A group with no import is left out with its comment.
 - **An import sits in the group of what it imports,** whatever ruff's isort thinks: the standard library, a third-party
@@ -636,7 +647,7 @@ logger to an object they test, to test that parameter or to capture the logs.
   | `WARNING` | A degraded result the code recovers from |
   | `ERROR` | A failure, just before raising |
 
-- **Every method logs, at each level that applies to it, except in `tests/` and `src/models/`.** Not every method has a
+- **Every method logs, at each level that applies to it, except in `tests/` and `models`.** Not every method has a
   failure to report, so do not invent one, but every failure path has its `WARNING` or `ERROR`.
 - **EVERY logical branch logs**, in `src/` outside `models/`: each `if`, `elif` and `else` body, each `case` of a
   `match`, and each `except`. A branch that returns early, skips an item or picks a default says so at `DEBUG`, and a
@@ -651,11 +662,10 @@ logger to an object they test, to test that parameter or to capture the logs.
 - `DEBUG` lines are written by default, because the root level in `conf/logger.yaml` is `DEBUG`. Keep them short.
 - **Never log a secret or a typed value.** If an error might quote one, log `type(error).__name__`.
 - `models` never logs. It raises.
-- Only `scripts/` and `api/cli/` use `print`, because that output is for the person at the terminal; `api/cli/`
-  disappears with the backend split.
+- Only `scripts/` uses `print`, because that output is for the person at the terminal.
 
-A service configures logging once, at its entry point, with `swarm_logging.configurators.logging_configurator.LoggingConfigurator(LoggingConfig(...)).configure()`.
-`LoggingConfig.path` names the service's `conf/logger.yaml`, and None uses the reference `logger.yaml` shipped in
+An app configures logging once, in its `main()`, with `swarm_logging.configurators.logging_configurator.LoggingConfigurator(LoggingConfig(...)).configure()`.
+`LoggingConfig.path` names the app's `conf/logger.yaml`, and None uses the reference `logger.yaml` shipped in
 swarm_logging. `LoggingConfig.format` is `coloured` by default and `json` in production, which writes one JSON object
 per line on every handler.
 
@@ -694,13 +704,14 @@ class DatabaseConfig(BaseModel):
 
 ## Data and enums
 
-- Do not hard-code data in Python. It goes in `conf/catalogs/*.yaml`, loaded by a model that subclasses `YamlCatalog`,
+- Do not hard-code data in Python. It goes in the app's `conf/catalogs/*.yaml`, loaded by a model that subclasses `YamlCatalog`,
   which provides `load(path)` and raises the model's `UNREADABLE` exception. YamlCatalog is
   `swarm_catalog.models.yaml_catalog.YamlCatalog`, and a subclass sets `UNREADABLE` to its own exception.
 - A string that selects behaviour is a `StrEnum` with `@unique`, with its members listed under `Attributes:`.
 - **ALL the enums of a module are in ONE `enums.py`, at the root of its `models` module:**
-  `src/<module>/models/enums.py`, imported as `from swarm_lifecycle.models.enums import RunnableStatus`. There is no
-  `enums/` folder and no enum anywhere else, and `enums.py` holds only enums.
+  `swarm_models/enums.py` for the models layer, `src/<module>/models/enums.py` for a kernel library, imported as
+  `from swarm_lifecycle.models.enums import RunnableStatus`. There is no `enums/` folder and no enum anywhere else,
+  and `enums.py` holds only enums.
 - **NO hyphen in an enum's values.** A value is lower case words joined by underscores: `NOT_STARTED = "not_started"`,
   never `"not-started"`.
 - **NO raw string in the code of `src/`.** A string that means something (a status, a phase, a kind, a mode, a key, a
@@ -719,9 +730,9 @@ class DatabaseConfig(BaseModel):
 - Name files `test_<subject>.py`, in the folder that mirrors the source. There are no `__init__.py` files.
 - Put each file's tests in one `Test<Subject>` class. A helper class, such as a stand-in server, gets its own file.
 - When a source file needs several test classes, give it a folder of its name:
-  `tests/service/customers/customer_service/`.
+  `tests/swarm_service/customers/customer_service/`.
 - In that folder, `helpers.py` holds the functions and constants several classes share, and `conftest.py` the fixtures.
-  Import them by their full path: `from tests.service.customers.customer_service.helpers import a_customer`.
+  Import them by their full path: `from tests.swarm_service.customers.customer_service.helpers import a_customer`.
 - Scripts that tests run as child processes load their helpers by path, so keep them in place.
 - Name tests as sentences: `test_a_customer_without_a_name_is_refused`.
 - Tests need no docstrings, banners or import comments. Add a docstring only if the purpose is not obvious.
@@ -734,7 +745,7 @@ class DatabaseConfig(BaseModel):
   `/usr/lib/postgresql/*/bin`. The tests connect as the role `swarm_app`, which is neither superuser nor `BYPASSRLS`, so
   that row-level security applies. They skip when the binaries are missing, as the NATS tests do.
 - Test file names are unique across the whole uv workspace, because pytest imports test modules by their base name, so
-  a service's tests carry its name.
+  an app's tests carry its name: `test_swarm_simulator_main.py`.
 
 Every model gets this set of tests:
 

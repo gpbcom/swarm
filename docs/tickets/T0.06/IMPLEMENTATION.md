@@ -28,7 +28,7 @@
 
 ## <a id="d1"></a>D1: Source of the generated types
 
-**Chosen:** the Pydantic models are the source, exported as one canonical bundle · **Where:** [`packages/python/swarm-models/src/swarm_models/service/schemas/schema_exporter.py:77`](../../../packages/python/swarm-models/src/swarm_models/service/schemas/schema_exporter.py#L77) · **Source:** PLAN.md assumption 17
+**Chosen:** the Pydantic models are the source, exported as one canonical bundle · **Where:** [`backend/swarm-service/src/swarm_service/shared/schema/schema_exporter.py:77`](../../../backend/swarm-service/src/swarm_service/shared/schema/schema_exporter.py#L77) · **Source:** PLAN.md assumption 17
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -42,7 +42,7 @@
 
 ## <a id="d2"></a>D2: Where the stale checks run
 
-**Chosen:** reuse the existing workflows · **Where:** [`python.yml:81`](../../../.github/workflows/python.yml#L81), [`generated_is_current.rs:6`](../../../packages/rust/swarm-models/tests/generated_is_current.rs#L6), [`package.json:11`](../../../packages/ts/live/package.json#L11) · **Source:** PLAN.md assumptions 18 to 20
+**Chosen:** reuse the existing workflows · **Where:** [`python.yml:81`](../../../.github/workflows/python.yml#L81), [`generated_is_current.rs:6`](../../../rust/swarm-models/tests/generated_is_current.rs#L6), [`package.json:11`](../../../frontend/packages/live/package.json#L11) · **Source:** PLAN.md assumptions 18 to 20
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -55,7 +55,7 @@
 
 ## <a id="d3"></a>D3: Field sets the specification does not detail
 
-**Chosen:** the most conservative set (TKT-8) · **Where:** [`packages/python/swarm-models/src/swarm_models/models/people/role.py:86`](../../../packages/python/swarm-models/src/swarm_models/models/people/role.py#L86) · **Source:** PLAN.md assumptions 3 and 10
+**Chosen:** the most conservative set (TKT-8) · **Where:** [`backend/swarm-models/src/swarm_models/people/role.py:86`](../../../backend/swarm-models/src/swarm_models/people/role.py#L86) · **Source:** PLAN.md assumptions 3 and 10
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -68,7 +68,7 @@
 
 ## <a id="d4"></a>D4: Safety lane
 
-**Chosen:** four safety kinds, and a safety kind on the normal lane is refused · **Where:** [`packages/python/swarm-models/src/swarm_models/models/commands/command.py:146`](../../../packages/python/swarm-models/src/swarm_models/models/commands/command.py#L146) · **Source:** PLAN.md assumption 16
+**Chosen:** four safety kinds, and a safety kind on the normal lane is refused · **Where:** [`backend/swarm-models/src/swarm_models/commands/command.py:146`](../../../backend/swarm-models/src/swarm_models/commands/command.py#L146) · **Source:** PLAN.md assumption 16
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -81,7 +81,7 @@
 
 ## <a id="d5"></a>D5: Validation style
 
-**Chosen:** one exception per field, shared `SwarmModel` helpers, `mode="before"` validators · **Where:** [`packages/python/swarm-models/src/swarm_models/models/base/swarm_model.py:36`](../../../packages/python/swarm-models/src/swarm_models/models/base/swarm_model.py#L36) · **Source:** PLAN.md assumptions 7 and 8, review
+**Chosen:** one exception per field, shared `SwarmModel` helpers, `mode="before"` validators · **Where:** [`backend/swarm-models/src/swarm_models/base/swarm_model.py:36`](../../../backend/swarm-models/src/swarm_models/base/swarm_model.py#L36) · **Source:** PLAN.md assumptions 7 and 8, review
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -94,7 +94,7 @@
 
 ## <a id="d6"></a>D6: SquadFrame content
 
-**Chosen:** full frames · **Where:** [`packages/python/swarm-models/src/swarm_models/models/telemetry/squad_frame.py:97`](../../../packages/python/swarm-models/src/swarm_models/models/telemetry/squad_frame.py#L97) · **Source:** PLAN.md assumption 15
+**Chosen:** full frames · **Where:** [`backend/swarm-models/src/swarm_models/telemetry/squad_frame.py:97`](../../../backend/swarm-models/src/swarm_models/telemetry/squad_frame.py#L97) · **Source:** PLAN.md assumption 15
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -107,7 +107,7 @@
 
 ## <a id="d7"></a>D7: Event envelope
 
-**Chosen:** `operator_id` required, `mission_id` optional · **Where:** [`packages/python/swarm-models/src/swarm_models/models/events/event.py:27`](../../../packages/python/swarm-models/src/swarm_models/models/events/event.py#L27) · **Source:** PLAN.md assumption 11
+**Chosen:** `operator_id` required, `mission_id` optional · **Where:** [`backend/swarm-models/src/swarm_models/events/event.py:27`](../../../backend/swarm-models/src/swarm_models/events/event.py#L27) · **Source:** PLAN.md assumption 11
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -120,7 +120,7 @@
 
 ## <a id="d8"></a>D8: Rust generation
 
-**Chosen:** a separate `swarm-models-codegen` crate · **Where:** [`packages/rust/swarm-models-codegen/src/lib.rs:49`](../../../packages/rust/swarm-models-codegen/src/lib.rs#L49) · **Source:** PLAN.md assumption 18
+**Chosen:** a separate `swarm-models-codegen` crate · **Where:** [`rust/swarm-models-codegen/src/lib.rs:49`](../../../rust/swarm-models-codegen/src/lib.rs#L49) · **Source:** PLAN.md assumption 18
 
 | Option | For | Against |
 | --- | --- | --- |
@@ -133,7 +133,7 @@
 
 ## <a id="d9"></a>D9: Bundle path
 
-**Chosen:** `DEFAULT_ROOT` relative to the source tree · **Where:** [`packages/python/swarm-models/src/swarm_models/storage/schemas/schema_folder.py:25`](../../../packages/python/swarm-models/src/swarm_models/storage/schemas/schema_folder.py#L25) · **Source:** read from the diff, review
+**Chosen:** `DEFAULT_ROOT` relative to the source tree · **Where:** [`backend/swarm-storage/src/swarm_storage/shared/schemas/schema_folder.py:25`](../../../backend/swarm-storage/src/swarm_storage/shared/schemas/schema_folder.py#L25) · **Source:** read from the diff, review
 
 | Option | For | Against |
 | --- | --- | --- |

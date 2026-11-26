@@ -45,7 +45,7 @@ class ImportSections(ConventionRule):
         THIRD_PARTY: "# Third-party imports",
         FIRST_PARTY: "# First-party imports",
     }
-    NAMESPACES: ClassVar[Tuple[str, ...]] = ("tests", "services", "packages", "backend")
+    NAMESPACES: ClassVar[Tuple[str, ...]] = ("tests", "backend")
     INIT: ClassVar[str] = "__init__.py"
     FUTURE: ClassVar[str] = "__future__"
 

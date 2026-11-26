@@ -94,7 +94,7 @@ def write_reports(base: Path, errors: int = 0) -> Path:
     for folder, name, text in (
         ("test-report-python-repository", "repository.xml", JUNIT.format(errors=errors)),
         ("test-report-rust", "rust-cargo-test.log", RUST_LOG),
-        ("test-report-ts-frontends-ground-control", "typescript.log", VITEST_LOG),
+        ("test-report-ts-frontend-apps-ground-control", "typescript.log", VITEST_LOG),
         ("test-report-specs", "specs-check.log", ""),
         ("test-report-ts-packages-ts-live", "packages-ts-live.log", NODE_TEST_LOG),
         ("test-report-ts-packages-ts-config", "packages-ts-config.log", ""),

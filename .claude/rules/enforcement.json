@@ -486,7 +486,7 @@
    {
     "kind": "test",
     "path": "tests/harness/roadmap_gantt/test_roadmap_gantt_areas.py",
-    "what": "an area of the old layout and its new-layout path are the same area for the lock and the board"
+    "what": "every area is a target-layout folder, and a folder the ticket graph still names in the old layout is read as its target-layout folder, for the lock and the board"
    }
   ],
   "TKT-17": [
