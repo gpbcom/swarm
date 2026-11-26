@@ -14,8 +14,8 @@ from flight_engine.api.live.live_endpoint import LiveEndpoint
 from flight_engine.models.config.live_server_config import LiveServerConfig
 from swarm_live.service.live_codec import LiveCodec
 from swarm_live.service.live_hub import LiveHub
-from swarm_models.models.enums import LiveOperation, LiveTopicKind
-from swarm_models.models.live.live_subscription import LiveSubscription
+from swarm_models.enums import LiveOperation, LiveTopicKind
+from swarm_models.live.live_subscription import LiveSubscription
 
 
 class TestFlightEngineLiveEndpoint:

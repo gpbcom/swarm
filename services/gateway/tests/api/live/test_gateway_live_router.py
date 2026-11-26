@@ -10,8 +10,8 @@ from gateway_stand_in_live_source import GatewayStandInLiveSource
 
 # First-party imports
 from swarm_live.service.live_codec import LiveCodec  # isort: skip
-from swarm_models.models.enums import LiveOperation, LiveRate, LiveTopicKind  # isort: skip
-from swarm_models.models.live.live_subscription import LiveSubscription  # isort: skip
+from swarm_models.enums import LiveOperation, LiveRate, LiveTopicKind  # isort: skip
+from swarm_models.live.live_subscription import LiveSubscription  # isort: skip
 
 
 class TestGatewayLiveRouter:

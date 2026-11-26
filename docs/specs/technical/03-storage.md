@@ -62,7 +62,7 @@
 
 How every repository works:
 
-- **One base class**, `PostgresRepository[Model]` in `packages/python/swarm-storage`: maps rows to the Pydantic model and back, sets `swarm.operator_id` on the transaction for row-level security, pages with cursors, and checks a `version` column on update (optimistic concurrency, which the REST layer exposes as `ETag`).
+- **One base class**, `PostgresRepository[Model]` in `backend/swarm-storage` (`swarm_storage/shared/postgres/`): maps rows to the Pydantic model and back, sets `swarm.operator_id` on the transaction for row-level security, pages with cursors, and checks a `version` column on update (optimistic concurrency, which the REST layer exposes as `ETag`).
 - **Methods named after what the service needs**, beyond `get`, `list`, `add`, `update` and `delete`: `MissionRepository.flying_in_cell()`, `DroneRepository.ready_for(drone_model_id)`, `DefectRepository.suspected_for(deliverable_id)`, `AuthorisationRepository.expiring_within(days)`.
 - **Unit of work:** a service opens one `UnitOfWork` per business operation; every repository it uses shares the same transaction, and events go into an **outbox** table in that transaction, published to NATS JetStream by a relay afterwards, so a change and its event never disagree.
 - **No SQL outside repositories**; queries are written with SQLAlchemy Core expressions or plain SQL in the repository, measured in the query budget of the service.

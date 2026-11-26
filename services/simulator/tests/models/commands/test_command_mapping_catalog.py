@@ -15,7 +15,7 @@ from simulator.models.commands.exceptions import (
     SECommandMappingCatalogInvalidCommands,
     SECommandMappingCatalogUnreadable,
 )
-from swarm_models.models.commands.enums import CommandKind
+from swarm_models.commands.enums import CommandKind
 
 
 class TestCommandMappingCatalog:

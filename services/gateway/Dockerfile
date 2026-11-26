@@ -17,9 +17,9 @@ COPY services/gateway/pyproject.toml services/gateway/pyproject.toml
 COPY backend/libs/swarm-catalog/pyproject.toml backend/libs/swarm-catalog/pyproject.toml
 COPY backend/libs/swarm-lifecycle/pyproject.toml backend/libs/swarm-lifecycle/pyproject.toml
 COPY backend/libs/swarm-logging/pyproject.toml backend/libs/swarm-logging/pyproject.toml
-COPY packages/python/swarm-models/pyproject.toml packages/python/swarm-models/pyproject.toml
+COPY backend/swarm-models/pyproject.toml backend/swarm-models/pyproject.toml
 COPY packages/python/swarm-nats/pyproject.toml packages/python/swarm-nats/pyproject.toml
-COPY packages/python/swarm-storage/pyproject.toml packages/python/swarm-storage/pyproject.toml
+COPY backend/swarm-storage/pyproject.toml backend/swarm-storage/pyproject.toml
 COPY packages/python/swarm-rest/pyproject.toml packages/python/swarm-rest/pyproject.toml
 
 RUN --mount=type=cache,target=/root/.cache/uv \
@@ -28,7 +28,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 COPY README.md README.md
 COPY services/gateway services/gateway
 COPY packages/python packages/python
-COPY backend/libs backend/libs
+COPY backend backend
 
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev --no-editable --package swarm-gateway

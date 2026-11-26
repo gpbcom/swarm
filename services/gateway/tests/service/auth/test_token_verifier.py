@@ -23,7 +23,7 @@ from gateway.models.auth.caller import Caller  # isort: skip
 from gateway.models.enums import TokenClaim  # isort: skip
 from gateway.models.keycloak.exceptions import SEKeycloakUnreachableError  # isort: skip
 from gateway.service.auth.token_verifier import TokenVerifier  # isort: skip
-from swarm_models.models.people.enums import RoleName  # isort: skip
+from swarm_models.people.enums import RoleName  # isort: skip
 from services.gateway.tests.support.keycloak.helpers import AUDIENCE, claims_for  # isort: skip
 from services.gateway.tests.support.keycloak.keycloak_stand_in import KeycloakStandIn  # isort: skip
 

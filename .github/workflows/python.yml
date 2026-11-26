@@ -155,13 +155,13 @@ jobs:
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
           "$HOME/.local/bin/nats-server" --version
       - name: Ruff check
-        run: uv run ruff check packages/python backend/libs
+        run: uv run ruff check packages/python backend scripts
       - name: Ruff format check
-        run: uv run ruff format --check packages/python backend/libs
+        run: uv run ruff format --check packages/python backend scripts
       - name: Mypy
         run: |
           found=0
-          for src in packages/python/*/src backend/libs/*/src; do
+          for src in packages/python/*/src backend/libs/*/src backend/swarm-*/src scripts/src; do
             if [ -d "$src" ]; then
               found=1
               uv run mypy "$src" || exit 1
@@ -178,7 +178,7 @@ jobs:
             echo "No tests in packages/python: pytest is not applicable."
           fi
       - name: JSON Schema bundle is up to date
-        run: uv run swarm-models-schemas --check
+        run: uv run swarm-schemas-check
       - name: Every Python message is in English, French, German and Spanish
         run: uv run swarm-i18n-check
       - name: Keep the test reports (TKT-26)

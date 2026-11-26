@@ -9,7 +9,7 @@ from uuid import UUID
 from pydantic import ConfigDict, Field, JsonValue, SecretStr, field_validator, model_validator
 
 # First-party imports
-from swarm_models.models.base.swarm_model import SwarmModel
+from swarm_models.base.swarm_model import SwarmModel
 from swarm_nats.models.accounts.exceptions import (
     SEIssuedCredentialInconsistentKind,
     SEIssuedCredentialInvalidJwt,

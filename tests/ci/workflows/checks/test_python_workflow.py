@@ -169,7 +169,7 @@ class TestPythonWorkflow:
             "uv run ruff format --check",
             "uv run mypy",
             "uv run pytest",
-            "uv run swarm-models-schemas --check",
+            "uv run swarm-schemas-check",
             "uv run swarm-i18n-check",
         ]
         indexes = [self.run_index("packages", command) for command in commands]
@@ -185,6 +185,12 @@ class TestPythonWorkflow:
     )
     def test_each_packages_tool_targets_the_python_packages(self, command: str) -> None:
         assert "packages/python" in self.run_with("packages", command)
+
+    @pytest.mark.parametrize("command", ["uv run ruff check", "uv run ruff format --check", "uv run mypy"])
+    def test_each_packages_tool_also_targets_the_backend_and_the_scripts(self, command: str) -> None:
+        run = self.run_with("packages", command)
+        assert "backend" in run
+        assert "scripts" in run
 
     def test_the_packages_job_runs_the_tests_on_two_workers(self) -> None:
         assert "-n 2" in self.run_with("packages", "uv run pytest")

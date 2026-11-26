@@ -19,7 +19,7 @@ from simulator.models.registry.exceptions import SEAdapterRegistryUnknownDroneEr
 from simulator.models.registry.registered_drone import RegisteredDrone
 from simulator.service.registry.adapter_registry import AdapterRegistry
 from simulator.storage.edge.flight_log_store import FlightLogStore
-from swarm_models.models.commands.command import Command
+from swarm_models.commands.command import Command
 
 
 class SimulatedCommandService:

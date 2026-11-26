@@ -25,8 +25,8 @@ from simulator.models.commands.command_reply import CommandReply
 from simulator.models.config.simulator_config import SimulatorConfig
 from simulator.models.enums import CommandVerdict, SimulatorCommandName
 from swarm_lifecycle.runnables.runnable import Runnable
-from swarm_models.models.commands.command import Command
-from swarm_models.models.commands.enums import CommandKind, CommandLane
+from swarm_models.commands.command import Command
+from swarm_models.commands.enums import CommandKind, CommandLane
 from swarm_nats.clients.nats_requester import NatsRequester
 from swarm_nats.models.bus.exceptions import SENatsNoResponderError, SENatsRequestDeadlineExceededError
 from swarm_nats.models.config.nats_client_config import NatsClientConfig

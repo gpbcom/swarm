@@ -8,7 +8,7 @@ from typing import ClassVar, Literal, Optional
 from pydantic import ConfigDict, Field, JsonValue, field_validator
 
 # First-party imports
-from swarm_models.models.base.swarm_model import SwarmModel
+from swarm_models.base.swarm_model import SwarmModel
 from swarm_nats.models.streams.exceptions import (
     SEStreamSourceInvalidDomain,
     SEStreamSourceInvalidFilterSubject,

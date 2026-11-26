@@ -8,7 +8,7 @@ from typing import Optional
 import pytest
 
 # First-party imports
-from swarm_models.models.enums import Language
+from swarm_models.enums import Language
 
 MESSAGE_ID = "Language: {language}"
 HEADER = 'msgid ""\nmsgstr ""\n"Content-Type: text/plain; charset=UTF-8\\n"\n\n'

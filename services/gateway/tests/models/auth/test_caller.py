@@ -17,7 +17,7 @@ from gateway.models.auth.exceptions import (
     SECallerOperatorMismatch,
     SEInvalidCallerException,
 )
-from swarm_models.models.people.enums import RoleName
+from swarm_models.people.enums import RoleName
 
 
 class TestCaller:

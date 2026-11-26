@@ -5,7 +5,7 @@ from logging import Logger, getLogger
 from typing import ClassVar, Optional
 
 # First-party imports
-from swarm_storage.storage.postgres.migrations.alembic_migrator import AlembicMigrator
+from swarm_storage.shared.postgres.migrations.alembic_migrator import AlembicMigrator
 
 
 class SchemaService:

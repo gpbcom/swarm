@@ -10,10 +10,10 @@ import pytest
 from pydantic import JsonValue, ValidationError
 
 # First-party imports
-from swarm_models.models.base.swarm_model import SwarmModel
-from swarm_models.models.events.actor import Actor
-from swarm_models.models.events.enums import ActorKind
-from swarm_models.models.events.event import Event
+from swarm_models.base.swarm_model import SwarmModel
+from swarm_models.events.actor import Actor
+from swarm_models.events.enums import ActorKind
+from swarm_models.events.event import Event
 from swarm_nats.models.subjects.exceptions import (
     SEInvalidOperatorSubjectsException,
     SEOperatorSubjectsInvalidEvent,

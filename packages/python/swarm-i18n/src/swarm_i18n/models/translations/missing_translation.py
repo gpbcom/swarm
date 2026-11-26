@@ -13,7 +13,7 @@ from swarm_i18n.models.translations.exceptions import (  # isort: skip
     SEMissingTranslationInvalidMessageId,
     SEMissingTranslationInvalidProblem,
 )
-from swarm_models.models.enums import Language
+from swarm_models.enums import Language
 
 
 class MissingTranslation(BaseModel):

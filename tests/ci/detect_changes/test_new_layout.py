@@ -10,6 +10,7 @@ import pytest
 # First-party imports
 from tests.ci.detect_changes.helpers import (
     IMAGES_KEY,
+    REPOSITORY_KEY,
     RUST_KEY,
     SERVICES_KEY,
     TYPESCRIPT_KEY,
@@ -53,6 +54,19 @@ class TestNewLayout:
     def test_a_domain_change_selects_the_apps_that_own_it(self, tmp_path: Path, path: str, apps: str) -> None:
         self.repo(tmp_path)
         assert outputs(run_detector(tmp_path, [path]))[SERVICES_KEY] == apps
+
+    def test_a_layer_change_also_selects_the_old_services_that_depend_on_it(self, tmp_path: Path) -> None:
+        self.repo(tmp_path)
+        (tmp_path / "services" / "alpha" / "pyproject.toml").write_text(
+            "[project]\nname = 'alpha'\ndependencies = ['swarm-models>=0.1']\n", encoding="utf-8"
+        )
+        values = outputs(run_detector(tmp_path, ["backend/swarm-models/src/swarm_models/unowned/x.py"]))
+        assert values[SERVICES_KEY] == '["alpha"]'
+        assert "services/alpha" in values[IMAGES_KEY]
+
+    def test_a_layer_change_runs_the_repository_checks(self, tmp_path: Path) -> None:
+        self.repo(tmp_path)
+        assert outputs(run_detector(tmp_path, ["backend/swarm-models/src/swarm_models/x.py"]))[REPOSITORY_KEY] == "true"
 
     @pytest.mark.parametrize(
         "path",

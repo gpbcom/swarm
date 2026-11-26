@@ -18,7 +18,7 @@ from simulator.models.flight_logs.exceptions import (
     SEFlightLogEntryInvalidTUs,
     SEFlightLogEntryNotSimulated,
 )
-from swarm_models.models.base.swarm_model import SwarmModel
+from swarm_models.base.swarm_model import SwarmModel
 
 
 class FlightLogEntry(SwarmModel):

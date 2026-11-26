@@ -13,7 +13,7 @@ from babel.messages.pofile import PoFileError, read_po
 
 # First-party imports
 from swarm_i18n.models.catalogs.exceptions import SECatalogUnreadableError  # isort: skip
-from swarm_models.models.enums import Language
+from swarm_models.enums import Language
 
 
 class PoCatalogStore:

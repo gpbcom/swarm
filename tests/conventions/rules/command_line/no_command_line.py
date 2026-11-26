@@ -39,7 +39,9 @@ class NoCommandLine(ConventionRule):
     TEST_MIRRORS: ClassVar[Tuple[str, ...]] = ("swarm_", "scripts")
     SKIPPED: ClassVar[Tuple[str, ...]] = ("__pycache__", "node_modules", ".venv")
     PARSERS: ClassVar[Set[str]] = {"argparse", "click", "typer"}
-    FORBIDDEN_NAMES: ClassVar[Set[str]] = {"cli", "commands"}
+    FORBIDDEN_NAMES: ClassVar[Set[str]] = {"cli"}
+    API_ONLY_NAMES: ClassVar[Set[str]] = {"commands"}
+    API_HOMES: ClassVar[Set[str]] = {"swarm_api", "api", "apps"}
     SYS: ClassVar[str] = "sys"
     ARGV: ClassVar[str] = "argv"
 
@@ -82,6 +84,17 @@ class NoCommandLine(ConventionRule):
             folders.extend(Path(folder) / name for name in names)
             files.extend(Path(folder) / name for name in filenames if name.endswith(".py"))
         return folders, sorted(files)
+
+    def _command_line_in_api(self, path: Path) -> bool:
+        """Tell whether a folder or module named ``commands`` sits in an api layer or an app.
+
+        Args:
+            path (Path): The folder or the module.
+
+        Returns:
+            bool: True when its name means a command line there. Elsewhere, ``commands`` is the Drone Command domain.
+        """
+        return path.stem in self.API_ONLY_NAMES and any(part in self.API_HOMES for part in path.parts[:-1])
 
     def _import_problems(self, tree: ast.Module) -> List[Tuple[int, str]]:
         """Find the command line imports and ``sys.argv`` uses of a module.
@@ -132,10 +145,10 @@ class NoCommandLine(ConventionRule):
         for root in self._checked_roots(service):
             folders, files = self._entries(root)
             for folder in folders:
-                if folder.name in self.FORBIDDEN_NAMES:
+                if folder.name in self.FORBIDDEN_NAMES or self._command_line_in_api(folder):
                     messages.append(self.violation(service, folder, None, f"Folder {folder.name!r} is a command line."))
             for path in files:
-                if path.stem in self.FORBIDDEN_NAMES:
+                if path.stem in self.FORBIDDEN_NAMES or self._command_line_in_api(path):
                     messages.append(self.violation(service, path, None, f"Module {path.stem!r} is a command line."))
                 for line, message in self._import_problems(self.parse(path)):
                     messages.append(self.violation(service, path, line, message))

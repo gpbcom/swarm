@@ -16,7 +16,7 @@ from flight_engine.models.telemetry.exceptions import (
     SEDroneStateCatalogInvalidSystemStatusStates,
     SEDroneStateCatalogUnreadable,
 )
-from swarm_models.models.telemetry.enums import DroneState
+from swarm_models.telemetry.enums import DroneState
 
 
 class TestDroneStateCatalog:

@@ -9,8 +9,8 @@ from uuid import UUID
 from pydantic import ConfigDict, Field, JsonValue, field_validator
 
 # First-party imports
-from swarm_models.models.base.swarm_model import SwarmModel
-from swarm_models.models.events.event import Event
+from swarm_models.base.swarm_model import SwarmModel
+from swarm_models.events.event import Event
 from swarm_nats.models.subjects.exceptions import (
     SEOperatorSubjectsInvalidEvent,
     SEOperatorSubjectsInvalidMissionId,

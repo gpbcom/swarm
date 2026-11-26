@@ -13,7 +13,7 @@ from simulator.models.commands.exceptions import (
 )
 from simulator.models.commands.mavlink_command_spec import MavlinkCommandSpec
 from swarm_catalog.models.yaml_catalog import YamlCatalog
-from swarm_models.models.commands.enums import CommandKind
+from swarm_models.commands.enums import CommandKind
 
 
 class CommandMappingCatalog(YamlCatalog):

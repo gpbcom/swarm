@@ -8,7 +8,7 @@ from typing import Dict
 import pytest
 
 # First-party imports
-from swarm_models.models.enums import Language
+from swarm_models.enums import Language
 
 MESSAGE_ID = "Language: {language}"
 TRANSLATIONS: Dict[Language, str] = {

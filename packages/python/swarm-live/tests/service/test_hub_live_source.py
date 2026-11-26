@@ -8,8 +8,8 @@ from uuid import UUID
 from swarm_live.service.hub_live_source import HubLiveSource  # isort: skip
 from swarm_live.service.live_hub import LiveHub  # isort: skip
 from swarm_live.service.live_source import LiveSource  # isort: skip
-from swarm_models.models.enums import LiveOperation, LiveTopicKind
-from swarm_models.models.live.live_subscription import LiveSubscription
+from swarm_models.enums import LiveOperation, LiveTopicKind
+from swarm_models.live.live_subscription import LiveSubscription
 
 
 class TestHubLiveSource:

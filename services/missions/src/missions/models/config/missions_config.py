@@ -17,8 +17,8 @@ from missions.models.config.exceptions import (
     SEMissionsConfigUnreadable,
 )
 from swarm_catalog.models.yaml_catalog import YamlCatalog
+from swarm_models.config.postgres.postgres_config import PostgresConfig
 from swarm_rest.models.config.rest_config import RestConfig
-from swarm_storage.models.config.postgres_config import PostgresConfig
 
 
 class MissionsConfig(YamlCatalog):

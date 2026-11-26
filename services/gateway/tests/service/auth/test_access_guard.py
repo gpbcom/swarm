@@ -13,7 +13,7 @@ from gateway.models.access.exceptions import SEAccessError, SEAccessMissingRoleE
 from gateway.models.auth.caller import Caller
 from gateway.models.enums import AccessRefusal
 from gateway.service.auth.access_guard import AccessGuard
-from swarm_models.models.people.enums import RoleName
+from swarm_models.people.enums import RoleName
 
 
 class TestAccessGuard:

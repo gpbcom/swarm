@@ -11,8 +11,8 @@ import pytest
 from missions.models.config.missions_config import MissionsConfig
 from missions.service.factories.schema_service_factory import SchemaServiceFactory
 from missions.service.schema.schema_service import SchemaService
-from swarm_storage.storage.postgres.ddl.outbox_table import OutboxTable
-from swarm_storage.storage.postgres.ddl.row_level_security import RowLevelSecurity
+from swarm_storage.shared.postgres.ddl.outbox_table import OutboxTable
+from swarm_storage.shared.postgres.ddl.row_level_security import RowLevelSecurity
 
 
 class TestMissionsSchemaService:

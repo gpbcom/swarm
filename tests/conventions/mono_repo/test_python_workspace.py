@@ -28,13 +28,12 @@ class TestPythonWorkspace:
     TEST_PATHS: ClassVar[List[str]] = [
         "services/missions/tests",
         "services/fleet/tests",
-        "packages/python/swarm-storage/tests",
         "packages/python/swarm-rest/tests",
     ]
     MYPY_FILES: ClassVar[List[str]] = [
         "services/missions/src",
         "services/fleet/src",
-        "packages/python/swarm-storage/src",
+        "backend/swarm-storage/src",
         "packages/python/swarm-rest/src",
     ]
     DISTRIBUTION_SEPARATORS: ClassVar[str] = r"[\[<>=!~;@ ]"
@@ -58,6 +57,13 @@ class TestPythonWorkspace:
     def project_file(self, kind: str, name: str) -> Path:
         return repo_root() / kind / name / "pyproject.toml"
 
+    def package_file(self, name: str) -> Path:
+        for kind in ("packages/python", "backend", "backend/libs"):
+            path = self.project_file(kind, name)
+            if path.is_file():
+                return path
+        return self.project_file("packages/python", name)
+
     def dependencies_of(self, path: Path) -> List[str]:
         project = self.table(self.load_toml(path), "project")
         return self.distribution_names(project.get("dependencies", []))
@@ -70,7 +76,9 @@ class TestPythonWorkspace:
     def test_the_root_pyproject_has_no_project_table(self) -> None:
         assert "project" not in self.load_root()
 
-    @pytest.mark.parametrize("member", ["services/*", "packages/python/*", "backend/libs/*"])
+    @pytest.mark.parametrize(
+        "member", ["services/*", "packages/python/*", "backend/libs/*", "backend/swarm-*", "scripts"]
+    )
     def test_the_uv_workspace_lists_its_members(self, member: str) -> None:
         tool = self.load_root().get("tool", {})
         assert isinstance(tool, dict)
@@ -128,7 +136,7 @@ class TestPythonWorkspace:
 
     @pytest.mark.parametrize("package", NEW_PACKAGES)
     def test_a_new_package_declares_its_name_and_module(self, package: str) -> None:
-        data = self.load_toml(self.project_file("packages/python", package))
+        data = self.load_toml(self.package_file(package))
         assert self.table(data, "project")["name"] == package
         assert self.table(data, "tool", "uv", "build-backend")["module-name"] == package.replace("-", "_")
 
@@ -149,11 +157,11 @@ class TestPythonWorkspace:
 
     @pytest.mark.parametrize("dependency", STORAGE_DEPENDENCIES)
     def test_swarm_storage_depends_on(self, dependency: str) -> None:
-        assert dependency in self.dependencies_of(self.project_file("packages/python", "swarm-storage"))
+        assert dependency in self.dependencies_of(self.package_file("swarm-storage"))
 
     @pytest.mark.parametrize("dependency", REST_DEPENDENCIES)
     def test_swarm_rest_depends_on(self, dependency: str) -> None:
-        assert dependency in self.dependencies_of(self.project_file("packages/python", "swarm-rest"))
+        assert dependency in self.dependencies_of(self.package_file("swarm-rest"))
 
     @pytest.mark.parametrize("service", ALL_SERVICES)
     @pytest.mark.parametrize("dependency", SHARED_DEPENDENCIES)

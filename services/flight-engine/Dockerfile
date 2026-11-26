@@ -40,7 +40,7 @@ WORKDIR /workspace
 
 COPY pyproject.toml uv.lock README.md ./
 COPY packages/python packages/python
-COPY backend/libs backend/libs
+COPY backend backend
 COPY services/flight-engine services/flight-engine
 
 RUN --mount=type=cache,target=/root/.cache/uv \

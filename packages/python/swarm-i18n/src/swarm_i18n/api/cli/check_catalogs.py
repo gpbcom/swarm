@@ -9,7 +9,7 @@ from typing import List, Optional
 # First-party imports
 from swarm_i18n.models.catalogs.exceptions import SECatalogError  # isort: skip
 from swarm_i18n.service.catalogs.catalog_checker import CatalogChecker  # isort: skip
-from swarm_models.models.enums import Language
+from swarm_models.enums import Language
 
 
 def main(argv: Optional[List[str]] = None) -> int:

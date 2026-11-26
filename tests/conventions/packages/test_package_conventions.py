@@ -9,7 +9,7 @@ from typing import ClassVar, Dict, List
 import pytest
 
 # First-party imports
-from tests.conventions.helpers import libs_root, packages_root, write_files
+from tests.conventions.helpers import layers_root, libs_root, packages_root, write_files
 from tests.conventions.rules.convention_rule import ConventionRule
 from tests.conventions.rules.convention_rules import ConventionRules
 from tests.conventions.rules.service_tree import ServiceTree
@@ -17,7 +17,11 @@ from tests.conventions.rules.service_tree import ServiceTree
 
 class TestPackageConventions:
     FILES: ClassVar[Dict[str, str]] = {"logging/src/logging_pkg/a.py": ""}
-    PACKAGES: ClassVar[List[ServiceTree]] = ServiceTree.discover(packages_root()) + ServiceTree.discover(libs_root())
+    PACKAGES: ClassVar[List[ServiceTree]] = (
+        ServiceTree.discover(packages_root())
+        + ServiceTree.discover(libs_root())
+        + [tree for tree in ServiceTree.discover(layers_root()) if tree.name.startswith("swarm-")]
+    )
 
     @pytest.mark.parametrize(
         ("package", "rule"),

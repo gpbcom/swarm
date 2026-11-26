@@ -8,7 +8,7 @@ from swarm_i18n.models.enums import MessageProblem
 from swarm_i18n.models.translations.missing_translation import MissingTranslation
 from swarm_i18n.service.catalogs.catalog_checker import CatalogChecker
 from swarm_i18n.storage.catalogs.po_catalog_store import PoCatalogStore
-from swarm_models.models.enums import Language
+from swarm_models.enums import Language
 
 Entries = Dict[Language, List[Tuple[str, str, bool]]]
 StoreBuilder = Callable[[List[str], Entries], PoCatalogStore]

@@ -59,15 +59,16 @@ uv run maturin build --release --manifest-path rust/swarm-core/python/Cargo.toml
 TypeScript packages and front ends extend `@swarm/config` (`frontend/packages/config`), which holds the strict
 `tsconfig.base.json` and the eslint configuration.
 
-After any change to a shared model of `packages/python/swarm-models`, regenerate the generated types in this order:
+After any change to a shared model of `backend/swarm-models`, regenerate the generated types in this order:
 
 ```bash
-uv run swarm-models-schemas
+uv run swarm-schemas-export
 cargo run -p swarm-models-codegen
 pnpm --filter ./frontend/packages/live run generate
 ```
 
-- `swarm-models-schemas` writes `packages/python/swarm-models/schemas/swarm_models.schema.json`.
+- `swarm-schemas-export` writes `backend/swarm-models/schemas/swarm_models.schema.json`, and `uv run swarm-schemas-check`
+  checks it is current. Both are argument-free scripts of `scripts/schemas/`.
 - `cargo run -p swarm-models-codegen`, run in `rust/`, writes `rust/swarm-models/src/generated.rs`.
 - `pnpm --filter ./frontend/packages/live run generate` writes `frontend/packages/live/src/generated/models.ts`.
 
@@ -208,7 +209,7 @@ skip without it, and CI installs a pinned one. Inside a package, Pydantic models
 `src/<module>/models/`, as in a service.
 
 The packages `swarm-storage` (`swarm_storage`) and `swarm-rest` (`swarm_rest`) were added by ticket T0.12.
-`swarm-storage` holds the PostgreSQL pool, the unit of work that sets `swarm.operator_id` on each transaction for
+`swarm-storage`, now the storage layer `backend/swarm-storage`, holds in `swarm_storage/shared/postgres/` the PostgreSQL pool, the unit of work that sets `swarm.operator_id` on each transaction for
 row-level security, the `PostgresRepository` base and the outbox repository, the row-level security and outbox DDL,
 and the Alembic migrator. `swarm-rest` holds the REST conventions of every `/v1` app: `problem+json` errors, the
 `Idempotency-Key` middleware, `ETag` and `If-Match`, the app builder, the uvicorn server runnable, the OpenAPI export
@@ -239,12 +240,12 @@ with a Tauri desktop shell, images go to GHCR, and Argo CD deploys them; see `do
 
 **Shared models**
 
-- **The models:** every Pydantic model shared between services lives in `packages/python/swarm-models`, under
-  `swarm_models/models/<concern>/`, and a service never redefines one.
+- **The models:** every Pydantic model shared between services lives in `backend/swarm-models`, under
+  `swarm_models/<concern>/`, and a service never redefines one.
 - **The single source:** the JSON Schema bundle, the Rust structs and the TypeScript types are generated from those
   models, and are never edited by hand.
 - **The CI checks:** CI fails when one of them is stale. Three checks enforce it:
-  - the `packages` job of `python.yml` runs `swarm-models-schemas --check`;
+  - the `packages` job of `python.yml` runs `swarm-schemas-check`;
   - `cargo test` runs `generated_is_current` in `rust/swarm-models`;
   - the `test` script of `frontend/packages/live` runs `generate.ts --check`.
 
@@ -620,7 +621,8 @@ logger to an object they test, to test that parameter or to capture the logs.
 - `DEBUG` lines are written by default, because the root level in `conf/logger.yaml` is `DEBUG`. Keep them short.
 - **Never log a secret or a typed value.** If an error might quote one, log `type(error).__name__`.
 - `models` never logs. It raises.
-- Only `api/cli/` uses `print`, because that output is for the person at the terminal.
+- Only `scripts/` and `api/cli/` use `print`, because that output is for the person at the terminal; `api/cli/`
+  disappears with the backend split.
 
 A service configures logging once, at its entry point, with `swarm_logging.configurators.logging_configurator.LoggingConfigurator(LoggingConfig(...)).configure()`.
 `LoggingConfig.path` names the service's `conf/logger.yaml`, and None uses the reference `logger.yaml` shipped in

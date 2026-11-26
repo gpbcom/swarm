@@ -23,6 +23,7 @@ class PydanticModelsInModels(ConventionRule):
     """
 
     NAME: ClassVar[str] = "pydantic_models_in_models"
+    MODELS_PACKAGE: ClassVar[str] = "swarm-models"
     BASES: ClassVar[Tuple[str, ...]] = ("BaseModel", "RootModel")
 
     ############################
@@ -78,6 +79,8 @@ class PydanticModelsInModels(ConventionRule):
         Returns:
             List[str]: One message per model class outside ``src/models/``.
         """
+        if service.name == self.MODELS_PACKAGE:
+            return []
         trees: Dict[Path, ast.Module] = {path: self.parse(path) for path in service.python_files()}
         classes: Dict[str, Set[str]] = {}
         for tree in trees.values():

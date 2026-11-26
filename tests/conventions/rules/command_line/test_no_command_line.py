@@ -51,22 +51,36 @@ class TestNoCommandLine:
     def test_another_argv_attribute_is_allowed(self, tmp_path: Path) -> None:
         assert self.violations(tmp_path, {self.SCRIPT_PATH: "value = settings.argv\n"}) == []
 
-    @pytest.mark.parametrize("name", ["cli", "commands"])
-    def test_a_folder_with_a_forbidden_name_is_refused(self, tmp_path: Path, name: str) -> None:
-        found = self.violations(tmp_path, {f"backend/swarm-service/src/swarm_service/{name}/run.py": "x = 1\n"})
+    @pytest.mark.parametrize(
+        "path",
+        [
+            "backend/swarm-service/src/swarm_service/cli/run.py",
+            "backend/swarm-api/src/swarm_api/commands/run.py",
+            "backend/apps/gateway/src/swarm_gateway/commands/run.py",
+        ],
+    )
+    def test_a_command_line_folder_is_refused(self, tmp_path: Path, path: str) -> None:
+        found = self.violations(tmp_path, {path: "x = 1\n"})
         assert len(found) == 1
-        assert name in found[0]
+        assert "Folder" in found[0]
 
-    @pytest.mark.parametrize("name", ["cli", "commands"])
-    def test_a_module_with_a_forbidden_name_is_refused(self, tmp_path: Path, name: str) -> None:
-        found = self.violations(tmp_path, {f"scripts/{name}.py": "x = 1\n"})
+    @pytest.mark.parametrize("path", ["scripts/cli.py", "backend/swarm-api/src/swarm_api/v1/commands.py"])
+    def test_a_command_line_module_is_refused(self, tmp_path: Path, path: str) -> None:
+        found = self.violations(tmp_path, {path: "x = 1\n"})
         assert len(found) == 1
         assert "Module" in found[0]
+
+    def test_the_commands_domain_outside_the_api_layer_is_allowed(self, tmp_path: Path) -> None:
+        files = {
+            "backend/swarm-models/src/swarm_models/commands/command.py": "x = 1\n",
+            "tests/swarm_models/commands/test_command.py": "x = 1\n",
+        }
+        assert self.violations(tmp_path, files) == []
 
     def test_the_test_mirrors_are_checked_and_other_tests_are_not(self, tmp_path: Path) -> None:
         files = {
             "tests/scripts/test_export.py": "import argparse\n",
-            "tests/swarm_gateway/commands/test_x.py": "x = 1\n",
+            "tests/swarm_gateway/cli/test_x.py": "x = 1\n",
             "tests/harness/test_tool.py": "import argparse\n",
         }
         assert len(self.violations(tmp_path, files)) == 2

@@ -8,7 +8,7 @@ from typing import Optional
 from gateway.models.config.gateway_config import GatewayConfig
 from gateway.service.events.event_service import EventService
 from swarm_lifecycle.factories.factory import Factory
-from swarm_storage.storage.postgres.postgres_pool import PostgresPool
+from swarm_storage.shared.postgres.postgres_pool import PostgresPool
 
 
 class EventServiceFactory(Factory[EventService]):

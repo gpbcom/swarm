@@ -7,7 +7,7 @@ from typing import Optional
 # First-party imports
 from simulator.models.commands.command_reply import CommandReply
 from simulator.service.commands.simulated_command_service import SimulatedCommandService
-from swarm_models.models.commands.command import Command
+from swarm_models.commands.command import Command
 
 
 class CommandEndpoint:

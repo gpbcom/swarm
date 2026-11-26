@@ -18,10 +18,10 @@ from gateway.models.config.exceptions import (
 )
 from gateway.models.config.gateway_config import GatewayConfig
 from swarm_catalog.models.yaml_catalog import YamlCatalog
+from swarm_models.config.postgres.exceptions import SEPostgresConfigInvalidDsnKey
+from swarm_models.config.postgres.postgres_config import PostgresConfig
 from swarm_rest.models.config.exceptions import SERestConfigInvalidPort
 from swarm_rest.models.config.rest_config import RestConfig
-from swarm_storage.models.config.exceptions import SEPostgresConfigInvalidDsnKey
-from swarm_storage.models.config.postgres_config import PostgresConfig
 
 
 class TestGatewayConfig:

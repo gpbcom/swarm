@@ -8,7 +8,7 @@ from typing import Optional
 from missions.models.config.missions_config import MissionsConfig
 from missions.service.events.event_service import EventService
 from swarm_lifecycle.factories.factory import Factory
-from swarm_storage.storage.postgres.postgres_pool import PostgresPool
+from swarm_storage.shared.postgres.postgres_pool import PostgresPool
 
 
 class EventServiceFactory(Factory[EventService]):

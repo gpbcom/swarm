@@ -14,9 +14,9 @@ from fleet.models.config.fleet_config import FleetConfig
 from fleet.service.events.event_service import EventService
 from fleet.service.factories.event_service_factory import EventServiceFactory
 from fleet.service.factories.schema_service_factory import SchemaServiceFactory
-from swarm_models.models.events.actor import Actor
-from swarm_models.models.events.enums import ActorKind
-from swarm_models.models.events.event import Event
+from swarm_models.events.actor import Actor
+from swarm_models.events.enums import ActorKind
+from swarm_models.events.event import Event
 
 
 class TestFleetEventService:

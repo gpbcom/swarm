@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 
 # First-party imports
 from swarm_live.service.live_mailbox import LiveMailbox
-from swarm_models.models.live.live_subscription import LiveSubscription
+from swarm_models.live.live_subscription import LiveSubscription
 
 
 class LiveSource(ABC):

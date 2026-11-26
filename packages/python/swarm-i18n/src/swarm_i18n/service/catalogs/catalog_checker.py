@@ -12,7 +12,7 @@ from babel.messages.catalog import Catalog, Message
 from swarm_i18n.models.enums import MessageProblem  # isort: skip
 from swarm_i18n.models.translations.missing_translation import MissingTranslation  # isort: skip
 from swarm_i18n.storage.catalogs.po_catalog_store import PoCatalogStore  # isort: skip
-from swarm_models.models.enums import Language
+from swarm_models.enums import Language
 
 
 class CatalogChecker:

@@ -7,7 +7,7 @@ from typing import ClassVar, Optional
 # First-party imports
 from missions.service.schema.schema_service import SchemaService
 from swarm_lifecycle.runnables.async_runnable import AsyncRunnable
-from swarm_storage.models.postgres.exceptions import SEStorageError
+from swarm_models.storage.exceptions import SEStorageError
 
 
 class MigrateCommand(AsyncRunnable):

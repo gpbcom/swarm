@@ -21,8 +21,8 @@ from simulator.models.flight_logs.flight_log_entry import FlightLogEntry
 from simulator.service.commands.simulated_command_service import SimulatedCommandService
 from simulator.service.registry.adapter_registry import AdapterRegistry
 from simulator.storage.edge.flight_log_store import FlightLogStore
-from swarm_models.models.commands.command import Command
-from swarm_models.models.commands.enums import CommandKind, CommandLane
+from swarm_models.commands.command import Command
+from swarm_models.commands.enums import CommandKind, CommandLane
 
 
 class TestSimulatedCommandService:
