@@ -43,7 +43,7 @@ COPY packages/python packages/python
 COPY services/flight-engine services/flight-engine
 
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --locked --no-dev --no-editable --package swarm-flight-engine
+    uv sync --frozen --no-dev --no-editable --package swarm-flight-engine
 
 COPY --from=wheel /wheels /wheels
 
