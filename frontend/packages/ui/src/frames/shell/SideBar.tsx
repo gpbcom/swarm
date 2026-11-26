@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { useIntl } from "react-intl";
 
-import type { NavItem } from "./parts";
+import type { NavItem } from "../parts";
 
 export interface SideBarProps {
   items: readonly NavItem[];

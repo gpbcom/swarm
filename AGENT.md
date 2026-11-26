@@ -146,7 +146,7 @@ Swarm is meant to become a mono-repo of backend and front-end micro-services, ea
 applies everywhere. The tests in `tests/conventions/mono_repo/` enforce part of this section: the uv workspace, the
 Cargo and pnpm workspaces, and the Terraform layout. The CI/CD change detection and check workflows are tested by
 `tests/ci/`. The Dockerfiles are tested by `tests/infra/images/test_service_images.py`, and `infra/compose/e2e.yaml` by
-`tests/ci/e2e/`. `tests/conventions/mono_repo/test_frontend_workspace.py` and `test_desktop_shell.py` check the front-end
+`tests/ci/e2e/`. `tests/conventions/mono_repo/frontend/test_frontend_workspace.py` and `test_desktop_shell.py` check the front-end
 workspace layout and the desktop shell, and the Docker rules of the front ends are not tested yet. `tests/infra/` checks the charts, the dev environment, the PostgreSQL image and the dev-cell script,
 and `tests/ci/dev_cell/` checks the dev-cell workflow.
 
@@ -362,7 +362,8 @@ layer (`OneClassPerEntity`). `SWARM_CONVENTIONS_BACKEND_ROOT` points it at anoth
 
 - More than one top-level class in a file, whatever the kind of class, except several enums in an `enums.py`.
 - More than five Python files in a folder, not counting `__init__.py` and `conftest.py`. The rule of [File shape](#file-shape)
-  also counts JavaScript, TypeScript and Rust files, in every folder of the repository.
+  also counts JavaScript, TypeScript and Rust files, in every folder of the repository, checked by
+  `tests/conventions/repository/test_five_code_files.py`.
 - A nested function.
 - `@staticmethod`. Use an instance method or a `@classmethod`.
 - `Any`. See [Typing](#typing).

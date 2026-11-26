@@ -1,6 +1,6 @@
 import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { Card, Conversation, Kpi, Kpis, List, ListItem, Message, Panel, Split, Table } from "../src/data";
+import { Card, Conversation, Kpi, Kpis, List, ListItem, Message, Panel, Split, Table } from "../../src/data";
 
 describe("data components", () => {
   describe("Card", () => {

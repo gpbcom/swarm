@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { Badge, Banner, Checklist, EmptyState, Progress, Toast, ToastProvider } from "../src/feedback";
+import { Badge, Banner, Checklist, EmptyState, Progress, Toast, ToastProvider } from "../../src/feedback";
 
 const BADGE_KINDS = ["persona", "entity", "system", "success", "failure", "decision", "action"] as const;
 const BANNER_ROLES = [

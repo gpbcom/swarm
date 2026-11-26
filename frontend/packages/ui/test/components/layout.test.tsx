@@ -1,7 +1,7 @@
 import { render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { Grid2, Mono, Muted, Row, Spacer, Stack } from '../src/layout';
+import { Grid2, Mono, Muted, Row, Spacer, Stack } from '../../src/layout';
 
 describe('layout helpers', () => {
   it.each([

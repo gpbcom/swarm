@@ -1,10 +1,10 @@
 import type { ReactNode } from "react";
 
-import { PARTS, SWARM_ADMINISTRATION_ITEMS } from "./parts";
-import { SideBar } from "./SideBar";
-import { StatusBar } from "./StatusBar";
-import { TitleBar } from "./TitleBar";
-import { Window } from "./Window";
+import { PARTS, SWARM_ADMINISTRATION_ITEMS } from "../parts";
+import { SideBar } from "../shell/SideBar";
+import { StatusBar } from "../shell/StatusBar";
+import { TitleBar } from "../shell/TitleBar";
+import { Window } from "../shell/Window";
 
 export interface SwarmAdministrationFrameProps {
   active?: string;

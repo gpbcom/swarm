@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
-import { Dialog } from "../src/overlays";
+import { Dialog } from "../../src/overlays";
 
 describe("Dialog", () => {
   it("renders an overlay and a dialog named by its title when open", () => {

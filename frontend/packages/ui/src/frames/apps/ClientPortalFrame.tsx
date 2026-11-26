@@ -1,11 +1,11 @@
 import type { ReactNode } from "react";
 
-import { CLIENT_PORTAL_ITEMS, PARTS } from "./parts";
-import type { ClientNavItem } from "./parts";
-import { SideBar } from "./SideBar";
-import { StatusBar } from "./StatusBar";
-import { TitleBar } from "./TitleBar";
-import { Window } from "./Window";
+import { CLIENT_PORTAL_ITEMS, PARTS } from "../parts";
+import type { ClientNavItem } from "../parts";
+import { SideBar } from "../shell/SideBar";
+import { StatusBar } from "../shell/StatusBar";
+import { TitleBar } from "../shell/TitleBar";
+import { Window } from "../shell/Window";
 
 export interface ClientPortalFrameProps {
   active?: string;

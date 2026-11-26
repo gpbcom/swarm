@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
-import { Button, Field, Tabs } from "../src/controls";
+import { Button, Field, Tabs } from "../../src/controls";
 
 describe("Button", () => {
   it.each(["primary", "secondary", "danger"] as const)("renders the %s variant", (variant) => {

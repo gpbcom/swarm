@@ -1,8 +1,8 @@
 import { Fragment } from "react";
 import type { ReactNode } from "react";
 
-import { Spacer } from "../layout";
-import { APP_NAME } from "./parts";
+import { Spacer } from "../../layout";
+import { APP_NAME } from "../parts";
 
 export interface TitleBarProps {
   part: string;
