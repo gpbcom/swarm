@@ -2,7 +2,7 @@ from __future__ import annotations
 
 # Standard library imports
 from typing import ClassVar, Dict, List, Optional
-from uuid import UUID, uuid1, uuid4
+from uuid import UUID
 
 # Third-party imports
 import pytest
@@ -21,8 +21,9 @@ from swarm_models.models.people.enums import RoleName
 
 
 class TestCaller:
-    PERSON: ClassVar[UUID] = uuid4()
-    OPERATOR: ClassVar[UUID] = uuid4()
+    PERSON: ClassVar[UUID] = UUID("0b1e3c5a-7d2f-4e8a-9c41-5f6a7b8c9d01")
+    OPERATOR: ClassVar[UUID] = UUID("5d2c4a6e-1f3b-4c7d-8e9f-0a1b2c3d4e5f")
+    UUID_V1: ClassVar[UUID] = UUID("6ba7b810-9dad-11d1-80b4-00c04fd430c8")
     OPERATOR_ROLES: ClassVar[List[RoleName]] = [role for role in RoleName if role is not RoleName.SWARM_ADMINISTRATOR]
     FIELD_ERRORS: ClassVar[List[type[Exception]]] = [
         SECallerInvalidPersonId,
@@ -99,7 +100,7 @@ class TestCaller:
         with pytest.raises(ValidationError):
             caller.operator_id = None
 
-    @pytest.mark.parametrize("person_id", [uuid1(), uuid4()])
+    @pytest.mark.parametrize("person_id", [UUID_V1, PERSON])
     def test_a_person_id_of_any_version_is_accepted(self, person_id: UUID) -> None:
         assert Caller.model_validate({"person_id": str(person_id)}).person_id == person_id
 
