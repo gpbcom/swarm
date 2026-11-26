@@ -67,6 +67,7 @@ this page keeps what happened, so that each problem is closed once and never met
 | [L-41](#l-41) | 2026-11-26 | A review finding in the ticket's own TICKET.md went to code tasks, which could not change it | 🟢 Closed |
 | [L-42](#l-42) | 2026-11-26 | Finishing one ticket made the next one's changes table stale, and its finish refused | 🟢 Closed |
 | [L-43](#l-43) | 2026-11-26 | The ticket checks run pytest on one worker, CI on two: a test only CI refuses passed every check | 🟢 Closed |
+| [L-44](#l-44) | 2026-11-26 | The 5 % bench gate refused a pull request that changes no Rust code | 🔴 Open |
 
 ## <a id="lessons"></a>📋 Lessons
 
@@ -789,6 +790,22 @@ this page keeps what happened, so that each problem is closed once and never met
   - To do: `checks.py` runs pytest with `-n 2` as AGENT.md and CI do, with a test in `tests/harness/checks/`.
 - **Closed:** 2026-11-26, refactor phase 1. Enforced by [`test_checks_python.py`](../../tests/harness/checks/runs/test_checks_python.py): pytest runs with `-n 2`.
 - **Rule:** [TKT-6](../../.claude/rules/tickets.md#tkt-6) (the verifier runs the AGENT.md tools, as CI does).
+
+### <a id="l-44"></a>L-44: The 5 % bench gate refused a pull request that changes no Rust code
+
+- **Seen:** #400 (refactor phase 4, front end only), 2026-11-26, job `rust / bench`.
+- **What happened:** the gate reported `route_follower_step_1000: +7.24 % regression`. The pull request changes no
+  Rust file. A re-run of the job was needed to merge it.
+- **Cause:**
+  - The base and the pull request are benchmarked one after the other on one shared GitHub runner, whose speed varies
+    by several percent.
+  - The bench job runs for every pull request that selects Rust, and a change to a lock file or the pipeline selects
+    everything.
+  - The gate only really compared since #399 fixed the base folder of the refactor.
+- **Fix:** to do, with a test in `tests/ci/`. Either:
+  - run the bench job only when a Rust file changed;
+  - or have the gate re-run a suspect benchmark, and refuse only when the slowdown repeats.
+- **Rule:** AGENT.md, CI/CD (`cargo bench` with the 5 % gate on pull requests).
 
 ## <a id="already-ruled"></a>📜 Lessons already turned into rules
 
