@@ -3,84 +3,91 @@ from __future__ import annotations
 # Standard library imports
 import logging
 from pathlib import Path
-from typing import Iterator, List
+from typing import AsyncIterator, ClassVar, List
 from uuid import UUID
 
 # Third-party imports
 import pytest
 
 # First-party imports
-from services.simulator.tests.helpers import MISSION_ID, a_registered_drone
-from services.simulator.tests.stand_in_drone import StandInDrone
-from services.simulator.tests.stand_in_drones import StandInDrones
-from simulator.clients.mavlink.mavlink_drone_client import MavlinkDroneClient
-from simulator.models.config.flight_config import FlightConfig
-from simulator.models.config.route_config import RouteConfig
-from simulator.models.enums import FlightLogEntryKind
-from simulator.models.flight_logs.flight_log_entry import FlightLogEntry
-from simulator.models.flights.exceptions import SEDroneFlightTimeoutError
-from simulator.models.mavlink.exceptions import SEMavlinkClientTimeoutError
-from simulator.service.flights.drone_flight import DroneFlight
-from simulator.service.routes.square_route_builder import SquareRouteBuilder
-from simulator.storage.edge.flight_log_store import FlightLogStore
-from swarm_lifecycle.models.enums import RunnableStatus
+from swarm_models.commands.enums import CommandKind
+from swarm_models.config.simulator.flight_config import FlightConfig
+from swarm_models.config.simulator.route_config import RouteConfig
+from swarm_models.enums import FlightLogEntryKind
+from swarm_models.mavlink.exceptions import SEMavlinkClientTimeoutError
+from swarm_models.simulation.commands.command_mapping_catalog import CommandMappingCatalog
+from swarm_models.simulation.commands.mavlink_command_spec import MavlinkCommandSpec
+from swarm_models.simulation.flight_logs.flight_log_entry import FlightLogEntry
+from swarm_models.simulation.flights.exceptions import SEDroneFlightTimeoutError
+from swarm_models.simulation.registry.exceptions import SEAdapterRegistryUnknownDroneError
+from swarm_models.simulation.registry.registered_drone import RegisteredDrone
+from swarm_service.simulation.drones.drone_service import DroneService
+from swarm_service.simulation.registry.adapter_registry import AdapterRegistry
+from swarm_service.simulation.routes.square_route_builder import SquareRouteBuilder
+from swarm_storage.simulation.flight_logs.flight_log_store import FlightLogStore
+from tests.fakes.mavlink.helpers import MISSION_ID, a_registered_drone
+from tests.fakes.mavlink.stand_in_drone import StandInDrone
+from tests.fakes.mavlink.stand_in_drones import StandInDrones
 
 WAYPOINTS = 5
 STORE_FILE = "flight_log.sqlite3"
 
 
-class TestDroneFlight:
-    @pytest.fixture
-    def store(self, tmp_path: Path) -> Iterator[FlightLogStore]:
-        flight_log_store = FlightLogStore(str(tmp_path / STORE_FILE))
-        flight_log_store.open()
-        yield flight_log_store
-        flight_log_store.close()
+class TestDroneServiceFlights:
+    HOSTS: ClassVar[List[str]] = ["127.0.0.1", "localhost"]
+    RETURN_HOME_ID: ClassVar[int] = 20
+    MAPPING: ClassVar[CommandMappingCatalog] = CommandMappingCatalog(
+        commands={CommandKind.RETURN_HOME: MavlinkCommandSpec(command_id=RETURN_HOME_ID)}
+    )
 
     @pytest.fixture
     def config(self) -> FlightConfig:
         return FlightConfig(heartbeat_timeout_s=1.0, arm_timeout_s=2.0, route_timeout_s=1.0, status_interval_s=0.1)
 
-    def a_flight(self, stand_in: StandInDrone, store: FlightLogStore, config: FlightConfig) -> DroneFlight:
-        drone = a_registered_drone(stand_in)
-        return DroneFlight(
-            drone,
-            UUID(str(MISSION_ID)),
-            MavlinkDroneClient(drone, config),
-            SquareRouteBuilder(RouteConfig()),
-            store,
-            config,
-        )
+    @pytest.fixture
+    async def services(self) -> AsyncIterator[List[DroneService]]:
+        opened: List[DroneService] = []
+        yield opened
+        for service in opened:
+            await service.close()
 
-    def entries(self, store: FlightLogStore) -> List[FlightLogEntry]:
-        return store.entries(UUID(str(MISSION_ID)))
+    async def a_service(
+        self, tmp_path: Path, services: List[DroneService], drones: List[RegisteredDrone], config: FlightConfig
+    ) -> DroneService:
+        registry = AdapterRegistry(self.HOSTS)
+        for drone in drones:
+            registry.register(drone)
+        store = FlightLogStore(str(tmp_path / STORE_FILE))
+        service = DroneService(registry, store, self.MAPPING, SquareRouteBuilder(RouteConfig()), config)
+        await service.open()
+        services.append(service)
+        return service
 
-    async def test_execute_yields_its_status_then_executed(
-        self, stand_in_drone: StandInDrone, store: FlightLogStore, config: FlightConfig
-    ) -> None:
-        flight = self.a_flight(stand_in_drone, store, config)
-        statuses = [status async for status in flight.execute()]
-        assert statuses[-1] == RunnableStatus.EXECUTED
-        assert set(statuses[:-1]) <= {RunnableStatus.INITIALISING, RunnableStatus.RUNNING}
+    def entries(self, service: DroneService) -> List[FlightLogEntry]:
+        return service.store.entries(UUID(str(MISSION_ID)))
 
     async def test_the_outcome_is_completed_with_five_waypoints(
-        self, stand_in_drone: StandInDrone, store: FlightLogStore, config: FlightConfig
+        self, tmp_path: Path, services: List[DroneService], stand_in_drone: StandInDrone, config: FlightConfig
     ) -> None:
-        flight = self.a_flight(stand_in_drone, store, config)
-        async for _ in flight.execute():
-            pass
-        assert flight.outcome is not None
-        assert flight.outcome.completed is True
-        assert flight.outcome.waypoints_reached == WAYPOINTS
-        assert flight.outcome.drone_id == flight.drone.drone_id
+        drone = a_registered_drone(stand_in_drone)
+        service = await self.a_service(tmp_path, services, [drone], config)
+
+        outcome = await service.fly(drone, UUID(str(MISSION_ID)))
+
+        assert outcome.completed is True
+        assert outcome.waypoints_reached == WAYPOINTS
+        assert outcome.drone_id == drone.drone_id
+        assert service.outcomes[drone.drone_id] == outcome
 
     async def test_the_flight_log_follows_the_flight_in_order_and_is_simulated(
-        self, stand_in_drone: StandInDrone, store: FlightLogStore, config: FlightConfig
+        self, tmp_path: Path, services: List[DroneService], stand_in_drone: StandInDrone, config: FlightConfig
     ) -> None:
-        flight = self.a_flight(stand_in_drone, store, config)
-        async for _ in flight.execute():
-            pass
-        entries = self.entries(store)
+        drone = a_registered_drone(stand_in_drone)
+        service = await self.a_service(tmp_path, services, [drone], config)
+
+        await service.fly(drone, UUID(str(MISSION_ID)))
+
+        entries = self.entries(service)
         expected = [
             FlightLogEntryKind.ROUTE_UPLOADED,
             FlightLogEntryKind.ARMED,
@@ -95,33 +102,47 @@ class TestDroneFlight:
 
     async def test_a_stalled_drone_gives_the_timeout_error_and_an_incomplete_outcome(
         self,
+        tmp_path: Path,
+        services: List[DroneService],
         stand_in_drones: StandInDrones,
-        store: FlightLogStore,
         config: FlightConfig,
         caplog: pytest.LogCaptureFixture,
     ) -> None:
-        stalled = stand_in_drones.make(stall_after_seq=2)
-        flight = self.a_flight(stalled, store, config)
+        drone = a_registered_drone(stand_in_drones.make(stall_after_seq=2))
+        service = await self.a_service(tmp_path, services, [drone], config)
+
         with caplog.at_level(logging.ERROR), pytest.raises(SEDroneFlightTimeoutError):
-            async for _ in flight.execute():
-                pass
-        assert flight.outcome is not None
-        assert flight.outcome.completed is False
-        entries = self.entries(store)
+            await service.fly(drone, UUID(str(MISSION_ID)))
+
+        outcome = service.outcomes[drone.drone_id]
+        assert outcome.completed is False
+        assert outcome.waypoints_reached == 2
+        entries = self.entries(service)
         assert entries[-1].kind == FlightLogEntryKind.ROUTE_FAILED
         assert entries[-1].detail == SEMavlinkClientTimeoutError.__name__
         assert FlightLogEntryKind.ROUTE_COMPLETED not in [entry.kind for entry in entries]
         assert all(entry.simulated is True for entry in entries)
         assert any(record.levelno == logging.ERROR for record in caplog.records)
 
-    async def test_a_silent_drone_fails_in_initialize_the_same_way(
-        self, stand_in_drones: StandInDrones, store: FlightLogStore, config: FlightConfig
+    async def test_a_silent_drone_fails_before_its_route_the_same_way(
+        self, tmp_path: Path, services: List[DroneService], stand_in_drones: StandInDrones, config: FlightConfig
     ) -> None:
-        silent = stand_in_drones.make(silent=True)
-        flight = self.a_flight(silent, store, config)
+        drone = a_registered_drone(stand_in_drones.make(silent=True))
+        service = await self.a_service(tmp_path, services, [drone], config)
+
         with pytest.raises(SEDroneFlightTimeoutError):
-            async for _ in flight.execute():
-                pass
-        assert flight.outcome is not None
-        assert flight.outcome.completed is False
-        assert [entry.kind for entry in self.entries(store)] == [FlightLogEntryKind.ROUTE_FAILED]
+            await service.fly(drone, UUID(str(MISSION_ID)))
+
+        assert service.outcomes[drone.drone_id].completed is False
+        assert [entry.kind for entry in self.entries(service)] == [FlightLogEntryKind.ROUTE_FAILED]
+
+    async def test_a_drone_outside_the_registry_never_flies(
+        self, tmp_path: Path, services: List[DroneService], stand_in_drone: StandInDrone, config: FlightConfig
+    ) -> None:
+        service = await self.a_service(tmp_path, services, [], config)
+
+        with pytest.raises(SEAdapterRegistryUnknownDroneError):
+            await service.fly(a_registered_drone(stand_in_drone), UUID(str(MISSION_ID)))
+
+        assert stand_in_drone.received_commands == []
+        assert self.entries(service) == []

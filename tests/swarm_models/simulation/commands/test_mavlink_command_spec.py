@@ -8,11 +8,11 @@ import pytest
 from pydantic import JsonValue, ValidationError
 
 # First-party imports
-from simulator.models.commands.exceptions import (
+from swarm_models.simulation.commands.exceptions import (
     SEMavlinkCommandSpecInvalidCommandId,
     SEMavlinkCommandSpecInvalidParam1,
 )
-from simulator.models.commands.mavlink_command_spec import MavlinkCommandSpec
+from swarm_models.simulation.commands.mavlink_command_spec import MavlinkCommandSpec
 
 
 class TestMavlinkCommandSpec:

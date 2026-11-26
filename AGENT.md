@@ -8,12 +8,10 @@ When you edit a file, follow these rules even where a neighbouring file does not
 
 ```bash
 uv sync
-uv run ruff check services packages tests
+uv run ruff check backend scripts tests
 uv run ruff format <the files you edited>
-uv run mypy services/<service>/src
-uv run pytest services/<service>/tests/<layer>/<package> -n 2
-uv run mypy packages/python/<package>/src
-uv run pytest packages/python/<package>/tests -n 2
+uv run mypy
+uv run pytest tests/swarm_<module>/<folder> -n 2
 ```
 
 For a front end or a TypeScript package, run its scripts from the root with the pnpm filter of its name,
@@ -22,10 +20,10 @@ desktop shell is built from the root with `pnpm --filter @swarm/desktop tauri bu
 `frontend/apps/desktop/src-tauri`, which is its own Cargo workspace, run `cargo fmt --check` and
 `cargo clippy --all-targets --locked -- -D warnings`.
 
-To build the image of a service locally, run this from the repository root, because the build context is the root:
+To build the image of an app locally, run this from the repository root, because the build context is the root:
 
 ```bash
-docker build -f services/<service>/Dockerfile -t <name>:local .
+docker build -f backend/apps/<app>/Dockerfile -t <name>:local .
 ```
 
 To run the Playwright scaffold against the images of a pipeline run, give the tag of those images:
@@ -94,12 +92,13 @@ pnpm --filter ./frontend/packages/api-client run generate
   changed. It prints six lines, including `images`, the JSON array of the image folders to build.
 - Then the reusable workflows `python.yml`, `rust.yml`, `typescript.yml` and `specs.yml` run the checks of this section
   for what was selected:
-  - for each selected service: `ruff check`, `ruff format --check`, `mypy services/<service>/src`,
-    `pytest services/<service>/tests` and that service's convention tests;
-  - the `services` job of `python.yml` installs the pinned nats-server, and builds and installs the `swarm_core` wheel for a
-    service whose `src` imports it;
-  - the `repository` job of `python.yml` also builds and installs the `swarm_core` wheel, for `tests/live`;
-  - the `packages` job of `python.yml` runs ruff, mypy and pytest on `packages/python`, and `swarm-i18n-check`;
+  - for each selected app of `backend/apps/`: `ruff check`, `ruff format --check`, `mypy` on its `src`, and `pytest` on
+    its tests and those of the domains it lists;
+  - the `services` job of `python.yml` installs the pinned nats-server, and builds and installs the `swarm_core` wheel for an
+    app whose code (its `main()` and its domains) imports it;
+  - the `repository` job of `python.yml` also builds and installs the `swarm_core` wheel, for the tests of the whole tree;
+  - the `packages` job of `python.yml` runs ruff and mypy on `backend` and `scripts`, `swarm-schemas-check` and
+    `swarm-i18n-check`;
   - the tests under `tests/`;
   - for Rust: `cargo fmt`, `clippy` and `cargo test`;
     - `rust.yml` has a `bench` job that runs only on pull requests, after `check`. It saves criterion benchmarks of the
@@ -146,7 +145,8 @@ in `service`.
 
 Swarm is meant to become a mono-repo of backend and front-end micro-services, each with its own Docker image. The root
 `src/` moved to `services/gateway` (ticket T0.01), then to `backend/apps/gateway` and the layer packages (refactor
-phase 5d), so the `services/<service>/src/<service>/` reading of `src/` applies to the services still in `services/`.
+phase 5d). Since phase 5e, `services/` and `packages/python/` are gone: read `src/` as the layer packages of
+[Target layout](#target-layout).
 The tests in `tests/conventions/mono_repo/` enforce part of this section: the uv workspace, the Cargo and pnpm
 workspaces, and the Terraform layout. The CI/CD change detection and check workflows are tested by
 `tests/ci/`. The Dockerfiles are tested by `tests/infra/images/test_service_images.py`, and `infra/compose/e2e.yaml` by
@@ -157,7 +157,7 @@ and `tests/ci/dev_cell/` checks the dev-cell workflow.
 | Path | Holds |
 | --- | --- |
 | `pyproject.toml` | The uv workspace root, with one `uv.lock` for the whole repository |
-| `services/<service>/` | One backend service: its `Dockerfile`, `pyproject.toml`, `conf/`, `src/<service>/`, `tests/` |
+| `backend/apps/<app>/` | One backend app: its `Dockerfile`, `pyproject.toml`, `conf/`, `src/swarm_<app>/main.py` |
 | `frontend/apps/<frontend>/` | One front end: its `Dockerfile`, `src/`, and its Playwright tests in `e2e/` |
 | `packages/` | Shared code: `python/` (lifecycle base classes, logging, models), `rust/` (PyO3 crates of the hot path), `ts/` (front-end packages) |
 | `infra/terraform/` | The Terraform modules per provider and building block, and one root per cell |
@@ -191,12 +191,15 @@ imports the functions from a wheel it builds.
 the MAVLink state machine) and a binary, `swarm-synthetic-drones`, which flies up to 255 synthetic Drones per process
 over UDP MAVLink 2, for example `cargo run -p swarm-synthetic-drones -- --count 10`. Its criterion benchmark is `step`.
 
-`services/simulator/` is the simulator service. `swarm-simulator fly --config conf/app.yaml --mission-id <uuid7>` flies
-the Squad of `conf/catalogs/simulated_squad.yaml` on a square route. `swarm-simulator serve` answers Commands on NATS,
-and refuses to start without simulated credentials. Its adapter registry holds only simulated Drones, and its Flight log,
-in SQLite, is marked simulated ([📏 BR-014](docs/specs/functional/business-rules/BR-014-simulation-isolation.md)).
-Its acceptance tests are in `tests/simulator/`. They need cargo and `nats-server`, and for PX4, docker with the image built
-by `docker build -f infra/images/px4-sitl/Dockerfile -t swarm-px4-sitl:local .`. They skip without them.
+`backend/apps/simulator/` is the simulator app, of the `simulation` domain. It has no command line: `swarm-simulator-serve`
+reads `conf/app.yaml` and serves `POST /v1/simulations`, whose body names the Mission and which answers `202 Accepted`
+with the Drones that fly, then flies the Squad of `conf/catalogs/simulated_squad.yaml` on a square route in the
+background (`409 Conflict` while a flight flies). In the background of its application it also answers Commands on
+NATS, and it refuses to start without simulated credentials. Its adapter registry holds only simulated Drones, and its
+Flight log, in SQLite, is marked simulated
+([📏 BR-014](docs/specs/functional/business-rules/BR-014-simulation-isolation.md)). Its acceptance tests are in
+`tests/swarm_simulator/main/`. They need cargo and `nats-server`, and for PX4, docker with the image built by
+`docker build -f infra/images/px4-sitl/Dockerfile -t swarm-px4-sitl:local .`. They skip without them.
 
 The kernel libraries of `backend/libs/` are `swarm-lifecycle` (`swarm_lifecycle`), with Runnable, AsyncRunnable and
 the abstract factories; `swarm-logging` (`swarm_logging`), with the logging configuration; `swarm-catalog`
@@ -222,13 +225,13 @@ are in `tests/conftest.py`. An app's router of `swarm_api/v1/<domain>/` builds i
 `ProblemHandlers.application` of `swarm_api`, which hands the problem model to `swarm_web`'s `RestAppBuilder`, then
 installs the idempotency middleware.
 
-The packages still in `packages/python/`, until the backend split moves them, are `swarm-i18n` (`swarm_i18n`), the
-Babel catalogues of Python messages in English, French, German and Spanish, whose catalogues live in
-`src/swarm_i18n/locales/` (`swarm.pot` and `<en|fr|de|es>/LC_MESSAGES/swarm.po`), with `Translator`, which gives a
-message in a person's language (swarm-models now holds `Language` and `Person.language`); and `swarm-live`, below.
-`swarm-rest` is gone: the runner that drives an `AsyncRunnable` from synchronous code is in the kernel's
-`swarm_web.runners`, and `scripts/openapi` exports the OpenAPI documents. Inside a package, Pydantic models, enums and
-exceptions sit in `src/<module>/models/`, as in a service.
+The Babel catalogues of Python messages, in English, French, German and Spanish, are package data of the storage layer,
+in `swarm_storage/shared/i18n/locales/` (`swarm.pot` and `<en|fr|de|es>/LC_MESSAGES/swarm.po`), read by its
+`PoCatalogStore`. `swarm_service/shared/i18n/` holds `Translator`, which gives a message in a person's language, and the
+`CatalogChecker` of the argument-free script `uv run swarm-i18n-check` (`scripts/i18n/check.py`), which reads the
+folder `SWARM_I18N_LOCALES` names when it is set. Their models are in `swarm_models/i18n/`, and `Language` and
+`MessageProblem` in `swarm_models/enums.py`. `swarm-rest` is gone: the runner that drives an `AsyncRunnable` from
+synchronous code is in the kernel's `swarm_web.runners`, and `scripts/openapi` exports the OpenAPI documents.
 
 The package `swarm-storage` (`swarm_storage`) was added by ticket T0.12. `swarm-storage`, now the storage layer
 `backend/swarm-storage`, holds in `swarm_storage/shared/postgres/` the PostgreSQL pool, the unit of work that sets
@@ -237,11 +240,13 @@ repository, the row-level security and outbox DDL, and the Alembic migrator. The
 `fleet` each have their own PostgreSQL schema and their Alembic migrations in `backend/apps/<app>/migrations/`, outside
 `src/` because Alembic needs module-level functions.
 
-The package `swarm-live` (`swarm_live`) is the live fan-out shared by the gateway and the flight engine: the one-slot
-mailbox, the hub, the MessagePack codec, and the `LiveSession` AsyncRunnable behind `/v1/live`.
+The live fan-out shared by the gateway and the flight engine is in `swarm_service/shared/live/`: the one-slot mailbox
+and the hub (`hub/`), the live sources (`sources/`), the MessagePack codec, and the `LiveSession` AsyncRunnable, built by
+its factory, behind the `/v1/live` socket of `swarm_api/v1/live/`. Its errors are in `swarm_models/live/exceptions/`.
 
-The flight engine (`services/flight-engine`) imports `swarm_core` from the wheel built from `rust/swarm-core/python`,
-not from the uv workspace. After `uv sync`, build and install it with:
+The flight engine app (`backend/apps/flight-engine`, of the `flight` domain) imports `swarm_core`, through the MAVLink
+listener of `swarm_clients/flight/mavlink/`, from the wheel built from `rust/swarm-core/python`, not from the uv
+workspace. After `uv sync`, build and install it with:
 
 ```bash
 uv run maturin build --release --manifest-path rust/swarm-core/python/Cargo.toml --out dist
@@ -252,12 +257,14 @@ uv pip install --no-deps dist/swarm_core-*.whl
 NATS tests skip without nats-server. mypy reads `rust/swarm-core/python/swarm_core.pyi` through the root
 `mypy_path`.
 
-The apps `gateway`, `fleet` and `missions` sit in `backend/apps/<app>/`, each with one console script,
-`swarm-<app>-serve`, whose argument-free `main()` reads `conf/app.yaml` in the folder `SWARM_APP_ROOT` names (the
-current one without it) and serves the app. Their routes, services, clients and models sit in the layer packages,
-under the domain of the same name. The simulator and the flight engine are still services of `services/`.
+The apps `gateway`, `fleet`, `missions`, `simulator` and `flight-engine` sit in `backend/apps/<app>/`, each with one
+console script, `swarm-<app>-serve`, whose argument-free `main()` reads `conf/app.yaml` in the folder `SWARM_APP_ROOT`
+names (the current one without it) and serves the app; a relative path of the configuration is read in that folder.
+Their routes, services, clients and models sit in the layer packages, under the domain the app lists in
+`[tool.swarm] domains`: `simulation` for the simulator and `flight` for the flight engine, the others under their own
+name.
 
-The Python rules in this file apply to `services/` and `packages/python/`. The front ends use React and TypeScript
+The Python rules in this file apply to `backend/` and `scripts/`, and to the central `tests/`. The front ends use React and TypeScript
 with a Tauri desktop shell, images go to GHCR, and Argo CD deploys them; see `docs/specs/technical/`.
 
 **Shared models**
@@ -273,9 +280,9 @@ with a Tauri desktop shell, images go to GHCR, and Argo CD deploys them; see `do
 
 **Services**
 
-- The layers in [Layout](#layout) sit inside each service, under its name:
-  `services/<service>/src/<service>/{api,service,storage,models}/`. Elsewhere in this file, read `src/` as
-  `services/<service>/src/<service>/`, and `from service.customers...` as `from <service>.service.customers...`.
+- The layers in [Layout](#layout) are the layer packages of `backend/` since phase 5e: read `src/` as
+  `backend/swarm-<layer>/src/swarm_<layer>/<domain>/`, and `from service.customers...` as
+  `from swarm_service.<domain>.customers...`.
 - NEVER add a top-level `api`, `service`, `storage` or `models` package to a service. Services share one uv environment,
   so they would overwrite each other.
 - A service never imports another service. Code they share goes in `packages/`, which holds no business rules.
@@ -365,16 +372,17 @@ domains`.
 
 `tests/conventions/` fails on any of these, in `src/` and `tests/` unless stated:
 
-Since T0.03, `tests/conventions/services/test_service_conventions.py` runs these rules against every service it finds
-under `services/`. The rules checked are: more than one top-level class in a file; more than five Python files in a
+`tests/conventions/backend/test_backend_conventions.py` runs these rules against every package of `backend/` and
+`scripts/` (the kernel libs, the layer packages, the apps and the scripts), and against the central tests of the
+backend (`tests/swarm_*`, `tests/scripts` and `tests/fakes`); they ran against `services/` and `packages/python/` until
+phase 5e. The rules checked are: more than one top-level class in a file; more than five Python files in a
 folder; a nested function; `Any`; an import that Layout does not allow, checked in `src/` only; the lifecycle rule
 (`start` or `stop`, or `run` without a lifecycle base class); a Pydantic model outside `src/models/`; a module
 docstring; an import outside its group (`tests/conventions/imports/` also checks the root `tests/`); and a logger
 handed to a new object or to `super().__init__`, checked in `src/` only. `@staticmethod`,
 attributes starting with an underscore and the node rules are not tested yet. Each rule is one class in
-`tests/conventions/rules/`. The environment variable `SWARM_CONVENTIONS_SERVICES_ROOT` runs the tests against another
-folder of services. `tests/conventions/packages/test_package_conventions.py` runs the same rules against every package of
-`packages/python/`, and `SWARM_CONVENTIONS_PACKAGES_ROOT` points it at another folder. The lifecycle rule accepts the
+`tests/conventions/rules/`. The environment variable `SWARM_CONVENTIONS_BACKEND_ROOT` runs the tests against another
+repository root. The lifecycle rule accepts the
 definitions of `Runnable` and `AsyncRunnable` themselves.
 
 Since the refactor's phase 1, `tests/conventions/backend/` checks the [Target layout](#target-layout) in `backend/`
@@ -513,7 +521,7 @@ from models.customers.exceptions import SECustomerCatalogUnreadable
 - **Every module of `src/` and `tests/` has its groups,** exception files and test files included. Only `__init__.py`
   files, which only re-export, have none. A group with no import is left out with its comment.
 - **An import sits in the group of what it imports,** whatever ruff's isort thinks: the standard library, a third-party
-  distribution, or the repository's own code (a package of `services/`, `packages/`, `backend/`, `tests`, or a name of
+  distribution, or the repository's own code (a package of `backend/` or `scripts/`, `tests`, or a name of
   `known-first-party`). Where isort would move an import into another group, it stays in its AGENT.md group, marked
   `# isort: skip` on its line. Adding the module to `known-first-party` in `pyproject.toml` is better when it is
   first-party code.

@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 # Standard library imports
+from http import HTTPStatus
 from pathlib import Path
 
 # First-party imports
-from simulator.models.enums import FlightLogEntryKind
-from tests.simulator.helpers import (
+from swarm_models.enums import FlightLogEntryKind
+from tests.swarm_simulator.main.helpers import (
     MISSION_ID,
     SYNTHETIC_COUNT,
     count_kind,
@@ -24,7 +25,6 @@ class TestSquareRouteFlight:
     PX4_HEARTBEAT_TIMEOUT_S = 120
     PX4_ARM_TIMEOUT_S = 300
     PX4_FLY_TIMEOUT_S = 700.0
-    COMPLETED_EXIT_CODE = 0
 
     def test_ten_synthetic_drones_complete_a_square_route(
         self, tmp_path: Path, simulator_script: Path, synthetic_drones: int
@@ -32,9 +32,9 @@ class TestSquareRouteFlight:
         catalog = write_squad_catalog(tmp_path, synthetic_endpoints(synthetic_drones))
         config = write_app_config(tmp_path, catalog)
 
-        finished = run_fly(config, MISSION_ID)
+        accepted = run_fly(config, MISSION_ID, SYNTHETIC_COUNT)
 
-        assert finished.returncode == self.COMPLETED_EXIT_CODE, finished.stderr
+        assert accepted.status_code == HTTPStatus.ACCEPTED, accepted.text
         rows = flight_log_rows(flight_log_path(tmp_path))
         assert count_kind(rows, FlightLogEntryKind.ROUTE_COMPLETED) == SYNTHETIC_COUNT
         assert count_kind(rows, FlightLogEntryKind.ROUTE_FAILED) == 0
@@ -52,8 +52,8 @@ class TestSquareRouteFlight:
             route_timeout_s=self.PX4_ROUTE_TIMEOUT_S,
         )
 
-        finished = run_fly(config, MISSION_ID, self.PX4_FLY_TIMEOUT_S)
+        accepted = run_fly(config, MISSION_ID, SYNTHETIC_COUNT + 1, self.PX4_FLY_TIMEOUT_S)
 
-        assert finished.returncode == self.COMPLETED_EXIT_CODE, finished.stderr
+        assert accepted.status_code == HTTPStatus.ACCEPTED, accepted.text
         rows = flight_log_rows(flight_log_path(tmp_path))
         assert count_kind(rows, FlightLogEntryKind.ROUTE_COMPLETED) == SYNTHETIC_COUNT + 1

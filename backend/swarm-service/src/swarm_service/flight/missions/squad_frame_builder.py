@@ -7,10 +7,10 @@ from typing import ClassVar, Dict, List, Optional
 from uuid import UUID
 
 # First-party imports
-from flight_engine.models.missions.drone_entry import DroneEntry
-from flight_engine.models.missions.mission_entry import MissionEntry
-from flight_engine.models.telemetry.drone_sample import DroneSample
-from flight_engine.models.telemetry.drone_state_catalog import DroneStateCatalog
+from swarm_models.flight.missions.drone_entry import DroneEntry
+from swarm_models.flight.missions.mission_entry import MissionEntry
+from swarm_models.flight.telemetry.drone_sample import DroneSample
+from swarm_models.flight.telemetry.drone_state_catalog import DroneStateCatalog
 from swarm_models.telemetry.enums.drone_state import DroneState
 from swarm_models.telemetry.squad_frame import SquadFrame
 from swarm_models.telemetry.telemetry_frame import TelemetryFrame

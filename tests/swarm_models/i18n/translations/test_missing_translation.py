@@ -8,15 +8,14 @@ import pytest
 from pydantic import JsonValue, ValidationError
 
 # First-party imports
-from swarm_i18n.models.enums import MessageProblem  # isort: skip
-from swarm_i18n.models.translations.exceptions import (  # isort: skip
+from swarm_models.enums import Language, MessageProblem
+from swarm_models.i18n.translations.exceptions import (
     SEInvalidMissingTranslationException,
     SEMissingTranslationInvalidLanguage,
     SEMissingTranslationInvalidMessageId,
     SEMissingTranslationInvalidProblem,
 )
-from swarm_i18n.models.translations.missing_translation import MissingTranslation  # isort: skip
-from swarm_models.enums import Language
+from swarm_models.i18n.translations.missing_translation import MissingTranslation
 
 
 class TestMissingTranslation:

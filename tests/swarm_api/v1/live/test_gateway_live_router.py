@@ -8,10 +8,10 @@ from typing import Callable
 from fastapi.testclient import TestClient
 
 # First-party imports
-from swarm_live.service.live_codec import LiveCodec  # isort: skip
-from swarm_models.enums import LiveOperation, LiveRate, LiveTopicKind  # isort: skip
-from swarm_models.live.live_subscription import LiveSubscription  # isort: skip
-from tests.swarm_api.v1.live.gateway_stand_in_live_source import GatewayStandInLiveSource  # isort: skip
+from swarm_models.enums import LiveOperation, LiveRate, LiveTopicKind
+from swarm_models.live.live_subscription import LiveSubscription
+from swarm_service.shared.live.live_codec import LiveCodec
+from tests.swarm_api.v1.live.gateway_stand_in_live_source import GatewayStandInLiveSource
 
 
 class TestGatewayLiveRouter:

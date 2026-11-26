@@ -4,11 +4,10 @@ from __future__ import annotations
 from typing import Callable, ClassVar, Dict, List, Tuple
 
 # First-party imports
-from swarm_i18n.models.enums import MessageProblem
-from swarm_i18n.models.translations.missing_translation import MissingTranslation
-from swarm_i18n.service.catalogs.catalog_checker import CatalogChecker
-from swarm_i18n.storage.catalogs.po_catalog_store import PoCatalogStore
-from swarm_models.enums import Language
+from swarm_models.enums import Language, MessageProblem
+from swarm_models.i18n.translations.missing_translation import MissingTranslation
+from swarm_service.shared.i18n.catalog_checker import CatalogChecker
+from swarm_storage.shared.i18n.po_catalog_store import PoCatalogStore
 
 Entries = Dict[Language, List[Tuple[str, str, bool]]]
 StoreBuilder = Callable[[List[str], Entries], PoCatalogStore]

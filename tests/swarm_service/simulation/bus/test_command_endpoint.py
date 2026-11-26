@@ -8,14 +8,14 @@ from typing import ClassVar
 from uuid import UUID
 
 # First-party imports
-from services.simulator.tests.helpers import DRONE_IDS, MISSION_ID, OPERATOR_ID, a_registered_drone
-from services.simulator.tests.stand_in_drone import StandInDrone
-from simulator.api.bus.command_endpoint import CommandEndpoint
-from simulator.models.config.simulator_config import SimulatorConfig
-from simulator.models.enums import CommandVerdict
-from simulator.service.factories.commands.simulated_command_service_factory import SimulatedCommandServiceFactory
 from swarm_models.commands.command import Command
 from swarm_models.commands.enums import CommandKind, CommandLane
+from swarm_models.config.simulator.simulator_config import SimulatorConfig
+from swarm_models.enums import CommandVerdict
+from swarm_service.simulation.bus.command_endpoint import CommandEndpoint
+from swarm_service.simulation.factories.drones.drone_service_factory import DroneServiceFactory
+from tests.fakes.mavlink.helpers import DRONE_IDS, MISSION_ID, OPERATOR_ID, a_registered_drone
+from tests.fakes.mavlink.stand_in_drone import StandInDrone
 
 
 class TestCommandEndpoint:
@@ -37,7 +37,7 @@ class TestCommandEndpoint:
         self, stand_in_drone: StandInDrone, app_config: partial[Path]
     ) -> None:
         config = SimulatorConfig.load(app_config([a_registered_drone(stand_in_drone)]))
-        service = SimulatedCommandServiceFactory(config, getLogger(__name__)).create()
+        service = DroneServiceFactory(config, getLogger(__name__)).create()
         await service.open()
         endpoint = CommandEndpoint(service, getLogger(__name__))
 
@@ -52,7 +52,7 @@ class TestCommandEndpoint:
         self, stand_in_drone: StandInDrone, app_config: partial[Path]
     ) -> None:
         config = SimulatorConfig.load(app_config([a_registered_drone(stand_in_drone)]))
-        service = SimulatedCommandServiceFactory(config, getLogger(__name__)).create()
+        service = DroneServiceFactory(config, getLogger(__name__)).create()
         await service.open()
         endpoint = CommandEndpoint(service, getLogger(__name__))
 

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 # First-party imports
-from tests.live.helpers import (
+from tests.swarm_flight_engine.main.helpers import (
     DRONE_IDS,
     MISSION_ID,
     OTHER_OPERATOR_ID,
@@ -10,7 +10,7 @@ from tests.live.helpers import (
     receive_full_squad,
     receives_anything,
 )
-from tests.live.simulated_drones import SimulatedDrones
+from tests.swarm_flight_engine.main.simulated_drones import SimulatedDrones
 
 
 class TestLivePath:

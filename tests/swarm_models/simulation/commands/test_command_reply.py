@@ -9,14 +9,14 @@ import pytest
 from pydantic import JsonValue, ValidationError
 
 # First-party imports
-from simulator.models.commands.command_reply import CommandReply
-from simulator.models.commands.exceptions import (
+from swarm_models.enums import CommandVerdict
+from swarm_models.simulation.commands.command_reply import CommandReply
+from swarm_models.simulation.commands.exceptions import (
     SECommandReplyInvalidCommandId,
     SECommandReplyInvalidReason,
     SECommandReplyInvalidVerdict,
     SECommandReplyRefusedWithoutReason,
 )
-from simulator.models.enums import CommandVerdict
 
 
 class TestCommandReply:

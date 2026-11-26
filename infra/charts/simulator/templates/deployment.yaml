@@ -19,10 +19,6 @@ spec:
         - name: simulator
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          args:
-            - serve
-            - --config
-            - /app/conf/app.yaml
           {{- with .Values.resources }}
           resources:
             {{- toYaml . | nindent 12 }}

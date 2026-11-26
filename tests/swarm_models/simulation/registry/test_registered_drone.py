@@ -9,15 +9,15 @@ import pytest
 from pydantic import JsonValue, ValidationError
 
 # First-party imports
-from simulator.models.enums import SimulatedDroneKind
-from simulator.models.registry.exceptions import (
+from swarm_models.enums import SimulatedDroneKind
+from swarm_models.simulation.registry.exceptions import (
     SERegisteredDroneInvalidDroneId,
     SERegisteredDroneInvalidHost,
     SERegisteredDroneInvalidKind,
     SERegisteredDroneInvalidPort,
     SERegisteredDroneInvalidSystemId,
 )
-from simulator.models.registry.registered_drone import RegisteredDrone
+from swarm_models.simulation.registry.registered_drone import RegisteredDrone
 
 
 class TestRegisteredDrone:

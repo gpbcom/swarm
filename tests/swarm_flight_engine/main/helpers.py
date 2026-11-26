@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-# ruff: noqa: I001 -- swarm_live joins known-first-party with its package.
-
 # Standard library imports
 import asyncio
 import socket
@@ -15,10 +13,12 @@ from fastapi import WebSocket
 from websockets.asyncio.client import connect
 
 # First-party imports
-from swarm_live.service.live_codec import LiveCodec
+from swarm_models.config.app_config import AppConfig
 from swarm_models.enums import LiveOperation, LiveTopicKind
 from swarm_models.live.live_subscription import LiveSubscription
 from swarm_models.telemetry.squad_frame import SquadFrame
+from swarm_service.gateway.live.live_feed import LiveFeed
+from swarm_service.shared.live.live_codec import LiveCodec
 
 HOST = "127.0.0.1"
 ENCODING = "utf-8"
@@ -88,7 +88,8 @@ def wait_for_port(port: int, timeout_s: float) -> bool:
 
 
 def write_app_yaml(folder: Path, nats_url: str, live_port: int, missions: Path, states: Path) -> Path:
-    path = folder / "app.yaml"
+    path = folder / AppConfig.CONF_FOLDER / AppConfig.APP_FILE
+    path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
         APP_TEMPLATE.format(missions=missions, states=states, nats_url=nats_url, live_port=live_port),
         encoding=ENCODING,
@@ -111,7 +112,7 @@ def write_missions_yaml(folder: Path, mavlink_port: int) -> Path:
     return path
 
 
-def operator_from_query(websocket: WebSocket) -> UUID:
+async def operator_from_query(websocket: WebSocket) -> UUID:
     value = websocket.query_params.get(OPERATOR_QUERY)
     if value:
         return UUID(value)
@@ -162,3 +163,9 @@ async def receives_anything(url: str) -> bool:
 
 def drone_ids_of(squad: SquadFrame) -> List[UUID]:
     return sorted(frame.drone_id for frame in squad.frames)
+
+
+async def consume_feed(feed: LiveFeed) -> None:
+    """Read the statuses of the gateway's live feed until it ends."""
+    async for _ in feed.execute():
+        pass

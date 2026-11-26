@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 # First-party imports
-from simulator.models.flights.exceptions.errors.se_drone_flight_error import (
+from swarm_models.simulation.flights.exceptions.errors.se_drone_flight_error import (
     SEDroneFlightError,
 )
 

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 # First-party imports
-from simulator.models.routes.exceptions.waypoint.se_invalid_waypoint_exception import (
+from swarm_models.simulation.routes.exceptions.waypoint.se_invalid_waypoint_exception import (
     SEInvalidWaypointException,
 )
 

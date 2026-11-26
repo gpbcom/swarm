@@ -8,14 +8,14 @@ from uuid import UUID
 from pydantic import ConfigDict, Field, JsonValue, field_validator, model_validator
 
 # First-party imports
-from simulator.models.commands.exceptions import (
+from swarm_models.base.swarm_model import SwarmModel
+from swarm_models.enums import CommandVerdict
+from swarm_models.simulation.commands.exceptions import (
     SECommandReplyInvalidCommandId,
     SECommandReplyInvalidReason,
     SECommandReplyInvalidVerdict,
     SECommandReplyRefusedWithoutReason,
 )
-from simulator.models.enums import CommandVerdict
-from swarm_models.base.swarm_model import SwarmModel
 
 
 class CommandReply(SwarmModel):

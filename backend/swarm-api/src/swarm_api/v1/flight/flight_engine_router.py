@@ -3,80 +3,88 @@ from __future__ import annotations
 # Standard library imports
 from logging import Logger, getLogger
 from typing import ClassVar, Optional
+from uuid import UUID
 
 # Third-party imports
-from fastapi import APIRouter, WebSocket
+from fastapi import APIRouter, FastAPI
 
 # First-party imports
-from flight_engine.models.config.live_server_config import LiveServerConfig
-from swarm_live.api.factories.live.live_session_factory import LiveSessionFactory
-from swarm_live.service.hub_live_source import HubLiveSource
-from swarm_live.service.live_codec import LiveCodec
-from swarm_live.service.live_hub import LiveHub
+from swarm_api.dependencies.edge_live_operator import EdgeLiveOperator
+from swarm_api.handlers.problem_handlers import ProblemHandlers
+from swarm_api.v1.live.live_router import LiveRouter
+from swarm_models.config.flight_engine.flight_engine_config import FlightEngineConfig
 from swarm_models.live.session.live_session_config import LiveSessionConfig
+from swarm_service.shared.live.hub.live_hub import LiveHub
+from swarm_service.shared.live.live_codec import LiveCodec
+from swarm_service.shared.live.sources.hub_live_source import HubLiveSource
+from swarm_service.shared.live.sources.live_source import LiveSource
 
 
-class LiveEndpoint:
-    """Serves the local ``/v1/live`` WebSocket of the flight engine, with the protocol of the gateway.
+class FlightEngineRouter(APIRouter):
+    """The ``/v1`` routes of the flight domain, and the FastAPI application of the flight engine app that serves them.
 
     Attributes:
-        PATH (ClassVar[str]): The path of the socket.
-        hub (LiveHub): The hub the Mission actors publish their frames to.
-        codec (LiveCodec): Decodes the messages of the clients.
-        config (LiveServerConfig): The settings of the live server.
+        TITLE (ClassVar[str]): The title of the API.
+        VERSION (ClassVar[str]): The version of the API.
+        flight_engine_config (FlightEngineConfig): The configuration of the flight engine.
+        hub (LiveHub): The hub the Mission actors publish their frames to, which the live socket reads.
+        codec (LiveCodec): The codec shared by the actors and the sockets.
         logger (Logger): Logger instance.
 
     Notes:
-        - At the edge, Ground control connects straight to the flight engine, with no Operator check: the leaf node
-          is local.
-        - The handler holds no rule: the ``LiveSession`` of ``swarm_live`` does the work.
+        - The domain has no REST route: its application serves the local ``/v1/live`` WebSocket, with the
+          ``LiveRouter`` the gateway serves too, and the protocol of the gateway.
+        - **At the edge there is no Operator check**: ``EdgeLiveOperator`` accepts every local client, and every
+          client reads the hub of the edge.
+        - The hub and the codec are created here and handed by the app to the runnable of the engine, so that the
+          actors and the sockets share them.
     """
 
-    PATH: ClassVar[str] = "/v1/live"
+    TITLE: ClassVar[str] = "Swarm flight engine"
+    VERSION: ClassVar[str] = "0.1.0"
 
-    def __init__(
-        self, hub: LiveHub, codec: LiveCodec, config: LiveServerConfig, logger: Optional[Logger] = None
-    ) -> None:
-        """Initialise the endpoint.
+    def __init__(self, config: FlightEngineConfig, logger: Optional[Logger] = None) -> None:
+        """Initialise the router, with its hub and its codec.
 
         Args:
-            hub (LiveHub): The hub the Mission actors publish their frames to.
-            codec (LiveCodec): Decodes the messages of the clients.
-            config (LiveServerConfig): The settings of the live server.
+            config (FlightEngineConfig): The configuration of the flight engine.
             logger (Optional[Logger]): Logger instance.
         """
+        super().__init__()
         self.logger = logger if logger else getLogger(__name__)
-        self.hub = hub
-        self.codec = codec
-        self.config = config
+        self.flight_engine_config = config
+        self.hub = LiveHub()
+        self.codec = LiveCodec()
 
     ############################
     # Internal Helpers Methods #
     ############################
 
-    async def _serve(self, websocket: WebSocket) -> None:
-        """Accept a connection and run its session until the client leaves.
+    def _source_for(self, operator_id: UUID) -> LiveSource:
+        """Give the live source of a connection of the edge.
 
         Args:
-            websocket (WebSocket): The connection.
+            operator_id (UUID): The value of ``EdgeLiveOperator``, which names no Operator.
+
+        Returns:
+            LiveSource: A source that reads the hub of the edge.
         """
-        await websocket.accept()
-        self.logger.debug("A live socket is accepted.")
-        session_config = LiveSessionConfig(status_interval_s=self.config.status_interval_s)
-        session = LiveSessionFactory(websocket, HubLiveSource(self.hub), self.codec, session_config).create()
-        async for status in session.execute():
-            self.logger.debug("The live session is %s.", status)
+        self.logger.debug("A live client of the edge reads its hub.")
+        return HubLiveSource(self.hub)
 
     ############################
     # Publicly Exposed Methods #
     ############################
 
-    def router(self) -> APIRouter:
-        """Build the router.
+    def application(self) -> FastAPI:
+        """Build the application of the flight engine app.
 
         Returns:
-            APIRouter: A router with the live WebSocket.
+            FastAPI: The application, with the REST conventions of Swarm and the local live socket.
         """
-        router = APIRouter()
-        router.add_api_websocket_route(self.PATH, self._serve)
-        return router
+        self.logger.debug("Building the flight engine application.")
+        app = ProblemHandlers().application(self.TITLE, self.VERSION, [self])
+        session = LiveSessionConfig(status_interval_s=self.flight_engine_config.live.status_interval_s)
+        app.include_router(LiveRouter(self._source_for, session, EdgeLiveOperator()))
+        self.logger.debug("The live socket of the edge is wired on the flight engine application.")
+        return app

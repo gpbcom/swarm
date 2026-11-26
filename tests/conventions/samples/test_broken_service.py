@@ -55,9 +55,8 @@ class TestBrokenService:
         assert expected in violations[0]
 
     def test_the_convention_tests_fail_once_per_rule(self, tmp_path: Path) -> None:
-        services_root = tmp_path / "services"
-        write_broken_service(services_root)
-        result = run_convention_tests(services_root)
+        write_broken_service(tmp_path / "backend" / "libs")
+        result = run_convention_tests(tmp_path)
         output = result.stdout + result.stderr
         assert result.returncode != 0
         assert re.search(r"\b10 failed\b", output)

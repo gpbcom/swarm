@@ -1,5 +1,5 @@
 [tool.uv.workspace]
-members = ["services/*", "packages/python/*", "backend/libs/*", "backend/swarm-*", "backend/apps/*", "scripts"]
+members = ["backend/libs/*", "backend/swarm-*", "backend/apps/*", "scripts"]
 
 [dependency-groups]
 dev = [
@@ -29,7 +29,7 @@ ignore = ["UP006", "UP007", "UP035", "UP045"]
 # Tests are written before the code they import (TKT-4): pinning ``tests`` as first-party keeps the import order the
 # same whether or not the imported module exists yet. The code of the repository is first-party, so that the AGENT.md
 # import groups match ruff.
-known-first-party = ["tests", "simulator", "flight_engine", "swarm_live", "swarm_catalog", "swarm_i18n", "swarm_lifecycle", "swarm_logging", "swarm_models", "swarm_nats", "swarm_web", "swarm_storage", "swarm_service", "swarm_clients", "swarm_api", "swarm_scripts", "swarm_gateway", "swarm_fleet", "swarm_missions"]
+known-first-party = ["tests", "swarm_catalog", "swarm_lifecycle", "swarm_logging", "swarm_models", "swarm_nats", "swarm_web", "swarm_storage", "swarm_service", "swarm_clients", "swarm_api", "swarm_scripts", "swarm_gateway", "swarm_fleet", "swarm_missions", "swarm_simulator", "swarm_flight_engine"]
 
 [tool.ruff.format]
 quote-style = "double"
@@ -37,20 +37,11 @@ quote-style = "double"
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 pythonpath = ["."]
-testpaths = [
-    "tests",
-    "services/simulator/tests",
-    "services/flight-engine/tests",
-    "packages/python/swarm-i18n/tests",
-    "packages/python/swarm-live/tests",
-]
+testpaths = ["tests"]
 
 [tool.mypy]
 files = [
-    "services/simulator/src",
-    "services/flight-engine/src",
     "backend/libs/swarm-lifecycle/src",
-    "packages/python/swarm-i18n/src",
     "backend/libs/swarm-catalog/src",
     "backend/libs/swarm-logging/src",
     "backend/swarm-models/src",
@@ -61,17 +52,15 @@ files = [
     "scripts/src",
     "backend/swarm-clients/src",
     "backend/swarm-service/src",
-    "packages/python/swarm-live/src",
     "backend/apps/gateway/src",
     "backend/apps/fleet/src",
     "backend/apps/missions/src",
+    "backend/apps/simulator/src",
+    "backend/apps/flight-engine/src",
 ]
 mypy_path = [
     "rust/swarm-core/python",
-    "services/simulator/src",
-    "services/flight-engine/src",
     "backend/libs/swarm-lifecycle/src",
-    "packages/python/swarm-i18n/src",
     "backend/libs/swarm-catalog/src",
     "backend/libs/swarm-logging/src",
     "backend/swarm-models/src",
@@ -82,10 +71,11 @@ mypy_path = [
     "scripts/src",
     "backend/swarm-clients/src",
     "backend/swarm-service/src",
-    "packages/python/swarm-live/src",
     "backend/apps/gateway/src",
     "backend/apps/fleet/src",
     "backend/apps/missions/src",
+    "backend/apps/simulator/src",
+    "backend/apps/flight-engine/src",
 ]
 explicit_package_bases = true
 

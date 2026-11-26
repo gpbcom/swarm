@@ -7,23 +7,23 @@ from typing import Callable, ClassVar, Dict, List, Tuple
 from uuid import UUID
 
 # Third-party imports
-from flight_engine_stand_in_source import StandInSampleSource  # isort: skip
 from nats.aio.client import Client
 
 # First-party imports
-from flight_engine.models.config.flight_engine_config import FlightEngineConfig
-from flight_engine.models.missions.mission_catalog import MissionCatalog
-from flight_engine.models.missions.mission_entry import MissionEntry
-from flight_engine.models.telemetry.drone_sample import DroneSample
-from flight_engine.models.telemetry.drone_state_catalog import DroneStateCatalog
-from flight_engine.service.engine.flight_engine import FlightEngine
 from swarm_lifecycle.models.enums import RunnableStatus
-from swarm_live.service.live_codec import LiveCodec
-from swarm_live.service.live_hub import LiveHub
+from swarm_models.config.flight_engine.flight_engine_config import FlightEngineConfig
 from swarm_models.enums import LiveTopicKind
+from swarm_models.flight.missions.mission_catalog import MissionCatalog
+from swarm_models.flight.missions.mission_entry import MissionEntry
+from swarm_models.flight.telemetry.drone_sample import DroneSample
+from swarm_models.flight.telemetry.drone_state_catalog import DroneStateCatalog
 from swarm_models.subjects.operator_subjects import OperatorSubjects
 from swarm_nats.clients.nats_connector import NatsConnector
 from swarm_nats.models.config.nats_client_config import NatsClientConfig
+from swarm_service.flight.engine.flight_engine import FlightEngine
+from swarm_service.shared.live.hub.live_hub import LiveHub
+from swarm_service.shared.live.live_codec import LiveCodec
+from tests.swarm_service.flight.flight_engine_stand_in_source import StandInSampleSource
 
 
 class TestFlightEngine:

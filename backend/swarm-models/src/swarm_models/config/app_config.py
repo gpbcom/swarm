@@ -23,6 +23,8 @@ class AppConfig(YamlCatalog):
         - **The app's folder is passed in, never found from the path of a module**: an installed package has no
           source tree, so each image sets ``APP_ROOT_KEY`` to the folder its ``COPY`` fills.
         - Without the entry, the folder is the current one, so that an app runs from ``backend/apps/<app>``.
+        - A relative path of a configuration, such as a catalogue, is read in the folder of the app
+          (``in_app_folder``), never in the folder of a module.
     """
 
     APP_ROOT_KEY: ClassVar[str] = "SWARM_APP_ROOT"
@@ -55,6 +57,18 @@ class AppConfig(YamlCatalog):
             Path: ``conf`` in the folder of the app.
         """
         return cls.app_folder() / cls.CONF_FOLDER
+
+    @classmethod
+    def in_app_folder(cls, path: str) -> Path:
+        """Find a file that the configuration names, in the folder of the app.
+
+        Args:
+            path (str): The path as configured.
+
+        Returns:
+            Path: The path itself when it is absolute, else the path in the folder of the app.
+        """
+        return cls.app_folder() / path
 
     @classmethod
     def migrations_folder(cls) -> Path:

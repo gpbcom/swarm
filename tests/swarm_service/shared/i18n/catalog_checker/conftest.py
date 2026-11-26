@@ -9,8 +9,8 @@ from typing import Callable, Dict, List, Tuple
 import pytest
 
 # First-party imports
-from swarm_i18n.storage.catalogs.po_catalog_store import PoCatalogStore
 from swarm_models.enums import Language
+from swarm_storage.shared.i18n.po_catalog_store import PoCatalogStore
 
 HEADER = 'msgid ""\nmsgstr ""\n"Content-Type: text/plain; charset=UTF-8\\n"\n\n'
 COMPLETE_IDS = ["greeting", "farewell"]

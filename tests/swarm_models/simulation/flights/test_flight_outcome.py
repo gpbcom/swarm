@@ -8,15 +8,15 @@ import pytest
 from pydantic import JsonValue, ValidationError
 
 # First-party imports
-from simulator.models.enums import SimulatedDroneKind
-from simulator.models.flights.exceptions import (
+from swarm_models.enums import SimulatedDroneKind
+from swarm_models.simulation.flights.exceptions import (
     SEFlightOutcomeInvalidCompleted,
     SEFlightOutcomeInvalidDroneId,
     SEFlightOutcomeInvalidElapsed,
     SEFlightOutcomeInvalidKind,
     SEFlightOutcomeInvalidWaypointsReached,
 )
-from simulator.models.flights.flight_outcome import FlightOutcome
+from swarm_models.simulation.flights.flight_outcome import FlightOutcome
 
 
 class TestFlightOutcome:

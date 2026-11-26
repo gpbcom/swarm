@@ -2,75 +2,42 @@ from __future__ import annotations
 
 # Standard library imports
 import asyncio
-import logging
-import signal
-import subprocess
-import sys
 import time
 from functools import partial
 from pathlib import Path
-from typing import ClassVar, Iterator, Tuple
+from typing import ClassVar, Tuple
 from uuid import UUID
 
 # Third-party imports
 import nats
-import pytest
 
 # First-party imports
-from services.simulator.tests.helpers import MISSION_ID, OPERATOR_ID, a_registered_drone
-from services.simulator.tests.stand_in_drone import StandInDrone
-from simulator.api.cli.commands.serve_command import ServeCommand
-from simulator.api.factories.serve.serve_command_factory import ServeCommandFactory
-from simulator.models.commands.command_reply import CommandReply
-from simulator.models.config.simulator_config import SimulatorConfig
-from simulator.models.enums import CommandVerdict, SimulatorCommandName
 from swarm_clients.shared.nats.nats_requester import NatsRequester
-from swarm_lifecycle.runnables.runnable import Runnable
+from swarm_lifecycle.runnables.async_runnable import AsyncRunnable
 from swarm_models.commands.command import Command
 from swarm_models.commands.enums import CommandKind, CommandLane
+from swarm_models.config.simulator.simulator_config import SimulatorConfig
+from swarm_models.enums import CommandVerdict
+from swarm_models.simulation.commands.command_reply import CommandReply
 from swarm_models.subjects.operator_subjects import OperatorSubjects
 from swarm_nats.models.bus.exceptions import SENatsNoResponderError, SENatsRequestDeadlineExceededError
 from swarm_nats.models.config.nats_client_config import NatsClientConfig
-from tests.infra.nats.helpers import connz_users
+from swarm_service.simulation.bus.command_responder import CommandResponder
+from swarm_service.simulation.factories.bus.command_responder_factory import CommandResponderFactory
+from tests.fakes.mavlink.helpers import MISSION_ID, OPERATOR_ID, a_registered_drone
+from tests.fakes.mavlink.stand_in_drone import StandInDrone
 
 Cell = Tuple[str, int, Path, Path]
-Served = Tuple[subprocess.Popen[bytes], str, Path]
 
 
-class TestServeCommand:
-    SCRIPT_NAME: ClassVar[str] = "swarm-simulator"
-    CONFIG_FLAG: ClassVar[str] = "--config"
+class TestCommandResponder:
     COMMAND_EVENT: ClassVar[str] = "command"
     COMMAND_ID: ClassVar[str] = "0190a5b2-7c3e-7d4f-8a1b-2c3d4e5f7002"
     UNKNOWN_DRONE_ID: ClassVar[str] = "0190a5b2-7c3e-7d4f-8a1b-2c3d4e5f7098"
-    IDEMPOTENCY_KEY: ClassVar[str] = "serve-test-1"
-    LOG_NAME: ClassVar[str] = "serve.log"
+    IDEMPOTENCY_KEY: ClassVar[str] = "responder-test-1"
     REQUEST_DEADLINE_S: ClassVar[float] = 2.0
     READY_TIMEOUT_S: ClassVar[float] = 30.0
-    EXIT_TIMEOUT_S: ClassVar[float] = 20.0
     RETRY_PAUSE_S: ClassVar[float] = 0.2
-    EXIT_OK: ClassVar[int] = 0
-    EXIT_REFUSED_CREDENTIALS: ClassVar[int] = 3
-
-    @pytest.fixture
-    def served(
-        self, nats_cell: Cell, stand_in_drone: StandInDrone, app_config: partial[Path], tmp_path: Path
-    ) -> Iterator[Served]:
-        url, _, simulated_creds, _ = nats_cell
-        config = app_config([a_registered_drone(stand_in_drone)], server=url, creds=simulated_creds)
-        log = (tmp_path / self.LOG_NAME).open("wb")
-        script = Path(sys.executable).parent / self.SCRIPT_NAME
-        process = subprocess.Popen(
-            [str(script), SimulatorCommandName.SERVE, self.CONFIG_FLAG, str(config)],
-            cwd=tmp_path,
-            stdout=log,
-            stderr=log,
-        )
-        yield process, url, nats_cell[3]
-        if process.poll() is None:
-            process.kill()
-        process.wait()
-        log.close()
 
     def a_command(self, drone_id: str) -> Command:
         return Command(
@@ -87,76 +54,57 @@ class TestServeCommand:
         requester = NatsRequester(client, NatsClientConfig(servers=[url]))
         subject = OperatorSubjects(operator_id=UUID(str(OPERATOR_ID))).mission(MISSION_ID, self.COMMAND_EVENT)
         deadline = time.monotonic() + self.READY_TIMEOUT_S
-        while True:
-            try:
-                reply = await requester.request(
-                    subject,
-                    self.a_command(drone_id),
-                    CommandReply,
-                    self.IDEMPOTENCY_KEY,
-                    self.REQUEST_DEADLINE_S,
-                )
-            except (SENatsNoResponderError, SENatsRequestDeadlineExceededError):
-                if time.monotonic() > deadline:
-                    await client.close()
-                    raise
-                await asyncio.sleep(self.RETRY_PAUSE_S)
-                continue
+        try:
+            while True:
+                try:
+                    return await requester.request(
+                        subject,
+                        self.a_command(drone_id),
+                        CommandReply,
+                        self.IDEMPOTENCY_KEY,
+                        self.REQUEST_DEADLINE_S,
+                    )
+                except (SENatsNoResponderError, SENatsRequestDeadlineExceededError):
+                    if time.monotonic() > deadline:
+                        raise
+                    await asyncio.sleep(self.RETRY_PAUSE_S)
+        finally:
             await client.close()
-            return reply
 
-    def test_it_is_a_runnable(self) -> None:
-        assert issubclass(ServeCommand, Runnable)
+    async def consume(self, responder: CommandResponder) -> None:
+        async for _ in responder.execute():
+            pass
 
-    def test_service_credentials_give_exit_code_three_and_nothing_connects(
-        self,
-        nats_cell: Cell,
-        stand_in_drone: StandInDrone,
-        app_config: partial[Path],
-        caplog: pytest.LogCaptureFixture,
-        capsys: pytest.CaptureFixture[str],
+    def test_it_is_an_async_runnable(self) -> None:
+        assert issubclass(CommandResponder, AsyncRunnable)
+
+    async def test_with_simulated_credentials_it_answers_a_command_for_an_unknown_drone_with_refused(
+        self, nats_cell: Cell, stand_in_drone: StandInDrone, app_config: partial[Path]
     ) -> None:
-        url, monitor_port, _, service_creds = nats_cell
-        config = SimulatorConfig.load(app_config([a_registered_drone(stand_in_drone)], server=url, creds=service_creds))
-        command = ServeCommandFactory(config).create()
-
-        with caplog.at_level(logging.ERROR):
-            command.execute()
-
-        assert command.exit_code == self.EXIT_REFUSED_CREDENTIALS
-        assert any(record.levelno == logging.ERROR for record in caplog.records)
-        assert capsys.readouterr().out.strip()
-        assert connz_users(monitor_port) == []
-
-    def test_an_unreadable_credentials_file_gives_exit_code_three(
-        self, nats_cell: Cell, stand_in_drone: StandInDrone, app_config: partial[Path], tmp_path: Path
-    ) -> None:
-        url, monitor_port, _, _ = nats_cell
+        url, _, simulated_creds, service_creds = nats_cell
         config = SimulatorConfig.load(
-            app_config([a_registered_drone(stand_in_drone)], server=url, creds=tmp_path / "missing.creds")
+            app_config([a_registered_drone(stand_in_drone)], server=url, creds=simulated_creds)
         )
-        command = ServeCommandFactory(config).create()
+        responder = CommandResponderFactory(config).create()
+        task = asyncio.create_task(self.consume(responder))
 
-        command.execute()
-
-        assert command.exit_code == self.EXIT_REFUSED_CREDENTIALS
-        assert connz_users(monitor_port) == []
-
-    async def test_simulated_credentials_answer_a_command_for_an_unknown_drone_with_refused(
-        self, served: Served
-    ) -> None:
-        _, url, service_creds = served
-
-        reply = await self.ask(url, service_creds, self.UNKNOWN_DRONE_ID)
+        try:
+            reply = await self.ask(url, service_creds, self.UNKNOWN_DRONE_ID)
+        finally:
+            task.cancel()
+            await asyncio.gather(task, return_exceptions=True)
 
         assert reply.verdict == CommandVerdict.REFUSED
         assert reply.command_id == UUID(self.COMMAND_ID)
         assert reply.reason
+        assert responder.client is None
 
-    async def test_it_exits_zero_on_sigterm(self, served: Served) -> None:
-        process, url, service_creds = served
-        await self.ask(url, service_creds, self.UNKNOWN_DRONE_ID)
+    async def test_close_is_safe_before_it_connects(
+        self, stand_in_drone: StandInDrone, app_config: partial[Path]
+    ) -> None:
+        config = SimulatorConfig.load(app_config([a_registered_drone(stand_in_drone)]))
+        responder = CommandResponderFactory(config).create()
 
-        process.send_signal(signal.SIGTERM)
+        await responder.close()
 
-        assert process.wait(timeout=self.EXIT_TIMEOUT_S) == self.EXIT_OK
+        assert responder.client is None

@@ -8,8 +8,9 @@ from uuid import UUID
 from pydantic import ConfigDict, Field, JsonValue, field_validator
 
 # First-party imports
-from simulator.models.enums import FlightLogEntryKind
-from simulator.models.flight_logs.exceptions import (
+from swarm_models.base.swarm_model import SwarmModel
+from swarm_models.enums import FlightLogEntryKind
+from swarm_models.simulation.flight_logs.exceptions import (
     SEFlightLogEntryInvalidDetail,
     SEFlightLogEntryInvalidDroneId,
     SEFlightLogEntryInvalidKind,
@@ -18,7 +19,6 @@ from simulator.models.flight_logs.exceptions import (
     SEFlightLogEntryInvalidTUs,
     SEFlightLogEntryNotSimulated,
 )
-from swarm_models.base.swarm_model import SwarmModel
 
 
 class FlightLogEntry(SwarmModel):

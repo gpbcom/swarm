@@ -1,4 +1,5 @@
-# The configuration of the flight engine service, with every default written out.
+# The configuration of the flight engine app, read from the folder SWARM_APP_ROOT names, with every default written out.
+# Every relative path is read in that folder.
 tick_interval_ms: 50
 status_interval_s: 5.0
 link_lost_after_ms: 5000

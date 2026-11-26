@@ -8,13 +8,13 @@ import pytest
 from pydantic import JsonValue, ValidationError
 
 # First-party imports
-from flight_engine.models.config.exceptions import (
+from swarm_models.config.flight_engine.exceptions import (
     SEInvalidLiveServerConfigException,
     SELiveServerConfigInvalidHost,
     SELiveServerConfigInvalidPort,
     SELiveServerConfigInvalidStatusInterval,
 )
-from flight_engine.models.config.live_server_config import LiveServerConfig
+from swarm_models.config.flight_engine.live_server_config import LiveServerConfig
 
 
 class TestLiveServerConfig:

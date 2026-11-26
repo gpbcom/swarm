@@ -7,9 +7,9 @@ from typing import ClassVar, List, Literal, Mapping
 from pydantic import ConfigDict, Field, JsonValue, field_validator
 
 # First-party imports
-from simulator.models.routes.exceptions import SERouteInvalidWaypoints
-from simulator.models.routes.waypoint import Waypoint
 from swarm_models.base.swarm_model import SwarmModel
+from swarm_models.simulation.routes.exceptions import SERouteInvalidWaypoints
+from swarm_models.simulation.routes.waypoint import Waypoint
 
 
 class Route(SwarmModel):

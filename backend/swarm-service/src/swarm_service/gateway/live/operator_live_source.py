@@ -7,9 +7,8 @@ from uuid import UUID
 
 # First-party imports
 from swarm_models.live.live_subscription import LiveSubscription
-
-from swarm_live.service.live_mailbox import LiveMailbox  # isort: skip
-from swarm_live.service.live_source import LiveSource  # isort: skip
+from swarm_service.shared.live.hub.live_mailbox import LiveMailbox
+from swarm_service.shared.live.sources.live_source import LiveSource
 
 if TYPE_CHECKING:
     from swarm_service.gateway.live.live_fan_out import LiveFanOut

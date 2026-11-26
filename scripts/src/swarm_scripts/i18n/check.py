@@ -1,31 +1,30 @@
 from __future__ import annotations
 
 # Standard library imports
-import argparse
+import os
 import sys
 from pathlib import Path
-from typing import List, Optional
 
 # First-party imports
-from swarm_i18n.models.catalogs.exceptions import SECatalogError  # isort: skip
-from swarm_i18n.service.catalogs.catalog_checker import CatalogChecker  # isort: skip
 from swarm_models.enums import Language
+from swarm_models.i18n.catalogs.exceptions import SECatalogError
+from swarm_service.shared.i18n.catalog_checker import CatalogChecker
 
 
-def main(argv: Optional[List[str]] = None) -> int:
-    """Check that every message is translated into every language.
-
-    Args:
-        argv (Optional[List[str]]): The arguments. Defaults to ``sys.argv``.
+def main() -> int:
+    """Check that every Python message of Swarm is translated into every language.
 
     Returns:
         int: 0 when the catalogues are complete, 1 when a translation is missing, 2 on a catalogue error.
+
+    Notes:
+        - The script takes no argument: it checks the catalogues shipped with ``swarm_storage``, or the folder the
+          environment entry ``SWARM_I18N_LOCALES`` names.
+        - Only ``scripts/`` prints, because this output is for the person at the terminal.
     """
-    parser = argparse.ArgumentParser(prog="swarm-i18n-check", description="Check the message catalogues.")
-    parser.add_argument("--locales", default=None, help="The folder of the catalogues.")
-    arguments = parser.parse_args(argv)
+    folder = os.environ.get(CatalogChecker.LOCALES_KEY, "").strip()
     try:
-        checker = CatalogChecker.at(Path(arguments.locales) if arguments.locales else None)
+        checker = CatalogChecker.at(Path(folder) if folder else None)
         missing = checker.find_missing()
     except SECatalogError as error:
         print(error, file=sys.stderr)

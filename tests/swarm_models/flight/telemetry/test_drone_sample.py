@@ -8,8 +8,8 @@ import pytest
 from pydantic import JsonValue, ValidationError
 
 # First-party imports
-from flight_engine.models.telemetry.drone_sample import DroneSample
-from flight_engine.models.telemetry.exceptions import (
+from swarm_models.flight.telemetry.drone_sample import DroneSample
+from swarm_models.flight.telemetry.exceptions import (
     SEDroneSampleInvalidBaseMode,
     SEDroneSampleInvalidBatteryRemaining,
     SEDroneSampleInvalidHasPosition,

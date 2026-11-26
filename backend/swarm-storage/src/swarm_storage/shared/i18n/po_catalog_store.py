@@ -2,6 +2,7 @@ from __future__ import annotations
 
 # Standard library imports
 import re
+from importlib.resources import files
 from io import StringIO
 from logging import Logger, getLogger
 from pathlib import Path
@@ -12,8 +13,8 @@ from babel.messages.catalog import Catalog
 from babel.messages.pofile import PoFileError, read_po
 
 # First-party imports
-from swarm_i18n.models.catalogs.exceptions import SECatalogUnreadableError  # isort: skip
 from swarm_models.enums import Language
+from swarm_models.i18n.catalogs.exceptions import SECatalogUnreadableError
 
 
 class PoCatalogStore:
@@ -21,7 +22,8 @@ class PoCatalogStore:
 
     Attributes:
         DOMAIN (str): The gettext domain of the catalogues.
-        DEFAULT_ROOT (Path): The ``locales`` folder shipped beside the package.
+        PACKAGE (str): The package that ships the catalogues as package data.
+        DEFAULT_ROOT (Path): The ``locales`` folder shipped in ``PACKAGE``.
         ENCODING (str): The encoding of the catalogue files.
         TEMPLATE_SUFFIX (str): The suffix of the template file.
         CATALOG_SUFFIX (str): The suffix of a language catalogue file.
@@ -33,12 +35,15 @@ class PoCatalogStore:
         logger (Logger): Logger instance.
 
     Notes:
-        This class only reads data. Checking it is the job of the service layer.
+        - This class only reads data. Checking it is the job of the service layer.
+        - **The catalogues are package data of this package**, found with ``importlib.resources`` and never by counting
+          the parents of the module's path, so that they are found in an installed image as in the repository.
     """
 
     DOMAIN: ClassVar[str] = "swarm"
     LOCALES_FOLDER: ClassVar[str] = "locales"
-    DEFAULT_ROOT: ClassVar[Path] = Path(__file__).resolve().parents[2] / LOCALES_FOLDER
+    PACKAGE: ClassVar[str] = "swarm_storage.shared.i18n"
+    DEFAULT_ROOT: ClassVar[Path] = Path(str(files(PACKAGE) / LOCALES_FOLDER))
     ENCODING: ClassVar[str] = "utf-8"
     TEMPLATE_SUFFIX: ClassVar[str] = ".pot"
     CATALOG_SUFFIX: ClassVar[str] = ".po"

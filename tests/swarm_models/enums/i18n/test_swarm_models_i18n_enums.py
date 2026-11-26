@@ -8,7 +8,7 @@ from typing import ClassVar, Dict, Type
 import pytest
 
 # First-party imports
-from swarm_i18n.models.enums import MessageProblem
+from swarm_models.enums import MessageProblem
 
 
 class TestSwarmI18nEnums:

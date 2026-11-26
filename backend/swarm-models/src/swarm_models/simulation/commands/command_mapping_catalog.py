@@ -7,13 +7,13 @@ from typing import ClassVar, Dict, Literal
 from pydantic import Field, JsonValue, field_validator
 
 # First-party imports
-from simulator.models.commands.exceptions import (
+from swarm_catalog.models.yaml_catalog import YamlCatalog
+from swarm_models.commands.enums import CommandKind
+from swarm_models.simulation.commands.exceptions import (
     SECommandMappingCatalogInvalidCommands,
     SECommandMappingCatalogUnreadable,
 )
-from simulator.models.commands.mavlink_command_spec import MavlinkCommandSpec
-from swarm_catalog.models.yaml_catalog import YamlCatalog
-from swarm_models.commands.enums import CommandKind
+from swarm_models.simulation.commands.mavlink_command_spec import MavlinkCommandSpec
 
 
 class CommandMappingCatalog(YamlCatalog):

@@ -7,18 +7,18 @@ from typing import AsyncIterator, List
 import pytest
 
 # First-party imports
-from services.simulator.tests.helpers import (
+from swarm_clients.shared.mavlink.mavlink_drone_client import MavlinkDroneClient
+from swarm_models.mavlink.exceptions import SEMavlinkClientRefusedError, SEMavlinkClientTimeoutError
+from swarm_models.simulation.commands.mavlink_command_spec import MavlinkCommandSpec
+from tests.fakes.mavlink.helpers import (
     START_LAT_E7,
     START_LON_E7,
     a_flight_config,
     a_registered_drone,
     a_square_route,
 )
-from services.simulator.tests.stand_in_drone import StandInDrone
-from services.simulator.tests.stand_in_drones import StandInDrones
-from simulator.clients.mavlink.mavlink_drone_client import MavlinkDroneClient
-from simulator.models.commands.mavlink_command_spec import MavlinkCommandSpec
-from simulator.models.mavlink.exceptions import SEMavlinkClientRefusedError, SEMavlinkClientTimeoutError
+from tests.fakes.mavlink.stand_in_drone import StandInDrone
+from tests.fakes.mavlink.stand_in_drones import StandInDrones
 
 NAV_TAKEOFF = 22
 NAV_WAYPOINT = 16

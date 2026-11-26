@@ -11,11 +11,11 @@ from typing import Callable, ClassVar, List, Optional, Tuple
 from pymavlink import mavutil
 
 # First-party imports
-from simulator.models.commands.mavlink_command_spec import MavlinkCommandSpec
-from simulator.models.config.flight_config import FlightConfig
-from simulator.models.mavlink.exceptions import SEMavlinkClientRefusedError, SEMavlinkClientTimeoutError
-from simulator.models.registry.registered_drone import RegisteredDrone
-from simulator.models.routes.route import Route
+from swarm_models.config.simulator.flight_config import FlightConfig
+from swarm_models.mavlink.exceptions import SEMavlinkClientRefusedError, SEMavlinkClientTimeoutError
+from swarm_models.simulation.commands.mavlink_command_spec import MavlinkCommandSpec
+from swarm_models.simulation.registry.registered_drone import RegisteredDrone
+from swarm_models.simulation.routes.route import Route
 
 
 class MavlinkDroneClient:
@@ -167,27 +167,6 @@ class MavlinkDroneClient:
         )
         self.logger.debug("Sent command %d to drone %s.", command_id, self.drone.drone_id)
 
-    async def _command_result(self, link: mavutil.mavfile, command_id: int, timeout_s: float) -> int:
-        """Wait for the acknowledgement of a command.
-
-        Args:
-            link (mavutil.mavfile): The connection.
-            command_id (int): The MAVLink command id.
-            timeout_s (float): The deadline, in seconds.
-
-        Returns:
-            int: The ``MAV_RESULT`` of the acknowledgement.
-
-        Raises:
-            SEMavlinkClientTimeoutError: If the Drone does not acknowledge in time.
-        """
-        message = await self._wait_for(link, [self.COMMAND_ACK_TYPE], timeout_s, self._is_ack_of(command_id))
-        if message is None:
-            self.logger.error("Drone %s did not acknowledge command %d.", self.drone.drone_id, command_id)
-            raise SEMavlinkClientTimeoutError(f"Drone {self.drone.drone_id} did not acknowledge command {command_id}.")
-        self.logger.debug("Command %d answered with result %d.", command_id, message.result)
-        return int(message.result)
-
     def _mission_items(self, route: Route) -> List[Tuple[int, int, int, int, float]]:
         """Turn a route into mission items: take off, the waypoints, land.
 
@@ -234,6 +213,27 @@ class MavlinkDroneClient:
             altitude_m,
         )
         self.logger.debug("Sent mission item %d.", seq)
+
+    async def _command_result(self, link: mavutil.mavfile, command_id: int, timeout_s: float) -> int:
+        """Wait for the acknowledgement of a command.
+
+        Args:
+            link (mavutil.mavfile): The connection.
+            command_id (int): The MAVLink command id.
+            timeout_s (float): The deadline, in seconds.
+
+        Returns:
+            int: The ``MAV_RESULT`` of the acknowledgement.
+
+        Raises:
+            SEMavlinkClientTimeoutError: If the Drone does not acknowledge in time.
+        """
+        message = await self._wait_for(link, [self.COMMAND_ACK_TYPE], timeout_s, self._is_ack_of(command_id))
+        if message is None:
+            self.logger.error("Drone %s did not acknowledge command %d.", self.drone.drone_id, command_id)
+            raise SEMavlinkClientTimeoutError(f"Drone {self.drone.drone_id} did not acknowledge command {command_id}.")
+        self.logger.debug("Command %d answered with result %d.", command_id, message.result)
+        return int(message.result)
 
     async def _wait_for(
         self,

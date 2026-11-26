@@ -2,31 +2,26 @@ from __future__ import annotations
 
 # Standard library imports
 from logging import Logger, getLogger
-from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 from uuid import UUID
 
 # First-party imports
-from simulator.models.config.simulator_config import SimulatorConfig
-from simulator.models.registry.simulated_squad_catalog import SimulatedSquadCatalog
-from simulator.service.factories.flight_factory import FlightFactory
-from simulator.service.factories.flights.drone_flight_factory import DroneFlightFactory
-from simulator.service.flights.drone_flight import DroneFlight
-from simulator.service.flights.squad_flight import SquadFlight
-from simulator.service.registry.adapter_registry import AdapterRegistry
-from simulator.service.routes.square_route_builder import SquareRouteBuilder
-from simulator.storage.edge.flight_log_store import FlightLogStore
+from swarm_models.config.simulator.simulator_config import SimulatorConfig
+from swarm_service.simulation.factories.drones.drone_service_factory import DroneServiceFactory
+from swarm_service.simulation.factories.flight_factory import FlightFactory
+from swarm_service.simulation.flights.squad_flight import SquadFlight
 
 
 class SquadFlightFactory(FlightFactory[SquadFlight]):
-    """Build the flight of the whole simulated Squad.
+    """Build the flight of the whole simulated Squad, for one Mission.
 
     Attributes:
         config (SimulatorConfig): The configuration of the Simulator.
         mission_id (UUID): The Mission the Flight log belongs to.
 
     Notes:
-        - The registry is loaded here, so a Drone on a host outside ``simulated_hosts`` stops the build (BR-014).
+        - The registry is loaded by the Drone service's factory, so a Drone on a host outside ``simulated_hosts`` stops
+          the build (BR-014).
     """
 
     def __init__(self, config: SimulatorConfig, mission_id: UUID, logger: Optional[Logger] = None) -> None:
@@ -47,19 +42,11 @@ class SquadFlightFactory(FlightFactory[SquadFlight]):
     ############################
 
     def _build(self) -> SquadFlight:
-        """Build the Squad flight, with one Drone flight per registered Drone.
+        """Build the Squad flight, with a Drone service of its own.
 
         Returns:
             SquadFlight: The new flight, with its store not yet open.
         """
-        squad = SimulatedSquadCatalog.load(Path(self.config.registry.squad_catalog_path))
-        registry = AdapterRegistry(self.config.registry.simulated_hosts)
-        registry.load(squad)
-        builder = SquareRouteBuilder(self.config.route)
-        store = FlightLogStore(self.config.flight_log_path)
-        flights: List[DroneFlight] = []
-        for drone in registry.drones():
-            factory = DroneFlightFactory(drone, self.mission_id, builder, store, self.config.flight)
-            flights.append(factory.create())
-        self.logger.debug("Built the flights of %d Drones.", len(flights))
-        return SquadFlight(flights, store, self.config.flight.status_interval_s)
+        service = DroneServiceFactory(self.config).create()
+        self.logger.debug("Built the flight of the Squad for Mission %s.", self.mission_id)
+        return SquadFlight(service, self.mission_id, self.config.flight.status_interval_s)

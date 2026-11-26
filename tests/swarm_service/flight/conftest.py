@@ -6,18 +6,18 @@ from uuid import UUID
 
 # Third-party imports
 import pytest
-from flight_engine_recording_sink import RecordingFrameSink
-from flight_engine_stand_in_source import StandInSampleSource
 
 # First-party imports
-from flight_engine.models.config.flight_engine_config import FlightEngineConfig
-from flight_engine.models.missions.drone_entry import DroneEntry
-from flight_engine.models.missions.mission_entry import MissionEntry
-from flight_engine.models.telemetry.drone_sample import DroneSample
-from flight_engine.models.telemetry.drone_state_catalog import DroneStateCatalog
-from swarm_live.service.live_codec import LiveCodec
-from swarm_live.service.live_hub import LiveHub
+from swarm_models.config.flight_engine.flight_engine_config import FlightEngineConfig
+from swarm_models.flight.missions.drone_entry import DroneEntry
+from swarm_models.flight.missions.mission_entry import MissionEntry
+from swarm_models.flight.telemetry.drone_sample import DroneSample
+from swarm_models.flight.telemetry.drone_state_catalog import DroneStateCatalog
 from swarm_models.telemetry.enums.drone_state import DroneState
+from swarm_service.shared.live.hub.live_hub import LiveHub
+from swarm_service.shared.live.live_codec import LiveCodec
+from tests.swarm_service.flight.flight_engine_recording_sink import RecordingFrameSink
+from tests.swarm_service.flight.flight_engine_stand_in_source import StandInSampleSource
 
 UUID_TEMPLATE = "01943c5e-8a4b-7c2d-9e1f-{number:012x}"
 OPERATOR_NUMBER = 1

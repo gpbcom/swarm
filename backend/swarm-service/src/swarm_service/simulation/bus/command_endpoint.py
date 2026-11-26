@@ -5,27 +5,27 @@ from logging import Logger, getLogger
 from typing import Optional
 
 # First-party imports
-from simulator.models.commands.command_reply import CommandReply
-from simulator.service.commands.simulated_command_service import SimulatedCommandService
 from swarm_models.commands.command import Command
+from swarm_models.simulation.commands.command_reply import CommandReply
+from swarm_service.simulation.drones.drone_service import DroneService
 
 
 class CommandEndpoint:
-    """The entry point of the command bus: it hands each command to the service and returns its reply.
+    """The handler of the command bus: it hands each command to the Drone service and returns its reply.
 
     Attributes:
-        service (SimulatedCommandService): The service that carries out the commands.
+        service (DroneService): The service that carries out the commands.
         logger (Logger): Logger instance.
 
     Notes:
         - It holds no business rule: a refusal is the service's reply, not an error of the endpoint.
     """
 
-    def __init__(self, service: SimulatedCommandService, logger: Optional[Logger] = None) -> None:
+    def __init__(self, service: DroneService, logger: Optional[Logger] = None) -> None:
         """Create the endpoint.
 
         Args:
-            service (SimulatedCommandService): The service that carries out the commands.
+            service (DroneService): The service that carries out the commands.
             logger (Optional[Logger]): Logger instance.
         """
         self.service = service

@@ -7,11 +7,11 @@ from typing import ClassVar, Literal
 from pydantic import ConfigDict, Field, JsonValue, field_validator
 
 # First-party imports
-from simulator.models.commands.exceptions import (
+from swarm_models.base.swarm_model import SwarmModel
+from swarm_models.simulation.commands.exceptions import (
     SEMavlinkCommandSpecInvalidCommandId,
     SEMavlinkCommandSpecInvalidParam1,
 )
-from swarm_models.base.swarm_model import SwarmModel
 
 
 class MavlinkCommandSpec(SwarmModel):

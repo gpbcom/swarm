@@ -9,7 +9,7 @@ from nats.aio.client import Client, Msg
 from nats.errors import TimeoutError as NatsTimeoutError
 
 # First-party imports
-from flight_engine.clients.leaf.squad_frame_publisher import SquadFramePublisher  # isort: skip
+from swarm_clients.flight.leaf.squad_frame_publisher import SquadFramePublisher
 
 SUBJECT_TEMPLATE = "op.{operator_id}.mission.{mission_id}.squad"
 FRAME = b"\x82\xa4tick\x01\xa6drones\x90"

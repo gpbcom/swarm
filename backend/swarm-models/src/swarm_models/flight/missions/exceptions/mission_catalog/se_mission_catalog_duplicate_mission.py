@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 # First-party imports
-from flight_engine.models.missions.exceptions.mission_catalog.se_invalid_mission_catalog_exception import (
+from swarm_models.flight.missions.exceptions.mission_catalog.se_invalid_mission_catalog_exception import (
     SEInvalidMissionCatalogException,
 )
 

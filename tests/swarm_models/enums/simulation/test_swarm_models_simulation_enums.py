@@ -8,20 +8,18 @@ from typing import ClassVar, Dict, List
 import pytest
 
 # First-party imports
-from simulator.models.enums import (
+from swarm_models.enums import (
     CommandVerdict,
     FlightLogEntryKind,
     SimulatedDroneKind,
-    SimulatorCommandName,
 )
 
 
-class TestSimulatorEnums:
+class TestSwarmModelsSimulationEnums:
     ENUMS: ClassVar[List[type[StrEnum]]] = [
         SimulatedDroneKind,
         FlightLogEntryKind,
         CommandVerdict,
-        SimulatorCommandName,
     ]
     MEMBERS: ClassVar[Dict[type[StrEnum], Dict[str, str]]] = {
         SimulatedDroneKind: {"SYNTHETIC": "synthetic", "PX4_SITL": "px4_sitl"},
@@ -36,7 +34,6 @@ class TestSimulatorEnums:
             "COMMAND_REFUSED": "command_refused",
         },
         CommandVerdict: {"ACCEPTED": "accepted", "REFUSED": "refused"},
-        SimulatorCommandName: {"SERVE": "serve", "FLY": "fly"},
     }
 
     @pytest.mark.parametrize("enum", ENUMS)

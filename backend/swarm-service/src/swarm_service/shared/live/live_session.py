@@ -10,13 +10,13 @@ from starlette.websockets import WebSocketDisconnect
 
 # First-party imports
 from swarm_lifecycle.runnables.async_runnable import AsyncRunnable
-from swarm_live.api.live.live_socket import LiveSocket
-from swarm_live.models.exceptions import SELiveMessageUnreadable
-from swarm_live.service.live_codec import LiveCodec
-from swarm_live.service.live_mailbox import LiveMailbox
-from swarm_live.service.live_source import LiveSource
+from swarm_models.live.exceptions import SELiveMessageUnreadable
 from swarm_models.live.live_subscription import LiveSubscription
 from swarm_models.live.session.live_session_config import LiveSessionConfig
+from swarm_service.shared.live.hub.live_mailbox import LiveMailbox
+from swarm_service.shared.live.live_codec import LiveCodec
+from swarm_service.shared.live.live_socket import LiveSocket
+from swarm_service.shared.live.sources.live_source import LiveSource
 
 
 class LiveSession(AsyncRunnable):

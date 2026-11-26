@@ -5,10 +5,10 @@ import pytest
 from live_stand_in_socket import LiveStandInSocket
 
 # First-party imports
-from swarm_models.live.session.live_session_config import LiveSessionConfig  # isort: skip
-from swarm_live.service.hub_live_source import HubLiveSource  # isort: skip
-from swarm_live.service.live_codec import LiveCodec  # isort: skip
-from swarm_live.service.live_hub import LiveHub  # isort: skip
+from swarm_models.live.session.live_session_config import LiveSessionConfig
+from swarm_service.shared.live.hub.live_hub import LiveHub
+from swarm_service.shared.live.live_codec import LiveCodec
+from swarm_service.shared.live.sources.hub_live_source import HubLiveSource
 
 
 @pytest.fixture

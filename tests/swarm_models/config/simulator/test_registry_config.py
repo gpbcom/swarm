@@ -8,12 +8,12 @@ import pytest
 from pydantic import JsonValue, ValidationError
 
 # First-party imports
-from simulator.models.config.exceptions import (
+from swarm_models.config.simulator.exceptions import (
     SERegistryConfigInvalidCommandMappingPath,
     SERegistryConfigInvalidSimulatedHosts,
     SERegistryConfigInvalidSquadCatalogPath,
 )
-from simulator.models.config.registry_config import RegistryConfig
+from swarm_models.config.simulator.registry_config import RegistryConfig
 
 
 class TestRegistryConfig:

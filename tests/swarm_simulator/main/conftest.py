@@ -10,7 +10,7 @@ from typing import Iterator
 import pytest
 
 # First-party imports
-from tests.simulator.helpers import (
+from tests.swarm_simulator.main.helpers import (
     BINARY_PATH,
     BIND_ATTEMPTS,
     DOCKER_IMAGE_ENV,
@@ -46,10 +46,10 @@ def synthetic_binary() -> Path:
 
 @pytest.fixture
 def simulator_script() -> Path:
-    """Return the ``swarm-simulator`` console script, or skip while it is not installed."""
+    """Return the ``swarm-simulator-serve`` console script, or skip while it is not installed."""
     path = script_path()
     if not path.exists():
-        pytest.skip("swarm-simulator is not installed")
+        pytest.skip("swarm-simulator-serve is not installed")
     return path
 
 

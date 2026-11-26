@@ -9,15 +9,15 @@ from uuid import UUID
 import pytest
 
 # First-party imports
-from simulator.models.enums import SimulatedDroneKind
-from simulator.models.registry.exceptions import (
+from swarm_models.enums import SimulatedDroneKind
+from swarm_models.simulation.registry.exceptions import (
     SEAdapterRegistryDuplicateDroneError,
     SEAdapterRegistryHostRefusedError,
     SEAdapterRegistryUnknownDroneError,
 )
-from simulator.models.registry.registered_drone import RegisteredDrone
-from simulator.models.registry.simulated_squad_catalog import SimulatedSquadCatalog
-from simulator.service.registry.adapter_registry import AdapterRegistry
+from swarm_models.simulation.registry.registered_drone import RegisteredDrone
+from swarm_models.simulation.registry.simulated_squad_catalog import SimulatedSquadCatalog
+from swarm_service.simulation.registry.adapter_registry import AdapterRegistry
 
 
 class TestAdapterRegistry:

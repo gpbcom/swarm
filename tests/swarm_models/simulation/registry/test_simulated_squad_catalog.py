@@ -11,18 +11,26 @@ import yaml
 from pydantic import JsonValue, ValidationError
 
 # First-party imports
-from simulator.models.enums import SimulatedDroneKind
-from simulator.models.registry.exceptions import (
+from swarm_models.enums import SimulatedDroneKind
+from swarm_models.simulation.registry.exceptions import (
     SESimulatedSquadCatalogDuplicateDrone,
     SESimulatedSquadCatalogDuplicateEndpoint,
     SESimulatedSquadCatalogInvalidDrones,
     SESimulatedSquadCatalogUnreadable,
 )
-from simulator.models.registry.simulated_squad_catalog import SimulatedSquadCatalog
+from swarm_models.simulation.registry.simulated_squad_catalog import SimulatedSquadCatalog
 
 
 class TestSimulatedSquadCatalog:
-    SHIPPED: ClassVar[Path] = Path(__file__).parents[3] / "conf" / "catalogs" / "simulated_squad.yaml"
+    SHIPPED: ClassVar[Path] = (
+        Path(__file__).resolve().parents[4]
+        / "backend"
+        / "apps"
+        / "simulator"
+        / "conf"
+        / "catalogs"
+        / "simulated_squad.yaml"
+    )
     FIRST: ClassVar[Dict[str, JsonValue]] = {
         "drone_id": "01943c5e-8a4b-7c2d-9e1f-0a1b2c3d4e51",
         "kind": SimulatedDroneKind.SYNTHETIC.value,

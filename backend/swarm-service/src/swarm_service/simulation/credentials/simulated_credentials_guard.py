@@ -11,11 +11,11 @@ from typing import ClassVar, List, Optional
 from pydantic import JsonValue
 
 # First-party imports
-from simulator.models.credentials.exceptions import (
+from swarm_models.enums import CredentialKind
+from swarm_models.simulation.credentials.exceptions import (
     SESimulatedCredentialsNotSimulatedError,
     SESimulatedCredentialsUnreadableError,
 )
-from swarm_models.enums import CredentialKind
 
 
 class SimulatedCredentialsGuard:

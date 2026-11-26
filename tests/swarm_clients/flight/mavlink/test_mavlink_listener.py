@@ -9,19 +9,19 @@ from uuid import UUID, uuid4
 # Third-party imports
 import pytest
 
+pytest.importorskip("swarm_core")
+
 # First-party imports
-from flight_engine.clients.mavlink.mavlink_listener import MavlinkListener  # isort: skip
-from flight_engine.models.clients.exceptions import SEMavlinkListenerError  # isort: skip
-from flight_engine.models.missions.mission_entry import MissionEntry  # isort: skip
-from flight_engine.models.telemetry.drone_sample import DroneSample  # isort: skip
-from tests.rust.swarm_core.helpers import (  # isort: skip
+from swarm_clients.flight.mavlink.mavlink_listener import MavlinkListener
+from swarm_models.flight.clients.exceptions import SEMavlinkListenerError
+from swarm_models.flight.missions.mission_entry import MissionEntry
+from swarm_models.flight.telemetry.drone_sample import DroneSample
+from tests.rust.swarm_core.helpers import (
     global_position_int_payload,
     heartbeat_payload,
     mavlink_frame,
     sys_status_payload,
 )
-
-pytest.importorskip("swarm_core")
 
 LOCALHOST = "127.0.0.1"
 HEARTBEAT_ID = 0

@@ -7,13 +7,12 @@ from typing import ClassVar, Literal
 from pydantic import BaseModel, ConfigDict, Field, JsonValue, field_validator
 
 # First-party imports
-from swarm_i18n.models.enums import MessageProblem  # isort: skip
-from swarm_i18n.models.translations.exceptions import (  # isort: skip
+from swarm_models.enums import Language, MessageProblem
+from swarm_models.i18n.translations.exceptions import (
     SEMissingTranslationInvalidLanguage,
     SEMissingTranslationInvalidMessageId,
     SEMissingTranslationInvalidProblem,
 )
-from swarm_models.enums import Language
 
 
 class MissingTranslation(BaseModel):

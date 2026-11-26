@@ -8,10 +8,10 @@ from typing import Dict, Optional
 from babel.messages.catalog import Catalog
 
 # First-party imports
-from swarm_i18n.models.catalogs.exceptions import SECatalogUnknownMessageError  # isort: skip
-from swarm_i18n.storage.catalogs.po_catalog_store import PoCatalogStore  # isort: skip
 from swarm_models.enums import Language
+from swarm_models.i18n.catalogs.exceptions import SECatalogUnknownMessageError
 from swarm_models.people.person import Person
+from swarm_storage.shared.i18n.po_catalog_store import PoCatalogStore
 
 
 class Translator:

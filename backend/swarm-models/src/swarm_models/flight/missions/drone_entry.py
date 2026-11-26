@@ -8,8 +8,8 @@ from uuid import UUID
 from pydantic import ConfigDict, Field, JsonValue, field_validator
 
 # First-party imports
-from flight_engine.models.missions.exceptions import SEDroneEntryInvalidDroneId, SEDroneEntryInvalidSystemId
 from swarm_models.base.swarm_model import SwarmModel
+from swarm_models.flight.missions.exceptions import SEDroneEntryInvalidDroneId, SEDroneEntryInvalidSystemId
 
 
 class DroneEntry(SwarmModel):

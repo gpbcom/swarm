@@ -9,7 +9,7 @@ import ormsgpack
 from pydantic import BaseModel
 
 # First-party imports
-from swarm_live.models.exceptions import SELiveMessageUnreadable
+from swarm_models.live.exceptions import SELiveMessageUnreadable
 from swarm_models.live.live_subscription import LiveSubscription
 from swarm_models.telemetry.squad_frame import SquadFrame
 

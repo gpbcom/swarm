@@ -55,6 +55,23 @@ class PostgresPool:
         """
         return self.pool is not None
 
+    def unit_of_work(self, operator_id: Optional[UUID]) -> UnitOfWork:
+        """Create a unit of work on this pool.
+
+        Args:
+            operator_id (Optional[UUID]): The Operator the work is done for, or none.
+
+        Returns:
+            UnitOfWork: A unit of work, to enter with ``async with``.
+
+        Raises:
+            SEStorageNotOpenError: If the pool is not open.
+        """
+        if self.pool is None:
+            self.logger.error("A unit of work was asked of a closed pool.")
+            raise SEStorageNotOpenError("The pool is not open. Call open first.")
+        return UnitOfWork(self.pool, operator_id)
+
     async def open(self) -> None:
         """Open the pool.
 
@@ -94,20 +111,3 @@ class PostgresPool:
             self.logger.error("The pool could not close cleanly: %s.", type(error).__name__)
             raise
         self.logger.info("Pool closed.")
-
-    def unit_of_work(self, operator_id: Optional[UUID]) -> UnitOfWork:
-        """Create a unit of work on this pool.
-
-        Args:
-            operator_id (Optional[UUID]): The Operator the work is done for, or none.
-
-        Returns:
-            UnitOfWork: A unit of work, to enter with ``async with``.
-
-        Raises:
-            SEStorageNotOpenError: If the pool is not open.
-        """
-        if self.pool is None:
-            self.logger.error("A unit of work was asked of a closed pool.")
-            raise SEStorageNotOpenError("The pool is not open. Call open first.")
-        return UnitOfWork(self.pool, operator_id)

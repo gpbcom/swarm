@@ -7,7 +7,7 @@ from typing import ClassVar, Literal
 from pydantic import BaseModel, ConfigDict, Field, JsonValue, field_validator
 
 # First-party imports
-from simulator.models.config.exceptions import SERouteConfigInvalidAltitude, SERouteConfigInvalidSide
+from swarm_models.config.simulator.exceptions import SERouteConfigInvalidAltitude, SERouteConfigInvalidSide
 
 
 class RouteConfig(BaseModel):

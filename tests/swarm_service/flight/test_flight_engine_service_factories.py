@@ -8,19 +8,19 @@ import inspect
 import pytest
 
 # First-party imports
-from flight_engine.models.config.flight_engine_config import FlightEngineConfig
-from flight_engine.models.missions.mission_catalog import MissionCatalog
-from flight_engine.models.telemetry.drone_state_catalog import DroneStateCatalog
-from flight_engine.service.engine.flight_engine import FlightEngine
-from flight_engine.service.factories.engine_factory import EngineFactory
-from flight_engine.service.factories.missions.mission_actor_factory import MissionActorFactory
 from swarm_lifecycle.factories.async_runnable_factory import AsyncRunnableFactory
-from swarm_live.service.live_codec import LiveCodec
-from swarm_live.service.live_hub import LiveHub
+from swarm_models.config.flight_engine.flight_engine_config import FlightEngineConfig
+from swarm_models.flight.missions.mission_catalog import MissionCatalog
+from swarm_models.flight.telemetry.drone_state_catalog import DroneStateCatalog
+from swarm_service.flight.engine.flight_engine import FlightEngine
+from swarm_service.flight.factories.engine_factory import EngineFactory
+from swarm_service.flight.factories.missions.mission_actor_factory import MissionActorFactory
+from swarm_service.shared.live.hub.live_hub import LiveHub
+from swarm_service.shared.live.live_codec import LiveCodec
 
 
 class TestFlightEngineServiceFactories:
-    FACTORY_MODULE = "flight_engine.service.factories.engine.flight_engine_factory"
+    FACTORY_MODULE = "swarm_service.flight.factories.engine.flight_engine_factory"
     FACTORY_CLASS = "FlightEngineFactory"
     SWARM_CORE = "swarm_core"
 

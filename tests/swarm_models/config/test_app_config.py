@@ -41,3 +41,17 @@ class TestAppConfig:
         monkeypatch.chdir(tmp_path)
 
         assert AppConfig.app_folder() == tmp_path
+
+    def test_a_relative_path_of_the_configuration_is_read_in_the_app_folder(
+        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    ) -> None:
+        monkeypatch.setenv(AppConfig.APP_ROOT_KEY, str(tmp_path))
+
+        assert AppConfig.in_app_folder("conf/catalogs/a.yaml") == tmp_path / "conf" / "catalogs" / "a.yaml"
+
+    def test_an_absolute_path_of_the_configuration_is_kept(
+        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    ) -> None:
+        monkeypatch.setenv(AppConfig.APP_ROOT_KEY, str(tmp_path / "app"))
+
+        assert AppConfig.in_app_folder(str(tmp_path / "a.yaml")) == tmp_path / "a.yaml"

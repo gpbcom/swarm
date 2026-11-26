@@ -35,24 +35,27 @@ jobs:
           python-version: "3.12"
       - name: Install the workspace
         run: uv sync --locked
-      - name: Find the folder and the tests of the service or the app
+      - name: Find the folder, the sources and the tests of the app
         run: |
-          if [ -d "services/$SERVICE" ]; then
-            echo "FOLDER=services/$SERVICE" >> "$GITHUB_ENV"
-            echo "TESTS=services/$SERVICE/tests" >> "$GITHUB_ENV"
-          else
-            tests="tests/swarm_${SERVICE//-/_}"
-            domains=$(uv run python -c "import sys, tomllib; print(' '.join(tomllib.load(open(sys.argv[1], 'rb'))['tool']['swarm']['domains']))" "backend/apps/$SERVICE/pyproject.toml")
-            for domain in $domains; do
-              for folder in tests/swarm_*/"$domain" tests/swarm_api/v1/"$domain"; do
-                if [ -d "$folder" ]; then
-                  tests="$tests $folder"
-                fi
-              done
+          # An app's tests are those of its main, then those of each domain it lists in [tool.swarm] domains.
+          tests="tests/swarm_${SERVICE//-/_}"
+          sources="backend/apps/$SERVICE/src"
+          domains=$(uv run python -c "import sys, tomllib; print(' '.join(tomllib.load(open(sys.argv[1], 'rb'))['tool']['swarm']['domains']))" "backend/apps/$SERVICE/pyproject.toml")
+          for domain in $domains; do
+            for folder in tests/swarm_*/"$domain" tests/swarm_api/v1/"$domain"; do
+              if [ -d "$folder" ]; then
+                tests="$tests $folder"
+              fi
             done
-            echo "FOLDER=backend/apps/$SERVICE" >> "$GITHUB_ENV"
-            echo "TESTS=$tests" >> "$GITHUB_ENV"
-          fi
+            for folder in backend/swarm-*/src/swarm_*/"$domain" backend/swarm-api/src/swarm_api/v1/"$domain"; do
+              if [ -d "$folder" ]; then
+                sources="$sources $folder"
+              fi
+            done
+          done
+          echo "FOLDER=backend/apps/$SERVICE" >> "$GITHUB_ENV"
+          echo "SOURCES=$sources" >> "$GITHUB_ENV"
+          echo "TESTS=$tests" >> "$GITHUB_ENV"
       - name: Install nats-server
         run: |
           base="https://github.com/nats-io/nats-server/releases/download/v$NATS_SERVER_VERSION"
@@ -66,7 +69,9 @@ jobs:
           "$HOME/.local/bin/nats-server" --version
       - name: Build and install the swarm_core wheel
         run: |
-          if grep -rqsE '(^|\s)(import|from) swarm_core' "$FOLDER/src"; then
+          # The code of an app is its main and the code of its domains: SOURCES holds several folders.
+          # shellcheck disable=SC2086
+          if grep -rqsE '(^|\s)(import|from) swarm_core' $SOURCES; then
             uv run maturin build --release --manifest-path rust/swarm-core/python/Cargo.toml --out dist
             uv pip install --no-deps dist/swarm_core-*.whl
           else
@@ -91,16 +96,6 @@ jobs:
             uv run pytest $TESTS -n 2 --junitxml="reports/service-$SERVICE.xml"
           else
             echo "No tests for $SERVICE: pytest is not applicable."
-          fi
-      - name: Convention tests of the service
-        run: |
-          if [ ! -d "services/$SERVICE" ]; then
-            echo "$SERVICE is an app of backend/apps: the backend convention tests of the repository job cover it."
-          elif [ -f tests/conventions/services/test_service_conventions.py ]; then
-            uv run pytest tests/conventions/services/test_service_conventions.py -k "$SERVICE-" -n 2 \
-              --junitxml="reports/conventions-$SERVICE.xml"
-          else
-            echo "No convention tests: not applicable."
           fi
       - name: Keep the test reports (TKT-26)
         if: always()
@@ -155,8 +150,6 @@ jobs:
   packages:
     if: inputs.repository
     runs-on: ubuntu-latest
-    env:
-      NATS_SERVER_VERSION: "2.15.3"
     steps:
       - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v10.3.3
@@ -165,39 +158,21 @@ jobs:
           python-version: "3.12"
       - name: Install the workspace
         run: uv sync --locked
-      - name: Install nats-server
-        run: |
-          base="https://github.com/nats-io/nats-server/releases/download/v$NATS_SERVER_VERSION"
-          archive="nats-server-v$NATS_SERVER_VERSION-linux-amd64.tar.gz"
-          curl --fail --silent --show-error --location --remote-name "$base/$archive"
-          curl --fail --silent --show-error --location --remote-name "$base/SHA256SUMS"
-          sha256sum --check --ignore-missing SHA256SUMS
-          mkdir -p "$HOME/.local/bin"
-          tar --extract --gzip --file "$archive" --strip-components=1 --directory "$HOME/.local/bin" "nats-server-v$NATS_SERVER_VERSION-linux-amd64/nats-server"
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-          "$HOME/.local/bin/nats-server" --version
       - name: Ruff check
-        run: uv run ruff check packages/python backend scripts
+        run: uv run ruff check backend scripts
       - name: Ruff format check
-        run: uv run ruff format --check packages/python backend scripts
+        run: uv run ruff format --check backend scripts
       - name: Mypy
         run: |
           found=0
-          for src in packages/python/*/src backend/libs/*/src backend/swarm-*/src backend/apps/*/src scripts/src; do
+          for src in backend/libs/*/src backend/swarm-*/src backend/apps/*/src scripts/src; do
             if [ -d "$src" ]; then
               found=1
               uv run mypy "$src" || exit 1
             fi
           done
           if [ "$found" = 0 ]; then
-            echo "No source folder in packages/python: mypy is not applicable."
-          fi
-      - name: Pytest
-        run: |
-          if [ -n "$(find packages/python -name 'test_*.py' -print -quit)" ]; then
-            uv run pytest packages/python -n 2 --junitxml=reports/packages.xml
-          else
-            echo "No tests in packages/python: pytest is not applicable."
+            echo "No source folder in backend or scripts: mypy is not applicable."
           fi
       - name: JSON Schema bundle is up to date
         run: uv run swarm-schemas-check

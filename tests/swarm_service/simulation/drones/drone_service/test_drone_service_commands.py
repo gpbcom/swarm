@@ -10,22 +10,24 @@ from uuid import UUID
 import pytest
 
 # First-party imports
-from services.simulator.tests.helpers import DRONE_IDS, MISSION_ID, OPERATOR_ID, a_flight_config, a_registered_drone
-from services.simulator.tests.stand_in_drone import StandInDrone
-from services.simulator.tests.stand_in_drones import StandInDrones
-from simulator.models.commands.command_mapping_catalog import CommandMappingCatalog
-from simulator.models.commands.command_reply import CommandReply
-from simulator.models.commands.mavlink_command_spec import MavlinkCommandSpec
-from simulator.models.enums import CommandVerdict, FlightLogEntryKind
-from simulator.models.flight_logs.flight_log_entry import FlightLogEntry
-from simulator.service.commands.simulated_command_service import SimulatedCommandService
-from simulator.service.registry.adapter_registry import AdapterRegistry
-from simulator.storage.edge.flight_log_store import FlightLogStore
 from swarm_models.commands.command import Command
 from swarm_models.commands.enums import CommandKind, CommandLane
+from swarm_models.config.simulator.route_config import RouteConfig
+from swarm_models.enums import CommandVerdict, FlightLogEntryKind
+from swarm_models.simulation.commands.command_mapping_catalog import CommandMappingCatalog
+from swarm_models.simulation.commands.command_reply import CommandReply
+from swarm_models.simulation.commands.mavlink_command_spec import MavlinkCommandSpec
+from swarm_models.simulation.flight_logs.flight_log_entry import FlightLogEntry
+from swarm_service.simulation.drones.drone_service import DroneService
+from swarm_service.simulation.registry.adapter_registry import AdapterRegistry
+from swarm_service.simulation.routes.square_route_builder import SquareRouteBuilder
+from swarm_storage.simulation.flight_logs.flight_log_store import FlightLogStore
+from tests.fakes.mavlink.helpers import DRONE_IDS, MISSION_ID, OPERATOR_ID, a_flight_config, a_registered_drone
+from tests.fakes.mavlink.stand_in_drone import StandInDrone
+from tests.fakes.mavlink.stand_in_drones import StandInDrones
 
 
-class TestSimulatedCommandService:
+class TestDroneServiceCommands:
     COMMAND_ID = "01926f3e-0000-7000-8000-0000000000c1"
     UNKNOWN_DRONE_ID = "01926f3e-0000-7000-8000-0000000000ff"
     HOSTS: ClassVar[List[str]] = ["127.0.0.1", "localhost"]
@@ -34,8 +36,8 @@ class TestSimulatedCommandService:
     UNSUPPORTED_ID = 999
 
     @pytest.fixture
-    async def services(self) -> AsyncIterator[List[SimulatedCommandService]]:
-        opened: List[SimulatedCommandService] = []
+    async def services(self) -> AsyncIterator[List[DroneService]]:
+        opened: List[DroneService] = []
         yield opened
         for service in opened:
             await service.close()
@@ -61,26 +63,28 @@ class TestSimulatedCommandService:
     async def _service(
         self,
         tmp_path: Path,
-        services: List[SimulatedCommandService],
+        services: List[DroneService],
         stand_ins: List[StandInDrone],
         hold_id: int = HOLD_ID,
-    ) -> SimulatedCommandService:
+    ) -> DroneService:
         registry = AdapterRegistry(self.HOSTS)
         for index, stand_in in enumerate(stand_ins):
             registry.register(a_registered_drone(stand_in, index))
         store = FlightLogStore(str(tmp_path / "flight_log.sqlite3"))
-        service = SimulatedCommandService(registry, store, self._mapping(hold_id), a_flight_config())
+        service = DroneService(
+            registry, store, self._mapping(hold_id), SquareRouteBuilder(RouteConfig()), a_flight_config()
+        )
         await service.open()
         services.append(service)
         return service
 
-    def _entries(self, service: SimulatedCommandService) -> List[FlightLogEntry]:
+    def _entries(self, service: DroneService) -> List[FlightLogEntry]:
         return service.store.entries(UUID(MISSION_ID))
 
     async def test_an_unknown_drone_is_refused_logged_and_never_sent_anything(
         self,
         tmp_path: Path,
-        services: List[SimulatedCommandService],
+        services: List[DroneService],
         stand_in_drones: StandInDrones,
         caplog: pytest.LogCaptureFixture,
     ) -> None:
@@ -107,7 +111,7 @@ class TestSimulatedCommandService:
         self,
         kind: CommandKind,
         tmp_path: Path,
-        services: List[SimulatedCommandService],
+        services: List[DroneService],
         stand_in_drones: StandInDrones,
         caplog: pytest.LogCaptureFixture,
     ) -> None:
@@ -124,7 +128,7 @@ class TestSimulatedCommandService:
         assert stand_in.received_commands == []
 
     async def test_return_home_to_a_registered_drone_is_accepted_and_sent(
-        self, tmp_path: Path, services: List[SimulatedCommandService], stand_in_drones: StandInDrones
+        self, tmp_path: Path, services: List[DroneService], stand_in_drones: StandInDrones
     ) -> None:
         stand_in = stand_in_drones.make()
         service = await self._service(tmp_path, services, [stand_in])
@@ -140,7 +144,7 @@ class TestSimulatedCommandService:
         assert entries[0].simulated is True
 
     async def test_a_command_without_a_drone_reaches_every_registered_drone(
-        self, tmp_path: Path, services: List[SimulatedCommandService], stand_in_drones: StandInDrones
+        self, tmp_path: Path, services: List[DroneService], stand_in_drones: StandInDrones
     ) -> None:
         stand_ins = [stand_in_drones.make() for _ in range(3)]
         service = await self._service(tmp_path, services, stand_ins)
@@ -154,7 +158,7 @@ class TestSimulatedCommandService:
         assert {entry.drone_id for entry in entries} == {UUID(drone_id) for drone_id in DRONE_IDS[:3]}
 
     async def test_a_drone_that_refuses_the_command_gives_a_refused_reply(
-        self, tmp_path: Path, services: List[SimulatedCommandService], stand_in_drones: StandInDrones
+        self, tmp_path: Path, services: List[DroneService], stand_in_drones: StandInDrones
     ) -> None:
         stand_in = stand_in_drones.make()
         service = await self._service(tmp_path, services, [stand_in], hold_id=self.UNSUPPORTED_ID)
@@ -167,7 +171,7 @@ class TestSimulatedCommandService:
         assert FlightLogEntryKind.COMMAND_ACCEPTED not in [entry.kind for entry in self._entries(service)]
 
     async def test_close_is_safe_twice(
-        self, tmp_path: Path, services: List[SimulatedCommandService], stand_in_drones: StandInDrones
+        self, tmp_path: Path, services: List[DroneService], stand_in_drones: StandInDrones
     ) -> None:
         service = await self._service(tmp_path, services, [stand_in_drones.make()])
         await service.handle(self._command(CommandKind.RETURN_HOME, DRONE_IDS[0]))

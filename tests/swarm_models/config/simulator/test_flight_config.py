@@ -8,13 +8,13 @@ import pytest
 from pydantic import JsonValue, ValidationError
 
 # First-party imports
-from simulator.models.config.exceptions import (
+from swarm_models.config.simulator.exceptions import (
     SEFlightConfigInvalidArmTimeout,
     SEFlightConfigInvalidHeartbeatTimeout,
     SEFlightConfigInvalidRouteTimeout,
     SEFlightConfigInvalidStatusInterval,
 )
-from simulator.models.config.flight_config import FlightConfig
+from swarm_models.config.simulator.flight_config import FlightConfig
 
 
 class TestFlightConfig:

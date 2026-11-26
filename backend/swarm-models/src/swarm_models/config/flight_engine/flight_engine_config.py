@@ -7,7 +7,9 @@ from typing import ClassVar, Literal
 from pydantic import ConfigDict, Field, JsonValue, field_validator
 
 # First-party imports
-from flight_engine.models.config.exceptions import (
+from swarm_models.base.swarm_model import SwarmModel
+from swarm_models.config.app_config import AppConfig
+from swarm_models.config.flight_engine.exceptions import (
     SEFlightEngineConfigInvalidDroneStatesCatalogPath,
     SEFlightEngineConfigInvalidLinkLostAfter,
     SEFlightEngineConfigInvalidLive,
@@ -17,14 +19,12 @@ from flight_engine.models.config.exceptions import (
     SEFlightEngineConfigInvalidTickInterval,
     SEFlightEngineConfigUnreadable,
 )
-from flight_engine.models.config.live_server_config import LiveServerConfig
-from swarm_catalog.models.yaml_catalog import YamlCatalog
-from swarm_models.base.swarm_model import SwarmModel
+from swarm_models.config.flight_engine.live_server_config import LiveServerConfig
 from swarm_nats.models.config.nats_client_config import NatsClientConfig
 
 
-class FlightEngineConfig(YamlCatalog):
-    """The configuration of the flight engine service, loaded from ``conf/app.yaml``.
+class FlightEngineConfig(AppConfig):
+    """The configuration of the flight engine app, loaded from ``conf/app.yaml``.
 
     Attributes:
         tick_interval_ms (int): The interval between two safety ticks of a Mission, in milliseconds.
@@ -51,7 +51,8 @@ class FlightEngineConfig(YamlCatalog):
 
     Notes:
         - Every duration is positive.
-        - The catalogue paths are relative to the folder the service starts in.
+        - A relative catalogue path is read in the folder of the app, which ``AppConfig`` gives: ``SWARM_APP_ROOT`` in
+          the image.
     """
 
     model_config = ConfigDict(extra="forbid", frozen=True, validate_default=True)

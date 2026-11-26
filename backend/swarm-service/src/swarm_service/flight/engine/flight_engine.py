@@ -9,18 +9,18 @@ from typing import Callable, List, Optional
 from nats.aio.client import Client
 
 # First-party imports
-from flight_engine.clients.leaf.squad_frame_publisher import SquadFramePublisher
-from flight_engine.clients.mavlink.sample_source import SampleSource
-from flight_engine.models.config.flight_engine_config import FlightEngineConfig
-from flight_engine.models.missions.mission_catalog import MissionCatalog
-from flight_engine.models.missions.mission_entry import MissionEntry
-from flight_engine.models.telemetry.drone_state_catalog import DroneStateCatalog
-from flight_engine.service.factories.missions.actors.squad_mission_actor_factory import SquadMissionActorFactory
-from flight_engine.service.missions.mission_actor import MissionActor
+from swarm_clients.flight.leaf.squad_frame_publisher import SquadFramePublisher
+from swarm_clients.flight.mavlink.sample_source import SampleSource
 from swarm_lifecycle.runnables.async_runnable import AsyncRunnable
-from swarm_live.service.live_codec import LiveCodec
-from swarm_live.service.live_hub import LiveHub
+from swarm_models.config.flight_engine.flight_engine_config import FlightEngineConfig
+from swarm_models.flight.missions.mission_catalog import MissionCatalog
+from swarm_models.flight.missions.mission_entry import MissionEntry
+from swarm_models.flight.telemetry.drone_state_catalog import DroneStateCatalog
 from swarm_nats.clients.nats_connector import NatsConnector
+from swarm_service.flight.factories.missions.actors.squad_mission_actor_factory import SquadMissionActorFactory
+from swarm_service.flight.missions.mission_actor import MissionActor
+from swarm_service.shared.live.hub.live_hub import LiveHub
+from swarm_service.shared.live.live_codec import LiveCodec
 
 
 class FlightEngine(AsyncRunnable):

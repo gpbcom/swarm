@@ -8,15 +8,15 @@ from uuid import UUID
 from pydantic import ConfigDict, Field, JsonValue, field_validator
 
 # First-party imports
-from simulator.models.enums import SimulatedDroneKind
-from simulator.models.registry.exceptions import (
+from swarm_models.base.swarm_model import SwarmModel
+from swarm_models.enums import SimulatedDroneKind
+from swarm_models.simulation.registry.exceptions import (
     SERegisteredDroneInvalidDroneId,
     SERegisteredDroneInvalidHost,
     SERegisteredDroneInvalidKind,
     SERegisteredDroneInvalidPort,
     SERegisteredDroneInvalidSystemId,
 )
-from swarm_models.base.swarm_model import SwarmModel
 
 
 class RegisteredDrone(SwarmModel):

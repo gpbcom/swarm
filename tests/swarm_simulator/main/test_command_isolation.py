@@ -13,15 +13,14 @@ import pytest
 from nats.aio.client import Client
 
 # First-party imports
-from simulator.models.enums import CommandVerdict, FlightLogEntryKind, SimulatedDroneKind
 from swarm_clients.shared.nats.nats_requester import NatsRequester
 from swarm_models.commands.command import Command
 from swarm_models.commands.enums import CommandKind, CommandLane
-from swarm_models.enums import CredentialKind
+from swarm_models.enums import CommandVerdict, CredentialKind, FlightLogEntryKind, SimulatedDroneKind
 from swarm_nats.models.config.nats_client_config import NatsClientConfig
 from tests.infra.nats.helpers import connz_users, free_port, issuers, operator_mode_config, write_creds
 from tests.infra.nats.nats_server_process import NatsServerProcess
-from tests.simulator.helpers import (
+from tests.swarm_simulator.main.helpers import (
     COMMAND_ID,
     ENCODING,
     HOST,
@@ -74,7 +73,7 @@ class TestCommandIsolation:
 
     @pytest.fixture
     def processes(self, simulator_script: Path) -> Iterator[List[subprocess.Popen[bytes]]]:
-        """Hold the ``swarm-simulator serve`` processes of a test and stop them after it."""
+        """Hold the simulator app processes of a test and stop them after it."""
         started: List[subprocess.Popen[bytes]] = []
         yield started
         for process in started:

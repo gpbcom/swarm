@@ -9,9 +9,9 @@ import pytest
 from babel.messages.catalog import Catalog
 
 # First-party imports
-from swarm_i18n.models.catalogs.exceptions import SECatalogError, SECatalogUnreadableError  # isort: skip
-from swarm_i18n.storage.catalogs.po_catalog_store import PoCatalogStore  # isort: skip
 from swarm_models.enums import Language
+from swarm_models.i18n.catalogs.exceptions import SECatalogError, SECatalogUnreadableError
+from swarm_storage.shared.i18n.po_catalog_store import PoCatalogStore
 
 
 class TestPoCatalogStore:
@@ -63,7 +63,8 @@ class TestPoCatalogStore:
 
     def test_the_default_root_is_the_locales_folder_of_the_package(self) -> None:
         root = PoCatalogStore.DEFAULT_ROOT
-        assert root.parts[-2:] == ("swarm_i18n", "locales")
+        assert root.parts[-2:] == ("i18n", PoCatalogStore.LOCALES_FOLDER)
+        assert root.parent.name == PoCatalogStore.PACKAGE.rsplit(".", 1)[-1]
         assert (root / self.TEMPLATE_FILE).is_file()
         for language in Language:
             assert (root / language.value / self.MESSAGES_FOLDER / self.PO_FILE).is_file()

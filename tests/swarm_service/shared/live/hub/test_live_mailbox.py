@@ -7,7 +7,7 @@ import asyncio
 import pytest
 
 # First-party imports
-from swarm_live.service.live_mailbox import LiveMailbox  # isort: skip
+from swarm_service.shared.live.hub.live_mailbox import LiveMailbox
 
 
 class TestLiveMailbox:

@@ -27,9 +27,9 @@ class TestSwarmApps:
     def test_the_app_entry_is_swarm_app(self) -> None:
         assert SwarmApps.APP_KEY == "SWARM_APP"
 
-    def test_every_app_has_its_configuration_and_its_application(self) -> None:
-        assert set(SwarmApps.CONFIGS) == set(AppName)
+    def test_every_app_has_its_application_and_the_apps_with_a_schema_their_configuration(self) -> None:
         assert set(SwarmApps.APPLICATIONS) == set(AppName)
+        assert set(SwarmApps.CONFIGS) == {AppName.GATEWAY, AppName.FLEET, AppName.MISSIONS}
 
     @pytest.mark.parametrize("app", list(AppName))
     def test_each_application_is_a_fastapi_application(self, app: AppName) -> None:
@@ -44,6 +44,13 @@ class TestSwarmApps:
 
         assert SwarmApps().selected() == [AppName.MISSIONS]
 
+    def test_the_entry_may_name_an_app_by_its_folder(self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+        monkeypatch.setenv(SwarmApps.APP_KEY, SwarmApps.FOLDERS[AppName.FLIGHT_ENGINE])
+        monkeypatch.setenv(AppConfig.APP_ROOT_KEY, str(tmp_path))
+
+        assert SwarmApps().selected() == [AppName.FLIGHT_ENGINE]
+        assert SwarmApps().folder(AppName.FLIGHT_ENGINE) == tmp_path
+
     def test_an_unknown_app_selects_none(self, monkeypatch: pytest.MonkeyPatch) -> None:
         monkeypatch.setenv(SwarmApps.APP_KEY, self.UNKNOWN_APP)
 
@@ -54,9 +61,15 @@ class TestSwarmApps:
     def test_without_the_entries_the_folder_is_the_one_of_the_repository(self, app: AppName) -> None:
         folder = SwarmApps().folder(app)
 
-        assert folder == RepositoryPaths.APPS / app.value
+        assert folder.parent == RepositoryPaths.APPS
         assert (folder / AppConfig.CONF_FOLDER / AppConfig.APP_FILE).is_file()
-        assert (folder / AppConfig.MIGRATIONS_FOLDER).is_dir()
+
+    def test_the_folder_of_the_flight_engine_writes_its_underscore_as_a_hyphen(self) -> None:
+        assert SwarmApps().folder(AppName.FLIGHT_ENGINE) == RepositoryPaths.APPS / "flight-engine"
+
+    @pytest.mark.parametrize("app", list(SwarmApps.CONFIGS))
+    def test_an_app_with_a_schema_has_its_migrations(self, app: AppName) -> None:
+        assert (SwarmApps().folder(app) / AppConfig.MIGRATIONS_FOLDER).is_dir()
 
     def test_the_app_root_names_the_folder_of_the_app_the_entry_names(
         self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
@@ -72,7 +85,7 @@ class TestSwarmApps:
 
         assert SwarmApps().folder(AppName.GATEWAY) == RepositoryPaths.APPS / AppName.GATEWAY.value
 
-    @pytest.mark.parametrize("app", list(AppName))
+    @pytest.mark.parametrize("app", list(SwarmApps.CONFIGS))
     def test_each_configuration_loads_from_the_app_yaml_of_its_app(self, app: AppName) -> None:
         config = SwarmApps().config(app)
 

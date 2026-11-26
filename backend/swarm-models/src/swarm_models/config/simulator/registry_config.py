@@ -7,7 +7,7 @@ from typing import ClassVar, List, Literal
 from pydantic import BaseModel, ConfigDict, Field, JsonValue, field_validator
 
 # First-party imports
-from simulator.models.config.exceptions import (
+from swarm_models.config.simulator.exceptions import (
     SERegistryConfigInvalidCommandMappingPath,
     SERegistryConfigInvalidSimulatedHosts,
     SERegistryConfigInvalidSquadCatalogPath,

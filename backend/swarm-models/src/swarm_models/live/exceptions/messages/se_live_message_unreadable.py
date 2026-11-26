@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 # First-party imports
-from swarm_live.models.exceptions.se_live_error import SELiveError
+from swarm_models.live.exceptions.messages.se_live_error import SELiveError
 
 
 class SELiveMessageUnreadable(SELiveError):

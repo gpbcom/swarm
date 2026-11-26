@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import List, Union
 
 # First-party imports
-from services.simulator.tests.stand_in_drone import StandInDrone
+from tests.fakes.mavlink.stand_in_drone import StandInDrone
 
 
 class StandInDrones:

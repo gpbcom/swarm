@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 # First-party imports
-from simulator.models.credentials.exceptions.s_e_simulated_credentials_error import SESimulatedCredentialsError
+from swarm_models.simulation.credentials.exceptions.s_e_simulated_credentials_error import SESimulatedCredentialsError
 
 
 class SESimulatedCredentialsNotSimulatedError(SESimulatedCredentialsError):

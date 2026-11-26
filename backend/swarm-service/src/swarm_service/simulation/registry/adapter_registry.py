@@ -6,13 +6,13 @@ from typing import Dict, List, Optional
 from uuid import UUID
 
 # First-party imports
-from simulator.models.registry.exceptions import (
+from swarm_models.simulation.registry.exceptions import (
     SEAdapterRegistryDuplicateDroneError,
     SEAdapterRegistryHostRefusedError,
     SEAdapterRegistryUnknownDroneError,
 )
-from simulator.models.registry.registered_drone import RegisteredDrone
-from simulator.models.registry.simulated_squad_catalog import SimulatedSquadCatalog
+from swarm_models.simulation.registry.registered_drone import RegisteredDrone
+from swarm_models.simulation.registry.simulated_squad_catalog import SimulatedSquadCatalog
 
 
 class AdapterRegistry:

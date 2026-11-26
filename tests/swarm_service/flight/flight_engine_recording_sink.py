@@ -6,8 +6,8 @@ from typing import List, Tuple
 from uuid import UUID
 
 # First-party imports
-from flight_engine.clients.leaf.frame_sink import FrameSink
-from flight_engine.models.clients.exceptions import SESquadFramePublishError
+from swarm_clients.flight.leaf.frame_sink import FrameSink
+from swarm_models.flight.clients.exceptions import SESquadFramePublishError
 
 
 class RecordingFrameSink(FrameSink):

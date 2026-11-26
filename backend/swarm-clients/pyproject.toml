@@ -8,6 +8,7 @@ dependencies = [
     "httpx>=0.28.1",
     "nats-py>=2.11.0",
     "pydantic>=2.14.3",
+    "pymavlink>=2.4.49",
     "swarm-models",
     "swarm-nats",
 ]

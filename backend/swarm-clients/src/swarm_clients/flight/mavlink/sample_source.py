@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 from typing import List
 
 # First-party imports
-from flight_engine.models.telemetry.drone_sample import DroneSample
+from swarm_models.flight.telemetry.drone_sample import DroneSample
 
 
 class SampleSource(ABC):

@@ -7,7 +7,8 @@ from typing import ClassVar, Dict, Literal, Optional, Tuple, Type
 from pydantic import ConfigDict, Field, JsonValue, ValidationInfo, field_validator
 
 # First-party imports
-from flight_engine.models.telemetry.exceptions import (
+from swarm_models.base.swarm_model import SwarmModel
+from swarm_models.flight.telemetry.exceptions import (
     SEDroneSampleInvalidBaseMode,
     SEDroneSampleInvalidBatteryRemaining,
     SEDroneSampleInvalidHasPosition,
@@ -23,7 +24,6 @@ from flight_engine.models.telemetry.exceptions import (
     SEDroneSampleInvalidVxCmS,
     SEDroneSampleInvalidVyCmS,
 )
-from swarm_models.base.swarm_model import SwarmModel
 
 
 class DroneSample(SwarmModel):

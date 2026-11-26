@@ -8,7 +8,7 @@ from typing import ClassVar, List
 
 class TestSimulatorImage:
     ROOT: ClassVar[Path] = Path(__file__).resolve().parents[3]
-    DOCKERFILE: ClassVar[Path] = ROOT / "services" / "simulator" / "Dockerfile"
+    DOCKERFILE: ClassVar[Path] = ROOT / "backend" / "apps" / "simulator" / "Dockerfile"
     CARGO_BUILD: ClassVar[str] = "cargo build"
     CARGO_FLAGS: ClassVar[List[str]] = ["--release", "--locked", "-p swarm-synthetic-drones"]
     UV_SYNC: ClassVar[str] = "uv sync"
@@ -16,7 +16,7 @@ class TestSimulatorImage:
     UV_FILES: ClassVar[List[str]] = ["uv.lock", "pyproject.toml"]
     BINARY: ClassVar[str] = "swarm-synthetic-drones"
     CONF: ClassVar[str] = "conf"
-    ENTRYPOINT: ClassVar[str] = "swarm-simulator"
+    ENTRYPOINT: ClassVar[str] = "swarm-simulator-serve"
     RUST_DIRECTORY: ClassVar[str] = "rust"
     ROOT_USERS: ClassVar[List[str]] = ["root", "0"]
 

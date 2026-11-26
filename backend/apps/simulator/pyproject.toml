@@ -1,34 +1,30 @@
 [project]
 name = "swarm-simulator"
 version = "0.1.0"
-description = "The Swarm simulator service."
-readme = "../../README.md"
+description = "The Swarm simulator app: its main() reads conf/app.yaml, serves the simulation domain and answers the Commands of the bus."
+readme = "../../../README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "pydantic>=2.14.3",
-    "pymavlink>=2.4.49",
-    "pyyaml>=6.0",
-    "swarm-catalog",
-    "swarm-lifecycle",
+    "swarm-api",
     "swarm-logging",
     "swarm-models",
-    "swarm-nats",
-    "swarm-service",
+    "swarm-web",
 ]
 
 [project.scripts]
-swarm-simulator = "simulator.api.cli.main:main"
+swarm-simulator-serve = "swarm_simulator.main:main"
+
+[tool.swarm]
+domains = ["simulation"]
 
 [tool.uv.build-backend]
-module-name = "simulator"
+module-name = "swarm_simulator"
 
 [tool.uv.sources]
-swarm-catalog = { workspace = true }
-swarm-lifecycle = { workspace = true }
+swarm-api = { workspace = true }
 swarm-logging = { workspace = true }
 swarm-models = { workspace = true }
-swarm-nats = { workspace = true }
-swarm-service = { workspace = true }
+swarm-web = { workspace = true }
 
 [build-system]
 requires = ["uv_build>=0.12.21,<0.13.0"]

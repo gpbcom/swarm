@@ -38,13 +38,29 @@ ENV UV_COMPILE_BYTECODE=1 \
 
 WORKDIR /workspace
 
-COPY pyproject.toml uv.lock README.md ./
-COPY packages/python packages/python
-COPY backend backend
-COPY services/flight-engine services/flight-engine
+COPY pyproject.toml uv.lock ./
+COPY backend/apps/flight-engine/pyproject.toml backend/apps/flight-engine/pyproject.toml
+COPY scripts/pyproject.toml scripts/pyproject.toml
+COPY backend/libs/swarm-catalog/pyproject.toml backend/libs/swarm-catalog/pyproject.toml
+COPY backend/libs/swarm-lifecycle/pyproject.toml backend/libs/swarm-lifecycle/pyproject.toml
+COPY backend/libs/swarm-logging/pyproject.toml backend/libs/swarm-logging/pyproject.toml
+COPY backend/libs/swarm-nats/pyproject.toml backend/libs/swarm-nats/pyproject.toml
+COPY backend/libs/swarm-web/pyproject.toml backend/libs/swarm-web/pyproject.toml
+COPY backend/swarm-models/pyproject.toml backend/swarm-models/pyproject.toml
+COPY backend/swarm-storage/pyproject.toml backend/swarm-storage/pyproject.toml
+COPY backend/swarm-clients/pyproject.toml backend/swarm-clients/pyproject.toml
+COPY backend/swarm-service/pyproject.toml backend/swarm-service/pyproject.toml
+COPY backend/swarm-api/pyproject.toml backend/swarm-api/pyproject.toml
 
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-dev --no-editable --package swarm-flight-engine
+    uv sync --frozen --no-dev --no-editable --no-install-workspace --package swarm-flight-engine --package swarm-scripts
+
+COPY README.md README.md
+COPY backend backend
+COPY scripts scripts
+
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-dev --no-editable --package swarm-flight-engine --package swarm-scripts
 
 COPY --from=wheel /wheels /wheels
 
@@ -55,7 +71,8 @@ FROM python:3.12.16-slim-bookworm AS runtime
 
 ENV PATH="/opt/venv/bin:$PATH" \
     PYTHONUNBUFFERED=1 \
-    SWARM_FLIGHT_ENGINE_HOME=/app
+    SWARM_APP=flight-engine \
+    SWARM_APP_ROOT=/app
 
 RUN groupadd --system --gid 10001 swarm \
     && useradd --system --uid 10001 --gid swarm --home-dir /app --shell /usr/sbin/nologin swarm \
@@ -63,9 +80,10 @@ RUN groupadd --system --gid 10001 swarm \
     && chown swarm:swarm /app
 
 COPY --from=build /opt/venv /opt/venv
-COPY --from=build --chown=swarm:swarm /workspace/services/flight-engine/conf /app/conf
+COPY --from=build --chown=swarm:swarm /workspace/backend/apps/flight-engine/conf /app/conf
 
 WORKDIR /app
 USER 10001:10001
 
-ENTRYPOINT ["swarm-flight-engine", "--config", "conf/app.yaml"]
+# The image flies the Missions of its edge and serves their live socket: it reads /app/conf/app.yaml.
+ENTRYPOINT ["swarm-flight-engine-serve"]

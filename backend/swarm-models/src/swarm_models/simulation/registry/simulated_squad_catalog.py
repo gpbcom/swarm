@@ -8,14 +8,14 @@ from uuid import UUID
 from pydantic import Field, JsonValue, field_validator, model_validator
 
 # First-party imports
-from simulator.models.registry.exceptions import (
+from swarm_catalog.models.yaml_catalog import YamlCatalog
+from swarm_models.simulation.registry.exceptions import (
     SESimulatedSquadCatalogDuplicateDrone,
     SESimulatedSquadCatalogDuplicateEndpoint,
     SESimulatedSquadCatalogInvalidDrones,
     SESimulatedSquadCatalogUnreadable,
 )
-from simulator.models.registry.registered_drone import RegisteredDrone
-from swarm_catalog.models.yaml_catalog import YamlCatalog
+from swarm_models.simulation.registry.registered_drone import RegisteredDrone
 
 
 class SimulatedSquadCatalog(YamlCatalog):

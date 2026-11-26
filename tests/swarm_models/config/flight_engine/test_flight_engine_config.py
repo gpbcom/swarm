@@ -10,7 +10,7 @@ import yaml
 from pydantic import JsonValue, ValidationError
 
 # First-party imports
-from flight_engine.models.config.exceptions import (
+from swarm_models.config.flight_engine.exceptions import (
     SEFlightEngineConfigInvalidDroneStatesCatalogPath,
     SEFlightEngineConfigInvalidLinkLostAfter,
     SEFlightEngineConfigInvalidLive,
@@ -21,13 +21,13 @@ from flight_engine.models.config.exceptions import (
     SEFlightEngineConfigUnreadable,
     SEInvalidFlightEngineConfigException,
 )
-from flight_engine.models.config.flight_engine_config import FlightEngineConfig
-from flight_engine.models.config.live_server_config import LiveServerConfig
+from swarm_models.config.flight_engine.flight_engine_config import FlightEngineConfig
+from swarm_models.config.flight_engine.live_server_config import LiveServerConfig
 from swarm_nats.models.config.nats_client_config import NatsClientConfig
 
 
 class TestFlightEngineConfig:
-    CONF_FOLDER: ClassVar[Path] = Path(__file__).resolve().parents[3] / "conf"
+    CONF_FOLDER: ClassVar[Path] = Path(__file__).resolve().parents[4] / "backend" / "apps" / "flight-engine" / "conf"
     APP_FILE: ClassVar[str] = "app.yaml"
     FIELDS: ClassVar[List[str]] = [
         "tick_interval_ms",

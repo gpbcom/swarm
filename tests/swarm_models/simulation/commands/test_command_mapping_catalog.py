@@ -10,16 +10,24 @@ import yaml
 from pydantic import JsonValue, ValidationError
 
 # First-party imports
-from simulator.models.commands.command_mapping_catalog import CommandMappingCatalog
-from simulator.models.commands.exceptions import (
+from swarm_models.commands.enums import CommandKind
+from swarm_models.simulation.commands.command_mapping_catalog import CommandMappingCatalog
+from swarm_models.simulation.commands.exceptions import (
     SECommandMappingCatalogInvalidCommands,
     SECommandMappingCatalogUnreadable,
 )
-from swarm_models.commands.enums import CommandKind
 
 
 class TestCommandMappingCatalog:
-    SHIPPED: ClassVar[Path] = Path(__file__).parents[3] / "conf" / "catalogs" / "command_mapping.yaml"
+    SHIPPED: ClassVar[Path] = (
+        Path(__file__).resolve().parents[4]
+        / "backend"
+        / "apps"
+        / "simulator"
+        / "conf"
+        / "catalogs"
+        / "command_mapping.yaml"
+    )
     VALID: ClassVar[Dict[str, JsonValue]] = {
         "commands": {
             CommandKind.HOLD.value: {"command_id": 193, "param1": 0.0},

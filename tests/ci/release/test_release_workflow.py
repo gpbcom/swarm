@@ -73,6 +73,9 @@ class TestReleaseWorkflow:
         assert uploads[0]["if"] == "always()"
         assert str(cast(Dict[str, str], uploads[0]["with"])["name"]).startswith(artifact)
 
-    @pytest.mark.parametrize("job", ["services", "repository", "packages"])
+    @pytest.mark.parametrize("job", ["services", "repository"])
     def test_pytest_writes_junit_reports(self, job: str) -> None:
         assert "--junitxml=" in runs("python.yml", job)
+
+    def test_the_packages_job_runs_no_tests_since_every_python_test_sits_in_the_central_tree(self) -> None:
+        assert "uv run pytest" not in runs("python.yml", "packages")

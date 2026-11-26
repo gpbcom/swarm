@@ -7,7 +7,7 @@ from typing import ClassVar, Dict, Literal, Type
 from pydantic import BaseModel, ConfigDict, Field, JsonValue, ValidationInfo, field_validator
 
 # First-party imports
-from simulator.models.config.exceptions import (
+from swarm_models.config.simulator.exceptions import (
     SEFlightConfigInvalidArmTimeout,
     SEFlightConfigInvalidHeartbeatTimeout,
     SEFlightConfigInvalidRouteTimeout,

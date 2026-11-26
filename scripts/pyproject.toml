@@ -1,7 +1,7 @@
 [project]
 name = "swarm-scripts"
 version = "0.1.0"
-description = "The operations of Swarm, run with uv run and taking no arguments: schemas, OpenAPI documents and migrations."
+description = "The operations of Swarm, run with uv run and taking no arguments: schemas, OpenAPI documents, migrations and message catalogues."
 readme = "../README.md"
 requires-python = ">=3.12"
 dependencies = [
@@ -19,6 +19,7 @@ swarm-schemas-check = "swarm_scripts.schemas.check:main"
 swarm-openapi-export = "swarm_scripts.openapi.export:main"
 swarm-openapi-check = "swarm_scripts.openapi.check:main"
 swarm-migrations-migrate = "swarm_scripts.migrations.migrate:main"
+swarm-i18n-check = "swarm_scripts.i18n.check:main"
 
 [tool.uv.sources]
 swarm-api = { workspace = true }

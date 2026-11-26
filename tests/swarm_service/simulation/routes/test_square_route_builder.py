@@ -9,10 +9,10 @@ from typing import ClassVar, List, Tuple
 import pytest
 
 # First-party imports
-from simulator.models.config.route_config import RouteConfig
-from simulator.models.routes.route import Route
-from simulator.models.routes.waypoint import Waypoint
-from simulator.service.routes.square_route_builder import SquareRouteBuilder
+from swarm_models.config.simulator.route_config import RouteConfig
+from swarm_models.simulation.routes.route import Route
+from swarm_models.simulation.routes.waypoint import Waypoint
+from swarm_service.simulation.routes.square_route_builder import SquareRouteBuilder
 
 
 class TestSquareRouteBuilder:

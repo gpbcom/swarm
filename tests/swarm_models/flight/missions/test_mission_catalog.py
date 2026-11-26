@@ -10,17 +10,25 @@ import yaml
 from pydantic import JsonValue, ValidationError
 
 # First-party imports
-from flight_engine.models.missions.exceptions import (
+from swarm_models.flight.missions.exceptions import (
     SEMissionCatalogDuplicateMission,
     SEMissionCatalogDuplicatePort,
     SEMissionCatalogInvalidMissions,
     SEMissionCatalogUnreadable,
 )
-from flight_engine.models.missions.mission_catalog import MissionCatalog
+from swarm_models.flight.missions.mission_catalog import MissionCatalog
 
 
 class TestMissionCatalog:
-    SHIPPED: ClassVar[Path] = Path(__file__).resolve().parents[3] / "conf" / "catalogs" / "missions.yaml"
+    SHIPPED: ClassVar[Path] = (
+        Path(__file__).resolve().parents[4]
+        / "backend"
+        / "apps"
+        / "flight-engine"
+        / "conf"
+        / "catalogs"
+        / "missions.yaml"
+    )
     OPERATOR_ID: ClassVar[str] = "01943c5e-8a4b-7c2d-9e1f-0a1b2c3d4e5e"
     FIRST: ClassVar[Dict[str, JsonValue]] = {
         "operator_id": OPERATOR_ID,

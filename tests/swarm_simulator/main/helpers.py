@@ -4,6 +4,7 @@ from __future__ import annotations
 import asyncio
 import os
 import select
+import shutil
 import socket
 import sqlite3
 import subprocess
@@ -15,28 +16,32 @@ from typing import List, Optional, Tuple
 from uuid import UUID
 
 # Third-party imports
+import httpx
 import yaml
 
 # First-party imports
-from simulator.models.commands.command_reply import CommandReply
-from simulator.models.enums import FlightLogEntryKind, SimulatedDroneKind
 from swarm_clients.shared.nats.nats_requester import NatsRequester
 from swarm_models.commands.command import Command
+from swarm_models.config.app_config import AppConfig
+from swarm_models.enums import CredentialKind, FlightLogEntryKind, SimulatedDroneKind
+from swarm_models.simulation.commands.command_reply import CommandReply
 from swarm_nats.models.bus.exceptions import SENatsNoResponderError, SENatsRequestDeadlineExceededError
+from tests.infra.nats.helpers import issuers, write_creds
 
 Endpoint = Tuple[UUID, SimulatedDroneKind, str, int, int]
 FlightLogRow = Tuple[str, str, int]
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-SERVICE_DIR = REPO_ROOT / "services" / "simulator"
+REPO_ROOT = Path(__file__).resolve().parents[3]
+APP_DIR = REPO_ROOT / "backend" / "apps" / "simulator"
 RUST_DIR = REPO_ROOT / "rust"
 BINARY_PATH = RUST_DIR / "target" / "debug" / "swarm-synthetic-drones"
-COMMAND_MAPPING_PATH = SERVICE_DIR / "conf" / "catalogs" / "command_mapping.yaml"
-SCRIPT_NAME = "swarm-simulator"
-SERVE_COMMAND = "serve"
-FLY_COMMAND = "fly"
-CONFIG_FLAG = "--config"
-MISSION_ID_FLAG = "--mission-id"
+COMMAND_MAPPING_PATH = APP_DIR / AppConfig.CONF_FOLDER / "catalogs" / "command_mapping.yaml"
+LOGGER_PATH = APP_DIR / AppConfig.CONF_FOLDER / AppConfig.LOGGER_FILE
+SCRIPT_NAME = "swarm-simulator-serve"
+SIMULATIONS_URL = "http://{host}:{port}/v1/simulations"
+OPENAPI_URL = "http://{host}:{port}/v1/openapi.json"
+IDEMPOTENCY_KEY_HEADER = "Idempotency-Key"
+FLY_KEY_PREFIX = "simulation-"
 HOST = "127.0.0.1"
 ENCODING = "utf-8"
 READY_LINE = "ready"
@@ -46,6 +51,9 @@ SYNTHETIC_COUNT = 10
 SYNTHETIC_SPEED_M_S = 50
 SYNTHETIC_TICK_MS = 20
 FLY_TIMEOUT_S = 180.0
+SERVE_START_TIMEOUT_S = 30.0
+STOP_TIMEOUT_S = 30.0
+HTTP_TIMEOUT_S = 5.0
 POLL_INTERVAL_S = 0.1
 SQUAD_STATUS_INTERVAL_S = 1.0
 UUID_TEMPLATE = "0190a5b2-7c3e-7d4f-8a1b-{index:012x}"
@@ -87,11 +95,17 @@ ARM_TIMEOUT_KEY = "arm_timeout_s"
 ROUTE_TIMEOUT_KEY = "route_timeout_s"
 STATUS_INTERVAL_KEY = "status_interval_s"
 FLIGHT_LOG_PATH_KEY = "flight_log_path"
+REST_KEY = "rest"
+REST_HOST_KEY = "host"
+REST_PORT_KEY = "port"
+MISSION_ID_KEY = "mission_id"
+SIMULATED_NAME = "squad-sim"
+OPERATOR_NAME = "cell"
 SQUAD_CATALOG_NAME = "simulated_squad.yaml"
 APP_CONFIG_NAME = "app.yaml"
 FLIGHT_LOG_NAME = "flight_log.sqlite3"
 NATS_URL_DEFAULT = "nats://127.0.0.1:4222"
-CREDENTIALS_DEFAULT_NAME = "simulated.creds"
+CREDS_FOLDER = "creds"
 ROUTE_SIDE_M = 20
 ROUTE_ALTITUDE_M = 10
 HEARTBEAT_TIMEOUT_S = 20
@@ -109,6 +123,7 @@ COMMAND_WILDCARD_SUBJECT = "op.{operator}.mission.*.command"
 KEY_PREFIX = "command-"
 REQUEST_DEADLINE_S = 2.0
 SERVE_READY_TIMEOUT_S = 30.0
+STDERR_NAME = "serve.stderr"
 DOCKER_IMAGE_ENV = "SWARM_PX4_SITL_IMAGE"
 DOCKER_IMAGE_DEFAULT = "swarm-px4-sitl:local"
 
@@ -199,7 +214,7 @@ def px4_endpoint(port: int) -> Endpoint:
 
 
 def script_path() -> Path:
-    """Return the path of the ``swarm-simulator`` console script of this environment."""
+    """Return the path of the ``swarm-simulator-serve`` console script of this environment."""
     return Path(sys.executable).parent / SCRIPT_NAME
 
 
@@ -235,10 +250,15 @@ def write_app_config(
     arm_timeout_s: float = ARM_TIMEOUT_S,
     route_timeout_s: float = ROUTE_TIMEOUT_S,
 ) -> Path:
-    """Write the application configuration of one run, with the Flight log in ``tmp_path``."""
+    """Write the folder of the simulator app for one run, with the Flight log in ``tmp_path``, and return it.
+
+    The folder holds ``conf/app.yaml`` and ``conf/logger.yaml``, as the image's ``/app`` does. Without a credentials
+    file, simulated credentials are written.
+    """
     if credentials_path is None:
-        credentials_path = tmp_path / CREDENTIALS_DEFAULT_NAME
+        credentials_path = write_simulated_creds(tmp_path)
     config = {
+        REST_KEY: {REST_HOST_KEY: HOST, REST_PORT_KEY: free_tcp_port()},
         OPERATOR_ID_KEY: str(OPERATOR_ID),
         NATS_KEY: {SERVERS_KEY: [nats_url], CREDENTIALS_PATH_KEY: str(credentials_path)},
         RESPONDER_KEY: {
@@ -260,33 +280,99 @@ def write_app_config(
         },
         FLIGHT_LOG_PATH_KEY: str(flight_log_path(tmp_path)),
     }
-    path = tmp_path / APP_CONFIG_NAME
-    path.write_text(yaml.safe_dump(config, sort_keys=False), encoding=ENCODING)
-    return path
+    conf = tmp_path / AppConfig.CONF_FOLDER
+    conf.mkdir(parents=True, exist_ok=True)
+    (conf / AppConfig.APP_FILE).write_text(yaml.safe_dump(config, sort_keys=False), encoding=ENCODING)
+    shutil.copy(LOGGER_PATH, conf / AppConfig.LOGGER_FILE)
+    return tmp_path
 
 
-def run_fly(config: Path, mission_id: UUID, timeout_s: float = FLY_TIMEOUT_S) -> subprocess.CompletedProcess[str]:
-    """Run ``swarm-simulator fly`` to its end and return the finished process."""
-    return subprocess.run(
-        [str(script_path()), FLY_COMMAND, CONFIG_FLAG, str(config), MISSION_ID_FLAG, str(mission_id)],
-        cwd=SERVICE_DIR,
-        capture_output=True,
-        text=True,
-        encoding=ENCODING,
-        timeout=timeout_s,
-        check=False,
-    )
+def free_tcp_port() -> int:
+    """Return a free TCP port."""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as probe:
+        probe.bind((HOST, 0))
+        return int(probe.getsockname()[1])
 
 
-def start_serve(config: Path, stderr_path: Path) -> subprocess.Popen[bytes]:
-    """Start ``swarm-simulator serve`` with its standard error written to a file."""
+def write_simulated_creds(tmp_path: Path) -> Path:
+    """Write credentials of kind simulated for the Operator of the run, signed by a throwaway operator."""
+    operator_issuer, account_issuer, credential_issuer = issuers()
+    account = account_issuer.issue(operator_issuer.issue(OPERATOR_NAME), OPERATOR_ID)
+    simulated = credential_issuer.issue(account, OPERATOR_ID, CredentialKind.SIMULATED, SIMULATED_NAME)
+    return write_creds(tmp_path / CREDS_FOLDER, simulated, credential_issuer)
+
+
+def rest_port(app_folder: Path) -> int:
+    """Read the port the app of a run serves on."""
+    config = yaml.safe_load((app_folder / AppConfig.CONF_FOLDER / AppConfig.APP_FILE).read_text(encoding=ENCODING))
+    return int(config[REST_KEY][REST_PORT_KEY])
+
+
+def start_serve(app_folder: Path, stderr_path: Path) -> subprocess.Popen[bytes]:
+    """Start the simulator app from its folder, with its standard error written to a file."""
+    environment = dict(os.environ)
+    environment[AppConfig.APP_ROOT_KEY] = str(app_folder)
     stderr = stderr_path.open("wb")
     return subprocess.Popen(
-        [str(script_path()), SERVE_COMMAND, CONFIG_FLAG, str(config)],
-        cwd=SERVICE_DIR,
-        stdout=subprocess.DEVNULL,
-        stderr=stderr,
+        [str(script_path())], cwd=app_folder, env=environment, stdout=subprocess.DEVNULL, stderr=stderr
     )
+
+
+def stop_serve(process: subprocess.Popen[bytes]) -> None:
+    """Stop the app and wait for it."""
+    if process.poll() is None:
+        process.terminate()
+        try:
+            process.wait(timeout=STOP_TIMEOUT_S)
+        except subprocess.TimeoutExpired:
+            process.kill()
+            process.wait()
+
+
+def wait_until_serving(port: int, process: subprocess.Popen[bytes]) -> None:
+    """Wait until the app answers its OpenAPI document."""
+    deadline = time.monotonic() + SERVE_START_TIMEOUT_S
+    while time.monotonic() < deadline:
+        assert process.poll() is None, f"The simulator app stopped with code {process.returncode}."
+        try:
+            if httpx.get(OPENAPI_URL.format(host=HOST, port=port), timeout=HTTP_TIMEOUT_S).is_success:
+                return
+        except httpx.TransportError:
+            time.sleep(POLL_INTERVAL_S)
+    raise AssertionError("The simulator app did not serve in time.")
+
+
+def ended_flights(path: Path) -> int:
+    """Count the Drones whose flight has ended in the Flight log, completed or failed."""
+    if not path.is_file():
+        return 0
+    try:
+        rows = flight_log_rows(path)
+    except sqlite3.OperationalError:
+        return 0
+    return count_kind(rows, FlightLogEntryKind.ROUTE_COMPLETED) + count_kind(rows, FlightLogEntryKind.ROUTE_FAILED)
+
+
+def run_fly(app_folder: Path, mission_id: UUID, drones: int, timeout_s: float = FLY_TIMEOUT_S) -> httpx.Response:
+    """Serve the app, start the flight of the Squad with ``POST /v1/simulations``, and wait until every Drone ends."""
+    port = rest_port(app_folder)
+    process = start_serve(app_folder, app_folder / STDERR_NAME)
+    try:
+        wait_until_serving(port, process)
+        response = httpx.post(
+            SIMULATIONS_URL.format(host=HOST, port=port),
+            json={MISSION_ID_KEY: str(mission_id)},
+            headers={IDEMPOTENCY_KEY_HEADER: FLY_KEY_PREFIX + str(mission_id)},
+            timeout=HTTP_TIMEOUT_S,
+        )
+        deadline = time.monotonic() + timeout_s
+        while response.is_success and ended_flights(flight_log_path(app_folder)) < drones:
+            assert time.monotonic() < deadline, "The simulated flight did not end in time."
+            assert process.poll() is None, "The simulator app stopped during the flight."
+            time.sleep(POLL_INTERVAL_S)
+        return response
+    finally:
+        stop_serve(process)
 
 
 def flight_log_rows(path: Path) -> List[FlightLogRow]:
@@ -323,14 +409,14 @@ async def request_until_answered(
     subject = COMMAND_SUBJECT.format(operator=OPERATOR_ID, mission=command.mission_id)
     deadline = time.monotonic() + SERVE_READY_TIMEOUT_S
     while time.monotonic() < deadline:
-        assert process.poll() is None, "swarm-simulator serve exited before it answered."
+        assert process.poll() is None, "The simulator app exited before it answered."
         try:
             return await requester.request(
                 subject, command, CommandReply, KEY_PREFIX + str(command.id), REQUEST_DEADLINE_S
             )
         except (SENatsNoResponderError, SENatsRequestDeadlineExceededError):
             await asyncio.sleep(POLL_INTERVAL_S)
-    raise AssertionError("swarm-simulator serve never answered the command.")
+    raise AssertionError("The simulator app never answered the command.")
 
 
 def docker_image() -> str:

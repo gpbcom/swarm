@@ -9,8 +9,8 @@ import pytest
 from pydantic import JsonValue, ValidationError
 
 # First-party imports
-from simulator.models.enums import FlightLogEntryKind
-from simulator.models.flight_logs.exceptions import (
+from swarm_models.enums import FlightLogEntryKind
+from swarm_models.simulation.flight_logs.exceptions import (
     SEFlightLogEntryInvalidDetail,
     SEFlightLogEntryInvalidDroneId,
     SEFlightLogEntryInvalidKind,
@@ -19,7 +19,7 @@ from simulator.models.flight_logs.exceptions import (
     SEFlightLogEntryInvalidTUs,
     SEFlightLogEntryNotSimulated,
 )
-from simulator.models.flight_logs.flight_log_entry import FlightLogEntry
+from swarm_models.simulation.flight_logs.flight_log_entry import FlightLogEntry
 
 
 class TestFlightLogEntry:

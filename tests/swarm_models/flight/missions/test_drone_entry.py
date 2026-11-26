@@ -9,8 +9,8 @@ import pytest
 from pydantic import JsonValue, ValidationError
 
 # First-party imports
-from flight_engine.models.missions.drone_entry import DroneEntry
-from flight_engine.models.missions.exceptions import (
+from swarm_models.flight.missions.drone_entry import DroneEntry
+from swarm_models.flight.missions.exceptions import (
     SEDroneEntryInvalidDroneId,
     SEDroneEntryInvalidSystemId,
     SEInvalidDroneEntryException,

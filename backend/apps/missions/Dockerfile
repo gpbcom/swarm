@@ -25,14 +25,12 @@ COPY backend/swarm-storage/pyproject.toml backend/swarm-storage/pyproject.toml
 COPY backend/swarm-clients/pyproject.toml backend/swarm-clients/pyproject.toml
 COPY backend/swarm-service/pyproject.toml backend/swarm-service/pyproject.toml
 COPY backend/swarm-api/pyproject.toml backend/swarm-api/pyproject.toml
-COPY packages/python/swarm-live/pyproject.toml packages/python/swarm-live/pyproject.toml
 
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev --no-editable --no-install-workspace --package swarm-missions --package swarm-scripts
 
 COPY README.md README.md
 COPY backend backend
-COPY packages/python packages/python
 COPY scripts scripts
 
 RUN --mount=type=cache,target=/root/.cache/uv \

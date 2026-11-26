@@ -8,9 +8,9 @@ import pytest
 from pydantic import JsonValue, ValidationError
 
 # First-party imports
-from simulator.models.routes.exceptions import SERouteInvalidWaypoints
-from simulator.models.routes.route import Route
-from simulator.models.routes.waypoint import Waypoint
+from swarm_models.simulation.routes.exceptions import SERouteInvalidWaypoints
+from swarm_models.simulation.routes.route import Route
+from swarm_models.simulation.routes.waypoint import Waypoint
 
 
 class TestRoute:

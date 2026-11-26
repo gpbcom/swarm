@@ -10,11 +10,11 @@ from typing import ClassVar, Dict, List, Optional, Union
 from swarm_core import LatestFrames
 
 # First-party imports
-from flight_engine.clients.mavlink.mavlink_datagram_protocol import MavlinkDatagramProtocol
-from flight_engine.clients.mavlink.sample_source import SampleSource
-from flight_engine.models.clients.exceptions import SEMavlinkListenerError
-from flight_engine.models.missions.mission_entry import MissionEntry
-from flight_engine.models.telemetry.drone_sample import DroneSample
+from swarm_clients.flight.mavlink.mavlink_datagram_protocol import MavlinkDatagramProtocol
+from swarm_clients.flight.mavlink.sample_source import SampleSource
+from swarm_models.flight.clients.exceptions import SEMavlinkListenerError
+from swarm_models.flight.missions.mission_entry import MissionEntry
+from swarm_models.flight.telemetry.drone_sample import DroneSample
 
 
 class MavlinkListener(SampleSource):
@@ -50,26 +50,6 @@ class MavlinkListener(SampleSource):
     # Publicly Exposed Methods #
     ############################
 
-    async def open(self) -> None:
-        """Bind the UDP endpoint of the Mission.
-
-        Raises:
-            SEMavlinkListenerError: When the port cannot be bound.
-        """
-        loop = get_running_loop()
-        host, port = self.mission.mavlink_host, self.mission.mavlink_port
-        try:
-            transport, _ = await loop.create_datagram_endpoint(
-                lambda: MavlinkDatagramProtocol(self.ingest), local_addr=(host, port)
-            )
-        except OSError as error:
-            self.logger.error("Could not bind %s:%d: %s.", host, port, type(error).__name__)
-            raise SEMavlinkListenerError(
-                f"Invalid port: {port!r}. The bind on {host} failed with {type(error).__name__}."
-            ) from error
-        self.transport = transport
-        self.logger.info("Listening for MAVLink on %s:%d.", host, port)
-
     def ingest(self, data: bytes) -> None:
         """Give one datagram to the Rust store, stamped with the time of arrival.
 
@@ -91,6 +71,26 @@ class MavlinkListener(SampleSource):
             values: Dict[str, Union[int, bool]] = {name: getattr(raw, name) for name in DroneSample.model_fields}
             samples.append(DroneSample.model_validate(values))
         return samples
+
+    async def open(self) -> None:
+        """Bind the UDP endpoint of the Mission.
+
+        Raises:
+            SEMavlinkListenerError: When the port cannot be bound.
+        """
+        loop = get_running_loop()
+        host, port = self.mission.mavlink_host, self.mission.mavlink_port
+        try:
+            transport, _ = await loop.create_datagram_endpoint(
+                lambda: MavlinkDatagramProtocol(self.ingest), local_addr=(host, port)
+            )
+        except OSError as error:
+            self.logger.error("Could not bind %s:%d: %s.", host, port, type(error).__name__)
+            raise SEMavlinkListenerError(
+                f"Invalid port: {port!r}. The bind on {host} failed with {type(error).__name__}."
+            ) from error
+        self.transport = transport
+        self.logger.info("Listening for MAVLink on %s:%d.", host, port)
 
     async def close(self) -> None:
         """Close the UDP endpoint, which frees the port. Safe to call when it was never opened."""

@@ -5,16 +5,16 @@ from logging import Logger, getLogger
 from typing import Optional
 
 # First-party imports
-from flight_engine.clients.leaf.frame_sink import FrameSink
-from flight_engine.clients.mavlink.sample_source import SampleSource
-from flight_engine.models.config.flight_engine_config import FlightEngineConfig
-from flight_engine.models.missions.mission_entry import MissionEntry
-from flight_engine.models.telemetry.drone_state_catalog import DroneStateCatalog
-from flight_engine.service.factories.missions.mission_actor_factory import MissionActorFactory
-from flight_engine.service.missions.mission_actor import MissionActor
-from flight_engine.service.missions.squad_frame_builder import SquadFrameBuilder
-from swarm_live.service.live_codec import LiveCodec
-from swarm_live.service.live_hub import LiveHub
+from swarm_clients.flight.leaf.frame_sink import FrameSink
+from swarm_clients.flight.mavlink.sample_source import SampleSource
+from swarm_models.config.flight_engine.flight_engine_config import FlightEngineConfig
+from swarm_models.flight.missions.mission_entry import MissionEntry
+from swarm_models.flight.telemetry.drone_state_catalog import DroneStateCatalog
+from swarm_service.flight.factories.missions.mission_actor_factory import MissionActorFactory
+from swarm_service.flight.missions.mission_actor import MissionActor
+from swarm_service.flight.missions.squad_frame_builder import SquadFrameBuilder
+from swarm_service.shared.live.hub.live_hub import LiveHub
+from swarm_service.shared.live.live_codec import LiveCodec
 
 
 class SquadMissionActorFactory(MissionActorFactory):

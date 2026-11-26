@@ -4,8 +4,8 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 
 # First-party imports
-from swarm_live.service.live_mailbox import LiveMailbox
 from swarm_models.live.live_subscription import LiveSubscription
+from swarm_service.shared.live.hub.live_mailbox import LiveMailbox
 
 
 class LiveSource(ABC):

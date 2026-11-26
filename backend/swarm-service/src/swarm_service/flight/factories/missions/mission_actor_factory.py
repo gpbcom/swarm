@@ -4,8 +4,8 @@ from __future__ import annotations
 from abc import ABC
 
 # First-party imports
-from flight_engine.service.missions.mission_actor import MissionActor
 from swarm_lifecycle.factories.async_runnable_factory import AsyncRunnableFactory
+from swarm_service.flight.missions.mission_actor import MissionActor
 
 
 class MissionActorFactory(AsyncRunnableFactory[MissionActor], ABC):

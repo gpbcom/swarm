@@ -8,11 +8,11 @@ from typing import ClassVar, List, Optional
 from uuid import UUID
 
 # First-party imports
-from simulator.models.flight_logs.exceptions import (
+from swarm_models.simulation.flight_logs.exceptions import (
     SEFlightLogStoreNotSimulatedError,
     SEFlightLogStoreUnwritableError,
 )
-from simulator.models.flight_logs.flight_log_entry import FlightLogEntry
+from swarm_models.simulation.flight_logs.flight_log_entry import FlightLogEntry
 
 
 class FlightLogStore:

@@ -13,6 +13,9 @@ import pytest
 import yaml
 from pydantic import JsonValue
 
+# First-party imports
+from swarm_models.config.app_config import AppConfig
+
 HELM_MISSING = shutil.which("helm") is None
 
 
@@ -41,13 +44,8 @@ class TestSimulatorChart:
     NAME_LABEL: ClassVar[str] = "app.kubernetes.io/name"
     COMMAND_KEYS: ClassVar[List[str]] = ["command", "args"]
     SECRET_PATTERN: ClassVar[Pattern[str]] = re.compile(r"seed|jwt|password|secret", re.IGNORECASE)
-    DOCKERFILE: ClassVar[Path] = ROOT / "services" / "simulator" / "Dockerfile"
-    PARSER: ClassVar[Path] = (
-        ROOT / "services" / "simulator" / "src" / "simulator" / "api" / "cli" / "simulator_argument_parser.py"
-    )
-    WORKDIR_PATTERN: ClassVar[Pattern[str]] = re.compile(r"^WORKDIR\s+(\S+)", re.MULTILINE)
-    DEFAULT_CONFIG_PATTERN: ClassVar[Pattern[str]] = re.compile(r'DEFAULT_CONFIG: ClassVar\[str\] = "([^"]+)"')
-    CONFIG_OPTION: ClassVar[str] = "--config"
+    DOCKERFILE: ClassVar[Path] = ROOT / "backend" / "apps" / "simulator" / "Dockerfile"
+    APP_ROOT_PATTERN: ClassVar[Pattern[str]] = re.compile(r"SWARM_APP_ROOT=(\S+)")
     SEMVER_PATTERN: ClassVar[Pattern[str]] = re.compile(r"^\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$")
 
     def _load(self, name: str) -> JsonValue:
@@ -189,7 +187,7 @@ class TestSimulatorChart:
 
     @pytest.mark.skipif(HELM_MISSING, reason="helm is not installed")
     def test_the_simulator_serves_with_the_credentials_secret_mounted(self, tmp_path: Path) -> None:
-        assert "serve" in self._command_line(tmp_path, self.NAME)
+        assert self._command_line(tmp_path, self.NAME) == []
         volumes = self._items(self._pod_spec(tmp_path, self.NAME), "volumes")
         secrets: List[JsonValue] = []
         for volume in volumes:
@@ -243,15 +241,9 @@ class TestSimulatorChart:
 
     @pytest.mark.skipif(HELM_MISSING, reason="helm is not installed")
     def test_the_mounted_configuration_is_the_file_the_simulator_reads(self, tmp_path: Path) -> None:
-        words = self._command_line(tmp_path, self.NAME)
-        workdirs = self.WORKDIR_PATTERN.findall(self.DOCKERFILE.read_text(encoding="utf-8"))
-        assert workdirs
-        default = self.DEFAULT_CONFIG_PATTERN.search(self.PARSER.read_text(encoding="utf-8"))
-        assert default is not None
-        read = default.group(1)
-        if self.CONFIG_OPTION in words:
-            read = words[words.index(self.CONFIG_OPTION) + 1]
-        read = posixpath.normpath(posixpath.join(workdirs[-1], read))
+        roots = self.APP_ROOT_PATTERN.findall(self.DOCKERFILE.read_text(encoding="utf-8"))
+        assert roots
+        read = posixpath.join(roots[-1], AppConfig.CONF_FOLDER, AppConfig.APP_FILE)
         mounts = self._items(self._container(tmp_path, self.NAME), "volumeMounts")
         mounted = [m["mountPath"] for m in mounts if isinstance(m, dict) and m.get("subPath") == self.CONFIG_FILE]
         assert mounted == [read]

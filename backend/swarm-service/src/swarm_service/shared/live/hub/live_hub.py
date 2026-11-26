@@ -5,7 +5,7 @@ from logging import Logger, getLogger
 from typing import Dict, List, Optional, Tuple
 
 # First-party imports
-from swarm_live.service.live_mailbox import LiveMailbox
+from swarm_service.shared.live.hub.live_mailbox import LiveMailbox
 
 
 class LiveHub:

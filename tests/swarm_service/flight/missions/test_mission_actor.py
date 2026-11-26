@@ -8,21 +8,21 @@ from typing import Callable, ClassVar, List
 
 # Third-party imports
 import pytest
-from flight_engine_recording_sink import RecordingFrameSink
-from flight_engine_stand_in_source import StandInSampleSource
 
 # First-party imports
-from flight_engine.models.config.flight_engine_config import FlightEngineConfig
-from flight_engine.models.missions.mission_entry import MissionEntry
-from flight_engine.models.telemetry.drone_sample import DroneSample
-from flight_engine.models.telemetry.drone_state_catalog import DroneStateCatalog
-from flight_engine.service.missions.mission_actor import MissionActor
-from flight_engine.service.missions.squad_frame_builder import SquadFrameBuilder
 from swarm_lifecycle.models.enums import RunnableStatus
-from swarm_live.service.live_codec import LiveCodec
-from swarm_live.service.live_hub import LiveHub
+from swarm_models.config.flight_engine.flight_engine_config import FlightEngineConfig
 from swarm_models.enums import LiveTopicKind
+from swarm_models.flight.missions.mission_entry import MissionEntry
+from swarm_models.flight.telemetry.drone_sample import DroneSample
+from swarm_models.flight.telemetry.drone_state_catalog import DroneStateCatalog
 from swarm_models.live.live_subscription import LiveSubscription
+from swarm_service.flight.missions.mission_actor import MissionActor
+from swarm_service.flight.missions.squad_frame_builder import SquadFrameBuilder
+from swarm_service.shared.live.hub.live_hub import LiveHub
+from swarm_service.shared.live.live_codec import LiveCodec
+from tests.swarm_service.flight.flight_engine_recording_sink import RecordingFrameSink
+from tests.swarm_service.flight.flight_engine_stand_in_source import StandInSampleSource
 
 
 class TestMissionActor:

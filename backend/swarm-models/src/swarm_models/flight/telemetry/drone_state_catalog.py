@@ -7,12 +7,12 @@ from typing import ClassVar, Dict, Literal, Type
 from pydantic import ConfigDict, Field, JsonValue, field_validator
 
 # First-party imports
-from flight_engine.models.telemetry.exceptions import (
+from swarm_catalog.models.yaml_catalog import YamlCatalog
+from swarm_models.flight.telemetry.exceptions import (
     SEDroneStateCatalogInvalidDefaultState,
     SEDroneStateCatalogInvalidSystemStatusStates,
     SEDroneStateCatalogUnreadable,
 )
-from swarm_catalog.models.yaml_catalog import YamlCatalog
 from swarm_models.telemetry.enums import DroneState
 
 

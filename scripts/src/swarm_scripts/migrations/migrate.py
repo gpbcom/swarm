@@ -22,6 +22,7 @@ def main() -> int:
         - The DSN of each app is read from the environment entry its ``postgres.dsn_key`` names,
           ``SWARM_<APP>_POSTGRES_DSN``, and is never printed.
         - In an image, the migration runs as a job with ``SWARM_APP`` and ``SWARM_APP_ROOT`` set.
+        - An app that owns no PostgreSQL schema, such as the simulator, is skipped.
     """
     LoggingConfigurator(LoggingConfig()).configure()
     apps = SwarmApps()
@@ -31,6 +32,9 @@ def main() -> int:
         return 2
     code = 0
     for app in selected:
+        if app not in SwarmApps.CONFIGS:
+            print(f"The {app.value} app owns no schema to migrate.")
+            continue
         config = apps.config(app)
         folder = apps.folder(app) / AppConfig.MIGRATIONS_FOLDER
         migration = SchemaMigrationFactory(config.postgres, config.schema_name, folder).create()

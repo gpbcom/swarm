@@ -6,9 +6,9 @@ from logging import Logger, getLogger
 from typing import ClassVar, List, Optional
 
 # First-party imports
-from simulator.models.config.route_config import RouteConfig
-from simulator.models.routes.route import Route
-from simulator.models.routes.waypoint import Waypoint
+from swarm_models.config.simulator.route_config import RouteConfig
+from swarm_models.simulation.routes.route import Route
+from swarm_models.simulation.routes.waypoint import Waypoint
 
 
 class SquareRouteBuilder:

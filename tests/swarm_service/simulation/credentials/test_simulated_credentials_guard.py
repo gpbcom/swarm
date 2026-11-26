@@ -10,18 +10,18 @@ from uuid import UUID
 import pytest
 
 # First-party imports
-from simulator.models.credentials.exceptions import (
+from swarm_models.accounts.issued_credential import IssuedCredential
+from swarm_models.enums import CredentialKind
+from swarm_models.simulation.credentials.exceptions import (
     SESimulatedCredentialsNotSimulatedError,
     SESimulatedCredentialsUnreadableError,
 )
-from simulator.service.credentials.simulated_credentials_guard import SimulatedCredentialsGuard
-from swarm_models.accounts.issued_credential import IssuedCredential
-from swarm_models.enums import CredentialKind
 from swarm_service.shared.accounts.account_issuer import AccountIssuer
 from swarm_service.shared.accounts.credential_issuer import CredentialIssuer
 from swarm_service.shared.accounts.nats_jwt_signer import NatsJwtSigner
 from swarm_service.shared.accounts.nkey_factory import NkeyFactory
 from swarm_service.shared.accounts.operator_issuer import OperatorIssuer
+from swarm_service.simulation.credentials.simulated_credentials_guard import SimulatedCredentialsGuard
 
 
 class TestSimulatedCredentialsGuard:

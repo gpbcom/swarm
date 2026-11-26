@@ -4,8 +4,8 @@ from __future__ import annotations
 from typing import List, Optional
 
 # First-party imports
-from flight_engine.clients.mavlink.sample_source import SampleSource
-from flight_engine.models.telemetry.drone_sample import DroneSample
+from swarm_clients.flight.mavlink.sample_source import SampleSource
+from swarm_models.flight.telemetry.drone_sample import DroneSample
 
 
 class StandInSampleSource(SampleSource):

@@ -3,22 +3,22 @@ from __future__ import annotations
 # Standard library imports
 from logging import Logger, getLogger
 from pathlib import Path
-from typing import List, Optional
+from typing import ClassVar, List, Optional
 
 # Third-party imports
 from babel.messages.catalog import Catalog, Message
 
 # First-party imports
-from swarm_i18n.models.enums import MessageProblem  # isort: skip
-from swarm_i18n.models.translations.missing_translation import MissingTranslation  # isort: skip
-from swarm_i18n.storage.catalogs.po_catalog_store import PoCatalogStore  # isort: skip
-from swarm_models.enums import Language
+from swarm_models.enums import Language, MessageProblem
+from swarm_models.i18n.translations.missing_translation import MissingTranslation
+from swarm_storage.shared.i18n.po_catalog_store import PoCatalogStore
 
 
 class CatalogChecker:
     """Finds the messages of the template that have no usable translation.
 
     Attributes:
+        LOCALES_KEY (str): The environment entry that names another folder of catalogues for ``swarm-i18n-check``.
         store (PoCatalogStore): Where the catalogues are read.
         logger (Logger): Logger instance.
 
@@ -26,6 +26,8 @@ class CatalogChecker:
         - Problems come in template order, then in the order of the ``Language`` enum.
         - Storage errors propagate unchanged.
     """
+
+    LOCALES_KEY: ClassVar[str] = "SWARM_I18N_LOCALES"
 
     def __init__(self, store: PoCatalogStore, logger: Optional[Logger] = None) -> None:
         self.store = store

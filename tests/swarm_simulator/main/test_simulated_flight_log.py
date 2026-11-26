@@ -2,14 +2,15 @@ from __future__ import annotations
 
 # Standard library imports
 import sqlite3
+from http import HTTPStatus
 from pathlib import Path
 
 # Third-party imports
 import pytest
 
 # First-party imports
-from simulator.models.enums import FlightLogEntryKind
-from tests.simulator.helpers import (
+from swarm_models.enums import FlightLogEntryKind
+from tests.swarm_simulator.main.helpers import (
     MISSION_ID,
     SYNTHETIC_COUNT,
     flight_log_path,
@@ -26,14 +27,13 @@ from tests.simulator.helpers import (
 
 class TestSimulatedFlightLog:
     SIMULATED = 1
-    COMPLETED_EXIT_CODE = 0
 
     @pytest.fixture
     def flown(self, tmp_path: Path, simulator_script: Path, synthetic_drones: int) -> Path:
         catalog = write_squad_catalog(tmp_path, synthetic_endpoints(synthetic_drones))
         config = write_app_config(tmp_path, catalog)
-        finished = run_fly(config, MISSION_ID)
-        assert finished.returncode == self.COMPLETED_EXIT_CODE, finished.stderr
+        accepted = run_fly(config, MISSION_ID, SYNTHETIC_COUNT)
+        assert accepted.status_code == HTTPStatus.ACCEPTED, accepted.text
         return flight_log_path(tmp_path)
 
     def test_every_row_of_the_flight_log_is_marked_simulated(self, flown: Path) -> None:

@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import List
 
 # First-party imports
-from swarm_live.service.live_hub import LiveHub  # isort: skip
+from swarm_service.shared.live.hub.live_hub import LiveHub
 
 
 class TestLiveHub:

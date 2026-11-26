@@ -3,44 +3,50 @@ from __future__ import annotations
 # Standard library imports
 import logging
 from pathlib import Path
-from typing import List
+from typing import ClassVar, List
 from uuid import UUID
 
 # Third-party imports
 import pytest
 
 # First-party imports
-from services.simulator.tests.helpers import MISSION_ID, a_registered_drone
-from services.simulator.tests.stand_in_drone import StandInDrone
-from services.simulator.tests.stand_in_drones import StandInDrones
-from simulator.clients.mavlink.mavlink_drone_client import MavlinkDroneClient
-from simulator.models.config.flight_config import FlightConfig
-from simulator.models.config.route_config import RouteConfig
-from simulator.service.flights.drone_flight import DroneFlight
-from simulator.service.flights.squad_flight import SquadFlight
-from simulator.service.routes.square_route_builder import SquareRouteBuilder
-from simulator.storage.edge.flight_log_store import FlightLogStore
 from swarm_lifecycle.models.enums import RunnableStatus
+from swarm_models.commands.enums import CommandKind
+from swarm_models.config.simulator.flight_config import FlightConfig
+from swarm_models.config.simulator.route_config import RouteConfig
+from swarm_models.simulation.commands.command_mapping_catalog import CommandMappingCatalog
+from swarm_models.simulation.commands.mavlink_command_spec import MavlinkCommandSpec
+from swarm_service.simulation.drones.drone_service import DroneService
+from swarm_service.simulation.flights.squad_flight import SquadFlight
+from swarm_service.simulation.registry.adapter_registry import AdapterRegistry
+from swarm_service.simulation.routes.square_route_builder import SquareRouteBuilder
+from swarm_storage.simulation.flight_logs.flight_log_store import FlightLogStore
+from tests.fakes.mavlink.helpers import MISSION_ID, a_registered_drone
+from tests.fakes.mavlink.stand_in_drone import StandInDrone
+from tests.fakes.mavlink.stand_in_drones import StandInDrones
 
 STORE_FILE = "flight_log.sqlite3"
 SQUAD_SIZE = 3
 
 
 class TestSquadFlight:
+    HOSTS: ClassVar[List[str]] = ["127.0.0.1", "localhost"]
+    RETURN_HOME_ID: ClassVar[int] = 20
+    MAPPING: ClassVar[CommandMappingCatalog] = CommandMappingCatalog(
+        commands={CommandKind.RETURN_HOME: MavlinkCommandSpec(command_id=RETURN_HOME_ID)}
+    )
+
     @pytest.fixture
     def config(self) -> FlightConfig:
         return FlightConfig(heartbeat_timeout_s=1.0, arm_timeout_s=2.0, route_timeout_s=1.0, status_interval_s=0.1)
 
     def a_squad(self, stand_ins: List[StandInDrone], tmp_path: Path, config: FlightConfig) -> SquadFlight:
-        store = FlightLogStore(str(tmp_path / STORE_FILE))
-        builder = SquareRouteBuilder(RouteConfig())
-        flights: List[DroneFlight] = []
+        registry = AdapterRegistry(self.HOSTS)
         for index, stand_in in enumerate(stand_ins):
-            drone = a_registered_drone(stand_in, index)
-            flights.append(
-                DroneFlight(drone, UUID(str(MISSION_ID)), MavlinkDroneClient(drone, config), builder, store, config)
-            )
-        return SquadFlight(flights, store, config.status_interval_s)
+            registry.register(a_registered_drone(stand_in, index))
+        store = FlightLogStore(str(tmp_path / STORE_FILE))
+        service = DroneService(registry, store, self.MAPPING, SquareRouteBuilder(RouteConfig()), config)
+        return SquadFlight(service, UUID(str(MISSION_ID)), config.status_interval_s)
 
     async def test_a_squad_of_three_completes_every_flight(
         self, stand_in_drones: StandInDrones, tmp_path: Path, config: FlightConfig
@@ -49,6 +55,7 @@ class TestSquadFlight:
         squad = self.a_squad(stand_ins, tmp_path, config)
         statuses = [status async for status in squad.execute()]
         assert statuses[-1] == RunnableStatus.EXECUTED
+        assert set(statuses[:-1]) <= {RunnableStatus.INITIALISING, RunnableStatus.RUNNING}
         assert len(squad.outcomes) == SQUAD_SIZE
         assert squad.all_completed is True
 

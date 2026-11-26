@@ -8,23 +8,25 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, JsonValue, ValidationInfo, field_validator, model_validator
 
 # First-party imports
-from simulator.models.config.exceptions import (
+from swarm_models.config.app_config import AppConfig
+from swarm_models.config.nats.nats_responder_config import NatsResponderConfig
+from swarm_models.config.simulator.exceptions import (
     SESimulatorConfigInvalidFlightLogPath,
     SESimulatorConfigInvalidOperatorId,
+    SESimulatorConfigInvalidRest,
     SESimulatorConfigNoCredentials,
     SESimulatorConfigSubjectOutsideOperator,
     SESimulatorConfigUnreadable,
 )
-from simulator.models.config.flight_config import FlightConfig
-from simulator.models.config.registry_config import RegistryConfig
-from simulator.models.config.route_config import RouteConfig
-from swarm_catalog.models.yaml_catalog import YamlCatalog
-from swarm_models.config.nats.nats_responder_config import NatsResponderConfig
+from swarm_models.config.simulator.flight_config import FlightConfig
+from swarm_models.config.simulator.registry_config import RegistryConfig
+from swarm_models.config.simulator.route_config import RouteConfig
 from swarm_nats.models.config.nats_client_config import NatsClientConfig
+from swarm_web.models.config.rest_config import RestConfig
 
 
-class SimulatorConfig(YamlCatalog):
-    """The configuration of the simulator service.
+class SimulatorConfig(AppConfig):
+    """The configuration of the simulator app.
 
     Attributes:
         operator_id (UUID): The Operator the simulated squad belongs to, a UUID version 7.
@@ -34,12 +36,14 @@ class SimulatorConfig(YamlCatalog):
         route (RouteConfig): The route the simulator flies.
         flight (FlightConfig): The timings of a flight.
         flight_log_path (str): The path of the flight log.
+        rest (RestConfig): The settings of the REST server of ``POST /v1/simulations``.
         UNREADABLE (type[Exception]): The exception raised when the file cannot be read.
         OPERATOR_ID_FIELD (str): The name of the ``operator_id`` field.
         FLIGHT_LOG_PATH_FIELD (str): The name of the ``flight_log_path`` field.
         REGISTRY_FIELD (str): The name of the ``registry`` field.
         ROUTE_FIELD (str): The name of the ``route`` field.
         FLIGHT_FIELD (str): The name of the ``flight`` field.
+        REST_FIELD (str): The name of the ``rest`` field.
         DEFAULT_FLIGHT_LOG_PATH (str): The default path of the flight log.
         OPERATOR_ID_VERSION (int): The UUID version an Operator identifier must have.
         SUBJECT_PREFIX (str): The start of every subject of an Operator, before its identifier.
@@ -51,6 +55,8 @@ class SimulatorConfig(YamlCatalog):
         - **The credentials and the subject come from the deployment, never from a default.** A simulated squad
           must not be able to reach another Operator's subjects (BR-014).
         - The nested sections are validated by their own models.
+        - The folders of the app come from ``AppConfig``, whose ``APP_ROOT_KEY`` the image sets, and every relative
+          path of this configuration is read in the folder of the app.
     """
 
     UNREADABLE: ClassVar[Type[Exception]] = SESimulatorConfigUnreadable
@@ -59,6 +65,7 @@ class SimulatorConfig(YamlCatalog):
     REGISTRY_FIELD: ClassVar[str] = "registry"
     ROUTE_FIELD: ClassVar[str] = "route"
     FLIGHT_FIELD: ClassVar[str] = "flight"
+    REST_FIELD: ClassVar[str] = "rest"
     DEFAULT_FLIGHT_LOG_PATH: ClassVar[str] = "data/flight_log.sqlite3"
     OPERATOR_ID_VERSION: ClassVar[int] = 7
     SUBJECT_PREFIX: ClassVar[str] = "op."
@@ -81,6 +88,7 @@ class SimulatorConfig(YamlCatalog):
         default=DEFAULT_FLIGHT_LOG_PATH,
         description="The path of the flight log. Defaults to data/flight_log.sqlite3.",
     )
+    rest: RestConfig = Field(default_factory=RestConfig, description="The settings of the REST server.")
 
     @field_validator(OPERATOR_ID_FIELD, mode=BEFORE)
     def validate_operator_id(cls, value: Union[JsonValue, UUID]) -> Union[JsonValue, UUID]:
@@ -127,6 +135,25 @@ class SimulatorConfig(YamlCatalog):
         """
         if value is None:
             return cls.model_fields[str(info.field_name)].get_default(call_default_factory=True)
+        return value
+
+    @field_validator(REST_FIELD, mode=BEFORE)
+    def validate_rest(cls, value: Union[JsonValue, RestConfig]) -> Union[JsonValue, RestConfig]:
+        """Validate ``rest``.
+
+        Args:
+            value (Union[JsonValue, RestConfig]): The raw input.
+
+        Returns:
+            Union[JsonValue, RestConfig]: The section, or the default section when ``None``.
+
+        Raises:
+            SESimulatorConfigInvalidRest: If the value is neither a mapping nor a RestConfig.
+        """
+        if value is None:
+            return cls.model_fields[cls.REST_FIELD].get_default(call_default_factory=True)
+        if not isinstance(value, (dict, RestConfig)):
+            raise SESimulatorConfigInvalidRest(f"Invalid rest: {type(value).__name__}. Must be a mapping.")
         return value
 
     @field_validator(FLIGHT_LOG_PATH_FIELD, mode=BEFORE)

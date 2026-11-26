@@ -11,6 +11,9 @@ from typing import ClassVar, Dict
 # Third-party imports
 import asyncpg
 
+# Third-party imports
+import pytest
+
 # First-party imports
 from swarm_models.config.app_config import AppConfig
 from swarm_models.config.gateway.gateway_config import GatewayConfig
@@ -51,6 +54,13 @@ class TestMigrationsScripts:
         result = self.run_script(tmp_path, {SwarmApps.APP_KEY: self.UNKNOWN_APP})
 
         assert result.returncode == 2, result.stderr
+
+    @pytest.mark.parametrize("app", [AppName.SIMULATOR, AppName.FLIGHT_ENGINE])
+    def test_an_app_that_owns_no_schema_is_skipped(self, tmp_path: Path, app: AppName) -> None:
+        result = self.run_script(tmp_path, {SwarmApps.APP_KEY: app.value})
+
+        assert result.returncode == 0, result.stderr
+        assert app.value in result.stdout
 
     def test_without_a_dsn_the_migration_of_the_app_fails_with_one(self, tmp_path: Path) -> None:
         result = self.run_script(tmp_path, {SwarmApps.APP_KEY: AppName.GATEWAY.value})

@@ -5,16 +5,19 @@ from logging import Logger, getLogger
 from typing import Optional
 
 # First-party imports
-from simulator.api.cli.commands.serve_command import ServeCommand
-from simulator.api.factories.command_factory import CommandFactory
-from simulator.models.config.simulator_config import SimulatorConfig
+from swarm_models.config.simulator.simulator_config import SimulatorConfig
+from swarm_nats.clients.nats_connector import NatsConnector
+from swarm_service.shared.bus.factories.bus_runnable_factory import BusRunnableFactory
+from swarm_service.simulation.bus.command_responder import CommandResponder
+from swarm_service.simulation.factories.drones.drone_service_factory import DroneServiceFactory
 
 
-class ServeCommandFactory(CommandFactory):
-    """Builds the command that serves the commands of a Mission.
+class CommandResponderFactory(BusRunnableFactory[CommandResponder]):
+    """Builds the responder that answers the Commands of the bus with the simulated Drones.
 
     Attributes:
         config (SimulatorConfig): The configuration of the Simulator.
+        logger (Logger): Logger instance.
     """
 
     def __init__(self, config: SimulatorConfig, logger: Optional[Logger] = None) -> None:
@@ -32,11 +35,11 @@ class ServeCommandFactory(CommandFactory):
     # Internal Helpers Methods #
     ############################
 
-    def _build(self) -> ServeCommand:
-        """Build one serve command.
+    def _build(self) -> CommandResponder:
+        """Build one responder, with its own Drone service and connector.
 
         Returns:
-            ServeCommand: A new command, not run.
+            CommandResponder: A new responder, not connected yet.
         """
-        self.logger.debug("Building a serve command.")
-        return ServeCommand(self.config)
+        self.logger.debug("Building the command responder on %s.", self.config.responder.subject)
+        return CommandResponder(self.config, DroneServiceFactory(self.config).create(), NatsConnector(self.config.nats))

@@ -11,13 +11,13 @@ from uuid import UUID
 import pytest
 
 # First-party imports
-from simulator.models.enums import FlightLogEntryKind
-from simulator.models.flight_logs.exceptions import (
+from swarm_models.enums import FlightLogEntryKind
+from swarm_models.simulation.flight_logs.exceptions import (
     SEFlightLogStoreNotSimulatedError,
     SEFlightLogStoreUnwritableError,
 )
-from simulator.models.flight_logs.flight_log_entry import FlightLogEntry
-from simulator.storage.edge.flight_log_store import FlightLogStore
+from swarm_models.simulation.flight_logs.flight_log_entry import FlightLogEntry
+from swarm_storage.simulation.flight_logs.flight_log_store import FlightLogStore
 
 
 class TestFlightLogStore:

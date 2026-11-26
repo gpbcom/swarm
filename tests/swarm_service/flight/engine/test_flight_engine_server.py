@@ -1,82 +1,101 @@
 from __future__ import annotations
 
 # Standard library imports
-import signal
+import asyncio
 import socket
-import subprocess
-import sys
-import time
 from pathlib import Path
 from typing import ClassVar
 
 # Third-party imports
 import pytest
-from websockets.sync.client import connect
+from websockets.asyncio.client import connect
 
 pytest.importorskip("swarm_core")
 
 # First-party imports
-from flight_engine.api.cli.commands.serve_command import ServeCommand  # isort: skip
-from flight_engine.api.factories.serve.serve_command_factory import ServeCommandFactory  # isort: skip
-from swarm_lifecycle.runnables.runnable import Runnable  # isort: skip
+from swarm_api.v1.flight.flight_engine_router import FlightEngineRouter
+from swarm_lifecycle.runnables.async_runnable import AsyncRunnable
+from swarm_models.config.flight_engine.flight_engine_config import FlightEngineConfig
+from swarm_models.config.flight_engine.live_server_config import LiveServerConfig
+from swarm_nats.models.bus.exceptions import SENatsConnectionError
+from swarm_nats.models.config.nats_client_config import NatsClientConfig
+from swarm_service.flight.engine.flight_engine_server import FlightEngineServer
+from swarm_service.flight.factories.engine.flight_engine_server_factory import FlightEngineServerFactory
 
 
-class TestServeCommand:
+class TestFlightEngineServer:
     HOST: ClassVar[str] = "127.0.0.1"
     PATH: ClassVar[str] = "/v1/live"
-    CONFIG_NAME: ClassVar[str] = "app.yaml"
     MISSIONS_NAME: ClassVar[str] = "missions.yaml"
+    STATES: ClassVar[Path] = (
+        Path(__file__).resolve().parents[4]
+        / "backend"
+        / "apps"
+        / "flight-engine"
+        / "conf"
+        / "catalogs"
+        / "drone_states.yaml"
+    )
     ENCODING: ClassVar[str] = "utf-8"
-    LAUNCH: ClassVar[str] = "import sys; from flight_engine.api.cli.main import main; sys.argv = sys.argv[1:]; main()"
-    PROGRAM: ClassVar[str] = "swarm-flight-engine"
-    CONFIG_FLAG: ClassVar[str] = "--config"
-    READY_TIMEOUT_S: ClassVar[float] = 30.0
-    EXIT_TIMEOUT_S: ClassVar[float] = 20.0
-    OPEN_TIMEOUT_S: ClassVar[float] = 1.0
-    POLL_S: ClassVar[float] = 0.1
+    READY_TIMEOUT_S: ClassVar[float] = 15.0
+    STOP_TIMEOUT_S: ClassVar[float] = 15.0
+    POLL_S: ClassVar[float] = 0.05
+    STATUS_INTERVAL_S: ClassVar[float] = 0.05
+    CONNECT_TIMEOUT_S: ClassVar[float] = 1.0
 
     def free_port(self) -> int:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as probe:
             probe.bind((self.HOST, 0))
             return int(probe.getsockname()[1])
 
-    def test_the_command_is_a_runnable_built_by_its_factory(self, tmp_path: Path) -> None:
-        command = ServeCommandFactory(tmp_path / self.CONFIG_NAME).create()
-
-        assert isinstance(command, ServeCommand)
-        assert isinstance(command, Runnable)
-
-    def test_the_served_engine_accepts_a_websocket_and_stops_on_sigint_with_zero(
-        self, tmp_path: Path, nats_url: str
-    ) -> None:
-        port = self.free_port()
+    def a_config(self, tmp_path: Path, nats_url: str) -> FlightEngineConfig:
         missions = tmp_path / self.MISSIONS_NAME
         missions.write_text("missions: []\n", encoding=self.ENCODING)
-        config = tmp_path / self.CONFIG_NAME
-        config.write_text(
-            f"missions_catalog_path: {missions}\n"
-            f"nats:\n  servers: ['{nats_url}']\n"
-            f"live:\n  host: {self.HOST}\n  port: {port}\n",
-            encoding=self.ENCODING,
+        return FlightEngineConfig(
+            status_interval_s=self.STATUS_INTERVAL_S,
+            missions_catalog_path=str(missions),
+            drone_states_catalog_path=str(self.STATES),
+            nats=NatsClientConfig(servers=[nats_url], connect_timeout_s=self.CONNECT_TIMEOUT_S),
+            live=LiveServerConfig(host=self.HOST, port=self.free_port(), status_interval_s=self.STATUS_INTERVAL_S),
         )
-        process = subprocess.Popen(
-            [sys.executable, "-c", self.LAUNCH, self.PROGRAM, self.CONFIG_FLAG, str(config)],
-            cwd=tmp_path,
-        )
+
+    def a_server(self, config: FlightEngineConfig) -> FlightEngineServer:
+        router = FlightEngineRouter(config)
+        return FlightEngineServerFactory(config, router.application(), router.hub, router.codec).create()
+
+    async def consume(self, server: FlightEngineServer) -> None:
+        async for _ in server.execute():
+            pass
+
+    async def test_the_factory_builds_an_async_runnable(self, tmp_path: Path, nats_url: str) -> None:
+        server = self.a_server(self.a_config(tmp_path, nats_url))
+
+        assert isinstance(server, FlightEngineServer)
+        assert isinstance(server, AsyncRunnable)
+
+    async def test_the_socket_is_served_after_the_engine_ends_and_cancelling_stops_both(
+        self, tmp_path: Path, nats_url: str
+    ) -> None:
+        config = self.a_config(tmp_path, nats_url)
+        task = asyncio.create_task(self.consume(self.a_server(config)))
+        url = f"ws://{self.HOST}:{config.live.port}{self.PATH}"
         connected = False
-        try:
-            deadline = time.monotonic() + self.READY_TIMEOUT_S
-            while time.monotonic() < deadline and not connected and process.poll() is None:
-                try:
-                    with connect(f"ws://{self.HOST}:{port}{self.PATH}", open_timeout=self.OPEN_TIMEOUT_S):
-                        connected = True
-                except OSError:
-                    time.sleep(self.POLL_S)
-            process.send_signal(signal.SIGINT)
-            code = process.wait(timeout=self.EXIT_TIMEOUT_S)
-        finally:
-            if process.poll() is None:
-                process.kill()
+        deadline = asyncio.get_running_loop().time() + self.READY_TIMEOUT_S
+        while not connected and asyncio.get_running_loop().time() < deadline:
+            try:
+                async with connect(url, open_timeout=self.POLL_S * 10):
+                    connected = True
+            except OSError:
+                await asyncio.sleep(self.POLL_S)
+
+        task.cancel()
+        await asyncio.gather(task, return_exceptions=True)
 
         assert connected
-        assert code == 0
+        assert task.done()
+
+    async def test_a_failed_engine_stops_the_server_and_is_raised(self, tmp_path: Path) -> None:
+        config = self.a_config(tmp_path, f"nats://{self.HOST}:{self.free_port()}")
+
+        with pytest.raises(SENatsConnectionError):
+            await asyncio.wait_for(self.consume(self.a_server(config)), timeout=self.STOP_TIMEOUT_S)

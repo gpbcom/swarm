@@ -8,14 +8,14 @@ from uuid import UUID
 from pydantic import ConfigDict, Field, JsonValue, field_validator, model_validator
 
 # First-party imports
-from flight_engine.models.missions.exceptions import (
+from swarm_catalog.models.yaml_catalog import YamlCatalog
+from swarm_models.flight.missions.exceptions import (
     SEMissionCatalogDuplicateMission,
     SEMissionCatalogDuplicatePort,
     SEMissionCatalogInvalidMissions,
     SEMissionCatalogUnreadable,
 )
-from flight_engine.models.missions.mission_entry import MissionEntry
-from swarm_catalog.models.yaml_catalog import YamlCatalog
+from swarm_models.flight.missions.mission_entry import MissionEntry
 
 
 class MissionCatalog(YamlCatalog):

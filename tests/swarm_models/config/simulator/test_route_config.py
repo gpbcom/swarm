@@ -8,8 +8,8 @@ import pytest
 from pydantic import JsonValue, ValidationError
 
 # First-party imports
-from simulator.models.config.exceptions import SERouteConfigInvalidAltitude, SERouteConfigInvalidSide
-from simulator.models.config.route_config import RouteConfig
+from swarm_models.config.simulator.exceptions import SERouteConfigInvalidAltitude, SERouteConfigInvalidSide
+from swarm_models.config.simulator.route_config import RouteConfig
 
 
 class TestRouteConfig:

@@ -12,15 +12,15 @@ import pytest
 from live_stand_in_socket import LiveStandInSocket
 
 # First-party imports
-from swarm_lifecycle.models.enums import RunnableStatus  # isort: skip
-from swarm_live.api.factories.live.live_session_factory import LiveSessionFactory  # isort: skip
-from swarm_live.api.live.live_session import LiveSession  # isort: skip
-from swarm_models.live.session.live_session_config import LiveSessionConfig  # isort: skip
-from swarm_live.service.hub_live_source import HubLiveSource  # isort: skip
-from swarm_live.service.live_codec import LiveCodec  # isort: skip
-from swarm_live.service.live_hub import LiveHub  # isort: skip
+from swarm_lifecycle.models.enums import RunnableStatus
 from swarm_models.enums import LiveOperation, LiveTopicKind
 from swarm_models.live.live_subscription import LiveSubscription
+from swarm_models.live.session.live_session_config import LiveSessionConfig
+from swarm_service.shared.live.factories.live.live_session_factory import LiveSessionFactory
+from swarm_service.shared.live.hub.live_hub import LiveHub
+from swarm_service.shared.live.live_codec import LiveCodec
+from swarm_service.shared.live.live_session import LiveSession
+from swarm_service.shared.live.sources.hub_live_source import HubLiveSource
 
 
 class TestLiveSession:

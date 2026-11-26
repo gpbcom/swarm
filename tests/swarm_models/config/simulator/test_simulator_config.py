@@ -10,21 +10,24 @@ import yaml
 from pydantic import JsonValue, ValidationError
 
 # First-party imports
-from simulator.models.config.exceptions import (
+from swarm_catalog.models.yaml_catalog import YamlCatalog
+from swarm_models.config.app_config import AppConfig
+from swarm_models.config.nats.nats_responder_config import NatsResponderConfig
+from swarm_models.config.simulator.exceptions import (
     SEFlightConfigInvalidArmTimeout,
     SESimulatorConfigInvalidFlightLogPath,
     SESimulatorConfigInvalidOperatorId,
+    SESimulatorConfigInvalidRest,
     SESimulatorConfigNoCredentials,
     SESimulatorConfigSubjectOutsideOperator,
     SESimulatorConfigUnreadable,
 )
-from simulator.models.config.flight_config import FlightConfig
-from simulator.models.config.registry_config import RegistryConfig
-from simulator.models.config.route_config import RouteConfig
-from simulator.models.config.simulator_config import SimulatorConfig
-from swarm_catalog.models.yaml_catalog import YamlCatalog
-from swarm_models.config.nats.nats_responder_config import NatsResponderConfig
+from swarm_models.config.simulator.flight_config import FlightConfig
+from swarm_models.config.simulator.registry_config import RegistryConfig
+from swarm_models.config.simulator.route_config import RouteConfig
+from swarm_models.config.simulator.simulator_config import SimulatorConfig
 from swarm_nats.models.config.nats_client_config import NatsClientConfig
+from swarm_web.models.config.rest_config import RestConfig
 
 
 class TestSimulatorConfig:
@@ -32,7 +35,9 @@ class TestSimulatorConfig:
     VERSION_4_ID: ClassVar[str] = "6f1c2a4e-8b3d-4c5e-9a7f-1d2e3f4a5b6c"
     CREDENTIALS_PATH: ClassVar[str] = "creds/simulated.creds"
     SUBJECT: ClassVar[str] = "op.018f4c1e-5b7a-7c3e-9a1b-2d4e6f8a0b1c.mission.*.command"
-    APP_YAML: ClassVar[Path] = Path(__file__).resolve().parents[3] / "conf" / "app.yaml"
+    APP_YAML: ClassVar[Path] = (
+        Path(__file__).resolve().parents[4] / "backend" / "apps" / "simulator" / "conf" / "app.yaml"
+    )
     OPERATOR_ID_KEY: ClassVar[str] = "operator_id"
     NATS_KEY: ClassVar[str] = "nats"
     RESPONDER_KEY: ClassVar[str] = "responder"
@@ -40,6 +45,7 @@ class TestSimulatorConfig:
     SUBJECT_KEY: ClassVar[str] = "subject"
     QUEUE_GROUP_KEY: ClassVar[str] = "queue_group"
     FLIGHT_LOG_PATH_KEY: ClassVar[str] = "flight_log_path"
+    HOST_KEY: ClassVar[str] = "host"
     QUEUE_GROUP: ClassVar[str] = "simulator"
     ENCODING: ClassVar[str] = "utf-8"
 
@@ -79,10 +85,17 @@ class TestSimulatorConfig:
         assert config.flight.arm_timeout_s == 9.0
         assert config.flight_log_path == "other/log.sqlite3"
 
-    def test_none_becomes_the_default(self) -> None:
-        config = SimulatorConfig.model_validate({**self.required(), self.FLIGHT_LOG_PATH_KEY: None})
-        default = SimulatorConfig.model_fields[self.FLIGHT_LOG_PATH_KEY].get_default(call_default_factory=True)
-        assert config.flight_log_path == default
+    @pytest.mark.parametrize("name", ["flight_log_path", "rest"])
+    def test_none_becomes_the_default(self, name: str) -> None:
+        config = SimulatorConfig.model_validate({**self.required(), name: None})
+        default = SimulatorConfig.model_fields[name].get_default(call_default_factory=True)
+        assert getattr(config, name) == default
+
+    def test_it_is_an_app_config_whose_rest_server_defaults_to_the_kernel_s(self) -> None:
+        config = SimulatorConfig.model_validate(self.required())
+
+        assert issubclass(SimulatorConfig, AppConfig)
+        assert config.rest == RestConfig()
 
     @pytest.mark.parametrize(
         ("name", "value", "error"),
@@ -95,6 +108,8 @@ class TestSimulatorConfig:
             ("flight_log_path", "", SESimulatorConfigInvalidFlightLogPath),
             ("flight_log_path", "   ", SESimulatorConfigInvalidFlightLogPath),
             ("flight_log_path", 3, SESimulatorConfigInvalidFlightLogPath),
+            ("rest", "0.0.0.0:8000", SESimulatorConfigInvalidRest),
+            ("rest", 8000, SESimulatorConfigInvalidRest),
         ],
     )
     def test_rejects_bad_values(self, name: str, value: JsonValue, error: type[Exception]) -> None:
@@ -178,6 +193,7 @@ class TestSimulatorConfig:
         assert config.flight == FlightConfig()
         assert config.flight_log_path == SimulatorConfig.model_fields[self.FLIGHT_LOG_PATH_KEY].get_default()
         assert config.nats == NatsClientConfig(credentials_path=self.CREDENTIALS_PATH)
+        assert config.rest.model_dump(exclude={self.HOST_KEY}) == RestConfig().model_dump(exclude={self.HOST_KEY})
         ignored = {self.SUBJECT_KEY, self.QUEUE_GROUP_KEY}
         responder_defaults = NatsResponderConfig(subject=self.SUBJECT, queue_group=config.responder.queue_group)
         assert config.responder.model_dump(exclude=ignored) == responder_defaults.model_dump(exclude=ignored)
