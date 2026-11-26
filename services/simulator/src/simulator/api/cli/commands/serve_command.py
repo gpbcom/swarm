@@ -19,10 +19,10 @@ from simulator.service.commands.simulated_command_service import SimulatedComman
 from simulator.service.credentials.simulated_credentials_guard import SimulatedCredentialsGuard
 from simulator.service.factories.commands.simulated_command_service_factory import SimulatedCommandServiceFactory
 from swarm_models.commands.command import Command as BusCommand
-from swarm_nats.api.bus.nats_responder import NatsResponder
-from swarm_nats.api.factories.bus.nats_responder_factory import NatsResponderFactory
 from swarm_nats.clients.nats_connector import NatsConnector
 from swarm_nats.models.bus.exceptions import SENatsConnectionError
+from swarm_service.shared.bus.factories.nats_responder_factory import NatsResponderFactory
+from swarm_service.shared.bus.nats_responder import NatsResponder
 
 
 class ServeCommand(Command):

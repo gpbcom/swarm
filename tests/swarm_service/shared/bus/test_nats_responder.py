@@ -13,10 +13,10 @@ from nats.errors import TimeoutError as NatsTimeoutError
 
 # First-party imports
 from swarm_lifecycle.models.enums import RunnableStatus
-from swarm_nats.api.bus.nats_responder import NatsResponder
+from swarm_models.config.nats.nats_responder_config import NatsResponderConfig
+from swarm_models.streams.stream_source import StreamSource
 from swarm_nats.models.bus.nats_headers import NatsHeaders
-from swarm_nats.models.config.nats_responder_config import NatsResponderConfig
-from swarm_nats.models.streams.stream_source import StreamSource
+from swarm_service.shared.bus.nats_responder import NatsResponder
 
 
 class TestNatsResponder:

@@ -11,7 +11,8 @@ from nats.aio.client import Client
 from nats.aio.msg import Msg
 
 # First-party imports
-from swarm_nats.clients.nats_requester import NatsRequester
+from swarm_clients.shared.nats.nats_requester import NatsRequester
+from swarm_models.streams.stream_source import StreamSource
 from swarm_nats.models.bus.exceptions import (
     SENatsInvalidDeadlineError,
     SENatsInvalidIdempotencyKeyError,
@@ -22,7 +23,6 @@ from swarm_nats.models.bus.exceptions import (
 )
 from swarm_nats.models.bus.nats_headers import NatsHeaders
 from swarm_nats.models.config.nats_client_config import NatsClientConfig
-from swarm_nats.models.streams.stream_source import StreamSource
 
 
 class TestNatsRequester:

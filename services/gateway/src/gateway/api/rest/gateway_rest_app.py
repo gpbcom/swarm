@@ -14,7 +14,11 @@ from gateway.api.live.live_router import LiveRouter
 from gateway.api.rest.auth.access_installer import AccessInstaller
 from gateway.models.config.gateway_config import GatewayConfig
 from gateway.service.factories.live.live_feed_factory import LiveFeedFactory
-from swarm_rest.api.rest.rest_app_builder import RestAppBuilder
+from swarm_api.handlers.problem_handlers import ProblemHandlers
+from swarm_api.middleware.idempotency_middleware import IdempotencyMiddleware
+from swarm_models.rest.problems.problem import Problem
+from swarm_service.shared.idempotency.factories.idempotency_service_factory import IdempotencyServiceFactory
+from swarm_web.rest.rest_app_builder import RestAppBuilder
 
 
 class GatewayRestApp:
@@ -58,7 +62,12 @@ class GatewayRestApp:
         """
         self.logger.debug("Building the gateway application.")
         feed = LiveFeedFactory(self.config.live).create()
-        app = RestAppBuilder(self.config.rest).build(self.TITLE, version(self.DISTRIBUTION), routers=[])
+        app = RestAppBuilder().build(
+            self.TITLE, version(self.DISTRIBUTION), routers=[], problem=Problem, problem_media_type=Problem.MEDIA_TYPE
+        )
+        ProblemHandlers().install(app)
+        app.add_middleware(IdempotencyMiddleware, service=IdempotencyServiceFactory(self.config.rest).create())
+        self.logger.debug("The problem handlers and the idempotency middleware are installed.")
         app.include_router(LiveRouter(feed.source_for, self.config.live.session).build())
         app.router.lifespan_context = LiveFeedLifespan(feed).lifespan
         self.logger.debug("The live socket and its feed are wired on the gateway application.")

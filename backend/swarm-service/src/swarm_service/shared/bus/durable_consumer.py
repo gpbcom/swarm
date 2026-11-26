@@ -14,7 +14,7 @@ from pydantic import BaseModel, ValidationError
 
 # First-party imports
 from swarm_lifecycle.runnables.async_runnable import AsyncRunnable
-from swarm_nats.models.config.durable_consumer_config import DurableConsumerConfig
+from swarm_models.config.nats.durable_consumer_config import DurableConsumerConfig
 
 
 class DurableConsumer[M: BaseModel](AsyncRunnable):

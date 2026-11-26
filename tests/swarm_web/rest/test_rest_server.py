@@ -9,9 +9,10 @@ import pytest
 
 # First-party imports
 from swarm_lifecycle.models.enums import RunnableStatus
-from swarm_rest.api.rest.rest_app_builder import RestAppBuilder
-from swarm_rest.api.rest.rest_server import RestServer
-from swarm_rest.models.config.rest_config import RestConfig
+from swarm_models.rest.problems.problem import Problem
+from swarm_web.models.config.rest_config import RestConfig
+from swarm_web.rest.rest_app_builder import RestAppBuilder
+from swarm_web.rest.rest_server import RestServer
 
 
 class TestRestServer:
@@ -31,7 +32,7 @@ class TestRestServer:
         return RestConfig(host=self.HOST, port=self.free_port(), status_interval_s=self.STATUS_INTERVAL_S)
 
     def a_server(self, config: RestConfig) -> RestServer:
-        app = RestAppBuilder(config).build(self.TITLE, self.VERSION, [])
+        app = RestAppBuilder().build(self.TITLE, self.VERSION, [], Problem, Problem.MEDIA_TYPE)
         return RestServer(app, config)
 
     def test_the_status_interval_comes_from_the_configuration(self) -> None:

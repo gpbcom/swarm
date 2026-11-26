@@ -11,8 +11,8 @@ import pytest
 from nats.errors import TimeoutError as NatsTimeoutError
 
 # First-party imports
-from swarm_nats.models.enums import CredentialKind
-from swarm_nats.models.subjects.operator_subjects import OperatorSubjects
+from swarm_models.enums import CredentialKind
+from swarm_models.subjects.operator_subjects import OperatorSubjects
 from tests.infra.nats.helpers import (
     OPERATOR_A_ID,
     OPERATOR_B_ID,

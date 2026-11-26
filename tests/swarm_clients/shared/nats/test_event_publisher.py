@@ -12,15 +12,15 @@ from nats.js.errors import NotFoundError
 from pydantic import JsonValue
 
 # First-party imports
+from swarm_clients.shared.nats.event_publisher import EventPublisher
+from swarm_clients.shared.nats.jetstream_admin import JetStreamAdmin
 from swarm_models.events.actor import Actor
 from swarm_models.events.enums import ActorKind
 from swarm_models.events.event import Event
-from swarm_nats.clients.event_publisher import EventPublisher
-from swarm_nats.clients.jetstream_admin import JetStreamAdmin
+from swarm_models.streams.stream_spec import StreamSpec
+from swarm_models.subjects.operator_subjects import OperatorSubjects
 from swarm_nats.models.bus.exceptions import SENatsPublishError
 from swarm_nats.models.bus.nats_headers import NatsHeaders
-from swarm_nats.models.streams.stream_spec import StreamSpec
-from swarm_nats.models.subjects.operator_subjects import OperatorSubjects
 
 
 class TestEventPublisher:

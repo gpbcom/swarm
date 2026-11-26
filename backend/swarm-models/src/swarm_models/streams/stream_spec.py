@@ -9,8 +9,8 @@ from pydantic import ConfigDict, Field, JsonValue, field_validator, model_valida
 
 # First-party imports
 from swarm_models.base.swarm_model import SwarmModel
-from swarm_nats.models.enums import StreamRetention, StreamStorage
-from swarm_nats.models.streams.exceptions import (
+from swarm_models.enums import StreamRetention, StreamStorage
+from swarm_models.streams.exceptions import (
     SEStreamSpecInvalidDuplicateWindow,
     SEStreamSpecInvalidName,
     SEStreamSpecInvalidReplicas,
@@ -20,7 +20,7 @@ from swarm_nats.models.streams.exceptions import (
     SEStreamSpecInvalidSubjects,
     SEStreamSpecNoSubjectsNorSources,
 )
-from swarm_nats.models.streams.stream_source import StreamSource
+from swarm_models.streams.stream_source import StreamSource
 
 
 class StreamSpec(SwarmModel):

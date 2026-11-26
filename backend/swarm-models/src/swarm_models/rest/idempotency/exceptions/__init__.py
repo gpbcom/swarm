@@ -1,18 +1,18 @@
 from __future__ import annotations
 
-from swarm_rest.models.idempotency.exceptions.se_invalid_stored_response_exception import (
+from swarm_models.rest.idempotency.exceptions.se_invalid_stored_response_exception import (
     SEInvalidStoredResponseException,
 )
-from swarm_rest.models.idempotency.exceptions.se_stored_response_invalid_body import (
+from swarm_models.rest.idempotency.exceptions.se_stored_response_invalid_body import (
     SEStoredResponseInvalidBody,
 )
-from swarm_rest.models.idempotency.exceptions.se_stored_response_invalid_fingerprint import (
+from swarm_models.rest.idempotency.exceptions.se_stored_response_invalid_fingerprint import (
     SEStoredResponseInvalidFingerprint,
 )
-from swarm_rest.models.idempotency.exceptions.se_stored_response_invalid_headers import (
+from swarm_models.rest.idempotency.exceptions.se_stored_response_invalid_headers import (
     SEStoredResponseInvalidHeaders,
 )
-from swarm_rest.models.idempotency.exceptions.se_stored_response_invalid_status import (
+from swarm_models.rest.idempotency.exceptions.se_stored_response_invalid_status import (
     SEStoredResponseInvalidStatus,
 )
 

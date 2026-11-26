@@ -9,9 +9,9 @@ from nats.aio.client import Client
 from pydantic import BaseModel
 
 # First-party imports
-from swarm_nats.api.bus.durable_consumer import DurableConsumer
-from swarm_nats.api.factories.bus_runnable_factory import BusRunnableFactory
-from swarm_nats.models.config.durable_consumer_config import DurableConsumerConfig
+from swarm_models.config.nats.durable_consumer_config import DurableConsumerConfig
+from swarm_service.shared.bus.durable_consumer import DurableConsumer
+from swarm_service.shared.bus.factories.bus_runnable_factory import BusRunnableFactory
 
 
 class DurableConsumerFactory[M: BaseModel](BusRunnableFactory[DurableConsumer[M]]):

@@ -8,7 +8,7 @@ import pytest
 from pydantic import JsonValue, ValidationError
 
 # First-party imports
-from swarm_rest.models.config.exceptions import (
+from swarm_web.models.config.exceptions import (
     SEInvalidRestConfigException,
     SERestConfigInvalidHost,
     SERestConfigInvalidIdempotencyMaxEntries,
@@ -16,7 +16,7 @@ from swarm_rest.models.config.exceptions import (
     SERestConfigInvalidPort,
     SERestConfigInvalidStatusInterval,
 )
-from swarm_rest.models.config.rest_config import RestConfig
+from swarm_web.models.config.rest_config import RestConfig
 
 
 class TestRestConfig:

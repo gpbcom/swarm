@@ -9,8 +9,8 @@ from fastapi import FastAPI
 
 # First-party imports
 from swarm_lifecycle.factories.async_runnable_factory import AsyncRunnableFactory
-from swarm_rest.api.rest.rest_server import RestServer
-from swarm_rest.models.config.rest_config import RestConfig
+from swarm_web.models.config.rest_config import RestConfig
+from swarm_web.rest.rest_server import RestServer
 
 
 class RestServerFactory(AsyncRunnableFactory[RestServer]):

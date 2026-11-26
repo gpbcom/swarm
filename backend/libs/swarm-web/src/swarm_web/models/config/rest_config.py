@@ -7,7 +7,7 @@ from typing import ClassVar, Literal
 from pydantic import BaseModel, ConfigDict, Field, JsonValue, field_validator
 
 # First-party imports
-from swarm_rest.models.config.exceptions import (
+from swarm_web.models.config.exceptions import (
     SERestConfigInvalidHost,
     SERestConfigInvalidIdempotencyMaxEntries,
     SERestConfigInvalidIdempotencyTtl,

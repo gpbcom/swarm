@@ -8,14 +8,14 @@ import pytest
 from pydantic import JsonValue, SecretStr, ValidationError
 
 # First-party imports
-from swarm_nats.models.accounts.exceptions import (
+from swarm_models.accounts.exceptions import (
     SEInvalidIssuedAccountException,
     SEIssuedAccountInvalidJwt,
     SEIssuedAccountInvalidName,
     SEIssuedAccountInvalidPublicKey,
     SEIssuedAccountInvalidSeed,
 )
-from swarm_nats.models.accounts.issued_account import IssuedAccount
+from swarm_models.accounts.issued_account import IssuedAccount
 
 
 class TestIssuedAccount:

@@ -9,17 +9,17 @@ from uuid import UUID
 from pydantic import JsonValue, SecretStr
 
 # First-party imports
-from swarm_nats.models.accounts.exceptions import (
+from swarm_models.accounts.exceptions import (
     SECredentialIssuerAccountMismatchError,
     SECredentialIssuerInvalidKindError,
 )
-from swarm_nats.models.accounts.issued_account import IssuedAccount
-from swarm_nats.models.accounts.issued_credential import IssuedCredential
-from swarm_nats.models.accounts.issued_operator import IssuedOperator
-from swarm_nats.models.enums import CredentialKind, NatsClaimType
-from swarm_nats.models.subjects.operator_subjects import OperatorSubjects
-from swarm_nats.service.accounts.nats_jwt_signer import NatsJwtSigner
-from swarm_nats.service.accounts.nkey_factory import NkeyFactory
+from swarm_models.accounts.issued_account import IssuedAccount
+from swarm_models.accounts.issued_credential import IssuedCredential
+from swarm_models.accounts.issued_operator import IssuedOperator
+from swarm_models.enums import CredentialKind, NatsClaimType
+from swarm_models.subjects.operator_subjects import OperatorSubjects
+from swarm_service.shared.accounts.nats_jwt_signer import NatsJwtSigner
+from swarm_service.shared.accounts.nkey_factory import NkeyFactory
 
 
 class CredentialIssuer:

@@ -9,8 +9,7 @@ from uuid import UUID
 from pydantic import ConfigDict, Field, JsonValue, SecretStr, field_validator, model_validator
 
 # First-party imports
-from swarm_models.base.swarm_model import SwarmModel
-from swarm_nats.models.accounts.exceptions import (
+from swarm_models.accounts.exceptions import (
     SEIssuedCredentialInconsistentKind,
     SEIssuedCredentialInvalidJwt,
     SEIssuedCredentialInvalidKind,
@@ -19,7 +18,8 @@ from swarm_nats.models.accounts.exceptions import (
     SEIssuedCredentialInvalidPublicKey,
     SEIssuedCredentialInvalidSeed,
 )
-from swarm_nats.models.enums import CredentialKind
+from swarm_models.base.swarm_model import SwarmModel
+from swarm_models.enums import CredentialKind
 
 
 class IssuedCredential(SwarmModel):

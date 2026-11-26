@@ -14,11 +14,11 @@ from nats.aio.client import Client
 
 # First-party imports
 from simulator.models.enums import CommandVerdict, FlightLogEntryKind, SimulatedDroneKind
+from swarm_clients.shared.nats.nats_requester import NatsRequester
 from swarm_models.commands.command import Command
 from swarm_models.commands.enums import CommandKind, CommandLane
-from swarm_nats.clients.nats_requester import NatsRequester
+from swarm_models.enums import CredentialKind
 from swarm_nats.models.config.nats_client_config import NatsClientConfig
-from swarm_nats.models.enums import CredentialKind
 from tests.infra.nats.helpers import connz_users, free_port, issuers, operator_mode_config, write_creds
 from tests.infra.nats.nats_server_process import NatsServerProcess
 from tests.simulator.helpers import (

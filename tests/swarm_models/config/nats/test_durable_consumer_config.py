@@ -8,8 +8,8 @@ import pytest
 from pydantic import JsonValue, ValidationError
 
 # First-party imports
-from swarm_nats.models.config.durable_consumer_config import DurableConsumerConfig
-from swarm_nats.models.config.exceptions import (
+from swarm_models.config.nats.durable_consumer_config import DurableConsumerConfig
+from swarm_models.config.nats.exceptions import (
     SEDurableConsumerConfigInvalidAckWait,
     SEDurableConsumerConfigInvalidBatchSize,
     SEDurableConsumerConfigInvalidDurableName,

@@ -14,14 +14,14 @@ from swarm_models.base.swarm_model import SwarmModel
 from swarm_models.events.actor import Actor
 from swarm_models.events.enums import ActorKind
 from swarm_models.events.event import Event
-from swarm_nats.models.subjects.exceptions import (
+from swarm_models.subjects.exceptions import (
     SEInvalidOperatorSubjectsException,
     SEOperatorSubjectsInvalidEvent,
     SEOperatorSubjectsInvalidMissionId,
     SEOperatorSubjectsInvalidOperatorId,
     SEOperatorSubjectsOperatorMismatch,
 )
-from swarm_nats.models.subjects.operator_subjects import OperatorSubjects
+from swarm_models.subjects.operator_subjects import OperatorSubjects
 
 
 class TestOperatorSubjects:

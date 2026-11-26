@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 # First-party imports
-from swarm_rest.models.problems.exceptions.se_invalid_problem_exception import (
+from swarm_models.rest.problems.exceptions.se_invalid_problem_exception import (
     SEInvalidProblemException,
 )
 

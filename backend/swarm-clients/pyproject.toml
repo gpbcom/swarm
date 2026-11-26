@@ -4,7 +4,16 @@ version = "0.1.0"
 description = "The clients layer of Swarm: one client per remote system, a folder per domain."
 readme = "../../README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "nats-py>=2.11.0",
+    "pydantic>=2.14.3",
+    "swarm-models",
+    "swarm-nats",
+]
+
+[tool.uv.sources]
+swarm-models = { workspace = true }
+swarm-nats = { workspace = true }
 
 [tool.uv.build-backend]
 module-name = "swarm_clients"

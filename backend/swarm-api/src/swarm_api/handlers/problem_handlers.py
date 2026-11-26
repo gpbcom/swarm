@@ -12,8 +12,8 @@ from fastapi.responses import JSONResponse, Response
 from starlette.exceptions import HTTPException
 
 # First-party imports
-from swarm_rest.models.problems.problem import Problem
-from swarm_rest.models.rest.exceptions import SERestError
+from swarm_models.rest.problems.problem import Problem
+from swarm_web.models.rest.exceptions import SERestError
 
 
 class ProblemHandlers:

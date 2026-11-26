@@ -8,15 +8,15 @@ from typing import ClassVar, Dict, Literal, Union
 from pydantic import ConfigDict, Field, JsonValue, SecretStr, field_validator
 
 # First-party imports
-from swarm_models.base.swarm_model import SwarmModel
-from swarm_nats.models.accounts.exceptions import (
+from swarm_models.accounts.exceptions import (
     SEIssuedOperatorInvalidJwt,
     SEIssuedOperatorInvalidName,
     SEIssuedOperatorInvalidPublicKey,
     SEIssuedOperatorInvalidSeed,
     SEIssuedOperatorInvalidSystemAccount,
 )
-from swarm_nats.models.accounts.issued_account import IssuedAccount
+from swarm_models.accounts.issued_account import IssuedAccount
+from swarm_models.base.swarm_model import SwarmModel
 
 
 class IssuedOperator(SwarmModel):

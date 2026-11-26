@@ -15,7 +15,7 @@ from simulator.models.credentials.exceptions import (
     SESimulatedCredentialsNotSimulatedError,
     SESimulatedCredentialsUnreadableError,
 )
-from swarm_nats.models.enums import CredentialKind
+from swarm_models.enums import CredentialKind
 
 
 class SimulatedCredentialsGuard:

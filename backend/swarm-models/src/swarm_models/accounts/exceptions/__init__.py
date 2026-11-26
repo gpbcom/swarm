@@ -1,18 +1,18 @@
-from swarm_nats.models.accounts.exceptions.errors import (
+from swarm_models.accounts.exceptions.errors import (
     SECredentialIssuerAccountMismatchError,
     SECredentialIssuerInvalidKindError,
     SENatsAccountsError,
     SENatsJwtInvalidError,
     SENkeyInvalidSeedError,
 )
-from swarm_nats.models.accounts.exceptions.issued_account import (
+from swarm_models.accounts.exceptions.issued_account import (
     SEInvalidIssuedAccountException,
     SEIssuedAccountInvalidJwt,
     SEIssuedAccountInvalidName,
     SEIssuedAccountInvalidPublicKey,
     SEIssuedAccountInvalidSeed,
 )
-from swarm_nats.models.accounts.exceptions.issued_credential import (
+from swarm_models.accounts.exceptions.issued_credential import (
     SEInvalidIssuedCredentialException,
     SEIssuedCredentialInconsistentKind,
     SEIssuedCredentialInvalidJwt,
@@ -22,7 +22,7 @@ from swarm_nats.models.accounts.exceptions.issued_credential import (
     SEIssuedCredentialInvalidPublicKey,
     SEIssuedCredentialInvalidSeed,
 )
-from swarm_nats.models.accounts.exceptions.issued_operator import (
+from swarm_models.accounts.exceptions.issued_operator import (
     SEInvalidIssuedOperatorException,
     SEIssuedOperatorInvalidJwt,
     SEIssuedOperatorInvalidName,

@@ -10,7 +10,11 @@ from fastapi import FastAPI
 
 # First-party imports
 from missions.models.config.missions_config import MissionsConfig
-from swarm_rest.api.rest.rest_app_builder import RestAppBuilder
+from swarm_api.handlers.problem_handlers import ProblemHandlers
+from swarm_api.middleware.idempotency_middleware import IdempotencyMiddleware
+from swarm_models.rest.problems.problem import Problem
+from swarm_service.shared.idempotency.factories.idempotency_service_factory import IdempotencyServiceFactory
+from swarm_web.rest.rest_app_builder import RestAppBuilder
 
 
 class MissionsRestApp:
@@ -65,4 +69,8 @@ class MissionsRestApp:
             FastAPI: The application, with the REST conventions of Swarm and no router yet.
         """
         self.logger.debug("Building the missions application.")
-        return RestAppBuilder(self.config.rest).build(self.TITLE, self.VERSION, [])
+        app = RestAppBuilder().build(self.TITLE, self.VERSION, [], Problem, Problem.MEDIA_TYPE)
+        ProblemHandlers().install(app)
+        app.add_middleware(IdempotencyMiddleware, service=IdempotencyServiceFactory(self.config.rest).create())
+        self.logger.debug("The problem handlers and the idempotency middleware are installed.")
+        return app

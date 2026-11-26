@@ -9,7 +9,7 @@ import pytest
 from pydantic import JsonValue, SecretStr, ValidationError
 
 # First-party imports
-from swarm_nats.models.accounts.exceptions import (
+from swarm_models.accounts.exceptions import (
     SEInvalidIssuedCredentialException,
     SEIssuedCredentialInconsistentKind,
     SEIssuedCredentialInvalidJwt,
@@ -19,8 +19,8 @@ from swarm_nats.models.accounts.exceptions import (
     SEIssuedCredentialInvalidPublicKey,
     SEIssuedCredentialInvalidSeed,
 )
-from swarm_nats.models.accounts.issued_credential import IssuedCredential
-from swarm_nats.models.enums import CredentialKind
+from swarm_models.accounts.issued_credential import IssuedCredential
+from swarm_models.enums import CredentialKind
 
 
 class TestIssuedCredential:

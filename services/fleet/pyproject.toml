@@ -14,6 +14,9 @@ dependencies = [
     "swarm-models",
     "swarm-storage",
     "swarm-rest",
+    "swarm-web",
+    "swarm-api",
+    "swarm-service",
 ]
 
 [project.scripts]
@@ -31,6 +34,9 @@ swarm-catalog = { workspace = true }
 swarm-models = { workspace = true }
 swarm-storage = { workspace = true }
 swarm-rest = { workspace = true }
+swarm-web = { workspace = true }
+swarm-api = { workspace = true }
+swarm-service = { workspace = true }
 
 [build-system]
 requires = ["uv_build>=0.12.21,<0.13.0"]

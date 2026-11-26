@@ -6,7 +6,7 @@ from time import monotonic
 from typing import Callable, Dict, Optional, Set, Tuple
 
 # First-party imports
-from swarm_rest.models.idempotency.stored_response import StoredResponse
+from swarm_models.rest.idempotency.stored_response import StoredResponse
 
 
 class MemoryIdempotencyStore:

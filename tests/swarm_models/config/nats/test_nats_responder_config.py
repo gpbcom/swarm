@@ -8,7 +8,7 @@ import pytest
 from pydantic import JsonValue, ValidationError
 
 # First-party imports
-from swarm_nats.models.config.exceptions import (
+from swarm_models.config.nats.exceptions import (
     SEInvalidNatsResponderConfigException,
     SENatsResponderConfigInvalidIdempotencyBucket,
     SENatsResponderConfigInvalidIdempotencyTtl,
@@ -17,7 +17,7 @@ from swarm_nats.models.config.exceptions import (
     SENatsResponderConfigInvalidStatusInterval,
     SENatsResponderConfigInvalidSubject,
 )
-from swarm_nats.models.config.nats_responder_config import NatsResponderConfig
+from swarm_models.config.nats.nats_responder_config import NatsResponderConfig
 
 
 class TestNatsResponderConfig:

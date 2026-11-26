@@ -9,9 +9,9 @@ from nats.aio.client import Client
 from pydantic import BaseModel
 
 # First-party imports
-from swarm_nats.api.bus.nats_responder import NatsResponder
-from swarm_nats.api.factories.bus_runnable_factory import BusRunnableFactory
-from swarm_nats.models.config.nats_responder_config import NatsResponderConfig
+from swarm_models.config.nats.nats_responder_config import NatsResponderConfig
+from swarm_service.shared.bus.factories.bus_runnable_factory import BusRunnableFactory
+from swarm_service.shared.bus.nats_responder import NatsResponder
 
 
 class NatsResponderFactory[Q: BaseModel, R: BaseModel](BusRunnableFactory[NatsResponder[Q, R]]):

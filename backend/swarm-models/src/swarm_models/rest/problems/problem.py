@@ -7,7 +7,7 @@ from typing import ClassVar, Literal, Optional
 from pydantic import BaseModel, ConfigDict, Field, JsonValue, field_validator
 
 # First-party imports
-from swarm_rest.models.problems.exceptions import (
+from swarm_models.rest.problems.exceptions import (
     SEProblemInvalidDetail,
     SEProblemInvalidInstance,
     SEProblemInvalidStatus,

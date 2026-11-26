@@ -8,13 +8,11 @@ from typing import ClassVar, Dict, List
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from pydantic import JsonValue
-from samples.sample_resource import SampleResource
 
 # First-party imports
-from swarm_rest.api.rest.idempotency_middleware import IdempotencyMiddleware
-from swarm_rest.api.rest.rest_app_builder import RestAppBuilder
-from swarm_rest.models.config.rest_config import RestConfig
-from swarm_rest.models.problems.problem import Problem
+from swarm_models.rest.problems.problem import Problem
+from swarm_web.rest.rest_app_builder import RestAppBuilder
+from tests.swarm_web.rest.sample_resource import SampleResource
 
 
 class TestRestAppBuilder:
@@ -29,25 +27,21 @@ class TestRestAppBuilder:
     OPENAPI_PREFIX: ClassVar[str] = "3.1"
     PROBLEM_REF: ClassVar[str] = "#/components/schemas/Problem"
     PROBLEM_PROPERTIES: ClassVar[List[str]] = ["type", "title", "status", "detail", "instance"]
-    KEY: ClassVar[str] = "key-1"
+    OTHER_MEDIA_TYPE: ClassVar[str] = "application/sample+json"
     BODY: ClassVar[Dict[str, JsonValue]] = {"name": "first"}
 
-    def build(self, routers: bool = True) -> FastAPI:
+    def build(self, routers: bool = True, media_type: str = Problem.MEDIA_TYPE) -> FastAPI:
         resources = [SampleResource().router] if routers else []
-        return RestAppBuilder(RestConfig()).build(self.TITLE, self.VERSION, resources)
+        return RestAppBuilder().build(self.TITLE, self.VERSION, resources, Problem, media_type)
 
-    def document(self, routers: bool = True) -> Dict[str, JsonValue]:
-        response = TestClient(self.build(routers)).get(self.OPENAPI_PATH)
+    def document(self, routers: bool = True, media_type: str = Problem.MEDIA_TYPE) -> Dict[str, JsonValue]:
+        response = TestClient(self.build(routers, media_type)).get(self.OPENAPI_PATH)
         assert response.status_code == HTTPStatus.OK
         return response.json()
 
     def test_the_routes_are_served_under_v1(self) -> None:
         client = TestClient(self.build())
-        response = client.post(
-            self.PREFIX + SampleResource.SAMPLES_PATH,
-            json=self.BODY,
-            headers={IdempotencyMiddleware.IDEMPOTENCY_KEY_HEADER: self.KEY},
-        )
+        response = client.post(self.PREFIX + SampleResource.SAMPLES_PATH, json=self.BODY)
         assert response.status_code == HTTPStatus.CREATED
 
     def test_the_document_and_the_docs_are_under_v1_only(self) -> None:
@@ -89,7 +83,15 @@ class TestRestAppBuilder:
         assert isinstance(schemas, dict)
         assert "Problem" in schemas
 
-    def test_the_handlers_and_the_middleware_are_installed(self) -> None:
+    def test_the_default_response_takes_the_media_type_it_is_given(self) -> None:
+        paths = self.document(media_type=self.OTHER_MEDIA_TYPE)["paths"]
+        assert isinstance(paths, dict)
+        operations = [operation for path in paths.values() for operation in path.values()]
+        assert operations
+        for operation in operations:
+            assert list(operation["responses"]["default"]["content"]) == [self.OTHER_MEDIA_TYPE]
+
+    def test_the_builder_installs_no_problem_handler_of_its_own(self) -> None:
         response = TestClient(self.build()).post(self.ANYTHING_PATH, json=self.BODY)
-        assert response.status_code == HTTPStatus.BAD_REQUEST
-        assert response.headers[self.CONTENT_TYPE] == Problem.MEDIA_TYPE
+        assert response.status_code == HTTPStatus.NOT_FOUND
+        assert response.headers[self.CONTENT_TYPE] != Problem.MEDIA_TYPE

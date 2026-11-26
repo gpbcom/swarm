@@ -17,7 +17,7 @@ from nkeys import KeyPair  # type: ignore[import-untyped]
 from pydantic import JsonValue
 
 # First-party imports
-from swarm_nats.models.accounts.exceptions import SENatsJwtInvalidError
+from swarm_models.accounts.exceptions import SENatsJwtInvalidError
 
 
 class NatsJwtSigner:

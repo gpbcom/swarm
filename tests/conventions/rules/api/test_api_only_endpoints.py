@@ -39,6 +39,26 @@ class TestApiOnlyEndpoints:
         )
         assert self.violations(tmp_path, {self.PATH: source}) == []
 
+    def test_a_pure_asgi_middleware_is_allowed(self, tmp_path: Path) -> None:
+        source = "class KeyMiddleware:\n    async def __call__(self, scope, receive, send) -> None:\n        pass\n"
+        assert self.violations(tmp_path, {self.PATH: source}) == []
+
+    def test_a_class_whose_call_is_no_asgi_call_is_reported(self, tmp_path: Path) -> None:
+        source = "class Builder:\n    def __call__(self, app) -> None:\n        pass\n"
+        found = self.violations(tmp_path, {self.PATH: source})
+        assert len(found) == 1
+        assert "'Builder'" in found[0]
+
+    def test_a_class_that_registers_exception_handlers_is_allowed(self, tmp_path: Path) -> None:
+        source = (
+            "class ProblemHandlers:\n"
+            "    def install(self, app) -> None:\n"
+            "        app.add_exception_handler(Exception, self.handle)\n\n"
+            "    async def handle(self, request, error) -> None:\n"
+            "        pass\n"
+        )
+        assert self.violations(tmp_path, {self.PATH: source}) == []
+
     def test_a_depends_provider_function_and_class_are_allowed(self, tmp_path: Path) -> None:
         source = (
             f"{self.HEADER}def get_service() -> None:\n    pass\n\n"

@@ -10,10 +10,10 @@ from typing import ClassVar, List, Optional
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 # First-party imports
-from swarm_rest.api.rest.problem_handlers import ProblemHandlers
-from swarm_rest.models.idempotency.stored_response import StoredResponse
-from swarm_rest.models.rest.exceptions import SEIdempotencyKeyMissingError, SERestError
-from swarm_rest.service.idempotency.idempotency_service import IdempotencyService
+from swarm_api.handlers.problem_handlers import ProblemHandlers
+from swarm_models.rest.idempotency.stored_response import StoredResponse
+from swarm_service.shared.idempotency.idempotency_service import IdempotencyService
+from swarm_web.models.rest.exceptions import SEIdempotencyKeyMissingError, SERestError
 
 
 class IdempotencyMiddleware:

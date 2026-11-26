@@ -1,16 +1,16 @@
 from __future__ import annotations
 
-from swarm_nats.models.subjects.exceptions.se_invalid_operator_subjects_exception import (
+from swarm_models.subjects.exceptions.se_invalid_operator_subjects_exception import (
     SEInvalidOperatorSubjectsException,
 )
-from swarm_nats.models.subjects.exceptions.se_operator_subjects_invalid_event import SEOperatorSubjectsInvalidEvent
-from swarm_nats.models.subjects.exceptions.se_operator_subjects_invalid_mission_id import (
+from swarm_models.subjects.exceptions.se_operator_subjects_invalid_event import SEOperatorSubjectsInvalidEvent
+from swarm_models.subjects.exceptions.se_operator_subjects_invalid_mission_id import (
     SEOperatorSubjectsInvalidMissionId,
 )
-from swarm_nats.models.subjects.exceptions.se_operator_subjects_invalid_operator_id import (
+from swarm_models.subjects.exceptions.se_operator_subjects_invalid_operator_id import (
     SEOperatorSubjectsInvalidOperatorId,
 )
-from swarm_nats.models.subjects.exceptions.se_operator_subjects_operator_mismatch import (
+from swarm_models.subjects.exceptions.se_operator_subjects_operator_mismatch import (
     SEOperatorSubjectsOperatorMismatch,
 )
 

@@ -8,8 +8,8 @@ import pytest
 from pydantic import JsonValue, ValidationError
 
 # First-party imports
-from swarm_nats.models.enums import StreamRetention, StreamStorage
-from swarm_nats.models.streams.exceptions import (
+from swarm_models.enums import StreamRetention, StreamStorage
+from swarm_models.streams.exceptions import (
     SEInvalidStreamSpecException,
     SEStreamSourceInvalidName,
     SEStreamSpecInvalidDuplicateWindow,
@@ -21,8 +21,8 @@ from swarm_nats.models.streams.exceptions import (
     SEStreamSpecInvalidSubjects,
     SEStreamSpecNoSubjectsNorSources,
 )
-from swarm_nats.models.streams.stream_source import StreamSource
-from swarm_nats.models.streams.stream_spec import StreamSpec
+from swarm_models.streams.stream_source import StreamSource
+from swarm_models.streams.stream_spec import StreamSpec
 
 
 class TestStreamSpec:

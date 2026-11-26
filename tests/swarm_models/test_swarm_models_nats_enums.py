@@ -8,10 +8,10 @@ from typing import ClassVar, Dict, Type
 import pytest
 
 # First-party imports
-from swarm_nats.models.enums import CredentialKind, NatsClaimType, StreamRetention, StreamStorage
+from swarm_models.enums import CredentialKind, NatsClaimType, StreamRetention, StreamStorage
 
 
-class TestSwarmNatsEnums:
+class TestSwarmModelsNatsEnums:
     EXPECTED: ClassVar[Dict[Type[StrEnum], Dict[str, str]]] = {
         CredentialKind: {"SERVICE": "service", "EDGE": "edge", "SIMULATED": "simulated", "SYSTEM": "system"},
         NatsClaimType: {"OPERATOR": "operator", "ACCOUNT": "account", "USER": "user"},

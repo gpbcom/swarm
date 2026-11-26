@@ -12,7 +12,7 @@ from nats.errors import TimeoutError as NatsTimeoutError
 from pydantic import JsonValue
 
 # First-party imports
-from swarm_nats.models.accounts.issued_account import IssuedAccount
+from swarm_models.accounts.issued_account import IssuedAccount
 from swarm_nats.models.bus.exceptions import SENatsAccountPushRefusedError
 
 

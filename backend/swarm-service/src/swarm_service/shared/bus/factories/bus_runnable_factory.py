@@ -9,7 +9,7 @@ from swarm_lifecycle.runnables.async_runnable import AsyncRunnable
 
 
 class BusRunnableFactory[A: AsyncRunnable](AsyncRunnableFactory[A], ABC):
-    """Abstract factory of the api layer for the bus runnables, responders and consumers.
+    """Abstract factory of the service layer for the bus runnables, responders and consumers.
 
     Notes:
         - Its concrete factories are in ``api/factories/bus/``.

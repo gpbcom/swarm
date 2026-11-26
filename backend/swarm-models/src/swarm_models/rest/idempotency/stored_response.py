@@ -8,7 +8,7 @@ from typing import ClassVar, List, Literal, Pattern, Tuple, Union
 from pydantic import BaseModel, ConfigDict, Field, JsonValue, field_validator
 
 # First-party imports
-from swarm_rest.models.idempotency.exceptions import (
+from swarm_models.rest.idempotency.exceptions import (
     SEStoredResponseInvalidBody,
     SEStoredResponseInvalidFingerprint,
     SEStoredResponseInvalidHeaders,

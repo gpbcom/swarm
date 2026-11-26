@@ -1,10 +1,10 @@
-from swarm_nats.models.accounts.exceptions.issued_credential.identity.se_issued_credential_invalid_kind import (
+from swarm_models.accounts.exceptions.issued_credential.identity.se_issued_credential_invalid_kind import (
     SEIssuedCredentialInvalidKind,
 )
-from swarm_nats.models.accounts.exceptions.issued_credential.identity.se_issued_credential_invalid_name import (
+from swarm_models.accounts.exceptions.issued_credential.identity.se_issued_credential_invalid_name import (
     SEIssuedCredentialInvalidName,
 )
-from swarm_nats.models.accounts.exceptions.issued_credential.identity.se_issued_credential_invalid_operator_id import (
+from swarm_models.accounts.exceptions.issued_credential.identity.se_issued_credential_invalid_operator_id import (
     SEIssuedCredentialInvalidOperatorId,
 )
 

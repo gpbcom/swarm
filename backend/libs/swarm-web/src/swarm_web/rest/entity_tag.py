@@ -5,7 +5,7 @@ from logging import Logger, getLogger
 from typing import ClassVar, Optional
 
 # First-party imports
-from swarm_rest.models.rest.exceptions import SEPreconditionFailedError, SEPreconditionRequiredError
+from swarm_web.models.rest.exceptions import SEPreconditionFailedError, SEPreconditionRequiredError
 
 
 class EntityTag:

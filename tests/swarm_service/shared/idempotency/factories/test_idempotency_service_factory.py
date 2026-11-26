@@ -5,9 +5,9 @@ from typing import ClassVar
 
 # First-party imports
 from swarm_lifecycle.factories.factory import Factory
-from swarm_rest.models.config.rest_config import RestConfig
-from swarm_rest.service.factories.idempotency_service_factory import IdempotencyServiceFactory
-from swarm_rest.service.idempotency.idempotency_service import IdempotencyService
+from swarm_service.shared.idempotency.factories.idempotency_service_factory import IdempotencyServiceFactory
+from swarm_service.shared.idempotency.idempotency_service import IdempotencyService
+from swarm_web.models.config.rest_config import RestConfig
 
 
 class TestIdempotencyServiceFactory:

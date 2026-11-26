@@ -18,7 +18,7 @@ from missions.models.config.exceptions import (
 )
 from missions.models.config.missions_config import MissionsConfig
 from swarm_models.config.postgres.postgres_config import PostgresConfig
-from swarm_rest.models.config.rest_config import RestConfig
+from swarm_web.models.config.rest_config import RestConfig
 
 
 class TestMissionsConfig:

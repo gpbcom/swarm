@@ -12,10 +12,10 @@ from nkeys import KeyPair
 from pydantic import JsonValue
 
 # First-party imports
-from swarm_nats.models.accounts.exceptions import SENatsJwtInvalidError
-from swarm_nats.models.enums import NatsClaimType
-from swarm_nats.service.accounts.nats_jwt_signer import NatsJwtSigner
-from swarm_nats.service.accounts.nkey_factory import NkeyFactory
+from swarm_models.accounts.exceptions import SENatsJwtInvalidError
+from swarm_models.enums import NatsClaimType
+from swarm_service.shared.accounts.nats_jwt_signer import NatsJwtSigner
+from swarm_service.shared.accounts.nkey_factory import NkeyFactory
 
 
 class TestNatsJwtSigner:

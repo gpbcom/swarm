@@ -1,7 +1,7 @@
-from swarm_nats.models.accounts.exceptions.issued_operator.identity.se_issued_operator_invalid_name import (
+from swarm_models.accounts.exceptions.issued_operator.identity.se_issued_operator_invalid_name import (
     SEIssuedOperatorInvalidName,
 )
-from swarm_nats.models.accounts.exceptions.issued_operator.identity.se_issued_operator_invalid_system_account import (
+from swarm_models.accounts.exceptions.issued_operator.identity.se_issued_operator_invalid_system_account import (
     SEIssuedOperatorInvalidSystemAccount,
 )
 

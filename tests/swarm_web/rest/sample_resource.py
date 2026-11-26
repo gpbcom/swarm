@@ -10,11 +10,11 @@ from fastapi.responses import JSONResponse, Response
 from pydantic import JsonValue
 
 # First-party imports
-from swarm_rest.api.rest.entity_tag import EntityTag
+from swarm_web.rest.entity_tag import EntityTag
 
 
 class SampleResource:
-    """A small REST resource that exercises the conventions of ``swarm_rest``.
+    """A small REST resource that exercises the conventions of ``swarm_web`` and ``swarm_api``.
 
     Attributes:
         VERSION (int): The row version the resource exposes as its entity tag.

@@ -13,6 +13,7 @@ dependencies = [
     "swarm-logging",
     "swarm-models",
     "swarm-nats",
+    "swarm-service",
 ]
 
 [project.scripts]
@@ -27,6 +28,7 @@ swarm-lifecycle = { workspace = true }
 swarm-logging = { workspace = true }
 swarm-models = { workspace = true }
 swarm-nats = { workspace = true }
+swarm-service = { workspace = true }
 
 [build-system]
 requires = ["uv_build>=0.12.21,<0.13.0"]

@@ -9,14 +9,14 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from pydantic import JsonValue
-from samples.sample_resource import SampleResource
 
 # First-party imports
-from swarm_rest.api.rest.idempotency_middleware import IdempotencyMiddleware
-from swarm_rest.api.rest.problem_handlers import ProblemHandlers
-from swarm_rest.models.config.rest_config import RestConfig
-from swarm_rest.models.problems.problem import Problem
-from swarm_rest.service.factories.idempotency_service_factory import IdempotencyServiceFactory
+from swarm_api.handlers.problem_handlers import ProblemHandlers
+from swarm_api.middleware.idempotency_middleware import IdempotencyMiddleware
+from swarm_models.rest.problems.problem import Problem
+from swarm_service.shared.idempotency.factories.idempotency_service_factory import IdempotencyServiceFactory
+from swarm_web.models.config.rest_config import RestConfig
+from tests.swarm_web.rest.sample_resource import SampleResource
 
 
 class TestIdempotencyMiddleware:

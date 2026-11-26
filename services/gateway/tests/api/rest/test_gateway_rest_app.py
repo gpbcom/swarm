@@ -12,7 +12,7 @@ from fastapi.testclient import TestClient
 # First-party imports
 from gateway.api.rest.gateway_rest_app import GatewayRestApp
 from gateway.models.config.gateway_config import GatewayConfig
-from swarm_rest.models.problems.problem import Problem
+from swarm_models.rest.problems.problem import Problem
 
 
 class TestGatewayRestApp:

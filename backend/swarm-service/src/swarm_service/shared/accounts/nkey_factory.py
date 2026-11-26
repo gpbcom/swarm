@@ -10,8 +10,8 @@ import nkeys  # type: ignore[import-untyped]
 from nkeys import KeyPair  # type: ignore[import-untyped]
 
 # First-party imports
-from swarm_nats.models.accounts.exceptions import SENkeyInvalidSeedError
-from swarm_nats.models.enums import NatsClaimType
+from swarm_models.accounts.exceptions import SENkeyInvalidSeedError
+from swarm_models.enums import NatsClaimType
 
 
 class NkeyFactory:

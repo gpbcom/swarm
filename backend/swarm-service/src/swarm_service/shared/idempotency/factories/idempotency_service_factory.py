@@ -6,9 +6,9 @@ from typing import Optional
 
 # First-party imports
 from swarm_lifecycle.factories.factory import Factory
-from swarm_rest.models.config.rest_config import RestConfig
-from swarm_rest.service.idempotency.idempotency_service import IdempotencyService
-from swarm_rest.storage.idempotency.memory_idempotency_store import MemoryIdempotencyStore
+from swarm_service.shared.idempotency.idempotency_service import IdempotencyService
+from swarm_storage.shared.idempotency.memory_idempotency_store import MemoryIdempotencyStore
+from swarm_web.models.config.rest_config import RestConfig
 
 
 class IdempotencyServiceFactory(Factory[IdempotencyService]):

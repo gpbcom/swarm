@@ -12,11 +12,11 @@ from nats.js.api import RetentionPolicy, StorageType, StreamInfo
 from nats.js.errors import NotFoundError
 
 # First-party imports
-from swarm_nats.clients.jetstream_admin import JetStreamAdmin
+from swarm_clients.shared.nats.jetstream_admin import JetStreamAdmin
+from swarm_models.enums import StreamRetention, StreamStorage
+from swarm_models.streams.stream_source import StreamSource
+from swarm_models.streams.stream_spec import StreamSpec
 from swarm_nats.models.bus.exceptions import SENatsStreamError
-from swarm_nats.models.enums import StreamRetention, StreamStorage
-from swarm_nats.models.streams.stream_source import StreamSource
-from swarm_nats.models.streams.stream_spec import StreamSpec
 
 
 class TestJetStreamAdmin:

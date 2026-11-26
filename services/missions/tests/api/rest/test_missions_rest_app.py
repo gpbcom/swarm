@@ -12,7 +12,7 @@ from fastapi.testclient import TestClient
 # First-party imports
 from missions.api.rest.missions_rest_app import MissionsRestApp
 from missions.models.config.missions_config import MissionsConfig
-from swarm_rest.models.problems.problem import Problem
+from swarm_models.rest.problems.problem import Problem
 
 
 class TestMissionsRestApp:

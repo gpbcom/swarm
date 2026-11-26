@@ -20,6 +20,9 @@ dependencies = [
     "swarm-nats",
     "ormsgpack>=1.7.0",
     "uvicorn[standard]>=0.30.0",
+    "swarm-web",
+    "swarm-api",
+    "swarm-service",
 ]
 
 [project.scripts]
@@ -40,6 +43,9 @@ swarm-storage = { workspace = true }
 swarm-rest = { workspace = true }
 swarm-live = { workspace = true }
 swarm-nats = { workspace = true }
+swarm-web = { workspace = true }
+swarm-api = { workspace = true }
+swarm-service = { workspace = true }
 
 [build-system]
 requires = ["uv_build>=0.12.21,<0.13.0"]

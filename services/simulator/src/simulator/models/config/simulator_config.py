@@ -19,8 +19,8 @@ from simulator.models.config.flight_config import FlightConfig
 from simulator.models.config.registry_config import RegistryConfig
 from simulator.models.config.route_config import RouteConfig
 from swarm_catalog.models.yaml_catalog import YamlCatalog
+from swarm_models.config.nats.nats_responder_config import NatsResponderConfig
 from swarm_nats.models.config.nats_client_config import NatsClientConfig
-from swarm_nats.models.config.nats_responder_config import NatsResponderConfig
 
 
 class SimulatorConfig(YamlCatalog):

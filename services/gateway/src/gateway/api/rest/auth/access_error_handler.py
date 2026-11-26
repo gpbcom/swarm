@@ -13,7 +13,7 @@ from fastapi.responses import Response
 from gateway.models.access.exceptions import SEAccessError
 from gateway.models.enums import AccessRefusal
 from gateway.models.keycloak.exceptions import SEKeycloakError
-from swarm_rest.api.rest.problem_handlers import ProblemHandlers
+from swarm_api.handlers.problem_handlers import ProblemHandlers
 
 
 class AccessErrorHandler:

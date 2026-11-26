@@ -8,15 +8,15 @@ from typing import ClassVar, List, Optional
 import pytest
 
 # First-party imports
-from swarm_rest.models.idempotency.stored_response import StoredResponse
-from swarm_rest.models.rest.exceptions import (
+from swarm_models.rest.idempotency.stored_response import StoredResponse
+from swarm_service.shared.idempotency.idempotency_service import IdempotencyService
+from swarm_storage.shared.idempotency.memory_idempotency_store import MemoryIdempotencyStore
+from swarm_web.models.rest.exceptions import (
     SEIdempotencyKeyInFlightError,
     SEIdempotencyKeyInvalidError,
     SEIdempotencyKeyMissingError,
     SEIdempotencyKeyReusedError,
 )
-from swarm_rest.service.idempotency.idempotency_service import IdempotencyService
-from swarm_rest.storage.idempotency.memory_idempotency_store import MemoryIdempotencyStore
 
 
 class TestIdempotencyService:

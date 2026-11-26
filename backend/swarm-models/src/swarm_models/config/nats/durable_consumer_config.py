@@ -8,7 +8,7 @@ from typing import ClassVar, Literal, Optional, Pattern
 from pydantic import BaseModel, ConfigDict, Field, JsonValue, field_validator
 
 # First-party imports
-from swarm_nats.models.config.exceptions import (
+from swarm_models.config.nats.exceptions import (
     SEDurableConsumerConfigInvalidAckWait,
     SEDurableConsumerConfigInvalidBatchSize,
     SEDurableConsumerConfigInvalidDurableName,

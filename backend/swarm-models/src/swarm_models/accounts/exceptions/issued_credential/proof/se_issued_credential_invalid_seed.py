@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 # First-party imports
-from swarm_nats.models.accounts.exceptions.issued_credential.se_invalid_issued_credential_exception import (
+from swarm_models.accounts.exceptions.issued_credential.se_invalid_issued_credential_exception import (
     SEInvalidIssuedCredentialException,
 )
 

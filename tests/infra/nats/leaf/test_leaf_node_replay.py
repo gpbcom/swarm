@@ -14,13 +14,13 @@ from nats.aio.client import Client
 from nats.js.api import StreamInfo
 
 # First-party imports
-from swarm_nats.clients.jetstream_admin import JetStreamAdmin
+from swarm_clients.shared.nats.jetstream_admin import JetStreamAdmin
+from swarm_models.enums import CredentialKind
+from swarm_models.streams.stream_source import StreamSource
+from swarm_models.streams.stream_spec import StreamSpec
+from swarm_models.subjects.operator_subjects import OperatorSubjects
 from swarm_nats.clients.nats_connector import NatsConnector
 from swarm_nats.models.config.nats_client_config import NatsClientConfig
-from swarm_nats.models.enums import CredentialKind
-from swarm_nats.models.streams.stream_source import StreamSource
-from swarm_nats.models.streams.stream_spec import StreamSpec
-from swarm_nats.models.subjects.operator_subjects import OperatorSubjects
 from tests.infra.nats.helpers import free_port, issuers, operator_mode_config, write_creds
 from tests.infra.nats.leaf.link_proxy import LinkProxy
 from tests.infra.nats.nats_server_process import NatsServerProcess

@@ -8,12 +8,12 @@ import pytest
 from pydantic import JsonValue
 
 # First-party imports
-from swarm_nats.models.accounts.exceptions import SEIssuedOperatorInvalidName
-from swarm_nats.models.accounts.issued_operator import IssuedOperator
-from swarm_nats.models.enums import NatsClaimType
-from swarm_nats.service.accounts.nats_jwt_signer import NatsJwtSigner
-from swarm_nats.service.accounts.nkey_factory import NkeyFactory
-from swarm_nats.service.accounts.operator_issuer import OperatorIssuer
+from swarm_models.accounts.exceptions import SEIssuedOperatorInvalidName
+from swarm_models.accounts.issued_operator import IssuedOperator
+from swarm_models.enums import NatsClaimType
+from swarm_service.shared.accounts.nats_jwt_signer import NatsJwtSigner
+from swarm_service.shared.accounts.nkey_factory import NkeyFactory
+from swarm_service.shared.accounts.operator_issuer import OperatorIssuer
 
 
 class TestOperatorIssuer:

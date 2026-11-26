@@ -19,13 +19,13 @@ from pydantic import BaseModel, ValidationError
 
 # First-party imports
 from swarm_lifecycle.runnables.async_runnable import AsyncRunnable
+from swarm_models.config.nats.nats_responder_config import NatsResponderConfig
 from swarm_nats.models.bus.exceptions import (
     SENatsInvalidDeadlineError,
     SENatsInvalidIdempotencyKeyError,
     SENatsRequestInvalidError,
 )
 from swarm_nats.models.bus.nats_headers import NatsHeaders
-from swarm_nats.models.config.nats_responder_config import NatsResponderConfig
 
 
 class NatsResponder[Q: BaseModel, R: BaseModel](AsyncRunnable):

@@ -9,8 +9,8 @@ from typing import ClassVar, Dict, List, Type
 import pytest
 
 # First-party imports
-from swarm_rest.models.rest import exceptions
-from swarm_rest.models.rest.exceptions import (
+from swarm_web.models.rest import exceptions
+from swarm_web.models.rest.exceptions import (
     SEIdempotencyKeyInFlightError,
     SEIdempotencyKeyInvalidError,
     SEIdempotencyKeyMissingError,

@@ -12,8 +12,8 @@ from fastapi import FastAPI
 
 # First-party imports
 from swarm_lifecycle.runnables.async_runnable import AsyncRunnable
-from swarm_rest.models.config.rest_config import RestConfig
-from swarm_rest.models.rest.exceptions import SERestServerStartError
+from swarm_web.models.config.rest_config import RestConfig
+from swarm_web.models.rest.exceptions import SERestServerStartError
 
 
 class RestServer(AsyncRunnable):

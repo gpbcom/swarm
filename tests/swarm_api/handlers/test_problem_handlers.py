@@ -8,12 +8,12 @@ from typing import ClassVar, List
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from httpx import Response
-from samples.sample_resource import SampleResource
 
 # First-party imports
-from swarm_rest.api.rest.problem_handlers import ProblemHandlers
-from swarm_rest.models.problems.problem import Problem
-from swarm_rest.models.rest.exceptions import SEPreconditionRequiredError
+from swarm_api.handlers.problem_handlers import ProblemHandlers
+from swarm_models.rest.problems.problem import Problem
+from swarm_web.models.rest.exceptions import SEPreconditionRequiredError
+from tests.swarm_web.rest.sample_resource import SampleResource
 
 
 class TestProblemHandlers:

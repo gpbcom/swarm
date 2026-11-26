@@ -8,14 +8,14 @@ import pytest
 from pydantic import JsonValue, ValidationError
 
 # First-party imports
-from swarm_rest.models.idempotency.exceptions import (
+from swarm_models.rest.idempotency.exceptions import (
     SEInvalidStoredResponseException,
     SEStoredResponseInvalidBody,
     SEStoredResponseInvalidFingerprint,
     SEStoredResponseInvalidHeaders,
     SEStoredResponseInvalidStatus,
 )
-from swarm_rest.models.idempotency.stored_response import StoredResponse
+from swarm_models.rest.idempotency.stored_response import StoredResponse
 
 
 class TestStoredResponse:

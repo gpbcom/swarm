@@ -11,9 +11,9 @@ from nats.js.errors import Error as JetStreamError
 
 # First-party imports
 from swarm_models.events.event import Event
+from swarm_models.subjects.operator_subjects import OperatorSubjects
 from swarm_nats.models.bus.exceptions import SENatsPublishError
 from swarm_nats.models.bus.nats_headers import NatsHeaders
-from swarm_nats.models.subjects.operator_subjects import OperatorSubjects
 
 
 class EventPublisher:

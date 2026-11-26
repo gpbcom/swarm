@@ -5,7 +5,7 @@ from http import HTTPStatus
 from typing import ClassVar
 
 # First-party imports
-from swarm_rest.models.rest.exceptions.se_rest_error import SERestError
+from swarm_web.models.rest.exceptions.se_rest_error import SERestError
 
 
 class SEPreconditionRequiredError(SERestError):

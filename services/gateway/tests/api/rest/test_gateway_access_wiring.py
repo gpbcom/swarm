@@ -19,7 +19,7 @@ from gateway.api.rest.gateway_rest_app import GatewayRestApp
 from gateway.models.auth.auth_config import AuthConfig
 from gateway.models.config.gateway_config import GatewayConfig
 from gateway.service.auth.access_service import AccessService
-from swarm_rest.models.problems.problem import Problem
+from swarm_models.rest.problems.problem import Problem
 
 
 class TestGatewayAccessWiring:

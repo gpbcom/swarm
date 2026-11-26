@@ -131,8 +131,7 @@ pub fn write(schema: &Path, output: &Path) -> Result<(), CodegenError> {
 /// The path of the schema bundle exported from the Pydantic models.
 #[must_use]
 pub fn default_schema_path() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("../../backend/swarm-models/schemas/swarm_models.schema.json")
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../backend/swarm-models/schemas/swarm_models.schema.json")
 }
 
 /// The path of the generated Rust file in the `swarm-models` crate.
