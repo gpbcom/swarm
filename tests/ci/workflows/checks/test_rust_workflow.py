@@ -152,6 +152,17 @@ class TestRustWorkflow:
         assert "touch" in step
         assert step.index("touch") < step.index("cargo bench")
 
+    def test_the_gate_script_is_found_from_the_bench_working_directory(self) -> None:
+        workdir = str(self.bench_job()["defaults"]["run"]["working-directory"])
+        gate = next(run for run in self.bench_runs() if "bench_gate.py" in run)
+        relative = gate.split("python3 ", 1)[1].split(" ", 1)[0]
+        assert (Path(__file__).resolve().parents[4] / workdir / relative).resolve().is_file()
+
+    def test_the_base_commit_is_benchmarked_from_either_layout(self) -> None:
+        base = next(run for run in self.bench_runs() if "--save-baseline pr-base" in run)
+        assert "base/rust" in base
+        assert "base/packages/rust" in base
+
     def test_the_bench_job_knows_the_base_commit(self) -> None:
         assert self.bench_env().get("BASE_SHA") == "${{ github.event.pull_request.base.sha }}"
 

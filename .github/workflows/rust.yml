@@ -62,9 +62,12 @@ jobs:
       - name: Benchmark the base commit
         run: |
           git worktree add --detach "$RUNNER_TEMP/base" "$BASE_SHA"
-          if compgen -G "$RUNNER_TEMP/base/rust/*/benches/*.rs" > /dev/null \
-            || compgen -G "$RUNNER_TEMP/base/rust/benches/*.rs" > /dev/null; then
-            cd "$RUNNER_TEMP/base/rust"
+          # A base commit from before the layout refactor keeps its Cargo workspace in packages/rust.
+          base="$RUNNER_TEMP/base/rust"
+          if [ ! -f "$base/Cargo.toml" ]; then base="$RUNNER_TEMP/base/packages/rust"; fi
+          if compgen -G "$base/*/benches/*.rs" > /dev/null \
+            || compgen -G "$base/benches/*.rs" > /dev/null; then
+            cd "$base"
             cargo bench --locked --workspace --bench '*' -- --save-baseline pr-base
           else
             echo "The base commit has no benchmark: nothing to compare."
@@ -76,4 +79,4 @@ jobs:
           find . -path ./target -prune -o \( -name '*.rs' -o -name Cargo.toml \) -print0 | xargs -0 touch
           cargo bench --workspace --locked --bench '*' -- --baseline-lenient pr-base
       - name: Run the 5 % gate
-        run: python3 ../../.github/scripts/bench_gate.py --criterion-dir "$CARGO_TARGET_DIR/criterion"
+        run: python3 ../.github/scripts/bench_gate.py --criterion-dir "$CARGO_TARGET_DIR/criterion"
