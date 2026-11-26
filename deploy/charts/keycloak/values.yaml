@@ -1,0 +1,17 @@
+image:
+  repository: quay.io/keycloak/keycloak
+  tag: "26.4.0"
+  pullPolicy: IfNotPresent
+port: 8080
+managementPort: 9000
+admin:
+  credentialsSecret: keycloak-admin
+database:
+  instances: 1
+  storage:
+    size: 5Gi
+    storageClass: ""
+ingress:
+  enabled: false
+  host: ""
+  className: ""

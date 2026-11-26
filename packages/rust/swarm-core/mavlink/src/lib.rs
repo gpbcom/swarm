@@ -1,6 +1,14 @@
-//! Shell of the `MAVLink` encoder of the Swarm core.
+//! The `MAVLink` reader of the Swarm core.
 //!
-//! It holds one placeholder function, until the real logic arrives.
+//! [`decode`] reads the `MAVLink` 2 frames of a datagram, and [`LatestFrames`] keeps the latest frame of
+//! each Drone, so that the flight engine never waits for a slow Drone. [`encode`] is a placeholder until
+//! the real encoder arrives.
+
+mod frame;
+mod latest_frames;
+
+pub use frame::{decode, Decoded, Frame, Message};
+pub use latest_frames::{DroneSample, LatestFrames};
 
 /// Return the wrapping sum of `values`.
 ///

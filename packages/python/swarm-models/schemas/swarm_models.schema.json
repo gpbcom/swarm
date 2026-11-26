@@ -242,6 +242,59 @@
       "type": "object"
     },
     "JsonValue": {},
+    "Language": {
+      "description": "A language in which Swarm shows its screens.\n\nAttributes:\n    ENGLISH: English, the default language.\n    FRENCH: French.\n    GERMAN: German.\n    SPANISH: Spanish.",
+      "enum": [
+        "en",
+        "fr",
+        "de",
+        "es"
+      ],
+      "title": "Language",
+      "type": "string"
+    },
+    "LiveOperation": {
+      "description": "An operation a client asks of the live WebSocket.\n\nAttributes:\n    SUBSCRIBE: Subscribe to a topic.",
+      "enum": [
+        "subscribe"
+      ],
+      "title": "LiveOperation",
+      "type": "string"
+    },
+    "LiveRate": {
+      "description": "How often a subscriber receives frames.\n\nAttributes:\n    FULL: Every frame, at the rate of the source.",
+      "enum": [
+        "full"
+      ],
+      "title": "LiveRate",
+      "type": "string"
+    },
+    "LiveSubscription": {
+      "additionalProperties": false,
+      "description": "The message a client sends on the live WebSocket to follow a topic.\n\nAttributes:\n    model_config (ConfigDict): Forbids unknown keys and freezes the subscription.\n    TOPIC_PREFIX (ClassVar[str]): The first part of every topic.\n    TOPIC_SEPARATOR (ClassVar[str]): The separator between the parts of a topic.\n    TOPIC_PATTERN (ClassVar[Pattern[str]]): The shape of a topic, ``mission/<id>/<kind>``.\n    op (LiveOperation): What the client asks.\n    topic (str): The topic followed, ``mission/<version 7 UUID>/<kind>``.\n    rate (LiveRate): How often frames are sent. Defaults to full.\n\nNotes:\n    - The topic stays a string on the wire,\n      and ``mission()`` and ``kind()`` read its parts.\n    - **A mission identifier that is not a version 7 UUID is refused.**",
+      "properties": {
+        "op": {
+          "$ref": "#/$defs/LiveOperation",
+          "description": "What the client asks."
+        },
+        "rate": {
+          "$ref": "#/$defs/LiveRate",
+          "default": "full",
+          "description": "How often frames are sent."
+        },
+        "topic": {
+          "description": "The topic followed, mission/<version 7 UUID>/<kind>.",
+          "title": "Topic",
+          "type": "string"
+        }
+      },
+      "required": [
+        "op",
+        "topic"
+      ],
+      "title": "LiveSubscription",
+      "type": "object"
+    },
     "Operator": {
       "additionalProperties": false,
       "description": "A person who pilots drones, global to every cell.\n\nAttributes:\n    model_config (ConfigDict): Forbids unknown keys.\n    id (UUID): The version 7 identifier of the operator.\n    name (str): The name of the operator.\n\nNotes:\n    - An operator lives in exactly one cell, given by its ``CellAssignment``.\n    - No field has a default, so ``None`` is refused.",
@@ -267,7 +320,7 @@
     },
     "Person": {
       "additionalProperties": false,
-      "description": "A person known to Swarm.\n\nAttributes:\n    model_config (ConfigDict): Forbids unknown keys.\n    id (UUID): The version 7 identifier of the person.\n    operator_id (Optional[UUID]): The Operator the person belongs to, ``None`` for a Swarm administrator.\n    name (str): The full name of the person.\n    email (str): The email address of the person.\n    EMAIL_SEPARATOR (ClassVar[str]): The character that splits an email address into its local part and domain.\n\nNotes:\n    The email check is structural only: one separator, a local part and a domain, and no whitespace.",
+      "description": "A person known to Swarm.\n\nAttributes:\n    model_config (ConfigDict): Forbids unknown keys.\n    id (UUID): The version 7 identifier of the person.\n    operator_id (Optional[UUID]): The Operator the person belongs to, ``None`` for a Swarm administrator.\n    name (str): The full name of the person.\n    email (str): The email address of the person.\n    language (Language): The language of the screens the person sees, English by default.\n    LANGUAGE_FIELD (ClassVar[str]): The name of the ``language`` field.\n    EMAIL_SEPARATOR (ClassVar[str]): The character that splits an email address into its local part and domain.\n\nNotes:\n    The email check is structural only: one separator, a local part and a domain, and no whitespace.",
       "properties": {
         "email": {
           "description": "The email address of the person.",
@@ -279,6 +332,11 @@
           "format": "uuid",
           "title": "Id",
           "type": "string"
+        },
+        "language": {
+          "$ref": "#/$defs/Language",
+          "default": "en",
+          "description": "The language of the screens the person sees."
         },
         "name": {
           "description": "The full name of the person.",

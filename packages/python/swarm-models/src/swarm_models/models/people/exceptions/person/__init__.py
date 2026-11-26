@@ -1,3 +1,4 @@
+from swarm_models.models.people.exceptions.person.preferences import SEPersonInvalidLanguage
 from swarm_models.models.people.exceptions.person.se_invalid_person_exception import SEInvalidPersonException
 from swarm_models.models.people.exceptions.person.se_person_invalid_email import SEPersonInvalidEmail
 from swarm_models.models.people.exceptions.person.se_person_invalid_id import SEPersonInvalidId
@@ -8,6 +9,7 @@ __all__ = [
     "SEInvalidPersonException",
     "SEPersonInvalidEmail",
     "SEPersonInvalidId",
+    "SEPersonInvalidLanguage",
     "SEPersonInvalidName",
     "SEPersonInvalidOperatorId",
 ]

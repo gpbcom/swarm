@@ -1,0 +1,21 @@
+$ pnpm install --frozen-lockfile
+(cwd ., on the ticket's own files only)
+
+Scope: all 13 workspace projects
+[WARN] The store at /home/guillaume/.local/share/pnpm/store/v11 is not used because packages cannot be hard linked from it into this project. Using the store at /tmp/.pnpm-store/v11 instead. Set storeDir to choose the store.
+[WARN] Unsupported engine for undici@8.12.4: wanted: {"node":">=22.19.0"} (current: {"node":"22.17.1"})
+[WARN] Unsupported engine for jsdom@31.0.1: wanted: {"node":"^22.22.2 || ^24.15.0 || >=26.0.0"} (current: {"node":"22.17.1"})
+[WARN] Unsupported engine for w3c-xmlserializer@6.0.0: wanted: {"node":"^22.22.2 || ^24.15.0 || >=26.0.0"} (current: {"node":"22.17.1"})
+✓ Lockfile passes supply-chain policies (verified 2d ago)
+Lockfile is up to date, resolution step is skipped
+Packages are hard linked from the content-addressable store to the virtual store.
+  Content-addressable store is at: /tmp/.pnpm-store/v11
+  Virtual store is at:             node_modules/.pnpm
+Packages: +268
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Progress: resolved 268, reused 268, downloaded 0, added 268, done
+
+devDependencies:
++ turbo 2.11.11
+
+Done in 92ms using pnpm v12.21.0

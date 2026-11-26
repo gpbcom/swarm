@@ -90,7 +90,7 @@ class TestTypescriptWorkflow:
     def test_dependencies_are_installed_from_the_frozen_lockfile(self) -> None:
         assert "pnpm install --frozen-lockfile" in self.runs()[0]
 
-    @pytest.mark.parametrize(("index", "script"), [(1, "lint"), (2, "typecheck"), (3, "test")])
+    @pytest.mark.parametrize(("index", "script"), [(1, "lint"), (2, "typecheck"), (3, "test"), (4, "check-messages")])
     def test_each_script_runs_for_the_selected_project(self, index: int, script: str) -> None:
         run = self.runs()[index]
         assert "pnpm --filter" in run
@@ -98,8 +98,8 @@ class TestTypescriptWorkflow:
         assert "--if-present" in run
         assert f"run --if-present {script}" in run
 
-    def test_there_are_exactly_four_run_steps(self) -> None:
-        assert len(self.runs()) == 4
+    def test_there_are_exactly_five_run_steps(self) -> None:
+        assert len(self.runs()) == 5
 
     def test_no_run_step_interpolates_an_expression(self) -> None:
         for run in self.runs():

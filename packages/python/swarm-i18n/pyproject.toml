@@ -1,0 +1,24 @@
+[project]
+name = "swarm-i18n"
+version = "0.1.0"
+description = "The Babel message catalogues of Swarm, their checks and the translation of texts into the person's language."
+readme = "../../../README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "babel>=2.16.0",
+    "pydantic>=2.14.3",
+    "swarm-models",
+]
+
+[project.scripts]
+swarm-i18n-check = "swarm_i18n.api.cli.check_catalogs:main"
+
+[tool.uv.sources]
+swarm-models = { workspace = true }
+
+[tool.uv.build-backend]
+module-name = "swarm_i18n"
+
+[build-system]
+requires = ["uv_build>=0.12.21,<0.13.0"]
+build-backend = "uv_build"

@@ -2,6 +2,8 @@
 
 **Plan:** 🟢 Approved
 
+**Push:** 🟢 Approved
+
 <!-- ticket:specs -->
 ## 📚 Specifications
 
@@ -567,7 +569,7 @@ Unique basenames, no unittest.mock.
 - `services/flight-engine/tests/api/live/test_flight_engine_live_endpoint.py`
 - `services/flight-engine/tests/api/server/test_live_server.py`
 - `services/flight-engine/tests/api/cli/test_flight_engine_main.py`
-- `services/flight-engine/tests/api/cli/commands/test_serve_command.py`
+- `services/flight-engine/tests/api/cli/commands/test_flight_engine_serve_command.py`
 - `services/flight-engine/tests/api/factories/test_flight_engine_api_factories.py`
 
 **Done when:** `uv run ruff check services/flight-engine/tests/api` and `uv run ruff format --check services/flight-engine/tests/api` pass. The tests fail only with ModuleNotFoundError for `flight_engine`.
@@ -1319,7 +1321,7 @@ Finally, build and install the swarm_core wheel (see K22), run the whole flight-
       "services/flight-engine/tests/api/live/test_flight_engine_live_endpoint.py",
       "services/flight-engine/tests/api/server/test_live_server.py",
       "services/flight-engine/tests/api/cli/test_flight_engine_main.py",
-      "services/flight-engine/tests/api/cli/commands/test_serve_command.py",
+      "services/flight-engine/tests/api/cli/commands/test_flight_engine_serve_command.py",
       "services/flight-engine/tests/api/factories/test_flight_engine_api_factories.py"
     ],
     "brief": "Write the api-layer tests of the flight engine: the local WebSocket that Ground control uses at the edge, served with the same protocol as the gateway. Specs: docs/specs/technical/05-api.md#live (\"At the edge Ground control connects straight to the flight engine with the same protocol\"), docs/specs/technical/04-engine.md#flight-engine (one asyncio process with uvloop; SquadFrame to the local WebSocket), docs/specs/technical/01-architecture.md#layers (api/live, api/cli), docs/tickets/T0.18/TICKET.md. Rules: AGENT.md Tests, Lifecycle and factories.\n\nThe API, implemented by K26:\n- `flight_engine.api.live.live_endpoint.LiveEndpoint(hub: LiveHub, codec: LiveCodec, config: LiveServerConfig, logger=None)` gives `router() -> APIRouter`, with a WebSocket at `/v1/live`.\n  - Each connection runs a `swarm_live` LiveSession, built by its LiveSessionFactory over `HubLiveSource(hub)`.\n  - The client sends MessagePack `LiveSubscription(op=SUBSCRIBE, topic=mission/<id>/squad)`.\n  - The client receives the bytes the actors publish to the hub under that topic.\n- `flight_engine.api.server.live_server.LiveServer(app: FastAPI, config: LiveServerConfig, logger=None)` is an AsyncRunnable running uvicorn. It serves when `initialize` returns and stops on close.\n- `flight_engine.api.cli.commands.serve_command.ServeCommand` is a Runnable whose `run()` uses `uvloop.run` to run the FlightEngine and the LiveServer together until it is stopped. It has an `exit_code`.\n- `flight_engine.api.cli.main.main()` reads `--config PATH`, default `conf/app.yaml`, configures logging with `conf/logger.yaml`, then runs the serve command.\n- The factories are the abstract `flight_engine.api.factories.command_factory.CommandFactory`, `flight_engine.api.factories.serve.serve_command_factory.ServeCommandFactory(config_path: Path, logger=None)` and `flight_engine.api.factories.live.live_server_factory.LiveServerFactory(app, config, logger=None)`.\n\nCases:\n- with Starlette's TestClient, a client that subscribes to a Mission receives the bytes published to the hub topic, and does not receive another Mission's;\n- an unreadable message is ignored and the connection stays open;\n- LiveServer on a free port accepts a WebSocket connection with the `websockets` client (a root dev dependency added by K13), and `close` frees the port;\n- `execute()` yields RunnableStatus values;\n- the console script `swarm-flight-engine` is declared and points at `flight_engine.api.cli.main:main` (see services/gateway/tests/api/cli/test_main.py for the pattern);\n- the factories build the right types.\n\nTest file basenames must be unique in the repository: `test_flight_engine_main.py`, never `test_main.py`. No unittest.mock.",

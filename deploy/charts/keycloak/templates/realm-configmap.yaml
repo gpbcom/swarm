@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keycloak-realm
+  labels:
+    {{- include "keycloak.labels" . | nindent 4 }}
+data:
+  swarm-realm.json: |
+    {{- .Files.Get "files/swarm-realm.json" | nindent 4 }}

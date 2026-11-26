@@ -1,0 +1,4 @@
+$ python3 .claude/scripts/tickets/ticket_refs.py check --ticket T0.15
+(cwd ., on the ticket's own files only)
+
+

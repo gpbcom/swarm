@@ -14,6 +14,7 @@ from pydantic.json_schema import models_json_schema
 from swarm_models.models.commands.command import Command
 from swarm_models.models.events.actor import Actor
 from swarm_models.models.events.event import Event
+from swarm_models.models.live.live_subscription import LiveSubscription
 from swarm_models.models.operators.cell_assignment import CellAssignment
 from swarm_models.models.operators.operator import Operator
 from swarm_models.models.people.person import Person
@@ -51,6 +52,7 @@ class SchemaExporter:
         TelemetryFrame,
         SquadFrame,
         Command,
+        LiveSubscription,
     )
     FILE_NAME: ClassVar[str] = "swarm_models.schema.json"
     TITLE: ClassVar[str] = "Swarm models"

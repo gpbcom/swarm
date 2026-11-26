@@ -59,3 +59,25 @@ module "argocd" {
 
   depends_on = [module.k3s]
 }
+
+module "identity" {
+  source = "../../modules/self-hosted/identity"
+  count  = var.identity_enabled ? 1 : 0
+
+  depends_on = [module.k3s]
+}
+
+module "identity_application" {
+  source = "../../modules/self-hosted/cell-application"
+  count  = var.identity_enabled ? 1 : 0
+
+  name               = "identity"
+  namespace          = module.identity[0].namespace
+  repository_url     = var.repository_url
+  target_revision    = var.platform_revision
+  chart_path         = "deploy/charts/keycloak"
+  values_files       = []
+  apps_chart_version = var.argocd_apps_chart_version
+
+  depends_on = [module.argocd, module.identity]
+}

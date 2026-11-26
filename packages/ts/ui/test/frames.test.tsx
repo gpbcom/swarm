@@ -1,6 +1,8 @@
 import { createElement } from "react";
 import type { ReactElement } from "react";
-import { render, screen } from "@testing-library/react";
+import { render as renderBare, screen } from "@testing-library/react";
+import type { RenderResult } from "@testing-library/react";
+import { I18nProvider } from "@swarm/i18n";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -63,6 +65,10 @@ const FRAMES: FrameCase[] = [
   },
 ];
 
+function render(ui: ReactElement, language = "en"): RenderResult {
+  return renderBare(<I18nProvider language={language}>{ui}</I18nProvider>);
+}
+
 function navLabels(container: HTMLElement): string[] {
   return Array.from(container.querySelectorAll("nav.sidebar .nav-item")).map((item) =>
     item.textContent.replace(/\s+/g, " ").trim(),
@@ -117,8 +123,8 @@ describe("TitleBar", () => {
 
 describe("SideBar", () => {
   const items = [
-    { id: "one", icon: "1️⃣", label: "One" },
-    { id: "two", icon: "2️⃣", label: "Two" },
+    { id: "one", icon: "1️⃣", messageId: "nav.flight" },
+    { id: "two", icon: "2️⃣", messageId: "nav.squad" },
   ];
 
   it("renders one nav item per item with its icon and label", () => {
@@ -127,7 +133,7 @@ describe("SideBar", () => {
     const rendered = container.querySelectorAll(".nav-item");
     expect(rendered.length).toBe(2);
     expect(rendered[1]?.textContent).toContain("2️⃣");
-    expect(rendered[1]?.textContent).toContain("Two");
+    expect(rendered[1]?.textContent).toContain("Squad");
   });
 
   it("marks only the active item", () => {
@@ -144,6 +150,23 @@ describe("SideBar", () => {
     const { container } = render(<SideBar items={items} active="one" onSelect={onSelect} />);
     await userEvent.click(container.querySelectorAll(".nav-item")[1] as HTMLElement);
     expect(onSelect).toHaveBeenCalledWith("two");
+  });
+});
+
+describe("French", () => {
+  it("shows the side bar items and the Hold and Abort buttons in French", () => {
+    const { container } = render(<GroundControlFrame />, "fr");
+    expect(navLabels(container)).toEqual([
+      "🛰️ Vol",
+      "📋 Pré-vol",
+      "🛸 Escadrille",
+      "🎥 Vidéo",
+      "📼 Débriefing",
+      "🔧 Paramètres",
+    ]);
+    const buttons = Array.from(container.querySelectorAll("header.titlebar button")).map((b) => b.textContent);
+    expect(buttons).toEqual(["✋ Mettre l'escadrille en attente", "🛑 Interrompre"]);
+    expect(container.querySelector("header.titlebar")?.textContent).toContain("Ground control");
   });
 });
 

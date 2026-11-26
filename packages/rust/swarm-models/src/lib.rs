@@ -8,6 +8,6 @@
 mod generated;
 
 pub use generated::{
-    Actor, ActorKind, CellAssignment, Command, CommandKind, CommandLane, DroneState, Event, JsonValue, Operator,
-    Person, Role, RoleName, SquadFrame, TelemetryFrame,
+    Actor, ActorKind, CellAssignment, Command, CommandKind, CommandLane, DroneState, Event, JsonValue, Language,
+    LiveOperation, LiveRate, LiveSubscription, Operator, Person, Role, RoleName, SquadFrame, TelemetryFrame,
 };

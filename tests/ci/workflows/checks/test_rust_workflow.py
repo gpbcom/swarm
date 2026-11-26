@@ -147,6 +147,11 @@ class TestRustWorkflow:
         assert installs
         assert min(installs) < first_cargo
 
+    def test_the_pull_request_sources_are_touched_before_its_benchmark(self) -> None:
+        step = next(run for run in self.bench_runs() if "--baseline-lenient" in run)
+        assert "touch" in step
+        assert step.index("touch") < step.index("cargo bench")
+
     def test_the_bench_job_knows_the_base_commit(self) -> None:
         assert self.bench_env().get("BASE_SHA") == "${{ github.event.pull_request.base.sha }}"
 

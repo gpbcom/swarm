@@ -17,7 +17,8 @@
     "@radix-ui/react-progress": "1.2.1",
     "@radix-ui/react-tabs": "1.2.1",
     "@radix-ui/react-toast": "1.3.1",
-    "@swarm/tokens": "workspace:*"
+    "@swarm/tokens": "workspace:*",
+    "react-intl": "8.1.3"
   },
   "peerDependencies": {
     "react": "19.3.1",
@@ -26,6 +27,7 @@
   "devDependencies": {
     "@eslint/js": "10.0.1",
     "@swarm/config": "workspace:*",
+    "@swarm/i18n": "workspace:*",
     "@testing-library/dom": "10.4.2",
     "@testing-library/react": "16.3.3",
     "@testing-library/user-event": "14.6.13",

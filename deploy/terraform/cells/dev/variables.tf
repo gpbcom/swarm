@@ -80,6 +80,17 @@ variable "platform_enabled" {
   default     = false
 }
 
+variable "identity_enabled" {
+  description = "Whether the cell deploys the identity of the global layer (Keycloak). It needs the platform, so enable it on a second apply, once platform_enabled is true."
+  type        = bool
+  default     = false
+
+  validation {
+    condition     = !var.identity_enabled || var.platform_enabled
+    error_message = "The identity cannot be enabled unless the platform is enabled."
+  }
+}
+
 variable "repository_url" {
   description = "The URL of the Git repository that Argo CD follows. Required when the platform is enabled."
   type        = string

@@ -2,6 +2,7 @@ from swarm_models.models.people.exceptions.person import (
     SEInvalidPersonException,
     SEPersonInvalidEmail,
     SEPersonInvalidId,
+    SEPersonInvalidLanguage,
     SEPersonInvalidName,
     SEPersonInvalidOperatorId,
 )
@@ -18,6 +19,7 @@ __all__ = [
     "SEInvalidRoleException",
     "SEPersonInvalidEmail",
     "SEPersonInvalidId",
+    "SEPersonInvalidLanguage",
     "SEPersonInvalidName",
     "SEPersonInvalidOperatorId",
     "SERoleInvalidName",

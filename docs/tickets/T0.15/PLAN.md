@@ -2,6 +2,8 @@
 
 **Plan:** 🟢 Approved
 
+**Push:** 🟢 Approved
+
 <!-- ticket:specs -->
 ## 📚 Specifications
 
@@ -39,7 +41,7 @@ A doc-writer task updates AGENT.md. No capture task: the ticket's area has no `f
 
 ## Assumptions
 
-- No screen is linked: the roadmap row names no use case and changes no `frontends/` folder.
+- No screen is linked: the four shells are the empty frames of T0.14 and show no use case state; the ticket only takes their side bar items, Hold, Abort and the status bar language from the messages in four languages.
 - Criterion 3 comes from FS-012 AC-2; only the stored language and its application at sign-in are verified here, as the Client portal comes later.
 - The ticket anchor is the sprint anchor `#s03`, as the roadmap has no anchor per ticket.
 - UC-023 and UC-015 are cited for BR-017 criteria as they apply BR-017; the check script was not run by me.
@@ -69,7 +71,7 @@ A doc-writer task updates AGENT.md. No capture task: the ticket's area has no `f
 | 2 | [K09](#k09), [K10](#k10), [K12](#k12) | 3 of 3 |
 | 3 | [K11](#k11), [K13](#k13), [K14](#k14) | 3 of 3 |
 | 4 | [K15](#k15), [K18](#k18), [K19](#k19) | 3 of 3 |
-| 5 | [K16](#k16) | 1 of 1 |
+| 5 | [K20](#k20), [K16](#k16) | 2 of 2 |
 | 6 | [K17](#k17) | 1 of 1 |
 
 | Wave | Task | Agent | Depends on | Unblocks |
@@ -89,7 +91,8 @@ A doc-writer task updates AGENT.md. No capture task: the ticket's area has no `f
 | 3 | [K13](#k13) swarm-i18n: package scaffold and models | 🐍 implementer | [K02](#k02), [K09](#k09) | [K15](#k15), [K19](#k19) |
 | 3 | [K14](#k14) Regenerate the JSON Schema bundle, Rust structs and TypeScript types after Person.language | 🐍 implementer | [K09](#k09) | none |
 | 4 | [K15](#k15) swarm-i18n storage: PoCatalogStore and the shipped catalogues | 🐍 implementer | [K03](#k03), [K13](#k13) | [K16](#k16) |
-| 4 | [K18](#k18) Shells: wrap the four apps in I18nProvider and take their frame texts from the messages | 🖥️ frontend-implementer | [K11](#k11) | none |
+| 4 | [K18](#k18) Shells: wrap the four apps in I18nProvider and take their frame texts from the messages | 🖥️ frontend-implementer | [K11](#k11) | [K20](#k20) |
+| 5 | [K20](#k20) Frames: side bar items, Hold and Abort from the messages, in the four languages | 🖥️ frontend-implementer | [K18](#k18) | none |
 | 4 | [K19](#k19) Docs: the four-language packages and checks in AGENT.md | 📝 doc-writer | [K10](#k10), [K12](#k12), [K13](#k13) | none |
 | 5 | [K16](#k16) swarm-i18n service: CatalogChecker and Translator | 🐍 implementer | [K04](#k04), [K15](#k15) | [K17](#k17) |
 | 6 | [K17](#k17) swarm-i18n api: the swarm-i18n-check command line | 🐍 implementer | [K05](#k05), [K16](#k16) | none |
@@ -129,6 +132,7 @@ flowchart LR
   end
   subgraph W5["Wave 5"]
     direction TB
+    K20["K20 · 🖥️ frontend-implementer<br/>Frames: side bar items, Hold and Abort from the messages, in the four languages"]:::frontend_implementer
     K16["K16 · 🐍 implementer<br/>swarm-i18n service: CatalogChecker and Translator"]:::implementer
   end
   subgraph W6["Wave 6"]
@@ -146,6 +150,7 @@ flowchart LR
   K03 --> K15
   K13 --> K15
   K11 --> K18
+  K18 --> K20
   K10 --> K19
   K12 --> K19
   K13 --> K19
@@ -804,7 +809,7 @@ Rules (AGENT.md Logging, Exceptions and File shape):
 
 | Agent | Wave | Depends on | Unblocks |
 | --- | --- | --- | --- |
-| 🖥️ frontend-implementer | 4 | [K11](#k11) | none |
+| 🖥️ frontend-implementer | 4 | [K11](#k11) | [K20](#k20) |
 
 **Files** (only this task may change them in its wave):
 
@@ -849,6 +854,62 @@ For each of `ground-control`, `mission-studio`, `back-office` and `client-portal
 If T0.14 put the shell root or the frame texts in files other than `src/main.tsx` and `src/App.tsx` of the shell, or inside `packages/ts/ui`, change only the files listed here. Report the exact other paths as `blocked`, and do not edit `packages/ts/ui`.
 
 Add no visible language control: the choice of language belongs to UC-023 A3 and UC-015 A2. Their screens are later tickets. Strict TypeScript, no `any`.
+
+### <a id="k20"></a>K20: Frames: side bar items, Hold and Abort from the messages, in the four languages
+
+| Agent | Wave | Depends on | Unblocks |
+| --- | --- | --- | --- |
+| 🖥️ frontend-implementer | 5 | [K18](#k18) | none |
+
+**Files** (only this task may change them in its wave):
+
+- `packages/ts/ui/package.json`
+- `packages/ts/ui/src/frames/parts.ts`
+- `packages/ts/ui/src/frames/SideBar.tsx`
+- `packages/ts/ui/src/frames/StatusBar.tsx`
+- `packages/ts/ui/src/frames/TitleBar.tsx`
+- `packages/ts/ui/src/frames/GroundControlFrame.tsx`
+- `packages/ts/ui/src/frames/MissionStudioFrame.tsx`
+- `packages/ts/ui/src/frames/BackOfficeFrame.tsx`
+- `packages/ts/ui/src/frames/ClientPortalFrame.tsx`
+- `packages/ts/ui/src/frames/SwarmAdministrationFrame.tsx`
+- `packages/ts/ui/src/frames/index.ts`
+- `packages/ts/ui/test/frames.test.tsx`
+- `frontends/ground-control/src/App.tsx`
+- `frontends/mission-studio/src/App.tsx`
+- `frontends/back-office/src/App.tsx`
+- `frontends/client-portal/src/App.tsx`
+- `frontends/ground-control/test/app.test.tsx`
+- `frontends/mission-studio/test/app.test.tsx`
+- `frontends/back-office/test/app.test.tsx`
+- `frontends/client-portal/test/app.test.tsx`
+- `packages/ts/i18n/src/messages/en.json`
+- `packages/ts/i18n/src/messages/fr.json`
+- `packages/ts/i18n/src/messages/de.json`
+- `packages/ts/i18n/src/messages/es.json`
+- `AGENT.md`
+- `pnpm-lock.yaml`
+
+**Done when:** `pnpm install` succeeds. `pnpm --filter @swarm/ui run lint`, `typecheck` and `test` pass. For each of the four shells, `pnpm --filter ./frontends/<app> run --if-present lint`, `typecheck`, `test` and `build` pass. `pnpm --filter ./packages/ts/i18n run test` passes and `pnpm --filter ./packages/ts/i18n run check-messages` exits 0. No English text of a side bar item, Hold or Abort is left in packages/ts/ui/src/frames/parts.ts.
+
+**Brief:**
+
+Close the gap K18 reported (docs/tickets/T0.15/TICKET.md, acceptance criteria 2 and 3): the side bar items (GROUND_CONTROL_ITEMS, MISSION_STUDIO_ITEMS, BACK_OFFICE_ITEMS, CLIENT_PORTAL_ITEMS and the Swarm administration items) and GROUND_CONTROL_LABELS (Hold the Squad, Abort) are fixed English strings in packages/ts/ui/src/frames/parts.ts, so the shells cannot switch them to another language.
+
+Specifications applied:
+- docs/specs/visual-identity.md#components (the frame of each part: title bar, side bar, status bar)
+- docs/specs/technical/10-frontends.md#apps
+- docs/specs/functional/business-rules/BR-017-every-screen-in-four-languages.md (and its exception)
+- docs/specs/functional/use-cases/UC-023-configure-the-workspace-of-ground-control.md
+- docs/specs/functional/use-cases/UC-015-invite-a-client-to-the-client-portal.md
+
+1. In parts.ts, every fixed frame text a person reads (side bar items, Hold and Abort, any other fixed label of the frames) becomes a message id, never English text. Do not translate `Swarm`, the names of the parts (Ground control, Mission studio, Back office, Client portal, Swarm administration) or Client data (BR-017 exception).
+2. The frames render those ids with react-intl (`useIntl().formatMessage` or `FormattedMessage`), so that they switch language with the I18nProvider of the shell, without reloading. Add `"react-intl": "8.1.3"` to packages/ts/ui/package.json (the version @swarm/i18n pins), then `pnpm install`.
+3. Add each id to the four catalogues of packages/ts/i18n/src/messages/, with the English text it had and a French, German and Spanish translation; `pnpm --filter ./packages/ts/i18n run check-messages` must exit 0.
+4. Update packages/ts/ui/test/frames.test.tsx and the four shells' test/app.test.tsx so they render inside an IntlProvider or I18nProvider and assert the English texts, plus one test that a frame shows the French side bar items when the language is French. Change the shells' src/App.tsx only if they must pass something new.
+5. In AGENT.md, the sentence on packages/ts/ui/src/frames/parts.ts says it holds the frames' message ids, and their words are in the catalogues of @swarm/i18n.
+
+Add no file to packages/ts/ui/src/frames/ (it already holds more than five code files; the layout refactor sorts it). Strict TypeScript, no `any`. Add no visible language control.
 
 ### <a id="k19"></a>K19: Docs: the four-language packages and checks in AGENT.md
 
@@ -1262,6 +1323,45 @@ Output (only `api/cli` may `print`):
     "brief": "Make the four empty shells of T0.14 switch language without reloading (docs/tickets/T0.15/TICKET.md, 'The shells switching language without reloading', acceptance criterion 2).\n\nSpecifications applied:\n- docs/specs/technical/10-frontends.md#apps\n- docs/specs/visual-identity.md#components (the frame of each part: title bar, side bar, status bar)\n- docs/specs/functional/business-rules/BR-017-every-screen-in-four-languages.md (and its exception)\n- docs/specs/functional/use-cases/UC-023-configure-the-workspace-of-ground-control.md\n- docs/specs/functional/use-cases/UC-015-invite-a-client-to-the-client-portal.md\n\nFor each of `ground-control`, `mission-studio`, `back-office` and `client-portal`:\n1. Add `\"@swarm/i18n\": \"workspace:*\"` to its `package.json` and run `pnpm install`.\n2. Wrap the shell's root in `<I18nProvider language={...}>` in `src/main.tsx`. Until sign-in hands the person to the shell, pass `undefined`, which gives English. When the signed-in person is available, pass its `language`.\n3. In `src/App.tsx`, take every fixed frame text the shell shows from the messages with react-intl, as the frame table of the visual identity lists them: side bar items, status bar labels such as `status.language`. Add those ids to the four catalogues in `packages/ts/i18n/src/messages/`, with a French, German and Spanish translation for each. Do not translate:\n   - `Swarm` or the names of the parts (Ground control, Mission studio, Back office, Client portal);\n   - Client data (names of Sites and Drones, BR-017 exception).\n\nIf T0.14 put the shell root or the frame texts in files other than `src/main.tsx` and `src/App.tsx` of the shell, or inside `packages/ts/ui`, change only the files listed here. Report the exact other paths as `blocked`, and do not edit `packages/ts/ui`.\n\nAdd no visible language control: the choice of language belongs to UC-023 A3 and UC-015 A2. Their screens are later tickets. Strict TypeScript, no `any`.",
     "done_when": "`pnpm install` succeeds. For each of the four shells, `pnpm --filter ./frontends/<app> run --if-present lint`, `typecheck` and `build` pass. `pnpm --filter ./packages/ts/i18n run test` passes. `pnpm --filter ./packages/ts/i18n run check-messages` exits 0.",
     "wave": 4
+  },
+  {
+    "id": "K20",
+    "title": "Frames: side bar items, Hold and Abort from the messages, in the four languages",
+    "agent": "frontend-implementer",
+    "depends_on": [
+      "K18"
+    ],
+    "files": [
+      "packages/ts/ui/package.json",
+      "packages/ts/ui/src/frames/parts.ts",
+      "packages/ts/ui/src/frames/SideBar.tsx",
+      "packages/ts/ui/src/frames/StatusBar.tsx",
+      "packages/ts/ui/src/frames/TitleBar.tsx",
+      "packages/ts/ui/src/frames/GroundControlFrame.tsx",
+      "packages/ts/ui/src/frames/MissionStudioFrame.tsx",
+      "packages/ts/ui/src/frames/BackOfficeFrame.tsx",
+      "packages/ts/ui/src/frames/ClientPortalFrame.tsx",
+      "packages/ts/ui/src/frames/SwarmAdministrationFrame.tsx",
+      "packages/ts/ui/src/frames/index.ts",
+      "packages/ts/ui/test/frames.test.tsx",
+      "frontends/ground-control/src/App.tsx",
+      "frontends/mission-studio/src/App.tsx",
+      "frontends/back-office/src/App.tsx",
+      "frontends/client-portal/src/App.tsx",
+      "frontends/ground-control/test/app.test.tsx",
+      "frontends/mission-studio/test/app.test.tsx",
+      "frontends/back-office/test/app.test.tsx",
+      "frontends/client-portal/test/app.test.tsx",
+      "packages/ts/i18n/src/messages/en.json",
+      "packages/ts/i18n/src/messages/fr.json",
+      "packages/ts/i18n/src/messages/de.json",
+      "packages/ts/i18n/src/messages/es.json",
+      "AGENT.md",
+      "pnpm-lock.yaml"
+    ],
+    "brief": "Close the gap K18 reported (docs/tickets/T0.15/TICKET.md, acceptance criteria 2 and 3): the side bar items (GROUND_CONTROL_ITEMS, MISSION_STUDIO_ITEMS, BACK_OFFICE_ITEMS, CLIENT_PORTAL_ITEMS and the Swarm administration items) and GROUND_CONTROL_LABELS (Hold the Squad, Abort) are fixed English strings in packages/ts/ui/src/frames/parts.ts, so the shells cannot switch them to another language.\n\nSpecifications applied:\n- docs/specs/visual-identity.md#components (the frame of each part: title bar, side bar, status bar)\n- docs/specs/technical/10-frontends.md#apps\n- docs/specs/functional/business-rules/BR-017-every-screen-in-four-languages.md (and its exception)\n- docs/specs/functional/use-cases/UC-023-configure-the-workspace-of-ground-control.md\n- docs/specs/functional/use-cases/UC-015-invite-a-client-to-the-client-portal.md\n\n1. In parts.ts, every fixed frame text a person reads (side bar items, Hold and Abort, any other fixed label of the frames) becomes a message id, never English text. Do not translate `Swarm`, the names of the parts (Ground control, Mission studio, Back office, Client portal, Swarm administration) or Client data (BR-017 exception).\n2. The frames render those ids with react-intl (`useIntl().formatMessage` or `FormattedMessage`), so that they switch language with the I18nProvider of the shell, without reloading. Add `\"react-intl\": \"8.1.3\"` to packages/ts/ui/package.json (the version @swarm/i18n pins), then `pnpm install`.\n3. Add each id to the four catalogues of packages/ts/i18n/src/messages/, with the English text it had and a French, German and Spanish translation; `pnpm --filter ./packages/ts/i18n run check-messages` must exit 0.\n4. Update packages/ts/ui/test/frames.test.tsx and the four shells' test/app.test.tsx so they render inside an IntlProvider or I18nProvider and assert the English texts, plus one test that a frame shows the French side bar items when the language is French. Change the shells' src/App.tsx only if they must pass something new.\n5. In AGENT.md, the sentence on packages/ts/ui/src/frames/parts.ts says it holds the frames' message ids, and their words are in the catalogues of @swarm/i18n.\n\nAdd no file to packages/ts/ui/src/frames/ (it already holds more than five code files; the layout refactor sorts it). Strict TypeScript, no `any`. Add no visible language control.",
+    "done_when": "`pnpm install` succeeds. `pnpm --filter @swarm/ui run lint`, `typecheck` and `test` pass. For each of the four shells, `pnpm --filter ./frontends/<app> run --if-present lint`, `typecheck`, `test` and `build` pass. `pnpm --filter ./packages/ts/i18n run test` passes and `pnpm --filter ./packages/ts/i18n run check-messages` exits 0. No English text of a side bar item, Hold or Abort is left in packages/ts/ui/src/frames/parts.ts.",
+    "wave": 5
   },
   {
     "id": "K19",

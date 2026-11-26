@@ -73,7 +73,7 @@ class TestServiceImages:
         destination = self._conf_destination(dockerfile)
         if destination is None:
             pytest.skip("This image does not copy its conf folder from the build stage.")
-        key = self.HOME_KEY.format(service=dockerfile.parent.name.upper())
+        key = self.HOME_KEY.format(service=dockerfile.parent.name.upper().replace("-", "_"))
         entries: List[str] = []
         for arguments in self._instructions(self._final_stage(dockerfile), self.ENV):
             entries.extend(re.findall(r"(\w+)=(\S+)", arguments))

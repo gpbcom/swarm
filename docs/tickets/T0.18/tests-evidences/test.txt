@@ -1,0 +1,284 @@
+$ pnpm -r --if-present test
+(cwd ., on the ticket's own files only)
+
+Scope: 12 of 13 workspace projects
+packages/ts/i18n test$ vitest run
+packages/ts/api-client test$ node --experimental-strip-types --test test/*.test.ts && node --experimental-strip-types scripts/generate.ts --check
+packages/ts/live test$ node --experimental-strip-types --test test/*.test.ts && node --experimental-strip-types scripts/generate.ts --check
+packages/ts/e2e test$ node --experimental-strip-types --test test/*.test.ts
+packages/ts/live test: TAP version 13
+packages/ts/e2e test: TAP version 13
+packages/ts/api-client test: TAP version 13
+packages/ts/live test: # (node:712323) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+packages/ts/live test: # (Use `node --trace-warnings ...` to show where the warning was created)
+packages/ts/api-client test: # (node:712325) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+packages/ts/api-client test: # (Use `node --trace-warnings ...` to show where the warning was created)
+packages/ts/e2e test: # (node:712331) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+packages/ts/e2e test: # (Use `node --trace-warnings ...` to show where the warning was created)
+packages/ts/i18n test: 
+packages/ts/i18n test:  RUN  v5.1.1 /tmp/swarm-checks-e7o5g4mh/packages/ts/i18n
+packages/ts/i18n test: 
+packages/ts/live test: # Subtest: the live models generator
+packages/ts/live test:     # Subtest: starts the render with the banner
+packages/ts/live test:     ok 1 - starts the render with the banner
+packages/ts/live test:       ---
+packages/ts/live test:       duration_ms: 104.773116
+packages/ts/live test:       type: 'test'
+packages/ts/live test:       ...
+packages/ts/live test:     # Subtest: renders one exported type per definition
+packages/ts/live test:     ok 2 - renders one exported type per definition
+packages/ts/live test:       ---
+packages/ts/live test:       duration_ms: 10.663642
+packages/ts/live test:       type: 'test'
+packages/ts/live test:       ...
+packages/ts/live test:     # Subtest: renders the same text twice
+packages/ts/live test:     ok 3 - renders the same text twice
+packages/ts/live test:       ---
+packages/ts/live test:       duration_ms: 14.718072
+packages/ts/live test:       type: 'test'
+packages/ts/live test:       ...
+packages/ts/live test:     # Subtest: rejects invalid JSON
+packages/ts/live test:     ok 4 - rejects invalid JSON
+packages/ts/live test:       ---
+packages/ts/live test:       duration_ms: 0.621303
+packages/ts/live test:       type: 'test'
+packages/ts/live test:       ...
+packages/ts/live test:     # Subtest: is stale when the output is missing
+packages/ts/live test:     ok 5 - is stale when the output is missing
+packages/ts/live test:       ---
+packages/ts/live test:       duration_ms: 17.575867
+packages/ts/live test:       type: 'test'
+packages/ts/live test:       ...
+packages/ts/live test:     # Subtest: writes into missing folders and is then fresh
+packages/ts/live test:     ok 6 - writes into missing folders and is then fresh
+packages/ts/live test:       ---
+packages/ts/live test:       duration_ms: 21.262431
+packages/ts/live test:       type: 'test'
+packages/ts/live test:       ...
+packages/ts/live test:     # Subtest: is stale again after the output is edited
+packages/ts/live test:     ok 7 - is stale again after the output is edited
+packages/ts/live test:       ---
+packages/ts/live test:       duration_ms: 16.11795
+packages/ts/live test:       type: 'test'
+packages/ts/live test:       ...
+packages/ts/live test:     # Subtest: points at the schema and the generated file
+packages/ts/live test:     ok 8 - points at the schema and the generated file
+packages/ts/live test:       ---
+packages/ts/live test:       duration_ms: 0.400751
+packages/ts/live test:       type: 'test'
+packages/ts/live test:       ...
+packages/ts/live test:     1..8
+packages/ts/live test: ok 1 - the live models generator
+packages/ts/live test:   ---
+packages/ts/live test:   duration_ms: 192.247389
+packages/ts/live test:   type: 'suite'
+packages/ts/live test:   ...
+packages/ts/live test: 1..1
+packages/ts/live test: # tests 8
+packages/ts/live test: # suites 1
+packages/ts/live test: # pass 8
+packages/ts/live test: # fail 0
+packages/ts/live test: # cancelled 0
+packages/ts/live test: # skipped 0
+packages/ts/live test: # todo 0
+packages/ts/live test: # duration_ms 330.100577
+packages/ts/e2e test: # Subtest: the shared Playwright configuration
+packages/ts/e2e test:     # Subtest: keeps the test folder, has no web server and writes an html report
+packages/ts/e2e test:     ok 1 - keeps the test folder, has no web server and writes an html report
+packages/ts/e2e test:       ---
+packages/ts/e2e test:       duration_ms: 1.037571
+packages/ts/e2e test:       type: 'test'
+packages/ts/e2e test:       ...
+packages/ts/e2e test:     # Subtest: uses the base URL of the environment when it is set
+packages/ts/e2e test:     ok 2 - uses the base URL of the environment when it is set
+packages/ts/e2e test:       ---
+packages/ts/e2e test:       duration_ms: 0.123078
+packages/ts/e2e test:       type: 'test'
+packages/ts/e2e test:       ...
+packages/ts/e2e test:     # Subtest: has no base URL when the environment has none
+packages/ts/e2e test:     ok 3 - has no base URL when the environment has none
+packages/ts/e2e test:       ---
+packages/ts/e2e test:       duration_ms: 0.135435
+packages/ts/e2e test:       type: 'test'
+packages/ts/e2e test:       ...
+packages/ts/e2e test:     # Subtest: refuses a missing image tag
+packages/ts/e2e test:     ok 4 - refuses a missing image tag
+packages/ts/e2e test:       ---
+packages/ts/e2e test:       duration_ms: 0.34291
+packages/ts/e2e test:       type: 'test'
+packages/ts/e2e test:       ...
+packages/ts/e2e test:     # Subtest: refuses a blank image tag
+packages/ts/e2e test:     ok 5 - refuses a blank image tag
+packages/ts/e2e test:       ---
+packages/ts/e2e test:       duration_ms: 0.119404
+packages/ts/e2e test:       type: 'test'
+packages/ts/e2e test:       ...
+packages/ts/e2e test:     # Subtest: refuses a development server
+packages/ts/e2e test:     ok 6 - refuses a development server
+packages/ts/e2e test:       ---
+packages/ts/e2e test:       duration_ms: 0.21226
+packages/ts/e2e test:       type: 'test'
+packages/ts/e2e test:       ...
+packages/ts/e2e test:     # Subtest: forbids test.only on CI
+packages/ts/e2e test:     ok 7 - forbids test.only on CI
+packages/ts/e2e test:       ---
+packages/ts/e2e test:       duration_ms: 0.090219
+packages/ts/e2e test:       type: 'test'
+packages/ts/e2e test:       ...
+packages/ts/e2e test:     1..7
+packages/ts/e2e test: ok 1 - the shared Playwright configuration
+packages/ts/e2e test:   ---
+packages/ts/e2e test:   duration_ms: 2.782871
+packages/ts/e2e test:   type: 'suite'
+packages/ts/e2e test:   ...
+packages/ts/e2e test: 1..1
+packages/ts/e2e test: # tests 7
+packages/ts/e2e test: # suites 1
+packages/ts/e2e test: # pass 7
+packages/ts/e2e test: # fail 0
+packages/ts/e2e test: # cancelled 0
+packages/ts/e2e test: # skipped 0
+packages/ts/e2e test: # todo 0
+packages/ts/e2e test: # duration_ms 345.893486
+packages/ts/e2e test: Done
+packages/ts/live test: (node:712492) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+packages/ts/live test: (Use `node --trace-warnings ...` to show where the warning was created)
+packages/ts/live test: Done
+packages/ts/api-client test: # Subtest: the api client generator
+packages/ts/api-client test:     # Subtest: writes one file per document
+packages/ts/api-client test:     ok 1 - writes one file per document
+packages/ts/api-client test:       ---
+packages/ts/api-client test:       duration_ms: 524.464063
+packages/ts/api-client test:       type: 'test'
+packages/ts/api-client test:       ...
+packages/ts/i18n test: 
+packages/ts/i18n test:  Test Files  5 passed (5)
+packages/ts/i18n test:       Tests  37 passed (37)
+packages/ts/i18n test:    Start at  16:33:38
+packages/ts/i18n test:    Duration  749ms (environment 38%, tests 27%, import 19%, transform 13%, worker 2%)
+packages/ts/i18n test: 
+packages/ts/i18n test: Done
+packages/ts/ui test$ vitest run
+packages/ts/ui test: 
+packages/ts/ui test:  RUN  v5.1.1 /tmp/swarm-checks-e7o5g4mh/packages/ts/ui
+packages/ts/ui test: 
+packages/ts/api-client test:     # Subtest: checks clean right after a generation
+packages/ts/api-client test:     ok 2 - checks clean right after a generation
+packages/ts/api-client test:       ---
+packages/ts/api-client test:       duration_ms: 1001.683107
+packages/ts/api-client test:       type: 'test'
+packages/ts/api-client test:       ...
+packages/ts/ui test: 
+packages/ts/ui test:  Test Files  7 passed (7)
+packages/ts/ui test:       Tests  155 passed (155)
+packages/ts/ui test:    Start at  16:33:39
+packages/ts/ui test:    Duration  1.19s (environment 63%, import 16%, tests 15%, transform 6%, worker 1%)
+packages/ts/ui test: 
+packages/ts/ui test: Done
+frontends/back-office test$ vitest run
+frontends/client-portal test$ vitest run
+frontends/ground-control test$ vitest run
+packages/ts/api-client test:     # Subtest: fails the check and names the file after a generated file is edited
+packages/ts/api-client test:     ok 3 - fails the check and names the file after a generated file is edited
+packages/ts/api-client test:       ---
+packages/ts/api-client test:       duration_ms: 1010.674298
+packages/ts/api-client test:       type: 'test'
+packages/ts/api-client test:       ...
+frontends/ground-control test: 
+frontends/ground-control test:  RUN  v5.1.1 /tmp/swarm-checks-e7o5g4mh/frontends/ground-control
+frontends/ground-control test: 
+frontends/back-office test: 
+frontends/back-office test:  RUN  v5.1.1 /tmp/swarm-checks-e7o5g4mh/frontends/back-office
+frontends/back-office test: 
+frontends/client-portal test: 
+frontends/client-portal test:  RUN  v5.1.1 /tmp/swarm-checks-e7o5g4mh/frontends/client-portal
+frontends/client-portal test: 
+frontends/ground-control test: 
+frontends/ground-control test:  Test Files  1 passed (1)
+frontends/ground-control test:       Tests  10 passed (10)
+frontends/ground-control test:    Start at  16:33:40
+frontends/ground-control test:    Duration  928ms (environment 41%, transform 27%, import 24%, tests 7%)
+frontends/ground-control test: 
+packages/ts/api-client test:     # Subtest: fails the check when a generated file has no document
+packages/ts/api-client test:     ok 4 - fails the check when a generated file has no document
+packages/ts/api-client test:       ---
+packages/ts/api-client test:       duration_ms: 958.597839
+packages/ts/api-client test:       type: 'test'
+packages/ts/api-client test:       ...
+frontends/ground-control test: Done
+frontends/mission-studio test$ vitest run
+frontends/back-office test: 
+frontends/back-office test:  Test Files  1 passed (1)
+frontends/back-office test:       Tests  8 passed (8)
+frontends/back-office test:    Start at  16:33:40
+frontends/back-office test:    Duration  940ms (environment 45%, transform 25%, import 24%, tests 6%)
+frontends/back-office test: 
+frontends/client-portal test: 
+frontends/client-portal test:  Test Files  1 passed (1)
+frontends/client-portal test:       Tests  9 passed (9)
+frontends/client-portal test:    Start at  16:33:40
+frontends/client-portal test:    Duration  926ms (environment 41%, transform 27%, import 25%, tests 7%)
+frontends/client-portal test: 
+frontends/back-office test: Done
+frontends/client-portal test: Done
+frontends/mission-studio test: 
+frontends/mission-studio test:  RUN  v5.1.1 /tmp/swarm-checks-e7o5g4mh/frontends/mission-studio
+frontends/mission-studio test: 
+packages/ts/api-client test:     # Subtest: checks the package's own generated clients with the default folders
+packages/ts/api-client test:     ok 5 - checks the package's own generated clients with the default folders
+packages/ts/api-client test:       ---
+packages/ts/api-client test:       duration_ms: 468.816181
+packages/ts/api-client test:       type: 'test'
+packages/ts/api-client test:       ...
+packages/ts/api-client test:     1..5
+packages/ts/api-client test: ok 1 - the api client generator
+packages/ts/api-client test:   ---
+packages/ts/api-client test:   duration_ms: 3970.810378
+packages/ts/api-client test:   type: 'suite'
+packages/ts/api-client test:   ...
+packages/ts/api-client test: # (node:712330) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+packages/ts/api-client test: # (Use `node --trace-warnings ...` to show where the warning was created)
+packages/ts/api-client test: # Subtest: the api client renderer
+packages/ts/api-client test:     # Subtest: starts the render with the generated banner
+packages/ts/api-client test:     ok 1 - starts the render with the generated banner
+packages/ts/api-client test:       ---
+packages/ts/api-client test:       duration_ms: 17.049909
+packages/ts/api-client test:       type: 'test'
+packages/ts/api-client test:       ...
+packages/ts/api-client test:     # Subtest: renders the paths, the components and the problem schema
+packages/ts/api-client test:     ok 2 - renders the paths, the components and the problem schema
+packages/ts/api-client test:       ---
+packages/ts/api-client test:       duration_ms: 5.584419
+packages/ts/api-client test:       type: 'test'
+packages/ts/api-client test:       ...
+packages/ts/api-client test:     # Subtest: renders the same text twice
+packages/ts/api-client test:     ok 3 - renders the same text twice
+packages/ts/api-client test:       ---
+packages/ts/api-client test:       duration_ms: 5.314074
+packages/ts/api-client test:       type: 'test'
+packages/ts/api-client test:       ...
+packages/ts/api-client test:     1..3
+packages/ts/api-client test: ok 2 - the api client renderer
+packages/ts/api-client test:   ---
+packages/ts/api-client test:   duration_ms: 28.754243
+packages/ts/api-client test:   type: 'suite'
+packages/ts/api-client test:   ...
+packages/ts/api-client test: 1..2
+packages/ts/api-client test: # tests 8
+packages/ts/api-client test: # suites 2
+packages/ts/api-client test: # pass 8
+packages/ts/api-client test: # fail 0
+packages/ts/api-client test: # cancelled 0
+packages/ts/api-client test: # skipped 0
+packages/ts/api-client test: # todo 0
+packages/ts/api-client test: # duration_ms 4060.177267
+packages/ts/api-client test: (node:713189) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+packages/ts/api-client test: (Use `node --trace-warnings ...` to show where the warning was created)
+packages/ts/api-client test: Done
+frontends/mission-studio test: 
+frontends/mission-studio test:  Test Files  1 passed (1)
+frontends/mission-studio test:       Tests  8 passed (8)
+frontends/mission-studio test:    Start at  16:33:42
+frontends/mission-studio test:    Duration  783ms (environment 48%, import 25%, transform 20%, tests 6%)
+frontends/mission-studio test: 
+frontends/mission-studio test: Done

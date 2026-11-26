@@ -408,6 +408,209 @@ impl ::std::convert::From<::serde_json::Value> for JsonValue {
         Self(value)
     }
 }
+/**A language in which Swarm shows its screens.
+
+Attributes:
+    ENGLISH: English, the default language.
+    FRENCH: French.
+    GERMAN: German.
+    SPANISH: Spanish.*/
+#[derive(
+    ::serde::Deserialize,
+    ::serde::Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd
+)]
+pub enum Language {
+    #[serde(rename = "en")]
+    En,
+    #[serde(rename = "fr")]
+    Fr,
+    #[serde(rename = "de")]
+    De,
+    #[serde(rename = "es")]
+    Es,
+}
+impl ::std::fmt::Display for Language {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::En => f.write_str("en"),
+            Self::Fr => f.write_str("fr"),
+            Self::De => f.write_str("de"),
+            Self::Es => f.write_str("es"),
+        }
+    }
+}
+impl ::std::str::FromStr for Language {
+    type Err = self::error::ConversionError;
+    fn from_str(
+        value: &str,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "en" => Ok(Self::En),
+            "fr" => Ok(Self::Fr),
+            "de" => Ok(Self::De),
+            "es" => Ok(Self::Es),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for Language {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &str,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for Language {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+/**An operation a client asks of the live WebSocket.
+
+Attributes:
+    SUBSCRIBE: Subscribe to a topic.*/
+#[derive(
+    ::serde::Deserialize,
+    ::serde::Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd
+)]
+pub enum LiveOperation {
+    #[serde(rename = "subscribe")]
+    Subscribe,
+}
+impl ::std::fmt::Display for LiveOperation {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Subscribe => f.write_str("subscribe"),
+        }
+    }
+}
+impl ::std::str::FromStr for LiveOperation {
+    type Err = self::error::ConversionError;
+    fn from_str(
+        value: &str,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "subscribe" => Ok(Self::Subscribe),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for LiveOperation {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &str,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for LiveOperation {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+/**How often a subscriber receives frames.
+
+Attributes:
+    FULL: Every frame, at the rate of the source.*/
+#[derive(
+    ::serde::Deserialize,
+    ::serde::Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd
+)]
+pub enum LiveRate {
+    #[serde(rename = "full")]
+    Full,
+}
+impl ::std::fmt::Display for LiveRate {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Full => f.write_str("full"),
+        }
+    }
+}
+impl ::std::str::FromStr for LiveRate {
+    type Err = self::error::ConversionError;
+    fn from_str(
+        value: &str,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "full" => Ok(Self::Full),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for LiveRate {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &str,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for LiveRate {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+/**The message a client sends on the live WebSocket to follow a topic.
+
+Attributes:
+    model_config (ConfigDict): Forbids unknown keys and freezes the subscription.
+    TOPIC_PREFIX (ClassVar[str]): The first part of every topic.
+    TOPIC_SEPARATOR (ClassVar[str]): The separator between the parts of a topic.
+    TOPIC_PATTERN (ClassVar[Pattern[str]]): The shape of a topic, ``mission/<id>/<kind>``.
+    op (LiveOperation): What the client asks.
+    topic (str): The topic followed, ``mission/<version 7 UUID>/<kind>``.
+    rate (LiveRate): How often frames are sent. Defaults to full.
+
+Notes:
+    - The topic stays a string on the wire,
+      and ``mission()`` and ``kind()`` read its parts.
+    - **A mission identifier that is not a version 7 UUID is refused.***/
+#[derive(::serde::Deserialize, ::serde::Serialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct LiveSubscription {
+    ///What the client asks.
+    pub op: LiveOperation,
+    ///How often frames are sent.
+    #[serde(default = "defaults::live_subscription_rate")]
+    pub rate: LiveRate,
+    ///The topic followed, mission/<version 7 UUID>/<kind>.
+    pub topic: ::std::string::String,
+}
 /**A person who pilots drones, global to every cell.
 
 Attributes:
@@ -434,6 +637,8 @@ Attributes:
     operator_id (Optional[UUID]): The Operator the person belongs to, ``None`` for a Swarm administrator.
     name (str): The full name of the person.
     email (str): The email address of the person.
+    language (Language): The language of the screens the person sees, English by default.
+    LANGUAGE_FIELD (ClassVar[str]): The name of the ``language`` field.
     EMAIL_SEPARATOR (ClassVar[str]): The character that splits an email address into its local part and domain.
 
 Notes:
@@ -445,6 +650,9 @@ pub struct Person {
     pub email: ::std::string::String,
     ///The version 7 identifier of the person.
     pub id: ::uuid::Uuid,
+    ///The language of the screens the person sees.
+    #[serde(default = "defaults::person_language")]
+    pub language: Language,
     ///The full name of the person.
     pub name: ::std::string::String,
     ///The Operator the person belongs to, if any.
@@ -653,6 +861,12 @@ pub mod defaults {
         <T as ::std::convert::TryFrom<u64>>::Error: ::std::fmt::Debug,
     {
         T::try_from(V).unwrap()
+    }
+    pub(super) fn live_subscription_rate() -> super::LiveRate {
+        super::LiveRate::Full
+    }
+    pub(super) fn person_language() -> super::Language {
+        super::Language::En
     }
 }
 /// Error types.

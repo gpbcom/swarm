@@ -11,3 +11,21 @@ rest:
   status_interval_s: 5.0
   idempotency_ttl_s: 86400.0
   idempotency_max_entries: 10000
+auth:
+  issuer_url: http://keycloak.global.svc.cluster.local:8080/realms/swarm
+  audience: swarm-gateway
+  jwks_cache_ttl_s: 300.0
+  leeway_s: 0.0
+  request_timeout_s: 5.0
+live:
+  status_interval_s: 5.0
+  nats:
+    servers:
+      - nats://127.0.0.1:4222
+    name: swarm
+    credentials_path: null
+    connect_timeout_s: 2.0
+    reconnect_wait_s: 2.0
+    request_deadline_s: 5.0
+  session:
+    status_interval_s: 5.0
