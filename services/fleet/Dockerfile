@@ -14,9 +14,9 @@ WORKDIR /workspace
 
 COPY pyproject.toml uv.lock ./
 COPY services/fleet/pyproject.toml services/fleet/pyproject.toml
-COPY packages/python/swarm-catalog/pyproject.toml packages/python/swarm-catalog/pyproject.toml
-COPY packages/python/swarm-lifecycle/pyproject.toml packages/python/swarm-lifecycle/pyproject.toml
-COPY packages/python/swarm-logging/pyproject.toml packages/python/swarm-logging/pyproject.toml
+COPY backend/libs/swarm-catalog/pyproject.toml backend/libs/swarm-catalog/pyproject.toml
+COPY backend/libs/swarm-lifecycle/pyproject.toml backend/libs/swarm-lifecycle/pyproject.toml
+COPY backend/libs/swarm-logging/pyproject.toml backend/libs/swarm-logging/pyproject.toml
 COPY packages/python/swarm-models/pyproject.toml packages/python/swarm-models/pyproject.toml
 COPY packages/python/swarm-nats/pyproject.toml packages/python/swarm-nats/pyproject.toml
 COPY packages/python/swarm-storage/pyproject.toml packages/python/swarm-storage/pyproject.toml
@@ -28,6 +28,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 COPY README.md README.md
 COPY services/fleet services/fleet
 COPY packages/python packages/python
+COPY backend/libs backend/libs
 
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev --no-editable --package swarm-fleet

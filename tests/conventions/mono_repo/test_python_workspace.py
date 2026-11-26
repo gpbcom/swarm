@@ -70,7 +70,7 @@ class TestPythonWorkspace:
     def test_the_root_pyproject_has_no_project_table(self) -> None:
         assert "project" not in self.load_root()
 
-    @pytest.mark.parametrize("member", ["services/*", "packages/python/*"])
+    @pytest.mark.parametrize("member", ["services/*", "packages/python/*", "backend/libs/*"])
     def test_the_uv_workspace_lists_its_members(self, member: str) -> None:
         tool = self.load_root().get("tool", {})
         assert isinstance(tool, dict)

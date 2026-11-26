@@ -155,13 +155,13 @@ jobs:
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
           "$HOME/.local/bin/nats-server" --version
       - name: Ruff check
-        run: uv run ruff check packages/python
+        run: uv run ruff check packages/python backend/libs
       - name: Ruff format check
-        run: uv run ruff format --check packages/python
+        run: uv run ruff format --check packages/python backend/libs
       - name: Mypy
         run: |
           found=0
-          for src in packages/python/*/src; do
+          for src in packages/python/*/src backend/libs/*/src; do
             if [ -d "$src" ]; then
               found=1
               uv run mypy "$src" || exit 1

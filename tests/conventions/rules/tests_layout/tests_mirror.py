@@ -20,7 +20,9 @@ class TestsMirror(BackendRule):
     Notes:
         - A test folder matches a folder of the module, or a source file of the module: the folder
           ``customer_service/`` holds the several test classes of ``customer_service.py``.
-        - A ``test_<subject>.py`` file matches ``<subject>.py`` or the package ``<subject>/`` beside it.
+        - A ``test_<subject>.py`` file matches ``<subject>.py`` or the package ``<subject>/`` beside it. The subject may
+          carry a prefix that keeps test file names unique across the workspace: ``test_swarm_logging_enums.py``
+          matches ``enums.py``.
         - Other files (``helpers.py``, ``conftest.py``) and the folders that do not start with ``swarm_`` are free.
     """
 
@@ -58,6 +60,8 @@ class TestsMirror(BackendRule):
             return []
         subject = name[len(self.TEST_PREFIX) : -len(self.SUFFIX)]
         if (current / f"{subject}{self.SUFFIX}").is_file() or (current / subject).is_dir():
+            return []
+        if any(subject.endswith(f"_{source.stem}") for source in current.glob(f"*{self.SUFFIX}")):
             return []
         message = f"No {subject}{self.SUFFIX} in {current.relative_to(root).as_posix()} for this test."
         return [self.violation(root, path, None, message)]

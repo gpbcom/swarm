@@ -1,5 +1,5 @@
 [tool.uv.workspace]
-members = ["services/*", "packages/python/*"]
+members = ["services/*", "packages/python/*", "backend/libs/*"]
 
 [dependency-groups]
 dev = [
@@ -44,10 +44,7 @@ testpaths = [
     "services/fleet/tests",
     "services/simulator/tests",
     "services/flight-engine/tests",
-    "packages/python/swarm-lifecycle/tests",
     "packages/python/swarm-i18n/tests",
-    "packages/python/swarm-catalog/tests",
-    "packages/python/swarm-logging/tests",
     "packages/python/swarm-models/tests",
     "packages/python/swarm-nats/tests",
     "packages/python/swarm-storage/tests",
@@ -62,10 +59,10 @@ files = [
     "services/fleet/src",
     "services/simulator/src",
     "services/flight-engine/src",
-    "packages/python/swarm-lifecycle/src",
+    "backend/libs/swarm-lifecycle/src",
     "packages/python/swarm-i18n/src",
-    "packages/python/swarm-catalog/src",
-    "packages/python/swarm-logging/src",
+    "backend/libs/swarm-catalog/src",
+    "backend/libs/swarm-logging/src",
     "packages/python/swarm-models/src",
     "packages/python/swarm-nats/src",
     "packages/python/swarm-storage/src",
@@ -79,10 +76,10 @@ mypy_path = [
     "services/fleet/src",
     "services/simulator/src",
     "services/flight-engine/src",
-    "packages/python/swarm-lifecycle/src",
+    "backend/libs/swarm-lifecycle/src",
     "packages/python/swarm-i18n/src",
-    "packages/python/swarm-catalog/src",
-    "packages/python/swarm-logging/src",
+    "backend/libs/swarm-catalog/src",
+    "backend/libs/swarm-logging/src",
     "packages/python/swarm-models/src",
     "packages/python/swarm-nats/src",
     "packages/python/swarm-storage/src",

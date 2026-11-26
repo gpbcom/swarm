@@ -37,6 +37,14 @@ class TestTestsMirror:
         tests = {"tests/swarm_service/fleet/drone_service/test_create.py": ""}
         assert self.violations_of(tmp_path, tests) == []
 
+    def test_a_prefix_that_keeps_the_test_name_unique_is_accepted(self, tmp_path: Path) -> None:
+        tests = {"tests/swarm_service/fleet/test_swarm_service_drone_service.py": ""}
+        assert self.violations_of(tmp_path, tests) == []
+
+    def test_a_prefixed_name_still_needs_its_source_file(self, tmp_path: Path) -> None:
+        found = self.violations_of(tmp_path, {"tests/swarm_service/fleet/test_swarm_service_ghost.py": ""})
+        assert len(found) == 1
+
     def test_a_folder_without_counterpart_is_reported(self, tmp_path: Path) -> None:
         found = self.violations_of(tmp_path, {"tests/swarm_service/ghost/test_x.py": ""})
         assert len(found) == 1

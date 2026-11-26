@@ -194,9 +194,10 @@ in SQLite, is marked simulated ([📏 BR-014](docs/specs/functional/business-rul
 Its acceptance tests are in `tests/simulator/`. They need cargo and `nats-server`, and for PX4, docker with the image built
 by `docker build -f infra/images/px4-sitl/Dockerfile -t swarm-px4-sitl:local .`. They skip without them.
 
-The packages of `packages/python/` are `swarm-lifecycle` (`swarm_lifecycle`), with Runnable, AsyncRunnable and the
-abstract factories; `swarm-logging` (`swarm_logging`), with the logging configuration; and `swarm-catalog`
-(`swarm_catalog`), with YamlCatalog; `swarm-i18n` (`swarm_i18n`), the Babel catalogues of Python messages in English,
+The kernel libraries of `backend/libs/` are `swarm-lifecycle` (`swarm_lifecycle`), with Runnable, AsyncRunnable and
+the abstract factories; `swarm-logging` (`swarm_logging`), with the logging configuration; and `swarm-catalog`
+(`swarm_catalog`), with YamlCatalog. Their tests are in `tests/swarm_<module>/`. The packages still in
+`packages/python/`, until the backend split moves them, are `swarm-i18n` (`swarm_i18n`), the Babel catalogues of Python messages in English,
 French, German and Spanish, whose catalogues live in `src/swarm_i18n/locales/` (`swarm.pot` and
 `<en|fr|de|es>/LC_MESSAGES/swarm.po`), with `Translator`, which gives a message in a person's language (swarm-models
 now holds `Language` and `Person.language`); and `swarm-nats` (`swarm_nats`), the shared async NATS client: the connector,
