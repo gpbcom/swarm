@@ -11,10 +11,10 @@ import pytest
 from pydantic import JsonValue
 
 # First-party imports
+from swarm_models.config.postgres.postgres_config import PostgresConfig
 from swarm_models.events.actor import Actor
 from swarm_models.events.enums import ActorKind
 from swarm_models.events.event import Event
-from swarm_models.config.postgres.postgres_config import PostgresConfig
 from swarm_models.storage.exceptions import (
     SEStorageInvalidPageError,
     SEStorageOperatorRefusedError,
