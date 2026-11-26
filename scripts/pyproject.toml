@@ -1,0 +1,22 @@
+[project]
+name = "swarm-scripts"
+version = "0.1.0"
+description = "The operations of Swarm, run with uv run and taking no arguments: schema export and check."
+readme = "../README.md"
+requires-python = ">=3.12"
+dependencies = ["swarm-models", "swarm-service"]
+
+[project.scripts]
+swarm-schemas-export = "swarm_scripts.schemas.export:main"
+swarm-schemas-check = "swarm_scripts.schemas.check:main"
+
+[tool.uv.sources]
+swarm-models = { workspace = true }
+swarm-service = { workspace = true }
+
+[tool.uv.build-backend]
+module-name = "swarm_scripts"
+
+[build-system]
+requires = ["uv_build>=0.12.21,<0.13.0"]
+build-backend = "uv_build"

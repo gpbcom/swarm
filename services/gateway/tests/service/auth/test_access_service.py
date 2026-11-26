@@ -22,7 +22,7 @@ from gateway.service.auth.access_service import AccessService
 
 from services.gateway.tests.support.keycloak.helpers import claims_for  # isort: skip
 from services.gateway.tests.support.keycloak.keycloak_stand_in import KeycloakStandIn  # isort: skip
-from swarm_models.models.people.enums import RoleName
+from swarm_models.people.enums import RoleName
 
 
 class TestAccessService:

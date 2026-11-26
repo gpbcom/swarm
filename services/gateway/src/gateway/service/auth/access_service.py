@@ -11,7 +11,7 @@ from gateway.models.auth.auth_config import AuthConfig
 from gateway.models.auth.caller import Caller
 from gateway.service.auth.access_guard import AccessGuard
 from gateway.service.auth.token_verifier import TokenVerifier
-from swarm_models.models.people.enums import RoleName
+from swarm_models.people.enums import RoleName
 
 
 class AccessService:

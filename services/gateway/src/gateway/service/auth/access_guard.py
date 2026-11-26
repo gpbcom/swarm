@@ -8,7 +8,7 @@ from uuid import UUID
 # First-party imports
 from gateway.models.access.exceptions import SEAccessMissingRoleError, SEAccessWrongOperatorError
 from gateway.models.auth.caller import Caller
-from swarm_models.models.people.enums import RoleName
+from swarm_models.people.enums import RoleName
 
 
 class AccessGuard:

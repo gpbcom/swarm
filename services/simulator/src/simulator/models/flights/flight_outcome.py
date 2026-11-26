@@ -16,7 +16,7 @@ from simulator.models.flights.exceptions import (
     SEFlightOutcomeInvalidKind,
     SEFlightOutcomeInvalidWaypointsReached,
 )
-from swarm_models.models.base.swarm_model import SwarmModel
+from swarm_models.base.swarm_model import SwarmModel
 
 
 class FlightOutcome(SwarmModel):

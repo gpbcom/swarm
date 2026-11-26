@@ -12,7 +12,7 @@ from nats.errors import Error as NatsError
 # First-party imports
 from flight_engine.clients.leaf.frame_sink import FrameSink
 from flight_engine.models.clients.exceptions import SESquadFramePublishError
-from swarm_models.models.enums import LiveTopicKind
+from swarm_models.enums import LiveTopicKind
 from swarm_nats.models.subjects.operator_subjects import OperatorSubjects
 
 

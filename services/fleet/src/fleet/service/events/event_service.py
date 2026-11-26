@@ -6,9 +6,9 @@ from typing import List, Optional
 from uuid import UUID
 
 # First-party imports
-from swarm_models.models.events.event import Event
-from swarm_storage.storage.postgres.postgres_pool import PostgresPool
-from swarm_storage.storage.postgres.repositories.outbox_repository import OutboxRepository
+from swarm_models.events.event import Event
+from swarm_storage.shared.postgres.postgres_pool import PostgresPool
+from swarm_storage.shared.postgres.repositories.outbox_repository import OutboxRepository
 
 
 class EventService:

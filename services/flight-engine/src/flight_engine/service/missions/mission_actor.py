@@ -16,8 +16,8 @@ from flight_engine.service.missions.squad_frame_builder import SquadFrameBuilder
 from swarm_lifecycle.runnables.async_runnable import AsyncRunnable
 from swarm_live.service.live_codec import LiveCodec
 from swarm_live.service.live_hub import LiveHub
-from swarm_models.models.enums import LiveTopicKind
-from swarm_models.models.live.live_subscription import LiveSubscription
+from swarm_models.enums import LiveTopicKind
+from swarm_models.live.live_subscription import LiveSubscription
 
 
 class MissionActor(AsyncRunnable):

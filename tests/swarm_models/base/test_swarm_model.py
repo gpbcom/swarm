@@ -10,7 +10,7 @@ import pytest
 from pydantic import BaseModel
 
 # First-party imports
-from swarm_models.models.base.swarm_model import SwarmModel
+from swarm_models.base.swarm_model import SwarmModel
 
 
 class TestSwarmModel:

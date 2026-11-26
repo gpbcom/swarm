@@ -11,7 +11,7 @@ from babel.messages.catalog import Catalog
 # First-party imports
 from swarm_i18n.models.catalogs.exceptions import SECatalogError, SECatalogUnreadableError  # isort: skip
 from swarm_i18n.storage.catalogs.po_catalog_store import PoCatalogStore  # isort: skip
-from swarm_models.models.enums import Language
+from swarm_models.enums import Language
 
 
 class TestPoCatalogStore:

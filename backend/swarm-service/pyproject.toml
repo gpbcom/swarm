@@ -1,0 +1,18 @@
+[project]
+name = "swarm-service"
+version = "0.1.0"
+description = "The service layer of Swarm: the business rules and the runnables, a folder per domain."
+readme = "../../README.md"
+requires-python = ">=3.12"
+dependencies = ["pydantic>=2.14.3", "swarm-models", "swarm-storage"]
+
+[tool.uv.sources]
+swarm-models = { workspace = true }
+swarm-storage = { workspace = true }
+
+[tool.uv.build-backend]
+module-name = "swarm_service"
+
+[build-system]
+requires = ["uv_build>=0.12.21,<0.13.0"]
+build-backend = "uv_build"

@@ -11,17 +11,17 @@ from pydantic import BaseModel
 from pydantic.json_schema import models_json_schema
 
 # First-party imports
-from swarm_models.models.commands.command import Command
-from swarm_models.models.events.actor import Actor
-from swarm_models.models.events.event import Event
-from swarm_models.models.live.live_subscription import LiveSubscription
-from swarm_models.models.operators.cell_assignment import CellAssignment
-from swarm_models.models.operators.operator import Operator
-from swarm_models.models.people.person import Person
-from swarm_models.models.people.role import Role
-from swarm_models.models.telemetry.squad_frame import SquadFrame
-from swarm_models.models.telemetry.telemetry_frame import TelemetryFrame
-from swarm_models.storage.schemas.schema_folder import SchemaFolder
+from swarm_models.commands.command import Command
+from swarm_models.events.actor import Actor
+from swarm_models.events.event import Event
+from swarm_models.live.live_subscription import LiveSubscription
+from swarm_models.operators.cell_assignment import CellAssignment
+from swarm_models.operators.operator import Operator
+from swarm_models.people.person import Person
+from swarm_models.people.role import Role
+from swarm_models.telemetry.squad_frame import SquadFrame
+from swarm_models.telemetry.telemetry_frame import TelemetryFrame
+from swarm_storage.shared.schemas.schema_folder import SchemaFolder
 
 
 class SchemaExporter:
@@ -57,15 +57,15 @@ class SchemaExporter:
     FILE_NAME: ClassVar[str] = "swarm_models.schema.json"
     TITLE: ClassVar[str] = "Swarm models"
 
-    def __init__(self, root: Optional[Path] = None, logger: Optional[Logger] = None) -> None:
+    def __init__(self, root: Path, logger: Optional[Logger] = None) -> None:
         """Create an exporter.
 
         Args:
-            root (Optional[Path]): The folder of the bundle. Defaults to ``SchemaFolder.DEFAULT_ROOT``.
+            root (Path): The folder of the bundle, ``backend/swarm-models/schemas`` in the repository.
             logger (Optional[Logger]): Logger instance.
         """
         self.logger = logger if logger else getLogger(__name__)
-        self.folder = SchemaFolder(root or SchemaFolder.DEFAULT_ROOT)
+        self.folder = SchemaFolder(root)
 
     ############################
     # Publicly Exposed Methods #

@@ -1,4 +1,4 @@
-from swarm_models.models.people.exceptions.person import (
+from swarm_models.people.exceptions.person import (
     SEInvalidPersonException,
     SEPersonInvalidEmail,
     SEPersonInvalidId,
@@ -6,7 +6,7 @@ from swarm_models.models.people.exceptions.person import (
     SEPersonInvalidName,
     SEPersonInvalidOperatorId,
 )
-from swarm_models.models.people.exceptions.role import (
+from swarm_models.people.exceptions.role import (
     SEInvalidRoleException,
     SERoleInvalidName,
     SERoleInvalidOperatorId,

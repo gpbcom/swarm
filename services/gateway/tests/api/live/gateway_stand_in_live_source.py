@@ -13,7 +13,7 @@ from gateway.api.live.live_router import LiveRouter  # isort: skip
 from swarm_live.models.config.live_session_config import LiveSessionConfig  # isort: skip
 from swarm_live.service.live_mailbox import LiveMailbox  # isort: skip
 from swarm_live.service.live_source import LiveSource  # isort: skip
-from swarm_models.models.live.live_subscription import LiveSubscription  # isort: skip
+from swarm_models.live.live_subscription import LiveSubscription  # isort: skip
 
 
 class GatewayStandInLiveSource(LiveSource):

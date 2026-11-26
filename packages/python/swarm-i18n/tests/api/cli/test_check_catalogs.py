@@ -8,7 +8,7 @@ import pytest
 
 # First-party imports
 from swarm_i18n.api.cli.check_catalogs import main  # isort: skip
-from swarm_models.models.enums import Language
+from swarm_models.enums import Language
 
 
 class TestCheckCatalogs:

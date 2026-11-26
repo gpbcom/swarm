@@ -8,7 +8,7 @@ from uuid import UUID
 from pydantic import JsonValue
 
 # First-party imports
-from swarm_models.models.people.enums import RoleName
+from swarm_models.people.enums import RoleName
 
 AUDIENCE = "swarm-gateway"
 REALM_PATH = "/realms/swarm"

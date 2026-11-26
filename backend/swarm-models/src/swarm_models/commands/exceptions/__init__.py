@@ -1,4 +1,4 @@
-from swarm_models.models.commands.exceptions.command import (
+from swarm_models.commands.exceptions.command import (
     SECommandInvalidDroneId,
     SECommandInvalidId,
     SECommandInvalidIssuedBy,

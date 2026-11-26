@@ -18,7 +18,7 @@ from flight_engine.models.missions.exceptions import (
     SEMissionEntryInvalidMissionId,
     SEMissionEntryInvalidOperatorId,
 )
-from swarm_models.models.base.swarm_model import SwarmModel
+from swarm_models.base.swarm_model import SwarmModel
 
 
 class MissionEntry(SwarmModel):

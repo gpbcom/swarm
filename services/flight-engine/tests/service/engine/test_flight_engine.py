@@ -20,7 +20,7 @@ from flight_engine.service.engine.flight_engine import FlightEngine
 from swarm_lifecycle.models.enums import RunnableStatus
 from swarm_live.service.live_codec import LiveCodec
 from swarm_live.service.live_hub import LiveHub
-from swarm_models.models.enums import LiveTopicKind
+from swarm_models.enums import LiveTopicKind
 from swarm_nats.clients.nats_connector import NatsConnector
 from swarm_nats.models.config.nats_client_config import NatsClientConfig
 from swarm_nats.models.subjects.operator_subjects import OperatorSubjects

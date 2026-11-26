@@ -6,7 +6,7 @@ import { compile } from "json-schema-to-typescript";
 import type { JSONSchema } from "json-schema-to-typescript";
 
 export const SCHEMA_PATH: string = fileURLToPath(
-  new URL("../../../../packages/python/swarm-models/schemas/swarm_models.schema.json", import.meta.url),
+  new URL("../../../../backend/swarm-models/schemas/swarm_models.schema.json", import.meta.url),
 );
 export const OUTPUT_PATH: string = fileURLToPath(new URL("../src/generated/models.ts", import.meta.url));
 export const BANNER = `/* eslint-disable */

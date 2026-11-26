@@ -12,9 +12,9 @@ from nats.js.api import StreamConfig
 
 # First-party imports
 from swarm_lifecycle.models.enums import RunnableStatus
-from swarm_models.models.events.actor import Actor
-from swarm_models.models.events.enums import ActorKind
-from swarm_models.models.events.event import Event
+from swarm_models.events.actor import Actor
+from swarm_models.events.enums import ActorKind
+from swarm_models.events.event import Event
 from swarm_nats.api.bus.durable_consumer import DurableConsumer
 from swarm_nats.models.config.durable_consumer_config import DurableConsumerConfig
 

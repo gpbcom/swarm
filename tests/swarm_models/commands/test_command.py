@@ -9,9 +9,9 @@ import pytest
 from pydantic import JsonValue, ValidationError
 
 # First-party imports
-from swarm_models.models.commands.command import Command
-from swarm_models.models.commands.enums import CommandKind, CommandLane
-from swarm_models.models.commands.exceptions import (
+from swarm_models.commands.command import Command
+from swarm_models.commands.enums import CommandKind, CommandLane
+from swarm_models.commands.exceptions import (
     SECommandInvalidDroneId,
     SECommandInvalidId,
     SECommandInvalidIssuedBy,

@@ -15,7 +15,7 @@ from simulator.models.commands.exceptions import (
     SECommandReplyRefusedWithoutReason,
 )
 from simulator.models.enums import CommandVerdict
-from swarm_models.models.base.swarm_model import SwarmModel
+from swarm_models.base.swarm_model import SwarmModel
 
 
 class CommandReply(SwarmModel):

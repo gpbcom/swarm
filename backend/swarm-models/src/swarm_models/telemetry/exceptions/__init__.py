@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from swarm_models.models.telemetry.exceptions.squad_frame import (
+from swarm_models.telemetry.exceptions.squad_frame import (
     SEInvalidSquadFrameException,
     SESquadFrameDuplicateDrone,
     SESquadFrameInvalidFrames,
@@ -8,7 +8,7 @@ from swarm_models.models.telemetry.exceptions.squad_frame import (
     SESquadFrameInvalidTUs,
     SESquadFrameMissionMismatch,
 )
-from swarm_models.models.telemetry.exceptions.telemetry_frame import (
+from swarm_models.telemetry.exceptions.telemetry_frame import (
     SEInvalidTelemetryFrameException,
     SETelemetryFrameInvalidAltitudeM,
     SETelemetryFrameInvalidBatteryPct,

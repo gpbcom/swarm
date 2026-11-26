@@ -13,9 +13,9 @@ from gateway.models.config.gateway_config import GatewayConfig
 from gateway.service.events.event_service import EventService
 from gateway.service.factories.event_service_factory import EventServiceFactory
 from gateway.service.factories.schema_service_factory import SchemaServiceFactory
-from swarm_models.models.events.actor import Actor
-from swarm_models.models.events.enums import ActorKind
-from swarm_models.models.events.event import Event
+from swarm_models.events.actor import Actor
+from swarm_models.events.enums import ActorKind
+from swarm_models.events.event import Event
 
 
 class TestGatewayEventService:

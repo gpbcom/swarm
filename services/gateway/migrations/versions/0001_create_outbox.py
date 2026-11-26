@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from alembic import context, op
 
-from swarm_storage.storage.postgres.ddl.outbox_table import OutboxTable
-from swarm_storage.storage.postgres.migrations.alembic_migrator import AlembicMigrator
+from swarm_storage.shared.postgres.ddl.outbox_table import OutboxTable
+from swarm_storage.shared.postgres.migrations.alembic_migrator import AlembicMigrator
 
 revision = "0001"
 down_revision = None

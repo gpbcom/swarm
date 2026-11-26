@@ -21,7 +21,7 @@ from gateway.models.auth.caller import Caller
 from gateway.models.auth.exceptions import SEInvalidCallerException
 from gateway.models.enums import TokenClaim
 from gateway.models.keycloak.exceptions import SEKeycloakUnknownKeyError
-from swarm_models.models.people.enums import RoleName
+from swarm_models.people.enums import RoleName
 
 
 class TokenVerifier:

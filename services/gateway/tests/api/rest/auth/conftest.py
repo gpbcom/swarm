@@ -14,7 +14,7 @@ from gateway.api.rest.auth.access_installer import AccessInstaller
 from gateway.api.rest.auth.route_access import RouteAccess
 from gateway.models.auth.auth_config import AuthConfig
 from gateway.models.auth.caller import Caller
-from swarm_models.models.people.enums import RoleName
+from swarm_models.people.enums import RoleName
 
 OPERATOR_PROBE_PATH = "/v1/operators/{operator_id}/probe"
 PLAIN_PROBE_PATH = "/v1/probe"

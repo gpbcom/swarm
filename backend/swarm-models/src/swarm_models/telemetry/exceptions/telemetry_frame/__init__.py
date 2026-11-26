@@ -1,20 +1,20 @@
 from __future__ import annotations
 
-from swarm_models.models.telemetry.exceptions.telemetry_frame.identity import (
+from swarm_models.telemetry.exceptions.telemetry_frame.identity import (
     SETelemetryFrameInvalidDroneId,
     SETelemetryFrameInvalidMissionId,
     SETelemetryFrameInvalidSeq,
     SETelemetryFrameInvalidTUs,
 )
-from swarm_models.models.telemetry.exceptions.telemetry_frame.position import (
+from swarm_models.telemetry.exceptions.telemetry_frame.position import (
     SETelemetryFrameInvalidAltitudeM,
     SETelemetryFrameInvalidLatE7,
     SETelemetryFrameInvalidLonE7,
 )
-from swarm_models.models.telemetry.exceptions.telemetry_frame.se_invalid_telemetry_frame_exception import (
+from swarm_models.telemetry.exceptions.telemetry_frame.se_invalid_telemetry_frame_exception import (
     SEInvalidTelemetryFrameException,
 )
-from swarm_models.models.telemetry.exceptions.telemetry_frame.status import (
+from swarm_models.telemetry.exceptions.telemetry_frame.status import (
     SETelemetryFrameInvalidBatteryPct,
     SETelemetryFrameInvalidHeadingDeg,
     SETelemetryFrameInvalidLinkQualityPct,

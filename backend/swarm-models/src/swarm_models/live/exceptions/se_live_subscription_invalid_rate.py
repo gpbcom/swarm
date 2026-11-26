@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 # First-party imports
-from swarm_models.models.live.exceptions.se_invalid_live_subscription_exception import (
+from swarm_models.live.exceptions.se_invalid_live_subscription_exception import (
     SEInvalidLiveSubscriptionException,
 )
 

@@ -8,7 +8,7 @@ from typing import Optional
 from swarm_live.service.live_hub import LiveHub
 from swarm_live.service.live_mailbox import LiveMailbox
 from swarm_live.service.live_source import LiveSource
-from swarm_models.models.live.live_subscription import LiveSubscription
+from swarm_models.live.live_subscription import LiveSubscription
 
 
 class HubLiveSource(LiveSource):

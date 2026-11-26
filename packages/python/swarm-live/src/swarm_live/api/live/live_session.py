@@ -16,7 +16,7 @@ from swarm_live.models.exceptions import SELiveMessageUnreadable
 from swarm_live.service.live_codec import LiveCodec
 from swarm_live.service.live_mailbox import LiveMailbox
 from swarm_live.service.live_source import LiveSource
-from swarm_models.models.live.live_subscription import LiveSubscription
+from swarm_models.live.live_subscription import LiveSubscription
 
 
 class LiveSession(AsyncRunnable):

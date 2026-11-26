@@ -17,8 +17,8 @@ from fleet.models.config.exceptions import (
     SEInvalidFleetConfigException,
 )
 from fleet.models.config.fleet_config import FleetConfig
+from swarm_models.config.postgres.postgres_config import PostgresConfig
 from swarm_rest.models.config.rest_config import RestConfig
-from swarm_storage.models.config.postgres_config import PostgresConfig
 
 
 class TestFleetConfig:

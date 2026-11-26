@@ -8,7 +8,9 @@ resolution-markers = [
 
 [manifest]
 members = [
+    "swarm-api",
     "swarm-catalog",
+    "swarm-clients",
     "swarm-fleet",
     "swarm-flight-engine",
     "swarm-gateway",
@@ -20,6 +22,8 @@ members = [
     "swarm-models",
     "swarm-nats",
     "swarm-rest",
+    "swarm-scripts",
+    "swarm-service",
     "swarm-simulator",
     "swarm-storage",
 ]
@@ -1811,6 +1815,11 @@ wheels = [
 ]
 
 [[package]]
+name = "swarm-api"
+version = "0.1.0"
+source = { editable = "backend/swarm-api" }
+
+[[package]]
 name = "swarm-catalog"
 version = "0.1.0"
 source = { editable = "backend/libs/swarm-catalog" }
@@ -1824,6 +1833,11 @@ requires-dist = [
     { name = "pydantic", specifier = ">=2.14.3" },
     { name = "pyyaml", specifier = ">=6.0.3" },
 ]
+
+[[package]]
+name = "swarm-clients"
+version = "0.1.0"
+source = { editable = "backend/swarm-clients" }
 
 [[package]]
 name = "swarm-fleet"
@@ -1849,9 +1863,9 @@ requires-dist = [
     { name = "swarm-catalog", editable = "backend/libs/swarm-catalog" },
     { name = "swarm-lifecycle", editable = "backend/libs/swarm-lifecycle" },
     { name = "swarm-logging", editable = "backend/libs/swarm-logging" },
-    { name = "swarm-models", editable = "packages/python/swarm-models" },
+    { name = "swarm-models", editable = "backend/swarm-models" },
     { name = "swarm-rest", editable = "packages/python/swarm-rest" },
-    { name = "swarm-storage", editable = "packages/python/swarm-storage" },
+    { name = "swarm-storage", editable = "backend/swarm-storage" },
 ]
 
 [[package]]
@@ -1885,7 +1899,7 @@ requires-dist = [
     { name = "swarm-lifecycle", editable = "backend/libs/swarm-lifecycle" },
     { name = "swarm-live", editable = "packages/python/swarm-live" },
     { name = "swarm-logging", editable = "backend/libs/swarm-logging" },
-    { name = "swarm-models", editable = "packages/python/swarm-models" },
+    { name = "swarm-models", editable = "backend/swarm-models" },
     { name = "swarm-nats", editable = "packages/python/swarm-nats" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.30.0" },
     { name = "uvloop", specifier = ">=0.21.0" },
@@ -1925,10 +1939,10 @@ requires-dist = [
     { name = "swarm-lifecycle", editable = "backend/libs/swarm-lifecycle" },
     { name = "swarm-live", editable = "packages/python/swarm-live" },
     { name = "swarm-logging", editable = "backend/libs/swarm-logging" },
-    { name = "swarm-models", editable = "packages/python/swarm-models" },
+    { name = "swarm-models", editable = "backend/swarm-models" },
     { name = "swarm-nats", editable = "packages/python/swarm-nats" },
     { name = "swarm-rest", editable = "packages/python/swarm-rest" },
-    { name = "swarm-storage", editable = "packages/python/swarm-storage" },
+    { name = "swarm-storage", editable = "backend/swarm-storage" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.30.0" },
 ]
 
@@ -1946,7 +1960,7 @@ dependencies = [
 requires-dist = [
     { name = "babel", specifier = ">=2.16.0" },
     { name = "pydantic", specifier = ">=2.14.3" },
-    { name = "swarm-models", editable = "packages/python/swarm-models" },
+    { name = "swarm-models", editable = "backend/swarm-models" },
 ]
 
 [[package]]
@@ -1972,7 +1986,7 @@ requires-dist = [
     { name = "pydantic", specifier = ">=2.14.3" },
     { name = "starlette", specifier = ">=0.40.0" },
     { name = "swarm-lifecycle", editable = "backend/libs/swarm-lifecycle" },
-    { name = "swarm-models", editable = "packages/python/swarm-models" },
+    { name = "swarm-models", editable = "backend/swarm-models" },
 ]
 
 [[package]]
@@ -2014,15 +2028,15 @@ requires-dist = [
     { name = "swarm-catalog", editable = "backend/libs/swarm-catalog" },
     { name = "swarm-lifecycle", editable = "backend/libs/swarm-lifecycle" },
     { name = "swarm-logging", editable = "backend/libs/swarm-logging" },
-    { name = "swarm-models", editable = "packages/python/swarm-models" },
+    { name = "swarm-models", editable = "backend/swarm-models" },
     { name = "swarm-rest", editable = "packages/python/swarm-rest" },
-    { name = "swarm-storage", editable = "packages/python/swarm-storage" },
+    { name = "swarm-storage", editable = "backend/swarm-storage" },
 ]
 
 [[package]]
 name = "swarm-models"
 version = "0.1.0"
-source = { editable = "packages/python/swarm-models" }
+source = { editable = "backend/swarm-models" }
 dependencies = [
     { name = "pydantic" },
 ]
@@ -2048,7 +2062,7 @@ requires-dist = [
     { name = "nkeys", specifier = ">=0.2.1" },
     { name = "pydantic", specifier = ">=2.14.3" },
     { name = "swarm-lifecycle", editable = "backend/libs/swarm-lifecycle" },
-    { name = "swarm-models", editable = "packages/python/swarm-models" },
+    { name = "swarm-models", editable = "backend/swarm-models" },
 ]
 
 [[package]]
@@ -2068,6 +2082,38 @@ requires-dist = [
     { name = "pydantic", specifier = ">=2.14.3" },
     { name = "swarm-lifecycle", editable = "backend/libs/swarm-lifecycle" },
     { name = "uvicorn", specifier = ">=0.32.0" },
+]
+
+[[package]]
+name = "swarm-scripts"
+version = "0.1.0"
+source = { editable = "scripts" }
+dependencies = [
+    { name = "swarm-models" },
+    { name = "swarm-service" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "swarm-models", editable = "backend/swarm-models" },
+    { name = "swarm-service", editable = "backend/swarm-service" },
+]
+
+[[package]]
+name = "swarm-service"
+version = "0.1.0"
+source = { editable = "backend/swarm-service" }
+dependencies = [
+    { name = "pydantic" },
+    { name = "swarm-models" },
+    { name = "swarm-storage" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "pydantic", specifier = ">=2.14.3" },
+    { name = "swarm-models", editable = "backend/swarm-models" },
+    { name = "swarm-storage", editable = "backend/swarm-storage" },
 ]
 
 [[package]]
@@ -2093,14 +2139,14 @@ requires-dist = [
     { name = "swarm-catalog", editable = "backend/libs/swarm-catalog" },
     { name = "swarm-lifecycle", editable = "backend/libs/swarm-lifecycle" },
     { name = "swarm-logging", editable = "backend/libs/swarm-logging" },
-    { name = "swarm-models", editable = "packages/python/swarm-models" },
+    { name = "swarm-models", editable = "backend/swarm-models" },
     { name = "swarm-nats", editable = "packages/python/swarm-nats" },
 ]
 
 [[package]]
 name = "swarm-storage"
 version = "0.1.0"
-source = { editable = "packages/python/swarm-storage" }
+source = { editable = "backend/swarm-storage" }
 dependencies = [
     { name = "alembic" },
     { name = "asyncpg" },
@@ -2117,7 +2163,7 @@ requires-dist = [
     { name = "pydantic", specifier = ">=2.14.3" },
     { name = "sqlalchemy", extras = ["asyncio"], specifier = ">=2.0.36" },
     { name = "swarm-lifecycle", editable = "backend/libs/swarm-lifecycle" },
-    { name = "swarm-models", editable = "packages/python/swarm-models" },
+    { name = "swarm-models", editable = "backend/swarm-models" },
 ]
 
 [[package]]

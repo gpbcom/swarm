@@ -13,8 +13,8 @@ from nats.aio.client import Client
 from gateway.clients.nats.mission_feed_client import MissionFeedClient
 from gateway.service.live.live_fan_out import LiveFanOut
 from gateway.service.live.operator_live_source import OperatorLiveSource
-from swarm_models.models.enums import LiveOperation, LiveTopicKind
-from swarm_models.models.live.live_subscription import LiveSubscription
+from swarm_models.enums import LiveOperation, LiveTopicKind
+from swarm_models.live.live_subscription import LiveSubscription
 from swarm_nats.models.subjects.operator_subjects import OperatorSubjects
 
 from swarm_live.service.live_hub import LiveHub  # isort: skip

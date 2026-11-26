@@ -10,18 +10,18 @@ from typing import List
 import pytest
 
 # First-party imports
-from swarm_models.models.commands.command import Command
-from swarm_models.models.events.actor import Actor
-from swarm_models.models.events.event import Event
-from swarm_models.models.live.live_subscription import LiveSubscription
-from swarm_models.models.operators.cell_assignment import CellAssignment
-from swarm_models.models.operators.operator import Operator
-from swarm_models.models.people.person import Person
-from swarm_models.models.people.role import Role
-from swarm_models.models.telemetry.squad_frame import SquadFrame
-from swarm_models.models.telemetry.telemetry_frame import TelemetryFrame
-from swarm_models.service.schemas.schema_exporter import SchemaExporter
-from swarm_models.storage.schemas.schema_folder import SchemaFolder
+from swarm_models.commands.command import Command
+from swarm_models.events.actor import Actor
+from swarm_models.events.event import Event
+from swarm_models.live.live_subscription import LiveSubscription
+from swarm_models.operators.cell_assignment import CellAssignment
+from swarm_models.operators.operator import Operator
+from swarm_models.people.person import Person
+from swarm_models.people.role import Role
+from swarm_models.telemetry.squad_frame import SquadFrame
+from swarm_models.telemetry.telemetry_frame import TelemetryFrame
+from swarm_service.shared.schema.schema_exporter import SchemaExporter
+from swarm_storage.shared.schemas.schema_folder import SchemaFolder
 
 
 class TestSchemaExporter:
@@ -76,9 +76,6 @@ class TestSchemaExporter:
     def test_the_file_name_and_the_title_are_fixed(self) -> None:
         assert SchemaExporter.FILE_NAME == "swarm_models.schema.json"
         assert SchemaExporter.TITLE == "Swarm models"
-
-    def test_the_default_folder_is_rooted_at_the_default_root(self) -> None:
-        assert SchemaExporter().folder.root == SchemaFolder.DEFAULT_ROOT
 
     def test_the_folder_is_rooted_at_the_given_root(self, tmp_path: Path) -> None:
         exporter = SchemaExporter(root=tmp_path)

@@ -12,9 +12,9 @@ from flight_engine.models.missions.mission_entry import MissionEntry
 from flight_engine.models.telemetry.drone_sample import DroneSample
 from flight_engine.models.telemetry.drone_state_catalog import DroneStateCatalog
 from flight_engine.service.missions.squad_frame_builder import SquadFrameBuilder
-from swarm_models.models.telemetry.enums.drone_state import DroneState
-from swarm_models.models.telemetry.squad_frame import SquadFrame
-from swarm_models.models.telemetry.telemetry_frame import TelemetryFrame
+from swarm_models.telemetry.enums.drone_state import DroneState
+from swarm_models.telemetry.squad_frame import SquadFrame
+from swarm_models.telemetry.telemetry_frame import TelemetryFrame
 
 
 class TestSquadFrameBuilder:

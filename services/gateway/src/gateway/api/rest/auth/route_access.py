@@ -13,7 +13,7 @@ from gateway.api.rest.auth.access_installer import AccessInstaller
 from gateway.models.access.exceptions import SEAccessWrongOperatorError
 from gateway.models.auth.caller import Caller
 from gateway.service.auth.access_service import AccessService
-from swarm_models.models.people.enums import RoleName
+from swarm_models.people.enums import RoleName
 
 
 class RouteAccess:

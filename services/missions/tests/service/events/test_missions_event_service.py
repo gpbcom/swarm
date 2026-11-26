@@ -14,9 +14,9 @@ from missions.models.config.missions_config import MissionsConfig
 from missions.service.events.event_service import EventService
 from missions.service.factories.event_service_factory import EventServiceFactory
 from missions.service.factories.schema_service_factory import SchemaServiceFactory
-from swarm_models.models.events.actor import Actor
-from swarm_models.models.events.enums import ActorKind
-from swarm_models.models.events.event import Event
+from swarm_models.events.actor import Actor
+from swarm_models.events.enums import ActorKind
+from swarm_models.events.event import Event
 
 
 class TestMissionsEventService:

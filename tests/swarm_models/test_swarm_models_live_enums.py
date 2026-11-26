@@ -7,7 +7,7 @@ from typing import Union
 import pytest
 
 # First-party imports
-from swarm_models.models.enums import LiveOperation, LiveRate, LiveTopicKind
+from swarm_models.enums import LiveOperation, LiveRate, LiveTopicKind
 
 
 class TestSwarmModelsLiveEnums:

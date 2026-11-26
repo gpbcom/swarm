@@ -19,7 +19,7 @@ from flight_engine.models.config.exceptions import (
 )
 from flight_engine.models.config.live_server_config import LiveServerConfig
 from swarm_catalog.models.yaml_catalog import YamlCatalog
-from swarm_models.models.base.swarm_model import SwarmModel
+from swarm_models.base.swarm_model import SwarmModel
 from swarm_nats.models.config.nats_client_config import NatsClientConfig
 
 

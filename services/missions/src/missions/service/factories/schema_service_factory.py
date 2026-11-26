@@ -8,7 +8,7 @@ from typing import Optional
 from missions.models.config.missions_config import MissionsConfig
 from missions.service.schema.schema_service import SchemaService
 from swarm_lifecycle.factories.factory import Factory
-from swarm_storage.storage.postgres.migrations.alembic_migrator import AlembicMigrator
+from swarm_storage.shared.postgres.migrations.alembic_migrator import AlembicMigrator
 
 
 class SchemaServiceFactory(Factory[SchemaService]):

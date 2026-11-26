@@ -20,7 +20,7 @@ import yaml
 # First-party imports
 from simulator.models.commands.command_reply import CommandReply
 from simulator.models.enums import FlightLogEntryKind, SimulatedDroneKind
-from swarm_models.models.commands.command import Command
+from swarm_models.commands.command import Command
 from swarm_nats.clients.nats_requester import NatsRequester
 from swarm_nats.models.bus.exceptions import SENatsNoResponderError, SENatsRequestDeadlineExceededError
 

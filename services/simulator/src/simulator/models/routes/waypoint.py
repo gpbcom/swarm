@@ -12,7 +12,7 @@ from simulator.models.routes.exceptions import (
     SEWaypointInvalidLat,
     SEWaypointInvalidLon,
 )
-from swarm_models.models.base.swarm_model import SwarmModel
+from swarm_models.base.swarm_model import SwarmModel
 
 
 class Waypoint(SwarmModel):

@@ -8,7 +8,7 @@ from nats.aio.client import Client
 
 # First-party imports
 from swarm_lifecycle.models.enums import RunnableStatus
-from swarm_models.models.events.event import Event
+from swarm_models.events.event import Event
 from swarm_nats.api.bus.durable_consumer import DurableConsumer
 from swarm_nats.api.factories.bus.durable_consumer_factory import DurableConsumerFactory
 from swarm_nats.api.factories.bus_runnable_factory import BusRunnableFactory

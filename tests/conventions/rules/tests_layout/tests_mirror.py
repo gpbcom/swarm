@@ -61,7 +61,9 @@ class TestsMirror(BackendRule):
         subject = name[len(self.TEST_PREFIX) : -len(self.SUFFIX)]
         if (current / f"{subject}{self.SUFFIX}").is_file() or (current / subject).is_dir():
             return []
-        if any(subject.endswith(f"_{source.stem}") for source in current.glob(f"*{self.SUFFIX}")):
+        if any(subject.endswith(f"_{source.stem}") for source in current.glob(f"*{self.SUFFIX}")) or any(
+            subject.endswith(f"_{folder.name}") for folder in current.iterdir() if folder.is_dir()
+        ):
             return []
         message = f"No {subject}{self.SUFFIX} in {current.relative_to(root).as_posix()} for this test."
         return [self.violation(root, path, None, message)]

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import sys
 import tomllib
 from pathlib import Path
@@ -37,6 +38,7 @@ REPOSITORY_PREFIXES = ("tests/", ".claude/")
 SPECS_PREFIXES = ("docs/specs/", ".claude/skills/write-specs/")
 LAYER_PACKAGES = frozenset({"swarm-models", "swarm-storage", "swarm-clients", "swarm-service", "swarm-api"})
 SHARED_DOMAIN = "shared"
+DISTRIBUTION_NAME = re.compile(r"[\[<>=!~;@ ]")
 USAGE = "usage: detect_changes.py [--root <repo root>] [--all]"
 
 
@@ -81,6 +83,24 @@ def apps_of_layer_path(parts: List[str], apps: Dict[str, List[str]]) -> Optional
     if domain == SHARED_DOMAIN:
         return set(apps)
     return {name for name, domains in apps.items() if domain in domains}
+
+
+def services_depending_on(root: Path, distribution: str) -> Set[str]:
+    """Return the services of ``services/`` whose pyproject.toml depends on ``distribution``.
+
+    While the backend moves, the services of the old layout import the layer packages of ``backend/``: a change to
+    one of them must check those services too, not only the apps that own its domain.
+    """
+    found: Set[str] = set()
+    for name in discover_services(root):
+        manifest = root / "services" / name / "pyproject.toml"
+        dependencies = tomllib.loads(manifest.read_text(encoding="utf-8")).get("project", {}).get("dependencies", [])
+        if any(
+            DISTRIBUTION_NAME.split(str(dependency), maxsplit=1)[0].strip() == distribution
+            for dependency in dependencies
+        ):
+            found.add(name)
+    return found
 
 
 def discover_typescript(root: Path) -> List[str]:
@@ -183,8 +203,11 @@ def main(argv: Optional[List[str]] = None) -> int:
         parts = path.split("/")
         owners = apps_of_layer_path(parts, apps)
         if owners is not None:
-            services |= owners
+            dependents = services_depending_on(root, parts[1])
+            services |= owners | dependents
             images |= {f"backend/apps/{name}" for name in owners if f"backend/apps/{name}" in all_images}
+            images |= {f"services/{name}" for name in dependents if f"services/{name}" in all_images}
+            repository = True
             continue
         if parts[0] == "backend" and len(parts) > 3 and parts[1] == "apps" and parts[2] in apps:
             services.add(parts[2])

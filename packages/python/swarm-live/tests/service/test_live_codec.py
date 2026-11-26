@@ -10,11 +10,11 @@ import pytest
 # First-party imports
 from swarm_live.models.exceptions import SELiveMessageUnreadable  # isort: skip
 from swarm_live.service.live_codec import LiveCodec  # isort: skip
-from swarm_models.models.enums import LiveOperation, LiveTopicKind
-from swarm_models.models.live.live_subscription import LiveSubscription
-from swarm_models.models.telemetry.enums import DroneState
-from swarm_models.models.telemetry.squad_frame import SquadFrame
-from swarm_models.models.telemetry.telemetry_frame import TelemetryFrame
+from swarm_models.enums import LiveOperation, LiveTopicKind
+from swarm_models.live.live_subscription import LiveSubscription
+from swarm_models.telemetry.enums import DroneState
+from swarm_models.telemetry.squad_frame import SquadFrame
+from swarm_models.telemetry.telemetry_frame import TelemetryFrame
 
 
 class TestLiveCodec:

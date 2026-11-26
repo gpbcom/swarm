@@ -16,9 +16,9 @@ from websockets.asyncio.client import connect
 
 # First-party imports
 from swarm_live.service.live_codec import LiveCodec
-from swarm_models.models.enums import LiveOperation, LiveTopicKind
-from swarm_models.models.live.live_subscription import LiveSubscription
-from swarm_models.models.telemetry.squad_frame import SquadFrame
+from swarm_models.enums import LiveOperation, LiveTopicKind
+from swarm_models.live.live_subscription import LiveSubscription
+from swarm_models.telemetry.squad_frame import SquadFrame
 
 HOST = "127.0.0.1"
 ENCODING = "utf-8"

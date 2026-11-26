@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 # Standard library imports
+import fcntl
 import json
 import re
 import shutil
 import subprocess
+import tempfile
 from pathlib import Path
 from typing import Dict, Iterator
 
@@ -103,6 +105,7 @@ class TestFeatureSliceBoundaries:
     APP: str = "frontend/apps/ground-control"
     ROOT: str = "src/zz_boundaries_probe"
     RULE: str = "no-restricted-imports"
+    LOCK_FILE: str = "swarm-eslint-boundaries.lock"
 
     @pytest.fixture
     def probe(self) -> Iterator[Path]:
@@ -111,14 +114,18 @@ class TestFeatureSliceBoundaries:
         app = repo_root() / self.APP
         if not (app / "node_modules").is_dir():
             pytest.skip("The front-end dependencies are not installed.")
-        src = app / "src"
-        created = [src / name for name in ("features", "stores", "app") if not (src / name).exists()]
-        try:
-            yield app
-        finally:
-            shutil.rmtree(app / self.ROOT, ignore_errors=True)
-            for folder in created:
-                shutil.rmtree(folder, ignore_errors=True)
+        # The probes write into the app's src/ and remove what they created: under pytest-xdist, the lock makes the
+        # tests of this class take turns, so that no worker removes a folder another one is linting.
+        with (Path(tempfile.gettempdir()) / self.LOCK_FILE).open("w", encoding="utf-8") as lock:
+            fcntl.flock(lock, fcntl.LOCK_EX)
+            src = app / "src"
+            created = [src / name for name in ("features", "stores", "app") if not (src / name).exists()]
+            try:
+                yield app
+            finally:
+                shutil.rmtree(app / self.ROOT, ignore_errors=True)
+                for folder in created:
+                    shutil.rmtree(folder, ignore_errors=True)
 
     def lint(self, app: Path, relative: str, text: str) -> str:
         path = app / "src" / relative

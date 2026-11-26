@@ -5,7 +5,7 @@ from enum import StrEnum
 from typing import List
 
 # First-party imports
-from swarm_models.models.enums import Language
+from swarm_models.enums import Language
 
 
 class TestSwarmModelsEnums:

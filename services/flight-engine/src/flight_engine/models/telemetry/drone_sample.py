@@ -23,7 +23,7 @@ from flight_engine.models.telemetry.exceptions import (
     SEDroneSampleInvalidVxCmS,
     SEDroneSampleInvalidVyCmS,
 )
-from swarm_models.models.base.swarm_model import SwarmModel
+from swarm_models.base.swarm_model import SwarmModel
 
 
 class DroneSample(SwarmModel):

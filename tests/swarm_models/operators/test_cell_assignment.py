@@ -10,8 +10,8 @@ import pytest
 from pydantic import JsonValue, ValidationError
 
 # First-party imports
-from swarm_models.models.operators.cell_assignment import CellAssignment
-from swarm_models.models.operators.exceptions import (
+from swarm_models.operators.cell_assignment import CellAssignment
+from swarm_models.operators.exceptions import (
     SECellAssignmentInvalidAssignedAt,
     SECellAssignmentInvalidCell,
     SECellAssignmentInvalidOperatorId,

@@ -11,7 +11,7 @@ import pytest
 from gateway.models.config.gateway_config import GatewayConfig
 from gateway.service.factories.schema_service_factory import SchemaServiceFactory
 from gateway.service.schema.schema_service import SchemaService
-from swarm_storage.storage.postgres.ddl.row_level_security import RowLevelSecurity
+from swarm_storage.shared.postgres.ddl.row_level_security import RowLevelSecurity
 
 
 class TestGatewaySchemaService:

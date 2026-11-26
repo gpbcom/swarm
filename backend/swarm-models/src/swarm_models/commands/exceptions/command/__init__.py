@@ -1,11 +1,11 @@
-from swarm_models.models.commands.exceptions.command.orders import (
+from swarm_models.commands.exceptions.command.orders import (
     SECommandInvalidIssuedBy,
     SECommandInvalidKind,
     SECommandInvalidLane,
     SECommandWrongLane,
 )
-from swarm_models.models.commands.exceptions.command.se_invalid_command_exception import SEInvalidCommandException
-from swarm_models.models.commands.exceptions.command.targets import (
+from swarm_models.commands.exceptions.command.se_invalid_command_exception import SEInvalidCommandException
+from swarm_models.commands.exceptions.command.targets import (
     SECommandInvalidDroneId,
     SECommandInvalidId,
     SECommandInvalidMissionId,

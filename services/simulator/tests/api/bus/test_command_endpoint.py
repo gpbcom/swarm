@@ -14,8 +14,8 @@ from simulator.api.bus.command_endpoint import CommandEndpoint
 from simulator.models.config.simulator_config import SimulatorConfig
 from simulator.models.enums import CommandVerdict
 from simulator.service.factories.commands.simulated_command_service_factory import SimulatedCommandServiceFactory
-from swarm_models.models.commands.command import Command
-from swarm_models.models.commands.enums import CommandKind, CommandLane
+from swarm_models.commands.command import Command
+from swarm_models.commands.enums import CommandKind, CommandLane
 
 
 class TestCommandEndpoint:

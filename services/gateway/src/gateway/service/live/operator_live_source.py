@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Optional
 from uuid import UUID
 
 # First-party imports
-from swarm_models.models.live.live_subscription import LiveSubscription
+from swarm_models.live.live_subscription import LiveSubscription
 
 from swarm_live.service.live_mailbox import LiveMailbox  # isort: skip
 from swarm_live.service.live_source import LiveSource  # isort: skip

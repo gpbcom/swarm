@@ -14,8 +14,8 @@ from nats.aio.client import Client
 
 # First-party imports
 from simulator.models.enums import CommandVerdict, FlightLogEntryKind, SimulatedDroneKind
-from swarm_models.models.commands.command import Command
-from swarm_models.models.commands.enums import CommandKind, CommandLane
+from swarm_models.commands.command import Command
+from swarm_models.commands.enums import CommandKind, CommandLane
 from swarm_nats.clients.nats_requester import NatsRequester
 from swarm_nats.models.config.nats_client_config import NatsClientConfig
 from swarm_nats.models.enums import CredentialKind

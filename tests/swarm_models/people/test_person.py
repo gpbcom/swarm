@@ -9,8 +9,8 @@ import pytest
 from pydantic import JsonValue
 
 # First-party imports
-from swarm_models.models.enums import Language
-from swarm_models.models.people.exceptions import (
+from swarm_models.enums import Language
+from swarm_models.people.exceptions import (
     SEInvalidPersonException,
     SEPersonInvalidEmail,
     SEPersonInvalidId,
@@ -18,7 +18,7 @@ from swarm_models.models.people.exceptions import (
     SEPersonInvalidName,
     SEPersonInvalidOperatorId,
 )
-from swarm_models.models.people.person import Person
+from swarm_models.people.person import Person
 
 
 class TestPerson:

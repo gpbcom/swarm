@@ -1,4 +1,4 @@
-from swarm_models.models.people.exceptions.person.preferences.se_person_invalid_language import (
+from swarm_models.people.exceptions.person.preferences.se_person_invalid_language import (
     SEPersonInvalidLanguage,
 )
 

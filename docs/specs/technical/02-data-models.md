@@ -28,7 +28,7 @@
 - **Units in names** (AGENT.md): `altitude_m`, `speed_m_s`, `battery_pct`, `dose_l_ha` (liquids), `dose_kg_ha` (seeds and granules), `separation_m`, `heading_deg`.
 - **Geometry:** GeoJSON (WGS 84) in models and APIs, PostGIS `geometry(…, 4326)` in storage; altitudes above take-off point and above mean sea level are separate fields.
 - **States** are `StrEnum` members with the glossary names: `MissionState.PLANNED`, `DroneState.LANDED`, `ReplanState.PROPOSED`.
-- **Shared package:** `packages/python/swarm-models`, imported by every service; services never redefine a model.
+- **Shared package:** `backend/swarm-models`, imported by every service; services never redefine a model.
 
 ## <a id="models"></a>🧱 Main models
 

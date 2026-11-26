@@ -3,17 +3,16 @@ from __future__ import annotations
 # Standard library imports
 from logging import Logger, getLogger
 from pathlib import Path
-from typing import ClassVar, Optional
+from typing import Optional
 
 # First-party imports
-from swarm_models.models.schemas.exceptions import SESchemaUnreadableError, SESchemaUnwritableError
+from swarm_models.schemas.exceptions import SESchemaUnreadableError, SESchemaUnwritableError
 
 
 class SchemaFolder:
     """The folder that holds the exported JSON Schema files.
 
     Attributes:
-        DEFAULT_ROOT (ClassVar[Path]): The ``schemas`` folder of the ``swarm-models`` package.
         root (Path): The folder the files live in.
         logger (Logger): Logger instance.
 
@@ -21,8 +20,6 @@ class SchemaFolder:
         Files are UTF-8 and ``\\n`` line endings are written as they are, so that the bytes do not depend on the
         platform.
     """
-
-    DEFAULT_ROOT: ClassVar[Path] = Path(__file__).resolve().parents[4] / "schemas"
 
     def __init__(self, root: Path, logger: Optional[Logger] = None) -> None:
         """Create a folder handle.

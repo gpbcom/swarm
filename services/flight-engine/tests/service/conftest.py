@@ -17,7 +17,7 @@ from flight_engine.models.telemetry.drone_sample import DroneSample
 from flight_engine.models.telemetry.drone_state_catalog import DroneStateCatalog
 from swarm_live.service.live_codec import LiveCodec
 from swarm_live.service.live_hub import LiveHub
-from swarm_models.models.telemetry.enums.drone_state import DroneState
+from swarm_models.telemetry.enums.drone_state import DroneState
 
 UUID_TEMPLATE = "01943c5e-8a4b-7c2d-9e1f-{number:012x}"
 OPERATOR_NUMBER = 1

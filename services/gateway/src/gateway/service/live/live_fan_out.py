@@ -9,7 +9,7 @@ from uuid import UUID
 from gateway.clients.nats.mission_feed_client import MissionFeedClient
 from gateway.models.live.exceptions import SEMissionFeedError
 from gateway.service.live.operator_live_source import OperatorLiveSource
-from swarm_models.models.live.live_subscription import LiveSubscription
+from swarm_models.live.live_subscription import LiveSubscription
 from swarm_nats.models.subjects.operator_subjects import OperatorSubjects
 
 from swarm_live.service.live_hub import LiveHub  # isort: skip

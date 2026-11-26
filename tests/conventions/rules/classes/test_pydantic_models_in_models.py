@@ -54,5 +54,15 @@ class TestPydanticModelsInModels:
     def test_a_model_in_models_gives_no_violation(self, tmp_path: Path, path: str) -> None:
         assert self.violations(tmp_path, {path: "class Customer(BaseModel):\n    pass\n"}) == []
 
+    def test_the_swarm_models_package_is_the_models_layer_itself(self, tmp_path: Path) -> None:
+        root = tmp_path / "backend" / "swarm-models"
+        write_files(
+            root,
+            {
+                "src/swarm_models/commands/command.py": "from pydantic import BaseModel\n\n\nclass Command(BaseModel):\n    pass\n"
+            },
+        )
+        assert PydanticModelsInModels().violations(ServiceTree(root)) == []
+
     def test_a_plain_class_gives_no_violation(self, tmp_path: Path) -> None:
         assert self.violations(tmp_path, {self.CUSTOMER_PATH: "class Customer:\n    pass\n"}) == []

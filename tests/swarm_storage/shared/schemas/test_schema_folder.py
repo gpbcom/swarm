@@ -8,15 +8,11 @@ from pathlib import Path
 import pytest
 
 # First-party imports
-from swarm_models.models.schemas.exceptions import SESchemaError, SESchemaUnreadableError, SESchemaUnwritableError
-from swarm_models.storage.schemas.schema_folder import SchemaFolder
+from swarm_models.schemas.exceptions import SESchemaError, SESchemaUnreadableError, SESchemaUnwritableError
+from swarm_storage.shared.schemas.schema_folder import SchemaFolder
 
 
 class TestSchemaFolder:
-    def test_the_default_root_is_the_schemas_folder_of_swarm_models(self) -> None:
-        assert SchemaFolder.DEFAULT_ROOT.is_absolute()
-        assert SchemaFolder.DEFAULT_ROOT.parts[-2:] == ("swarm-models", "schemas")
-
     def test_the_attributes_hold_the_root_and_a_logger(self, tmp_path: Path) -> None:
         folder = SchemaFolder(tmp_path)
         assert folder.root == tmp_path

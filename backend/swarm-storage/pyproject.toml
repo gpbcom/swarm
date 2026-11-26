@@ -2,7 +2,7 @@
 name = "swarm-storage"
 version = "0.1.0"
 description = "The shared PostgreSQL storage of Swarm services: pool, unit of work, row-level security and migrations."
-readme = "../../../README.md"
+readme = "../../README.md"
 requires-python = ">=3.12"
 dependencies = [
     "asyncpg>=0.30.0",

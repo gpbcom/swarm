@@ -9,14 +9,14 @@ import pytest
 from pydantic import JsonValue, ValidationError
 
 # First-party imports
-from swarm_models.models.enums import LiveOperation, LiveRate, LiveTopicKind
-from swarm_models.models.live.exceptions import (
+from swarm_models.enums import LiveOperation, LiveRate, LiveTopicKind
+from swarm_models.live.exceptions import (
     SEInvalidLiveSubscriptionException,
     SELiveSubscriptionInvalidOp,
     SELiveSubscriptionInvalidRate,
     SELiveSubscriptionInvalidTopic,
 )
-from swarm_models.models.live.live_subscription import LiveSubscription
+from swarm_models.live.live_subscription import LiveSubscription
 
 
 class TestLiveSubscription:

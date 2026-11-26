@@ -8,9 +8,9 @@ from uuid import UUID
 from pydantic import ConfigDict, Field, JsonValue, field_validator, model_validator
 
 # First-party imports
-from swarm_models.models.base.swarm_model import SwarmModel
-from swarm_models.models.people.enums import RoleName
-from swarm_models.models.people.exceptions import (
+from swarm_models.base.swarm_model import SwarmModel
+from swarm_models.people.enums import RoleName
+from swarm_models.people.exceptions import (
     SERoleInvalidName,
     SERoleInvalidOperatorId,
     SERoleInvalidPersonId,

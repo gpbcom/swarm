@@ -11,7 +11,7 @@ import pytest
 from fleet.models.config.fleet_config import FleetConfig
 from fleet.service.factories.schema_service_factory import SchemaServiceFactory
 from fleet.service.schema.schema_service import SchemaService
-from swarm_storage.storage.postgres.ddl.row_level_security import RowLevelSecurity
+from swarm_storage.shared.postgres.ddl.row_level_security import RowLevelSecurity
 
 
 class TestFleetSchemaService:

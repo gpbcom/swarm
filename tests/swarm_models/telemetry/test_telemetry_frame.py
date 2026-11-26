@@ -9,8 +9,8 @@ import pytest
 from pydantic import JsonValue, ValidationError
 
 # First-party imports
-from swarm_models.models.telemetry.enums import DroneState
-from swarm_models.models.telemetry.exceptions import (
+from swarm_models.telemetry.enums import DroneState
+from swarm_models.telemetry.exceptions import (
     SEInvalidTelemetryFrameException,
     SETelemetryFrameInvalidAltitudeM,
     SETelemetryFrameInvalidBatteryPct,
@@ -25,7 +25,7 @@ from swarm_models.models.telemetry.exceptions import (
     SETelemetryFrameInvalidState,
     SETelemetryFrameInvalidTUs,
 )
-from swarm_models.models.telemetry.telemetry_frame import TelemetryFrame
+from swarm_models.telemetry.telemetry_frame import TelemetryFrame
 
 
 class TestTelemetryFrame:

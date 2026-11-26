@@ -9,15 +9,15 @@ import pytest
 from pydantic import JsonValue
 
 # First-party imports
-from swarm_models.models.people.enums import RoleName
-from swarm_models.models.people.exceptions import (
+from swarm_models.people.enums import RoleName
+from swarm_models.people.exceptions import (
     SEInvalidRoleException,
     SERoleInvalidName,
     SERoleInvalidOperatorId,
     SERoleInvalidPersonId,
     SERoleOperatorMismatch,
 )
-from swarm_models.models.people.role import Role
+from swarm_models.people.role import Role
 
 
 class TestRole:
