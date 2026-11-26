@@ -3,68 +3,46 @@ from __future__ import annotations
 # Standard library imports
 from functools import partial
 from pathlib import Path
-from typing import ClassVar, Tuple
+from typing import ClassVar
+from uuid import UUID
 
 # Third-party imports
-import pytest
 from fastapi import FastAPI
 
 # First-party imports
 from swarm_models.config.simulator.simulator_config import SimulatorConfig
-from swarm_models.simulation.credentials.exceptions import (
-    SESimulatedCredentialsNotSimulatedError,
-    SESimulatedCredentialsUnreadableError,
-)
+from swarm_models.simulation.simulations.simulation_request import SimulationRequest
 from swarm_service.simulation.factories.simulations.simulation_service_factory import SimulationServiceFactory
 from swarm_service.simulation.simulations.simulation_lifespan import SimulationLifespan
-from tests.fakes.mavlink.helpers import a_registered_drone
+from tests.fakes.mavlink.helpers import MISSION_ID, a_registered_drone
 from tests.fakes.mavlink.stand_in_drone import StandInDrone
-from tests.infra.nats.helpers import connz_users
-
-Cell = Tuple[str, int, Path, Path]
+from tests.fakes.mavlink.stand_in_drones import StandInDrones
 
 
 class TestSimulationLifespan:
-    MISSING_CREDS: ClassVar[str] = "missing.creds"
+    STALL_AFTER_SEQ: ClassVar[int] = 2
 
-    def a_lifespan(self, config: SimulatorConfig) -> SimulationLifespan:
-        return SimulationLifespan(config, SimulationServiceFactory(config).create())
-
-    async def test_service_credentials_stop_the_start_before_anything_connects(
-        self, nats_cell: Cell, stand_in_drone: StandInDrone, app_config: partial[Path]
+    async def test_the_end_of_the_application_stops_the_flight_that_flies(
+        self, stand_in_drones: StandInDrones, app_config: partial[Path]
     ) -> None:
-        url, monitor_port, _, service_creds = nats_cell
-        config = SimulatorConfig.load(app_config([a_registered_drone(stand_in_drone)], server=url, creds=service_creds))
-        lifespan = self.a_lifespan(config)
+        stalled = stand_in_drones.make(stall_after_seq=self.STALL_AFTER_SEQ)
+        simulations = SimulationServiceFactory(SimulatorConfig.load(app_config([a_registered_drone(stalled)]))).create()
 
-        with pytest.raises(SESimulatedCredentialsNotSimulatedError):
-            async with lifespan.lifespan(FastAPI()):
-                pass
+        async with SimulationLifespan(simulations).lifespan(FastAPI()):
+            await simulations.launch(SimulationRequest(mission_id=UUID(str(MISSION_ID))))
+            assert simulations.flying
 
-        assert lifespan.task is None
-        assert connz_users(monitor_port) == []
+        assert simulations.task is None
+        assert not simulations.flying
 
-    async def test_an_unreadable_credentials_file_stops_the_start(
-        self, stand_in_drone: StandInDrone, app_config: partial[Path], tmp_path: Path
+    async def test_an_application_that_flew_nothing_stops_cleanly(
+        self, stand_in_drone: StandInDrone, app_config: partial[Path]
     ) -> None:
-        drones = [a_registered_drone(stand_in_drone)]
-        config = SimulatorConfig.load(app_config(drones, creds=tmp_path / self.MISSING_CREDS))
+        simulations = SimulationServiceFactory(
+            SimulatorConfig.load(app_config([a_registered_drone(stand_in_drone)]))
+        ).create()
 
-        with pytest.raises(SESimulatedCredentialsUnreadableError):
-            async with self.a_lifespan(config).lifespan(FastAPI()):
-                pass
+        async with SimulationLifespan(simulations).lifespan(FastAPI()):
+            assert not simulations.flying
 
-    async def test_simulated_credentials_start_the_responder_and_stopping_cancels_it(
-        self, nats_cell: Cell, stand_in_drone: StandInDrone, app_config: partial[Path]
-    ) -> None:
-        url, _, simulated_creds, _ = nats_cell
-        config = SimulatorConfig.load(
-            app_config([a_registered_drone(stand_in_drone)], server=url, creds=simulated_creds)
-        )
-        lifespan = self.a_lifespan(config)
-
-        async with lifespan.lifespan(FastAPI()):
-            assert lifespan.task is not None
-            assert not lifespan.task.done()
-
-        assert lifespan.task is None
+        assert simulations.task is None

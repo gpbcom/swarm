@@ -2,6 +2,7 @@ from __future__ import annotations
 
 # Standard library imports
 import asyncio
+import signal
 import socket
 from pathlib import Path
 from typing import ClassVar
@@ -99,3 +100,12 @@ class TestFlightEngineServer:
 
         with pytest.raises(SENatsConnectionError):
             await asyncio.wait_for(self.consume(self.a_server(config)), timeout=self.STOP_TIMEOUT_S)
+
+    async def test_the_handlers_of_the_stop_signals_are_put_back_when_it_ends(self, tmp_path: Path) -> None:
+        before = [signal.getsignal(stop) for stop in FlightEngineServer.STOP_SIGNALS]
+        config = self.a_config(tmp_path, f"nats://{self.HOST}:{self.free_port()}")
+
+        with pytest.raises(SENatsConnectionError):
+            await asyncio.wait_for(self.consume(self.a_server(config)), timeout=self.STOP_TIMEOUT_S)
+
+        assert [signal.getsignal(stop) for stop in FlightEngineServer.STOP_SIGNALS] == before

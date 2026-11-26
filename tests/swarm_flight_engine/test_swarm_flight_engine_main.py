@@ -67,8 +67,9 @@ class TestSwarmFlightEngineMain:
     def test_main_takes_no_argument(self) -> None:
         assert not signature(main).parameters
 
+    @pytest.mark.parametrize("stop", [signal.SIGTERM, signal.SIGINT])
     def test_the_app_serves_its_live_socket_from_the_folder_the_entry_names_until_it_is_stopped(
-        self, tmp_path: Path, nats_url: str
+        self, tmp_path: Path, nats_url: str, stop: signal.Signals
     ) -> None:
         port = self.free_port()
         self.write_conf(tmp_path, nats_url, port)
@@ -90,7 +91,7 @@ class TestSwarmFlightEngineMain:
                         connected = True
                 except OSError:
                     time.sleep(self.POLL_S)
-            process.send_signal(signal.SIGTERM)
+            process.send_signal(stop)
             process.wait(timeout=self.EXIT_TIMEOUT_S)
         finally:
             if process.poll() is None:
@@ -98,4 +99,4 @@ class TestSwarmFlightEngineMain:
                 process.wait()
 
         assert connected
-        assert process.returncode is not None
+        assert process.returncode == 0

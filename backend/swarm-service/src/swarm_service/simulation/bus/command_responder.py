@@ -29,10 +29,10 @@ class CommandResponder(AsyncRunnable):
         logger (Logger): Logger instance.
 
     Notes:
-        - **The credentials are checked before this runnable is built** (``SimulationLifespan``), so nothing connects
+        - **The credentials are checked before this runnable is built** (``SimulatorServer``), so nothing connects
           with credentials that are not simulated (BR-014).
-        - It was the ``serve`` command of the Simulator's command line: the app now runs it in the background of its
-          application.
+        - It was the ``serve`` command of the Simulator's command line: the app now runs it beside the server of its
+          application, in ``SimulatorServer``, and a failure of it stops the app with an error.
         - ``close`` closes the service, then the connection, and is safe after a failed ``initialize``.
     """
 
