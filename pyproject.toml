@@ -73,7 +73,7 @@ files = [
     "packages/python/swarm-live/src",
 ]
 mypy_path = [
-    "packages/rust/swarm-core/python",
+    "rust/swarm-core/python",
     "services/gateway/src",
     "services/missions/src",
     "services/fleet/src",

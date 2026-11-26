@@ -12,7 +12,7 @@ import pytest
 
 class TestSwarmCoreLayout:
     ROOT: ClassVar[Path] = Path(__file__).resolve().parents[3]
-    WORKSPACE: ClassVar[Path] = ROOT / "packages" / "rust"
+    WORKSPACE: ClassVar[Path] = ROOT / "rust"
     CORE: ClassVar[Path] = WORKSPACE / "swarm-core"
     PYTHON: ClassVar[Path] = CORE / "python"
     CRATES: ClassVar[List[Tuple[str, str, str]]] = [

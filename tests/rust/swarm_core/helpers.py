@@ -21,8 +21,8 @@ def build_wheel(out_dir: Path) -> Path:
     command = str(maturin) if maturin.exists() else shutil.which("maturin")
     assert command, "maturin was not found next to the interpreter or on the PATH."
     worker = os.environ.get("PYTEST_XDIST_WORKER", "main")
-    target_dir = repo_root() / "packages" / "rust" / "target" / "wheel-tests" / worker
-    manifest = repo_root() / "packages" / "rust" / "swarm-core" / "python" / "Cargo.toml"
+    target_dir = repo_root() / "rust" / "target" / "wheel-tests" / worker
+    manifest = repo_root() / "rust" / "swarm-core" / "python" / "Cargo.toml"
     result = subprocess.run(
         [
             command,

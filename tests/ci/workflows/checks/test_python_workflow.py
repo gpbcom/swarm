@@ -216,7 +216,7 @@ class TestPythonWorkflow:
 
     def test_the_services_job_builds_and_installs_the_wheel_for_the_services_that_import_it(self) -> None:
         run = self.run_with("services", "maturin build")
-        assert "packages/rust/swarm-core/python/Cargo.toml" in run
+        assert "rust/swarm-core/python/Cargo.toml" in run
         assert "uv pip install" in run
         assert "swarm_core" in run
         assert "services/$SERVICE/src" in run
@@ -228,7 +228,7 @@ class TestPythonWorkflow:
 
     def test_the_repository_job_builds_and_installs_the_wheel_after_the_sync_and_before_the_tests(self) -> None:
         run = self.run_with("repository", "maturin build")
-        assert "packages/rust/swarm-core/python/Cargo.toml" in run
+        assert "rust/swarm-core/python/Cargo.toml" in run
         assert "uv pip install" in run
         build = self.run_index("repository", "maturin build")
         assert self.run_index("repository", "uv sync --locked") < build

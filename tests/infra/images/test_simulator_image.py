@@ -17,7 +17,7 @@ class TestSimulatorImage:
     BINARY: ClassVar[str] = "swarm-synthetic-drones"
     CONF: ClassVar[str] = "conf"
     ENTRYPOINT: ClassVar[str] = "swarm-simulator"
-    RUST_DIRECTORY: ClassVar[str] = "packages/rust"
+    RUST_DIRECTORY: ClassVar[str] = "rust"
     ROOT_USERS: ClassVar[List[str]] = ["root", "0"]
 
     def _lines(self) -> List[str]:

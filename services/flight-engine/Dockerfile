@@ -16,9 +16,9 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/* \
     && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain none
 
-WORKDIR /workspace/packages/rust
+WORKDIR /workspace/rust
 
-COPY packages/rust /workspace/packages/rust
+COPY rust /workspace/rust
 
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=cache,target=/opt/cargo/registry \

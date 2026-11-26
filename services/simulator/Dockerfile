@@ -3,9 +3,9 @@
 
 FROM rust:1.91.1-slim-bookworm AS rust
 
-WORKDIR /workspace/packages/rust
+WORKDIR /workspace/rust
 
-COPY packages/rust /workspace/packages/rust
+COPY rust /workspace/rust
 
 RUN cargo build --release --locked -p swarm-synthetic-drones
 
@@ -38,7 +38,7 @@ RUN groupadd --system --gid 10001 swarm \
     && chown -R swarm:swarm /app
 
 COPY --from=python /opt/venv /opt/venv
-COPY --from=rust /workspace/packages/rust/target/release/swarm-synthetic-drones /usr/local/bin/swarm-synthetic-drones
+COPY --from=rust /workspace/rust/target/release/swarm-synthetic-drones /usr/local/bin/swarm-synthetic-drones
 COPY services/simulator/conf/ /app/services/simulator/conf/
 
 WORKDIR /app/services/simulator

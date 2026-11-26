@@ -32,7 +32,7 @@ jobs:
           docker run --rm --volume "$PWD:/src:ro" --workdir /src ghcr.io/google/osv-scanner:v2.2.2 scan source \
             --lockfile=uv.lock \
             --lockfile=pnpm-lock.yaml \
-            --lockfile=packages/rust/Cargo.lock
+            --lockfile=rust/Cargo.lock
 
   image:
     needs: scan-dependencies

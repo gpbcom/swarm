@@ -56,7 +56,7 @@ swarm/
 | Toolchain | Workspace | Lock file |
 | --- | --- | --- |
 | Python 3.12 | uv workspace (root `pyproject.toml`) | one `uv.lock` |
-| Rust | Cargo workspace in `packages/rust`, wheels built with maturin | `Cargo.lock` |
+| Rust | Cargo workspace in `rust/`, wheels built with maturin | `Cargo.lock` |
 | TypeScript | pnpm workspace, Turborepo task cache | `pnpm-lock.yaml` |
 
 ## <a id="layers"></a>🧅 Layers inside each service

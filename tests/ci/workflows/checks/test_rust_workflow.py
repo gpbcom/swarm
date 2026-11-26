@@ -80,7 +80,7 @@ class TestRustWorkflow:
         assert self.bench_job()["runs-on"] == "ubuntu-latest"
 
     def test_it_runs_in_the_rust_workspace(self) -> None:
-        assert self.job()["defaults"]["run"]["working-directory"] == "packages/rust"
+        assert self.job()["defaults"]["run"]["working-directory"] == "rust"
 
     def test_it_checks_out_the_repository(self) -> None:
         uses = [str(step.get("uses", "")) for step in self.steps()]
@@ -129,7 +129,7 @@ class TestRustWorkflow:
         assert "github.event_name == 'pull_request'" in str(self.bench_job().get("if", ""))
 
     def test_the_bench_job_runs_in_the_rust_workspace(self) -> None:
-        assert self.bench_job()["defaults"]["run"]["working-directory"] == "packages/rust"
+        assert self.bench_job()["defaults"]["run"]["working-directory"] == "rust"
 
     def test_the_bench_job_checks_out_the_full_history(self) -> None:
         checkouts = [step for step in self.bench_steps() if str(step.get("uses", "")).startswith("actions/checkout@")]

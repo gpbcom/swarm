@@ -196,7 +196,7 @@ FAILING_FILES_MAX = 10
 # L-39: ``swarm_core`` is a PyO3 wheel built by maturin, outside the uv workspace, so ``uv run`` never puts it in the
 # clean tree's fresh environment. When Python code of the tree imports it, the checks build the wheel and install it there.
 SWARM_CORE_IMPORT = re.compile(r"^\s*(?:from|import)\s+swarm_core\b", re.MULTILINE)
-SWARM_CORE_MANIFEST = "packages/rust/swarm-core/python/Cargo.toml"
+SWARM_CORE_MANIFEST = "rust/swarm-core/python/Cargo.toml"
 PRINTED_PATH = re.compile(r"[\w.\-]+(?:/[\w.\-]+)+")
 MYPY_SOURCE_GLOBS = ("services/*/src", "packages/python/*/src", "backend/**/src")
 PYTHON_GLOBS = ("services/*/src/**/*.py", "services/*/tests/**/*.py", "tests/**/*.py")
@@ -218,7 +218,7 @@ def install_swarm_core(checks: Checks) -> None:
         checks.skip("swarm_core wheel", "no Python code imports swarm_core")
         return
     dist = Path(tempfile.mkdtemp(prefix="swarm-core-wheel-"))
-    target = {"CARGO_TARGET_DIR": str(ROOT / "packages" / "rust" / "target")}
+    target = {"CARGO_TARGET_DIR": str(ROOT / "rust" / "target")}
     try:
         built = checks.check(
             "swarm_core wheel",
@@ -331,16 +331,16 @@ def python_checks(checks: Checks, changed: List[str]) -> None:
 
 
 def rust_checks(checks: Checks, changed: List[str]) -> None:
-    manifest = checks.root / "packages" / "rust" / "Cargo.toml"
+    manifest = checks.root / "rust" / "Cargo.toml"
     # The clean tree shares the main checkout's build folder, so a check does not rebuild every crate from scratch.
-    target = {"CARGO_TARGET_DIR": str(ROOT / "packages" / "rust" / "target")}
-    if not any(f.startswith("packages/rust/") for f in changed) or not manifest.exists():
+    target = {"CARGO_TARGET_DIR": str(ROOT / "rust" / "target")}
+    if not any(f.startswith("rust/") for f in changed) or not manifest.exists():
         checks.skip("rust", "no Rust change")
         return
     checks.check(
         "cargo metadata",
         ["cargo", "metadata", "--no-deps", "--format-version", "1", "--locked", "--manifest-path", str(manifest)],
-        "packages/rust/Cargo.toml",
+        "rust/Cargo.toml",
         env=target,
     )
     members = re.search(r"members\s*=\s*\[(.*?)\]", manifest.read_text(encoding="utf-8"), re.DOTALL)
@@ -349,15 +349,15 @@ def rust_checks(checks: Checks, changed: List[str]) -> None:
             checks.skip(name, "the Cargo workspace has no member crate yet")
         return
     cwd = manifest.parent
-    checks.check("cargo fmt", ["cargo", "fmt", "--all", "--check"], "packages/rust", cwd, target)
+    checks.check("cargo fmt", ["cargo", "fmt", "--all", "--check"], "rust", cwd, target)
     checks.check(
         "cargo clippy",
         ["cargo", "clippy", "--workspace", "--all-targets", "--", "-D", "warnings"],
-        "packages/rust",
+        "rust",
         cwd,
         target,
     )
-    checks.check("cargo test", ["cargo", "test", "--workspace"], "packages/rust", cwd, target)
+    checks.check("cargo test", ["cargo", "test", "--workspace"], "rust", cwd, target)
 
 
 def typescript_checks(checks: Checks, changed: List[str]) -> None:

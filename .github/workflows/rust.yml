@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: packages/rust
+        working-directory: rust
     steps:
       - uses: actions/checkout@v7
       - name: Install the toolchain of rust-toolchain.toml
@@ -20,7 +20,7 @@ jobs:
           rustup show active-toolchain
       - uses: Swatinem/rust-cache@v2
         with:
-          workspaces: packages/rust
+          workspaces: rust
       - name: Check the format
         run: cargo fmt --all --check
       - name: Run clippy
@@ -44,10 +44,10 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: packages/rust
+        working-directory: rust
     env:
       BASE_SHA: ${{ github.event.pull_request.base.sha }}
-      CARGO_TARGET_DIR: ${{ github.workspace }}/packages/rust/target
+      CARGO_TARGET_DIR: ${{ github.workspace }}/rust/target
     steps:
       - uses: actions/checkout@v7
         with:
@@ -58,13 +58,13 @@ jobs:
           rustup show active-toolchain
       - uses: Swatinem/rust-cache@v2
         with:
-          workspaces: packages/rust
+          workspaces: rust
       - name: Benchmark the base commit
         run: |
           git worktree add --detach "$RUNNER_TEMP/base" "$BASE_SHA"
-          if compgen -G "$RUNNER_TEMP/base/packages/rust/*/benches/*.rs" > /dev/null \
-            || compgen -G "$RUNNER_TEMP/base/packages/rust/benches/*.rs" > /dev/null; then
-            cd "$RUNNER_TEMP/base/packages/rust"
+          if compgen -G "$RUNNER_TEMP/base/rust/*/benches/*.rs" > /dev/null \
+            || compgen -G "$RUNNER_TEMP/base/rust/benches/*.rs" > /dev/null; then
+            cd "$RUNNER_TEMP/base/rust"
             cargo bench --locked --workspace --bench '*' -- --save-baseline pr-base
           else
             echo "The base commit has no benchmark: nothing to compare."

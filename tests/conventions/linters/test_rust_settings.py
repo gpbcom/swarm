@@ -37,8 +37,8 @@ class TestRustSettings:
     ]
 
     def load_toml(self, name: str) -> Dict[str, JsonValue]:
-        path = repo_root() / "packages" / "rust" / name
-        assert path.is_file(), f"packages/rust/{name} is missing."
+        path = repo_root() / "rust" / name
+        assert path.is_file(), f"rust/{name} is missing."
         return tomllib.loads(path.read_text(encoding="utf-8"))
 
     def workspace(self) -> Dict[str, JsonValue]:
