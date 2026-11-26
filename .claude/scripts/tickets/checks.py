@@ -105,7 +105,9 @@ def isolated_tree(changed: List[str], root: Path = ROOT) -> Path:
         source, target = root / name, tree / name
         if source.is_file():
             target.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(source, target)
+            # L-39: a fresh modification time, never the source's (copy2): cargo shares the main checkout's target
+            # folder and judges freshness by time, so an older copied source would reuse another tree's stale build.
+            shutil.copy(source, target)
         elif target.is_file() or target.is_symlink():
             target.unlink()
     return tree
@@ -189,6 +191,46 @@ def screen_problems(
 
 
 FAILING_FILES_MAX = 10
+# L-39: ``swarm_core`` is a PyO3 wheel built by maturin, outside the uv workspace, so ``uv run`` never puts it in the
+# clean tree's fresh environment. When Python code of the tree imports it, the checks build the wheel and install it there.
+SWARM_CORE_IMPORT = re.compile(r"^\s*(?:from|import)\s+swarm_core\b", re.M)
+SWARM_CORE_MANIFEST = "packages/rust/swarm-core/python/Cargo.toml"
+PYTHON_GLOBS = ("services/*/src/**/*.py", "services/*/tests/**/*.py", "tests/**/*.py")
+
+
+def imports_swarm_core(root: Path) -> bool:
+    """Tell whether a Python file of a service or of the root ``tests/`` imports the ``swarm_core`` wheel."""
+    for pattern in PYTHON_GLOBS:
+        for path in root.glob(pattern):
+            if SWARM_CORE_IMPORT.search(path.read_text(encoding="utf-8", errors="replace")):
+                return True
+    return False
+
+
+def install_swarm_core(checks: "Checks") -> None:
+    """Build the ``swarm_core`` wheel from the tree's Rust sources and install it in the tree's own environment (L-39)."""
+    root = checks.root
+    if not (root / SWARM_CORE_MANIFEST).is_file() or not imports_swarm_core(root):
+        checks.skip("swarm_core wheel", "no Python code imports swarm_core")
+        return
+    dist = Path(tempfile.mkdtemp(prefix="swarm-core-wheel-"))
+    target = {"CARGO_TARGET_DIR": str(ROOT / "packages" / "rust" / "target")}
+    try:
+        built = checks.check(
+            "swarm_core wheel",
+            ["uv", "run", "maturin", "build", "--release", "--manifest-path", SWARM_CORE_MANIFEST, "--out", str(dist)],
+            SWARM_CORE_MANIFEST,
+            env=target,
+        )
+        wheels = sorted(dist.glob("swarm_core-*.whl"))
+        if built and wheels:
+            checks.check(
+                "swarm_core install",
+                ["uv", "pip", "install", "--no-deps", "--python", str(root / ".venv" / "bin" / "python"), str(wheels[-1])],
+                SWARM_CORE_MANIFEST,
+            )
+    finally:
+        shutil.rmtree(dist, ignore_errors=True)
 
 
 def failing_files(out: str, changed: List[str]) -> List[Tuple[str, str]]:
@@ -256,6 +298,7 @@ def python_checks(checks: Checks, changed: List[str]) -> None:
         return
     checks.check("ruff check", ["uv", "run", "ruff", "check", *files], files[0])
     checks.check("ruff format", ["uv", "run", "ruff", "format", "--check", *files], files[0])
+    install_swarm_core(checks)
     sources = sorted(
         str(p.relative_to(root)) for pattern in ("services/*/src", "packages/python/*/src") for p in root.glob(pattern)
     )

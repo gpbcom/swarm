@@ -60,6 +60,13 @@ this page keeps what happened, so that each problem is closed once and never met
 | [L-34](#l-34) | 2026-11-23 | A fix round of one ticket changed another running ticket's files, and took them as its own | 🔴 Open |
 | [L-35](#l-35) | 2026-11-23 | The runner `cd`-ed into the JSON that `ticket_tree.py home` prints, and failed the plan check | 🔴 Open |
 | [L-36](#l-36) | 2026-11-23 | `finish` pushed the commit, then failed on `gh pr edit` and left the ticket open | 🔴 Open |
+| [L-37](#l-37) | 2026-11-23 | A task blocked only by files a later wave writes stopped the ticket | 🔴 Open |
+| [L-38](#l-38) | 2026-11-23 | Continuing a ticket hit the area lock of a ticket admitted with it | 🔴 Open |
+| [L-39](#l-39) | 2026-11-23 | The clean check tree has no `swarm_core` wheel, so the flight engine's tests cannot be collected | 🔴 Open |
+| [L-40](#l-40) | 2026-11-26 | The runner read a warning as a refusal: it guessed the exit code | 🔴 Open |
+| [L-41](#l-41) | 2026-11-26 | A review finding in the ticket's own TICKET.md went to code tasks, which could not change it | 🔴 Open |
+| [L-42](#l-42) | 2026-11-26 | Finishing one ticket made the next one's changes table stale, and its finish refused | 🔴 Open |
+| [L-43](#l-43) | 2026-11-26 | The ticket checks run pytest on one worker, CI on two: a test only CI refuses passed every check | 🔴 Open |
 
 ## <a id="lessons"></a>📋 Lessons
 
@@ -647,6 +654,130 @@ this page keeps what happened, so that each problem is closed once and never met
   `gh api .../issues/<n>/labels`), and `finish` removes the ticket's state once the commit is pushed, whatever the
   pull request step does, with tests under `tests/harness/ticket_tree/` using a stand-in `gh` that fails `pr edit`.
 - **Rule:** [TKT-5](../../.claude/rules/tickets.md#tkt-5) and [TKT-15](../../.claude/rules/tickets.md#tkt-15).
+
+### <a id="l-37"></a>L-37: A task blocked only by files a later wave writes stopped the ticket
+
+- **Seen:** T0.15, run `wf_160ff812-f00`, 2026-11-23 at 18:46.
+- **What happened:** K09 (wave 2) finished its work and handed it off, but reported `blocked` twice:
+  - first by the schema bundle `swarm_models.schema.json`, which K14 regenerates in wave 3;
+  - then also by the `swarm-i18n` package, which K13 scaffolds in wave 3.
+  The workflow sends only earlier-wave files to their owners (TKT-19). It retried K09 once, and stopped the ticket
+  with "K09 not done after one retry".
+- **Cause:** a worker treats any failing check as a blocker, even when the failure comes from a file the plan has a
+  later task write. The workflow then counts a task reported `blocked` as not done, whatever blocks it.
+- **Fix:** worked around by running `ticket_tree.py integrate --ticket T0.15 --task K09` and running T0.15 again. In
+  the session copy of `ticket-run.js`, `laterOnly` now counts a task as done when every file in its `blocked_by` is
+  owned by tasks of later waves, and the retry brief says such a failure does not block. To do: the same in
+  [`ticket-run.js`](../../.claude/workflows/ticket-run.js) and in the workers' instructions, with a test in
+  `tests/harness/wiring/`.
+- **Rule:** [TKT-19](../../.claude/rules/tickets.md#tkt-19) (a file a later wave writes is missing, not wrong).
+
+### <a id="l-38"></a>L-38: Continuing a ticket hit the area lock of a ticket admitted with it
+
+- **Seen:** T0.18, run `wf_1c999bba-f76`, 2026-11-23 at 19:01.
+- **What happened:** T0.11 and T0.18 were started together at 18:40, when `tickets.py next P0` let both start. When T0.18
+  ran again to continue from wave 4 (TKT-11), `tickets.py check` refused it: T0.11, open and stopped at its checks,
+  changes `services/gateway`. The person had to allow `--force` for T0.18, and for T0.11's next run.
+- **Cause:**
+  - The start rule's area lock only looks at which tickets are open now. It does not see that the ticket being run
+    is already open itself, admitted at the same time as the other one.
+  - `next` let both start because neither was open yet, while their plans both change `services/gateway`
+    ([L-13](#l-13)).
+- **Fix:** worked around with `--force`, on the person's decision, logged in each `PROGRESS.md`. To do:
+  - `tickets.py check` applies the area lock only to a ticket that is not open yet; an open ticket continuing its run
+    passes it;
+  - `next` never starts together two tickets whose areas or plan files overlap.
+  Each with its test in `tests/harness/tickets/`.
+- **Rule:** [TKT-16](../../.claude/rules/tickets.md#tkt-16) (start rule and area locks),
+  [TKT-11](../../.claude/rules/tickets.md#tkt-11) (re-running continues).
+
+### <a id="l-39"></a>L-39: The clean check tree has no `swarm_core` wheel, so the flight engine's tests cannot be collected
+
+- **Seen:** T0.18, joint checks of T0.11, T0.15 and T0.18, run `wf_30b3014c-c05`, 2026-11-23 at 19:24.
+- **What happened:** `checks.py` ran pytest in its clean worktree.
+  - `uv run` made a fresh `.venv` there, and four flight-engine test modules failed to import with
+    `No module named 'swarm_core'`. The failure was rightly flagged `environment`, so the run stopped without a fix round.
+  - The same stop held back a real failure: `cargo clippy` refuses the dead code of `LiveSubscription` in the
+    generated [`generated.rs`](../../packages/rust/swarm-models/src/generated.rs).
+- **Cause:**
+  - `swarm_core` is a PyO3 wheel built by maturin, deliberately outside the uv workspace (AGENT.md, Mono-repo), so
+    `uv sync` never builds it.
+  - CI installs it (T0.18's K16), and each worker built and installed it in its own worktree, but `checks.py` does
+    neither.
+  - A ticket's environment failure also stops the fix round for its other, real failures.
+- **Fix:** to do:
+  - `checks.py` builds the wheel with `maturin build` once per run, and installs it in the clean tree's venv when a
+    Python project imports `swarm_core`;
+  - the Verify phase still sends the failures that are not `environment` to their owners;
+  - each with its test in `tests/harness/checks/`.
+- **Seen again:** 2026-11-26, run `wf_3285dd11-abe`.
+  - With the wheel now built in the clean tree, maturin failed with E0432: `LatestFrames` not found.
+  - The cause: `isolated_tree` copied the ticket's files with `shutil.copy2`, which keeps their old modification
+    times. Cargo shares the main checkout's `target` folder and judges freshness by time, so it reused a
+    `swarm-core-mavlink` built a little earlier from `develop`'s sources.
+  - Fixed in the main checkout's `checks.py` (uncommitted): `shutil.copy`, so every copied file is newer than any
+    artifact.
+- **Rule:** [TKT-6](../../.claude/rules/tickets.md#tkt-6) (checks run in a clean tree; an environment failure goes to no
+  agent).
+
+### <a id="l-40"></a>L-40: The runner read a warning as a refusal: it guessed the exit code
+
+- **Seen:** T0.18, run `wf_272b02d1-0b0`, 2026-11-26.
+- **What happened:** the gate ran `tickets.py check --ticket T0.18 --force`.
+  - With `--force`, the script prints the area-lock problem as a warning and exits 0.
+  - The `runner` agent reported exit code 1, and the run stopped as if the start rule had refused the ticket.
+- **Cause:** the Bash tool shows no exit code when a command succeeds. The haiku runner inferred one from the text,
+  which reads like a refusal. [L-31](#l-31) moved the decision to the exit code, but the exit code itself still came
+  from a model's reading.
+- **Fix:**
+  - Worked around in the session copy of `ticket-run.js`: `runExactly` appends `; echo "SWARM_EXIT_CODE=$?"` to the
+    command, and the number it prints decides, whatever the runner says.
+  - To do: the same in [`ticket-run.js`](../../.claude/workflows/ticket-run.js) and `ticket-plan.js`, with a test in
+    `tests/harness/wiring/`.
+- **Rule:** [TKT-6](../../.claude/rules/tickets.md#tkt-6) and [TKT-16](../../.claude/rules/tickets.md#tkt-16) (the
+  start rule's verdict is the script's exit code, reported unchanged).
+
+### <a id="l-41"></a>L-41: A review finding in the ticket's own TICKET.md went to code tasks, which could not change it
+
+- **Seen:** T0.15, run `wf_700b1ad6-598`, 2026-11-26 at 16:45.
+- **What happened:** the reviewer's only blocking finding was the `➖ No screen` reason in `docs/tickets/T0.15/TICKET.md`,
+  which had become false once K18 and K20 changed the shells and the frames. `ownersOf` sent it to K18 and K20, the
+  tasks the finding names, and both reported `blocked`: neither owns `TICKET.md`.
+- **Cause:** no task of a plan owns the ticket's own `TICKET.md` and `PLAN.md`, which the ticket-writer and the scribe
+  write. A finding on them has no owner the fix round can reach.
+- **Fix:**
+  - Worked around: the main session corrected both lines in the reviewer's words before the confirm round.
+  - To do: `fixRound` sends a finding on `docs/tickets/<ID>/TICKET.md` to the `ticket-writer`, and one on `PLAN.md`
+    to the `scribe`, never to the code tasks it names, with a test in `tests/harness/wiring/`.
+- **Rule:** [TKT-12](../../.claude/rules/tickets.md#tkt-12) (only blocking findings are fixed, by their owner),
+  [TKT-2](../../.claude/rules/tickets.md#tkt-2).
+
+### <a id="l-42"></a>L-42: Finishing one ticket made the next one's changes table stale, and its finish refused
+
+- **Seen:** T0.11, T0.15 and T0.18, pushed together in #396, 2026-11-26.
+- **What happened:** after `finish --ticket T0.11` committed the shared files (`uv.lock` among them), `finish --ticket
+  T0.15` refused: its `EXPLAIN.md` changes table was out of date. The same happened to T0.18 after T0.15's commit.
+- **Cause:** the changes table is the ticket's diff against `HEAD`, so a commit of another ticket that takes a shared
+  file changes it. `finish` checks the table but does not rewrite it.
+- **Fix:**
+  - Worked around: `ticket_tree.py changes --ticket <ID> --write` before each `finish`.
+  - To do: `finish` rewrites the table when the only change comes from shared files another ticket committed, with
+    a test in `tests/harness/ticket_tree/`.
+  - Better still: no two open tickets share a file ([L-13](#l-13), [L-29](#l-29), [L-38](#l-38)).
+- **Rule:** [TKT-14](../../.claude/rules/tickets.md#tkt-14) (the changes table is generated, never by hand),
+  [TKT-16](../../.claude/rules/tickets.md#tkt-16).
+
+### <a id="l-43"></a>L-43: The ticket checks run pytest on one worker, CI on two: a test only CI refuses passed every check
+
+- **Seen:** #396 (T0.11, T0.15, T0.18), 2026-11-26, job `python / services (gateway)`.
+- **What happened:** `test_caller.py` of T0.11 parametrised tests with `uuid4()` values computed at collection time.
+  With `pytest -n 2`, as CI runs it, the two xdist workers collected different test ids and pytest refused the run.
+  Every check of the ticket had passed, because `checks.py` runs `uv run pytest -q`, on one worker.
+- **Cause:** `checks.py` does not run pytest the way CI does.
+- **Fix:**
+  - Fixed in the test (`0f67ac9`, the person's go-ahead): fixed UUIDs.
+  - To do: `checks.py` runs pytest with `-n 2` as AGENT.md and CI do, with a test in `tests/harness/checks/`.
+- **Rule:** [TKT-6](../../.claude/rules/tickets.md#tkt-6) (the verifier runs the AGENT.md tools, as CI does).
 
 ## <a id="already-ruled"></a>📜 Lessons already turned into rules
 
