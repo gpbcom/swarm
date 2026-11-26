@@ -221,7 +221,7 @@ async function integrate(results, label) {
 }
 
 // Fix loop: send each failure or finding to every task that owns one of its files, each fixer only its own problems
-const ROOTS = ['services/', 'packages/', 'frontends/', 'tests/', 'infra/', 'docs/', '.claude/', '.github/']
+const ROOTS = ['services/', 'packages/', 'frontend/apps/', 'tests/', 'infra/', 'docs/', '.claude/', '.github/']
 function normalise(file) {
   let f = String(file || '').trim().replace(/:\d+(-\d+)?$/, '')
   for (const r of ROOTS) {
@@ -233,7 +233,7 @@ function normalise(file) {
 }
 function agentFor(f) {
   if (f.startsWith('rust/') || f.endsWith('.rs')) return 'rust-implementer'
-  if (f.startsWith('frontends/') || f.startsWith('packages/ts/') || /\.(ts|tsx)$/.test(f)) return 'frontend-implementer'
+  if (f.startsWith('frontend/apps/') || f.startsWith('frontend/packages/') || /\.(ts|tsx)$/.test(f)) return 'frontend-implementer'
   if (f.startsWith('tests/')) return 'test-writer'
   if (f.startsWith('docs/') || /\.md$/.test(f)) return 'doc-writer'
   return 'implementer'

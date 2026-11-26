@@ -15,26 +15,26 @@ from tests.conventions.mono_repo.helpers import repo_root
 
 
 class TestFrontendWorkspace:
-    TOKENS: ClassVar[str] = "packages/ts/tokens"
-    UI: ClassVar[str] = "packages/ts/ui"
-    DESKTOP: ClassVar[str] = "frontends/desktop"
+    TOKENS: ClassVar[str] = "frontend/packages/tokens"
+    UI: ClassVar[str] = "frontend/packages/ui"
+    DESKTOP: ClassVar[str] = "frontend/apps/desktop"
     APPS: ClassVar[List[str]] = [
-        "frontends/ground-control",
-        "frontends/mission-studio",
-        "frontends/back-office",
-        "frontends/client-portal",
+        "frontend/apps/ground-control",
+        "frontend/apps/mission-studio",
+        "frontend/apps/back-office",
+        "frontend/apps/client-portal",
     ]
     NAMES: ClassVar[Dict[str, str]] = {
-        "packages/ts/tokens": "@swarm/tokens",
-        "packages/ts/ui": "@swarm/ui",
-        "frontends/ground-control": "@swarm/ground-control",
-        "frontends/mission-studio": "@swarm/mission-studio",
-        "frontends/back-office": "@swarm/back-office",
-        "frontends/client-portal": "@swarm/client-portal",
-        "frontends/desktop": "@swarm/desktop",
+        "frontend/packages/tokens": "@swarm/tokens",
+        "frontend/packages/ui": "@swarm/ui",
+        "frontend/apps/ground-control": "@swarm/ground-control",
+        "frontend/apps/mission-studio": "@swarm/mission-studio",
+        "frontend/apps/back-office": "@swarm/back-office",
+        "frontend/apps/client-portal": "@swarm/client-portal",
+        "frontend/apps/desktop": "@swarm/desktop",
     }
     PROJECTS: ClassVar[List[str]] = list(NAMES)
-    CONFIGURED: ClassVar[List[str]] = [folder for folder in NAMES if folder != "packages/ts/tokens"]
+    CONFIGURED: ClassVar[List[str]] = [folder for folder in NAMES if folder != "frontend/packages/tokens"]
     WORKSPACE: ClassVar[str] = "workspace:*"
     EXACT_VERSION: ClassVar[str] = r"\d+\.\d+\.\d+(-[0-9A-Za-z.\-]+)?"
     REACT_19: ClassVar[str] = r"[\^~]?19\.\d+\.\d+(-[0-9A-Za-z.\-]+)?"

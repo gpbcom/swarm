@@ -24,7 +24,7 @@
 
 ## <a id="apps"></a>🗂️ Apps and shared packages
 
-| App (`frontends/`) | Persona | Platforms |
+| App (`frontend/apps/`) | Persona | Platforms |
 | --- | --- | --- |
 | `ground-control` | Pilot, Instructor | Desktop (Tauri), web browser, tablet, laptop |
 | `mission-studio` | Mission planner | Desktop (Tauri), web browser |
@@ -32,7 +32,7 @@
 | `client-portal` | Client, Site agent | Web browser, mobile (installable web app with push) |
 | `desktop` | Shell for Ground control and Mission studio | Windows, macOS, Linux |
 
-| Package (`packages/ts/`) | Holds |
+| Package (`frontend/packages/`) | Holds |
 | --- | --- |
 | `ui` | Components on Radix primitives, styled only with the design tokens |
 | `tokens` | CSS variables generated from [🎨 the visual identity](../visual-identity.md) |
@@ -77,8 +77,8 @@ WebSocket ──► Web Worker: MessagePack decode, delta merge, typed arrays (p
 
 ## <a id="design-system"></a>🎨 Design system
 
-- Tokens in [🎨 the visual identity](../visual-identity.md) are generated into `packages/ts/tokens` (CSS variables with light and dark values), by the same pipeline that writes the mock-ups' `visual-identity.css`.
-- Components in `packages/ts/ui` use the tokens only, like `components.css` does for the mock-ups; the frames of each part of Swarm are layout components.
+- Tokens in [🎨 the visual identity](../visual-identity.md) are generated into `frontend/packages/tokens` (CSS variables with light and dark values), by the same pipeline that writes the mock-ups' `visual-identity.css`.
+- Components in `frontend/packages/ui` use the tokens only, like `components.css` does for the mock-ups; the frames of each part of Swarm are layout components.
 - **Visual tests:** Playwright renders each screen of the use cases with the specification's sample data and compares it with the mock-up PNG, in light and dark mode; a large difference fails the build. Once a screen matches, its row becomes 📸 Screenshot in the use case.
 
 ## <a id="performance"></a>⏱️ Front-end budgets

@@ -1,6 +1,6 @@
 ---
 name: frontend-implementer
-description: Implements one task in the React and TypeScript front ends (frontends/, packages/ts) in its own worktree until its tests pass, then hands its changes off, uncommitted. Used by /ticket-run.
+description: Implements one task in the React and TypeScript front ends (frontend/apps/, frontend/packages) in its own worktree until its tests pass, then hands its changes off, uncommitted. Used by /ticket-run.
 tools: Read, Grep, Glob, Edit, Write, Bash
 model: sonnet
 effort: medium
@@ -13,7 +13,7 @@ You carry out exactly one task of a Swarm ticket, in your own git worktree, foll
 (TKT-4, TKT-5, TKT-8, TKT-14).
 
 - Change only the files listed in your brief. If you need another file, stop and report it as blocked.
-- Use only the tokens and components of packages/ts/ui and packages/ts/tokens; live data through packages/ts/live (Web Worker); follow docs/specs/technical/10-frontends.md and the screens of the use cases. eslint, tsc and Vitest must pass.
+- Use only the tokens and components of frontend/packages/ui and frontend/packages/tokens; live data through frontend/packages/live (Web Worker); follow docs/specs/technical/10-frontends.md and the screens of the use cases. eslint, tsc and Vitest must pass.
 - The screens listed in `TICKET.md` are captured after you by a capture task (TKT-21): build every state they show,
   reachable with the sample data of the visual identity, so that each can be captured as it is drawn.
 - Run the check named in `done_when` until it passes.

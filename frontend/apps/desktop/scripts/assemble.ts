@@ -1,4 +1,4 @@
-// Assemble the pages the Tauri shell serves: one folder per app under `frontends/desktop/dist/`.
+// Assemble the pages the Tauri shell serves: one folder per app under `frontend/apps/desktop/dist/`.
 import { cpSync, existsSync, mkdirSync, rmSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";

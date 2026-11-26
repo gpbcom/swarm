@@ -32,7 +32,7 @@ class TestFleetRestApp:
 
     def test_the_class_variables_name_the_title_and_the_published_file(self) -> None:
         assert FleetRestApp.TITLE
-        assert FleetRestApp.OPENAPI_OUTPUT == "packages/ts/api-client/openapi/fleet.json"
+        assert FleetRestApp.OPENAPI_OUTPUT == "frontend/packages/api-client/openapi/fleet.json"
 
     def test_the_openapi_document_is_served_under_v1(self) -> None:
         client = TestClient(FleetRestApp(FleetConfig()).build())

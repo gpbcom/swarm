@@ -37,7 +37,7 @@ class TestPnpmWorkspace:
     def test_the_root_package_depends_on_turbo(self) -> None:
         assert "turbo" in self.load_json("package.json").get("devDependencies", {})
 
-    @pytest.mark.parametrize("entry", ["frontends/*", "packages/ts/*"])
+    @pytest.mark.parametrize("entry", ["frontend/apps/*", "frontend/packages/*", "qa/e2e"])
     def test_the_workspace_lists_its_folders(self, entry: str) -> None:
         assert entry in self.workspace_entries()
 
@@ -48,6 +48,6 @@ class TestPnpmWorkspace:
     def test_the_lock_file_is_at_the_root(self) -> None:
         assert (repo_root() / "pnpm-lock.yaml").is_file()
 
-    @pytest.mark.parametrize("folder", ["frontends", "packages/ts"])
+    @pytest.mark.parametrize("folder", ["frontend/apps", "frontend/packages", "qa/e2e"])
     def test_the_workspace_folder_exists(self, folder: str) -> None:
         assert (repo_root() / folder).is_dir()

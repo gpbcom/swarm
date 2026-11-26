@@ -6,13 +6,13 @@ import { compile } from "json-schema-to-typescript";
 import type { JSONSchema } from "json-schema-to-typescript";
 
 export const SCHEMA_PATH: string = fileURLToPath(
-  new URL("../../../python/swarm-models/schemas/swarm_models.schema.json", import.meta.url),
+  new URL("../../../../packages/python/swarm-models/schemas/swarm_models.schema.json", import.meta.url),
 );
 export const OUTPUT_PATH: string = fileURLToPath(new URL("../src/generated/models.ts", import.meta.url));
 export const BANNER = `/* eslint-disable */
 /**
  * This file was generated from swarm_models.schema.json by scripts/generate.ts.
- * Do not edit it by hand. Run pnpm --filter ./packages/ts/live run generate.
+ * Do not edit it by hand. Run pnpm --filter ./frontend/packages/live run generate.
  */
 `;
 
@@ -48,7 +48,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   if (process.argv.includes("--check")) {
     if (await isStale(SCHEMA_PATH, OUTPUT_PATH)) {
       console.error(
-        `${OUTPUT_PATH} is out of date. Run pnpm --filter ./packages/ts/live run generate to regenerate it.`,
+        `${OUTPUT_PATH} is out of date. Run pnpm --filter ./frontend/packages/live run generate to regenerate it.`,
       );
       process.exit(1);
     }

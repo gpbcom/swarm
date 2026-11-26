@@ -43,4 +43,4 @@ infra/charts/*/charts/
 .VSCodeCounter
 
 # Front-end build output
-frontends/desktop/src-tauri/target/
+frontend/apps/desktop/src-tauri/target/

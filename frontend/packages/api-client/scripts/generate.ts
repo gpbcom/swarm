@@ -67,7 +67,7 @@ async function main(args: string[]): Promise<number> {
     console.error(problem);
   }
   if (problems.length > 0) {
-    console.error("Run pnpm --filter ./packages/ts/api-client run generate to regenerate.");
+    console.error("Run pnpm --filter ./frontend/packages/api-client run generate to regenerate.");
     return 1;
   }
   return 0;

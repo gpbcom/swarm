@@ -504,7 +504,7 @@ summary row and the heading.
 
 **Rule:**
 
-- A ticket that changes a front end (its area in `docs/specs/roadmap/gantt/ticket-graph.json` holds `frontends/`)
+- A ticket that changes a front end (its area in `docs/specs/roadmap/gantt/ticket-graph.json` holds `frontend/apps/`)
   links, under **Screens touched** of `TICKET.md`, every screen it shows: the PNG of the screen or its row on the use
   case page. When it really shows none, it says why, on its own line: `- ➖ No screen: <why>`.
 - Its plan holds a **capture task** (`mockup-writer`) that depends on every `frontend-implementer` task and owns both

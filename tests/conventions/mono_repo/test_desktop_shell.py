@@ -41,16 +41,16 @@ class TestDesktopShell:
     ]
 
     def shell(self) -> Path:
-        return repo_root() / "frontends" / "desktop" / "src-tauri"
+        return repo_root() / "frontend" / "apps" / "desktop" / "src-tauri"
 
     def cargo(self) -> Dict[str, JsonValue]:
         path = self.shell() / "Cargo.toml"
-        assert path.is_file(), "frontends/desktop/src-tauri/Cargo.toml is missing."
+        assert path.is_file(), "frontend/apps/desktop/src-tauri/Cargo.toml is missing."
         return tomllib.loads(path.read_text(encoding="utf-8"))
 
     def conf(self) -> Dict[str, JsonValue]:
         path = self.shell() / "tauri.conf.json"
-        assert path.is_file(), "frontends/desktop/src-tauri/tauri.conf.json is missing."
+        assert path.is_file(), "frontend/apps/desktop/src-tauri/tauri.conf.json is missing."
         data = json.loads(path.read_text(encoding="utf-8"))
         assert isinstance(data, dict)
         return data
@@ -88,7 +88,7 @@ class TestDesktopShell:
         assert (self.shell() / name).is_file()
 
     def test_the_assemble_script_exists(self) -> None:
-        assert (repo_root() / "frontends" / "desktop" / "scripts" / "assemble.ts").is_file()
+        assert (repo_root() / "frontend" / "apps" / "desktop" / "scripts" / "assemble.ts").is_file()
 
     def test_the_product_name_and_identifier(self) -> None:
         conf = self.conf()

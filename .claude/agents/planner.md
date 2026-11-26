@@ -18,7 +18,7 @@ Read `TICKET.md`, the linked specifications, and the parts of the repository the
 - **Tests first:** a `test-writer` task per behaviour in the first wave; each implementation task depends on its
   tests.
 - **Agents:** `test-writer`, `implementer` (Python services and packages), `rust-implementer`
-  (`rust/`), `frontend-implementer` (`frontends/`, `packages/ts`), `mockup-writer` (specification screens and
+  (`rust/`), `frontend-implementer` (`frontend/apps/`, `frontend/packages`), `mockup-writer` (specification screens and
   mock-ups), `doc-writer` (documentation and specification pages).
 - **Files:** list the exact files each task may create or change; two tasks of the same wave never share a file.
 - **Briefs:** each brief is self-contained: what to do, which specification sections and rules apply, the files, and

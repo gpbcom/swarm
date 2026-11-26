@@ -15,7 +15,7 @@ from tests.conventions.helpers import repo_root
 
 
 class TestTypescriptSettings:
-    PACKAGE: str = "packages/ts/config"
+    PACKAGE: str = "frontend/packages/config"
 
     def path(self, name: str) -> Path:
         return repo_root() / self.PACKAGE / name

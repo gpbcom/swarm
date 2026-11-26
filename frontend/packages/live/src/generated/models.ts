@@ -1,7 +1,7 @@
 /* eslint-disable */
 /**
  * This file was generated from swarm_models.schema.json by scripts/generate.ts.
- * Do not edit it by hand. Run pnpm --filter ./packages/ts/live run generate.
+ * Do not edit it by hand. Run pnpm --filter ./frontend/packages/live run generate.
  */
 
 /**

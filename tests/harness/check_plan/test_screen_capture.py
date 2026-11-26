@@ -48,8 +48,8 @@ def plan(root: Path, ticket: str, tasks: List[Dict[str, JsonValue]]) -> subproce
 
 def front_end_work() -> List[Dict[str, JsonValue]]:
     return [
-        a_task("K01", "test-writer", 1, files=["frontends/back-office/e2e/operator.spec.ts"]),
-        a_task("K02", "frontend-implementer", 2, ["K01"], ["frontends/back-office/src/operator.tsx"]),
+        a_task("K01", "test-writer", 1, files=["frontend/apps/back-office/e2e/operator.spec.ts"]),
+        a_task("K02", "frontend-implementer", 2, ["K01"], ["frontend/apps/back-office/src/operator.tsx"]),
     ]
 
 

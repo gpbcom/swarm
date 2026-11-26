@@ -85,7 +85,7 @@ describe('ground-control shell', () => {
   });
 
   it('has a dark mode block in the shared tokens', () => {
-    const css = readFileSync(resolve(APP_ROOT, '../../packages/ts/tokens/src/tokens.css'), 'utf-8');
+    const css = readFileSync(resolve(APP_ROOT, '../../packages/tokens/src/tokens.css'), 'utf-8');
     expect(css).toContain('@media (prefers-color-scheme: dark)');
   });
 });

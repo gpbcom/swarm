@@ -28,7 +28,7 @@ Usage, from anywhere:
 ``mockup``  creates the HTML mock-up of one state (a flow chart node) of a use case, to draw with components.css.
 ``render``  builds, then renders every mock-up whose PNG is missing or out of date (all of them with --all).
 ``build``   rewrites the generated content: summaries, navigation, page list, matrix, back links, palette, the
-            flow chart colours, visual-identity.css and packages/ts/tokens/src/tokens.css. It never touches other text.
+            flow chart colours, visual-identity.css and frontend/packages/tokens/src/tokens.css. It never touches other text.
 ``check``   prints one line per breach, ``<file>: SPEC-<n>: <message>``, and exits 1. It prints nothing and exits 0
             when the specifications comply.
 """

@@ -1,3 +1,4 @@
 packages:
-  - "frontends/*"
-  - "packages/ts/*"
+  - "frontend/apps/*"
+  - "frontend/packages/*"
+  - "qa/e2e"
