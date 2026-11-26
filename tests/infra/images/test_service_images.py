@@ -18,18 +18,35 @@ class TestServiceImages:
     )
     DOCKERFILES: ClassVar[List[Path]] = sorted(
         [*(Path(__file__).resolve().parents[3] / "services").glob("*/Dockerfile")]
+        + [*(Path(__file__).resolve().parents[3] / "backend" / "apps").glob("*/Dockerfile")]
         + [*(Path(__file__).resolve().parents[3] / "frontends").glob("*/Dockerfile")]
     )
     SERVICE_DOCKERFILES: ClassVar[List[Path]] = sorted(
         (Path(__file__).resolve().parents[3] / "services").glob("*/Dockerfile")
     )
+    APPS: ClassVar[List[Path]] = sorted(
+        path for path in (Path(__file__).resolve().parents[3] / "backend" / "apps").iterdir() if path.is_dir()
+    )
+    APP_DOCKERFILES: ClassVar[List[Path]] = sorted(
+        (Path(__file__).resolve().parents[3] / "backend" / "apps").glob("*/Dockerfile")
+    )
+    APP_KEY: ClassVar[str] = "SWARM_APP"
+    APP_ROOT_KEY: ClassVar[str] = "SWARM_APP_ROOT"
+    APP_LAYERS: ClassVar[List[str]] = [
+        "backend/swarm-models",
+        "backend/swarm-storage",
+        "backend/swarm-clients",
+        "backend/swarm-service",
+        "backend/swarm-api",
+    ]
+    MIGRATIONS_SCRIPT: ClassVar[str] = "--package swarm-scripts"
     ENV: ClassVar[str] = "ENV"
     HOME_KEY: ClassVar[str] = "SWARM_{service}_HOME"
     COPY_FROM_BUILD: ClassVar[str] = "--from=build"
     CONF_SUFFIX: ClassVar[str] = "/conf"
     DOCKERIGNORE: ClassVar[Path] = ROOT / ".dockerignore"
-    GATEWAY: ClassVar[Path] = ROOT / "services" / "gateway" / "Dockerfile"
-    GATEWAY_COMMAND: ClassVar[str] = "swarm-gateway"
+    GATEWAY: ClassVar[Path] = ROOT / "backend" / "apps" / "gateway" / "Dockerfile"
+    GATEWAY_COMMAND: ClassVar[str] = "swarm-gateway-serve"
     LOCK_FILE: ClassVar[str] = "uv.lock"
     FROM: ClassVar[str] = "FROM"
     USER: ClassVar[str] = "USER"
@@ -61,6 +78,12 @@ class TestServiceImages:
             sources.extend(words[:-1])
         return sources
 
+    def _env_entries(self, dockerfile: Path) -> List[Tuple[str, str]]:
+        entries: List[Tuple[str, str]] = []
+        for arguments in self._instructions(self._final_stage(dockerfile), self.ENV):
+            entries.extend(re.findall(r"(\w+)=(\S+)", arguments))
+        return entries
+
     def _conf_destination(self, dockerfile: Path) -> Optional[str]:
         for arguments in self._instructions(self._final_stage(dockerfile), self.COPY):
             words = [word for word in arguments.split() if not word.startswith("--")]
@@ -74,10 +97,30 @@ class TestServiceImages:
         if destination is None:
             pytest.skip("This image does not copy its conf folder from the build stage.")
         key = self.HOME_KEY.format(service=dockerfile.parent.name.upper().replace("-", "_"))
-        entries: List[str] = []
-        for arguments in self._instructions(self._final_stage(dockerfile), self.ENV):
-            entries.extend(re.findall(r"(\w+)=(\S+)", arguments))
-        assert (key, destination) in entries
+        assert (key, destination) in self._env_entries(dockerfile)
+
+    @pytest.mark.parametrize("dockerfile", APP_DOCKERFILES, ids=lambda path: str(path.parent.name))
+    def test_an_app_image_names_its_app_and_the_folder_its_conf_is_copied_to(self, dockerfile: Path) -> None:
+        destination = self._conf_destination(dockerfile)
+        entries = self._env_entries(dockerfile)
+        assert destination is not None
+        assert (self.APP_ROOT_KEY, destination) in entries
+        assert (self.APP_KEY, dockerfile.parent.name) in entries
+
+    @pytest.mark.parametrize("app", APPS, ids=lambda path: path.name)
+    def test_every_app_has_a_dockerfile(self, app: Path) -> None:
+        assert (app / "Dockerfile").is_file()
+
+    @pytest.mark.parametrize("dockerfile", APP_DOCKERFILES, ids=lambda path: str(path.parent.name))
+    def test_an_app_image_builds_from_the_root_with_its_layers_and_the_migrations_script(
+        self, dockerfile: Path
+    ) -> None:
+        sources = self._copy_sources(dockerfile)
+        text = dockerfile.read_text(encoding="utf-8")
+        assert self.LOCK_FILE in sources
+        assert f"backend/apps/{dockerfile.parent.name}/pyproject.toml" in sources
+        assert all(f"{layer}/pyproject.toml" in sources for layer in self.APP_LAYERS)
+        assert self.MIGRATIONS_SCRIPT in text
 
     @pytest.mark.parametrize("service", SERVICES, ids=lambda path: path.name)
     def test_every_service_has_a_dockerfile(self, service: Path) -> None:

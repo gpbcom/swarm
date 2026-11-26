@@ -10,10 +10,10 @@ from fastapi import APIRouter, WebSocket
 # First-party imports
 from flight_engine.models.config.live_server_config import LiveServerConfig
 from swarm_live.api.factories.live.live_session_factory import LiveSessionFactory
-from swarm_live.models.config.live_session_config import LiveSessionConfig
 from swarm_live.service.hub_live_source import HubLiveSource
 from swarm_live.service.live_codec import LiveCodec
 from swarm_live.service.live_hub import LiveHub
+from swarm_models.live.session.live_session_config import LiveSessionConfig
 
 
 class LiveEndpoint:

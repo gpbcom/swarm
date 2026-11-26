@@ -72,20 +72,22 @@ pnpm --filter ./frontend/packages/live run generate
 - `cargo run -p swarm-models-codegen`, run in `rust/`, writes `rust/swarm-models/src/generated.rs`.
 - `pnpm --filter ./frontend/packages/live run generate` writes `frontend/packages/live/src/generated/models.ts`.
 
-After any change to the routes of a service, regenerate the REST contract from the repository root:
+After any change to the routes of an app, regenerate the REST contract from the repository root:
 
 ```bash
-uv run swarm-<service>-openapi
+uv run swarm-openapi-export
 pnpm --filter ./frontend/packages/api-client run generate
 ```
 
-- `uv run swarm-<service>-openapi` runs for each service whose routes changed, and writes
-  `frontend/packages/api-client/openapi/<service>.json`.
+- `uv run swarm-openapi-export` writes `frontend/packages/api-client/openapi/<app>.json` for every app of
+  `backend/apps/`, or for the one the environment entry `SWARM_APP` names, and `uv run swarm-openapi-check` checks
+  they are current. Both are argument-free scripts of `scripts/openapi/`.
 - `pnpm --filter ./frontend/packages/api-client run generate` then writes the TypeScript client from those documents.
-- CI checks both: each service's pytest compares its published document with its app, and the `test` script of
-  `frontend/packages/api-client` runs `generate.ts --check`.
-- `uv run swarm-<service>-migrate` applies a service's migrations. Its DSN is read from the environment entry
-  `SWARM_<SERVICE>_POSTGRES_DSN`.
+- CI checks both: the tests of `tests/scripts/openapi/` compare each published document with its app, and the `test`
+  script of `frontend/packages/api-client` runs `generate.ts --check`.
+- `uv run swarm-migrations-migrate` applies the migrations of every app, or of the one `SWARM_APP` names. The DSN of an
+  app is read from the environment entry `SWARM_<APP>_POSTGRES_DSN`. In an image, `SWARM_APP` and `SWARM_APP_ROOT`
+  already name its app and its folder, so a job runs the same image with the entrypoint `swarm-migrations-migrate`.
 
 - `.github/workflows/ci.yml` runs on every push and pull request.
 - Its first job runs `.github/scripts/detect_changes.py`, which selects the services, front ends and packages that
@@ -143,9 +145,10 @@ in `service`.
 ## Mono-repo
 
 Swarm is meant to become a mono-repo of backend and front-end micro-services, each with its own Docker image. The root
-`src/` has moved to `services/gateway` (ticket T0.01), so the `services/<service>/src/<service>/` reading of `src/`
-applies everywhere. The tests in `tests/conventions/mono_repo/` enforce part of this section: the uv workspace, the
-Cargo and pnpm workspaces, and the Terraform layout. The CI/CD change detection and check workflows are tested by
+`src/` moved to `services/gateway` (ticket T0.01), then to `backend/apps/gateway` and the layer packages (refactor
+phase 5d), so the `services/<service>/src/<service>/` reading of `src/` applies to the services still in `services/`.
+The tests in `tests/conventions/mono_repo/` enforce part of this section: the uv workspace, the Cargo and pnpm
+workspaces, and the Terraform layout. The CI/CD change detection and check workflows are tested by
 `tests/ci/`. The Dockerfiles are tested by `tests/infra/images/test_service_images.py`, and `infra/compose/e2e.yaml` by
 `tests/ci/e2e/`. `tests/conventions/mono_repo/frontend/test_frontend_workspace.py` and `test_desktop_shell.py` check the front-end
 workspace layout and the desktop shell, and the Docker rules of the front ends are not tested yet. `tests/infra/` checks the charts, the dev environment, the PostgreSQL image and the dev-cell script,
@@ -215,22 +218,23 @@ The rest of the shared NATS and REST code sits in the layer packages since the b
   `rest/idempotency/`, and their enums in `swarm_models/enums.py`.
 
 The NATS tests need a nats-server binary on PATH and skip without it, and CI installs a pinned one; their fixtures
-are in `tests/conftest.py`. A service's REST app builds its application with `swarm_web`'s `RestAppBuilder`, then
-installs the problem handlers and the idempotency middleware of `swarm_api`.
+are in `tests/conftest.py`. An app's router of `swarm_api/v1/<domain>/` builds its application with
+`ProblemHandlers.application` of `swarm_api`, which hands the problem model to `swarm_web`'s `RestAppBuilder`, then
+installs the idempotency middleware.
 
 The packages still in `packages/python/`, until the backend split moves them, are `swarm-i18n` (`swarm_i18n`), the
 Babel catalogues of Python messages in English, French, German and Spanish, whose catalogues live in
 `src/swarm_i18n/locales/` (`swarm.pot` and `<en|fr|de|es>/LC_MESSAGES/swarm.po`), with `Translator`, which gives a
-message in a person's language (swarm-models now holds `Language` and `Person.language`); `swarm-live`, below; and
-`swarm-rest` (`swarm_rest`), which keeps only the OpenAPI export command and the runner that drives an `AsyncRunnable`
-from a console script, until `scripts/openapi` and the apps' `main()` replace them. Inside a package, Pydantic models,
-enums and exceptions sit in `src/<module>/models/`, as in a service.
+message in a person's language (swarm-models now holds `Language` and `Person.language`); and `swarm-live`, below.
+`swarm-rest` is gone: the runner that drives an `AsyncRunnable` from synchronous code is in the kernel's
+`swarm_web.runners`, and `scripts/openapi` exports the OpenAPI documents. Inside a package, Pydantic models, enums and
+exceptions sit in `src/<module>/models/`, as in a service.
 
 The package `swarm-storage` (`swarm_storage`) was added by ticket T0.12. `swarm-storage`, now the storage layer
 `backend/swarm-storage`, holds in `swarm_storage/shared/postgres/` the PostgreSQL pool, the unit of work that sets
 `swarm.operator_id` on each transaction for row-level security, the `PostgresRepository` base and the outbox
-repository, the row-level security and outbox DDL, and the Alembic migrator. The services `gateway`, `missions` and
-`fleet` each have their own PostgreSQL schema and their Alembic migrations in `services/<service>/migrations/`, outside
+repository, the row-level security and outbox DDL, and the Alembic migrator. The apps `gateway`, `missions` and
+`fleet` each have their own PostgreSQL schema and their Alembic migrations in `backend/apps/<app>/migrations/`, outside
 `src/` because Alembic needs module-level functions.
 
 The package `swarm-live` (`swarm_live`) is the live fan-out shared by the gateway and the flight engine: the one-slot
@@ -248,8 +252,10 @@ uv pip install --no-deps dist/swarm_core-*.whl
 NATS tests skip without nats-server. mypy reads `rust/swarm-core/python/swarm_core.pyi` through the root
 `mypy_path`.
 
-Each service's console scripts are `swarm-<service>-serve` (run the service), `swarm-<service>-openapi` (export its
-OpenAPI document) and `swarm-<service>-migrate` (apply its migrations). `swarm-gateway` still runs the greeting command.
+The apps `gateway`, `fleet` and `missions` sit in `backend/apps/<app>/`, each with one console script,
+`swarm-<app>-serve`, whose argument-free `main()` reads `conf/app.yaml` in the folder `SWARM_APP_ROOT` names (the
+current one without it) and serves the app. Their routes, services, clients and models sit in the layer packages,
+under the domain of the same name. The simulator and the flight engine are still services of `services/`.
 
 The Python rules in this file apply to `services/` and `packages/python/`. The front ends use React and TypeScript
 with a Tauri desktop shell, images go to GHCR, and Argo CD deploys them; see `docs/specs/technical/`.
@@ -344,7 +350,7 @@ split one entity's work in the same layer are merged. Factories and exceptions k
 | Package | May import |
 | --- | --- |
 | The kernel (`backend/libs/`) | The kernel only |
-| `swarm_models` | Itself, `swarm_catalog` and `swarm_lifecycle`. Never `swarm_logging` |
+| `swarm_models` | Itself, `swarm_catalog`, `swarm_lifecycle`, and the models of `swarm_web` and `swarm_nats` (`swarm_web.models`, `swarm_nats.models`). Never `swarm_logging` |
 | `swarm_storage`, `swarm_clients` | Itself, `swarm_models` and the kernel |
 | `swarm_service` | Itself, `swarm_storage`, `swarm_clients`, `swarm_models` and the kernel |
 | `swarm_api` | Itself, `swarm_service`, `swarm_models`, `swarm_web` and the rest of the kernel |

@@ -17,10 +17,10 @@ import uvicorn
 from fastapi import FastAPI
 
 # First-party imports
-from gateway.api.live.live_router import LiveRouter
-from gateway.models.live.live_config import LiveConfig
-from gateway.service.factories.live.live_feed_factory import LiveFeedFactory
-from swarm_live.models.config.live_session_config import LiveSessionConfig
+from swarm_api.v1.live.live_router import LiveRouter
+from swarm_models.live.feed.live_config import LiveConfig
+from swarm_service.gateway.factories.live.live_feed_factory import LiveFeedFactory
+from swarm_models.live.session.live_session_config import LiveSessionConfig
 from swarm_nats.models.config.nats_client_config import NatsClientConfig
 from tests.infra.nats.helpers import free_port
 from tests.infra.nats.nats_server_process import NatsServerProcess
@@ -144,7 +144,7 @@ async def gateway_port(nats_urls: Tuple[str, str]) -> AsyncIterator[int]:
             await asyncio.sleep(POLL_INTERVAL_S)
     router = LiveRouter(feed.source_for, LiveSessionConfig())
     app = FastAPI()
-    app.include_router(router.build())
+    app.include_router(router)
     app.dependency_overrides[router.operator] = operator_from_query
     port = free_port()
     server = uvicorn.Server(uvicorn.Config(app, host=HOST, port=port, log_level=LOG_LEVEL))

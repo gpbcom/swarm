@@ -46,6 +46,11 @@ class TestNewLayout:
         [
             ("backend/swarm-service/src/swarm_service/drones/x.py", '["gamma"]'),
             ("backend/swarm-api/src/swarm_api/missions/x.py", '["delta","gamma"]'),
+            ("backend/swarm-api/src/swarm_api/v1/drones/drone_router.py", '["gamma"]'),
+            ("backend/swarm-api/src/swarm_api/v1/missions/mission_router.py", '["delta","gamma"]'),
+            ("backend/swarm-api/src/swarm_api/v1/live/live_router.py", '["delta","gamma"]'),
+            ("backend/swarm-api/src/swarm_api/handlers/problem_handlers.py", '["delta","gamma"]'),
+            ("backend/apps/gamma/Dockerfile", '["gamma"]'),
             ("backend/swarm-storage/tests/drones/test_x.py", '["gamma"]'),
             ("backend/swarm-models/src/swarm_models/unowned/x.py", "[]"),
             ("backend/apps/delta/src/beta/main.py", '["delta"]'),

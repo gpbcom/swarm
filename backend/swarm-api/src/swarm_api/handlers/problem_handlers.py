@@ -3,10 +3,10 @@ from __future__ import annotations
 # Standard library imports
 from http import HTTPStatus
 from logging import Logger, getLogger
-from typing import ClassVar, Optional
+from typing import ClassVar, List, Optional
 
 # Third-party imports
-from fastapi import FastAPI, Request
+from fastapi import APIRouter, FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, Response
 from starlette.exceptions import HTTPException
@@ -14,6 +14,7 @@ from starlette.exceptions import HTTPException
 # First-party imports
 from swarm_models.rest.problems.problem import Problem
 from swarm_web.models.rest.exceptions import SERestError
+from swarm_web.rest.rest_app_builder import RestAppBuilder
 
 
 class ProblemHandlers:
@@ -28,6 +29,8 @@ class ProblemHandlers:
         - **The text of an unexpected error is never sent to the client**: the answer is a bare ``500``.
         - One method handles the four kinds of error, because the type of an exception handler is
           ``Callable[[Request, Exception], ...]``.
+        - **Only this class names the problem model**: ``application`` hands it to the kernel's ``RestAppBuilder``, so
+          that an app builds its application without importing the model, which ``swarm_models.rest`` holds.
     """
 
     VALIDATION_DETAIL: ClassVar[str] = "The request does not match the schema of this route."
@@ -79,6 +82,22 @@ class ProblemHandlers:
         """
         problem = Problem(title=title, status=status, detail=detail, instance=instance)
         return JSONResponse(problem.model_dump(exclude_none=True), status_code=status, media_type=Problem.MEDIA_TYPE)
+
+    def application(self, title: str, version: str, routers: List[APIRouter]) -> FastAPI:
+        """Build an application whose every error, in its document and in its answers, is a problem document.
+
+        Args:
+            title (str): The title of the API.
+            version (str): The version of the API.
+            routers (List[APIRouter]): The routers, each served under ``/v1``.
+
+        Returns:
+            FastAPI: The application, with these handlers installed.
+        """
+        app = RestAppBuilder().build(title, version, routers, problem=Problem, problem_media_type=Problem.MEDIA_TYPE)
+        self.install(app)
+        self.logger.debug("Built the application %s with its problem handlers.", title)
+        return app
 
     def install(self, app: FastAPI) -> None:
         """Register the handler for every kind of error.

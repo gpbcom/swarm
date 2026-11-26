@@ -13,6 +13,11 @@ import nats
 import pytest
 from nats.aio.client import Client
 
+# First-party imports
+from swarm_models.auth.auth_config import AuthConfig
+from tests.fakes.keycloak.helpers import AUDIENCE
+from tests.fakes.keycloak.keycloak_stand_in import KeycloakStandIn
+
 NATS_BINARY = "nats-server"
 LOCALHOST = "127.0.0.1"
 NATS_URL_TEMPLATE = "nats://{host}:{port}"
@@ -64,3 +69,14 @@ async def nats_client(nats_url: str) -> AsyncIterator[Client]:
     client = await nats.connect(nats_url)
     yield client
     await client.close()
+
+
+@pytest.fixture
+def keycloak_stand_in() -> Iterator[KeycloakStandIn]:
+    with KeycloakStandIn() as stand_in:
+        yield stand_in
+
+
+@pytest.fixture
+def auth_config(keycloak_stand_in: KeycloakStandIn) -> AuthConfig:
+    return AuthConfig(issuer_url=keycloak_stand_in.issuer_url, audience=AUDIENCE)

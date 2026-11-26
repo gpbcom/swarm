@@ -8,9 +8,9 @@ from typing import Optional
 from swarm_live.api.factories.live_runnable_factory import LiveRunnableFactory
 from swarm_live.api.live.live_session import LiveSession
 from swarm_live.api.live.live_socket import LiveSocket
-from swarm_live.models.config.live_session_config import LiveSessionConfig
 from swarm_live.service.live_codec import LiveCodec
 from swarm_live.service.live_source import LiveSource
+from swarm_models.live.session.live_session_config import LiveSessionConfig
 
 
 class LiveSessionFactory(LiveRunnableFactory[LiveSession]):

@@ -1,8 +1,0 @@
-from __future__ import annotations
-
-# First-party imports
-from gateway.models.keycloak.exceptions.se_keycloak_error import SEKeycloakError
-
-
-class SEKeycloakUnknownKeyError(SEKeycloakError):
-    """Raised when the identity provider publishes no key for the token's key identifier."""

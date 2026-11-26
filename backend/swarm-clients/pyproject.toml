@@ -5,6 +5,7 @@ description = "The clients layer of Swarm: one client per remote system, a folde
 readme = "../../README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "httpx>=0.28.1",
     "nats-py>=2.11.0",
     "pydantic>=2.14.3",
     "swarm-models",

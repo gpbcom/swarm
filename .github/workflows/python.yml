@@ -35,6 +35,24 @@ jobs:
           python-version: "3.12"
       - name: Install the workspace
         run: uv sync --locked
+      - name: Find the folder and the tests of the service or the app
+        run: |
+          if [ -d "services/$SERVICE" ]; then
+            echo "FOLDER=services/$SERVICE" >> "$GITHUB_ENV"
+            echo "TESTS=services/$SERVICE/tests" >> "$GITHUB_ENV"
+          else
+            tests="tests/swarm_${SERVICE//-/_}"
+            domains=$(uv run python -c "import sys, tomllib; print(' '.join(tomllib.load(open(sys.argv[1], 'rb'))['tool']['swarm']['domains']))" "backend/apps/$SERVICE/pyproject.toml")
+            for domain in $domains; do
+              for folder in tests/swarm_*/"$domain" tests/swarm_api/v1/"$domain"; do
+                if [ -d "$folder" ]; then
+                  tests="$tests $folder"
+                fi
+              done
+            done
+            echo "FOLDER=backend/apps/$SERVICE" >> "$GITHUB_ENV"
+            echo "TESTS=$tests" >> "$GITHUB_ENV"
+          fi
       - name: Install nats-server
         run: |
           base="https://github.com/nats-io/nats-server/releases/download/v$NATS_SERVER_VERSION"
@@ -48,33 +66,37 @@ jobs:
           "$HOME/.local/bin/nats-server" --version
       - name: Build and install the swarm_core wheel
         run: |
-          if grep -rqsE '(^|\s)(import|from) swarm_core' "services/$SERVICE/src"; then
+          if grep -rqsE '(^|\s)(import|from) swarm_core' "$FOLDER/src"; then
             uv run maturin build --release --manifest-path rust/swarm-core/python/Cargo.toml --out dist
             uv pip install --no-deps dist/swarm_core-*.whl
           else
             echo "$SERVICE does not import swarm_core: the wheel is not applicable."
           fi
       - name: Ruff check
-        run: uv run ruff check "services/$SERVICE"
+        run: uv run ruff check "$FOLDER"
       - name: Ruff format check
-        run: uv run ruff format --check "services/$SERVICE"
+        run: uv run ruff format --check "$FOLDER"
       - name: Mypy
         run: |
-          if [ -d "services/$SERVICE/src" ]; then
-            uv run mypy "services/$SERVICE/src"
+          if [ -d "$FOLDER/src" ]; then
+            uv run mypy "$FOLDER/src"
           else
             echo "No source folder for $SERVICE: mypy is not applicable."
           fi
       - name: Pytest
         run: |
-          if [ -d "services/$SERVICE/tests" ] && [ -n "$(find "services/$SERVICE/tests" -name 'test_*.py' -print -quit)" ]; then
-            uv run pytest "services/$SERVICE/tests" -n 2 --junitxml="reports/service-$SERVICE.xml"
+          # TESTS holds several folders for an app: its main's tests and the tests of its domains.
+          # shellcheck disable=SC2086
+          if [ -n "$(find $TESTS -name 'test_*.py' -print -quit 2>/dev/null)" ]; then
+            uv run pytest $TESTS -n 2 --junitxml="reports/service-$SERVICE.xml"
           else
             echo "No tests for $SERVICE: pytest is not applicable."
           fi
       - name: Convention tests of the service
         run: |
-          if [ -f tests/conventions/services/test_service_conventions.py ]; then
+          if [ ! -d "services/$SERVICE" ]; then
+            echo "$SERVICE is an app of backend/apps: the backend convention tests of the repository job cover it."
+          elif [ -f tests/conventions/services/test_service_conventions.py ]; then
             uv run pytest tests/conventions/services/test_service_conventions.py -k "$SERVICE-" -n 2 \
               --junitxml="reports/conventions-$SERVICE.xml"
           else
@@ -161,7 +183,7 @@ jobs:
       - name: Mypy
         run: |
           found=0
-          for src in packages/python/*/src backend/libs/*/src backend/swarm-*/src scripts/src; do
+          for src in packages/python/*/src backend/libs/*/src backend/swarm-*/src backend/apps/*/src scripts/src; do
             if [ -d "$src" ]; then
               found=1
               uv run mypy "$src" || exit 1

@@ -30,6 +30,7 @@ class ApiOnlyEndpoints(ConventionRule):
         HANDLER_SUFFIX (str): The function name ending that marks an exception handler.
         CALL (str): The method that makes an instance a callable provider.
         ASGI_PARAMETERS (Tuple[str, ...]): The parameters of the ``__call__`` of a pure ASGI middleware.
+        CONNECTIONS (Set[str]): The annotations of the connection a ``Depends`` provider class is called with.
 
     Notes:
         The tree root is the repository root, and every ``swarm_api`` folder under ``backend/`` is checked, in every
@@ -37,8 +38,9 @@ class ApiOnlyEndpoints(ConventionRule):
         - **Forbidden**: a class that subclasses ``Runnable``, ``AsyncRunnable``, or any base named ``*Factory``.
         - **A class is allowed** when it subclasses ``APIRouter`` or ``BaseHTTPMiddleware``; when it is a pure ASGI
           middleware, whose ``__call__`` takes ``scope``, ``receive`` and ``send``; when it registers exception
-          handlers, with an ``add_exception_handler(...)`` call in its body; or when its name is the argument of a
-          ``Depends(...)`` call of its module.
+          handlers, with an ``add_exception_handler(...)`` call in its body; when its name is the argument of a
+          ``Depends(...)`` call of its module; or when it is a ``Depends`` provider in a module of its own, whose
+          ``__call__`` takes a ``Request`` or a ``WebSocket``.
         - **A function is allowed** when a decorator is a router method (``@router.get``, ``post``, ``put``,
           ``patch``, ``delete``, ``head``, ``options``, ``websocket``, ``api_route``, ``route``), ``@app.middleware``
           or ``@app.exception_handler``; when its name ends with ``_handler``; when its name is registered by an
@@ -74,6 +76,7 @@ class ApiOnlyEndpoints(ConventionRule):
     HANDLER_SUFFIX: ClassVar[str] = "_handler"
     CALL: ClassVar[str] = "__call__"
     ASGI_PARAMETERS: ClassVar[Tuple[str, ...]] = ("self", "scope", "receive", "send")
+    CONNECTIONS: ClassVar[Set[str]] = {"Request", "WebSocket"}
 
     ############################
     # Internal Helpers Methods #
@@ -150,6 +153,21 @@ class ApiOnlyEndpoints(ConventionRule):
                 return tuple(argument.arg for argument in item.args.args) == self.ASGI_PARAMETERS
         return False
 
+    def _is_provider(self, node: ast.ClassDef) -> bool:
+        """Tell whether a class is a ``Depends`` provider, called with the connection.
+
+        Args:
+            node (ast.ClassDef): The class.
+
+        Returns:
+            bool: True when its ``__call__`` takes a parameter annotated ``Request`` or ``WebSocket``.
+        """
+        for item in node.body:
+            if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef)) and item.name == self.CALL:
+                annotations = [argument.annotation for argument in item.args.args if argument.annotation is not None]
+                return any(self._name_of(annotation) in self.CONNECTIONS for annotation in annotations)
+        return False
+
     def _registers_handlers(self, node: ast.ClassDef) -> bool:
         """Tell whether a class registers exception handlers.
 
@@ -178,7 +196,7 @@ class ApiOnlyEndpoints(ConventionRule):
             return f"Class {node.name!r} is a runnable or a factory: move it to the service layer."
         if bases & (self.ROUTER_BASES | self.MIDDLEWARE_BASES) or node.name in provided:
             return ""
-        if self._is_asgi_middleware(node) or self._registers_handlers(node):
+        if self._is_asgi_middleware(node) or self._registers_handlers(node) or self._is_provider(node):
             return ""
         return f"Class {node.name!r} is no router, provider or middleware: move it to the service layer."
 

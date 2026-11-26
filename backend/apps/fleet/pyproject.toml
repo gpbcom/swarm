@@ -1,0 +1,31 @@
+[project]
+name = "swarm-fleet"
+version = "0.1.0"
+description = "The Swarm fleet app: its main() reads conf/app.yaml and serves the fleet domain."
+readme = "../../../README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "swarm-api",
+    "swarm-logging",
+    "swarm-models",
+    "swarm-web",
+]
+
+[project.scripts]
+swarm-fleet-serve = "swarm_fleet.main:main"
+
+[tool.swarm]
+domains = ["fleet"]
+
+[tool.uv.build-backend]
+module-name = "swarm_fleet"
+
+[tool.uv.sources]
+swarm-api = { workspace = true }
+swarm-logging = { workspace = true }
+swarm-models = { workspace = true }
+swarm-web = { workspace = true }
+
+[build-system]
+requires = ["uv_build>=0.12.21,<0.13.0"]
+build-backend = "uv_build"
