@@ -2,6 +2,7 @@ from __future__ import annotations
 
 # Standard library imports
 import logging.config
+from importlib.resources import files
 from logging import Logger, getLogger
 from pathlib import Path
 from typing import ClassVar, Dict, Optional
@@ -39,7 +40,7 @@ class LoggingConfigurator:
         - The folder of each file handler is created, because a rotating file handler fails when its folder is missing.
     """
 
-    REFERENCE_PATH: ClassVar[Path] = Path(__file__).resolve().parents[1] / "conf" / "logger.yaml"
+    REFERENCE_PATH: ClassVar[Path] = Path(str(files("swarm_logging").joinpath("conf", "logger.yaml")))
     JSON_FORMATTER: ClassVar[str] = "swarm_logging.formatters.json_formatter.JsonFormatter"
     JSON_FORMATTER_ENTRY: ClassVar[Dict[str, str]] = {"()": JSON_FORMATTER}
     ENCODING: ClassVar[str] = "utf-8"

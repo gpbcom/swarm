@@ -69,7 +69,7 @@ def first_party(module: str, root: Path = ROOT) -> bool:
     top = module.split(".")[0]
     if top in ("tests", "conftest") or (root / top).exists():
         return True
-    return any(root.glob(f"services/*/src/{top}")) or any(root.glob(f"packages/python/*/src/{top}"))
+    return any(root.glob(f"services/*/src/{top}")) or any(root.glob(f"packages/python/*/src/{top}")) or any(root.glob(f"backend/libs/*/src/{top}"))
 
 
 def environment_failure(code: int, out: str, root: Path = ROOT) -> bool:

@@ -35,6 +35,17 @@ def packages_root() -> Path:
     return repo_root() / "packages" / "python"
 
 
+def libs_root() -> Path:
+    """Return the folder holding the kernel libraries of the target layout.
+
+    The variable ``SWARM_CONVENTIONS_LIBS_ROOT`` overrides the default ``backend/libs/`` folder.
+    """
+    override = os.environ.get("SWARM_CONVENTIONS_LIBS_ROOT")
+    if override:
+        return Path(override)
+    return repo_root() / "backend" / "libs"
+
+
 def write_files(root: Path, files: Dict[str, str]) -> None:
     """Write each relative POSIX path of ``files`` under ``root`` with its content."""
     for relative, content in files.items():
