@@ -1,6 +1,6 @@
 # T0.15: Four languages
 
-**Status:** 🟡 Planned
+**Status:** ✅ Done
 
 ## Roadmap
 
@@ -30,7 +30,7 @@
 
 ## Screens touched
 
-- ➖ No screen: the roadmap row names no use case and changes no `frontends/` folder; it delivers the message packages, the catalogues and the CI check.
+- ➖ No screen: the four shells are the empty frames of T0.14 and show no use case state; the ticket only takes their side bar items, Hold, Abort and the status bar language from the messages in four languages.
 
 ## Budgets touched
 

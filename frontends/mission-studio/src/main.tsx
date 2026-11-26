@@ -4,6 +4,8 @@ import "@swarm/ui/styles.css";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
+import { I18nProvider } from "@swarm/i18n";
+
 import { App } from "./App";
 
 const container = document.getElementById("root");
@@ -13,6 +15,8 @@ if (container === null) {
 
 createRoot(container).render(
   <StrictMode>
-    <App />
+    <I18nProvider language={undefined}>
+      <App />
+    </I18nProvider>
   </StrictMode>,
 );

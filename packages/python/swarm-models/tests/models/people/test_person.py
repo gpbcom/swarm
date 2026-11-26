@@ -9,10 +9,12 @@ import pytest
 from pydantic import JsonValue
 
 # First-party imports
+from swarm_models.models.enums import Language
 from swarm_models.models.people.exceptions import (
     SEInvalidPersonException,
     SEPersonInvalidEmail,
     SEPersonInvalidId,
+    SEPersonInvalidLanguage,
     SEPersonInvalidName,
     SEPersonInvalidOperatorId,
 )
@@ -30,6 +32,7 @@ class TestPerson:
     def test_defaults(self) -> None:
         person = Person.model_validate({"id": self.ID, "name": "Ada", "email": "ada@example.org"})
         assert person.operator_id is None
+        assert person.language == Language.ENGLISH
 
     def test_full_valid_construction(self) -> None:
         person = Person.model_validate({**self.valid(), "name": "  Ada Lovelace  ", "email": " ada@example.org "})
@@ -42,6 +45,7 @@ class TestPerson:
         ("name", "error"),
         [
             ("operator_id", None),
+            ("language", None),
             ("id", SEPersonInvalidId),
             ("name", SEPersonInvalidName),
             ("email", SEPersonInvalidEmail),
@@ -50,7 +54,11 @@ class TestPerson:
     def test_none_becomes_the_default(self, name: str, error: Optional[Type[Exception]]) -> None:
         data = {**self.valid(), name: None}
         if error is None:
-            assert Person.model_validate(data).operator_id is None
+            person = Person.model_validate(data)
+            if name == "operator_id":
+                assert person.operator_id is None
+            else:
+                assert person.language == Language.ENGLISH
         else:
             with pytest.raises(error):
                 Person.model_validate(data)
@@ -79,11 +87,32 @@ class TestPerson:
             ("email", "ada lovelace@example.org", SEPersonInvalidEmail),
             ("email", True, SEPersonInvalidEmail),
             ("email", 5, SEPersonInvalidEmail),
+            ("language", True, SEPersonInvalidLanguage),
+            ("language", 1, SEPersonInvalidLanguage),
+            ("language", "", SEPersonInvalidLanguage),
+            ("language", "it", SEPersonInvalidLanguage),
+            ("language", "en-GB", SEPersonInvalidLanguage),
+            ("language", "EN", SEPersonInvalidLanguage),
+            ("language", [], SEPersonInvalidLanguage),
         ],
     )
     def test_rejects_bad_values(self, name: str, value: JsonValue, error: Type[Exception]) -> None:
         with pytest.raises(error):
             Person.model_validate({**self.valid(), name: value})
+
+    @pytest.mark.parametrize("language", list(Language))
+    def test_every_language_is_accepted(self, language: Language) -> None:
+        assert Person.model_validate({**self.valid(), "language": language}).language == language
+        assert Person.model_validate({**self.valid(), "language": language.value}).language == language
+
+    def test_a_language_string_comes_back_as_the_member(self) -> None:
+        person = Person.model_validate({**self.valid(), "language": "de"})
+        assert person.language is Language.GERMAN
+
+    def test_the_language_survives_a_round_trip(self) -> None:
+        person = Person.model_validate({**self.valid(), "language": Language.GERMAN})
+        assert Person.model_validate(person.model_dump()).language == Language.GERMAN
+        assert Person.model_validate_json(person.model_dump_json()).language == Language.GERMAN
 
     def test_rejects_unknown_keys(self) -> None:
         with pytest.raises(ValueError):
@@ -105,6 +134,7 @@ class TestPerson:
             SEPersonInvalidOperatorId,
             SEPersonInvalidName,
             SEPersonInvalidEmail,
+            SEPersonInvalidLanguage,
         ]
         assert issubclass(SEInvalidPersonException, Exception)
         assert not issubclass(SEInvalidPersonException, ValueError)

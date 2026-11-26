@@ -1,0 +1,11 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: swarm\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: docs/specs/visual-identity.md
+msgid "Language: {language}"
+msgstr "Idioma: {language}"

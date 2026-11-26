@@ -26,6 +26,7 @@ jobs:
         service: ${{ fromJSON(inputs.services) }}
     env:
       SERVICE: ${{ matrix.service }}
+      NATS_SERVER_VERSION: "2.15.3"
     steps:
       - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v10.3.3
@@ -34,6 +35,25 @@ jobs:
           python-version: "3.12"
       - name: Install the workspace
         run: uv sync --locked
+      - name: Install nats-server
+        run: |
+          base="https://github.com/nats-io/nats-server/releases/download/v$NATS_SERVER_VERSION"
+          archive="nats-server-v$NATS_SERVER_VERSION-linux-amd64.tar.gz"
+          curl --fail --silent --show-error --location --remote-name "$base/$archive"
+          curl --fail --silent --show-error --location --remote-name "$base/SHA256SUMS"
+          sha256sum --check --ignore-missing SHA256SUMS
+          mkdir -p "$HOME/.local/bin"
+          tar --extract --gzip --file "$archive" --strip-components=1 --directory "$HOME/.local/bin" "nats-server-v$NATS_SERVER_VERSION-linux-amd64/nats-server"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          "$HOME/.local/bin/nats-server" --version
+      - name: Build and install the swarm_core wheel
+        run: |
+          if grep -rqsE '(^|\s)(import|from) swarm_core' "services/$SERVICE/src"; then
+            uv run maturin build --release --manifest-path packages/rust/swarm-core/python/Cargo.toml --out dist
+            uv pip install --no-deps dist/swarm_core-*.whl
+          else
+            echo "$SERVICE does not import swarm_core: the wheel is not applicable."
+          fi
       - name: Ruff check
         run: uv run ruff check "services/$SERVICE"
       - name: Ruff format check
@@ -92,6 +112,10 @@ jobs:
           tar --extract --gzip --file "$archive" --strip-components=1 --directory "$HOME/.local/bin" "nats-server-v$NATS_SERVER_VERSION-linux-amd64/nats-server"
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
           "$HOME/.local/bin/nats-server" --version
+      - name: Build and install the swarm_core wheel
+        run: |
+          uv run maturin build --release --manifest-path packages/rust/swarm-core/python/Cargo.toml --out dist
+          uv pip install --no-deps dist/swarm_core-*.whl
       - name: Ruff check
         run: uv run ruff check tests .github/scripts
       - name: Ruff format check
@@ -155,6 +179,8 @@ jobs:
           fi
       - name: JSON Schema bundle is up to date
         run: uv run swarm-models-schemas --check
+      - name: Every Python message is in English, French, German and Spanish
+        run: uv run swarm-i18n-check
       - name: Keep the test reports (TKT-26)
         if: always()
         uses: actions/upload-artifact@v4

@@ -1,10 +1,18 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import { cleanup, render } from '@testing-library/react';
+import { cleanup, render as renderBare } from '@testing-library/react';
+import type { RenderResult } from '@testing-library/react';
+import type { ReactElement } from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
 
+import { I18nProvider } from '@swarm/i18n';
+
 import { App } from '../src/App';
+
+function render(ui: ReactElement): RenderResult {
+  return renderBare(<I18nProvider language="en">{ui}</I18nProvider>);
+}
 
 const APP_ROOT = resolve(__dirname, '..');
 const PART = 'Client portal';

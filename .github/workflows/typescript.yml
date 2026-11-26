@@ -42,6 +42,8 @@ jobs:
           echo "name=$name" >> "$GITHUB_OUTPUT"
           mkdir -p reports
           pnpm --filter "./$PROJECT" run --if-present test 2>&1 | tee "reports/$name.log"
+      - name: Every message is in English, French, German and Spanish
+        run: pnpm --filter "./$PROJECT" run --if-present check-messages
       - name: Keep the test reports (TKT-26)
         if: always()
         uses: actions/upload-artifact@v4

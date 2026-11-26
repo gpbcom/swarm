@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useIntl } from "react-intl";
 
 import type { NavItem } from "./parts";
 
@@ -9,6 +10,7 @@ export interface SideBarProps {
 }
 
 export function SideBar({ items, active, onSelect }: SideBarProps): ReactNode {
+  const intl = useIntl();
   return (
     <nav className="sidebar">
       {items.map((item) => {
@@ -21,7 +23,7 @@ export function SideBar({ items, active, onSelect }: SideBarProps): ReactNode {
             aria-current={current ? "page" : undefined}
             onClick={() => onSelect?.(item.id)}
           >
-            <span aria-hidden="true">{item.icon}</span> {item.label}
+            <span aria-hidden="true">{item.icon}</span> {intl.formatMessage({ id: item.messageId })}
           </button>
         );
       })}

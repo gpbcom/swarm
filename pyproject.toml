@@ -14,6 +14,7 @@ dev = [
     "pyyaml>=6.0",
     "ruff>=0.6",
     "types-pyyaml>=6.0.12.20261113",
+    "websockets>=13.0",
 ]
 
 [tool.ruff]
@@ -28,7 +29,7 @@ ignore = ["UP006", "UP007", "UP035", "UP045"]
 # Tests are written before the code they import (TKT-4): pinning ``tests`` as first-party keeps the import order the
 # same whether or not the imported module exists yet. The code of the repository is first-party, so that the AGENT.md
 # import groups match ruff.
-known-first-party = ["tests", "gateway", "missions", "fleet", "simulator", "swarm_catalog", "swarm_lifecycle", "swarm_logging", "swarm_models", "swarm_nats", "swarm_rest", "swarm_storage"]
+known-first-party = ["tests", "gateway", "missions", "fleet", "simulator", "flight_engine", "swarm_live", "swarm_catalog", "swarm_i18n", "swarm_lifecycle", "swarm_logging", "swarm_models", "swarm_nats", "swarm_rest", "swarm_storage"]
 
 [tool.ruff.format]
 quote-style = "double"
@@ -42,13 +43,16 @@ testpaths = [
     "services/missions/tests",
     "services/fleet/tests",
     "services/simulator/tests",
+    "services/flight-engine/tests",
     "packages/python/swarm-lifecycle/tests",
+    "packages/python/swarm-i18n/tests",
     "packages/python/swarm-catalog/tests",
     "packages/python/swarm-logging/tests",
     "packages/python/swarm-models/tests",
     "packages/python/swarm-nats/tests",
     "packages/python/swarm-storage/tests",
     "packages/python/swarm-rest/tests",
+    "packages/python/swarm-live/tests",
 ]
 
 [tool.mypy]
@@ -57,26 +61,33 @@ files = [
     "services/missions/src",
     "services/fleet/src",
     "services/simulator/src",
+    "services/flight-engine/src",
     "packages/python/swarm-lifecycle/src",
+    "packages/python/swarm-i18n/src",
     "packages/python/swarm-catalog/src",
     "packages/python/swarm-logging/src",
     "packages/python/swarm-models/src",
     "packages/python/swarm-nats/src",
     "packages/python/swarm-storage/src",
     "packages/python/swarm-rest/src",
+    "packages/python/swarm-live/src",
 ]
 mypy_path = [
+    "packages/rust/swarm-core/python",
     "services/gateway/src",
     "services/missions/src",
     "services/fleet/src",
     "services/simulator/src",
+    "services/flight-engine/src",
     "packages/python/swarm-lifecycle/src",
+    "packages/python/swarm-i18n/src",
     "packages/python/swarm-catalog/src",
     "packages/python/swarm-logging/src",
     "packages/python/swarm-models/src",
     "packages/python/swarm-nats/src",
     "packages/python/swarm-storage/src",
     "packages/python/swarm-rest/src",
+    "packages/python/swarm-live/src",
 ]
 explicit_package_bases = true
 

@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useIntl } from "react-intl";
 
 import { Button } from "../controls";
 import { GROUND_CONTROL_ITEMS, GROUND_CONTROL_LABELS, PARTS } from "./parts";
@@ -28,6 +29,7 @@ export function GroundControlFrame({
   onAbort,
   children,
 }: GroundControlFrameProps): ReactNode {
+  const intl = useIntl();
   const context = [missionName, missionState].filter((entry): entry is string => entry !== undefined);
   return (
     <Window
@@ -38,10 +40,10 @@ export function GroundControlFrame({
           actions={
             <>
               <Button variant="secondary" onClick={onHold}>
-                {GROUND_CONTROL_LABELS.hold}
+                {GROUND_CONTROL_LABELS.hold.icon} {intl.formatMessage({ id: GROUND_CONTROL_LABELS.hold.messageId })}
               </Button>
               <Button variant="danger" onClick={onAbort}>
-                {GROUND_CONTROL_LABELS.abort}
+                {GROUND_CONTROL_LABELS.abort.icon} {intl.formatMessage({ id: GROUND_CONTROL_LABELS.abort.messageId })}
               </Button>
             </>
           }

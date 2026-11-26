@@ -170,10 +170,14 @@ class TestPythonWorkflow:
             "uv run mypy",
             "uv run pytest",
             "uv run swarm-models-schemas --check",
+            "uv run swarm-i18n-check",
         ]
         indexes = [self.run_index("packages", command) for command in commands]
         assert indexes == sorted(indexes)
         assert len(set(indexes)) == len(commands)
+
+    def test_the_packages_job_runs_the_message_check_without_an_expression(self) -> None:
+        assert "${{" not in self.run_with("packages", "uv run swarm-i18n-check")
 
     @pytest.mark.parametrize(
         "command",
@@ -191,21 +195,41 @@ class TestPythonWorkflow:
     def test_the_repository_job_never_expands_an_expression_inside_a_run(self) -> None:
         assert all("${{" not in run for run in self.runs("repository"))
 
-    @pytest.mark.parametrize("name", ["packages", "repository"])
+    @pytest.mark.parametrize("name", ["services", "packages", "repository"])
     def test_the_job_pins_the_nats_server_version(self, name: str) -> None:
         env = self.job(name).get("env")
         assert isinstance(env, dict)
         assert re.fullmatch(self.VERSION_PATTERN, str(env.get(self.NATS_VERSION_KEY)))
 
-    @pytest.mark.parametrize("name", ["packages", "repository"])
+    @pytest.mark.parametrize("name", ["services", "packages", "repository"])
     def test_the_job_installs_nats_server_after_the_sync_and_before_the_tests(self, name: str) -> None:
         install = self.run_index(name, "nats-server")
         assert self.run_index(name, "uv sync --locked") < install
         assert install < self.run_index(name, "uv run pytest")
 
-    @pytest.mark.parametrize("name", ["packages", "repository"])
+    @pytest.mark.parametrize("name", ["services", "packages", "repository"])
     def test_the_nats_server_download_is_checked(self, name: str) -> None:
         run = self.run_with(name, "nats-server")
         assert "sha256sum" in run
         assert "$NATS_SERVER_VERSION" in run
         assert '"$GITHUB_PATH"' in run
+
+    def test_the_services_job_builds_and_installs_the_wheel_for_the_services_that_import_it(self) -> None:
+        run = self.run_with("services", "maturin build")
+        assert "packages/rust/swarm-core/python/Cargo.toml" in run
+        assert "uv pip install" in run
+        assert "swarm_core" in run
+        assert "services/$SERVICE/src" in run
+
+    def test_the_services_job_installs_the_wheel_after_the_sync_and_before_the_tests(self) -> None:
+        build = self.run_index("services", "maturin build")
+        assert self.run_index("services", "uv sync --locked") < build
+        assert build < self.run_index("services", "uv run pytest")
+
+    def test_the_repository_job_builds_and_installs_the_wheel_after_the_sync_and_before_the_tests(self) -> None:
+        run = self.run_with("repository", "maturin build")
+        assert "packages/rust/swarm-core/python/Cargo.toml" in run
+        assert "uv pip install" in run
+        build = self.run_index("repository", "maturin build")
+        assert self.run_index("repository", "uv sync --locked") < build
+        assert build < self.run_index("repository", "uv run pytest")

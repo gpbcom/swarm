@@ -1,7 +1,7 @@
 export interface NavItem {
   id: string;
   icon: string;
-  label: string;
+  messageId: string;
 }
 
 export interface ClientNavItem extends NavItem {
@@ -19,45 +19,45 @@ export const PARTS = {
 } as const;
 
 export const GROUND_CONTROL_LABELS = {
-  hold: "✋ Hold the Squad",
-  abort: "🛑 Abort",
+  hold: { icon: "✋", messageId: "action.hold" },
+  abort: { icon: "🛑", messageId: "action.abort" },
 } as const;
 
 export const GROUND_CONTROL_ITEMS = [
-  { id: "flight", icon: "🛰️", label: "Flight" },
-  { id: "preflight", icon: "📋", label: "Pre-flight" },
-  { id: "squad", icon: "🛸", label: "Squad" },
-  { id: "video", icon: "🎥", label: "Video" },
-  { id: "debrief", icon: "📼", label: "Debrief" },
-  { id: "settings", icon: "🔧", label: "Settings" },
+  { id: "flight", icon: "🛰️", messageId: "nav.flight" },
+  { id: "preflight", icon: "📋", messageId: "nav.preflight" },
+  { id: "squad", icon: "🛸", messageId: "nav.squad" },
+  { id: "video", icon: "🎥", messageId: "nav.video" },
+  { id: "debrief", icon: "📼", messageId: "nav.debrief" },
+  { id: "settings", icon: "🔧", messageId: "nav.settings" },
 ] as const satisfies readonly NavItem[];
 
 export const MISSION_STUDIO_ITEMS = [
-  { id: "missions", icon: "🗺️", label: "Missions" },
-  { id: "design", icon: "🖊️", label: "Design" },
-  { id: "simulate", icon: "🕹️", label: "Simulate" },
-  { id: "assistant", icon: "💬", label: "Assistant" },
+  { id: "missions", icon: "🗺️", messageId: "nav.missions" },
+  { id: "design", icon: "🖊️", messageId: "nav.design" },
+  { id: "simulate", icon: "🕹️", messageId: "nav.simulate" },
+  { id: "assistant", icon: "💬", messageId: "nav.assistant" },
 ] as const satisfies readonly NavItem[];
 
 export const BACK_OFFICE_ITEMS = [
-  { id: "fleet", icon: "🛸", label: "Fleet" },
-  { id: "authorisations", icon: "📜", label: "Authorisations" },
-  { id: "deliverables", icon: "📦", label: "Deliverables" },
-  { id: "evidence", icon: "🔏", label: "Evidence" },
-  { id: "people", icon: "👥", label: "People" },
-  { id: "settings", icon: "🔧", label: "Settings" },
+  { id: "fleet", icon: "🛸", messageId: "nav.fleet" },
+  { id: "authorisations", icon: "📜", messageId: "nav.authorisations" },
+  { id: "deliverables", icon: "📦", messageId: "nav.deliverables" },
+  { id: "evidence", icon: "🔏", messageId: "nav.evidence" },
+  { id: "people", icon: "👥", messageId: "nav.people" },
+  { id: "settings", icon: "🔧", messageId: "nav.settings" },
 ] as const satisfies readonly NavItem[];
 
 export const CLIENT_PORTAL_ITEMS = [
-  { id: "missions", icon: "🗺️", label: "Missions" },
-  { id: "order", icon: "➕", label: "Order" },
-  { id: "deliverables", icon: "📦", label: "Deliverables" },
-  { id: "scorecards", icon: "🧾", label: "Scorecards" },
-  { id: "alarms", icon: "🔔", label: "Alarms", siteAgentOnly: true },
+  { id: "missions", icon: "🗺️", messageId: "nav.missions" },
+  { id: "order", icon: "➕", messageId: "nav.order" },
+  { id: "deliverables", icon: "📦", messageId: "nav.deliverables" },
+  { id: "scorecards", icon: "🧾", messageId: "nav.scorecards" },
+  { id: "alarms", icon: "🔔", messageId: "nav.alarms", siteAgentOnly: true },
 ] as const satisfies readonly ClientNavItem[];
 
 export const SWARM_ADMINISTRATION_ITEMS = [
-  { id: "operators", icon: "➕", label: "Operators" },
-  { id: "people", icon: "👥", label: "People" },
-  { id: "settings", icon: "🔧", label: "Settings" },
+  { id: "operators", icon: "➕", messageId: "nav.operators" },
+  { id: "people", icon: "👥", messageId: "nav.people" },
+  { id: "settings", icon: "🔧", messageId: "nav.settings" },
 ] as const satisfies readonly NavItem[];

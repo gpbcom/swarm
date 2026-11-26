@@ -133,6 +133,51 @@ export type Type = string;
  */
 export type Version = number;
 /**
+ * A language in which Swarm shows its screens.
+ *
+ * Attributes:
+ *     ENGLISH: English, the default language.
+ *     FRENCH: French.
+ *     GERMAN: German.
+ *     SPANISH: Spanish.
+ *
+ * This interface was referenced by `SwarmModels`'s JSON-Schema
+ * via the `definition` "Language".
+ */
+export type Language = "en" | "fr" | "de" | "es";
+/**
+ * An operation a client asks of the live WebSocket.
+ *
+ * Attributes:
+ *     SUBSCRIBE: Subscribe to a topic.
+ *
+ * This interface was referenced by `SwarmModels`'s JSON-Schema
+ * via the `definition` "LiveOperation".
+ */
+export type LiveOperation = "subscribe";
+/**
+ * How often a subscriber receives frames.
+ *
+ * Attributes:
+ *     FULL: Every frame, at the rate of the source.
+ *
+ * This interface was referenced by `SwarmModels`'s JSON-Schema
+ * via the `definition` "LiveRate".
+ */
+export type LiveRate = "full";
+/**
+ * What the client asks.
+ */
+export type LiveOperation1 = "subscribe";
+/**
+ * How often frames are sent.
+ */
+export type LiveRate1 = "full";
+/**
+ * The topic followed, mission/<version 7 UUID>/<kind>.
+ */
+export type Topic = string;
+/**
  * The version 7 identifier of the operator.
  */
 export type Id2 = string;
@@ -148,6 +193,10 @@ export type Email = string;
  * The version 7 identifier of the person.
  */
 export type Id3 = string;
+/**
+ * The language of the screens the person sees.
+ */
+export type Language1 = "en" | "fr" | "de" | "es";
 /**
  * The full name of the person.
  */
@@ -373,6 +422,31 @@ export interface Payload {
   [k: string]: JsonValue;
 }
 /**
+ * The message a client sends on the live WebSocket to follow a topic.
+ *
+ * Attributes:
+ *     model_config (ConfigDict): Forbids unknown keys and freezes the subscription.
+ *     TOPIC_PREFIX (ClassVar[str]): The first part of every topic.
+ *     TOPIC_SEPARATOR (ClassVar[str]): The separator between the parts of a topic.
+ *     TOPIC_PATTERN (ClassVar[Pattern[str]]): The shape of a topic, ``mission/<id>/<kind>``.
+ *     op (LiveOperation): What the client asks.
+ *     topic (str): The topic followed, ``mission/<version 7 UUID>/<kind>``.
+ *     rate (LiveRate): How often frames are sent. Defaults to full.
+ *
+ * Notes:
+ *     - The topic stays a string on the wire,
+ *       and ``mission()`` and ``kind()`` read its parts.
+ *     - **A mission identifier that is not a version 7 UUID is refused.**
+ *
+ * This interface was referenced by `SwarmModels`'s JSON-Schema
+ * via the `definition` "LiveSubscription".
+ */
+export interface LiveSubscription {
+  op: LiveOperation1;
+  rate?: LiveRate1;
+  topic: Topic;
+}
+/**
  * A person who pilots drones, global to every cell.
  *
  * Attributes:
@@ -400,6 +474,8 @@ export interface Operator {
  *     operator_id (Optional[UUID]): The Operator the person belongs to, ``None`` for a Swarm administrator.
  *     name (str): The full name of the person.
  *     email (str): The email address of the person.
+ *     language (Language): The language of the screens the person sees, English by default.
+ *     LANGUAGE_FIELD (ClassVar[str]): The name of the ``language`` field.
  *     EMAIL_SEPARATOR (ClassVar[str]): The character that splits an email address into its local part and domain.
  *
  * Notes:
@@ -411,6 +487,7 @@ export interface Operator {
 export interface Person {
   email: Email;
   id: Id3;
+  language?: Language1;
   name: Name1;
   operator_id?: OperatorId2;
 }

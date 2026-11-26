@@ -1,0 +1,4 @@
+$ cargo fmt --all --check
+(cwd packages/rust, on the ticket's own files only)
+
+
