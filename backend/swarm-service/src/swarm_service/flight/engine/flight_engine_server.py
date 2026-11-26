@@ -2,8 +2,11 @@ from __future__ import annotations
 
 # Standard library imports
 import asyncio
+import signal
+import threading
 from logging import Logger, getLogger
-from typing import Optional, Set
+from types import FrameType
+from typing import Callable, ClassVar, Dict, Optional, Set, Tuple, Union
 
 # First-party imports
 from swarm_lifecycle.runnables.async_runnable import AsyncRunnable
@@ -15,8 +18,11 @@ class FlightEngineServer(AsyncRunnable):
     """Runs the flight engine of an edge and the server of its live socket together, until one fails or both end.
 
     Attributes:
+        STOP_SIGNALS (ClassVar[Tuple[signal.Signals, ...]]): The signals that ask the app to stop.
         engine_factory (FlightEngineFactory): Builds the flight engine.
         server_factory (RestServerFactory): Builds the server of the application that serves the live socket.
+        previous_handlers (Dict[signal.Signals, Union[Callable, int, signal.Handlers, None]]): The handlers of the
+            stop signals before ``initialize`` replaced them, put back by ``close``.
         logger (Logger): Logger instance.
 
     Notes:
@@ -27,8 +33,18 @@ class FlightEngineServer(AsyncRunnable):
           ends with an error and is restarted.
         - The server ends when the process is asked to stop: uvicorn handles ``SIGINT`` and ``SIGTERM``, as in every
           app of Swarm, and the engine is then cancelled.
+        - **A requested stop is a clean stop, and the process exits with status 0.** After its graceful stop, uvicorn
+          puts back the handlers it found and raises the signal it caught again, which the default handlers turn into
+          a kill (``SIGTERM``) or a ``KeyboardInterrupt`` (``SIGINT``). ``initialize`` therefore installs, before the
+          server runs, a handler of each of ``STOP_SIGNALS`` that only logs the request: uvicorn puts it back and the
+          signal raised again is logged instead. ``close`` puts the previous handlers back.
+        - The handlers are installed from the main thread only, as uvicorn does, because Python refuses a signal
+          handler set from another thread. A stop signal that arrives between ``initialize`` and the start of uvicorn
+          is only logged.
         - It was the ``serve`` command of the flight engine's command line.
     """
+
+    STOP_SIGNALS: ClassVar[Tuple[signal.Signals, ...]] = (signal.SIGINT, signal.SIGTERM)
 
     def __init__(
         self,
@@ -49,6 +65,9 @@ class FlightEngineServer(AsyncRunnable):
         self.logger = logger if logger else getLogger(__name__)
         self.engine_factory = engine_factory
         self.server_factory = server_factory
+        self.previous_handlers: Dict[
+            signal.Signals, Union[Callable[[int, Optional[FrameType]], None], int, signal.Handlers, None]
+        ] = {}
 
     ############################
     # Internal Helpers Methods #
@@ -66,6 +85,15 @@ class FlightEngineServer(AsyncRunnable):
             self.logger.debug("The live server is %s.", status)
         self.logger.info("The live server has ended.")
 
+    def _log_stop_request(self, number: int, frame: Optional[FrameType]) -> None:
+        """Log a stop signal, which uvicorn has already handled or raises again after its graceful stop.
+
+        Args:
+            number (int): The number of the signal.
+            frame (Optional[FrameType]): The frame the signal interrupted.
+        """
+        self.logger.info("The flight engine app was asked to stop by %s.", signal.Signals(number).name)
+
     async def _stop(self, tasks: Set[asyncio.Task[None]]) -> None:
         """Cancel the tasks still running and wait for them.
 
@@ -82,8 +110,13 @@ class FlightEngineServer(AsyncRunnable):
     ############################
 
     async def initialize(self) -> None:
-        """Acquire nothing: the engine and the server initialise themselves when they run."""
-        self.logger.debug("Nothing to initialise before the engine and the server run.")
+        """Install the handlers of the stop signals: the engine and the server initialise themselves when they run."""
+        if threading.current_thread() is not threading.main_thread():
+            self.logger.debug("Not in the main thread: the handlers of the stop signals are left as they are.")
+            return
+        for stop in self.STOP_SIGNALS:
+            self.previous_handlers[stop] = signal.signal(stop, self._log_stop_request)
+        self.logger.debug("Installed the handlers of %d stop signals.", len(self.STOP_SIGNALS))
 
     async def run(self) -> None:
         """Run the engine and the server together until the server ends or one of them fails.
@@ -104,6 +137,9 @@ class FlightEngineServer(AsyncRunnable):
                         self.logger.error("The flight engine app failed: %s.", type(failure).__name__)
                     else:
                         self.logger.debug("A task of the flight engine app has ended.")
+        except BaseException as error:
+            self.logger.error("The flight engine app was interrupted: %s.", type(error).__name__)
+            raise
         finally:
             await self._stop(pending)
         if failure is not None:
@@ -111,5 +147,16 @@ class FlightEngineServer(AsyncRunnable):
             raise failure
 
     async def close(self) -> None:
-        """Release nothing: the engine and the server close themselves."""
-        self.logger.debug("Nothing to release after the engine and the server.")
+        """Put back the handlers of the stop signals: the engine and the server close themselves."""
+        if not self.previous_handlers:
+            self.logger.debug("No handler of a stop signal to put back.")
+            return
+        for stop, handler in self.previous_handlers.items():
+            if handler is None:
+                self.logger.debug("%s had no Python handler: its default action is put back.", stop.name)
+                signal.signal(stop, signal.SIG_DFL)
+            else:
+                self.logger.debug("Putting back the previous handler of %s.", stop.name)
+                signal.signal(stop, handler)
+        self.previous_handlers = {}
+        self.logger.debug("Put back the handlers of the stop signals.")

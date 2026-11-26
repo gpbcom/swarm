@@ -16,17 +16,15 @@ from nats.aio.client import Client
 from swarm_clients.shared.nats.nats_requester import NatsRequester
 from swarm_models.commands.command import Command
 from swarm_models.commands.enums import CommandKind, CommandLane
-from swarm_models.enums import CommandVerdict, CredentialKind, FlightLogEntryKind, SimulatedDroneKind
+from swarm_models.enums import CommandVerdict, FlightLogEntryKind, SimulatedDroneKind
 from swarm_nats.models.config.nats_client_config import NatsClientConfig
-from tests.infra.nats.helpers import connz_users, free_port, issuers, operator_mode_config, write_creds
-from tests.infra.nats.nats_server_process import NatsServerProcess
+from tests.infra.nats.helpers import connz_users
 from tests.swarm_simulator.main.helpers import (
     COMMAND_ID,
     ENCODING,
     HOST,
     ISSUER_ID,
     MISSION_ID,
-    OPERATOR_ID,
     UNKNOWN_DRONE_ID,
     WARNING_WORD,
     Endpoint,
@@ -44,32 +42,12 @@ Cell = Tuple[str, int, Path, Path]
 
 @pytest.mark.skipif(shutil.which("nats-server") is None, reason="nats-server is not installed")
 class TestCommandIsolation:
-    OPERATOR_NAME = "cell"
-    SIMULATED_NAME = "squad-sim"
-    SERVICE_NAME = "service"
     REGISTERED_ENDPOINT: Endpoint = (squad_drone_id(1), SimulatedDroneKind.SYNTHETIC, HOST, 14690, 1)
     LOG_WAIT_S = 10.0
     POLL_INTERVAL_S = 0.1
     EXIT_WAIT_S = 30.0
     SIMULATED = 1
     STDERR_NAME = "serve.stderr"
-
-    @pytest.fixture
-    def cell(self, tmp_path: Path) -> Iterator[Cell]:
-        operator_issuer, account_issuer, credential_issuer = issuers()
-        operator = operator_issuer.issue(self.OPERATOR_NAME)
-        account = account_issuer.issue(operator, OPERATOR_ID)
-        simulated = credential_issuer.issue(account, OPERATOR_ID, CredentialKind.SIMULATED, self.SIMULATED_NAME)
-        service = credential_issuer.issue(account, OPERATOR_ID, CredentialKind.SERVICE, self.SERVICE_NAME)
-        simulated_creds = write_creds(tmp_path / "creds", simulated, credential_issuer)
-        service_creds = write_creds(tmp_path / "creds", service, credential_issuer)
-        port = free_port()
-        monitor_port = free_port()
-        config = operator_mode_config(port, monitor_port, operator, [account], store_dir=tmp_path / "jetstream")
-        server = NatsServerProcess(tmp_path, config, port)
-        server.spawn()
-        yield server.url, monitor_port, simulated_creds, service_creds
-        server.kill()
 
     @pytest.fixture
     def processes(self, simulator_script: Path) -> Iterator[List[subprocess.Popen[bytes]]]:
@@ -91,8 +69,8 @@ class TestCommandIsolation:
         return process
 
     @pytest.fixture
-    async def caller(self, cell: Cell) -> AsyncIterator[Client]:
-        url, _, _, service_creds = cell
+    async def caller(self, nats_cell: Cell) -> AsyncIterator[Client]:
+        url, _, _, service_creds = nats_cell
         client = await nats.connect(url, user_credentials=str(service_creds))
         yield client
         await client.close()
@@ -117,9 +95,9 @@ class TestCommandIsolation:
             time.sleep(self.POLL_INTERVAL_S)
 
     async def test_a_command_to_a_drone_outside_the_registry_is_refused_and_logged(
-        self, tmp_path: Path, cell: Cell, processes: List[subprocess.Popen[bytes]], caller: Client
+        self, tmp_path: Path, nats_cell: Cell, processes: List[subprocess.Popen[bytes]], caller: Client
     ) -> None:
-        url, _, simulated_creds, service_creds = cell
+        url, _, simulated_creds, service_creds = nats_cell
         catalog = write_squad_catalog(tmp_path, [self.REGISTERED_ENDPOINT])
         config = write_app_config(tmp_path, catalog, simulated_creds, url)
         process = self.serve(processes, tmp_path, config)
@@ -139,9 +117,9 @@ class TestCommandIsolation:
         assert refused == [(str(UNKNOWN_DRONE_ID), self.SIMULATED)]
 
     def test_a_serve_started_with_a_service_credential_exits_and_never_connects(
-        self, tmp_path: Path, cell: Cell, processes: List[subprocess.Popen[bytes]]
+        self, tmp_path: Path, nats_cell: Cell, processes: List[subprocess.Popen[bytes]]
     ) -> None:
-        url, monitor_port, _, service_creds = cell
+        url, monitor_port, _, service_creds = nats_cell
         catalog = write_squad_catalog(tmp_path, [self.REGISTERED_ENDPOINT])
         config = write_app_config(tmp_path, catalog, service_creds, url)
 

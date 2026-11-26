@@ -3,6 +3,7 @@ from __future__ import annotations
 # Standard library imports
 from http import HTTPStatus
 from pathlib import Path
+from typing import Tuple
 
 # First-party imports
 from swarm_models.enums import FlightLogEntryKind
@@ -19,6 +20,8 @@ from tests.swarm_simulator.main.helpers import (
     write_squad_catalog,
 )
 
+Cell = Tuple[str, int, Path, Path]
+
 
 class TestSquareRouteFlight:
     PX4_ROUTE_TIMEOUT_S = 600
@@ -27,10 +30,11 @@ class TestSquareRouteFlight:
     PX4_FLY_TIMEOUT_S = 700.0
 
     def test_ten_synthetic_drones_complete_a_square_route(
-        self, tmp_path: Path, simulator_script: Path, synthetic_drones: int
+        self, tmp_path: Path, simulator_script: Path, synthetic_drones: int, nats_cell: Cell
     ) -> None:
+        url, _, simulated_creds, _ = nats_cell
         catalog = write_squad_catalog(tmp_path, synthetic_endpoints(synthetic_drones))
-        config = write_app_config(tmp_path, catalog)
+        config = write_app_config(tmp_path, catalog, simulated_creds, url)
 
         accepted = run_fly(config, MISSION_ID, SYNTHETIC_COUNT)
 
@@ -40,13 +44,16 @@ class TestSquareRouteFlight:
         assert count_kind(rows, FlightLogEntryKind.ROUTE_FAILED) == 0
 
     def test_ten_synthetic_drones_and_one_px4_sitl_drone_all_complete_it(
-        self, tmp_path: Path, simulator_script: Path, synthetic_drones: int, px4_sitl: int
+        self, tmp_path: Path, simulator_script: Path, synthetic_drones: int, px4_sitl: int, nats_cell: Cell
     ) -> None:
+        url, _, simulated_creds, _ = nats_cell
         endpoints = [*synthetic_endpoints(synthetic_drones), px4_endpoint(px4_sitl)]
         catalog = write_squad_catalog(tmp_path, endpoints)
         config = write_app_config(
             tmp_path,
             catalog,
+            simulated_creds,
+            url,
             heartbeat_timeout_s=self.PX4_HEARTBEAT_TIMEOUT_S,
             arm_timeout_s=self.PX4_ARM_TIMEOUT_S,
             route_timeout_s=self.PX4_ROUTE_TIMEOUT_S,

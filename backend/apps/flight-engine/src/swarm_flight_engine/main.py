@@ -23,6 +23,9 @@ def main() -> None:
         - The app's folder is ``SWARM_APP_ROOT``, which the image sets, or the current folder.
         - Logging is configured once, here at the entry point.
         - The event loop is uvloop's: the engine and its live socket run in one asyncio process.
+        - **``SIGINT`` and ``SIGTERM`` stop the app cleanly and the process exits with status 0**, because
+          ``FlightEngineServer`` logs the signal that uvicorn raises again after its graceful stop. A failure of the
+          engine or of the server is raised from here, and the process exits with an error.
     """
     folder = FlightEngineConfig.conf_folder()
     config = FlightEngineConfig.load(folder / FlightEngineConfig.APP_FILE)

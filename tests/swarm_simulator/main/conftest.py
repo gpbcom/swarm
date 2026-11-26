@@ -4,16 +4,20 @@ from __future__ import annotations
 import shutil
 import subprocess
 from pathlib import Path
-from typing import Iterator
+from typing import Iterator, Tuple
 
 # Third-party imports
 import pytest
 
 # First-party imports
+from swarm_models.enums import CredentialKind
+from tests.infra.nats.helpers import free_port, issuers, operator_mode_config, write_creds
+from tests.infra.nats.nats_server_process import NatsServerProcess
 from tests.swarm_simulator.main.helpers import (
     BINARY_PATH,
     BIND_ATTEMPTS,
     DOCKER_IMAGE_ENV,
+    OPERATOR_ID,
     PX4_CONTAINER_PORT,
     RUST_DIR,
     SYNTHETIC_COUNT,
@@ -33,6 +37,13 @@ DOCKER_RUN = [DOCKER, "run", "--rm", "-d", "-p", "{port}:{container_port}/udp", 
 DOCKER_REMOVE = [DOCKER, "rm", "-f"]
 BUILD_TIMEOUT_S = 900.0
 DOCKER_TIMEOUT_S = 120.0
+CELL_NAME = "cell"
+SIMULATED_NAME = "squad-sim"
+SERVICE_NAME = "service"
+CREDS_FOLDER = "creds"
+JETSTREAM_FOLDER = "jetstream"
+
+Cell = Tuple[str, int, Path, Path]
 
 
 @pytest.fixture(scope="session")
@@ -81,3 +92,28 @@ def px4_sitl() -> Iterator[int]:
     container = started.stdout.strip()
     yield port
     subprocess.run([*DOCKER_REMOVE, container], capture_output=True, check=False, timeout=DOCKER_TIMEOUT_S)
+
+
+@pytest.fixture
+def nats_cell(tmp_path: Path) -> Iterator[Cell]:
+    """A NATS server in operator mode with JetStream and the Operator's account, with simulated and service credentials.
+
+    It yields the URL, the monitoring port, the simulated credentials and the service credentials: the simulator app
+    stops when it cannot reach NATS, so every test that serves it needs this cell.
+    """
+    if shutil.which(NatsServerProcess.BINARY) is None:
+        pytest.skip("nats-server is not installed")
+    operator_issuer, account_issuer, credential_issuer = issuers()
+    operator = operator_issuer.issue(CELL_NAME)
+    account = account_issuer.issue(operator, OPERATOR_ID)
+    simulated = credential_issuer.issue(account, OPERATOR_ID, CredentialKind.SIMULATED, SIMULATED_NAME)
+    service = credential_issuer.issue(account, OPERATOR_ID, CredentialKind.SERVICE, SERVICE_NAME)
+    simulated_creds = write_creds(tmp_path / CREDS_FOLDER, simulated, credential_issuer)
+    service_creds = write_creds(tmp_path / CREDS_FOLDER, service, credential_issuer)
+    port = free_port()
+    monitor_port = free_port()
+    config = operator_mode_config(port, monitor_port, operator, [account], store_dir=tmp_path / JETSTREAM_FOLDER)
+    server = NatsServerProcess(tmp_path, config, port)
+    server.spawn()
+    yield server.url, monitor_port, simulated_creds, service_creds
+    server.kill()

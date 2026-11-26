@@ -38,8 +38,9 @@ class SimulationRouter(APIRouter):
           flies. The progress and the end of the flight are in the simulated Flight log of the Mission.
         - Like every ``POST`` of Swarm, it needs an ``Idempotency-Key``, so that a retried request never starts a
           second flight.
-        - ``application`` wires the Commands of the bus too, through ``SimulationLifespan``, which refuses to start
-          without simulated credentials (BR-014).
+        - ``application`` installs ``SimulationLifespan``, which stops the flight that flies when the application
+          stops. The Commands of the bus are answered beside the application by ``SimulatorServer``, which refuses to
+          start without simulated credentials (BR-014) and stops the app when the responder fails.
         - **The published document is generated from this application**: run ``uv run swarm-openapi-export`` after
           any change to a route, because ``uv run swarm-openapi-check`` fails on a stale file.
     """
@@ -88,7 +89,8 @@ class SimulationRouter(APIRouter):
         """Build the application of the simulator app.
 
         Returns:
-            FastAPI: The application, with the REST conventions of Swarm, this router and the Commands of the bus.
+            FastAPI: The application, with the REST conventions of Swarm, this router and the lifespan that stops the
+            flight.
         """
         self.logger.debug("Building the simulator application.")
         app = ProblemHandlers().application(self.TITLE, self.VERSION, [self])
@@ -96,6 +98,6 @@ class SimulationRouter(APIRouter):
             IdempotencyMiddleware, service=IdempotencyServiceFactory(self.simulator_config.rest).create()
         )
         self.logger.debug("The problem handlers and the idempotency middleware are installed.")
-        app.router.lifespan_context = SimulationLifespan(self.simulator_config, self.simulations).lifespan
-        self.logger.debug("The Commands of the bus are wired on the simulator application.")
+        app.router.lifespan_context = SimulationLifespan(self.simulations).lifespan
+        self.logger.debug("The flight is stopped with the simulator application.")
         return app

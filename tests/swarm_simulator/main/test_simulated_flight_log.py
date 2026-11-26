@@ -4,6 +4,7 @@ from __future__ import annotations
 import sqlite3
 from http import HTTPStatus
 from pathlib import Path
+from typing import Tuple
 
 # Third-party imports
 import pytest
@@ -24,14 +25,17 @@ from tests.swarm_simulator.main.helpers import (
     write_squad_catalog,
 )
 
+Cell = Tuple[str, int, Path, Path]
+
 
 class TestSimulatedFlightLog:
     SIMULATED = 1
 
     @pytest.fixture
-    def flown(self, tmp_path: Path, simulator_script: Path, synthetic_drones: int) -> Path:
+    def flown(self, tmp_path: Path, simulator_script: Path, synthetic_drones: int, nats_cell: Cell) -> Path:
+        url, _, simulated_creds, _ = nats_cell
         catalog = write_squad_catalog(tmp_path, synthetic_endpoints(synthetic_drones))
-        config = write_app_config(tmp_path, catalog)
+        config = write_app_config(tmp_path, catalog, simulated_creds, url)
         accepted = run_fly(config, MISSION_ID, SYNTHETIC_COUNT)
         assert accepted.status_code == HTTPStatus.ACCEPTED, accepted.text
         return flight_log_path(tmp_path)

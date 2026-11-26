@@ -15,7 +15,16 @@ import yaml
 
 # First-party imports
 from swarm_models.config.app_config import AppConfig
+from swarm_models.enums import SimulatedDroneKind
 from swarm_simulator.main import main
+from tests.swarm_simulator.main.helpers import (
+    HOST,
+    free_tcp_port,
+    free_udp_port,
+    squad_drone_id,
+    write_app_config,
+    write_squad_catalog,
+)
 
 
 class TestSwarmSimulatorMain:
@@ -80,3 +89,22 @@ class TestSwarmSimulatorMain:
 
         assert finished.returncode != 0
         assert b"SESimulatedCredentialsUnreadableError" in finished.stderr
+
+    def test_an_app_that_cannot_reach_nats_exits_with_an_error(self, tmp_path: Path) -> None:
+        endpoint = (squad_drone_id(1), SimulatedDroneKind.SYNTHETIC, HOST, free_udp_port(), 1)
+        catalog = write_squad_catalog(tmp_path, [endpoint])
+        app_folder = write_app_config(tmp_path, catalog, nats_url=f"nats://{HOST}:{free_tcp_port()}")
+        environment = dict(os.environ)
+        environment[AppConfig.APP_ROOT_KEY] = str(app_folder)
+
+        finished = subprocess.run(
+            [str(Path(sys.executable).parent / self.SCRIPT)],
+            cwd=app_folder,
+            env=environment,
+            capture_output=True,
+            timeout=self.EXIT_TIMEOUT_S,
+            check=False,
+        )
+
+        assert finished.returncode != 0
+        assert b"SENatsConnectionError" in finished.stderr
