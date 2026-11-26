@@ -1,0 +1,516 @@
+{
+  "realm": "swarm",
+  "enabled": true,
+  "organizationsEnabled": true,
+  "sslRequired": "external",
+  "accessTokenLifespan": 300,
+  "revokeRefreshToken": true,
+  "refreshTokenMaxReuse": 0,
+  "otpPolicyType": "totp",
+  "roles": {
+    "realm": [
+      {
+        "name": "pilot",
+        "description": "Swarm role pilot",
+        "composite": false,
+        "clientRole": false
+      },
+      {
+        "name": "mission_planner",
+        "description": "Swarm role mission_planner",
+        "composite": false,
+        "clientRole": false
+      },
+      {
+        "name": "fleet_maintainer",
+        "description": "Swarm role fleet_maintainer",
+        "composite": false,
+        "clientRole": false
+      },
+      {
+        "name": "instructor",
+        "description": "Swarm role instructor",
+        "composite": false,
+        "clientRole": false
+      },
+      {
+        "name": "client",
+        "description": "Swarm role client",
+        "composite": false,
+        "clientRole": false
+      },
+      {
+        "name": "site_agent",
+        "description": "Swarm role site_agent",
+        "composite": false,
+        "clientRole": false
+      },
+      {
+        "name": "swarm_administrator",
+        "description": "Swarm role swarm_administrator",
+        "composite": false,
+        "clientRole": false
+      }
+    ]
+  },
+  "clientScopes": [
+    {
+      "name": "basic",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "false",
+        "display.on.consent.screen": "false"
+      },
+      "protocolMappers": [
+        {
+          "name": "sub",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-sub-mapper",
+          "consentRequired": false,
+          "config": {
+            "claim.name": "sub",
+            "access.token.claim": "true",
+            "introspection.token.claim": "true"
+          }
+        }
+      ]
+    },
+    {
+      "name": "roles",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "false",
+        "display.on.consent.screen": "false"
+      },
+      "protocolMappers": [
+        {
+          "name": "realm roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "claim.name": "realm_access.roles",
+            "jsonType.label": "String",
+            "multivalued": "true",
+            "access.token.claim": "true",
+            "id.token.claim": "false",
+            "userinfo.token.claim": "false",
+            "introspection.token.claim": "true"
+          }
+        }
+      ]
+    },
+    {
+      "name": "swarm",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "false",
+        "display.on.consent.screen": "false"
+      },
+      "protocolMappers": [
+        {
+          "name": "operator_id",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "operator_id",
+            "claim.name": "operator_id",
+            "jsonType.label": "String",
+            "access.token.claim": "true",
+            "id.token.claim": "false",
+            "userinfo.token.claim": "false",
+            "introspection.token.claim": "true"
+          }
+        },
+        {
+          "name": "swarm-gateway audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.custom.audience": "swarm-gateway",
+            "access.token.claim": "true",
+            "id.token.claim": "false",
+            "introspection.token.claim": "true"
+          }
+        }
+      ]
+    }
+  ],
+  "clients": [
+    {
+      "clientId": "ground-control",
+      "name": "ground-control",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "redirectUris": [],
+      "webOrigins": [],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      },
+      "defaultClientScopes": [
+        "basic",
+        "roles",
+        "swarm"
+      ],
+      "optionalClientScopes": []
+    },
+    {
+      "clientId": "mission-studio",
+      "name": "mission-studio",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "redirectUris": [],
+      "webOrigins": [],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      },
+      "defaultClientScopes": [
+        "basic",
+        "roles",
+        "swarm"
+      ],
+      "optionalClientScopes": []
+    },
+    {
+      "clientId": "back-office",
+      "name": "back-office",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "redirectUris": [],
+      "webOrigins": [],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      },
+      "defaultClientScopes": [
+        "basic",
+        "roles",
+        "swarm"
+      ],
+      "optionalClientScopes": []
+    },
+    {
+      "clientId": "client-portal",
+      "name": "client-portal",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "redirectUris": [],
+      "webOrigins": [],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      },
+      "defaultClientScopes": [
+        "basic",
+        "roles",
+        "swarm"
+      ],
+      "optionalClientScopes": []
+    },
+    {
+      "clientId": "desktop",
+      "name": "desktop",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "redirectUris": [],
+      "webOrigins": [],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      },
+      "defaultClientScopes": [
+        "basic",
+        "roles",
+        "swarm"
+      ],
+      "optionalClientScopes": []
+    }
+  ],
+  "browserFlow": "swarm browser",
+  "authenticationFlows": [
+    {
+      "alias": "swarm browser",
+      "description": "Browser flow with a second factor for the staff roles",
+      "providerId": "basic-flow",
+      "topLevel": true,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "requirement": "ALTERNATIVE",
+          "priority": 10,
+          "userSetupAllowed": false,
+          "autheticatorFlow": false,
+          "authenticator": "auth-cookie"
+        },
+        {
+          "requirement": "ALTERNATIVE",
+          "priority": 20,
+          "userSetupAllowed": false,
+          "autheticatorFlow": true,
+          "authenticatorFlow": true,
+          "flowAlias": "swarm browser forms"
+        }
+      ]
+    },
+    {
+      "alias": "swarm browser forms",
+      "description": "Username, password and second factor",
+      "providerId": "basic-flow",
+      "topLevel": false,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "requirement": "REQUIRED",
+          "priority": 10,
+          "userSetupAllowed": false,
+          "autheticatorFlow": false,
+          "authenticator": "auth-username-password-form"
+        },
+        {
+          "requirement": "CONDITIONAL",
+          "priority": 20,
+          "userSetupAllowed": false,
+          "autheticatorFlow": true,
+          "authenticatorFlow": true,
+          "flowAlias": "swarm browser pilot otp"
+        },
+        {
+          "requirement": "CONDITIONAL",
+          "priority": 30,
+          "userSetupAllowed": false,
+          "autheticatorFlow": true,
+          "authenticatorFlow": true,
+          "flowAlias": "swarm browser mission_planner otp"
+        },
+        {
+          "requirement": "CONDITIONAL",
+          "priority": 40,
+          "userSetupAllowed": false,
+          "autheticatorFlow": true,
+          "authenticatorFlow": true,
+          "flowAlias": "swarm browser fleet_maintainer otp"
+        },
+        {
+          "requirement": "CONDITIONAL",
+          "priority": 50,
+          "userSetupAllowed": false,
+          "autheticatorFlow": true,
+          "authenticatorFlow": true,
+          "flowAlias": "swarm browser instructor otp"
+        },
+        {
+          "requirement": "CONDITIONAL",
+          "priority": 60,
+          "userSetupAllowed": false,
+          "autheticatorFlow": true,
+          "authenticatorFlow": true,
+          "flowAlias": "swarm browser swarm_administrator otp"
+        }
+      ]
+    },
+    {
+      "alias": "swarm browser pilot otp",
+      "description": "Second factor for pilot",
+      "providerId": "basic-flow",
+      "topLevel": false,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "requirement": "REQUIRED",
+          "priority": 10,
+          "userSetupAllowed": false,
+          "autheticatorFlow": false,
+          "authenticator": "conditional-user-role",
+          "authenticatorConfig": "swarm mfa pilot"
+        },
+        {
+          "requirement": "REQUIRED",
+          "priority": 20,
+          "userSetupAllowed": false,
+          "autheticatorFlow": false,
+          "authenticator": "auth-otp-form"
+        }
+      ]
+    },
+    {
+      "alias": "swarm browser mission_planner otp",
+      "description": "Second factor for mission_planner",
+      "providerId": "basic-flow",
+      "topLevel": false,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "requirement": "REQUIRED",
+          "priority": 10,
+          "userSetupAllowed": false,
+          "autheticatorFlow": false,
+          "authenticator": "conditional-user-role",
+          "authenticatorConfig": "swarm mfa mission_planner"
+        },
+        {
+          "requirement": "REQUIRED",
+          "priority": 20,
+          "userSetupAllowed": false,
+          "autheticatorFlow": false,
+          "authenticator": "auth-otp-form"
+        }
+      ]
+    },
+    {
+      "alias": "swarm browser fleet_maintainer otp",
+      "description": "Second factor for fleet_maintainer",
+      "providerId": "basic-flow",
+      "topLevel": false,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "requirement": "REQUIRED",
+          "priority": 10,
+          "userSetupAllowed": false,
+          "autheticatorFlow": false,
+          "authenticator": "conditional-user-role",
+          "authenticatorConfig": "swarm mfa fleet_maintainer"
+        },
+        {
+          "requirement": "REQUIRED",
+          "priority": 20,
+          "userSetupAllowed": false,
+          "autheticatorFlow": false,
+          "authenticator": "auth-otp-form"
+        }
+      ]
+    },
+    {
+      "alias": "swarm browser instructor otp",
+      "description": "Second factor for instructor",
+      "providerId": "basic-flow",
+      "topLevel": false,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "requirement": "REQUIRED",
+          "priority": 10,
+          "userSetupAllowed": false,
+          "autheticatorFlow": false,
+          "authenticator": "conditional-user-role",
+          "authenticatorConfig": "swarm mfa instructor"
+        },
+        {
+          "requirement": "REQUIRED",
+          "priority": 20,
+          "userSetupAllowed": false,
+          "autheticatorFlow": false,
+          "authenticator": "auth-otp-form"
+        }
+      ]
+    },
+    {
+      "alias": "swarm browser swarm_administrator otp",
+      "description": "Second factor for swarm_administrator",
+      "providerId": "basic-flow",
+      "topLevel": false,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "requirement": "REQUIRED",
+          "priority": 10,
+          "userSetupAllowed": false,
+          "autheticatorFlow": false,
+          "authenticator": "conditional-user-role",
+          "authenticatorConfig": "swarm mfa swarm_administrator"
+        },
+        {
+          "requirement": "REQUIRED",
+          "priority": 20,
+          "userSetupAllowed": false,
+          "autheticatorFlow": false,
+          "authenticator": "auth-otp-form"
+        }
+      ]
+    }
+  ],
+  "authenticatorConfig": [
+    {
+      "alias": "swarm mfa pilot",
+      "config": {
+        "condUserRole": "pilot",
+        "negate": "false"
+      }
+    },
+    {
+      "alias": "swarm mfa mission_planner",
+      "config": {
+        "condUserRole": "mission_planner",
+        "negate": "false"
+      }
+    },
+    {
+      "alias": "swarm mfa fleet_maintainer",
+      "config": {
+        "condUserRole": "fleet_maintainer",
+        "negate": "false"
+      }
+    },
+    {
+      "alias": "swarm mfa instructor",
+      "config": {
+        "condUserRole": "instructor",
+        "negate": "false"
+      }
+    },
+    {
+      "alias": "swarm mfa swarm_administrator",
+      "config": {
+        "condUserRole": "swarm_administrator",
+        "negate": "false"
+      }
+    }
+  ],
+  "requiredActions": [
+    {
+      "alias": "CONFIGURE_TOTP",
+      "name": "Configure OTP",
+      "providerId": "CONFIGURE_TOTP",
+      "enabled": true,
+      "defaultAction": false,
+      "priority": 10
+    }
+  ],
+  "components": {
+    "org.keycloak.userprofile.UserProfileProvider": [
+      {
+        "providerId": "declarative-user-profile",
+        "subComponents": {},
+        "config": {
+          "kc.user.profile.config": [
+            "{\"attributes\": [{\"name\": \"username\", \"displayName\": \"${username}\", \"validations\": {\"length\": {\"min\": 3, \"max\": 255}, \"username-prohibited-characters\": {}, \"up-username-not-idn-homograph\": {}}, \"permissions\": {\"view\": [\"admin\", \"user\"], \"edit\": [\"admin\", \"user\"]}}, {\"name\": \"email\", \"displayName\": \"${email}\", \"validations\": {\"email\": {}, \"length\": {\"max\": 255}}, \"permissions\": {\"view\": [\"admin\", \"user\"], \"edit\": [\"admin\", \"user\"]}}, {\"name\": \"firstName\", \"displayName\": \"${firstName}\", \"validations\": {\"length\": {\"max\": 255}, \"person-name-prohibited-characters\": {}}, \"permissions\": {\"view\": [\"admin\", \"user\"], \"edit\": [\"admin\", \"user\"]}}, {\"name\": \"lastName\", \"displayName\": \"${lastName}\", \"validations\": {\"length\": {\"max\": 255}, \"person-name-prohibited-characters\": {}}, \"permissions\": {\"view\": [\"admin\", \"user\"], \"edit\": [\"admin\", \"user\"]}}, {\"name\": \"operator_id\", \"displayName\": \"Operator\", \"permissions\": {\"view\": [\"admin\"], \"edit\": [\"admin\"]}}]}"
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,4 @@
+$ uv run mypy packages/python/swarm-catalog/src packages/python/swarm-i18n/src packages/python/swarm-lifecycle/src packages/python/swarm-live/src packages/python/swarm-logging/src packages/python/swarm-models/src packages/python/swarm-nats/src packages/python/swarm-rest/src packages/python/swarm-storage/src services/fleet/src services/flight-engine/src services/gateway/src services/missions/src services/simulator/src
+(cwd ., on the ticket's own files only)
+
+Success: no issues found in 911 source files

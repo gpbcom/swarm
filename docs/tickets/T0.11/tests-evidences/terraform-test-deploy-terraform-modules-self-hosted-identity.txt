@@ -1,0 +1,11 @@
+$ terraform test
+(cwd deploy/terraform/modules/self-hosted/identity, on the ticket's own files only)
+
+tests/identity.tftest.hcl... [37min progress[0m
+[0m  run "plans_the_global_namespace_and_the_admin_secret_by_default"... [32mpass[0m[0m
+  run "uses_a_custom_namespace"... [32mpass[0m[0m
+  run "refuses_an_invalid_namespace"... [32mpass[0m[0m
+tests/identity.tftest.hcl... [37mtearing down[0m
+[0mtests/identity.tftest.hcl... [32mpass[0m[0m
+
+[32mSuccess![0m[0m 3 passed, 0 failed.

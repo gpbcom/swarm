@@ -151,6 +151,38 @@ platform is off.
 > which is empty by default. From a workstation outside the cell, `kubectl` times out unless its address is in
 > `api_allowed_cidrs` before the first apply. Otherwise, run `kubectl` on the first server instead.
 
+## Global layer: identity
+
+The identity of the global layer is Keycloak, described in
+[🔑 Security: identity](../../docs/specs/technical/06-security.md#identity) and
+[👥 Security: roles and Operator isolation](../../docs/specs/technical/06-security.md#authorisation). Its namespace is `global` by default.
+
+Set `identity_enabled = true` in the variables file, and apply again. The variable needs `platform_enabled = true`, and
+Terraform refuses the apply otherwise. The
+[`identity` module](modules/self-hosted/identity/main.tf) creates the `global` namespace and the `keycloak-admin` Secret,
+with a password that Terraform generates. Read the password back with the command below. Do not write it to a file:
+
+```bash
+KUBECONFIG=<kubeconfig_path> kubectl -n global get secret keycloak-admin
+```
+
+Argo CD then deploys the [Keycloak chart](../charts/keycloak/Chart.yaml). It runs Keycloak with its own CloudNativePG
+database, and imports the `swarm` realm from
+[`files/swarm-realm.json`](../charts/keycloak/files/swarm-realm.json). The realm holds:
+
+- the organisations of the realm are enabled, but the file creates no organisation yet, so no Operator has one;
+- the seven roles: `pilot`, `mission_planner`, `fleet_maintainer`, `instructor`, `client`, `site_agent` and
+  `swarm_administrator`;
+- a one-time code, read from a TOTP authenticator app, required at sign-in for `pilot`, `mission_planner`,
+  `fleet_maintainer`, `instructor` and `swarm_administrator`;
+- access tokens that last 300 seconds (5 minutes), and refresh tokens that are revoked and replaced at each use;
+- five clients, `ground-control`, `mission-studio`, `back-office`, `client-portal` and `desktop`, each a public client
+  that uses PKCE with the `S256` method;
+- an `operator_id` claim, read from the user's `operator_id` attribute, and a `swarm-gateway` audience.
+
+> [!NOTE]
+> The redirect URIs of the five clients are empty. Add them once the apps have their addresses.
+
 ## Branch cells
 
 The root `cells/dev-branch` creates the cell of one branch: a namespace, the vault of that cell and the Argo CD

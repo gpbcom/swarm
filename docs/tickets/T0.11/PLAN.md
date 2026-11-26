@@ -2,6 +2,8 @@
 
 **Plan:** 🟢 Approved
 
+**Push:** 🟢 Approved
+
 <!-- ticket:specs -->
 ## 📚 Specifications
 

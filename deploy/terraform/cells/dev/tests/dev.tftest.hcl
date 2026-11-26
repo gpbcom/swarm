@@ -145,3 +145,69 @@ run "refuses_the_platform_with_a_floating_chart_version" {
 
   expect_failures = [var.argocd_chart_version]
 }
+
+run "plans_no_identity_by_default" {
+  command = plan
+
+  variables {
+    machines = [
+      { name = "dev-server-1", address = "192.0.2.10", role = "server" },
+      { name = "dev-agent-1", address = "192.0.2.11", role = "agent" },
+    ]
+  }
+
+  assert {
+    condition     = length(module.identity) == 0
+    error_message = "Identity must not be planned by default."
+  }
+
+  assert {
+    condition     = length(module.identity_application) == 0
+    error_message = "The identity Application must not be planned by default."
+  }
+}
+
+run "plans_identity_when_enabled_with_the_platform" {
+  command = plan
+
+  variables {
+    machines = [
+      { name = "dev-server-1", address = "192.0.2.10", role = "server" },
+      { name = "dev-agent-1", address = "192.0.2.11", role = "agent" },
+    ]
+    platform_enabled          = true
+    identity_enabled          = true
+    repository_url            = "https://git.example.org/swarm.git"
+    argocd_chart_version      = "0.0.1"
+    argocd_apps_chart_version = "0.0.1"
+  }
+
+  assert {
+    condition     = length(module.identity) == 1
+    error_message = "Identity must be planned when enabled."
+  }
+
+  assert {
+    condition     = length(module.identity_application) == 1
+    error_message = "The identity Application must be planned when enabled."
+  }
+
+  assert {
+    condition     = module.identity_application[0].application_name == "identity"
+    error_message = "The identity Application must be named identity."
+  }
+}
+
+run "refuses_identity_without_the_platform" {
+  command = plan
+
+  variables {
+    machines = [
+      { name = "dev-server-1", address = "192.0.2.10", role = "server" },
+      { name = "dev-agent-1", address = "192.0.2.11", role = "agent" },
+    ]
+    identity_enabled = true
+  }
+
+  expect_failures = [var.identity_enabled]
+}

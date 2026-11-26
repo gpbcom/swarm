@@ -1,0 +1,15 @@
+$ uv run maturin build --release --manifest-path packages/rust/swarm-core/python/Cargo.toml --out /tmp/swarm-core-wheel-u_vpqyhv
+(cwd ., on the ticket's own files only)
+
+🐍 Found CPython 3.12 at /tmp/swarm-checks-f3rz0440/.venv/bin/python
+🔗 Found pyo3 bindings
+📡 Using build options features from pyproject.toml
+   Compiling swarm-core-mavlink v0.1.0 (/tmp/swarm-checks-f3rz0440/packages/rust/swarm-core/mavlink)
+   Compiling swarm-core-safety v0.1.0 (/tmp/swarm-checks-f3rz0440/packages/rust/swarm-core/safety)
+   Compiling swarm-core-planner v0.1.0 (/tmp/swarm-checks-f3rz0440/packages/rust/swarm-core/planner)
+   Compiling pyo3-ffi v0.30.1
+   Compiling pyo3 v0.30.1
+   Compiling swarm-core-python v0.1.0 (/tmp/swarm-checks-f3rz0440/packages/rust/swarm-core/python)
+    Finished `release` profile [optimized] target(s) in 3.03s
+📖 Found type stub file at swarm_core.pyi
+📦 Built wheel for CPython 3.12 to /tmp/swarm-core-wheel-u_vpqyhv/swarm_core-0.1.0-cp312-cp312-linux_x86_64.whl

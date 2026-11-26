@@ -1,6 +1,6 @@
 # T0.11: Keycloak and gateway authentication
 
-**Status:** 🟡 Planned
+**Status:** ✅ Done
 
 ## Roadmap
 
