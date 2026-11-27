@@ -20,5 +20,6 @@
   "nav.alarms": "Alarmas",
   "nav.operators": "Operadores",
   "action.hold": "Mantener el escuadrón",
-  "action.abort": "Abortar"
+  "action.abort": "Abortar",
+  "flight.map.label": "Mapa del Escuadrón"
 }

@@ -165,12 +165,16 @@ jobs:
         run: pnpm --filter ./qa/e2e exec playwright install --with-deps chromium
       - name: Run Playwright
         run: pnpm --filter ./qa/e2e run e2e
+      - name: Run the front ends' Playwright tests
+        run: pnpm --filter "./frontend/apps/*" --if-present run e2e
       - name: Keep the Playwright report
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report
-          path: qa/e2e/playwright-report/
+          path: |
+            qa/e2e/playwright-report/
+            frontend/apps/*/playwright-report/
       - name: Stop the stack
         if: always()
         run: docker compose -f infra/compose/e2e.yaml down --volumes

@@ -4,9 +4,10 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   plugins: [react()],
   base: "./",
+  worker: { format: "es" },
   build: { outDir: "dist" },
   test: {
     environment: "jsdom",
-    include: ["test/**/*.test.tsx"],
+    include: ["test/**/*.test.{ts,tsx}"],
   },
 });

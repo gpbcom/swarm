@@ -203,6 +203,22 @@ class TestImagesWorkflow:
         runs = [run for run in self.runs("e2e") if "pnpm" in run and "./qa/e2e" in run]
         assert any("e2e" in run.split("./qa/e2e")[1] for run in runs)
 
+    def test_e2e_runs_the_front_end_e2e_scripts_after_the_shared_suite(self) -> None:
+        shared = self.index_where(
+            "e2e", lambda step: "pnpm" in str(step.get("run", "")) and "./qa/e2e" in str(step.get("run", ""))
+        )
+        self.index_where(
+            "e2e",
+            lambda step: all(word in str(step.get("run", "")) for word in ["pnpm", "./frontend/apps/", "e2e"]),
+            after=shared,
+        )
+
+    @pytest.mark.parametrize("path", ["qa/e2e/playwright-report/", "frontend/apps/*/playwright-report/"])
+    def test_e2e_uploads_the_reports_of_the_shared_suite_and_the_front_ends(self, path: str) -> None:
+        upload = self.uses_step("e2e", "actions/upload-artifact")
+        assert upload is not None
+        assert path in str(self.with_of(upload)["path"])
+
     def test_e2e_uploads_the_report_on_failure(self) -> None:
         upload = self.uses_step("e2e", "actions/upload-artifact")
         assert upload is not None

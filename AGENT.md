@@ -64,6 +64,18 @@ To run the Playwright suite of `qa/e2e` against the images of a pipeline run, gi
 SWARM_IMAGE_TAG=<tag> pnpm --filter ./qa/e2e run e2e
 ```
 
+The end-to-end test of Ground control runs against its own image the same way. It starts the ground-control service of
+`infra/compose/e2e.yaml` (port 8180) and feeds it a stand-in live socket:
+
+```bash
+SWARM_IMAGE_TAG=<tag> pnpm --filter @swarm/ground-control run e2e
+```
+
+Ground control reads its runtime configuration from `config.json`, beside `index.html`: the live URL, the Mission, the
+tiles, the metrics endpoint, the cell, and the edge or cell path. The image serves the PMTiles files from `/tiles/`,
+mounted by the deployment. The Grafana dashboards sit in `infra/charts/observability/dashboards/`, the first one being
+the Telemetry latency.
+
 For Rust (`rust/`, a Cargo workspace whose crates opt in to the workspace lints with `[lints] workspace = true`)
 and TypeScript (`frontend/packages`, a pnpm workspace), run these from their workspace folder:
 
@@ -238,6 +250,11 @@ The front-end packages of `frontend/packages/` are `frontend/packages/tokens` (`
 `specs.py build` from `docs/specs/visual-identity.md` and never edited by hand; and `frontend/packages/ui` (`@swarm/ui`), the components on
 Radix primitives, styled with `var(--...)` tokens only and using the class names of the mock-ups' `components.css`. The
 frames of each part of Swarm sit in `frontend/packages/ui/src/frames/`, and `frontend/packages/ui/src/frames/parts.ts` holds their message ids, whose words are in the catalogues of `@swarm/i18n`.
+`frontend/packages/live` (`@swarm/live`) holds the generated models, the MessagePack protocol, and the Web Worker that owns
+the live socket and posts typed-array snapshots at most 30 times a second to the main thread, where `LiveClient` reads
+them; it also holds the `Telemetry` latency histograms, exported as OTLP/HTTP JSON. `frontend/packages/maps` (`@swarm/maps`)
+holds the MapLibre base style on self-hosted PMTiles, and the deck.gl Drone layer, with binary attributes, and the
+`SquadMap` component, coloured from the tokens.
 The four app shells are `frontend/apps/ground-control`, `frontend/apps/mission-studio`, `frontend/apps/back-office` and
 `frontend/apps/client-portal`. `frontend/apps/desktop` (`@swarm/desktop`) is the Tauri 2 shell that wraps Ground control and
 Mission studio. Its Rust code is in `src-tauri/`, a Cargo workspace of its own, and `.github/workflows/desktop.yml`

@@ -1,1 +1,14 @@
 export type * from "./generated/models.ts";
+export { squadTopic, encodeSquadSubscription } from "./protocol/topics.ts";
+export { decodeSquadFrame } from "./protocol/squad-frame-decoder.ts";
+export { LiveTopicInvalidError, LiveMessageUnreadableError } from "./protocol/live-protocol-errors.ts";
+export { DRONE_STATES } from "./snapshot/squad-snapshot.ts";
+export type { SquadSnapshot } from "./snapshot/squad-snapshot.ts";
+export { SquadStore } from "./snapshot/squad-store.ts";
+export type { FromWorker, LiveStatus, ToWorker } from "./worker/live-worker-messages.ts";
+export { LiveClient } from "./client/live-client.ts";
+export type { WorkerLike, WorkerFactory } from "./client/live-client.ts";
+export { LatencyHistogram, LATENCY_BOUNDS_MS } from "./latency/latency-histogram.ts";
+export { TELEMETRY_METRICS, otlpMetricsBody } from "./latency/otlp-metrics-body.ts";
+export type { LivePath, OtlpMetricsInput } from "./latency/otlp-metrics-body.ts";
+export { LatencyReporter } from "./latency/latency-reporter.ts";

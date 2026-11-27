@@ -20,5 +20,6 @@
   "nav.alarms": "Alarme",
   "nav.operators": "Betreiber",
   "action.hold": "Staffel anhalten",
-  "action.abort": "Abbrechen"
+  "action.abort": "Abbrechen",
+  "flight.map.label": "Karte der Staffel"
 }

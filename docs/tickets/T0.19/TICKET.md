@@ -1,6 +1,6 @@
 # T0.19: Simulated Squad on the Ground control map
 
-**Status:** 🟡 Planned
+**Status:** ✅ Done
 
 ## Roadmap
 
@@ -11,10 +11,10 @@
 
 ## What it delivers
 
-- The first screen of `ground-control` in the browser, in `frontends/ground-control`, as [🖥️ GUI and WebUI: apps and shared packages](../../specs/technical/10-frontends.md#apps).
-- MapLibre with self-hosted PMTiles, in `packages/ts/maps`, as [🗺️ GUI and WebUI: maps and 3D](../../specs/technical/10-frontends.md#maps).
-- A deck.gl layer of Drones, in `packages/ts/maps`, with binary attribute updates for moving Drones, as [🗺️ GUI and WebUI: maps and 3D](../../specs/technical/10-frontends.md#maps).
-- The live client in `packages/ts/live`: MessagePack decoded in a Web Worker into typed arrays, as [📨 GUI and WebUI: live data in the browser](../../specs/technical/10-frontends.md#live-data) and [📨 API layer: live data over WebSocket](../../specs/technical/05-api.md#live).
+- The first screen of `ground-control` in the browser, in `frontend/apps/ground-control`, as [🖥️ GUI and WebUI: apps and shared packages](../../specs/technical/10-frontends.md#apps).
+- MapLibre with self-hosted PMTiles, in `frontend/packages/maps`, as [🗺️ GUI and WebUI: maps and 3D](../../specs/technical/10-frontends.md#maps).
+- A deck.gl layer of Drones, in `frontend/packages/maps`, with binary attribute updates for moving Drones, as [🗺️ GUI and WebUI: maps and 3D](../../specs/technical/10-frontends.md#maps).
+- The live client in `frontend/packages/live`: MessagePack decoded in a Web Worker into typed arrays, as [📨 GUI and WebUI: live data in the browser](../../specs/technical/10-frontends.md#live-data) and [📨 API layer: live data over WebSocket](../../specs/technical/05-api.md#live).
 - The frame of Ground control with ✋ Hold the Squad and 🛑 Abort shown but not yet wired, as [🎨 GUI and WebUI: design system](../../specs/technical/10-frontends.md#design-system) and [📏 BR-023](../../specs/functional/business-rules/BR-023-fixed-safety-controls.md).
 - The measure of the Telemetry latency from Drone to screen through the cell, shown in Grafana, as [🩺 Observability: signals](../../specs/technical/08-observability.md#signals).
 

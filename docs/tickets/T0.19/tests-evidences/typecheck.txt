@@ -1,0 +1,27 @@
+$ pnpm -r --if-present typecheck
+(cwd ., on the ticket's own files only)
+
+frontend/packages/config typecheck$ tsc --noEmit -p tsconfig.json
+frontend/packages/config typecheck: Done
+frontend/apps/desktop typecheck$ tsc --noEmit -p tsconfig.json
+frontend/packages/api-client typecheck$ tsc --noEmit -p tsconfig.json
+frontend/packages/i18n typecheck$ tsc --noEmit -p tsconfig.json
+frontend/packages/live typecheck$ tsc --noEmit -p tsconfig.json
+frontend/apps/desktop typecheck: Done
+frontend/packages/maps typecheck$ tsc --noEmit -p tsconfig.json
+frontend/packages/api-client typecheck: Done
+qa/e2e typecheck$ tsc --noEmit -p tsconfig.json
+frontend/packages/live typecheck: Done
+frontend/packages/i18n typecheck: Done
+frontend/packages/ui typecheck$ tsc --noEmit -p tsconfig.json
+qa/e2e typecheck: Done
+frontend/packages/maps typecheck: Done
+frontend/packages/ui typecheck: Done
+frontend/apps/client-portal typecheck$ tsc --noEmit -p tsconfig.json
+frontend/apps/back-office typecheck$ tsc --noEmit -p tsconfig.json
+frontend/apps/mission-studio typecheck$ tsc --noEmit -p tsconfig.json
+frontend/apps/ground-control typecheck$ tsc --noEmit -p tsconfig.json
+frontend/apps/back-office typecheck: Done
+frontend/apps/client-portal typecheck: Done
+frontend/apps/mission-studio typecheck: Done
+frontend/apps/ground-control typecheck: Done

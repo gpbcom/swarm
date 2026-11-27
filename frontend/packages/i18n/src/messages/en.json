@@ -20,5 +20,6 @@
   "nav.alarms": "Alarms",
   "nav.operators": "Operators",
   "action.hold": "Hold the Squad",
-  "action.abort": "Abort"
+  "action.abort": "Abort",
+  "flight.map.label": "Map of the Squad"
 }

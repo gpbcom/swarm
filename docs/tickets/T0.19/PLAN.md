@@ -2,6 +2,8 @@
 
 **Plan:** 🟢 Approved
 
+**Push:** 🟢 Approved
+
 <!-- ticket:specs -->
 ## 📚 Specifications
 
@@ -21,61 +23,34 @@ The technical pages, features, use cases and business rules of [TICKET.md](TICKE
 - [⏱️ Telemetry, Drone to Pilot's screen](../../specs/technical/07-scalability.md#budgets)
 <!-- /ticket:specs -->
 
-## 🔭 Summary
+## Summary
 
-T0.19 is planned as 19 tasks in 6 waves.
+T0.19 is split into 23 tasks in 6 waves. Wave 1 has eight test-writer tasks: the live protocol and snapshot store, the live worker and client, the latency histogram and OTLP reporter, the maps package, the ground-control unit tests, the ground-control Playwright e2e, the workspace, compose and images-workflow convention tests, and the Grafana dashboard test. Wave 2 holds three tasks: one scaffold task, the only owner of pnpm-lock.yaml, creates the new frontend/packages/maps package and adds every dependency; the translations; and the dashboard JSON. Wave 3 runs seven tasks in parallel: the live protocol and store, the latency code, the map style and palette, the Drone layer, the ground-control config, the Dockerfile, and the AGENT.md update. Wave 4 adds the Web Worker, the LiveClient and the package index of live, the SquadMap component of maps, and the CI wiring of the compose service and the front-end e2e step. Wave 5 wires the Flight view into Ground control: a lazy-loaded map, the measured latency and the not-yet-wired Hold the Squad and Abort buttons. Wave 6 is the TKT-21 capture task for UC-025 A1. T0.20 is not merged, so it updates the mock-up to what the app shows and renders it, rather than taking screenshots. Every brief fixes the shared contracts (SquadSnapshot, the worker messages, LiveClient, DroneLayerData and SquadMap, AppConfig, the metric names, port 8180) so that tasks of the same wave never need each other's files.
 
-Wave 1 has 8 test-writers, one per behaviour:
+## Assumptions
 
-- the SquadStore decoder (MessagePack to typed arrays, delta merge)
-- the Web Worker core and the main-thread LiveClient
-- the LatencyMeter
-- the deck.gl Drone layer and its binary attributes
-- the MapLibre PMTiles base-map style
-- the Ground control Flight screen and its config
-- the Playwright e2e against a stand-in live server
-- the latency export to OTLP and the Grafana dashboard
-
-Wave 2 has one scaffold task. It is the only owner of every `package.json`, `tsconfig.json`, test-runner config and `pnpm-lock.yaml`, so parallel tasks never fight over the lock file. It creates `packages/ts/maps` and declares subpath exports, so no two tasks share an `index.ts`.
-
-Wave 3 runs 6 implementations in parallel plus the AGENT.md documentation:
-
-- the SquadStore
-- the LatencyMeter
-- the base map
-- the Drone layer
-- the Flight screen with the not-wired Hold the Squad and Abort buttons
-- the Grafana dashboard
-
-Wave 4 builds the worker and the LiveClient. Wave 5 wires the map, the live client and the latency export into the Flight screen. Wave 6 is the TKT-21 capture task for UC-025 A1:
-
-- if T0.20 is merged, it captures the screen as a screenshot;
-- otherwise it updates the mock-up to what the app shows.
-
-Every brief fixes the same module paths, exported names, metric name and DOM hooks, so the tests and the code agree.
-
-## 🧩 Assumptions
-
-- The roadmap row names no feature, use case or business rule. BR-014 is linked because epic E0.6 names it, BR-023 because the technical page ties Hold the Squad and abort to fixed controls, and UC-025 because it is the use case of the Ground control Flight view.
-- The row names no screen. It is a front-end ticket (TKT-21), so UC-025 A1 is linked as the most conservative match, to be captured as a Screenshot.
-- The row names no budget row. The Telemetry Drone to Pilot's screen budget is linked because the row measures that latency.
-- The row gives no latency value for the done-when, so the criteria assert none beyond the budget row.
-- The roadmap has no per-ticket anchor, so the ticket link points to the sprint anchor #s04 and the epic link to #epics.
-- Created an empty tests-evidences/.gitkeep so the folder exists.
-- T0.17, which brings the OpenTelemetry stack, Prometheus and Grafana, depends on T0.19 in ticket-graph.json, so no Grafana runs in the dev cell yet. T0.19 delivers the measure and its export to a configured OTLP/HTTP collector URL, plus a Grafana dashboard JSON at frontends/ground-control/observability/telemetry-latency-dashboard.json, which T0.17 provisions. Criterion 2 can be checked end to end in the dev cell only once T0.17's stack exists. Writing no chart under deploy/charts keeps the ticket inside its area lock.
-- The Telemetry latency is measured in the browser as the paint time minus the Drone frame's t_us, one sample per Drone frame. This assumes the Simulator's clock and the browser's clock are synchronised (NTP). Negative samples, which come from clock skew, are skipped and counted, not recorded.
-- The metric names are not given by the specifications. The instrument is the histogram swarm.live.telemetry_latency, in ms, which is swarm_live_telemetry_latency_milliseconds in Prometheus. Its resource attributes are service.name=ground-control, cell and mission_id, and it has no drone_id label, as the observability signals require. The dashboard draws the 400 ms through-the-cell budget as a threshold.
-- The subscribe message and the frame batching follow the gateway /v1/live of T0.18, which is a prerequisite. Where it does not decide, the subscribe message is the JSON text written on the API page.
-- Sign-in to Ground control is not part of this ticket. The live client takes an optional token, and how the dev cell supplies one follows what T0.11 and T0.18 set up.
-- Ground control reads a runtime config.json served beside the app (liveUrl, pmtilesUrl, otlpMetricsUrl, cell), so that one image serves every cell, and takes the Mission from the query parameter mission. Writing the dev cell's config.json and hosting the PMTiles extract are deployment steps outside this ticket's area.
-- The PMTiles layer names follow the Protomaps basemap schema of OpenStreetMap PMTiles. The specifications name no schema.
-- The Drone layer is a deck.gl ScatterplotLayer coloured per Drone state from the design tokens. The specifications say only 'deck.gl GPU layers for Drones'.
-- ✋ Hold the Squad and 🛑 Abort are rendered as the visual identity's secondary and danger buttons in the title bar, with no action attached and no fixed keyboard or gamepad input. The roadmap says they are shown but not yet wired, and no command can reach any Drone (BR-014).
-- The title bar shows Ground control and the Mission id. The Mission name, its state badge and the status-bar contents need the Missions API and later tickets, and the frame of T0.14 is reused as it is.
-- The file names of T0.14's shell (src/App.tsx, its test runner) and of T0.10's Playwright scaffold are not known yet. The tasks use them when they exist and fall back to Vitest and frontends/ground-control/playwright.config.ts when they do not.
-- The four-language messages (BR-017, T0.15) are not linked by TICKET.md and T0.15 is not a prerequisite. The few new on-screen texts are written in English, using packages/ts/i18n when it exists, and no translation task is planned. The roadmap demo mentions translations in T0.19's task split, so the reviewer should confirm this.
-- The packages live and maps keep the node:test runner that packages/ts/live already uses. Vitest is used for the React app, as the stack says.
-- The capture task captures UC-025 A1 as a screenshot only if T0.20 is done. Otherwise it updates the mock-up to show the frame and the map as the app does, and keeps the video, Alerts and progress areas that UC-025 step 2 requires but this ticket does not build, so as not to contradict the approved use case.
+- TICKET.md and PROGRESS.md already existed and were complete, so they were kept. Only the stale front-end paths were updated to the current layout (frontend/apps/ground-control, frontend/packages/maps, frontend/packages/live).
+- The roadmap row names no feature, use case or business rule. BR-014 is linked because epic E0.6 names it, BR-023 because the technical page ties Hold the Squad and Abort to fixed controls, and UC-025 because it is the use case of the Ground control Flight view.
+- The row names no screen. The ticket changes a front end, so it links the A1 screen of UC-025 as the most conservative match, to be captured as a screenshot (TKT-21).
+- The row names no budget. The Telemetry budget is linked because the row measures that latency.
+- The row gives no latency value for its done-when, so the criteria assert none beyond the budget row.
+- I did not run check_ticket.py. The workflow runs it next.
+- The gateway's /v1/live reads the token from the Authorization header of the handshake (backend/swarm-api/src/swarm_api/dependencies/live_operator.py), and a browser cannot set that header on a WebSocket. The specifications do not settle how a browser sends its token, and the gateway is outside this ticket's areas. Ground control therefore connects to the live URL its runtime config names, by default the edge flight engine's ws://127.0.0.1:8080/v1/live, which checks no Operator. How a browser carries its token through the cell is a follow-up for the gateway.
+- No Helm chart deploys the gateway, the flight engine or Ground control in the dev cell, and infra/charts is outside this ticket's areas. Criterion 1 is proven by the Playwright test of the real ground-control image fed by a stand-in socket of 10 moving Drones. Running it in the dev cell is left to the demo and to the deployment work.
+- Grafana and the OpenTelemetry collector arrive with T0.17, which depends on T0.19. This ticket measures the latency in the browser and exports OTLP/HTTP JSON histograms to an optional metricsUrl. It also writes the dashboard at infra/charts/observability/dashboards/telemetry-latency.json, assuming T0.17's chart is named observability and provisions that folder. The Prometheus names (swarm_telemetry_drone_to_screen_milliseconds_bucket, swarm_live_frame_to_pixels_milliseconds_bucket, label swarm_live_path) assume the collector's default OTLP-to-Prometheus naming.
+- Drone to screen latency is the browser's Date.now() when the frame is drawn minus the frame's t_us. t_us is stamped when the datagram reaches the flight engine, so the measure assumes clocks synchronised by NTP; negative samples are counted as skipped, not recorded. Frame to pixels (worker receipt to draw) is measured too, for the < 50 ms budget of 10-frontends#performance.
+- The backend sends a full SquadFrame per tick, not a delta. The worker's delta merge keys each Drone by drone_id, ignores frames whose seq is not newer, and keeps the last values of Drones absent from a frame.
+- No PMTiles file is committed. The image serves /tiles/ from a volume the deployment mounts, and the style follows the Protomaps basemap schema (earth, water, landuse, roads, buildings). It has no labels, glyphs or sprite, so nothing is fetched from a third party. The colours come from the tokens, the attribution reads '© OpenStreetMap contributors', and the map first fits the Squad's bounds, so no start coordinates are invented.
+- Drones are drawn as dots in the entity colour, and a lost Drone in the failure colour. SquadFrame carries no Drone name, so no labels are shown.
+- ✋ Hold the Squad and 🛑 Abort stay the no-op buttons T0.14 left in GroundControlFrame: they are shown, not disabled and not wired, as the roadmap row says.
+- When the socket closes, the live client reports 'closed' and does not reconnect, because the specifications give no reconnection policy.
+- The runtime config is config.json beside index.html, with liveUrl, missionId, tilesUrl, metricsUrl, metricsIntervalS, cell and livePath. Its defaults come from backend/apps/flight-engine/conf/app.yaml (live port 8080) and from the OpenTelemetry SDK default export interval (60 s). Without a missionId, the map shows no Drones and no new text. The histogram bounds include the budget values 50, 150 and 400 ms.
+- The only new on-screen text is the map region's accessible label, flight.map.label ('Map of the Squad'), translated into four languages under BR-017.
+- The map is loaded on demand (React.lazy) so that the first route stays within the < 300 kB JavaScript budget of 10-frontends#performance.
+- The Playwright test of the image publishes ground-control on host port 8180 in infra/compose/e2e.yaml. images.yml runs the e2e script of every front end after qa/e2e's.
+- @swarm/maps does not import @swarm/live: it takes structural types (DroneLayerData), and SquadSnapshot meets them.
+- T0.20 is not merged, so the capture task updates the UC-025 A1 mock-up to what the app shows and renders it, and the row stays ✏️ Mock-up. The areas the app does not show yet (Squad panel, video, Alerts, progress) stay as UC-025 specifies them.
+- The telemetry export uses no OpenTelemetry SDK, to keep the bundle small. T0.17 brings the TypeScript SDK and may move the reporter onto it.
 
 <!-- plan:graph -->
 
@@ -88,33 +63,37 @@ Every brief fixes the same module paths, exported names, metric name and DOM hoo
 | Wave | Tasks | Agents running at once |
 | --- | --- | --- |
 | 1 | [K01](#k01), [K02](#k02), [K03](#k03), [K04](#k04), [K05](#k05), [K06](#k06), [K07](#k07), [K08](#k08) | 8 of 8 |
-| 2 | [K09](#k09) | 1 of 1 |
-| 3 | [K10](#k10), [K11](#k11), [K12](#k12), [K13](#k13), [K14](#k14), [K15](#k15), [K19](#k19) | 7 of 7 |
-| 4 | [K16](#k16) | 1 of 1 |
-| 5 | [K17](#k17) | 1 of 1 |
-| 6 | [K18](#k18) | 1 of 1 |
+| 2 | [K09](#k09), [K10](#k10), [K11](#k11) | 3 of 3 |
+| 3 | [K12](#k12), [K13](#k13), [K14](#k14), [K15](#k15), [K16](#k16), [K17](#k17), [K18](#k18) | 7 of 7 |
+| 4 | [K19](#k19), [K20](#k20), [K21](#k21) | 3 of 3 |
+| 5 | [K22](#k22) | 1 of 1 |
+| 6 | [K23](#k23) | 1 of 1 |
 
 | Wave | Task | Agent | Depends on | Unblocks |
 | --- | --- | --- | --- | --- |
-| 1 | [K01](#k01) Tests: SquadStore decodes MessagePack SquadFrames into typed arrays with delta merge | 🧪 test-writer | none | [K09](#k09), [K10](#k10) |
-| 1 | [K02](#k02) Tests: Web Worker core subscribes, decodes off the main thread and posts throttled transferable snapshots; LiveClient relays them | 🧪 test-writer | none | [K09](#k09), [K16](#k16) |
-| 1 | [K03](#k03) Tests: LatencyMeter records the Telemetry latency from Drone to screen as an OpenTelemetry histogram | 🧪 test-writer | none | [K09](#k09), [K11](#k11) |
-| 1 | [K04](#k04) Tests: deck.gl Drone layer with binary attributes updated in place | 🧪 test-writer | none | [K09](#k09), [K13](#k13) |
-| 1 | [K05](#k05) Tests: MapLibre base-map style on self-hosted PMTiles, light and dark | 🧪 test-writer | none | [K09](#k09), [K12](#k12) |
-| 1 | [K06](#k06) Tests: Ground control Flight screen frame with Hold the Squad and Abort shown but not wired; app config | 🧪 test-writer | none | [K09](#k09), [K15](#k15) |
-| 1 | [K07](#k07) Tests: Playwright e2e, 10 simulated Drones move on the Ground control map; safety controls visible and inert | 🧪 test-writer | none | [K09](#k09), [K17](#k17) |
-| 1 | [K08](#k08) Tests: latency metrics exported over OTLP and the Grafana dashboard of the Telemetry latency | 🧪 test-writer | none | [K09](#k09), [K14](#k14), [K17](#k17) |
-| 2 | [K09](#k09) Scaffold: create packages/ts/maps, add the dependencies and test runners of live, maps and ground-control, update the lock file | 🖥️ frontend-implementer | [K01](#k01), [K02](#k02), [K03](#k03), [K04](#k04), [K05](#k05), [K06](#k06), [K07](#k07), [K08](#k08) | [K10](#k10), [K11](#k11), [K12](#k12), [K13](#k13), [K14](#k14), [K15](#k15), [K19](#k19) |
-| 3 | [K10](#k10) Implement SquadStore: MessagePack decode, delta merge, typed-array snapshots | 🖥️ frontend-implementer | [K01](#k01), [K09](#k09) | [K16](#k16) |
-| 3 | [K11](#k11) Implement LatencyMeter: Telemetry latency histogram | 🖥️ frontend-implementer | [K03](#k03), [K09](#k09) | [K17](#k17) |
-| 3 | [K12](#k12) Implement the MapLibre base map on self-hosted PMTiles | 🖥️ frontend-implementer | [K05](#k05), [K09](#k09) | [K17](#k17) |
-| 3 | [K13](#k13) Implement the deck.gl Drone layer with in-place binary attributes | 🖥️ frontend-implementer | [K04](#k04), [K09](#k09) | [K17](#k17) |
-| 3 | [K14](#k14) Grafana dashboard of the Telemetry latency from Drone to screen | 🖥️ frontend-implementer | [K08](#k08), [K09](#k09) | [K17](#k17) |
-| 3 | [K15](#k15) Ground control Flight screen: frame, title bar with Hold the Squad and Abort shown but not wired, runtime config | 🖥️ frontend-implementer | [K06](#k06), [K09](#k09) | [K17](#k17), [K18](#k18) |
-| 3 | [K19](#k19) Document the live and maps packages and the Ground control app in AGENT.md | 📝 doc-writer | [K09](#k09) | none |
-| 4 | [K16](#k16) Implement the Web Worker live client: LiveWorkerCore, worker entry and main-thread LiveClient | 🖥️ frontend-implementer | [K02](#k02), [K10](#k10) | [K17](#k17) |
-| 5 | [K17](#k17) Wire the Ground control map: base map, Drone layer fed by the live worker, latency recorded and exported | 🖥️ frontend-implementer | [K07](#k07), [K08](#k08), [K11](#k11), [K12](#k12), [K13](#k13), [K14](#k14), [K15](#k15), [K16](#k16) | [K18](#k18) |
-| 6 | [K18](#k18) Capture UC-025 A1 from the running app (or update its mock-up before T0.20) | ✏️ mockup-writer | [K15](#k15), [K17](#k17) | none |
+| 1 | [K01](#k01) Tests: live protocol (subscribe message, SquadFrame decoder) and the SquadStore delta merge into typed arrays | 🧪 test-writer | none | [K09](#k09), [K12](#k12) |
+| 1 | [K02](#k02) Tests: the live Web Worker core (socket, throttled transferable snapshots) and the main-thread LiveClient | 🧪 test-writer | none | [K09](#k09), [K19](#k19) |
+| 1 | [K03](#k03) Tests: latency histogram and the OTLP/HTTP metrics reporter of the Telemetry latency | 🧪 test-writer | none | [K09](#k09), [K13](#k13) |
+| 1 | [K04](#k04) Tests: @swarm/maps (PMTiles base style, token palette, deck.gl Drone layer with binary attributes, SquadMap) | 🧪 test-writer | none | [K09](#k09), [K14](#k14), [K15](#k15), [K20](#k20) |
+| 1 | [K05](#k05) Tests: ground-control runtime config, squad feed, Flight view and the App with Hold the Squad and Abort not yet wired | 🧪 test-writer | none | [K09](#k09), [K10](#k10), [K16](#k16), [K22](#k22) |
+| 1 | [K06](#k06) Tests: Playwright e2e of the ground-control image with a stand-in live socket of 10 moving Drones | 🧪 test-writer | none | [K09](#k09), [K17](#k17), [K22](#k22) |
+| 1 | [K07](#k07) Tests: workspace conventions for @swarm/maps and @swarm/live, the ground-control compose service and the front-end e2e step of images.yml | 🧪 test-writer | none | [K09](#k09), [K17](#k17), [K21](#k21) |
+| 1 | [K08](#k08) Tests: the Grafana dashboard of the Telemetry latency, with the budgets as thresholds | 🧪 test-writer | none | [K11](#k11) |
+| 2 | [K09](#k09) Scaffold @swarm/maps and add the dependencies of live, maps and ground-control (sole owner of pnpm-lock.yaml) | 🖥️ frontend-implementer | [K01](#k01), [K02](#k02), [K03](#k03), [K04](#k04), [K05](#k05), [K06](#k06), [K07](#k07) | [K12](#k12), [K13](#k13), [K14](#k14), [K15](#k15), [K16](#k16), [K17](#k17), [K18](#k18), [K23](#k23) |
+| 2 | [K10](#k10) Translations: the map label of the Flight view in English, French, German and Spanish | 🖥️ frontend-implementer | [K05](#k05) | [K22](#k22), [K23](#k23) |
+| 2 | [K11](#k11) Grafana dashboard: Telemetry latency from Drone to screen, through the cell and at the edge, with the budget thresholds | 🐍 implementer | [K08](#k08) | none |
+| 3 | [K12](#k12) live: subscription encoder, SquadFrame decoder and the SquadStore delta merge into typed arrays | 🖥️ frontend-implementer | [K01](#k01), [K09](#k09) | [K19](#k19), [K23](#k23) |
+| 3 | [K13](#k13) live: latency histogram, OTLP/HTTP JSON body and the periodic LatencyReporter | 🖥️ frontend-implementer | [K03](#k03), [K09](#k09) | [K19](#k19), [K23](#k23) |
+| 3 | [K14](#k14) maps: PMTiles base style, the pmtiles protocol and the palette read from the tokens | 🖥️ frontend-implementer | [K04](#k04), [K09](#k09) | [K20](#k20), [K23](#k23) |
+| 3 | [K15](#k15) maps: the deck.gl Drone layer with binary attributes, and the bounds of the Squad | 🖥️ frontend-implementer | [K04](#k04), [K09](#k09) | [K20](#k20), [K23](#k23) |
+| 3 | [K16](#k16) ground-control: runtime configuration (config.json) and its loader | 🖥️ frontend-implementer | [K05](#k05), [K09](#k09) | [K22](#k22), [K23](#k23) |
+| 3 | [K17](#k17) ground-control: the image (multi-stage Dockerfile, unprivileged nginx serving the app, config.json and self-hosted tiles) | 🖥️ frontend-implementer | [K06](#k06), [K07](#k07), [K09](#k09) | [K21](#k21), [K23](#k23) |
+| 3 | [K18](#k18) Docs: AGENT.md names the live worker, the maps package, the ground-control image and its e2e command | 📝 doc-writer | [K09](#k09) | none |
+| 4 | [K19](#k19) live: the Web Worker core and entry, the LiveClient, and the package index | 🖥️ frontend-implementer | [K02](#k02), [K12](#k12), [K13](#k13) | [K22](#k22), [K23](#k23) |
+| 4 | [K20](#k20) maps: the SquadMap component (MapLibre and the deck.gl overlay), its stylesheet and the package index | 🖥️ frontend-implementer | [K04](#k04), [K14](#k14), [K15](#k15) | [K22](#k22), [K23](#k23) |
+| 4 | [K21](#k21) CI: the ground-control service in infra/compose/e2e.yaml and the front ends' e2e step of images.yml | 🐍 implementer | [K07](#k07), [K17](#k17) | none |
+| 5 | [K22](#k22) ground-control: the Flight view (lazy SquadMap fed by the live worker, measured latency) in the frame with Hold the Squad and Abort | 🖥️ frontend-implementer | [K05](#k05), [K06](#k06), [K10](#k10), [K16](#k16), [K19](#k19), [K20](#k20) | [K23](#k23) |
+| 6 | [K23](#k23) Screens: UC-025 A1 brought in line with the first Ground control screen (mock-up updated, T0.20 not merged) | ✏️ mockup-writer | [K09](#k09), [K10](#k10), [K12](#k12), [K13](#k13), [K14](#k14), [K15](#k15), [K16](#k16), [K17](#k17), [K19](#k19), [K20](#k20), [K22](#k22) | none |
 
 ## Dependency graph
 
@@ -122,40 +101,44 @@ Every brief fixes the same module paths, exported names, metric name and DOM hoo
 flowchart LR
   subgraph W1["Wave 1"]
     direction TB
-    K01["K01 · 🧪 test-writer<br/>Tests: SquadStore decodes MessagePack SquadFrames into typed arrays with delta merge"]:::test_writer
-    K02["K02 · 🧪 test-writer<br/>Tests: Web Worker core subscribes, decodes off the main thread and posts throttled transferable snapshots; LiveClient relays them"]:::test_writer
-    K03["K03 · 🧪 test-writer<br/>Tests: LatencyMeter records the Telemetry latency from Drone to screen as an OpenTelemetry histogram"]:::test_writer
-    K04["K04 · 🧪 test-writer<br/>Tests: deck.gl Drone layer with binary attributes updated in place"]:::test_writer
-    K05["K05 · 🧪 test-writer<br/>Tests: MapLibre base-map style on self-hosted PMTiles, light and dark"]:::test_writer
-    K06["K06 · 🧪 test-writer<br/>Tests: Ground control Flight screen frame with Hold the Squad and Abort shown but not wired; app config"]:::test_writer
-    K07["K07 · 🧪 test-writer<br/>Tests: Playwright e2e, 10 simulated Drones move on the Ground control map; safety controls visible and inert"]:::test_writer
-    K08["K08 · 🧪 test-writer<br/>Tests: latency metrics exported over OTLP and the Grafana dashboard of the Telemetry latency"]:::test_writer
+    K01["K01 · 🧪 test-writer<br/>Tests: live protocol (subscribe message, SquadFrame decoder) and the SquadStore delta merge into typed arrays"]:::test_writer
+    K02["K02 · 🧪 test-writer<br/>Tests: the live Web Worker core (socket, throttled transferable snapshots) and the main-thread LiveClient"]:::test_writer
+    K03["K03 · 🧪 test-writer<br/>Tests: latency histogram and the OTLP/HTTP metrics reporter of the Telemetry latency"]:::test_writer
+    K04["K04 · 🧪 test-writer<br/>Tests: @swarm/maps (PMTiles base style, token palette, deck.gl Drone layer with binary attributes, SquadMap)"]:::test_writer
+    K05["K05 · 🧪 test-writer<br/>Tests: ground-control runtime config, squad feed, Flight view and the App with Hold the Squad and Abort not yet wired"]:::test_writer
+    K06["K06 · 🧪 test-writer<br/>Tests: Playwright e2e of the ground-control image with a stand-in live socket of 10 moving Drones"]:::test_writer
+    K07["K07 · 🧪 test-writer<br/>Tests: workspace conventions for @swarm/maps and @swarm/live, the ground-control compose service and the front-end e2e step of images.yml"]:::test_writer
+    K08["K08 · 🧪 test-writer<br/>Tests: the Grafana dashboard of the Telemetry latency, with the budgets as thresholds"]:::test_writer
   end
   subgraph W2["Wave 2"]
     direction TB
-    K09["K09 · 🖥️ frontend-implementer<br/>Scaffold: create packages/ts/maps, add the dependencies and test runners of live, maps and ground-control, update the lock file"]:::frontend_implementer
+    K09["K09 · 🖥️ frontend-implementer<br/>Scaffold @swarm/maps and add the dependencies of live, maps and ground-control (sole owner of pnpm-lock.yaml)"]:::frontend_implementer
+    K10["K10 · 🖥️ frontend-implementer<br/>Translations: the map label of the Flight view in English, French, German and Spanish"]:::frontend_implementer
+    K11["K11 · 🐍 implementer<br/>Grafana dashboard: Telemetry latency from Drone to screen, through the cell and at the edge, with the budget thresholds"]:::implementer
   end
   subgraph W3["Wave 3"]
     direction TB
-    K10["K10 · 🖥️ frontend-implementer<br/>Implement SquadStore: MessagePack decode, delta merge, typed-array snapshots"]:::frontend_implementer
-    K11["K11 · 🖥️ frontend-implementer<br/>Implement LatencyMeter: Telemetry latency histogram"]:::frontend_implementer
-    K12["K12 · 🖥️ frontend-implementer<br/>Implement the MapLibre base map on self-hosted PMTiles"]:::frontend_implementer
-    K13["K13 · 🖥️ frontend-implementer<br/>Implement the deck.gl Drone layer with in-place binary attributes"]:::frontend_implementer
-    K14["K14 · 🖥️ frontend-implementer<br/>Grafana dashboard of the Telemetry latency from Drone to screen"]:::frontend_implementer
-    K15["K15 · 🖥️ frontend-implementer<br/>Ground control Flight screen: frame, title bar with Hold the Squad and Abort shown but not wired, runtime config"]:::frontend_implementer
-    K19["K19 · 📝 doc-writer<br/>Document the live and maps packages and the Ground control app in AGENT.md"]:::doc_writer
+    K12["K12 · 🖥️ frontend-implementer<br/>live: subscription encoder, SquadFrame decoder and the SquadStore delta merge into typed arrays"]:::frontend_implementer
+    K13["K13 · 🖥️ frontend-implementer<br/>live: latency histogram, OTLP/HTTP JSON body and the periodic LatencyReporter"]:::frontend_implementer
+    K14["K14 · 🖥️ frontend-implementer<br/>maps: PMTiles base style, the pmtiles protocol and the palette read from the tokens"]:::frontend_implementer
+    K15["K15 · 🖥️ frontend-implementer<br/>maps: the deck.gl Drone layer with binary attributes, and the bounds of the Squad"]:::frontend_implementer
+    K16["K16 · 🖥️ frontend-implementer<br/>ground-control: runtime configuration (config.json) and its loader"]:::frontend_implementer
+    K17["K17 · 🖥️ frontend-implementer<br/>ground-control: the image (multi-stage Dockerfile, unprivileged nginx serving the app, config.json and self-hosted tiles)"]:::frontend_implementer
+    K18["K18 · 📝 doc-writer<br/>Docs: AGENT.md names the live worker, the maps package, the ground-control image and its e2e command"]:::doc_writer
   end
   subgraph W4["Wave 4"]
     direction TB
-    K16["K16 · 🖥️ frontend-implementer<br/>Implement the Web Worker live client: LiveWorkerCore, worker entry and main-thread LiveClient"]:::frontend_implementer
+    K19["K19 · 🖥️ frontend-implementer<br/>live: the Web Worker core and entry, the LiveClient, and the package index"]:::frontend_implementer
+    K20["K20 · 🖥️ frontend-implementer<br/>maps: the SquadMap component (MapLibre and the deck.gl overlay), its stylesheet and the package index"]:::frontend_implementer
+    K21["K21 · 🐍 implementer<br/>CI: the ground-control service in infra/compose/e2e.yaml and the front ends' e2e step of images.yml"]:::implementer
   end
   subgraph W5["Wave 5"]
     direction TB
-    K17["K17 · 🖥️ frontend-implementer<br/>Wire the Ground control map: base map, Drone layer fed by the live worker, latency recorded and exported"]:::frontend_implementer
+    K22["K22 · 🖥️ frontend-implementer<br/>ground-control: the Flight view (lazy SquadMap fed by the live worker, measured latency) in the frame with Hold the Squad and Abort"]:::frontend_implementer
   end
   subgraph W6["Wave 6"]
     direction TB
-    K18["K18 · ✏️ mockup-writer<br/>Capture UC-025 A1 from the running app (or update its mock-up before T0.20)"]:::mockup_writer
+    K23["K23 · ✏️ mockup-writer<br/>Screens: UC-025 A1 brought in line with the first Ground control screen (mock-up updated, T0.20 not merged)"]:::mockup_writer
   end
   K01 --> K09
   K02 --> K09
@@ -164,207 +147,57 @@ flowchart LR
   K05 --> K09
   K06 --> K09
   K07 --> K09
-  K08 --> K09
-  K01 --> K10
-  K09 --> K10
-  K03 --> K11
-  K09 --> K11
-  K05 --> K12
+  K05 --> K10
+  K08 --> K11
+  K01 --> K12
   K09 --> K12
-  K04 --> K13
+  K03 --> K13
   K09 --> K13
-  K08 --> K14
+  K04 --> K14
   K09 --> K14
-  K06 --> K15
+  K04 --> K15
   K09 --> K15
-  K09 --> K19
-  K02 --> K16
-  K10 --> K16
+  K05 --> K16
+  K09 --> K16
+  K06 --> K17
   K07 --> K17
-  K08 --> K17
-  K11 --> K17
-  K12 --> K17
-  K13 --> K17
-  K14 --> K17
-  K15 --> K17
-  K16 --> K17
-  K15 --> K18
-  K17 --> K18
+  K09 --> K17
+  K09 --> K18
+  K02 --> K19
+  K12 --> K19
+  K13 --> K19
+  K04 --> K20
+  K14 --> K20
+  K15 --> K20
+  K07 --> K21
+  K17 --> K21
+  K05 --> K22
+  K06 --> K22
+  K10 --> K22
+  K16 --> K22
+  K19 --> K22
+  K20 --> K22
+  K09 --> K23
+  K10 --> K23
+  K12 --> K23
+  K13 --> K23
+  K14 --> K23
+  K15 --> K23
+  K16 --> K23
+  K17 --> K23
+  K19 --> K23
+  K20 --> K23
+  K22 --> K23
   classDef doc_writer fill:#e5e7eb,stroke:#4b5563,color:#111827
   classDef frontend_implementer fill:#e0f2f1,stroke:#0f766e,color:#053b36
+  classDef implementer fill:#dbeafe,stroke:#1d4ed8,color:#0b1f4d
   classDef mockup_writer fill:#f3e8ff,stroke:#7e22ce,color:#2e0b4f
   classDef test_writer fill:#fff4d6,stroke:#b8860b,color:#3d2e00
 ```
 
 ## Tasks
 
-### <a id="k01"></a>K01: Tests: SquadStore decodes MessagePack SquadFrames into typed arrays with delta merge
-
-| Agent | Wave | Depends on | Unblocks |
-| --- | --- | --- | --- |
-| 🧪 test-writer | 1 | none | [K09](#k09), [K10](#k10) |
-
-**Files** (only this task may change them in its wave):
-
-- `packages/ts/live/test/squad-store.test.ts`
-- `packages/ts/live/test/helpers/squad-frames.ts`
-
-**Done when:** `packages/ts/live/test/squad-store.test.ts` exists and covers every case of the brief. `pnpm --filter ./packages/ts/live run lint` passes on it. `node --experimental-strip-types --test packages/ts/live/test/squad-store.test.ts` fails only because `src/squad/*` does not exist yet.
-
-**Brief:**
-
-Write the failing tests of the live decoder of `packages/ts/live`. It is the part of the Web Worker that turns MessagePack frames into typed arrays and merges deltas. Specification: [📨 GUI and WebUI: live data in the browser](docs/specs/technical/10-frontends.md#live-data) ("Web Worker: MessagePack decode, delta merge, typed arrays (positions, states, battery)") and [📨 API layer: live data over WebSocket](docs/specs/technical/05-api.md#live) ("delta-encoded `SquadFrame`"). Use case: [🎬 UC-025](docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md), where each Drone is shown with its state, battery and Link. Rule: [📏 BR-014](docs/specs/functional/business-rules/BR-014-simulation-isolation.md), which covers the simulated Squad being displayed.
-
-The frame shape is `SquadFrame` and `TelemetryFrame` of `packages/ts/live/src/generated/models.ts`: fields `mission_id`, `t_us` and `frames[]`, with `drone_id`, `seq`, `t_us`, `lat_e7`, `lon_e7`, `altitude_m`, `speed_m_s`, `heading_deg`, `battery_pct`, `link_quality_pct` and `state`. Before you write, read how the gateway `/v1/live` of T0.18 (`services/gateway`) encodes a message: one SquadFrame per WebSocket message, or a batch. Encode test messages the same way with `@msgpack/msgpack` `encode`.
-
-The API under test, imported by relative path with the `.ts` extension:
-- `../src/squad/squad-store.ts`, `export class SquadStore`:
-  - `merge(message: Uint8Array): number` merges and returns the number of Drone frames merged.
-  - `snapshot(): SquadSnapshot | null` returns null when nothing changed since the last snapshot.
-  - getters `size` (the number of Drones) and `rejectedMessages`.
-- `../src/squad/squad-snapshot.ts`, `export interface SquadSnapshot`, with these fields:
-  - `droneIds: string[]`
-  - `positions: Float64Array`, holding lon, lat and altitude_m per Drone (stride 3, degrees = e7 / 1e7)
-  - `states: Uint8Array`
-  - `batteryPct: Float32Array`
-  - `linkQualityPct: Float32Array`
-  - `frameTimesUs: Float64Array`, the `t_us` of every Drone frame merged since the previous snapshot
-- `../src/squad/drone-state-code.ts`, `export const DRONE_STATE_CODES`, mapping each `DroneState` to a code in the order of the generated enum: ready 0, grounded 1, airborne 2, returning 3, landed 4, lost 5.
-
-Cases:
-- 10 Drones merged give size 10 and correct positions, states and battery values.
-- A later delta holding 3 Drones updates only those 3 slots. Every Drone keeps its slot index.
-- A new `drone_id` is appended.
-- An older `seq` for a Drone does not overwrite a newer one.
-- The snapshot's arrays are fresh copies that can be transferred: their buffers are not reused by the store.
-- `frameTimesUs` holds only the frames merged since the last snapshot.
-- A malformed message is rejected and counted, and leaves the store unchanged.
-- A frame of another `mission_id` is rejected.
-
-Use `node:test` and `node:assert/strict`, like `packages/ts/live/test/render.test.ts`. The package's `test` script runs `test/*.test.ts`. Put the frame builders in `test/helpers/squad-frames.ts`. Name tests as sentences. Use no mocks.
-
-### <a id="k02"></a>K02: Tests: Web Worker core subscribes, decodes off the main thread and posts throttled transferable snapshots; LiveClient relays them
-
-| Agent | Wave | Depends on | Unblocks |
-| --- | --- | --- | --- |
-| 🧪 test-writer | 1 | none | [K09](#k09), [K16](#k16) |
-
-**Files** (only this task may change them in its wave):
-
-- `packages/ts/live/test/live-worker-core.test.ts`
-- `packages/ts/live/test/live-client.test.ts`
-- `packages/ts/live/test/helpers/frame-stream.ts`
-- `packages/ts/live/test/helpers/live-test-server.ts`
-
-**Done when:** Both test files exist and cover every case of the brief. `pnpm --filter ./packages/ts/live run lint` passes on them. Running them with `node --experimental-strip-types --test` fails only because `src/worker/*` and `src/client/*` do not exist yet.
-
-**Brief:**
-
-Write the failing tests of the live client of `packages/ts/live`. Specification:
-- [📨 GUI and WebUI: live data in the browser](docs/specs/technical/10-frontends.md#live-data): "The main thread never decodes frames", and a transferable snapshot "at most 30 per second".
-- [📨 API layer: live data over WebSocket](docs/specs/technical/05-api.md#live): one socket per client, with `{"op": "subscribe", "topic": "mission/<id>/squad", "rate": "full"}`, and server frames in MessagePack.
-- [🗂️ GUI and WebUI: apps and shared packages](docs/specs/technical/10-frontends.md#apps): `live` holds the "WebSocket client, MessagePack decoder in a Web Worker".
-
-Rules: [📏 BR-014](docs/specs/functional/business-rules/BR-014-simulation-isolation.md) says the client only subscribes and sends no command. Use case: [🎬 UC-025](docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md).
-
-Read the gateway `/v1/live` of T0.18 (`services/gateway`) first. Match its subscribe message encoding (a JSON text message as written on the API page, unless the gateway expects another), how a token is passed, and how frames are batched.
-
-API under test, imported by relative path with `.ts`:
-- `../src/worker/live-worker-core.ts`, `export class LiveWorkerCore`, constructed with `(port: LivePort, options?: { maxSnapshotsPerSecond?: number })`. The default is 30. `LivePort` is a `MessagePort`-like with `postMessage(message, transfer?)` and `onmessage`.
-- `../src/worker/live-messages.ts`, the message types:
-  - from the main thread: `{ kind: "start", url, missionId, token? }` and `{ kind: "stop" }`;
-  - from the worker: `{ kind: "snapshot", snapshot: SquadSnapshot }`, with its typed-array buffers in the transfer list, and `{ kind: "status", status: "connecting" | "open" | "closed" | "error" }`.
-- `../src/client/live-client.ts`, `export class LiveClient`, constructed with `(port: LivePort)`. Its methods are `start({ url, missionId, token? })`, `onSnapshot(callback): () => void`, `onStatus(callback): () => void` and `stop()`.
-
-Cases:
-- On `start`, the core opens one WebSocket to the URL and sends exactly the subscribe message for `mission/<missionId>/squad` at full rate.
-- Binary frames from the server reach the main side as snapshots.
-- Under a burst of 200 frames in one second, at most `maxSnapshotsPerSecond` snapshots are posted, and the last state is never lost.
-- Snapshots' buffers are transferred: they are detached on the sending side after posting.
-- Statuses go from connecting to open, then closed when the server closes.
-- `stop` closes the socket.
-- LiveClient never decodes MessagePack: it only receives snapshots.
-- No message other than the subscribe is ever sent on the socket.
-
-Use real things, with no mocks:
-- a real local WebSocket server built with the `ws` package, in `test/helpers/live-test-server.ts`, which records what it receives and sends MessagePack frames built in `test/helpers/frame-stream.ts`. Do not import K01's helper;
-- Node 22's global `WebSocket` client;
-- a real `MessageChannel` joining LiveWorkerCore and LiveClient.
-
-Use `node:test`, like `test/render.test.ts`.
-
-### <a id="k03"></a>K03: Tests: LatencyMeter records the Telemetry latency from Drone to screen as an OpenTelemetry histogram
-
-| Agent | Wave | Depends on | Unblocks |
-| --- | --- | --- | --- |
-| 🧪 test-writer | 1 | none | [K09](#k09), [K11](#k11) |
-
-**Files** (only this task may change them in its wave):
-
-- `packages/ts/live/test/latency-meter.test.ts`
-
-**Done when:** `packages/ts/live/test/latency-meter.test.ts` exists and covers every case. Lint passes on it. Running it fails only because `src/latency/latency-meter.ts` does not exist yet.
-
-**Brief:**
-
-Write the failing tests of the latency measure in `packages/ts/live`. Specification:
-- [🩺 Observability: signals](docs/specs/technical/08-observability.md#signals): metrics are OpenTelemetry, and `drone_id` is never a metric label.
-- the budget [⏱️ Telemetry, Drone to Pilot's screen](docs/specs/technical/07-scalability.md#budgets): p95 &lt; 400 ms through the cell.
-- [⏱️ GUI and WebUI: front-end budgets](docs/specs/technical/10-frontends.md#performance).
-
-Use case: [🎬 UC-025](docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md). Rule: [📏 BR-014](docs/specs/functional/business-rules/BR-014-simulation-isolation.md), since simulated Drones are measured.
-
-API under test: `../src/latency/latency-meter.ts`, `export class LatencyMeter`, with:
-- `static INSTRUMENT_NAME = "swarm.live.telemetry_latency"` and `static UNIT = "ms"`;
-- the constructor `(meter: Meter)`, where `Meter` comes from `@opentelemetry/api`;
-- `record(frameTimesUs: Float64Array, paintedAtMs: number): void`, which records one sample per Drone frame: `paintedAtMs - t_us / 1000`;
-- the getter `skippedSamples`.
-
-Cases:
-- 10 frame times give 10 samples with the expected values.
-- A negative latency, from a clock ahead of the browser, is not recorded and is counted in `skippedSamples`.
-- The histogram has the instrument name and unit above.
-- No sample carries a `drone_id` attribute, nor any attribute naming a Drone.
-- An empty array records nothing.
-
-Use a real `MeterProvider` from `@opentelemetry/sdk-metrics` with an `InMemoryMetricExporter` and a manual reader to read the histogram back. Do not use a mock. Use `node:test`.
-
-### <a id="k04"></a>K04: Tests: deck.gl Drone layer with binary attributes updated in place
-
-| Agent | Wave | Depends on | Unblocks |
-| --- | --- | --- | --- |
-| 🧪 test-writer | 1 | none | [K09](#k09), [K13](#k13) |
-
-**Files** (only this task may change them in its wave):
-
-- `packages/ts/maps/test/drone-layer.test.ts`
-
-**Done when:** `packages/ts/maps/test/drone-layer.test.ts` exists and covers every case. Running it fails only because `packages/ts/maps/src/drone-layer/*` does not exist yet.
-
-**Brief:**
-
-Write the failing tests of the Drone layer of the new package `packages/ts/maps` (`@swarm/maps`). Specification:
-- [🗺️ GUI and WebUI: maps and 3D](docs/specs/technical/10-frontends.md#maps): "deck.gl GPU layers for Drones ... binary attribute updates for moving Drones".
-- [📨 GUI and WebUI: live data in the browser](docs/specs/technical/10-frontends.md#live-data): "deck.gl attributes updated in place", with a target of 5,000 moving Drones.
-- [🗂️ GUI and WebUI: apps and shared packages](docs/specs/technical/10-frontends.md#apps).
-
-Use case: [🎬 UC-025](docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md), where each Drone is shown on the map with its state.
-
-API under test, imported by relative path with `.ts`:
-- `../src/drone-layer/drone-attributes.ts`, `export class DroneAttributes`, with `update(input: { positions: Float64Array; states: Uint8Array; length: number }, colours: ReadonlyArray<readonly [number, number, number, number]>): DroneLayerData`. `colours` is indexed by state code. `DroneLayerData` is `{ length, attributes: { getPosition: { value: Float64Array, size: 3 }, getFillColor: { value: Uint8Array, size: 4 } } }`.
-- `../src/drone-layer/drone-layer.ts`, `export function createDroneLayer(data: DroneLayerData, options?: { id?: string; radiusPx?: number }): Layer`. It builds a deck.gl `ScatterplotLayer` from `@deck.gl/layers`.
-
-Cases:
-- Positions are copied, with stride 3.
-- Each Drone's colour is the one of its state code.
-- A second update with the same length reuses the same buffers (the same `ArrayBuffer`), which is the in-place update.
-- A larger length allocates larger buffers.
-- The layer has a stable id and receives the binary `data` with `length` and `attributes`.
-- Updating 5,000 Drones allocates nothing after the first update.
-
-The package does not depend on `@swarm/live`: the input is the plain interface above. Use `node:test` and `node:assert/strict`, as `packages/ts/live` does. The package's `test` script will run `test/*.test.ts`. Use no mocks.
-
-### <a id="k05"></a>K05: Tests: MapLibre base-map style on self-hosted PMTiles, light and dark
+### <a id="k01"></a>K01: Tests: live protocol (subscribe message, SquadFrame decoder) and the SquadStore delta merge into typed arrays
 
 | Agent | Wave | Depends on | Unblocks |
 | --- | --- | --- | --- |
@@ -372,376 +205,391 @@ The package does not depend on `@swarm/live`: the input is the plain interface a
 
 **Files** (only this task may change them in its wave):
 
-- `packages/ts/maps/test/base-map-style.test.ts`
+- `frontend/packages/live/test/protocol/topics.test.ts`
+- `frontend/packages/live/test/protocol/squad-frame-decoder.test.ts`
+- `frontend/packages/live/test/protocol/frames.ts`
+- `frontend/packages/live/test/snapshot/squad-store.test.ts`
 
-**Done when:** `packages/ts/maps/test/base-map-style.test.ts` exists and covers every case. Running it fails only because `src/base-map/base-map-style.ts` does not exist yet.
-
-**Brief:**
-
-Write the failing tests of the base map of `packages/ts/maps`. Specification:
-- [🗺️ GUI and WebUI: maps and 3D](docs/specs/technical/10-frontends.md#maps): "MapLibre GL JS with self-hosted vector tiles from OpenStreetMap (PMTiles files ...)".
-- [🎨 GUI and WebUI: design system](docs/specs/technical/10-frontends.md#design-system): tokens only, light and dark.
-- [🗂️ GUI and WebUI: apps and shared packages](docs/specs/technical/10-frontends.md#apps).
-
-Use case: [🎬 UC-025](docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md), which needs the map of step 2.
-
-API under test: `../src/base-map/base-map-style.ts`, `export function buildBaseMapStyle(options: { pmtilesUrl: string; palette: BaseMapPalette }): StyleSpecification`. `BaseMapPalette` is exported from the same file and holds `background`, `water`, `land`, `road`, `building` and `label` colours, as `#rrggbb` strings that the caller resolves from the design tokens. `StyleSpecification` is MapLibre's type.
-
-Cases:
-- The style has version 8 and one vector source whose URL is `pmtiles://<pmtilesUrl>`.
-- No layer or source points to a remote host other than `pmtilesUrl`, because the tiles are self-hosted.
-- Every colour in the style's paint properties comes from the palette: no hard-coded colour.
-- Two palettes, light and dark, give two styles that differ only in colours.
-- An empty `pmtilesUrl` is refused with a thrown `Error`.
-
-The layers use the layer names of the Protomaps basemap schema of OpenStreetMap PMTiles. Use `node:test`.
-
-### <a id="k06"></a>K06: Tests: Ground control Flight screen frame with Hold the Squad and Abort shown but not wired; app config
-
-| Agent | Wave | Depends on | Unblocks |
-| --- | --- | --- | --- |
-| 🧪 test-writer | 1 | none | [K09](#k09), [K15](#k15) |
-
-**Files** (only this task may change them in its wave):
-
-- `frontends/ground-control/test/flight-screen.test.tsx`
-- `frontends/ground-control/test/app-config.test.ts`
-
-**Done when:** Both test files exist and cover every case. The app's lint passes on them. The app's test command fails only because `src/flight/*` and `src/config/app-config.ts` do not exist yet.
+**Done when:** The four files exist; `pnpm --filter @swarm/live exec eslint test/protocol test/snapshot` reports no problem other than unresolved imports of the modules K12 writes; running `node --experimental-strip-types --test frontend/packages/live/test/protocol/*.test.ts frontend/packages/live/test/snapshot/*.test.ts` fails only because src/protocol and src/snapshot are missing.
 
 **Brief:**
 
-Write the failing component and config tests of the first screen of `frontends/ground-control`. Specification:
-- [📏 BR-023: Fixed safety controls](docs/specs/functional/business-rules/BR-023-fixed-safety-controls.md): Hold the Squad and abort are visible on every screen.
-- [🎬 UC-025 step 2 and screen A1](docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md#screen-a1).
-- [🎨 GUI and WebUI: design system](docs/specs/technical/10-frontends.md#design-system).
-- [🗂️ GUI and WebUI: apps and shared packages](docs/specs/technical/10-frontends.md#apps).
-- the Ground control frame row of `docs/specs/visual-identity.md#components`: the title bar reads `⚙️ Swarm` · Ground control · Mission, then on the right `✋ Hold the Squad` (button secondary) and `🛑 Abort` (button danger).
-- [📏 BR-014](docs/specs/functional/business-rules/BR-014-simulation-isolation.md): nothing is sent.
+Write the node:test tests (node --experimental-strip-types --test, like frontend/packages/live/test/render.test.ts: node:assert/strict, imports with the .ts extension) for the protocol and the snapshot store of @swarm/live. Specs: docs/specs/technical/10-frontends.md#live-data ("WebSocket -> Web Worker: MessagePack decode, delta merge, typed arrays (positions, states, battery)"), docs/specs/technical/05-api.md#live (subscribe message, topic mission/&lt;id>/squad, frames in MessagePack), docs/specs/technical/10-frontends.md#apps (live holds the WebSocket client and the MessagePack decoder), ticket docs/tickets/T0.19/TICKET.md (criterion 1, docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md). The wire format is the one the backend sends: backend/swarm-service/src/swarm_service/shared/live/live_codec.py packs Pydantic models with ormsgpack as MessagePack maps with the field names of frontend/packages/live/src/generated/models.ts (SquadFrame {mission_id, t_us, frames}, TelemetryFrame {mission_id, drone_id, seq, t_us, lat_e7, lon_e7, altitude_m, speed_m_s, heading_deg, battery_pct, link_quality_pct, state}, LiveSubscription {op: "subscribe", topic, rate: "full"}). Encode fixtures with @msgpack/msgpack (encode) in the helper test/protocol/frames.ts (aSquadFrame(missionId, drones, tUs) building a valid frame of N Drones; mission ids are version 7 UUIDs such as 01943c5e-8a4b-7c2d-9e1f-0a1b2c3d4e01).
 
-First read the shell of T0.14 (`frontends/ground-control`, and the Ground control frame of `packages/ts/ui`) and the test runner it set up. If it set up none, write the tests for Vitest with jsdom and `@testing-library/react`. Task K09 adds those dependencies.
+Contract the implementation (K12) must meet, import paths fixed:
+- src/protocol/topics.ts: squadTopic(missionId: string): string returns `mission/<id>/squad`; encodeSquadSubscription(missionId: string): Uint8Array returns MessagePack of {op: "subscribe", topic, rate: "full"}; a mission id that is not a version 7 UUID throws LiveTopicInvalidError (exported from src/protocol/live-protocol-errors.ts).
+- src/protocol/squad-frame-decoder.ts: decodeSquadFrame(data: ArrayBuffer | Uint8Array): SquadFrame; bytes that are not MessagePack, a missing or mistyped field, a state outside DroneState, or a boolean where a number is expected throw LiveMessageUnreadableError (src/protocol/live-protocol-errors.ts).
+- src/snapshot/squad-snapshot.ts: DRONE_STATES = ["ready","grounded","airborne","returning","landed","lost"] (index = state code) and interface SquadSnapshot {version: number; missionId: string; count: number; droneIds: readonly string[]; positions: Float64Array /* lon, lat, altitude_m per Drone */; states: Uint8Array; batteryPct: Float32Array; linkQualityPct: Float32Array; headingDeg: Float32Array; speedMS: Float32Array; tUs: Float64Array; updated: Uint8Array /* 1 when the slot changed since the previous snapshot */; receivedAtMs: number}.
+- src/snapshot/squad-store.ts: class SquadStore(missionId) with merge(frame: SquadFrame, receivedAtMs: number): void, get dirty(): boolean, snapshot(): SquadSnapshot, and transferables(snapshot): ArrayBuffer[].
 
-API under test:
-- `../src/flight/flight-screen.tsx`, `export function FlightScreen(props: { missionId: string; map?: ReactNode })`.
-- `../src/flight/safety-controls.tsx`, `export function SafetyControls()`.
-- `../src/config/app-config.ts`:
-  - `export interface AppConfig { liveUrl: string; pmtilesUrl: string; otlpMetricsUrl: string | null; cell: string; missionId: string }`;
-  - `export class AppConfigError extends Error`;
-  - `export function parseAppConfig(json: unknown, search: string): AppConfig`, where the Mission comes from the query parameter `mission` of `search`.
+Behaviours to test: the topic and the encoded subscription decode back to the expected map; a bad mission id is refused; a valid frame of 10 Drones decodes; each kind of bad input is refused with the specific error; merge places each Drone in a stable slot in order of first appearance, converts lat_e7/lon_e7 by 1e-7 into positions [lon, lat, alt]; a frame of another Mission is ignored; a Drone frame whose seq is not greater than the last seen for that Drone is ignored; a Drone absent from a frame keeps its last values (delta merge); snapshot() returns fresh buffers (later merges do not change a snapshot already taken), increments version, sets updated only for the slots changed since the previous snapshot, carries the newest receivedAtMs, and clears dirty; transferables() lists the distinct ArrayBuffers of the snapshot. Name tests as sentences. Each test folder holds at most five code files (AGENT.md, File shape). The tests fail now because src/protocol and src/snapshot do not exist yet; that is expected (TKT-4).
 
-Cases:
-- The title bar shows Ground control, the Mission id, then the buttons `✋ Hold the Squad` and `🛑 Abort`, in that order and on the right.
-- Both buttons are visible and reachable by role `button` with those names.
-- Clicking either button changes nothing and calls nothing: it is not wired. Check this with a real `window` event listener that sees no custom event and no network request, not with a mock.
-- The `map` slot is rendered inside an element with `data-testid="flight-map"`.
-- The screen renders in light and dark mode: `prefers-color-scheme` emulated through the token classes of `packages/ts/tokens`, if T0.14 provides them.
-- `parseAppConfig` accepts a full config.
-- `otlpMetricsUrl` absent becomes null.
-- A missing or empty `liveUrl`, `pmtilesUrl` or `cell` throws `AppConfigError` naming the field.
-- A missing or non-UUID `mission` parameter throws `AppConfigError`.
-
-### <a id="k07"></a>K07: Tests: Playwright e2e, 10 simulated Drones move on the Ground control map; safety controls visible and inert
+### <a id="k02"></a>K02: Tests: the live Web Worker core (socket, throttled transferable snapshots) and the main-thread LiveClient
 
 | Agent | Wave | Depends on | Unblocks |
 | --- | --- | --- | --- |
-| 🧪 test-writer | 1 | none | [K09](#k09), [K17](#k17) |
+| 🧪 test-writer | 1 | none | [K09](#k09), [K19](#k19) |
 
 **Files** (only this task may change them in its wave):
 
-- `frontends/ground-control/e2e/flight-map.spec.ts`
-- `frontends/ground-control/e2e/live-stand-in-server.ts`
+- `frontend/packages/live/test/worker/live-worker-core.test.ts`
+- `frontend/packages/live/test/worker/fake-socket.ts`
+- `frontend/packages/live/test/worker/fake-clock.ts`
+- `frontend/packages/live/test/client/live-client.test.ts`
+- `frontend/packages/live/test/client/fake-worker.ts`
 
-**Done when:** Both files exist. `pnpm --filter ./frontends/ground-control exec eslint e2e` passes on them once K09 has added the dependencies. The spec lists every assertion of the brief.
+**Done when:** The five files exist; `pnpm --filter @swarm/live exec eslint test/worker test/client` reports no problem other than unresolved imports of src/worker and src/client; `node --experimental-strip-types --test frontend/packages/live/test/worker/*.test.ts frontend/packages/live/test/client/*.test.ts` fails only because those modules are missing.
 
 **Brief:**
 
-Write the failing Playwright end-to-end test of acceptance criteria 1 and 3 of `docs/tickets/T0.19/TICKET.md`. The criteria are:
-- 10 simulated Drones move on the map;
-- ✋ Hold the Squad and 🛑 Abort are visible in the title bar and not wired.
+Write node:test tests (style of frontend/packages/live/test/render.test.ts, .ts import extensions) for the worker and the client of @swarm/live. Specs: docs/specs/technical/10-frontends.md#live-data ("The main thread never decodes frames"; the worker decodes, merges and posts a "transferable snapshot, at most 30 per second"), docs/specs/technical/05-api.md#live (one socket per client, subscriptions per Mission topic, MessagePack frames), docs/specs/technical/10-frontends.md#performance (live frame to pixels &lt; 50 ms), ticket docs/tickets/T0.19/TICKET.md criterion 1 (docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md). Use fakes, no browser: test/worker/fake-socket.ts (a SocketLike that records what is sent and lets the test fire open, binary message, close and error), test/worker/fake-clock.ts (manual time and timers), test/client/fake-worker.ts (a WorkerLike that records posted messages and lets the test emit messages). Build MessagePack SquadFrames with @msgpack/msgpack encode inside these test folders (do not import K01's helper).
 
-Specification:
-- [🎬 UC-025 screen A1](docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md#screen-a1)
-- [📏 BR-023](docs/specs/functional/business-rules/BR-023-fixed-safety-controls.md)
-- [📏 BR-014](docs/specs/functional/business-rules/BR-014-simulation-isolation.md): no command leaves the screen
-- [📨 API layer: live data over WebSocket](docs/specs/technical/05-api.md#live)
-- [📨 GUI and WebUI: live data in the browser](docs/specs/technical/10-frontends.md#live-data)
-- [🗺️ GUI and WebUI: maps and 3D](docs/specs/technical/10-frontends.md#maps)
+Contract the implementation (K19) must meet:
+- src/worker/live-worker-messages.ts: type ToWorker = {kind: "connect"; url: string; missionId: string} | {kind: "close"}; type FromWorker = {kind: "snapshot"; snapshot: SquadSnapshot} | {kind: "status"; status: LiveStatus}; type LiveStatus = "connecting" | "open" | "closed" | "failed". SquadSnapshot comes from src/snapshot/squad-snapshot.ts (K01/K12 contract: version, missionId, count, droneIds, positions Float64Array, states Uint8Array, batteryPct, linkQualityPct, headingDeg, speedMS Float32Array, tUs Float64Array, updated Uint8Array, receivedAtMs).
+- src/worker/live-worker-core.ts: class LiveWorkerCore(openSocket: (url: string) => SocketLike, post: (message: FromWorker, transfer: ArrayBuffer[]) => void, clock: {nowMs(): number; setTimer(callback: () => void, delayMs: number): number; clearTimer(id: number): void}, maxSnapshotsPerS = 30) with handle(message: ToWorker): void. SocketLike {binaryType: string; send(data: Uint8Array): void; close(): void; onopen, onmessage(event: {data: ArrayBuffer}), onclose, onerror}.
+- src/client/live-client.ts: class LiveClient(createWorker?: () => WorkerLike) with connect(url, missionId): void, onSnapshot(listener): () => void (returns the unsubscribe), onStatus(listener): () => void, close(): void. WorkerLike {postMessage(message: ToWorker): void; terminate(): void; onmessage: ((event: {data: FromWorker}) => void) | null}.
 
-AGENT.md, Front-end tests: Playwright tests live in `frontends/<frontend>/e2e/` and run against the real image, never a development server. Use the base URL of the Playwright scaffold of T0.10 if it exists, and read it first.
+Behaviours: connect opens one socket with binaryType arraybuffer, posts status connecting then open, and sends exactly one MessagePack subscription {op: subscribe, topic: mission/&lt;id>/squad, rate: full} on open; received frames are decoded and merged in the worker and posted as snapshots with their ArrayBuffers in the transfer list; several frames arriving within one interval give one snapshot; never more than 30 snapshots per second of fake time; no snapshot is posted when nothing changed; an unreadable message is skipped (no snapshot, socket stays open); close or a socket close posts status closed and stops the timer; a socket error posts failed; there is no automatic reconnection. LiveClient posts connect and close to the worker, never decodes (it only forwards snapshot and status messages to listeners), unsubscribe stops delivery, close terminates the worker. At most five code files per folder (AGENT.md, File shape). The tests fail until K19 lands; that is expected.
 
-The stand-in live server goes in `e2e/live-stand-in-server.ts`. It is a real WebSocket server built with `ws` and `@msgpack/msgpack`, which K09 adds as dev dependencies. It speaks the gateway `/v1/live` protocol of T0.18: read `services/gateway` for the subscribe message and the frame batching. It streams MessagePack `SquadFrame`s of 10 Drones (`state` airborne, `mission_id` the test Mission) at 10 Hz, flying a square, with `t_us` taken from the clock. It records every message it receives.
-
-The test serves the app's runtime `config.json` through `page.route` to point `liveUrl` at the stand-in, then opens `/?mission=<uuid>`. It asserts:
-- the buttons `✋ Hold the Squad` and `🛑 Abort` are visible in the title bar;
-- the element `[data-testid="flight-map"]` reaches `data-drone-count="10"`;
-- its `data-snapshot-count` keeps increasing;
-- two screenshots of the map canvas taken one second apart differ, because the Drones move;
-- after clicking both buttons, the stand-in has received only the subscribe message.
-
-Playwright's config, `frontends/ground-control/playwright.config.ts`, belongs to K09, which starts the stand-in as a `webServer` on port 8765. Write a short header comment in the spec saying so.
-
-### <a id="k08"></a>K08: Tests: latency metrics exported over OTLP and the Grafana dashboard of the Telemetry latency
+### <a id="k03"></a>K03: Tests: latency histogram and the OTLP/HTTP metrics reporter of the Telemetry latency
 
 | Agent | Wave | Depends on | Unblocks |
 | --- | --- | --- | --- |
-| 🧪 test-writer | 1 | none | [K09](#k09), [K14](#k14), [K17](#k17) |
+| 🧪 test-writer | 1 | none | [K09](#k09), [K13](#k13) |
 
 **Files** (only this task may change them in its wave):
 
-- `frontends/ground-control/test/latency-metrics.test.ts`
-- `frontends/ground-control/test/latency-dashboard.test.ts`
+- `frontend/packages/live/test/latency/latency-histogram.test.ts`
+- `frontend/packages/live/test/latency/otlp-metrics-body.test.ts`
+- `frontend/packages/live/test/latency/latency-reporter.test.ts`
 
-**Done when:** Both test files exist and cover every case. The app's lint passes on them. The app's tests fail only because `src/telemetry/latency-metrics.ts` and `observability/telemetry-latency-dashboard.json` do not exist yet.
+**Done when:** The three files exist; `pnpm --filter @swarm/live exec eslint test/latency` reports no problem other than unresolved imports of src/latency; `node --experimental-strip-types --test frontend/packages/live/test/latency/*.test.ts` fails only because src/latency is missing.
 
 **Brief:**
 
-Write the failing tests of acceptance criterion 2 of `docs/tickets/T0.19/TICKET.md`: the Telemetry latency from Drone to screen through the cell is measured and shown in Grafana. Specification:
-- [🩺 Observability: signals](docs/specs/technical/08-observability.md#signals): OpenTelemetry metrics, with `operator_id`, `mission_id` and `cell` as resource attributes, and `drone_id` never a metric label.
-- [📊 Observability: dashboards](docs/specs/technical/08-observability.md#dashboards): budgets are drawn as thresholds on every latency panel.
-- the budget [⏱️ Telemetry, Drone to Pilot's screen](docs/specs/technical/07-scalability.md#budgets): p95 &lt; 400 ms through the cell.
-- [🎬 UC-025](docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md) and [📏 BR-014](docs/specs/functional/business-rules/BR-014-simulation-isolation.md).
+Write node:test tests (style of frontend/packages/live/test/render.test.ts) for the latency measure of @swarm/live. Specs: docs/specs/technical/08-observability.md#signals (metrics through OpenTelemetry; operator_id, mission_id and cell are resource attributes; drone_id is never a metric label; no secrets or personal data), docs/specs/technical/07-scalability.md#budgets (Telemetry, Drone to Pilot's screen: p95 &lt; 150 ms at the edge, &lt; 400 ms through the cell), docs/specs/technical/10-frontends.md#performance (live frame to pixels &lt; 50 ms), ticket docs/tickets/T0.19/TICKET.md criterion 2 (docs/specs/functional/business-rules/BR-014-simulation-isolation.md, docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md).
 
-Use the test runner of the app: the one T0.14 set up, or Vitest if it set up none.
+Contract the implementation (K13) must meet:
+- src/latency/latency-histogram.ts: LATENCY_BOUNDS_MS = [10, 25, 50, 75, 100, 150, 200, 300, 400, 600, 800, 1000, 2000]; class LatencyHistogram(bounds = LATENCY_BOUNDS_MS) with record(ms: number): void, and readonly count, sum, min, max, skipped, bucketCounts(): number[] (length bounds.length + 1, explicit-bucket semantics of OTLP: a value equal to a bound falls in that bound's bucket). A negative or non-finite value (clock skew) is not recorded and increments skipped.
+- src/latency/otlp-metrics-body.ts: TELEMETRY_METRICS = {droneToScreen: "swarm.telemetry.drone_to_screen", frameToPixels: "swarm.live.frame_to_pixels"}; otlpMetricsBody({missionId: string | null, cell: string | null, path: "edge" | "cell", startTimeUnixNano: string, timeUnixNano: string, histograms: Record&lt;string, LatencyHistogram>}) returns the OTLP/HTTP JSON ExportMetricsServiceRequest: one resourceMetrics with resource attributes service.name = "ground-control", mission_id and cell only when set; one scopeMetrics; one histogram metric per entry with unit "ms", aggregationTemporality cumulative (2), one data point with count, sum, min, max, bucketCounts, explicitBounds and the attribute swarm.live.path. No attribute named drone_id anywhere.
+- src/latency/latency-reporter.ts: class LatencyReporter({url: string, intervalS: number, missionId, cell, path, histograms, post?: (url: string, body: string) => Promise&lt;{ok: boolean; status: number}>, clock?: {nowMs(): number; setInterval(callback: () => void, ms: number): number; clearInterval(id: number): void}}) with start(), stop(), flush(): Promise&lt;void>.
 
-`test/latency-metrics.test.ts` tests `../src/telemetry/latency-metrics.ts`, `export function createLatencyMeterProvider(config: { otlpMetricsUrl: string | null; cell: string; missionId: string; exportIntervalMs?: number }): MeterProvider | null`. Cases:
-- A null URL gives null, so nothing is exported.
-- With the URL of a real local HTTP server started by the test, recording through `new LatencyMeter(provider.getMeter("ground-control"))` from `@swarm/live/latency` and then calling `forceFlush` makes the server receive one OTLP/HTTP metrics export.
-- The export holds the histogram `swarm.live.telemetry_latency`, unit `ms`.
-- Its resource has `service.name` = `ground-control`, `cell` and `mission_id`.
-- No data point has a `drone_id` attribute.
+Behaviours: bucket placement on and between bounds; sum, count, min, max; skipped samples; the body shape above (parse it back from JSON); the body never holds drone_id; the reporter posts application/json bodies to the url every intervalS seconds of fake time, posts nothing when no sample was recorded since start, keeps running after a failed post (non ok or rejected promise), and stop() clears its interval; flush() posts at once. The tests fail until K13 lands; that is expected.
 
-`test/latency-dashboard.test.ts` reads `../observability/telemetry-latency-dashboard.json`. Cases:
-- It is valid JSON, with the uid `swarm-telemetry-latency`.
-- It has a time-series panel titled `Telemetry, Drone to Pilot's screen`.
-- The panel's Prometheus query is the p95 `histogram_quantile(0.95, ...)` of `swarm_live_telemetry_latency_milliseconds_bucket`.
-- The panel has a threshold at 400 (ms), the through-the-cell budget.
-- It has a `cell` template variable.
-- Nothing in it mentions `drone_id`.
-
-### <a id="k09"></a>K09: Scaffold: create packages/ts/maps, add the dependencies and test runners of live, maps and ground-control, update the lock file
+### <a id="k04"></a>K04: Tests: @swarm/maps (PMTiles base style, token palette, deck.gl Drone layer with binary attributes, SquadMap)
 
 | Agent | Wave | Depends on | Unblocks |
 | --- | --- | --- | --- |
-| 🖥️ frontend-implementer | 2 | [K01](#k01), [K02](#k02), [K03](#k03), [K04](#k04), [K05](#k05), [K06](#k06), [K07](#k07), [K08](#k08) | [K10](#k10), [K11](#k11), [K12](#k12), [K13](#k13), [K14](#k14), [K15](#k15), [K19](#k19) |
+| 🧪 test-writer | 1 | none | [K09](#k09), [K14](#k14), [K15](#k15), [K20](#k20) |
 
 **Files** (only this task may change them in its wave):
 
-- `packages/ts/maps/package.json`
-- `packages/ts/maps/tsconfig.json`
-- `packages/ts/maps/eslint.config.js`
-- `packages/ts/live/package.json`
-- `packages/ts/live/tsconfig.json`
-- `frontends/ground-control/package.json`
-- `frontends/ground-control/tsconfig.json`
-- `frontends/ground-control/vitest.config.ts`
-- `frontends/ground-control/playwright.config.ts`
+- `frontend/packages/maps/test/style/base-style.test.ts`
+- `frontend/packages/maps/test/style/pmtiles-protocol.test.ts`
+- `frontend/packages/maps/test/palette/map-palette.test.ts`
+- `frontend/packages/maps/test/drones/drone-layer.test.ts`
+- `frontend/packages/maps/test/drones/fit-squad.test.ts`
+- `frontend/packages/maps/test/map/squad-map.test.tsx`
+
+**Done when:** The six files exist and import only the module paths of the contract; `node -e` is not needed: once K09 has scaffolded the package, `pnpm --filter @swarm/maps exec vitest run` fails only on the missing src modules.
+
+**Brief:**
+
+Write the Vitest tests (jsdom, as frontend/packages/ui does) of the new package @swarm/maps in frontend/packages/maps. Specs: docs/specs/technical/10-frontends.md#maps ("MapLibre GL JS with self-hosted vector tiles from OpenStreetMap (PMTiles files)" and "deck.gl GPU layers for Drones; binary attribute updates for moving Drones"), docs/specs/technical/10-frontends.md#apps (maps holds the MapLibre and deck.gl layers), docs/specs/technical/10-frontends.md#live-data (deck.gl attributes updated in place), docs/specs/technical/10-frontends.md#design-system (tokens only), docs/specs/visual-identity.md#colours, ticket docs/tickets/T0.19/TICKET.md criterion 1 (docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md). jsdom has no WebGL: test pure functions, and test SquadMap with an injected fake map factory.
+
+Contract the implementation (K14, K15, K20) must meet; the package does not import @swarm/live (structural types only):
+- src/style/base-style.ts: buildBaseStyle({tilesUrl: string /* absolute URL of a .pmtiles file */, palette: MapPalette}): StyleSpecification (maplibre-gl) with version 8, one vector source "basemap" whose url is `pmtiles://` + tilesUrl and whose attribution contains "© OpenStreetMap contributors", a background layer in palette.background, and fill or line layers for the Protomaps basemap source layers earth, water, landuse, roads and buildings coloured only from the palette; no glyphs, no sprite, no symbol layer.
+- src/style/pmtiles-protocol.ts: registerPmtilesProtocol(target: {addProtocol(name: string, loader: unknown): void}): void registers the "pmtiles" protocol once, however many times it is called.
+- src/palette/map-palette.ts: type Rgba = [number, number, number, number]; interface MapPalette {background, surface, border, muted, text, drone, droneLost: Rgba}; readMapPalette(element: Element): MapPalette reads the CSS variables --color-background, --color-surface, --color-border, --color-muted, --color-text, --color-entity (drone) and --color-failure (droneLost) with getComputedStyle and converts #rrggbb to [r, g, b, 255]; a missing or malformed variable throws MapPaletteError.
+- src/drones/drone-layer.ts: interface DroneLayerData {version: number; count: number; positions: Float64Array /* lon, lat, alt */; states: Uint8Array}; LOST_STATE = 5; buildDroneLayer(data: DroneLayerData, palette: MapPalette): a deck.gl ScatterplotLayer with id "drones", data {length: count, attributes: {getPosition: {value: positions, size: 3}, getFillColor: {value: Uint8Array of count*4, size: 4, normalized: true}}} (binary attributes, no per-object accessor function), palette.drone for every state but lost and palette.droneLost for lost, and updateTriggers keyed on data.version.
+- src/drones/fit-squad.ts: squadBounds(data: DroneLayerData): [[west, south], [east, north]] | null (null when count is 0).
+- src/map/SquadMap.tsx: generic React component SquadMap&lt;T extends DroneLayerData>({tilesUrl, palette?, label, source: {current(): T | null; subscribe(listener: () => void): () => void}, onDrawn?: (data: T, drawnAtMs: number) => void, createMap?: (container: HTMLElement, style: StyleSpecification) => MapHandle}) rendering a &lt;div class="map" role="region" aria-label={label}>; MapHandle {setLayers(layers: unknown[]): void; fitBounds(bounds): void; onAfterRender(callback: () => void): void; remove(): void}. With a fake createMap, test: the region and its label; one map created; a source notification sets the Drone layer once per animation frame at most; the first non-empty data fits the bounds once; onDrawn receives the data drawn after the fake fires its after-render callback; unmount removes the map and unsubscribes.
+- src/index.ts re-exports all of these. Package stylesheet: ./styles.css.
+
+At most five code files per folder (AGENT.md, File shape). Tests fail until the package code lands; that is expected.
+
+### <a id="k05"></a>K05: Tests: ground-control runtime config, squad feed, Flight view and the App with Hold the Squad and Abort not yet wired
+
+| Agent | Wave | Depends on | Unblocks |
+| --- | --- | --- | --- |
+| 🧪 test-writer | 1 | none | [K09](#k09), [K10](#k10), [K16](#k16), [K22](#k22) |
+
+**Files** (only this task may change them in its wave):
+
+- `frontend/apps/ground-control/test/app.test.tsx`
+- `frontend/apps/ground-control/test/config/app-config.test.ts`
+- `frontend/apps/ground-control/test/flight/squad-feed.test.ts`
+- `frontend/apps/ground-control/test/flight/flight-view.test.tsx`
+- `frontend/apps/ground-control/test/flight/fakes.tsx`
+
+**Done when:** The five files exist; `pnpm --filter @swarm/ground-control exec eslint test` reports no problem other than unresolved imports of the modules K16 and K22 write; `pnpm --filter @swarm/ground-control test` fails only on those missing modules and on the replaced content-area test.
+
+**Brief:**
+
+Write the Vitest tests (jsdom) of the first Ground control screen in frontend/apps/ground-control. Specs: docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md (step 2 and the A1 screen row #screen-a1: the map and the Squad, Hold the Squad and Abort in the title bar), docs/specs/functional/business-rules/BR-023-fixed-safety-controls.md (both controls visible on every screen), docs/specs/technical/10-frontends.md#live-data (React only for panels, the map at display rate), docs/specs/technical/10-frontends.md#performance (heavy libraries loaded on demand), docs/specs/technical/08-observability.md#signals and docs/specs/technical/07-scalability.md#budgets (the measured latency), ticket docs/tickets/T0.19/TICKET.md criteria 1 to 3.
+
+Update test/app.test.tsx: keep every existing frame test, replace "shows no screen in the content area" by: main.content holds one region labelled "Map of the Squad" (message id flight.map.label, which K10 adds in four languages); ✋ Hold the Squad and 🛑 Abort are visible in header.titlebar; clicking them throws nothing and posts nothing to the live client (not yet wired, TICKET.md out of scope). Render App with injected fakes so no WebGL and no Worker is needed. Put shared fakes in test/flight/fakes.tsx: a fake LiveClient (records connect and close, lets the test push SquadSnapshots and statuses) and a fake SquadMap module (loadMap resolving to {SquadMap: a component rendering &lt;div class="map" role="region" aria-label={label}> that exposes the source it got and lets the test call onDrawn}).
+
+Contract the implementation (K16, K22) must meet:
+- src/config/app-config.ts: interface AppConfig {liveUrl: string; missionId: string | null; tilesUrl: string; metricsUrl: string | null; metricsIntervalS: number; cell: string | null; livePath: "edge" | "cell"}; DEFAULT_APP_CONFIG = {liveUrl: "ws://127.0.0.1:8080/v1/live", missionId: null, tilesUrl: "tiles/basemap.pmtiles", metricsUrl: null, metricsIntervalS: 60, cell: null, livePath: "edge"}; parseAppConfig(value: unknown): AppConfig (missing keys take the default; unknown keys, a non-ws(s) liveUrl, a missionId that is not a version 7 UUID, a non-positive or boolean metricsIntervalS, a livePath outside edge/cell throw AppConfigError); loadAppConfig(fetchConfig?: (url: string) => Promise&lt;Response>, url = "config.json"): Promise&lt;AppConfig> (a 404 gives the defaults, other failures throw AppConfigError).
+- src/flight/squad-feed.ts: class SquadFeed(client: LiveClientLike, histograms: {droneToScreen: LatencyHistogram; frameToPixels: LatencyHistogram}) with current(), subscribe(listener) (the DroneSource of SquadMap), get count(), start(url, missionId), stop(), and drawn(snapshot, drawnAtMs): for every slot with updated = 1 it records drawnAtMs - tUs[slot] / 1000 into droneToScreen, and records drawnAtMs - receivedAtMs once into frameToPixels. LatencyHistogram comes from @swarm/live (K03 contract).
+- src/flight/FlightView.tsx: FlightView({config, createLiveClient, loadMap}) where loadMap defaults to () => import("@swarm/maps") (lazy, so the first route stays small); it renders &lt;section class="flight-map" data-drone-count={n}> around the lazily loaded SquadMap labelled with flight.map.label; with a missionId it connects the live client to config.liveUrl and that Mission, without one it connects nothing and shows the empty map; data-drone-count follows the latest snapshot count, updated a few times per second at most; with metricsUrl set it starts a LatencyReporter of @swarm/live with config.metricsIntervalS, missionId, cell and livePath, and stops it on unmount.
+- src/App.tsx: App({config, createLiveClient?, loadMap?}) renders GroundControlFrame with the existing status items and FlightView as its child; onHold and onAbort stay no-ops.
+
+Tests: config parsing (defaults, each refusal, 404 gives defaults); squad feed (subscribe and notify, count, latency records for updated slots only, frameToPixels once per draw, stop closes the client); Flight view (connects with the Mission of the config, nothing without one, data-drone-count becomes 10 after a snapshot of 10 Drones, onDrawn records 10 drone-to-screen samples, unmount closes the client); the App tests above. Wrap renders in I18nProvider language en as the existing test does. At most five code files per folder. Tests fail until K16 and K22 land; that is expected.
+
+### <a id="k06"></a>K06: Tests: Playwright e2e of the ground-control image with a stand-in live socket of 10 moving Drones
+
+| Agent | Wave | Depends on | Unblocks |
+| --- | --- | --- | --- |
+| 🧪 test-writer | 1 | none | [K09](#k09), [K17](#k17), [K22](#k22) |
+
+**Files** (only this task may change them in its wave):
+
+- `frontend/apps/ground-control/playwright.config.ts`
+- `frontend/apps/ground-control/e2e/flight-view.spec.ts`
+- `frontend/apps/ground-control/e2e/live-stand-in-server.ts`
+- `frontend/apps/ground-control/e2e/squad-route.ts`
+- `frontend/apps/ground-control/e2e/global-setup.ts`
+
+**Done when:** The five files exist; `pnpm --filter @swarm/ground-control exec eslint e2e playwright.config.ts` reports no problem other than unresolved packages that K09 installs; once K09, K17, K21 and K22 land, `docker build -f frontend/apps/ground-control/Dockerfile -t ghcr.io/gpbcom/swarm/ground-control:local . && SWARM_IMAGE_TAG=local pnpm --filter @swarm/ground-control run e2e` passes.
+
+**Brief:**
+
+Write the Playwright end-to-end test of Ground control against its real image (AGENT.md, Front-end tests: tests in frontend/apps/&lt;frontend>/e2e/, against the images of infra/compose/e2e.yaml, never a development server). Specs: docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md (#screen-a1), docs/specs/functional/business-rules/BR-023-fixed-safety-controls.md, docs/specs/technical/10-frontends.md#live-data, docs/specs/technical/10-frontends.md#maps, docs/specs/technical/05-api.md#live, ticket docs/tickets/T0.19/TICKET.md criteria 1 and 3.
+
+- playwright.config.ts: export default defineE2eConfig({testDir: "./e2e", globalSetup: "./e2e/global-setup.ts", use: {baseURL: "http://127.0.0.1:8180"}}) from @swarm/e2e (qa/e2e/src/define-e2e-config.ts; it needs SWARM_IMAGE_TAG and lets SWARM_E2E_BASE_URL override the base URL); Chromium launch args that enable software WebGL in headless CI (for example --use-angle=swiftshader and --enable-unsafe-swiftshader).
+- e2e/global-setup.ts: runs `docker compose -f infra/compose/e2e.yaml up -d ground-control` from the repository root (find it relative to this file, as qa/e2e/e2e/images.spec.ts does), polls the base URL until it answers 200 within 120 s, and returns a teardown that runs `docker compose -f infra/compose/e2e.yaml rm -sf ground-control`. The compose service ground-control publishes host port 8180 to the container's port 8080 (K21 writes it; K17's nginx listens on 8080).
+- e2e/squad-route.ts: positions of 10 Drones flying a square of about 200 m around a fixed point, as a function of time.
+- e2e/live-stand-in-server.ts: a WebSocket server (package ws) on a free 127.0.0.1 port that records every message received, and after it receives a MessagePack subscription {op: subscribe, topic: mission/&lt;id>/squad, rate: full} sends every 50 ms one MessagePack SquadFrame (@msgpack/msgpack encode; fields of frontend/packages/live/src/generated/models.ts: mission_id, t_us, frames of 10 TelemetryFrames with drone_id UUIDs, increasing seq, t_us = Date.now() * 1000, lat_e7, lon_e7, altitude_m 40, speed_m_s, heading_deg, battery_pct, link_quality_pct, state "airborne").
+- e2e/flight-view.spec.ts: route **/config.json to fulfil {liveUrl: ws://127.0.0.1:&lt;port>/v1/live, missionId: a fixed version 7 UUID, tilesUrl: "tiles/basemap.pmtiles", metricsUrl: null, metricsIntervalS: 60, cell: null, livePath: "edge"}; route **/tiles/** to 404 (no PMTiles file in the image under test). Tests: the title bar shows ✋ Hold the Squad and 🛑 Abort (criterion 3); the region labelled "Map of the Squad" is visible; section.flight-map reaches data-drone-count="10"; two screenshots of the map region taken 1 s apart differ (the Drones move, criterion 1); clicking Hold the Squad and Abort leaves the server with exactly one received message, the subscription (not yet wired). Add the HTML report folder to nothing else: defineE2eConfig sets it.
+
+At most five code files per folder (e2e/ holds four). These tests run only once the image, the compose service and the app exist.
+
+### <a id="k07"></a>K07: Tests: workspace conventions for @swarm/maps and @swarm/live, the ground-control compose service and the front-end e2e step of images.yml
+
+| Agent | Wave | Depends on | Unblocks |
+| --- | --- | --- | --- |
+| 🧪 test-writer | 1 | none | [K09](#k09), [K17](#k17), [K21](#k21) |
+
+**Files** (only this task may change them in its wave):
+
+- `tests/conventions/mono_repo/frontend/test_frontend_workspace.py`
+- `tests/ci/e2e/test_compose_e2e.py`
+- `tests/ci/images/test_images_workflow.py`
+
+**Done when:** `uv run ruff check tests/conventions/mono_repo/frontend tests/ci/e2e tests/ci/images` and `uv run ruff format --check` on the three files pass; `uv run pytest tests/conventions/mono_repo/frontend/test_frontend_workspace.py tests/ci/e2e/test_compose_e2e.py tests/ci/images/test_images_workflow.py -n 2` fails only on the new tests.
+
+**Brief:**
+
+Extend three pytest files (AGENT.md Python test rules: one Test class per file, three import groups under their comments, no Any, ClassVar constants, tests named as sentences). Specs: docs/specs/technical/10-frontends.md#apps (packages live and maps, app ground-control), docs/specs/technical/10-frontends.md#maps, AGENT.md sections Mono-repo, Docker images, Front-end tests and CI/CD, ticket docs/tickets/T0.19/TICKET.md.
+
+- tests/conventions/mono_repo/frontend/test_frontend_workspace.py: add frontend/packages/maps (@swarm/maps) and frontend/packages/live (@swarm/live) to NAMES so the existing parametrised rules cover them (private module, exact versions, lock importer, shared tsconfig and eslint; live already has tsconfig and eslint). New tests: maps exports "." -> "./src/index.ts" and "./styles.css" -> "./src/styles.css"; maps depends on maplibre-gl, pmtiles, @deck.gl/core, @deck.gl/layers and @deck.gl/mapbox with exact versions and declares react and react-dom 19 as peers; maps tests with vitest; live depends on @msgpack/msgpack with an exact version and its test script runs the tests of its sub-folders (test/**/*.test.ts); ground-control depends on @swarm/live and @swarm/maps as workspace:*, has an e2e script running playwright test, and devDepends on @swarm/e2e (workspace:*) and @playwright/test with the exact version qa/e2e uses.
+- tests/ci/e2e/test_compose_e2e.py: a service named ground-control exists, publishes host port 8180 to container port 8080, and (by the existing rules) uses its published image and frontend/apps/ground-control/Dockerfile.
+- tests/ci/images/test_images_workflow.py: the e2e job runs the e2e script of the front ends through pnpm (a run containing pnpm, ./frontend/apps/ and e2e), after the step that runs ./qa/e2e, and the report upload path covers frontend/apps/*/playwright-report/ as well as qa/e2e/playwright-report/. Keep every existing test.
+
+The new tests fail until K09, K17 and K21 land; that is expected.
+
+### <a id="k08"></a>K08: Tests: the Grafana dashboard of the Telemetry latency, with the budgets as thresholds
+
+| Agent | Wave | Depends on | Unblocks |
+| --- | --- | --- | --- |
+| 🧪 test-writer | 1 | none | [K11](#k11) |
+
+**Files** (only this task may change them in its wave):
+
+- `tests/infra/charts/observability/test_telemetry_latency_dashboard.py`
+
+**Done when:** `uv run ruff check tests/infra/charts/observability` and `uv run ruff format --check tests/infra/charts/observability/test_telemetry_latency_dashboard.py` pass; `uv run pytest tests/infra/charts/observability -n 2` fails only because the dashboard file is missing.
+
+**Brief:**
+
+Write a pytest file (AGENT.md test rules: one TestTelemetryLatencyDashboard class, three import groups, no Any, ClassVar constants, JsonValue for parsed JSON) that checks infra/charts/observability/dashboards/telemetry-latency.json, the Grafana dashboard T0.17 will provision with the observability stack. Specs: docs/specs/technical/08-observability.md#signals (drone_id never a metric label), docs/specs/technical/08-observability.md#dashboards ("the budgets are drawn as thresholds on every latency panel"), docs/specs/technical/07-scalability.md#budgets (Telemetry, Drone to Pilot's screen: p95 &lt; 150 ms at the edge, &lt; 400 ms through the cell), docs/specs/technical/10-frontends.md#performance (live frame to pixels &lt; 50 ms), ticket docs/tickets/T0.19/TICKET.md criterion 2 (docs/specs/functional/business-rules/BR-014-simulation-isolation.md, docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md).
+
+The browser exports OTLP histograms swarm.telemetry.drone_to_screen and swarm.live.frame_to_pixels in ms with the data point attribute swarm.live.path (edge or cell); in Prometheus they read swarm_telemetry_drone_to_screen_milliseconds_bucket and swarm_live_frame_to_pixels_milliseconds_bucket with the label swarm_live_path. Assert: the file is valid JSON with uid swarm-telemetry-latency and a title; exactly three panels of type timeseries, each with unit ms and a Prometheus target; panel through the cell: expr is a histogram_quantile(0.95, ...) over swarm_telemetry_drone_to_screen_milliseconds_bucket with swarm_live_path="cell" and a threshold step at 400; panel at the edge: same with swarm_live_path="edge" and a threshold at 150; panel frame to pixels: histogram_quantile(0.95, ...) over swarm_live_frame_to_pixels_milliseconds_bucket with a threshold at 50; the text drone_id appears nowhere in the file. Read the file with an ENCODING ClassVar. The test fails until K11 writes the file; that is expected.
+
+### <a id="k09"></a>K09: Scaffold @swarm/maps and add the dependencies of live, maps and ground-control (sole owner of pnpm-lock.yaml)
+
+| Agent | Wave | Depends on | Unblocks |
+| --- | --- | --- | --- |
+| 🖥️ frontend-implementer | 2 | [K01](#k01), [K02](#k02), [K03](#k03), [K04](#k04), [K05](#k05), [K06](#k06), [K07](#k07) | [K12](#k12), [K13](#k13), [K14](#k14), [K15](#k15), [K16](#k16), [K17](#k17), [K18](#k18), [K23](#k23) |
+
+**Files** (only this task may change them in its wave):
+
+- `frontend/packages/maps/package.json`
+- `frontend/packages/maps/tsconfig.json`
+- `frontend/packages/maps/eslint.config.js`
+- `frontend/packages/maps/vitest.config.ts`
+- `frontend/packages/live/package.json`
+- `frontend/packages/live/tsconfig.json`
+- `frontend/apps/ground-control/package.json`
+- `frontend/apps/ground-control/tsconfig.json`
+- `frontend/apps/ground-control/eslint.config.js`
+- `frontend/apps/ground-control/vite.config.ts`
 - `pnpm-lock.yaml`
 
-**Done when:** `pnpm install --frozen-lockfile` succeeds from the root. `pnpm --filter ./packages/ts/maps run lint` and `pnpm --filter ./packages/ts/live run lint` pass. `pnpm --filter ./frontends/ground-control run lint` passes. The tests of K01 to K08 now fail only because of missing implementation modules, not missing dependencies.
+**Done when:** `pnpm install --frozen-lockfile` succeeds at the root; `uv run pytest tests/conventions/mono_repo/frontend/test_frontend_workspace.py -n 2` passes; `pnpm --filter @swarm/maps exec vitest --version` prints a version.
 
 **Brief:**
 
-Prepare the workspace so that the tests of K01 to K08 can run. You are the only task that changes these manifests and `pnpm-lock.yaml`, so that the parallel tasks of wave 3 never conflict on them. Specification: [🗂️ GUI and WebUI: apps and shared packages](docs/specs/technical/10-frontends.md#apps) (packages `live` and `maps`, app `ground-control`; the stack is React 19, Vite, Vitest and Playwright), [🗺️ GUI and WebUI: maps and 3D](docs/specs/technical/10-frontends.md#maps), [📨 GUI and WebUI: live data in the browser](docs/specs/technical/10-frontends.md#live-data), [🩺 Observability: signals](docs/specs/technical/08-observability.md#signals) (OpenTelemetry SDK for TypeScript) and [🎬 UC-025](docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md). Also follow AGENT.md: TypeScript packages extend `@swarm/config`, and the `lint`, `typecheck` and `test` scripts are run by CI.
+Create the manifests and tool configuration that the later tasks need, and install every dependency in one go: this task alone writes pnpm-lock.yaml. Specs: docs/specs/technical/10-frontends.md#apps (live: WebSocket client, MessagePack decoder in a Web Worker; maps: MapLibre and deck.gl layers; stack React 19, Vite, Vitest and Playwright), docs/specs/technical/10-frontends.md#maps, docs/specs/technical/10-frontends.md#live-data, docs/specs/technical/10-frontends.md#performance, AGENT.md (Commands, Mono-repo, Front-end tests), ticket docs/tickets/T0.19/TICKET.md. Read the convention tests tests/conventions/mono_repo/frontend/test_frontend_workspace.py (K07) and every test of K01 to K06 to know each import. Follow frontend/packages/ui and frontend/apps/ground-control: exact versions only, @swarm/config as workspace:*.
 
-1. **`packages/ts/maps`** (new, `@swarm/maps`). Copy the shape of `packages/ts/live` for `package.json`, `tsconfig.json` and `eslint.config.js`.
-   - Scripts: `lint`, `typecheck`, and `test` = `node --experimental-strip-types --test test/*.test.ts`.
-   - Subpath exports: `./base-map` → `./src/base-map/create-base-map.ts`, `./base-map-style` → `./src/base-map/base-map-style.ts`, `./drone-layer` → `./src/drone-layer/drone-layer.ts`, `./drone-attributes` → `./src/drone-layer/drone-attributes.ts`. There is no root `index.ts`, so the wave 3 tasks never share one.
-   - Dependencies: `maplibre-gl`, `pmtiles`, `@deck.gl/core`, `@deck.gl/layers`, `@deck.gl/mapbox`, and `@protomaps/basemaps` if the style needs its layer names.
-2. **`packages/ts/live`**.
-   - Add the dependencies `@msgpack/msgpack` and `@opentelemetry/api`, and the dev dependencies `ws`, `@types/ws` and `@opentelemetry/sdk-metrics`.
-   - Add these subpath exports beside `.`: `./squad` → `./src/squad/squad-store.ts`, `./snapshot` → `./src/squad/squad-snapshot.ts`, `./client` → `./src/client/live-client.ts`, `./latency` → `./src/latency/latency-meter.ts`. Do not edit `src/index.ts`.
-   - Keep the existing `test` script, which also runs `generate.ts --check`.
-   - Add the `DOM` lib to `tsconfig.json` if the client needs it. Leave the worker's lib to K16.
-3. **`frontends/ground-control`** (the shell of T0.14).
-   - Add the dependencies `@swarm/live`, `@swarm/maps` (workspace), `maplibre-gl`, `@deck.gl/core`, `@deck.gl/layers`, `@deck.gl/mapbox`, `@opentelemetry/api`, `@opentelemetry/sdk-metrics`, `@opentelemetry/exporter-metrics-otlp-http` and `@opentelemetry/resources`.
-   - If T0.14 set up no test runner, add the dev dependencies `vitest`, `jsdom`, `@testing-library/react` and `@playwright/test`. Add `ws` and `@msgpack/msgpack` as dev dependencies for the e2e stand-in.
-   - Set the `test` script to run Vitest, using `vitest.config.ts` with jsdom and `test/**/*.test.ts(x)`.
-   - Write or extend `playwright.config.ts`, keeping T0.10's base URL and reporter if they exist. It starts `e2e/live-stand-in-server.ts` as a `webServer` on port 8765.
-4. Pin exact versions, as `packages/ts/live/package.json` does, and run `pnpm install` to update `pnpm-lock.yaml`.
+- frontend/packages/maps: package.json for @swarm/maps (private, type module, exports ".": "./src/index.ts" and "./styles.css": "./src/styles.css"; dependencies maplibre-gl, pmtiles, @deck.gl/core, @deck.gl/layers, @deck.gl/mapbox in exact current versions; react and react-dom 19.3.1 as peer and dev dependencies; dev dependencies as @swarm/ui's for vitest, jsdom, testing-library, @vitejs/plugin-react, types, eslint, typescript; scripts lint, typecheck tsc --noEmit -p tsconfig.json, test vitest run); tsconfig.json and eslint.config.js as frontend/packages/ui's; vitest.config.ts with jsdom and test/**/*.test.{ts,tsx}.
+- frontend/packages/live: add the dependency @msgpack/msgpack (exact) and the dev dependencies ws and @types/ws only if K02 needs them; change the test script to run `node --experimental-strip-types --test "test/**/*.test.ts"` then the existing generate.ts --check; in tsconfig.json add the DOM and WebWorker libraries the worker and client need (if DOM and WebWorker clash, keep DOM and let the worker entry declare its scope, and report it).
+- frontend/apps/ground-control: dependencies @swarm/live and @swarm/maps (workspace:*); dev dependencies @swarm/e2e (workspace:*), @playwright/test with the exact version of qa/e2e/package.json, ws, @types/ws and @msgpack/msgpack for the e2e stand-in server; script e2e: playwright test; tsconfig.json includes e2e and playwright.config.ts; eslint.config.js ignores dist/, playwright-report/ and test-results/; vite.config.ts keeps base "./" and adds worker: {format: "es"} so the module worker of @swarm/live bundles.
 
-Write no source or test file.
+Run `pnpm install` at the root. Report every version you picked as a decision (TKT-14). Do not write any src file.
 
-### <a id="k10"></a>K10: Implement SquadStore: MessagePack decode, delta merge, typed-array snapshots
+### <a id="k10"></a>K10: Translations: the map label of the Flight view in English, French, German and Spanish
 
 | Agent | Wave | Depends on | Unblocks |
 | --- | --- | --- | --- |
-| 🖥️ frontend-implementer | 3 | [K01](#k01), [K09](#k09) | [K16](#k16) |
+| 🖥️ frontend-implementer | 2 | [K05](#k05) | [K22](#k22), [K23](#k23) |
 
 **Files** (only this task may change them in its wave):
 
-- `packages/ts/live/src/squad/squad-store.ts`
-- `packages/ts/live/src/squad/squad-snapshot.ts`
-- `packages/ts/live/src/squad/drone-state-code.ts`
+- `frontend/packages/i18n/src/messages/en.json`
+- `frontend/packages/i18n/src/messages/fr.json`
+- `frontend/packages/i18n/src/messages/de.json`
+- `frontend/packages/i18n/src/messages/es.json`
 
-**Done when:** `pnpm --filter ./packages/ts/live run lint` and `pnpm --filter ./packages/ts/live run typecheck` pass. `node --experimental-strip-types --test packages/ts/live/test/squad-store.test.ts` passes.
+**Done when:** `pnpm --filter ./frontend/packages/i18n run check-messages` passes and `pnpm --filter ./frontend/packages/i18n test` passes.
 
 **Brief:**
 
-Implement the decoder that runs inside the Web Worker of `packages/ts/live`, so that the tests of `packages/ts/live/test/squad-store.test.ts` (K01) pass. Specification:
-- [📨 GUI and WebUI: live data in the browser](docs/specs/technical/10-frontends.md#live-data): MessagePack decode, delta merge, typed arrays for positions, states and battery, and a transferable snapshot.
-- [📨 API layer: live data over WebSocket](docs/specs/technical/05-api.md#live): delta-encoded `SquadFrame`.
-- [🎬 UC-025](docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md).
-- [📏 BR-014](docs/specs/functional/business-rules/BR-014-simulation-isolation.md).
+Add the FormatJS message flight.map.label to the four catalogues of frontend/packages/i18n/src/messages/: English "Map of the Squad", and its French, German and Spanish translations, written with the glossary names (docs/specs/glossary.md: Squad is the entity name; keep the sense "map of the Squad"). Specs: docs/specs/functional/business-rules/BR-017-every-screen-in-four-languages.md (every screen in four languages), docs/specs/technical/10-frontends.md#apps (i18n holds FormatJS messages in four languages), docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md (step 2: the map and the Squad), ticket docs/tickets/T0.19/TICKET.md. Read the tests of K05 (frontend/apps/ground-control/test/) to confirm the id and the English text; add any other message id they use, in all four languages. Keep the existing keys and their order; add the new keys at the end.
 
-The frame types are in `src/generated/models.ts`, which is never edited. Decode with `@msgpack/msgpack`, matching the encoding of the gateway `/v1/live` of T0.18.
-
-Write the API fixed by K01:
-- `SquadStore`, with `merge`, `snapshot`, `size` and `rejectedMessages`;
-- the `SquadSnapshot` interface;
-- `DRONE_STATE_CODES`.
-
-Behaviour:
-- Each Drone keeps a stable slot.
-- A frame with an older `seq` never overwrites a newer one.
-- Frames of another Mission are rejected.
-- A malformed message is counted and changes nothing.
-- The snapshot copies into fresh typed arrays, so that the worker can transfer them.
-
-Keep the merge allocation-free in steady state, for the target of 5,000 Drones. Do not touch any manifest, test or other module. Report as `blocked` with the file and the change if a K01 test is wrong (TKT-19).
-
-### <a id="k11"></a>K11: Implement LatencyMeter: Telemetry latency histogram
+### <a id="k11"></a>K11: Grafana dashboard: Telemetry latency from Drone to screen, through the cell and at the edge, with the budget thresholds
 
 | Agent | Wave | Depends on | Unblocks |
 | --- | --- | --- | --- |
-| 🖥️ frontend-implementer | 3 | [K03](#k03), [K09](#k09) | [K17](#k17) |
+| 🐍 implementer | 2 | [K08](#k08) | none |
 
 **Files** (only this task may change them in its wave):
 
-- `packages/ts/live/src/latency/latency-meter.ts`
+- `infra/charts/observability/dashboards/telemetry-latency.json`
 
-**Done when:** `pnpm --filter ./packages/ts/live run lint` and `typecheck` pass. `node --experimental-strip-types --test packages/ts/live/test/latency-meter.test.ts` passes.
+**Done when:** `uv run pytest tests/infra/charts/observability -n 2` passes.
 
 **Brief:**
 
-Implement `packages/ts/live/src/latency/latency-meter.ts` so that `packages/ts/live/test/latency-meter.test.ts` (K03) passes. Specification:
-- [🩺 Observability: signals](docs/specs/technical/08-observability.md#signals): OpenTelemetry metrics, and `drone_id` never a metric label.
-- the budget [⏱️ Telemetry, Drone to Pilot's screen](docs/specs/technical/07-scalability.md#budgets).
-- [🎬 UC-025](docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md).
-- [📏 BR-014](docs/specs/functional/business-rules/BR-014-simulation-isolation.md).
+Write the Grafana dashboard JSON infra/charts/observability/dashboards/telemetry-latency.json that shows the Telemetry latency measured in the browser (T0.17 provisions every dashboard of this folder with its Grafana; it creates the rest of the chart). Specs: docs/specs/technical/08-observability.md#signals, docs/specs/technical/08-observability.md#dashboards (budgets drawn as thresholds on every latency panel), docs/specs/technical/07-scalability.md#budgets (Telemetry, Drone to Pilot's screen: p95 &lt; 150 ms at the edge, &lt; 400 ms through the cell), docs/specs/technical/10-frontends.md#performance (live frame to pixels &lt; 50 ms), ticket docs/tickets/T0.19/TICKET.md criterion 2. The test is tests/infra/charts/observability/test_telemetry_latency_dashboard.py (K08); read it first.
 
-`LatencyMeter` holds `static INSTRUMENT_NAME = "swarm.live.telemetry_latency"` and `static UNIT = "ms"`. It creates one histogram from the `Meter` of `@opentelemetry/api` it is given. Choose explicit bucket boundaries that resolve the 150 ms edge budget and the 400 ms cell budget.
+Dashboard: uid swarm-telemetry-latency, title "Telemetry latency", a datasource template variable of type prometheus, three timeseries panels with unit ms and red threshold steps: "Telemetry, Drone to Pilot's screen, through the cell" = histogram_quantile(0.95, sum by (le) (rate(swarm_telemetry_drone_to_screen_milliseconds_bucket{swarm_live_path="cell"}[5m]))) with a threshold at 400; "Telemetry, Drone to Pilot's screen, at the edge" = the same with swarm_live_path="edge" and 150; "Live frame to pixels, inside the browser" = histogram_quantile(0.95, sum by (le) (rate(swarm_live_frame_to_pixels_milliseconds_bucket[5m]))) with 50. No label or text drone_id anywhere. Plain British English titles, no em dash.
 
-`record(frameTimesUs, paintedAtMs)` records `paintedAtMs - t_us / 1000` for each frame, with no attribute. A negative sample is skipped and counted in `skippedSamples`. The meter allocates nothing per sample.
-
-Touch no other file. Report `blocked` if K03's test is wrong (TKT-19).
-
-### <a id="k12"></a>K12: Implement the MapLibre base map on self-hosted PMTiles
+### <a id="k12"></a>K12: live: subscription encoder, SquadFrame decoder and the SquadStore delta merge into typed arrays
 
 | Agent | Wave | Depends on | Unblocks |
 | --- | --- | --- | --- |
-| 🖥️ frontend-implementer | 3 | [K05](#k05), [K09](#k09) | [K17](#k17) |
+| 🖥️ frontend-implementer | 3 | [K01](#k01), [K09](#k09) | [K19](#k19), [K23](#k23) |
 
 **Files** (only this task may change them in its wave):
 
-- `packages/ts/maps/src/base-map/base-map-style.ts`
-- `packages/ts/maps/src/base-map/create-base-map.ts`
+- `frontend/packages/live/src/protocol/topics.ts`
+- `frontend/packages/live/src/protocol/squad-frame-decoder.ts`
+- `frontend/packages/live/src/protocol/live-protocol-errors.ts`
+- `frontend/packages/live/src/snapshot/squad-snapshot.ts`
+- `frontend/packages/live/src/snapshot/squad-store.ts`
 
-**Done when:** `pnpm --filter ./packages/ts/maps run lint` and `typecheck` pass. `node --experimental-strip-types --test packages/ts/maps/test/base-map-style.test.ts` passes.
+**Done when:** `node --experimental-strip-types --test frontend/packages/live/test/protocol/*.test.ts frontend/packages/live/test/snapshot/*.test.ts` passes; `pnpm --filter @swarm/live exec eslint src/protocol src/snapshot test/protocol test/snapshot` passes.
 
 **Brief:**
 
-Implement the base map of `@swarm/maps`, so that `packages/ts/maps/test/base-map-style.test.ts` (K05) passes. Specification: [🗺️ GUI and WebUI: maps and 3D](docs/specs/technical/10-frontends.md#maps) (MapLibre GL JS with self-hosted OpenStreetMap PMTiles; deck.gl layers above it), [🎨 GUI and WebUI: design system](docs/specs/technical/10-frontends.md#design-system) (colours from the tokens only, light and dark), [🗂️ GUI and WebUI: apps and shared packages](docs/specs/technical/10-frontends.md#apps) and [🎬 UC-025 step 2](docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md#main-flow).
+Implement the protocol and the snapshot store of @swarm/live so the tests of K01 (frontend/packages/live/test/protocol/ and test/snapshot/) pass; read them first, they fix the exact contract (squadTopic, encodeSquadSubscription, decodeSquadFrame, LiveTopicInvalidError, LiveMessageUnreadableError, DRONE_STATES, SquadSnapshot, SquadStore with merge, dirty, snapshot and transferables). Specs: docs/specs/technical/10-frontends.md#live-data (MessagePack decode, delta merge, typed arrays for positions, states and battery, transferable snapshot), docs/specs/technical/05-api.md#live (subscribe message and topic mission/&lt;id>/squad, MessagePack frames), ticket docs/tickets/T0.19/TICKET.md criterion 1. The wire format is what backend/swarm-service/src/swarm_service/shared/live/live_codec.py sends: MessagePack maps with the field names of frontend/packages/live/src/generated/models.ts; use those generated types (SquadFrame, TelemetryFrame, DroneState, LiveSubscription) instead of redefining them. Use @msgpack/msgpack; decode int64 values (t_us) as numbers. The decoder validates every field and refuses booleans where numbers are expected. Merge keeps a stable slot per Drone in order of first appearance, ignores frames of another Mission and frames whose seq is not newer, keeps absent Drones' last values, and snapshot() copies into fresh buffers so they can be transferred. These modules hold no DOM code: they run in the worker and in node tests. Do not touch src/index.ts (K19 exports them). At most five code files per folder.
 
-`base-map-style.ts` holds `BaseMapPalette` and `buildBaseMapStyle({ pmtilesUrl, palette })`. The style is a MapLibre style, version 8, with one vector source `pmtiles://<pmtilesUrl>` and the layers of the Protomaps basemap schema. Every colour comes from the palette. An empty URL is refused.
-
-`create-base-map.ts` holds two functions:
-- `registerPmtilesProtocol()` registers the `pmtiles` protocol on `maplibre-gl` once, and is idempotent.
-- `createBaseMap(container: HTMLElement, options: { style: StyleSpecification; center: [number, number]; zoom: number }): { map: maplibregl.Map; overlay: MapboxOverlay }` creates the map and attaches a deck.gl `MapboxOverlay` from `@deck.gl/mapbox`, through which K17 adds the Drone layer.
-
-Touch no other file. Report `blocked` if K05's test is wrong (TKT-19).
-
-### <a id="k13"></a>K13: Implement the deck.gl Drone layer with in-place binary attributes
+### <a id="k13"></a>K13: live: latency histogram, OTLP/HTTP JSON body and the periodic LatencyReporter
 
 | Agent | Wave | Depends on | Unblocks |
 | --- | --- | --- | --- |
-| 🖥️ frontend-implementer | 3 | [K04](#k04), [K09](#k09) | [K17](#k17) |
+| 🖥️ frontend-implementer | 3 | [K03](#k03), [K09](#k09) | [K19](#k19), [K23](#k23) |
 
 **Files** (only this task may change them in its wave):
 
-- `packages/ts/maps/src/drone-layer/drone-attributes.ts`
-- `packages/ts/maps/src/drone-layer/drone-layer.ts`
+- `frontend/packages/live/src/latency/latency-histogram.ts`
+- `frontend/packages/live/src/latency/otlp-metrics-body.ts`
+- `frontend/packages/live/src/latency/latency-reporter.ts`
 
-**Done when:** `pnpm --filter ./packages/ts/maps run lint` and `typecheck` pass. `node --experimental-strip-types --test packages/ts/maps/test/drone-layer.test.ts` passes.
+**Done when:** `node --experimental-strip-types --test frontend/packages/live/test/latency/*.test.ts` passes; `pnpm --filter @swarm/live exec eslint src/latency test/latency` passes.
 
 **Brief:**
 
-Implement the Drone layer of `@swarm/maps`, so that `packages/ts/maps/test/drone-layer.test.ts` (K04) passes. Specification:
-- [🗺️ GUI and WebUI: maps and 3D](docs/specs/technical/10-frontends.md#maps): deck.gl GPU layers for Drones, with binary attribute updates for moving Drones.
-- [📨 GUI and WebUI: live data in the browser](docs/specs/technical/10-frontends.md#live-data): deck.gl attributes are updated in place, with a target of 5,000 moving Drones at 60 frames per second.
-- [⏱️ GUI and WebUI: front-end budgets](docs/specs/technical/10-frontends.md#performance): live frame to pixels under 50 ms.
-- [🎬 UC-025](docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md).
+Implement the Telemetry latency measure of @swarm/live so the tests of K03 (frontend/packages/live/test/latency/) pass; read them first, they fix the contract (LATENCY_BOUNDS_MS, LatencyHistogram, TELEMETRY_METRICS, otlpMetricsBody, LatencyReporter). Specs: docs/specs/technical/08-observability.md#signals (OpenTelemetry metrics; mission_id and cell as resource attributes; drone_id never a metric label; no secrets or personal data), docs/specs/technical/07-scalability.md#budgets (the bounds include 150 and 400 ms), docs/specs/technical/10-frontends.md#performance (the bounds include 50 ms), ticket docs/tickets/T0.19/TICKET.md criterion 2. The body is the OTLP/HTTP JSON ExportMetricsServiceRequest (resourceMetrics, scopeMetrics, histogram with cumulative temporality 2, explicitBounds, bucketCounts as the JSON encoding of OTLP expects), service.name ground-control, data point attribute swarm.live.path. The reporter posts with fetch by default (Content-Type application/json), never throws on a failed post (it warns once on the console and keeps going), posts nothing without new samples, and accepts injected post and clock for the tests. No OpenTelemetry SDK dependency: T0.17 brings the SDKs; report this choice and its alternative (TKT-14). Do not touch src/index.ts (K19 exports them).
 
-Write `DroneAttributes.update(input, colours)` and `createDroneLayer(data, options)` as K04 fixes them:
-- `update` reuses its `Float64Array` and `Uint8Array` buffers while the length does not grow.
-- `createDroneLayer` returns a `ScatterplotLayer` with binary `data`, a stable id and a pixel radius.
-- The layer is told the data changed without being given new JavaScript objects per Drone.
-- The package does not import `@swarm/live`.
-
-Touch no other file. Report `blocked` if K04's test is wrong (TKT-19).
-
-### <a id="k14"></a>K14: Grafana dashboard of the Telemetry latency from Drone to screen
+### <a id="k14"></a>K14: maps: PMTiles base style, the pmtiles protocol and the palette read from the tokens
 
 | Agent | Wave | Depends on | Unblocks |
 | --- | --- | --- | --- |
-| 🖥️ frontend-implementer | 3 | [K08](#k08), [K09](#k09) | [K17](#k17) |
+| 🖥️ frontend-implementer | 3 | [K04](#k04), [K09](#k09) | [K20](#k20), [K23](#k23) |
 
 **Files** (only this task may change them in its wave):
 
-- `frontends/ground-control/observability/telemetry-latency-dashboard.json`
+- `frontend/packages/maps/src/style/base-style.ts`
+- `frontend/packages/maps/src/style/pmtiles-protocol.ts`
+- `frontend/packages/maps/src/palette/map-palette.ts`
 
-**Done when:** The JSON parses. The app's test run of `test/latency-dashboard.test.ts` passes.
+**Done when:** `pnpm --filter @swarm/maps exec vitest run test/style test/palette` passes; `pnpm --filter @swarm/maps exec eslint src/style src/palette` passes.
 
 **Brief:**
 
-Write the Grafana dashboard that shows the Telemetry latency from Drone to screen, so that `frontends/ground-control/test/latency-dashboard.test.ts` (K08) passes. This is acceptance criterion 2 of `docs/tickets/T0.19/TICKET.md`. Specification:
-- [🩺 Observability: signals](docs/specs/technical/08-observability.md#signals): metrics stored in Prometheus per cell, and `drone_id` never a label.
-- [📊 Observability: dashboards](docs/specs/technical/08-observability.md#dashboards): budgets are drawn as thresholds on every latency panel.
-- the budget [⏱️ Telemetry, Drone to Pilot's screen](docs/specs/technical/07-scalability.md#budgets): p95 &lt; 400 ms through the cell.
-- [🎬 UC-025](docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md).
+Implement the base map of @swarm/maps so the tests frontend/packages/maps/test/style/*.test.ts and test/palette/map-palette.test.ts (K04) pass; read them first, they fix the contract (buildBaseStyle, registerPmtilesProtocol, MapPalette, Rgba, readMapPalette, MapPaletteError). Specs: docs/specs/technical/10-frontends.md#maps ("MapLibre GL JS with self-hosted vector tiles from OpenStreetMap (PMTiles files ...)"), docs/specs/technical/10-frontends.md#design-system and docs/specs/visual-identity.md#colours (colours come from the tokens only, light and dark), ticket docs/tickets/T0.19/TICKET.md. The style uses one vector source basemap with url pmtiles://&lt;tilesUrl> and the attribution "© OpenStreetMap contributors" (required by the OpenStreetMap licence), a background layer and fill or line layers for the Protomaps basemap source layers earth, water, landuse, roads and buildings, coloured only from the palette (background, surface, border, muted, text); no glyphs, sprite or symbol layer, so nothing is fetched from a third party. registerPmtilesProtocol uses the Protocol of the pmtiles package and registers it once. readMapPalette reads the token CSS variables with getComputedStyle (--color-background, --color-surface, --color-border, --color-muted, --color-text, --color-entity, --color-failure). Do not touch src/index.ts (K20).
 
-Write a Grafana dashboard JSON model with:
-- the uid `swarm-telemetry-latency`;
-- a Prometheus data source variable and a `cell` variable;
-- a time-series panel `Telemetry, Drone to Pilot's screen` with `histogram_quantile(0.95, sum by (le) (rate(swarm_live_telemetry_latency_milliseconds_bucket{cell=~"$cell"}[1m])))` and a threshold at 400 ms;
-- a p50 series and a sample-rate panel beside it.
-
-The Grafana that provisions this file arrives with the observability stack of T0.17. Write no chart. Touch no other file.
-
-### <a id="k15"></a>K15: Ground control Flight screen: frame, title bar with Hold the Squad and Abort shown but not wired, runtime config
+### <a id="k15"></a>K15: maps: the deck.gl Drone layer with binary attributes, and the bounds of the Squad
 
 | Agent | Wave | Depends on | Unblocks |
 | --- | --- | --- | --- |
-| 🖥️ frontend-implementer | 3 | [K06](#k06), [K09](#k09) | [K17](#k17), [K18](#k18) |
+| 🖥️ frontend-implementer | 3 | [K04](#k04), [K09](#k09) | [K20](#k20), [K23](#k23) |
 
 **Files** (only this task may change them in its wave):
 
-- `frontends/ground-control/src/flight/flight-screen.tsx`
-- `frontends/ground-control/src/flight/safety-controls.tsx`
-- `frontends/ground-control/src/config/app-config.ts`
-- `frontends/ground-control/src/App.tsx`
+- `frontend/packages/maps/src/drones/drone-layer.ts`
+- `frontend/packages/maps/src/drones/fit-squad.ts`
 
-**Done when:** `pnpm --filter ./frontends/ground-control run lint`, `typecheck` and `test -- test/flight-screen.test.tsx test/app-config.test.ts` pass.
+**Done when:** `pnpm --filter @swarm/maps exec vitest run test/drones` passes; `pnpm --filter @swarm/maps exec eslint src/drones` passes.
 
 **Brief:**
 
-Build the first screen of Ground control, so that `frontends/ground-control/test/flight-screen.test.tsx` and `test/app-config.test.ts` (K06) pass. Specification:
-- [📏 BR-023: Fixed safety controls](docs/specs/functional/business-rules/BR-023-fixed-safety-controls.md)
-- [🎬 UC-025 step 2 and screen A1](docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md#screen-a1)
-- [🎨 GUI and WebUI: design system](docs/specs/technical/10-frontends.md#design-system): the frames are layout components of `packages/ts/ui` and use the tokens only.
-- [🗂️ GUI and WebUI: apps and shared packages](docs/specs/technical/10-frontends.md#apps)
-- the Ground control frame row of `docs/specs/visual-identity.md#components`
-- [📏 BR-014](docs/specs/functional/business-rules/BR-014-simulation-isolation.md)
+Implement the Drone layer of @swarm/maps so the tests frontend/packages/maps/test/drones/*.test.ts (K04) pass; read them first, they fix the contract (DroneLayerData {version, count, positions Float64Array lon/lat/alt, states Uint8Array}, LOST_STATE = 5, buildDroneLayer(data, palette), squadBounds(data)). Specs: docs/specs/technical/10-frontends.md#maps ("deck.gl GPU layers for Drones ...; binary attribute updates for moving Drones"), docs/specs/technical/10-frontends.md#live-data ("deck.gl attributes updated in place"; 5,000 moving Drones at 60 frames per second), docs/specs/technical/10-frontends.md#performance, ticket docs/tickets/T0.19/TICKET.md criterion 1 (docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md step 2). Use a ScatterplotLayer with id drones and binary attributes only (getPosition {value: positions, size: 3}, getFillColor {value, size: 4, normalized: true}), no per-object accessor function; reuse the colour buffer between calls when count does not change; palette.drone for every state but lost, palette.droneLost for lost; updateTriggers keyed on data.version; radius in pixels so a Drone stays visible at every zoom. MapPalette comes from src/palette/map-palette.ts (K14, same wave): import its type only by that path. Do not touch src/index.ts (K20).
 
-Use the Ground control frame and the button components that T0.14 put in `@swarm/ui`. Do not edit `packages/ts/ui`.
+### <a id="k16"></a>K16: ground-control: runtime configuration (config.json) and its loader
 
-- `SafetyControls` renders `✋ Hold the Squad` (button secondary) and `🛑 Abort` (button danger) in the frame's title bar, with no action attached and no command sent, because the roadmap says they are not yet wired. If T0.14's frame already renders them, pass them through it.
-- `FlightScreen({ missionId, map })` renders the frame with the 🛰️ Flight side bar item active, the title Ground control and the Mission id, and a content area `data-testid="flight-map"` holding `map`.
-- `app-config.ts` holds `AppConfig`, `AppConfigError` and `parseAppConfig(json, search)`, as K06 fixes them, plus `loadAppConfig()`, which fetches the runtime `config.json` served beside the app and parses it with `location.search`.
-- `App.tsx` is the root of T0.14's shell; if T0.14 named it otherwise, change that file and report it. It loads the config, then renders `FlightScreen`. On an `AppConfigError` it renders the frame with the error message.
+| Agent | Wave | Depends on | Unblocks |
+| --- | --- | --- | --- |
+| 🖥️ frontend-implementer | 3 | [K05](#k05), [K09](#k09) | [K22](#k22), [K23](#k23) |
 
-Tokens only: no colour or font of your own. Report `blocked` if a K06 test is wrong (TKT-19).
+**Files** (only this task may change them in its wave):
 
-### <a id="k19"></a>K19: Document the live and maps packages and the Ground control app in AGENT.md
+- `frontend/apps/ground-control/src/config/app-config.ts`
+- `frontend/apps/ground-control/src/config/load-app-config.ts`
+- `frontend/apps/ground-control/public/config.json`
+
+**Done when:** `pnpm --filter @swarm/ground-control exec vitest run test/config` passes; `pnpm --filter @swarm/ground-control exec eslint src/config` passes.
+
+**Brief:**
+
+Implement the runtime configuration of Ground control so frontend/apps/ground-control/test/config/app-config.test.ts (K05) passes; read it first, it fixes the contract (AppConfig, DEFAULT_APP_CONFIG, parseAppConfig, AppConfigError, loadAppConfig). Specs: docs/specs/technical/05-api.md#live ("At the edge Ground control connects straight to the flight engine with the same protocol, so the same front end works locally and remotely": the image reads where to connect at run time), docs/specs/technical/08-observability.md#signals (mission_id and cell as resource attributes), docs/specs/technical/07-scalability.md#budgets (livePath edge or cell selects the budget), ticket docs/tickets/T0.19/TICKET.md. The default liveUrl ws://127.0.0.1:8080/v1/live is the edge flight engine's live socket of backend/apps/flight-engine/conf/app.yaml; metricsIntervalS 60 is the OpenTelemetry SDK default export interval. public/config.json holds every default written out, so the image ships it and a deployment replaces it. Put AppConfigError beside the parser in app-config.ts. No secret in the configuration.
+
+### <a id="k17"></a>K17: ground-control: the image (multi-stage Dockerfile, unprivileged nginx serving the app, config.json and self-hosted tiles)
+
+| Agent | Wave | Depends on | Unblocks |
+| --- | --- | --- | --- |
+| 🖥️ frontend-implementer | 3 | [K06](#k06), [K07](#k07), [K09](#k09) | [K21](#k21), [K23](#k23) |
+
+**Files** (only this task may change them in its wave):
+
+- `frontend/apps/ground-control/Dockerfile`
+- `frontend/apps/ground-control/nginx.conf`
+
+**Done when:** `docker build -f frontend/apps/ground-control/Dockerfile -t ghcr.io/gpbcom/swarm/ground-control:local .` succeeds from the repository root (environment check: skipped if docker is missing); the container started from it answers 200 on / and on /config.json at port 8080.
+
+**Brief:**
+
+Write the image of Ground control (AGENT.md, Docker images: one image per front end, a multi-stage Dockerfile in its folder, built from the repository root because the shared lock files are there; CI discovers it through .github/scripts/detect_changes.py and scans it with Trivy, so use current, pinned base images). Specs: docs/specs/technical/10-frontends.md#apps, docs/specs/technical/10-frontends.md#maps (self-hosted PMTiles), docs/specs/technical/10-frontends.md#performance (the apps cache their shell), docs/specs/technical/09-deployment.md, ticket docs/tickets/T0.19/TICKET.md criterion 1. The e2e test frontend/apps/ground-control/e2e/ (K06) and tests/ci/e2e/test_compose_e2e.py (K07) use it.
+
+- Build stage: node 22 with corepack and the pnpm version of the root package.json packageManager; copy the workspace manifests and pnpm-lock.yaml, `pnpm install --frozen-lockfile --filter @swarm/ground-control...`, copy frontend/, then `pnpm --filter @swarm/ground-control build`.
+- Run stage: an unprivileged nginx image (non-root, listening on 8080) serving dist/ from /usr/share/nginx/html with nginx.conf: index.html fallback for the app; config.json served with no-store so a deployment's replacement is read; hashed assets cached long; location /tiles/ served from /srv/tiles (a volume a deployment mounts; no PMTiles file is committed) with the .pmtiles MIME type application/octet-stream and HTTP range requests; a 404 when a tile file is missing.
+- No secret, no build argument holding one. Report each base image and version you picked as a decision.
+
+### <a id="k18"></a>K18: Docs: AGENT.md names the live worker, the maps package, the ground-control image and its e2e command
 
 | Agent | Wave | Depends on | Unblocks |
 | --- | --- | --- | --- |
@@ -751,106 +599,119 @@ Tokens only: no colour or font of your own. Report `blocked` if a K06 test is wr
 
 - `AGENT.md`
 
-**Done when:** `AGENT.md` describes the three pieces in its Mono-repo section. `grep -n 'packages/ts/maps' AGENT.md` finds the new text, and the text has no em dash.
+**Done when:** `grep -n '@swarm/maps' AGENT.md` and `grep -n 'pnpm --filter @swarm/ground-control run e2e' AGENT.md` each find a line; `grep -c '—' AGENT.md` prints 0.
 
 **Brief:**
 
-Update the Mono-repo section of `AGENT.md`, the paragraph that lists the packages, to describe the TypeScript pieces this ticket adds. Specification: [🗂️ GUI and WebUI: apps and shared packages](docs/specs/technical/10-frontends.md#apps), [📨 GUI and WebUI: live data in the browser](docs/specs/technical/10-frontends.md#live-data), [🗺️ GUI and WebUI: maps and 3D](docs/specs/technical/10-frontends.md#maps) and [🩺 Observability: signals](docs/specs/technical/08-observability.md#signals).
+Update AGENT.md for what T0.19 adds, in plain British English, no em dash, keeping its style. Specs: docs/specs/technical/10-frontends.md#apps, docs/specs/technical/10-frontends.md#live-data, docs/specs/technical/10-frontends.md#maps, docs/specs/technical/08-observability.md#signals, ticket docs/tickets/T0.19/TICKET.md.
 
-Describe these three pieces:
-- `packages/ts/live` (`@swarm/live`) holds the generated models, the `SquadStore` decoder and the Web Worker (`LiveWorkerCore`), which decodes MessagePack off the main thread and posts at most 30 transferable snapshots per second. It also holds the main-thread `LiveClient` and the `LatencyMeter` (histogram `swarm.live.telemetry_latency`, in ms). It is imported through subpath exports.
-- `packages/ts/maps` (`@swarm/maps`) holds the MapLibre base map on self-hosted PMTiles and the deck.gl Drone layer with binary attributes updated in place.
-- `frontends/ground-control` reads a runtime `config.json` (`liveUrl`, `pmtilesUrl`, `otlpMetricsUrl`, `cell`) and the Mission from `?mission=`. Its Grafana dashboard is in `observability/`, and its Playwright tests in `e2e/` use a stand-in live server.
+- In the Mono-repo paragraph on the front-end packages (it names frontend/packages/tokens and frontend/packages/ui), add frontend/packages/live (@swarm/live): the generated models, the MessagePack protocol, the Web Worker that owns the live socket and posts typed-array snapshots at most 30 times a second, the main-thread LiveClient, and the Telemetry latency histograms exported as OTLP/HTTP JSON; and frontend/packages/maps (@swarm/maps): the MapLibre base style on self-hosted PMTiles, the deck.gl Drone layer with binary attributes and the SquadMap component, coloured from the tokens.
+- In Commands, next to the qa/e2e Playwright command, add the end-to-end test of Ground control: `SWARM_IMAGE_TAG=<tag> pnpm --filter @swarm/ground-control run e2e`, which starts the ground-control service of infra/compose/e2e.yaml (port 8180) and feeds it a stand-in live socket.
+- Say that Ground control reads its runtime configuration from config.json beside index.html (live URL, Mission, tiles, metrics endpoint, cell, edge or cell path), and that the image serves PMTiles files from /tiles/, mounted by the deployment.
+- Say that infra/charts/observability/dashboards/ holds the Grafana dashboards, the first being the Telemetry latency.
+Change nothing else.
 
-Keep AGENT.md's style: plain British English, no em dash, lines up to 120 characters. Do not invent commands: use the scripts K09 defined in the three `package.json` files.
-
-### <a id="k16"></a>K16: Implement the Web Worker live client: LiveWorkerCore, worker entry and main-thread LiveClient
+### <a id="k19"></a>K19: live: the Web Worker core and entry, the LiveClient, and the package index
 
 | Agent | Wave | Depends on | Unblocks |
 | --- | --- | --- | --- |
-| 🖥️ frontend-implementer | 4 | [K02](#k02), [K10](#k10) | [K17](#k17) |
+| 🖥️ frontend-implementer | 4 | [K02](#k02), [K12](#k12), [K13](#k13) | [K22](#k22), [K23](#k23) |
 
 **Files** (only this task may change them in its wave):
 
-- `packages/ts/live/src/worker/live-worker-core.ts`
-- `packages/ts/live/src/worker/live-messages.ts`
-- `packages/ts/live/src/worker/live-worker.ts`
-- `packages/ts/live/src/client/live-client.ts`
-- `packages/ts/live/tsconfig.json`
+- `frontend/packages/live/src/worker/live-worker-messages.ts`
+- `frontend/packages/live/src/worker/live-worker-core.ts`
+- `frontend/packages/live/src/worker/live.worker.ts`
+- `frontend/packages/live/src/client/live-client.ts`
+- `frontend/packages/live/src/index.ts`
 
-**Done when:** `pnpm --filter ./packages/ts/live run lint`, `typecheck` and `test` all pass, including the generator check and every test of K01 to K03.
+**Done when:** `pnpm --filter @swarm/live test`, `pnpm --filter @swarm/live typecheck` and `pnpm --filter @swarm/live lint` pass.
 
 **Brief:**
 
-Implement the live path of `packages/ts/live`, so that `packages/ts/live/test/live-worker-core.test.ts` and `test/live-client.test.ts` (K02) pass. Specification:
-- [📨 GUI and WebUI: live data in the browser](docs/specs/technical/10-frontends.md#live-data): WebSocket → Web Worker (decode, delta merge, typed arrays) → transferable snapshot at most 30 per second → main thread. The main thread never decodes frames.
-- [📨 API layer: live data over WebSocket](docs/specs/technical/05-api.md#live): one socket per client, the subscribe message per Mission topic, MessagePack frames.
-- [🗂️ GUI and WebUI: apps and shared packages](docs/specs/technical/10-frontends.md#apps)
-- [🎬 UC-025](docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md)
-- [📏 BR-014](docs/specs/functional/business-rules/BR-014-simulation-isolation.md): the client sends nothing but its subscription.
+Implement the worker and the client of @swarm/live so the tests of K02 (frontend/packages/live/test/worker/ and test/client/) pass, and the whole package test passes; read them first, they fix the contract (ToWorker, FromWorker, LiveStatus, LiveWorkerCore, SocketLike, LiveClient, WorkerLike). Specs: docs/specs/technical/10-frontends.md#live-data ("The main thread never decodes frames": the worker owns the WebSocket, decodes MessagePack, merges, and posts a transferable snapshot at most 30 times a second), docs/specs/technical/05-api.md#live (one socket per client, a MessagePack subscription per Mission topic), docs/specs/technical/10-frontends.md#performance (live frame to pixels &lt; 50 ms), ticket docs/tickets/T0.19/TICKET.md criterion 1. Use the protocol and the SquadStore of src/protocol and src/snapshot (K12).
 
-Match the gateway `/v1/live` of T0.18 in `services/gateway` for the subscribe encoding and the token.
+- live-worker-core.ts: on connect, open the socket (binaryType arraybuffer), post status connecting then open, send encodeSquadSubscription(missionId) on open; on each binary message decode and merge with receivedAtMs = Date.now() through the clock; post a snapshot with its transferables when the store is dirty, at most maxSnapshotsPerS (30) times a second; skip an unreadable message; post closed on close and failed on error; no automatic reconnection.
+- live.worker.ts: the thin worker entry that builds a LiveWorkerCore with the real WebSocket, self.postMessage with the transfer list and real timers, and forwards messages to handle().
+- live-client.ts: the default createWorker is new Worker(new URL("../worker/live.worker.ts", import.meta.url), {type: "module"}) (Vite bundles it); the client only forwards.
+- src/index.ts: keep `export type * from "./generated/models.ts"` and export the public API: squadTopic, encodeSquadSubscription, decodeSquadFrame, the errors, DRONE_STATES, SquadSnapshot, SquadStore, the worker message types, LiveClient, LatencyHistogram, LATENCY_BOUNDS_MS, TELEMETRY_METRICS, otlpMetricsBody, LatencyReporter (K13).
+At most five code files per folder.
 
-- `live-messages.ts` holds the message types fixed by K02.
-- `LiveWorkerCore(port, { maxSnapshotsPerSecond = 30 })`:
-  - On `start`, it opens one WebSocket with `binaryType = "arraybuffer"` and sends the subscribe message for `mission/<id>/squad` at full rate.
-  - It merges each message into a `SquadStore` (K10).
-  - It posts `{ kind: "snapshot" }` with the snapshot's buffers in the transfer list, at most `maxSnapshotsPerSecond` times per second and always ending on the latest state.
-  - It posts the statuses connecting, open, closed and error. On `stop`, it closes the socket.
-- `live-worker.ts` is the worker entry, `new LiveWorkerCore(self)`.
-- `live-client.ts` holds two things:
-  - `LiveClient(port)`, with `start`, `onSnapshot`, `onStatus` and `stop`. It only relays snapshots and statuses.
-  - `createLiveWorker()`, which returns `new Worker(new URL("../worker/live-worker.ts", import.meta.url), { type: "module" })` for Vite.
-- Adjust `tsconfig.json` so that the worker entry type-checks with the WebWorker lib, without breaking the DOM code: use a triple-slash lib reference or a separate include.
-
-Report `blocked` if a K02 test is wrong (TKT-19).
-
-### <a id="k17"></a>K17: Wire the Ground control map: base map, Drone layer fed by the live worker, latency recorded and exported
+### <a id="k20"></a>K20: maps: the SquadMap component (MapLibre and the deck.gl overlay), its stylesheet and the package index
 
 | Agent | Wave | Depends on | Unblocks |
 | --- | --- | --- | --- |
-| 🖥️ frontend-implementer | 5 | [K07](#k07), [K08](#k08), [K11](#k11), [K12](#k12), [K13](#k13), [K14](#k14), [K15](#k15), [K16](#k16) | [K18](#k18) |
+| 🖥️ frontend-implementer | 4 | [K04](#k04), [K14](#k14), [K15](#k15) | [K22](#k22), [K23](#k23) |
 
 **Files** (only this task may change them in its wave):
 
-- `frontends/ground-control/src/flight/flight-map.tsx`
-- `frontends/ground-control/src/flight/drone-colours.ts`
-- `frontends/ground-control/src/telemetry/latency-metrics.ts`
-- `frontends/ground-control/src/flight/flight-screen.tsx`
-- `frontends/ground-control/src/App.tsx`
+- `frontend/packages/maps/src/map/SquadMap.tsx`
+- `frontend/packages/maps/src/styles.css`
+- `frontend/packages/maps/src/index.ts`
 
-**Done when:** `pnpm --filter ./frontends/ground-control run lint`, `typecheck` and `test` pass. `pnpm --filter ./frontends/ground-control exec playwright test e2e/flight-map.spec.ts` passes against the app's image with the stand-in live server, or reports not applicable if T0.10's Playwright scaffold is missing.
+**Done when:** `pnpm --filter @swarm/maps test`, `pnpm --filter @swarm/maps typecheck` and `pnpm --filter @swarm/maps lint` pass.
 
 **Brief:**
 
-Put the simulated Squad on the Ground control map, so that `frontends/ground-control/test/latency-metrics.test.ts` (K08) and the Playwright spec `e2e/flight-map.spec.ts` (K07) pass, and every earlier test stays green. Specification:
-- [🎬 UC-025 step 2 and screen A1](docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md#screen-a1)
-- [🗺️ GUI and WebUI: maps and 3D](docs/specs/technical/10-frontends.md#maps)
-- [📨 GUI and WebUI: live data in the browser](docs/specs/technical/10-frontends.md#live-data): React only for panels, the map at the display rate, deck.gl attributes in place.
-- [⏱️ GUI and WebUI: front-end budgets](docs/specs/technical/10-frontends.md#performance): live frame to pixels under 50 ms.
-- [🩺 Observability: signals](docs/specs/technical/08-observability.md#signals)
-- the budget [⏱️ Telemetry, Drone to Pilot's screen](docs/specs/technical/07-scalability.md#budgets)
-- [📏 BR-014](docs/specs/functional/business-rules/BR-014-simulation-isolation.md) and [📏 BR-023](docs/specs/functional/business-rules/BR-023-fixed-safety-controls.md)
+Implement SquadMap so frontend/packages/maps/test/map/squad-map.test.tsx (K04) passes, then the whole package test; read it first, it fixes the contract (generic SquadMap&lt;T extends DroneLayerData> with tilesUrl, palette, label, source {current, subscribe}, onDrawn, createMap and MapHandle {setLayers, fitBounds, onAfterRender, remove}). Specs: docs/specs/technical/10-frontends.md#maps, docs/specs/technical/10-frontends.md#live-data ("deck.gl attributes updated in place, React only for panels and Alerts"; the map at the display rate), docs/specs/technical/10-frontends.md#design-system (tokens only), docs/specs/visual-identity.md#colours (light and dark), docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md (step 2, the map and the Squad), ticket docs/tickets/T0.19/TICKET.md criterion 1.
 
-What to build:
-- `drone-colours.ts` resolves, from the CSS variables of `packages/ts/tokens` at run time, the base-map palette and one RGBA colour per Drone state code, in light and dark mode. Use the tokens only.
-- `flight-map.tsx`:
-  - It calls `registerPmtilesProtocol()` and `createBaseMap()` from `@swarm/maps/base-map` with `buildBaseMapStyle()` on `config.pmtilesUrl`.
-  - It starts `LiveClient` from `@swarm/live/client` on `createLiveWorker()` with `config.liveUrl` and the Mission.
-  - On each snapshot, it updates `DroneAttributes` and sets the Drone layer on the overlay, outside React state.
-  - After deck.gl has drawn (`onAfterRender`), it records `LatencyMeter.record(snapshot.frameTimesUs, performance.timeOrigin + performance.now())`.
-  - It keeps `data-drone-count` and `data-snapshot-count` up to date on the `[data-testid="flight-map"]` element.
-  - It switches the base-map style when the colour scheme changes.
-- `latency-metrics.ts` holds `createLatencyMeterProvider(config)` as K08 fixes it: a `MeterProvider` with a periodic `OTLPMetricExporter` (HTTP) to `otlpMetricsUrl`, the resource `service.name=ground-control`, `cell` and `mission_id`, or null when no URL is set.
-- `flight-screen.tsx` and `App.tsx` render `FlightMap` in the map slot and shut the client and the provider down on unmount.
+- The default createMap registers the pmtiles protocol (K14), creates a maplibre-gl Map on the container with buildBaseStyle, and a MapboxOverlay of @deck.gl/mapbox (interleaved) holding the Drone layer of buildDroneLayer (K15); onAfterRender maps to the overlay's after-render callback. Import maplibre-gl's stylesheet here.
+- On a source notification, schedule one requestAnimationFrame that rebuilds the layer from source.current() (new layer instance over the same binary buffers, updateTriggers on version); never set React state per frame. Fit the map to squadBounds on the first non-empty data only. After each render, call onDrawn(data, Date.now()) once per new version.
+- The palette defaults to readMapPalette(container) and is read again when prefers-color-scheme changes (the style is rebuilt).
+- Render &lt;div className="map" role="region" aria-label={label}>; src/styles.css gives .map position relative, flex 1, a minimum height and the background var(--color-background), using var(--...) tokens only and no raw colour or font.
+- src/index.ts exports SquadMap and its types, buildBaseStyle, registerPmtilesProtocol, readMapPalette, MapPalette, Rgba, MapPaletteError, buildDroneLayer, DroneLayerData, LOST_STATE and squadBounds.
 
-Do not wire Hold the Squad or Abort. Report `blocked` with the file and the change if a test of K07 or K08 is wrong (TKT-19).
-
-### <a id="k18"></a>K18: Capture UC-025 A1 from the running app (or update its mock-up before T0.20)
+### <a id="k21"></a>K21: CI: the ground-control service in infra/compose/e2e.yaml and the front ends' e2e step of images.yml
 
 | Agent | Wave | Depends on | Unblocks |
 | --- | --- | --- | --- |
-| ✏️ mockup-writer | 6 | [K15](#k15), [K17](#k17) | none |
+| 🐍 implementer | 4 | [K07](#k07), [K17](#k17) | none |
+
+**Files** (only this task may change them in its wave):
+
+- `infra/compose/e2e.yaml`
+- `.github/workflows/images.yml`
+
+**Done when:** `uv run pytest tests/ci/e2e/test_compose_e2e.py tests/ci/images/test_images_workflow.py -n 2` passes; `docker compose -f infra/compose/e2e.yaml config --services` with SWARM_IMAGE_TAG=local lists gateway and ground-control.
+
+**Brief:**
+
+Wire the Ground control end-to-end test into the pipeline. Specs: AGENT.md sections CI/CD ("Run Playwright against those images, and upload the HTML report if a test fails"), Front-end tests (tests in frontend/apps/&lt;frontend>/e2e/, against the real images of infra/compose/e2e.yaml) and Docker images; docs/specs/technical/10-frontends.md#apps; ticket docs/tickets/T0.19/TICKET.md criteria 1 and 3. The tests are tests/ci/e2e/test_compose_e2e.py and tests/ci/images/test_images_workflow.py (K07); read them first.
+
+- infra/compose/e2e.yaml: add the service ground-control with image ${SWARM_IMAGE_REGISTRY:-ghcr.io/gpbcom/swarm}/ground-control:${SWARM_IMAGE_TAG:?SWARM_IMAGE_TAG names the images of a pipeline run}, pull_policy missing, restart "no", ports "8180:8080"; no build, no mount of source code, no development server. Its Dockerfile is frontend/apps/ground-control/Dockerfile (K17).
+- .github/workflows/images.yml, job e2e: keep the step that runs `pnpm --filter ./qa/e2e run e2e`; after it add a step that runs the e2e script of every front end that has one: `pnpm --filter "./frontend/apps/*" --if-present run e2e` (the Chromium already installed through qa/e2e serves the same @playwright/test version); extend the report upload path to qa/e2e/playwright-report/ and frontend/apps/*/playwright-report/. Change nothing else.
+
+### <a id="k22"></a>K22: ground-control: the Flight view (lazy SquadMap fed by the live worker, measured latency) in the frame with Hold the Squad and Abort
+
+| Agent | Wave | Depends on | Unblocks |
+| --- | --- | --- | --- |
+| 🖥️ frontend-implementer | 5 | [K05](#k05), [K06](#k06), [K10](#k10), [K16](#k16), [K19](#k19), [K20](#k20) | [K23](#k23) |
+
+**Files** (only this task may change them in its wave):
+
+- `frontend/apps/ground-control/src/App.tsx`
+- `frontend/apps/ground-control/src/main.tsx`
+- `frontend/apps/ground-control/src/flight/FlightView.tsx`
+- `frontend/apps/ground-control/src/flight/squad-feed.ts`
+- `frontend/apps/ground-control/src/flight/flight-view.css`
+
+**Done when:** `pnpm --filter @swarm/ground-control test`, `typecheck`, `lint` and `build` pass; `docker build -f frontend/apps/ground-control/Dockerfile -t ghcr.io/gpbcom/swarm/ground-control:local . && SWARM_IMAGE_TAG=local pnpm --filter @swarm/ground-control run e2e` passes (environment check: skipped if docker is missing).
+
+**Brief:**
+
+Build the first screen of Ground control so the Vitest tests of K05 (frontend/apps/ground-control/test/) pass, and the Playwright test of K06 passes against the image; read both first, they fix the contract (SquadFeed, FlightView with config, createLiveClient and loadMap, App with config, section.flight-map with data-drone-count, the region labelled by flight.map.label). Specs: docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md (step 2 and #screen-a1: the map and the Squad; Hold the Squad and Abort in the title bar), docs/specs/functional/business-rules/BR-023-fixed-safety-controls.md (both always visible), docs/specs/functional/business-rules/BR-014-simulation-isolation.md (the screen only reads the live data and sends no command), docs/specs/technical/10-frontends.md#live-data (the main thread never decodes; React only for panels; the map at the display rate), docs/specs/technical/10-frontends.md#performance (first route JavaScript &lt; 300 kB compressed: the map is loaded on demand; live frame to pixels &lt; 50 ms), docs/specs/technical/10-frontends.md#design-system, docs/specs/technical/08-observability.md#signals and docs/specs/technical/07-scalability.md#budgets (the measured latency), ticket docs/tickets/T0.19/TICKET.md criteria 1 to 3.
+
+- squad-feed.ts: SquadFeed bridges a LiveClient of @swarm/live (K19) to the DroneSource of SquadMap (@swarm/maps, K20) without React state per frame, keeps the latest SquadSnapshot, and records the latency into two LatencyHistograms on drawn(): drawnAtMs - tUs / 1000 for each updated slot (drone to screen), drawnAtMs - receivedAtMs once (frame to pixels).
+- FlightView.tsx: React.lazy over loadMap (default () => import("@swarm/maps")) inside Suspense; the tiles URL resolved against document.baseURI; connects only when config.missionId is set; data-drone-count refreshed at most a few times a second; starts a LatencyReporter (K13) when config.metricsUrl is set, with missionId, cell, livePath and the two histograms keyed by TELEMETRY_METRICS; cleans up on unmount. flight-view.css lays out section.flight-map to fill main.content, var(--...) tokens only, and imports @swarm/maps/styles.css.
+- App.tsx: GroundControlFrame with the existing status items, FlightView as its child, onHold and onAbort left as no-ops (the controls are shown, not yet wired).
+- main.tsx: keep the token and ui stylesheets and the I18nProvider; load the runtime configuration with loadAppConfig (K16) before rendering App; on an AppConfigError render nothing in the content and log the error to the console.
+At most five code files per folder.
+
+### <a id="k23"></a>K23: Screens: UC-025 A1 brought in line with the first Ground control screen (mock-up updated, T0.20 not merged)
+
+| Agent | Wave | Depends on | Unblocks |
+| --- | --- | --- | --- |
+| ✏️ mockup-writer | 6 | [K09](#k09), [K10](#k10), [K12](#k12), [K13](#k13), [K14](#k14), [K15](#k15), [K16](#k16), [K17](#k17), [K19](#k19), [K20](#k20), [K22](#k22) | none |
 
 **Files** (only this task may change them in its wave):
 
@@ -859,27 +720,13 @@ Do not wire Hold the Squad or Abort. Report `blocked` with the file and the chan
 - `docs/specs/screens/mockups/UC-025/a1.html`
 - `docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md`
 
-**Done when:** `python3 .claude/skills/write-specs/scripts/specs.py check` prints nothing. If T0.20 is done, the A1 row reads `📸 Screenshot`, both PNGs were written by this task and `docs/specs/screens/mockups/UC-025/a1.html` is gone.
+**Done when:** `python3 .claude/skills/write-specs/scripts/specs.py check` prints nothing, and both docs/specs/screens/UC-025/a1.png and a1.dark.png are rendered from the updated mock-up (or captured as 📸 Screenshot if T0.20 is merged).
 
 **Brief:**
 
-Carry out TKT-21 for the one screen listed under Screens touched of `docs/tickets/T0.19/TICKET.md`: [🖼️ UC-025 A1](docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md#screen-a1). Rules: SPEC-12 and SPEC-13 of `.claude/rules/specs.md`, [📏 BR-023](docs/specs/functional/business-rules/BR-023-fixed-safety-controls.md) (Hold the Squad and Abort in the title bar) and [🎨 GUI and WebUI: design system](docs/specs/technical/10-frontends.md#design-system) (visual tests and screenshots).
+Capture task for the screen listed under Screens touched of docs/tickets/T0.19/TICKET.md: docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md#screen-a1 (TKT-21 in .claude/rules/tickets.md, SPEC-12 and SPEC-13 in .claude/rules/specs.md). Other specs: docs/specs/functional/business-rules/BR-023-fixed-safety-controls.md, docs/specs/visual-identity.md#screens, docs/specs/technical/10-frontends.md#design-system.
 
-First decide whether T0.20 is done: its `EXPLAIN.md` is on `origin/develop`, which is the definition of `done_tickets()` in `.claude/scripts/tickets/tickets.py`.
-
-**If T0.20 is done:**
-1. Run Ground control with the stand-in live server of `frontends/ground-control/e2e/live-stand-in-server.ts`, sending 10 airborne Drones.
-2. Capture the A1 screen in light and dark mode with T0.20's screenshot pipeline, at the screen size of the visual identity, as 256-colour palette PNGs at `docs/specs/screens/UC-025/a1.png` and `a1.dark.png`.
-3. Set the A1 row's source to `📸 Screenshot`.
-4. Delete `docs/specs/screens/mockups/UC-025/a1.html`.
-
-**If T0.20 is not done:**
-1. Update `docs/specs/screens/mockups/UC-025/a1.html` to what the app shows. Use only the classes of `components.css` and keep the frame of the visual identity: the title bar with Ground control, the Mission, `✋ Hold the Squad` and `🛑 Abort`, and the map with the Squad's Drones.
-2. Keep the areas that UC-025 step 2 requires and that the app does not show yet (video, Alerts and Co-pilot, progress), because the use case is approved.
-3. Leave the row `✏️ Mock-up`.
-4. Run `python3 .claude/skills/write-specs/scripts/specs.py render`.
-
-In both cases, finish with `python3 .claude/skills/write-specs/scripts/specs.py build`, then `specs.py check`.
+T0.20 (the screenshot pipeline) is not merged, so the screenshot check is not applicable yet. If T0.20 is merged when you run: capture the A1 screen from the running app (the ground-control image with the stand-in live socket of frontend/apps/ground-control/e2e/) in light and dark mode with the T0.20 pipeline into docs/specs/screens/UC-025/a1.png and a1.dark.png, set the A1 row's Source cell to 📸 Screenshot and delete docs/specs/screens/mockups/UC-025/a1.html. Otherwise (the expected case): update the mock-up docs/specs/screens/mockups/UC-025/a1.html so that the parts the app now shows match it: the title bar (⚙️ Swarm, Ground control, ✋ Hold the Squad, 🛑 Abort), the side bar items, the status bar, and the map area showing the Squad as 🛸 markers of the Drones; keep the areas the app does not show yet (Squad panel, live video, Alerts and Co-pilot, progress) as they are, because UC-025 still requires them for later tickets. Use only the classes of docs/specs/screens/mockups/components.css, no style attribute, glossary names only (SPEC-2). Then run `python3 .claude/skills/write-specs/scripts/specs.py render` and `python3 .claude/skills/write-specs/scripts/specs.py build`; the A1 row stays ✏️ Mock-up. Change no other screen and no other row of the page.
 
 <!-- /plan:graph -->
 
@@ -892,110 +739,127 @@ In both cases, finish with `python3 .claude/skills/write-specs/scripts/specs.py 
 [
   {
     "id": "K01",
-    "title": "Tests: SquadStore decodes MessagePack SquadFrames into typed arrays with delta merge",
+    "title": "Tests: live protocol (subscribe message, SquadFrame decoder) and the SquadStore delta merge into typed arrays",
     "agent": "test-writer",
     "depends_on": [],
     "files": [
-      "packages/ts/live/test/squad-store.test.ts",
-      "packages/ts/live/test/helpers/squad-frames.ts"
+      "frontend/packages/live/test/protocol/topics.test.ts",
+      "frontend/packages/live/test/protocol/squad-frame-decoder.test.ts",
+      "frontend/packages/live/test/protocol/frames.ts",
+      "frontend/packages/live/test/snapshot/squad-store.test.ts"
     ],
-    "brief": "Write the failing tests of the live decoder of `packages/ts/live`. It is the part of the Web Worker that turns MessagePack frames into typed arrays and merges deltas. Specification: [📨 GUI and WebUI: live data in the browser](docs/specs/technical/10-frontends.md#live-data) (\"Web Worker: MessagePack decode, delta merge, typed arrays (positions, states, battery)\") and [📨 API layer: live data over WebSocket](docs/specs/technical/05-api.md#live) (\"delta-encoded `SquadFrame`\"). Use case: [🎬 UC-025](docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md), where each Drone is shown with its state, battery and Link. Rule: [📏 BR-014](docs/specs/functional/business-rules/BR-014-simulation-isolation.md), which covers the simulated Squad being displayed.\n\nThe frame shape is `SquadFrame` and `TelemetryFrame` of `packages/ts/live/src/generated/models.ts`: fields `mission_id`, `t_us` and `frames[]`, with `drone_id`, `seq`, `t_us`, `lat_e7`, `lon_e7`, `altitude_m`, `speed_m_s`, `heading_deg`, `battery_pct`, `link_quality_pct` and `state`. Before you write, read how the gateway `/v1/live` of T0.18 (`services/gateway`) encodes a message: one SquadFrame per WebSocket message, or a batch. Encode test messages the same way with `@msgpack/msgpack` `encode`.\n\nThe API under test, imported by relative path with the `.ts` extension:\n- `../src/squad/squad-store.ts`, `export class SquadStore`:\n  - `merge(message: Uint8Array): number` merges and returns the number of Drone frames merged.\n  - `snapshot(): SquadSnapshot | null` returns null when nothing changed since the last snapshot.\n  - getters `size` (the number of Drones) and `rejectedMessages`.\n- `../src/squad/squad-snapshot.ts`, `export interface SquadSnapshot`, with these fields:\n  - `droneIds: string[]`\n  - `positions: Float64Array`, holding lon, lat and altitude_m per Drone (stride 3, degrees = e7 / 1e7)\n  - `states: Uint8Array`\n  - `batteryPct: Float32Array`\n  - `linkQualityPct: Float32Array`\n  - `frameTimesUs: Float64Array`, the `t_us` of every Drone frame merged since the previous snapshot\n- `../src/squad/drone-state-code.ts`, `export const DRONE_STATE_CODES`, mapping each `DroneState` to a code in the order of the generated enum: ready 0, grounded 1, airborne 2, returning 3, landed 4, lost 5.\n\nCases:\n- 10 Drones merged give size 10 and correct positions, states and battery values.\n- A later delta holding 3 Drones updates only those 3 slots. Every Drone keeps its slot index.\n- A new `drone_id` is appended.\n- An older `seq` for a Drone does not overwrite a newer one.\n- The snapshot's arrays are fresh copies that can be transferred: their buffers are not reused by the store.\n- `frameTimesUs` holds only the frames merged since the last snapshot.\n- A malformed message is rejected and counted, and leaves the store unchanged.\n- A frame of another `mission_id` is rejected.\n\nUse `node:test` and `node:assert/strict`, like `packages/ts/live/test/render.test.ts`. The package's `test` script runs `test/*.test.ts`. Put the frame builders in `test/helpers/squad-frames.ts`. Name tests as sentences. Use no mocks.",
-    "done_when": "`packages/ts/live/test/squad-store.test.ts` exists and covers every case of the brief. `pnpm --filter ./packages/ts/live run lint` passes on it. `node --experimental-strip-types --test packages/ts/live/test/squad-store.test.ts` fails only because `src/squad/*` does not exist yet.",
+    "brief": "Write the node:test tests (node --experimental-strip-types --test, like frontend/packages/live/test/render.test.ts: node:assert/strict, imports with the .ts extension) for the protocol and the snapshot store of @swarm/live. Specs: docs/specs/technical/10-frontends.md#live-data (\"WebSocket -> Web Worker: MessagePack decode, delta merge, typed arrays (positions, states, battery)\"), docs/specs/technical/05-api.md#live (subscribe message, topic mission/<id>/squad, frames in MessagePack), docs/specs/technical/10-frontends.md#apps (live holds the WebSocket client and the MessagePack decoder), ticket docs/tickets/T0.19/TICKET.md (criterion 1, docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md). The wire format is the one the backend sends: backend/swarm-service/src/swarm_service/shared/live/live_codec.py packs Pydantic models with ormsgpack as MessagePack maps with the field names of frontend/packages/live/src/generated/models.ts (SquadFrame {mission_id, t_us, frames}, TelemetryFrame {mission_id, drone_id, seq, t_us, lat_e7, lon_e7, altitude_m, speed_m_s, heading_deg, battery_pct, link_quality_pct, state}, LiveSubscription {op: \"subscribe\", topic, rate: \"full\"}). Encode fixtures with @msgpack/msgpack (encode) in the helper test/protocol/frames.ts (aSquadFrame(missionId, drones, tUs) building a valid frame of N Drones; mission ids are version 7 UUIDs such as 01943c5e-8a4b-7c2d-9e1f-0a1b2c3d4e01).\n\nContract the implementation (K12) must meet, import paths fixed:\n- src/protocol/topics.ts: squadTopic(missionId: string): string returns `mission/<id>/squad`; encodeSquadSubscription(missionId: string): Uint8Array returns MessagePack of {op: \"subscribe\", topic, rate: \"full\"}; a mission id that is not a version 7 UUID throws LiveTopicInvalidError (exported from src/protocol/live-protocol-errors.ts).\n- src/protocol/squad-frame-decoder.ts: decodeSquadFrame(data: ArrayBuffer | Uint8Array): SquadFrame; bytes that are not MessagePack, a missing or mistyped field, a state outside DroneState, or a boolean where a number is expected throw LiveMessageUnreadableError (src/protocol/live-protocol-errors.ts).\n- src/snapshot/squad-snapshot.ts: DRONE_STATES = [\"ready\",\"grounded\",\"airborne\",\"returning\",\"landed\",\"lost\"] (index = state code) and interface SquadSnapshot {version: number; missionId: string; count: number; droneIds: readonly string[]; positions: Float64Array /* lon, lat, altitude_m per Drone */; states: Uint8Array; batteryPct: Float32Array; linkQualityPct: Float32Array; headingDeg: Float32Array; speedMS: Float32Array; tUs: Float64Array; updated: Uint8Array /* 1 when the slot changed since the previous snapshot */; receivedAtMs: number}.\n- src/snapshot/squad-store.ts: class SquadStore(missionId) with merge(frame: SquadFrame, receivedAtMs: number): void, get dirty(): boolean, snapshot(): SquadSnapshot, and transferables(snapshot): ArrayBuffer[].\n\nBehaviours to test: the topic and the encoded subscription decode back to the expected map; a bad mission id is refused; a valid frame of 10 Drones decodes; each kind of bad input is refused with the specific error; merge places each Drone in a stable slot in order of first appearance, converts lat_e7/lon_e7 by 1e-7 into positions [lon, lat, alt]; a frame of another Mission is ignored; a Drone frame whose seq is not greater than the last seen for that Drone is ignored; a Drone absent from a frame keeps its last values (delta merge); snapshot() returns fresh buffers (later merges do not change a snapshot already taken), increments version, sets updated only for the slots changed since the previous snapshot, carries the newest receivedAtMs, and clears dirty; transferables() lists the distinct ArrayBuffers of the snapshot. Name tests as sentences. Each test folder holds at most five code files (AGENT.md, File shape). The tests fail now because src/protocol and src/snapshot do not exist yet; that is expected (TKT-4).",
+    "done_when": "The four files exist; `pnpm --filter @swarm/live exec eslint test/protocol test/snapshot` reports no problem other than unresolved imports of the modules K12 writes; running `node --experimental-strip-types --test frontend/packages/live/test/protocol/*.test.ts frontend/packages/live/test/snapshot/*.test.ts` fails only because src/protocol and src/snapshot are missing.",
     "wave": 1
   },
   {
     "id": "K02",
-    "title": "Tests: Web Worker core subscribes, decodes off the main thread and posts throttled transferable snapshots; LiveClient relays them",
+    "title": "Tests: the live Web Worker core (socket, throttled transferable snapshots) and the main-thread LiveClient",
     "agent": "test-writer",
     "depends_on": [],
     "files": [
-      "packages/ts/live/test/live-worker-core.test.ts",
-      "packages/ts/live/test/live-client.test.ts",
-      "packages/ts/live/test/helpers/frame-stream.ts",
-      "packages/ts/live/test/helpers/live-test-server.ts"
+      "frontend/packages/live/test/worker/live-worker-core.test.ts",
+      "frontend/packages/live/test/worker/fake-socket.ts",
+      "frontend/packages/live/test/worker/fake-clock.ts",
+      "frontend/packages/live/test/client/live-client.test.ts",
+      "frontend/packages/live/test/client/fake-worker.ts"
     ],
-    "brief": "Write the failing tests of the live client of `packages/ts/live`. Specification:\n- [📨 GUI and WebUI: live data in the browser](docs/specs/technical/10-frontends.md#live-data): \"The main thread never decodes frames\", and a transferable snapshot \"at most 30 per second\".\n- [📨 API layer: live data over WebSocket](docs/specs/technical/05-api.md#live): one socket per client, with `{\"op\": \"subscribe\", \"topic\": \"mission/<id>/squad\", \"rate\": \"full\"}`, and server frames in MessagePack.\n- [🗂️ GUI and WebUI: apps and shared packages](docs/specs/technical/10-frontends.md#apps): `live` holds the \"WebSocket client, MessagePack decoder in a Web Worker\".\n\nRules: [📏 BR-014](docs/specs/functional/business-rules/BR-014-simulation-isolation.md) says the client only subscribes and sends no command. Use case: [🎬 UC-025](docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md).\n\nRead the gateway `/v1/live` of T0.18 (`services/gateway`) first. Match its subscribe message encoding (a JSON text message as written on the API page, unless the gateway expects another), how a token is passed, and how frames are batched.\n\nAPI under test, imported by relative path with `.ts`:\n- `../src/worker/live-worker-core.ts`, `export class LiveWorkerCore`, constructed with `(port: LivePort, options?: { maxSnapshotsPerSecond?: number })`. The default is 30. `LivePort` is a `MessagePort`-like with `postMessage(message, transfer?)` and `onmessage`.\n- `../src/worker/live-messages.ts`, the message types:\n  - from the main thread: `{ kind: \"start\", url, missionId, token? }` and `{ kind: \"stop\" }`;\n  - from the worker: `{ kind: \"snapshot\", snapshot: SquadSnapshot }`, with its typed-array buffers in the transfer list, and `{ kind: \"status\", status: \"connecting\" | \"open\" | \"closed\" | \"error\" }`.\n- `../src/client/live-client.ts`, `export class LiveClient`, constructed with `(port: LivePort)`. Its methods are `start({ url, missionId, token? })`, `onSnapshot(callback): () => void`, `onStatus(callback): () => void` and `stop()`.\n\nCases:\n- On `start`, the core opens one WebSocket to the URL and sends exactly the subscribe message for `mission/<missionId>/squad` at full rate.\n- Binary frames from the server reach the main side as snapshots.\n- Under a burst of 200 frames in one second, at most `maxSnapshotsPerSecond` snapshots are posted, and the last state is never lost.\n- Snapshots' buffers are transferred: they are detached on the sending side after posting.\n- Statuses go from connecting to open, then closed when the server closes.\n- `stop` closes the socket.\n- LiveClient never decodes MessagePack: it only receives snapshots.\n- No message other than the subscribe is ever sent on the socket.\n\nUse real things, with no mocks:\n- a real local WebSocket server built with the `ws` package, in `test/helpers/live-test-server.ts`, which records what it receives and sends MessagePack frames built in `test/helpers/frame-stream.ts`. Do not import K01's helper;\n- Node 22's global `WebSocket` client;\n- a real `MessageChannel` joining LiveWorkerCore and LiveClient.\n\nUse `node:test`, like `test/render.test.ts`.",
-    "done_when": "Both test files exist and cover every case of the brief. `pnpm --filter ./packages/ts/live run lint` passes on them. Running them with `node --experimental-strip-types --test` fails only because `src/worker/*` and `src/client/*` do not exist yet.",
+    "brief": "Write node:test tests (style of frontend/packages/live/test/render.test.ts, .ts import extensions) for the worker and the client of @swarm/live. Specs: docs/specs/technical/10-frontends.md#live-data (\"The main thread never decodes frames\"; the worker decodes, merges and posts a \"transferable snapshot, at most 30 per second\"), docs/specs/technical/05-api.md#live (one socket per client, subscriptions per Mission topic, MessagePack frames), docs/specs/technical/10-frontends.md#performance (live frame to pixels < 50 ms), ticket docs/tickets/T0.19/TICKET.md criterion 1 (docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md). Use fakes, no browser: test/worker/fake-socket.ts (a SocketLike that records what is sent and lets the test fire open, binary message, close and error), test/worker/fake-clock.ts (manual time and timers), test/client/fake-worker.ts (a WorkerLike that records posted messages and lets the test emit messages). Build MessagePack SquadFrames with @msgpack/msgpack encode inside these test folders (do not import K01's helper).\n\nContract the implementation (K19) must meet:\n- src/worker/live-worker-messages.ts: type ToWorker = {kind: \"connect\"; url: string; missionId: string} | {kind: \"close\"}; type FromWorker = {kind: \"snapshot\"; snapshot: SquadSnapshot} | {kind: \"status\"; status: LiveStatus}; type LiveStatus = \"connecting\" | \"open\" | \"closed\" | \"failed\". SquadSnapshot comes from src/snapshot/squad-snapshot.ts (K01/K12 contract: version, missionId, count, droneIds, positions Float64Array, states Uint8Array, batteryPct, linkQualityPct, headingDeg, speedMS Float32Array, tUs Float64Array, updated Uint8Array, receivedAtMs).\n- src/worker/live-worker-core.ts: class LiveWorkerCore(openSocket: (url: string) => SocketLike, post: (message: FromWorker, transfer: ArrayBuffer[]) => void, clock: {nowMs(): number; setTimer(callback: () => void, delayMs: number): number; clearTimer(id: number): void}, maxSnapshotsPerS = 30) with handle(message: ToWorker): void. SocketLike {binaryType: string; send(data: Uint8Array): void; close(): void; onopen, onmessage(event: {data: ArrayBuffer}), onclose, onerror}.\n- src/client/live-client.ts: class LiveClient(createWorker?: () => WorkerLike) with connect(url, missionId): void, onSnapshot(listener): () => void (returns the unsubscribe), onStatus(listener): () => void, close(): void. WorkerLike {postMessage(message: ToWorker): void; terminate(): void; onmessage: ((event: {data: FromWorker}) => void) | null}.\n\nBehaviours: connect opens one socket with binaryType arraybuffer, posts status connecting then open, and sends exactly one MessagePack subscription {op: subscribe, topic: mission/<id>/squad, rate: full} on open; received frames are decoded and merged in the worker and posted as snapshots with their ArrayBuffers in the transfer list; several frames arriving within one interval give one snapshot; never more than 30 snapshots per second of fake time; no snapshot is posted when nothing changed; an unreadable message is skipped (no snapshot, socket stays open); close or a socket close posts status closed and stops the timer; a socket error posts failed; there is no automatic reconnection. LiveClient posts connect and close to the worker, never decodes (it only forwards snapshot and status messages to listeners), unsubscribe stops delivery, close terminates the worker. At most five code files per folder (AGENT.md, File shape). The tests fail until K19 lands; that is expected.",
+    "done_when": "The five files exist; `pnpm --filter @swarm/live exec eslint test/worker test/client` reports no problem other than unresolved imports of src/worker and src/client; `node --experimental-strip-types --test frontend/packages/live/test/worker/*.test.ts frontend/packages/live/test/client/*.test.ts` fails only because those modules are missing.",
     "wave": 1
   },
   {
     "id": "K03",
-    "title": "Tests: LatencyMeter records the Telemetry latency from Drone to screen as an OpenTelemetry histogram",
+    "title": "Tests: latency histogram and the OTLP/HTTP metrics reporter of the Telemetry latency",
     "agent": "test-writer",
     "depends_on": [],
     "files": [
-      "packages/ts/live/test/latency-meter.test.ts"
+      "frontend/packages/live/test/latency/latency-histogram.test.ts",
+      "frontend/packages/live/test/latency/otlp-metrics-body.test.ts",
+      "frontend/packages/live/test/latency/latency-reporter.test.ts"
     ],
-    "brief": "Write the failing tests of the latency measure in `packages/ts/live`. Specification:\n- [🩺 Observability: signals](docs/specs/technical/08-observability.md#signals): metrics are OpenTelemetry, and `drone_id` is never a metric label.\n- the budget [⏱️ Telemetry, Drone to Pilot's screen](docs/specs/technical/07-scalability.md#budgets): p95 < 400 ms through the cell.\n- [⏱️ GUI and WebUI: front-end budgets](docs/specs/technical/10-frontends.md#performance).\n\nUse case: [🎬 UC-025](docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md). Rule: [📏 BR-014](docs/specs/functional/business-rules/BR-014-simulation-isolation.md), since simulated Drones are measured.\n\nAPI under test: `../src/latency/latency-meter.ts`, `export class LatencyMeter`, with:\n- `static INSTRUMENT_NAME = \"swarm.live.telemetry_latency\"` and `static UNIT = \"ms\"`;\n- the constructor `(meter: Meter)`, where `Meter` comes from `@opentelemetry/api`;\n- `record(frameTimesUs: Float64Array, paintedAtMs: number): void`, which records one sample per Drone frame: `paintedAtMs - t_us / 1000`;\n- the getter `skippedSamples`.\n\nCases:\n- 10 frame times give 10 samples with the expected values.\n- A negative latency, from a clock ahead of the browser, is not recorded and is counted in `skippedSamples`.\n- The histogram has the instrument name and unit above.\n- No sample carries a `drone_id` attribute, nor any attribute naming a Drone.\n- An empty array records nothing.\n\nUse a real `MeterProvider` from `@opentelemetry/sdk-metrics` with an `InMemoryMetricExporter` and a manual reader to read the histogram back. Do not use a mock. Use `node:test`.",
-    "done_when": "`packages/ts/live/test/latency-meter.test.ts` exists and covers every case. Lint passes on it. Running it fails only because `src/latency/latency-meter.ts` does not exist yet.",
+    "brief": "Write node:test tests (style of frontend/packages/live/test/render.test.ts) for the latency measure of @swarm/live. Specs: docs/specs/technical/08-observability.md#signals (metrics through OpenTelemetry; operator_id, mission_id and cell are resource attributes; drone_id is never a metric label; no secrets or personal data), docs/specs/technical/07-scalability.md#budgets (Telemetry, Drone to Pilot's screen: p95 < 150 ms at the edge, < 400 ms through the cell), docs/specs/technical/10-frontends.md#performance (live frame to pixels < 50 ms), ticket docs/tickets/T0.19/TICKET.md criterion 2 (docs/specs/functional/business-rules/BR-014-simulation-isolation.md, docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md).\n\nContract the implementation (K13) must meet:\n- src/latency/latency-histogram.ts: LATENCY_BOUNDS_MS = [10, 25, 50, 75, 100, 150, 200, 300, 400, 600, 800, 1000, 2000]; class LatencyHistogram(bounds = LATENCY_BOUNDS_MS) with record(ms: number): void, and readonly count, sum, min, max, skipped, bucketCounts(): number[] (length bounds.length + 1, explicit-bucket semantics of OTLP: a value equal to a bound falls in that bound's bucket). A negative or non-finite value (clock skew) is not recorded and increments skipped.\n- src/latency/otlp-metrics-body.ts: TELEMETRY_METRICS = {droneToScreen: \"swarm.telemetry.drone_to_screen\", frameToPixels: \"swarm.live.frame_to_pixels\"}; otlpMetricsBody({missionId: string | null, cell: string | null, path: \"edge\" | \"cell\", startTimeUnixNano: string, timeUnixNano: string, histograms: Record<string, LatencyHistogram>}) returns the OTLP/HTTP JSON ExportMetricsServiceRequest: one resourceMetrics with resource attributes service.name = \"ground-control\", mission_id and cell only when set; one scopeMetrics; one histogram metric per entry with unit \"ms\", aggregationTemporality cumulative (2), one data point with count, sum, min, max, bucketCounts, explicitBounds and the attribute swarm.live.path. No attribute named drone_id anywhere.\n- src/latency/latency-reporter.ts: class LatencyReporter({url: string, intervalS: number, missionId, cell, path, histograms, post?: (url: string, body: string) => Promise<{ok: boolean; status: number}>, clock?: {nowMs(): number; setInterval(callback: () => void, ms: number): number; clearInterval(id: number): void}}) with start(), stop(), flush(): Promise<void>.\n\nBehaviours: bucket placement on and between bounds; sum, count, min, max; skipped samples; the body shape above (parse it back from JSON); the body never holds drone_id; the reporter posts application/json bodies to the url every intervalS seconds of fake time, posts nothing when no sample was recorded since start, keeps running after a failed post (non ok or rejected promise), and stop() clears its interval; flush() posts at once. The tests fail until K13 lands; that is expected.",
+    "done_when": "The three files exist; `pnpm --filter @swarm/live exec eslint test/latency` reports no problem other than unresolved imports of src/latency; `node --experimental-strip-types --test frontend/packages/live/test/latency/*.test.ts` fails only because src/latency is missing.",
     "wave": 1
   },
   {
     "id": "K04",
-    "title": "Tests: deck.gl Drone layer with binary attributes updated in place",
+    "title": "Tests: @swarm/maps (PMTiles base style, token palette, deck.gl Drone layer with binary attributes, SquadMap)",
     "agent": "test-writer",
     "depends_on": [],
     "files": [
-      "packages/ts/maps/test/drone-layer.test.ts"
+      "frontend/packages/maps/test/style/base-style.test.ts",
+      "frontend/packages/maps/test/style/pmtiles-protocol.test.ts",
+      "frontend/packages/maps/test/palette/map-palette.test.ts",
+      "frontend/packages/maps/test/drones/drone-layer.test.ts",
+      "frontend/packages/maps/test/drones/fit-squad.test.ts",
+      "frontend/packages/maps/test/map/squad-map.test.tsx"
     ],
-    "brief": "Write the failing tests of the Drone layer of the new package `packages/ts/maps` (`@swarm/maps`). Specification:\n- [🗺️ GUI and WebUI: maps and 3D](docs/specs/technical/10-frontends.md#maps): \"deck.gl GPU layers for Drones ... binary attribute updates for moving Drones\".\n- [📨 GUI and WebUI: live data in the browser](docs/specs/technical/10-frontends.md#live-data): \"deck.gl attributes updated in place\", with a target of 5,000 moving Drones.\n- [🗂️ GUI and WebUI: apps and shared packages](docs/specs/technical/10-frontends.md#apps).\n\nUse case: [🎬 UC-025](docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md), where each Drone is shown on the map with its state.\n\nAPI under test, imported by relative path with `.ts`:\n- `../src/drone-layer/drone-attributes.ts`, `export class DroneAttributes`, with `update(input: { positions: Float64Array; states: Uint8Array; length: number }, colours: ReadonlyArray<readonly [number, number, number, number]>): DroneLayerData`. `colours` is indexed by state code. `DroneLayerData` is `{ length, attributes: { getPosition: { value: Float64Array, size: 3 }, getFillColor: { value: Uint8Array, size: 4 } } }`.\n- `../src/drone-layer/drone-layer.ts`, `export function createDroneLayer(data: DroneLayerData, options?: { id?: string; radiusPx?: number }): Layer`. It builds a deck.gl `ScatterplotLayer` from `@deck.gl/layers`.\n\nCases:\n- Positions are copied, with stride 3.\n- Each Drone's colour is the one of its state code.\n- A second update with the same length reuses the same buffers (the same `ArrayBuffer`), which is the in-place update.\n- A larger length allocates larger buffers.\n- The layer has a stable id and receives the binary `data` with `length` and `attributes`.\n- Updating 5,000 Drones allocates nothing after the first update.\n\nThe package does not depend on `@swarm/live`: the input is the plain interface above. Use `node:test` and `node:assert/strict`, as `packages/ts/live` does. The package's `test` script will run `test/*.test.ts`. Use no mocks.",
-    "done_when": "`packages/ts/maps/test/drone-layer.test.ts` exists and covers every case. Running it fails only because `packages/ts/maps/src/drone-layer/*` does not exist yet.",
+    "brief": "Write the Vitest tests (jsdom, as frontend/packages/ui does) of the new package @swarm/maps in frontend/packages/maps. Specs: docs/specs/technical/10-frontends.md#maps (\"MapLibre GL JS with self-hosted vector tiles from OpenStreetMap (PMTiles files)\" and \"deck.gl GPU layers for Drones; binary attribute updates for moving Drones\"), docs/specs/technical/10-frontends.md#apps (maps holds the MapLibre and deck.gl layers), docs/specs/technical/10-frontends.md#live-data (deck.gl attributes updated in place), docs/specs/technical/10-frontends.md#design-system (tokens only), docs/specs/visual-identity.md#colours, ticket docs/tickets/T0.19/TICKET.md criterion 1 (docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md). jsdom has no WebGL: test pure functions, and test SquadMap with an injected fake map factory.\n\nContract the implementation (K14, K15, K20) must meet; the package does not import @swarm/live (structural types only):\n- src/style/base-style.ts: buildBaseStyle({tilesUrl: string /* absolute URL of a .pmtiles file */, palette: MapPalette}): StyleSpecification (maplibre-gl) with version 8, one vector source \"basemap\" whose url is `pmtiles://` + tilesUrl and whose attribution contains \"© OpenStreetMap contributors\", a background layer in palette.background, and fill or line layers for the Protomaps basemap source layers earth, water, landuse, roads and buildings coloured only from the palette; no glyphs, no sprite, no symbol layer.\n- src/style/pmtiles-protocol.ts: registerPmtilesProtocol(target: {addProtocol(name: string, loader: unknown): void}): void registers the \"pmtiles\" protocol once, however many times it is called.\n- src/palette/map-palette.ts: type Rgba = [number, number, number, number]; interface MapPalette {background, surface, border, muted, text, drone, droneLost: Rgba}; readMapPalette(element: Element): MapPalette reads the CSS variables --color-background, --color-surface, --color-border, --color-muted, --color-text, --color-entity (drone) and --color-failure (droneLost) with getComputedStyle and converts #rrggbb to [r, g, b, 255]; a missing or malformed variable throws MapPaletteError.\n- src/drones/drone-layer.ts: interface DroneLayerData {version: number; count: number; positions: Float64Array /* lon, lat, alt */; states: Uint8Array}; LOST_STATE = 5; buildDroneLayer(data: DroneLayerData, palette: MapPalette): a deck.gl ScatterplotLayer with id \"drones\", data {length: count, attributes: {getPosition: {value: positions, size: 3}, getFillColor: {value: Uint8Array of count*4, size: 4, normalized: true}}} (binary attributes, no per-object accessor function), palette.drone for every state but lost and palette.droneLost for lost, and updateTriggers keyed on data.version.\n- src/drones/fit-squad.ts: squadBounds(data: DroneLayerData): [[west, south], [east, north]] | null (null when count is 0).\n- src/map/SquadMap.tsx: generic React component SquadMap<T extends DroneLayerData>({tilesUrl, palette?, label, source: {current(): T | null; subscribe(listener: () => void): () => void}, onDrawn?: (data: T, drawnAtMs: number) => void, createMap?: (container: HTMLElement, style: StyleSpecification) => MapHandle}) rendering a <div class=\"map\" role=\"region\" aria-label={label}>; MapHandle {setLayers(layers: unknown[]): void; fitBounds(bounds): void; onAfterRender(callback: () => void): void; remove(): void}. With a fake createMap, test: the region and its label; one map created; a source notification sets the Drone layer once per animation frame at most; the first non-empty data fits the bounds once; onDrawn receives the data drawn after the fake fires its after-render callback; unmount removes the map and unsubscribes.\n- src/index.ts re-exports all of these. Package stylesheet: ./styles.css.\n\nAt most five code files per folder (AGENT.md, File shape). Tests fail until the package code lands; that is expected.",
+    "done_when": "The six files exist and import only the module paths of the contract; `node -e` is not needed: once K09 has scaffolded the package, `pnpm --filter @swarm/maps exec vitest run` fails only on the missing src modules.",
     "wave": 1
   },
   {
     "id": "K05",
-    "title": "Tests: MapLibre base-map style on self-hosted PMTiles, light and dark",
+    "title": "Tests: ground-control runtime config, squad feed, Flight view and the App with Hold the Squad and Abort not yet wired",
     "agent": "test-writer",
     "depends_on": [],
     "files": [
-      "packages/ts/maps/test/base-map-style.test.ts"
+      "frontend/apps/ground-control/test/app.test.tsx",
+      "frontend/apps/ground-control/test/config/app-config.test.ts",
+      "frontend/apps/ground-control/test/flight/squad-feed.test.ts",
+      "frontend/apps/ground-control/test/flight/flight-view.test.tsx",
+      "frontend/apps/ground-control/test/flight/fakes.tsx"
     ],
-    "brief": "Write the failing tests of the base map of `packages/ts/maps`. Specification:\n- [🗺️ GUI and WebUI: maps and 3D](docs/specs/technical/10-frontends.md#maps): \"MapLibre GL JS with self-hosted vector tiles from OpenStreetMap (PMTiles files ...)\".\n- [🎨 GUI and WebUI: design system](docs/specs/technical/10-frontends.md#design-system): tokens only, light and dark.\n- [🗂️ GUI and WebUI: apps and shared packages](docs/specs/technical/10-frontends.md#apps).\n\nUse case: [🎬 UC-025](docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md), which needs the map of step 2.\n\nAPI under test: `../src/base-map/base-map-style.ts`, `export function buildBaseMapStyle(options: { pmtilesUrl: string; palette: BaseMapPalette }): StyleSpecification`. `BaseMapPalette` is exported from the same file and holds `background`, `water`, `land`, `road`, `building` and `label` colours, as `#rrggbb` strings that the caller resolves from the design tokens. `StyleSpecification` is MapLibre's type.\n\nCases:\n- The style has version 8 and one vector source whose URL is `pmtiles://<pmtilesUrl>`.\n- No layer or source points to a remote host other than `pmtilesUrl`, because the tiles are self-hosted.\n- Every colour in the style's paint properties comes from the palette: no hard-coded colour.\n- Two palettes, light and dark, give two styles that differ only in colours.\n- An empty `pmtilesUrl` is refused with a thrown `Error`.\n\nThe layers use the layer names of the Protomaps basemap schema of OpenStreetMap PMTiles. Use `node:test`.",
-    "done_when": "`packages/ts/maps/test/base-map-style.test.ts` exists and covers every case. Running it fails only because `src/base-map/base-map-style.ts` does not exist yet.",
+    "brief": "Write the Vitest tests (jsdom) of the first Ground control screen in frontend/apps/ground-control. Specs: docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md (step 2 and the A1 screen row #screen-a1: the map and the Squad, Hold the Squad and Abort in the title bar), docs/specs/functional/business-rules/BR-023-fixed-safety-controls.md (both controls visible on every screen), docs/specs/technical/10-frontends.md#live-data (React only for panels, the map at display rate), docs/specs/technical/10-frontends.md#performance (heavy libraries loaded on demand), docs/specs/technical/08-observability.md#signals and docs/specs/technical/07-scalability.md#budgets (the measured latency), ticket docs/tickets/T0.19/TICKET.md criteria 1 to 3.\n\nUpdate test/app.test.tsx: keep every existing frame test, replace \"shows no screen in the content area\" by: main.content holds one region labelled \"Map of the Squad\" (message id flight.map.label, which K10 adds in four languages); ✋ Hold the Squad and 🛑 Abort are visible in header.titlebar; clicking them throws nothing and posts nothing to the live client (not yet wired, TICKET.md out of scope). Render App with injected fakes so no WebGL and no Worker is needed. Put shared fakes in test/flight/fakes.tsx: a fake LiveClient (records connect and close, lets the test push SquadSnapshots and statuses) and a fake SquadMap module (loadMap resolving to {SquadMap: a component rendering <div class=\"map\" role=\"region\" aria-label={label}> that exposes the source it got and lets the test call onDrawn}).\n\nContract the implementation (K16, K22) must meet:\n- src/config/app-config.ts: interface AppConfig {liveUrl: string; missionId: string | null; tilesUrl: string; metricsUrl: string | null; metricsIntervalS: number; cell: string | null; livePath: \"edge\" | \"cell\"}; DEFAULT_APP_CONFIG = {liveUrl: \"ws://127.0.0.1:8080/v1/live\", missionId: null, tilesUrl: \"tiles/basemap.pmtiles\", metricsUrl: null, metricsIntervalS: 60, cell: null, livePath: \"edge\"}; parseAppConfig(value: unknown): AppConfig (missing keys take the default; unknown keys, a non-ws(s) liveUrl, a missionId that is not a version 7 UUID, a non-positive or boolean metricsIntervalS, a livePath outside edge/cell throw AppConfigError); loadAppConfig(fetchConfig?: (url: string) => Promise<Response>, url = \"config.json\"): Promise<AppConfig> (a 404 gives the defaults, other failures throw AppConfigError).\n- src/flight/squad-feed.ts: class SquadFeed(client: LiveClientLike, histograms: {droneToScreen: LatencyHistogram; frameToPixels: LatencyHistogram}) with current(), subscribe(listener) (the DroneSource of SquadMap), get count(), start(url, missionId), stop(), and drawn(snapshot, drawnAtMs): for every slot with updated = 1 it records drawnAtMs - tUs[slot] / 1000 into droneToScreen, and records drawnAtMs - receivedAtMs once into frameToPixels. LatencyHistogram comes from @swarm/live (K03 contract).\n- src/flight/FlightView.tsx: FlightView({config, createLiveClient, loadMap}) where loadMap defaults to () => import(\"@swarm/maps\") (lazy, so the first route stays small); it renders <section class=\"flight-map\" data-drone-count={n}> around the lazily loaded SquadMap labelled with flight.map.label; with a missionId it connects the live client to config.liveUrl and that Mission, without one it connects nothing and shows the empty map; data-drone-count follows the latest snapshot count, updated a few times per second at most; with metricsUrl set it starts a LatencyReporter of @swarm/live with config.metricsIntervalS, missionId, cell and livePath, and stops it on unmount.\n- src/App.tsx: App({config, createLiveClient?, loadMap?}) renders GroundControlFrame with the existing status items and FlightView as its child; onHold and onAbort stay no-ops.\n\nTests: config parsing (defaults, each refusal, 404 gives defaults); squad feed (subscribe and notify, count, latency records for updated slots only, frameToPixels once per draw, stop closes the client); Flight view (connects with the Mission of the config, nothing without one, data-drone-count becomes 10 after a snapshot of 10 Drones, onDrawn records 10 drone-to-screen samples, unmount closes the client); the App tests above. Wrap renders in I18nProvider language en as the existing test does. At most five code files per folder. Tests fail until K16 and K22 land; that is expected.",
+    "done_when": "The five files exist; `pnpm --filter @swarm/ground-control exec eslint test` reports no problem other than unresolved imports of the modules K16 and K22 write; `pnpm --filter @swarm/ground-control test` fails only on those missing modules and on the replaced content-area test.",
     "wave": 1
   },
   {
     "id": "K06",
-    "title": "Tests: Ground control Flight screen frame with Hold the Squad and Abort shown but not wired; app config",
+    "title": "Tests: Playwright e2e of the ground-control image with a stand-in live socket of 10 moving Drones",
     "agent": "test-writer",
     "depends_on": [],
     "files": [
-      "frontends/ground-control/test/flight-screen.test.tsx",
-      "frontends/ground-control/test/app-config.test.ts"
+      "frontend/apps/ground-control/playwright.config.ts",
+      "frontend/apps/ground-control/e2e/flight-view.spec.ts",
+      "frontend/apps/ground-control/e2e/live-stand-in-server.ts",
+      "frontend/apps/ground-control/e2e/squad-route.ts",
+      "frontend/apps/ground-control/e2e/global-setup.ts"
     ],
-    "brief": "Write the failing component and config tests of the first screen of `frontends/ground-control`. Specification:\n- [📏 BR-023: Fixed safety controls](docs/specs/functional/business-rules/BR-023-fixed-safety-controls.md): Hold the Squad and abort are visible on every screen.\n- [🎬 UC-025 step 2 and screen A1](docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md#screen-a1).\n- [🎨 GUI and WebUI: design system](docs/specs/technical/10-frontends.md#design-system).\n- [🗂️ GUI and WebUI: apps and shared packages](docs/specs/technical/10-frontends.md#apps).\n- the Ground control frame row of `docs/specs/visual-identity.md#components`: the title bar reads `⚙️ Swarm` · Ground control · Mission, then on the right `✋ Hold the Squad` (button secondary) and `🛑 Abort` (button danger).\n- [📏 BR-014](docs/specs/functional/business-rules/BR-014-simulation-isolation.md): nothing is sent.\n\nFirst read the shell of T0.14 (`frontends/ground-control`, and the Ground control frame of `packages/ts/ui`) and the test runner it set up. If it set up none, write the tests for Vitest with jsdom and `@testing-library/react`. Task K09 adds those dependencies.\n\nAPI under test:\n- `../src/flight/flight-screen.tsx`, `export function FlightScreen(props: { missionId: string; map?: ReactNode })`.\n- `../src/flight/safety-controls.tsx`, `export function SafetyControls()`.\n- `../src/config/app-config.ts`:\n  - `export interface AppConfig { liveUrl: string; pmtilesUrl: string; otlpMetricsUrl: string | null; cell: string; missionId: string }`;\n  - `export class AppConfigError extends Error`;\n  - `export function parseAppConfig(json: unknown, search: string): AppConfig`, where the Mission comes from the query parameter `mission` of `search`.\n\nCases:\n- The title bar shows Ground control, the Mission id, then the buttons `✋ Hold the Squad` and `🛑 Abort`, in that order and on the right.\n- Both buttons are visible and reachable by role `button` with those names.\n- Clicking either button changes nothing and calls nothing: it is not wired. Check this with a real `window` event listener that sees no custom event and no network request, not with a mock.\n- The `map` slot is rendered inside an element with `data-testid=\"flight-map\"`.\n- The screen renders in light and dark mode: `prefers-color-scheme` emulated through the token classes of `packages/ts/tokens`, if T0.14 provides them.\n- `parseAppConfig` accepts a full config.\n- `otlpMetricsUrl` absent becomes null.\n- A missing or empty `liveUrl`, `pmtilesUrl` or `cell` throws `AppConfigError` naming the field.\n- A missing or non-UUID `mission` parameter throws `AppConfigError`.",
-    "done_when": "Both test files exist and cover every case. The app's lint passes on them. The app's test command fails only because `src/flight/*` and `src/config/app-config.ts` do not exist yet.",
+    "brief": "Write the Playwright end-to-end test of Ground control against its real image (AGENT.md, Front-end tests: tests in frontend/apps/<frontend>/e2e/, against the images of infra/compose/e2e.yaml, never a development server). Specs: docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md (#screen-a1), docs/specs/functional/business-rules/BR-023-fixed-safety-controls.md, docs/specs/technical/10-frontends.md#live-data, docs/specs/technical/10-frontends.md#maps, docs/specs/technical/05-api.md#live, ticket docs/tickets/T0.19/TICKET.md criteria 1 and 3.\n\n- playwright.config.ts: export default defineE2eConfig({testDir: \"./e2e\", globalSetup: \"./e2e/global-setup.ts\", use: {baseURL: \"http://127.0.0.1:8180\"}}) from @swarm/e2e (qa/e2e/src/define-e2e-config.ts; it needs SWARM_IMAGE_TAG and lets SWARM_E2E_BASE_URL override the base URL); Chromium launch args that enable software WebGL in headless CI (for example --use-angle=swiftshader and --enable-unsafe-swiftshader).\n- e2e/global-setup.ts: runs `docker compose -f infra/compose/e2e.yaml up -d ground-control` from the repository root (find it relative to this file, as qa/e2e/e2e/images.spec.ts does), polls the base URL until it answers 200 within 120 s, and returns a teardown that runs `docker compose -f infra/compose/e2e.yaml rm -sf ground-control`. The compose service ground-control publishes host port 8180 to the container's port 8080 (K21 writes it; K17's nginx listens on 8080).\n- e2e/squad-route.ts: positions of 10 Drones flying a square of about 200 m around a fixed point, as a function of time.\n- e2e/live-stand-in-server.ts: a WebSocket server (package ws) on a free 127.0.0.1 port that records every message received, and after it receives a MessagePack subscription {op: subscribe, topic: mission/<id>/squad, rate: full} sends every 50 ms one MessagePack SquadFrame (@msgpack/msgpack encode; fields of frontend/packages/live/src/generated/models.ts: mission_id, t_us, frames of 10 TelemetryFrames with drone_id UUIDs, increasing seq, t_us = Date.now() * 1000, lat_e7, lon_e7, altitude_m 40, speed_m_s, heading_deg, battery_pct, link_quality_pct, state \"airborne\").\n- e2e/flight-view.spec.ts: route **/config.json to fulfil {liveUrl: ws://127.0.0.1:<port>/v1/live, missionId: a fixed version 7 UUID, tilesUrl: \"tiles/basemap.pmtiles\", metricsUrl: null, metricsIntervalS: 60, cell: null, livePath: \"edge\"}; route **/tiles/** to 404 (no PMTiles file in the image under test). Tests: the title bar shows ✋ Hold the Squad and 🛑 Abort (criterion 3); the region labelled \"Map of the Squad\" is visible; section.flight-map reaches data-drone-count=\"10\"; two screenshots of the map region taken 1 s apart differ (the Drones move, criterion 1); clicking Hold the Squad and Abort leaves the server with exactly one received message, the subscription (not yet wired). Add the HTML report folder to nothing else: defineE2eConfig sets it.\n\nAt most five code files per folder (e2e/ holds four). These tests run only once the image, the compose service and the app exist.",
+    "done_when": "The five files exist; `pnpm --filter @swarm/ground-control exec eslint e2e playwright.config.ts` reports no problem other than unresolved packages that K09 installs; once K09, K17, K21 and K22 land, `docker build -f frontend/apps/ground-control/Dockerfile -t ghcr.io/gpbcom/swarm/ground-control:local . && SWARM_IMAGE_TAG=local pnpm --filter @swarm/ground-control run e2e` passes.",
     "wave": 1
   },
   {
     "id": "K07",
-    "title": "Tests: Playwright e2e, 10 simulated Drones move on the Ground control map; safety controls visible and inert",
+    "title": "Tests: workspace conventions for @swarm/maps and @swarm/live, the ground-control compose service and the front-end e2e step of images.yml",
     "agent": "test-writer",
     "depends_on": [],
     "files": [
-      "frontends/ground-control/e2e/flight-map.spec.ts",
-      "frontends/ground-control/e2e/live-stand-in-server.ts"
+      "tests/conventions/mono_repo/frontend/test_frontend_workspace.py",
+      "tests/ci/e2e/test_compose_e2e.py",
+      "tests/ci/images/test_images_workflow.py"
     ],
-    "brief": "Write the failing Playwright end-to-end test of acceptance criteria 1 and 3 of `docs/tickets/T0.19/TICKET.md`. The criteria are:\n- 10 simulated Drones move on the map;\n- ✋ Hold the Squad and 🛑 Abort are visible in the title bar and not wired.\n\nSpecification:\n- [🎬 UC-025 screen A1](docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md#screen-a1)\n- [📏 BR-023](docs/specs/functional/business-rules/BR-023-fixed-safety-controls.md)\n- [📏 BR-014](docs/specs/functional/business-rules/BR-014-simulation-isolation.md): no command leaves the screen\n- [📨 API layer: live data over WebSocket](docs/specs/technical/05-api.md#live)\n- [📨 GUI and WebUI: live data in the browser](docs/specs/technical/10-frontends.md#live-data)\n- [🗺️ GUI and WebUI: maps and 3D](docs/specs/technical/10-frontends.md#maps)\n\nAGENT.md, Front-end tests: Playwright tests live in `frontends/<frontend>/e2e/` and run against the real image, never a development server. Use the base URL of the Playwright scaffold of T0.10 if it exists, and read it first.\n\nThe stand-in live server goes in `e2e/live-stand-in-server.ts`. It is a real WebSocket server built with `ws` and `@msgpack/msgpack`, which K09 adds as dev dependencies. It speaks the gateway `/v1/live` protocol of T0.18: read `services/gateway` for the subscribe message and the frame batching. It streams MessagePack `SquadFrame`s of 10 Drones (`state` airborne, `mission_id` the test Mission) at 10 Hz, flying a square, with `t_us` taken from the clock. It records every message it receives.\n\nThe test serves the app's runtime `config.json` through `page.route` to point `liveUrl` at the stand-in, then opens `/?mission=<uuid>`. It asserts:\n- the buttons `✋ Hold the Squad` and `🛑 Abort` are visible in the title bar;\n- the element `[data-testid=\"flight-map\"]` reaches `data-drone-count=\"10\"`;\n- its `data-snapshot-count` keeps increasing;\n- two screenshots of the map canvas taken one second apart differ, because the Drones move;\n- after clicking both buttons, the stand-in has received only the subscribe message.\n\nPlaywright's config, `frontends/ground-control/playwright.config.ts`, belongs to K09, which starts the stand-in as a `webServer` on port 8765. Write a short header comment in the spec saying so.",
-    "done_when": "Both files exist. `pnpm --filter ./frontends/ground-control exec eslint e2e` passes on them once K09 has added the dependencies. The spec lists every assertion of the brief.",
+    "brief": "Extend three pytest files (AGENT.md Python test rules: one Test class per file, three import groups under their comments, no Any, ClassVar constants, tests named as sentences). Specs: docs/specs/technical/10-frontends.md#apps (packages live and maps, app ground-control), docs/specs/technical/10-frontends.md#maps, AGENT.md sections Mono-repo, Docker images, Front-end tests and CI/CD, ticket docs/tickets/T0.19/TICKET.md.\n\n- tests/conventions/mono_repo/frontend/test_frontend_workspace.py: add frontend/packages/maps (@swarm/maps) and frontend/packages/live (@swarm/live) to NAMES so the existing parametrised rules cover them (private module, exact versions, lock importer, shared tsconfig and eslint; live already has tsconfig and eslint). New tests: maps exports \".\" -> \"./src/index.ts\" and \"./styles.css\" -> \"./src/styles.css\"; maps depends on maplibre-gl, pmtiles, @deck.gl/core, @deck.gl/layers and @deck.gl/mapbox with exact versions and declares react and react-dom 19 as peers; maps tests with vitest; live depends on @msgpack/msgpack with an exact version and its test script runs the tests of its sub-folders (test/**/*.test.ts); ground-control depends on @swarm/live and @swarm/maps as workspace:*, has an e2e script running playwright test, and devDepends on @swarm/e2e (workspace:*) and @playwright/test with the exact version qa/e2e uses.\n- tests/ci/e2e/test_compose_e2e.py: a service named ground-control exists, publishes host port 8180 to container port 8080, and (by the existing rules) uses its published image and frontend/apps/ground-control/Dockerfile.\n- tests/ci/images/test_images_workflow.py: the e2e job runs the e2e script of the front ends through pnpm (a run containing pnpm, ./frontend/apps/ and e2e), after the step that runs ./qa/e2e, and the report upload path covers frontend/apps/*/playwright-report/ as well as qa/e2e/playwright-report/. Keep every existing test.\n\nThe new tests fail until K09, K17 and K21 land; that is expected.",
+    "done_when": "`uv run ruff check tests/conventions/mono_repo/frontend tests/ci/e2e tests/ci/images` and `uv run ruff format --check` on the three files pass; `uv run pytest tests/conventions/mono_repo/frontend/test_frontend_workspace.py tests/ci/e2e/test_compose_e2e.py tests/ci/images/test_images_workflow.py -n 2` fails only on the new tests.",
     "wave": 1
   },
   {
     "id": "K08",
-    "title": "Tests: latency metrics exported over OTLP and the Grafana dashboard of the Telemetry latency",
+    "title": "Tests: the Grafana dashboard of the Telemetry latency, with the budgets as thresholds",
     "agent": "test-writer",
     "depends_on": [],
     "files": [
-      "frontends/ground-control/test/latency-metrics.test.ts",
-      "frontends/ground-control/test/latency-dashboard.test.ts"
+      "tests/infra/charts/observability/test_telemetry_latency_dashboard.py"
     ],
-    "brief": "Write the failing tests of acceptance criterion 2 of `docs/tickets/T0.19/TICKET.md`: the Telemetry latency from Drone to screen through the cell is measured and shown in Grafana. Specification:\n- [🩺 Observability: signals](docs/specs/technical/08-observability.md#signals): OpenTelemetry metrics, with `operator_id`, `mission_id` and `cell` as resource attributes, and `drone_id` never a metric label.\n- [📊 Observability: dashboards](docs/specs/technical/08-observability.md#dashboards): budgets are drawn as thresholds on every latency panel.\n- the budget [⏱️ Telemetry, Drone to Pilot's screen](docs/specs/technical/07-scalability.md#budgets): p95 < 400 ms through the cell.\n- [🎬 UC-025](docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md) and [📏 BR-014](docs/specs/functional/business-rules/BR-014-simulation-isolation.md).\n\nUse the test runner of the app: the one T0.14 set up, or Vitest if it set up none.\n\n`test/latency-metrics.test.ts` tests `../src/telemetry/latency-metrics.ts`, `export function createLatencyMeterProvider(config: { otlpMetricsUrl: string | null; cell: string; missionId: string; exportIntervalMs?: number }): MeterProvider | null`. Cases:\n- A null URL gives null, so nothing is exported.\n- With the URL of a real local HTTP server started by the test, recording through `new LatencyMeter(provider.getMeter(\"ground-control\"))` from `@swarm/live/latency` and then calling `forceFlush` makes the server receive one OTLP/HTTP metrics export.\n- The export holds the histogram `swarm.live.telemetry_latency`, unit `ms`.\n- Its resource has `service.name` = `ground-control`, `cell` and `mission_id`.\n- No data point has a `drone_id` attribute.\n\n`test/latency-dashboard.test.ts` reads `../observability/telemetry-latency-dashboard.json`. Cases:\n- It is valid JSON, with the uid `swarm-telemetry-latency`.\n- It has a time-series panel titled `Telemetry, Drone to Pilot's screen`.\n- The panel's Prometheus query is the p95 `histogram_quantile(0.95, ...)` of `swarm_live_telemetry_latency_milliseconds_bucket`.\n- The panel has a threshold at 400 (ms), the through-the-cell budget.\n- It has a `cell` template variable.\n- Nothing in it mentions `drone_id`.",
-    "done_when": "Both test files exist and cover every case. The app's lint passes on them. The app's tests fail only because `src/telemetry/latency-metrics.ts` and `observability/telemetry-latency-dashboard.json` do not exist yet.",
+    "brief": "Write a pytest file (AGENT.md test rules: one TestTelemetryLatencyDashboard class, three import groups, no Any, ClassVar constants, JsonValue for parsed JSON) that checks infra/charts/observability/dashboards/telemetry-latency.json, the Grafana dashboard T0.17 will provision with the observability stack. Specs: docs/specs/technical/08-observability.md#signals (drone_id never a metric label), docs/specs/technical/08-observability.md#dashboards (\"the budgets are drawn as thresholds on every latency panel\"), docs/specs/technical/07-scalability.md#budgets (Telemetry, Drone to Pilot's screen: p95 < 150 ms at the edge, < 400 ms through the cell), docs/specs/technical/10-frontends.md#performance (live frame to pixels < 50 ms), ticket docs/tickets/T0.19/TICKET.md criterion 2 (docs/specs/functional/business-rules/BR-014-simulation-isolation.md, docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md).\n\nThe browser exports OTLP histograms swarm.telemetry.drone_to_screen and swarm.live.frame_to_pixels in ms with the data point attribute swarm.live.path (edge or cell); in Prometheus they read swarm_telemetry_drone_to_screen_milliseconds_bucket and swarm_live_frame_to_pixels_milliseconds_bucket with the label swarm_live_path. Assert: the file is valid JSON with uid swarm-telemetry-latency and a title; exactly three panels of type timeseries, each with unit ms and a Prometheus target; panel through the cell: expr is a histogram_quantile(0.95, ...) over swarm_telemetry_drone_to_screen_milliseconds_bucket with swarm_live_path=\"cell\" and a threshold step at 400; panel at the edge: same with swarm_live_path=\"edge\" and a threshold at 150; panel frame to pixels: histogram_quantile(0.95, ...) over swarm_live_frame_to_pixels_milliseconds_bucket with a threshold at 50; the text drone_id appears nowhere in the file. Read the file with an ENCODING ClassVar. The test fails until K11 writes the file; that is expected.",
+    "done_when": "`uv run ruff check tests/infra/charts/observability` and `uv run ruff format --check tests/infra/charts/observability/test_telemetry_latency_dashboard.py` pass; `uv run pytest tests/infra/charts/observability -n 2` fails only because the dashboard file is missing.",
     "wave": 1
   },
   {
     "id": "K09",
-    "title": "Scaffold: create packages/ts/maps, add the dependencies and test runners of live, maps and ground-control, update the lock file",
+    "title": "Scaffold @swarm/maps and add the dependencies of live, maps and ground-control (sole owner of pnpm-lock.yaml)",
     "agent": "frontend-implementer",
     "depends_on": [
       "K01",
@@ -1004,125 +868,162 @@ In both cases, finish with `python3 .claude/skills/write-specs/scripts/specs.py 
       "K04",
       "K05",
       "K06",
-      "K07",
-      "K08"
+      "K07"
     ],
     "files": [
-      "packages/ts/maps/package.json",
-      "packages/ts/maps/tsconfig.json",
-      "packages/ts/maps/eslint.config.js",
-      "packages/ts/live/package.json",
-      "packages/ts/live/tsconfig.json",
-      "frontends/ground-control/package.json",
-      "frontends/ground-control/tsconfig.json",
-      "frontends/ground-control/vitest.config.ts",
-      "frontends/ground-control/playwright.config.ts",
+      "frontend/packages/maps/package.json",
+      "frontend/packages/maps/tsconfig.json",
+      "frontend/packages/maps/eslint.config.js",
+      "frontend/packages/maps/vitest.config.ts",
+      "frontend/packages/live/package.json",
+      "frontend/packages/live/tsconfig.json",
+      "frontend/apps/ground-control/package.json",
+      "frontend/apps/ground-control/tsconfig.json",
+      "frontend/apps/ground-control/eslint.config.js",
+      "frontend/apps/ground-control/vite.config.ts",
       "pnpm-lock.yaml"
     ],
-    "brief": "Prepare the workspace so that the tests of K01 to K08 can run. You are the only task that changes these manifests and `pnpm-lock.yaml`, so that the parallel tasks of wave 3 never conflict on them. Specification: [🗂️ GUI and WebUI: apps and shared packages](docs/specs/technical/10-frontends.md#apps) (packages `live` and `maps`, app `ground-control`; the stack is React 19, Vite, Vitest and Playwright), [🗺️ GUI and WebUI: maps and 3D](docs/specs/technical/10-frontends.md#maps), [📨 GUI and WebUI: live data in the browser](docs/specs/technical/10-frontends.md#live-data), [🩺 Observability: signals](docs/specs/technical/08-observability.md#signals) (OpenTelemetry SDK for TypeScript) and [🎬 UC-025](docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md). Also follow AGENT.md: TypeScript packages extend `@swarm/config`, and the `lint`, `typecheck` and `test` scripts are run by CI.\n\n1. **`packages/ts/maps`** (new, `@swarm/maps`). Copy the shape of `packages/ts/live` for `package.json`, `tsconfig.json` and `eslint.config.js`.\n   - Scripts: `lint`, `typecheck`, and `test` = `node --experimental-strip-types --test test/*.test.ts`.\n   - Subpath exports: `./base-map` → `./src/base-map/create-base-map.ts`, `./base-map-style` → `./src/base-map/base-map-style.ts`, `./drone-layer` → `./src/drone-layer/drone-layer.ts`, `./drone-attributes` → `./src/drone-layer/drone-attributes.ts`. There is no root `index.ts`, so the wave 3 tasks never share one.\n   - Dependencies: `maplibre-gl`, `pmtiles`, `@deck.gl/core`, `@deck.gl/layers`, `@deck.gl/mapbox`, and `@protomaps/basemaps` if the style needs its layer names.\n2. **`packages/ts/live`**.\n   - Add the dependencies `@msgpack/msgpack` and `@opentelemetry/api`, and the dev dependencies `ws`, `@types/ws` and `@opentelemetry/sdk-metrics`.\n   - Add these subpath exports beside `.`: `./squad` → `./src/squad/squad-store.ts`, `./snapshot` → `./src/squad/squad-snapshot.ts`, `./client` → `./src/client/live-client.ts`, `./latency` → `./src/latency/latency-meter.ts`. Do not edit `src/index.ts`.\n   - Keep the existing `test` script, which also runs `generate.ts --check`.\n   - Add the `DOM` lib to `tsconfig.json` if the client needs it. Leave the worker's lib to K16.\n3. **`frontends/ground-control`** (the shell of T0.14).\n   - Add the dependencies `@swarm/live`, `@swarm/maps` (workspace), `maplibre-gl`, `@deck.gl/core`, `@deck.gl/layers`, `@deck.gl/mapbox`, `@opentelemetry/api`, `@opentelemetry/sdk-metrics`, `@opentelemetry/exporter-metrics-otlp-http` and `@opentelemetry/resources`.\n   - If T0.14 set up no test runner, add the dev dependencies `vitest`, `jsdom`, `@testing-library/react` and `@playwright/test`. Add `ws` and `@msgpack/msgpack` as dev dependencies for the e2e stand-in.\n   - Set the `test` script to run Vitest, using `vitest.config.ts` with jsdom and `test/**/*.test.ts(x)`.\n   - Write or extend `playwright.config.ts`, keeping T0.10's base URL and reporter if they exist. It starts `e2e/live-stand-in-server.ts` as a `webServer` on port 8765.\n4. Pin exact versions, as `packages/ts/live/package.json` does, and run `pnpm install` to update `pnpm-lock.yaml`.\n\nWrite no source or test file.",
-    "done_when": "`pnpm install --frozen-lockfile` succeeds from the root. `pnpm --filter ./packages/ts/maps run lint` and `pnpm --filter ./packages/ts/live run lint` pass. `pnpm --filter ./frontends/ground-control run lint` passes. The tests of K01 to K08 now fail only because of missing implementation modules, not missing dependencies.",
+    "brief": "Create the manifests and tool configuration that the later tasks need, and install every dependency in one go: this task alone writes pnpm-lock.yaml. Specs: docs/specs/technical/10-frontends.md#apps (live: WebSocket client, MessagePack decoder in a Web Worker; maps: MapLibre and deck.gl layers; stack React 19, Vite, Vitest and Playwright), docs/specs/technical/10-frontends.md#maps, docs/specs/technical/10-frontends.md#live-data, docs/specs/technical/10-frontends.md#performance, AGENT.md (Commands, Mono-repo, Front-end tests), ticket docs/tickets/T0.19/TICKET.md. Read the convention tests tests/conventions/mono_repo/frontend/test_frontend_workspace.py (K07) and every test of K01 to K06 to know each import. Follow frontend/packages/ui and frontend/apps/ground-control: exact versions only, @swarm/config as workspace:*.\n\n- frontend/packages/maps: package.json for @swarm/maps (private, type module, exports \".\": \"./src/index.ts\" and \"./styles.css\": \"./src/styles.css\"; dependencies maplibre-gl, pmtiles, @deck.gl/core, @deck.gl/layers, @deck.gl/mapbox in exact current versions; react and react-dom 19.3.1 as peer and dev dependencies; dev dependencies as @swarm/ui's for vitest, jsdom, testing-library, @vitejs/plugin-react, types, eslint, typescript; scripts lint, typecheck tsc --noEmit -p tsconfig.json, test vitest run); tsconfig.json and eslint.config.js as frontend/packages/ui's; vitest.config.ts with jsdom and test/**/*.test.{ts,tsx}.\n- frontend/packages/live: add the dependency @msgpack/msgpack (exact) and the dev dependencies ws and @types/ws only if K02 needs them; change the test script to run `node --experimental-strip-types --test \"test/**/*.test.ts\"` then the existing generate.ts --check; in tsconfig.json add the DOM and WebWorker libraries the worker and client need (if DOM and WebWorker clash, keep DOM and let the worker entry declare its scope, and report it).\n- frontend/apps/ground-control: dependencies @swarm/live and @swarm/maps (workspace:*); dev dependencies @swarm/e2e (workspace:*), @playwright/test with the exact version of qa/e2e/package.json, ws, @types/ws and @msgpack/msgpack for the e2e stand-in server; script e2e: playwright test; tsconfig.json includes e2e and playwright.config.ts; eslint.config.js ignores dist/, playwright-report/ and test-results/; vite.config.ts keeps base \"./\" and adds worker: {format: \"es\"} so the module worker of @swarm/live bundles.\n\nRun `pnpm install` at the root. Report every version you picked as a decision (TKT-14). Do not write any src file.",
+    "done_when": "`pnpm install --frozen-lockfile` succeeds at the root; `uv run pytest tests/conventions/mono_repo/frontend/test_frontend_workspace.py -n 2` passes; `pnpm --filter @swarm/maps exec vitest --version` prints a version.",
     "wave": 2
   },
   {
     "id": "K10",
-    "title": "Implement SquadStore: MessagePack decode, delta merge, typed-array snapshots",
+    "title": "Translations: the map label of the Flight view in English, French, German and Spanish",
+    "agent": "frontend-implementer",
+    "depends_on": [
+      "K05"
+    ],
+    "files": [
+      "frontend/packages/i18n/src/messages/en.json",
+      "frontend/packages/i18n/src/messages/fr.json",
+      "frontend/packages/i18n/src/messages/de.json",
+      "frontend/packages/i18n/src/messages/es.json"
+    ],
+    "brief": "Add the FormatJS message flight.map.label to the four catalogues of frontend/packages/i18n/src/messages/: English \"Map of the Squad\", and its French, German and Spanish translations, written with the glossary names (docs/specs/glossary.md: Squad is the entity name; keep the sense \"map of the Squad\"). Specs: docs/specs/functional/business-rules/BR-017-every-screen-in-four-languages.md (every screen in four languages), docs/specs/technical/10-frontends.md#apps (i18n holds FormatJS messages in four languages), docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md (step 2: the map and the Squad), ticket docs/tickets/T0.19/TICKET.md. Read the tests of K05 (frontend/apps/ground-control/test/) to confirm the id and the English text; add any other message id they use, in all four languages. Keep the existing keys and their order; add the new keys at the end.",
+    "done_when": "`pnpm --filter ./frontend/packages/i18n run check-messages` passes and `pnpm --filter ./frontend/packages/i18n test` passes.",
+    "wave": 2
+  },
+  {
+    "id": "K11",
+    "title": "Grafana dashboard: Telemetry latency from Drone to screen, through the cell and at the edge, with the budget thresholds",
+    "agent": "implementer",
+    "depends_on": [
+      "K08"
+    ],
+    "files": [
+      "infra/charts/observability/dashboards/telemetry-latency.json"
+    ],
+    "brief": "Write the Grafana dashboard JSON infra/charts/observability/dashboards/telemetry-latency.json that shows the Telemetry latency measured in the browser (T0.17 provisions every dashboard of this folder with its Grafana; it creates the rest of the chart). Specs: docs/specs/technical/08-observability.md#signals, docs/specs/technical/08-observability.md#dashboards (budgets drawn as thresholds on every latency panel), docs/specs/technical/07-scalability.md#budgets (Telemetry, Drone to Pilot's screen: p95 < 150 ms at the edge, < 400 ms through the cell), docs/specs/technical/10-frontends.md#performance (live frame to pixels < 50 ms), ticket docs/tickets/T0.19/TICKET.md criterion 2. The test is tests/infra/charts/observability/test_telemetry_latency_dashboard.py (K08); read it first.\n\nDashboard: uid swarm-telemetry-latency, title \"Telemetry latency\", a datasource template variable of type prometheus, three timeseries panels with unit ms and red threshold steps: \"Telemetry, Drone to Pilot's screen, through the cell\" = histogram_quantile(0.95, sum by (le) (rate(swarm_telemetry_drone_to_screen_milliseconds_bucket{swarm_live_path=\"cell\"}[5m]))) with a threshold at 400; \"Telemetry, Drone to Pilot's screen, at the edge\" = the same with swarm_live_path=\"edge\" and 150; \"Live frame to pixels, inside the browser\" = histogram_quantile(0.95, sum by (le) (rate(swarm_live_frame_to_pixels_milliseconds_bucket[5m]))) with 50. No label or text drone_id anywhere. Plain British English titles, no em dash.",
+    "done_when": "`uv run pytest tests/infra/charts/observability -n 2` passes.",
+    "wave": 2
+  },
+  {
+    "id": "K12",
+    "title": "live: subscription encoder, SquadFrame decoder and the SquadStore delta merge into typed arrays",
     "agent": "frontend-implementer",
     "depends_on": [
       "K01",
       "K09"
     ],
     "files": [
-      "packages/ts/live/src/squad/squad-store.ts",
-      "packages/ts/live/src/squad/squad-snapshot.ts",
-      "packages/ts/live/src/squad/drone-state-code.ts"
+      "frontend/packages/live/src/protocol/topics.ts",
+      "frontend/packages/live/src/protocol/squad-frame-decoder.ts",
+      "frontend/packages/live/src/protocol/live-protocol-errors.ts",
+      "frontend/packages/live/src/snapshot/squad-snapshot.ts",
+      "frontend/packages/live/src/snapshot/squad-store.ts"
     ],
-    "brief": "Implement the decoder that runs inside the Web Worker of `packages/ts/live`, so that the tests of `packages/ts/live/test/squad-store.test.ts` (K01) pass. Specification:\n- [📨 GUI and WebUI: live data in the browser](docs/specs/technical/10-frontends.md#live-data): MessagePack decode, delta merge, typed arrays for positions, states and battery, and a transferable snapshot.\n- [📨 API layer: live data over WebSocket](docs/specs/technical/05-api.md#live): delta-encoded `SquadFrame`.\n- [🎬 UC-025](docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md).\n- [📏 BR-014](docs/specs/functional/business-rules/BR-014-simulation-isolation.md).\n\nThe frame types are in `src/generated/models.ts`, which is never edited. Decode with `@msgpack/msgpack`, matching the encoding of the gateway `/v1/live` of T0.18.\n\nWrite the API fixed by K01:\n- `SquadStore`, with `merge`, `snapshot`, `size` and `rejectedMessages`;\n- the `SquadSnapshot` interface;\n- `DRONE_STATE_CODES`.\n\nBehaviour:\n- Each Drone keeps a stable slot.\n- A frame with an older `seq` never overwrites a newer one.\n- Frames of another Mission are rejected.\n- A malformed message is counted and changes nothing.\n- The snapshot copies into fresh typed arrays, so that the worker can transfer them.\n\nKeep the merge allocation-free in steady state, for the target of 5,000 Drones. Do not touch any manifest, test or other module. Report as `blocked` with the file and the change if a K01 test is wrong (TKT-19).",
-    "done_when": "`pnpm --filter ./packages/ts/live run lint` and `pnpm --filter ./packages/ts/live run typecheck` pass. `node --experimental-strip-types --test packages/ts/live/test/squad-store.test.ts` passes.",
+    "brief": "Implement the protocol and the snapshot store of @swarm/live so the tests of K01 (frontend/packages/live/test/protocol/ and test/snapshot/) pass; read them first, they fix the exact contract (squadTopic, encodeSquadSubscription, decodeSquadFrame, LiveTopicInvalidError, LiveMessageUnreadableError, DRONE_STATES, SquadSnapshot, SquadStore with merge, dirty, snapshot and transferables). Specs: docs/specs/technical/10-frontends.md#live-data (MessagePack decode, delta merge, typed arrays for positions, states and battery, transferable snapshot), docs/specs/technical/05-api.md#live (subscribe message and topic mission/<id>/squad, MessagePack frames), ticket docs/tickets/T0.19/TICKET.md criterion 1. The wire format is what backend/swarm-service/src/swarm_service/shared/live/live_codec.py sends: MessagePack maps with the field names of frontend/packages/live/src/generated/models.ts; use those generated types (SquadFrame, TelemetryFrame, DroneState, LiveSubscription) instead of redefining them. Use @msgpack/msgpack; decode int64 values (t_us) as numbers. The decoder validates every field and refuses booleans where numbers are expected. Merge keeps a stable slot per Drone in order of first appearance, ignores frames of another Mission and frames whose seq is not newer, keeps absent Drones' last values, and snapshot() copies into fresh buffers so they can be transferred. These modules hold no DOM code: they run in the worker and in node tests. Do not touch src/index.ts (K19 exports them). At most five code files per folder.",
+    "done_when": "`node --experimental-strip-types --test frontend/packages/live/test/protocol/*.test.ts frontend/packages/live/test/snapshot/*.test.ts` passes; `pnpm --filter @swarm/live exec eslint src/protocol src/snapshot test/protocol test/snapshot` passes.",
     "wave": 3
   },
   {
-    "id": "K11",
-    "title": "Implement LatencyMeter: Telemetry latency histogram",
+    "id": "K13",
+    "title": "live: latency histogram, OTLP/HTTP JSON body and the periodic LatencyReporter",
     "agent": "frontend-implementer",
     "depends_on": [
       "K03",
       "K09"
     ],
     "files": [
-      "packages/ts/live/src/latency/latency-meter.ts"
+      "frontend/packages/live/src/latency/latency-histogram.ts",
+      "frontend/packages/live/src/latency/otlp-metrics-body.ts",
+      "frontend/packages/live/src/latency/latency-reporter.ts"
     ],
-    "brief": "Implement `packages/ts/live/src/latency/latency-meter.ts` so that `packages/ts/live/test/latency-meter.test.ts` (K03) passes. Specification:\n- [🩺 Observability: signals](docs/specs/technical/08-observability.md#signals): OpenTelemetry metrics, and `drone_id` never a metric label.\n- the budget [⏱️ Telemetry, Drone to Pilot's screen](docs/specs/technical/07-scalability.md#budgets).\n- [🎬 UC-025](docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md).\n- [📏 BR-014](docs/specs/functional/business-rules/BR-014-simulation-isolation.md).\n\n`LatencyMeter` holds `static INSTRUMENT_NAME = \"swarm.live.telemetry_latency\"` and `static UNIT = \"ms\"`. It creates one histogram from the `Meter` of `@opentelemetry/api` it is given. Choose explicit bucket boundaries that resolve the 150 ms edge budget and the 400 ms cell budget.\n\n`record(frameTimesUs, paintedAtMs)` records `paintedAtMs - t_us / 1000` for each frame, with no attribute. A negative sample is skipped and counted in `skippedSamples`. The meter allocates nothing per sample.\n\nTouch no other file. Report `blocked` if K03's test is wrong (TKT-19).",
-    "done_when": "`pnpm --filter ./packages/ts/live run lint` and `typecheck` pass. `node --experimental-strip-types --test packages/ts/live/test/latency-meter.test.ts` passes.",
+    "brief": "Implement the Telemetry latency measure of @swarm/live so the tests of K03 (frontend/packages/live/test/latency/) pass; read them first, they fix the contract (LATENCY_BOUNDS_MS, LatencyHistogram, TELEMETRY_METRICS, otlpMetricsBody, LatencyReporter). Specs: docs/specs/technical/08-observability.md#signals (OpenTelemetry metrics; mission_id and cell as resource attributes; drone_id never a metric label; no secrets or personal data), docs/specs/technical/07-scalability.md#budgets (the bounds include 150 and 400 ms), docs/specs/technical/10-frontends.md#performance (the bounds include 50 ms), ticket docs/tickets/T0.19/TICKET.md criterion 2. The body is the OTLP/HTTP JSON ExportMetricsServiceRequest (resourceMetrics, scopeMetrics, histogram with cumulative temporality 2, explicitBounds, bucketCounts as the JSON encoding of OTLP expects), service.name ground-control, data point attribute swarm.live.path. The reporter posts with fetch by default (Content-Type application/json), never throws on a failed post (it warns once on the console and keeps going), posts nothing without new samples, and accepts injected post and clock for the tests. No OpenTelemetry SDK dependency: T0.17 brings the SDKs; report this choice and its alternative (TKT-14). Do not touch src/index.ts (K19 exports them).",
+    "done_when": "`node --experimental-strip-types --test frontend/packages/live/test/latency/*.test.ts` passes; `pnpm --filter @swarm/live exec eslint src/latency test/latency` passes.",
     "wave": 3
   },
   {
-    "id": "K12",
-    "title": "Implement the MapLibre base map on self-hosted PMTiles",
-    "agent": "frontend-implementer",
-    "depends_on": [
-      "K05",
-      "K09"
-    ],
-    "files": [
-      "packages/ts/maps/src/base-map/base-map-style.ts",
-      "packages/ts/maps/src/base-map/create-base-map.ts"
-    ],
-    "brief": "Implement the base map of `@swarm/maps`, so that `packages/ts/maps/test/base-map-style.test.ts` (K05) passes. Specification: [🗺️ GUI and WebUI: maps and 3D](docs/specs/technical/10-frontends.md#maps) (MapLibre GL JS with self-hosted OpenStreetMap PMTiles; deck.gl layers above it), [🎨 GUI and WebUI: design system](docs/specs/technical/10-frontends.md#design-system) (colours from the tokens only, light and dark), [🗂️ GUI and WebUI: apps and shared packages](docs/specs/technical/10-frontends.md#apps) and [🎬 UC-025 step 2](docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md#main-flow).\n\n`base-map-style.ts` holds `BaseMapPalette` and `buildBaseMapStyle({ pmtilesUrl, palette })`. The style is a MapLibre style, version 8, with one vector source `pmtiles://<pmtilesUrl>` and the layers of the Protomaps basemap schema. Every colour comes from the palette. An empty URL is refused.\n\n`create-base-map.ts` holds two functions:\n- `registerPmtilesProtocol()` registers the `pmtiles` protocol on `maplibre-gl` once, and is idempotent.\n- `createBaseMap(container: HTMLElement, options: { style: StyleSpecification; center: [number, number]; zoom: number }): { map: maplibregl.Map; overlay: MapboxOverlay }` creates the map and attaches a deck.gl `MapboxOverlay` from `@deck.gl/mapbox`, through which K17 adds the Drone layer.\n\nTouch no other file. Report `blocked` if K05's test is wrong (TKT-19).",
-    "done_when": "`pnpm --filter ./packages/ts/maps run lint` and `typecheck` pass. `node --experimental-strip-types --test packages/ts/maps/test/base-map-style.test.ts` passes.",
-    "wave": 3
-  },
-  {
-    "id": "K13",
-    "title": "Implement the deck.gl Drone layer with in-place binary attributes",
+    "id": "K14",
+    "title": "maps: PMTiles base style, the pmtiles protocol and the palette read from the tokens",
     "agent": "frontend-implementer",
     "depends_on": [
       "K04",
       "K09"
     ],
     "files": [
-      "packages/ts/maps/src/drone-layer/drone-attributes.ts",
-      "packages/ts/maps/src/drone-layer/drone-layer.ts"
+      "frontend/packages/maps/src/style/base-style.ts",
+      "frontend/packages/maps/src/style/pmtiles-protocol.ts",
+      "frontend/packages/maps/src/palette/map-palette.ts"
     ],
-    "brief": "Implement the Drone layer of `@swarm/maps`, so that `packages/ts/maps/test/drone-layer.test.ts` (K04) passes. Specification:\n- [🗺️ GUI and WebUI: maps and 3D](docs/specs/technical/10-frontends.md#maps): deck.gl GPU layers for Drones, with binary attribute updates for moving Drones.\n- [📨 GUI and WebUI: live data in the browser](docs/specs/technical/10-frontends.md#live-data): deck.gl attributes are updated in place, with a target of 5,000 moving Drones at 60 frames per second.\n- [⏱️ GUI and WebUI: front-end budgets](docs/specs/technical/10-frontends.md#performance): live frame to pixels under 50 ms.\n- [🎬 UC-025](docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md).\n\nWrite `DroneAttributes.update(input, colours)` and `createDroneLayer(data, options)` as K04 fixes them:\n- `update` reuses its `Float64Array` and `Uint8Array` buffers while the length does not grow.\n- `createDroneLayer` returns a `ScatterplotLayer` with binary `data`, a stable id and a pixel radius.\n- The layer is told the data changed without being given new JavaScript objects per Drone.\n- The package does not import `@swarm/live`.\n\nTouch no other file. Report `blocked` if K04's test is wrong (TKT-19).",
-    "done_when": "`pnpm --filter ./packages/ts/maps run lint` and `typecheck` pass. `node --experimental-strip-types --test packages/ts/maps/test/drone-layer.test.ts` passes.",
-    "wave": 3
-  },
-  {
-    "id": "K14",
-    "title": "Grafana dashboard of the Telemetry latency from Drone to screen",
-    "agent": "frontend-implementer",
-    "depends_on": [
-      "K08",
-      "K09"
-    ],
-    "files": [
-      "frontends/ground-control/observability/telemetry-latency-dashboard.json"
-    ],
-    "brief": "Write the Grafana dashboard that shows the Telemetry latency from Drone to screen, so that `frontends/ground-control/test/latency-dashboard.test.ts` (K08) passes. This is acceptance criterion 2 of `docs/tickets/T0.19/TICKET.md`. Specification:\n- [🩺 Observability: signals](docs/specs/technical/08-observability.md#signals): metrics stored in Prometheus per cell, and `drone_id` never a label.\n- [📊 Observability: dashboards](docs/specs/technical/08-observability.md#dashboards): budgets are drawn as thresholds on every latency panel.\n- the budget [⏱️ Telemetry, Drone to Pilot's screen](docs/specs/technical/07-scalability.md#budgets): p95 < 400 ms through the cell.\n- [🎬 UC-025](docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md).\n\nWrite a Grafana dashboard JSON model with:\n- the uid `swarm-telemetry-latency`;\n- a Prometheus data source variable and a `cell` variable;\n- a time-series panel `Telemetry, Drone to Pilot's screen` with `histogram_quantile(0.95, sum by (le) (rate(swarm_live_telemetry_latency_milliseconds_bucket{cell=~\"$cell\"}[1m])))` and a threshold at 400 ms;\n- a p50 series and a sample-rate panel beside it.\n\nThe Grafana that provisions this file arrives with the observability stack of T0.17. Write no chart. Touch no other file.",
-    "done_when": "The JSON parses. The app's test run of `test/latency-dashboard.test.ts` passes.",
+    "brief": "Implement the base map of @swarm/maps so the tests frontend/packages/maps/test/style/*.test.ts and test/palette/map-palette.test.ts (K04) pass; read them first, they fix the contract (buildBaseStyle, registerPmtilesProtocol, MapPalette, Rgba, readMapPalette, MapPaletteError). Specs: docs/specs/technical/10-frontends.md#maps (\"MapLibre GL JS with self-hosted vector tiles from OpenStreetMap (PMTiles files ...)\"), docs/specs/technical/10-frontends.md#design-system and docs/specs/visual-identity.md#colours (colours come from the tokens only, light and dark), ticket docs/tickets/T0.19/TICKET.md. The style uses one vector source basemap with url pmtiles://<tilesUrl> and the attribution \"© OpenStreetMap contributors\" (required by the OpenStreetMap licence), a background layer and fill or line layers for the Protomaps basemap source layers earth, water, landuse, roads and buildings, coloured only from the palette (background, surface, border, muted, text); no glyphs, sprite or symbol layer, so nothing is fetched from a third party. registerPmtilesProtocol uses the Protocol of the pmtiles package and registers it once. readMapPalette reads the token CSS variables with getComputedStyle (--color-background, --color-surface, --color-border, --color-muted, --color-text, --color-entity, --color-failure). Do not touch src/index.ts (K20).",
+    "done_when": "`pnpm --filter @swarm/maps exec vitest run test/style test/palette` passes; `pnpm --filter @swarm/maps exec eslint src/style src/palette` passes.",
     "wave": 3
   },
   {
     "id": "K15",
-    "title": "Ground control Flight screen: frame, title bar with Hold the Squad and Abort shown but not wired, runtime config",
+    "title": "maps: the deck.gl Drone layer with binary attributes, and the bounds of the Squad",
     "agent": "frontend-implementer",
     "depends_on": [
-      "K06",
+      "K04",
       "K09"
     ],
     "files": [
-      "frontends/ground-control/src/flight/flight-screen.tsx",
-      "frontends/ground-control/src/flight/safety-controls.tsx",
-      "frontends/ground-control/src/config/app-config.ts",
-      "frontends/ground-control/src/App.tsx"
+      "frontend/packages/maps/src/drones/drone-layer.ts",
+      "frontend/packages/maps/src/drones/fit-squad.ts"
     ],
-    "brief": "Build the first screen of Ground control, so that `frontends/ground-control/test/flight-screen.test.tsx` and `test/app-config.test.ts` (K06) pass. Specification:\n- [📏 BR-023: Fixed safety controls](docs/specs/functional/business-rules/BR-023-fixed-safety-controls.md)\n- [🎬 UC-025 step 2 and screen A1](docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md#screen-a1)\n- [🎨 GUI and WebUI: design system](docs/specs/technical/10-frontends.md#design-system): the frames are layout components of `packages/ts/ui` and use the tokens only.\n- [🗂️ GUI and WebUI: apps and shared packages](docs/specs/technical/10-frontends.md#apps)\n- the Ground control frame row of `docs/specs/visual-identity.md#components`\n- [📏 BR-014](docs/specs/functional/business-rules/BR-014-simulation-isolation.md)\n\nUse the Ground control frame and the button components that T0.14 put in `@swarm/ui`. Do not edit `packages/ts/ui`.\n\n- `SafetyControls` renders `✋ Hold the Squad` (button secondary) and `🛑 Abort` (button danger) in the frame's title bar, with no action attached and no command sent, because the roadmap says they are not yet wired. If T0.14's frame already renders them, pass them through it.\n- `FlightScreen({ missionId, map })` renders the frame with the 🛰️ Flight side bar item active, the title Ground control and the Mission id, and a content area `data-testid=\"flight-map\"` holding `map`.\n- `app-config.ts` holds `AppConfig`, `AppConfigError` and `parseAppConfig(json, search)`, as K06 fixes them, plus `loadAppConfig()`, which fetches the runtime `config.json` served beside the app and parses it with `location.search`.\n- `App.tsx` is the root of T0.14's shell; if T0.14 named it otherwise, change that file and report it. It loads the config, then renders `FlightScreen`. On an `AppConfigError` it renders the frame with the error message.\n\nTokens only: no colour or font of your own. Report `blocked` if a K06 test is wrong (TKT-19).",
-    "done_when": "`pnpm --filter ./frontends/ground-control run lint`, `typecheck` and `test -- test/flight-screen.test.tsx test/app-config.test.ts` pass.",
+    "brief": "Implement the Drone layer of @swarm/maps so the tests frontend/packages/maps/test/drones/*.test.ts (K04) pass; read them first, they fix the contract (DroneLayerData {version, count, positions Float64Array lon/lat/alt, states Uint8Array}, LOST_STATE = 5, buildDroneLayer(data, palette), squadBounds(data)). Specs: docs/specs/technical/10-frontends.md#maps (\"deck.gl GPU layers for Drones ...; binary attribute updates for moving Drones\"), docs/specs/technical/10-frontends.md#live-data (\"deck.gl attributes updated in place\"; 5,000 moving Drones at 60 frames per second), docs/specs/technical/10-frontends.md#performance, ticket docs/tickets/T0.19/TICKET.md criterion 1 (docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md step 2). Use a ScatterplotLayer with id drones and binary attributes only (getPosition {value: positions, size: 3}, getFillColor {value, size: 4, normalized: true}), no per-object accessor function; reuse the colour buffer between calls when count does not change; palette.drone for every state but lost, palette.droneLost for lost; updateTriggers keyed on data.version; radius in pixels so a Drone stays visible at every zoom. MapPalette comes from src/palette/map-palette.ts (K14, same wave): import its type only by that path. Do not touch src/index.ts (K20).",
+    "done_when": "`pnpm --filter @swarm/maps exec vitest run test/drones` passes; `pnpm --filter @swarm/maps exec eslint src/drones` passes.",
     "wave": 3
   },
   {
-    "id": "K19",
-    "title": "Document the live and maps packages and the Ground control app in AGENT.md",
+    "id": "K16",
+    "title": "ground-control: runtime configuration (config.json) and its loader",
+    "agent": "frontend-implementer",
+    "depends_on": [
+      "K05",
+      "K09"
+    ],
+    "files": [
+      "frontend/apps/ground-control/src/config/app-config.ts",
+      "frontend/apps/ground-control/src/config/load-app-config.ts",
+      "frontend/apps/ground-control/public/config.json"
+    ],
+    "brief": "Implement the runtime configuration of Ground control so frontend/apps/ground-control/test/config/app-config.test.ts (K05) passes; read it first, it fixes the contract (AppConfig, DEFAULT_APP_CONFIG, parseAppConfig, AppConfigError, loadAppConfig). Specs: docs/specs/technical/05-api.md#live (\"At the edge Ground control connects straight to the flight engine with the same protocol, so the same front end works locally and remotely\": the image reads where to connect at run time), docs/specs/technical/08-observability.md#signals (mission_id and cell as resource attributes), docs/specs/technical/07-scalability.md#budgets (livePath edge or cell selects the budget), ticket docs/tickets/T0.19/TICKET.md. The default liveUrl ws://127.0.0.1:8080/v1/live is the edge flight engine's live socket of backend/apps/flight-engine/conf/app.yaml; metricsIntervalS 60 is the OpenTelemetry SDK default export interval. public/config.json holds every default written out, so the image ships it and a deployment replaces it. Put AppConfigError beside the parser in app-config.ts. No secret in the configuration.",
+    "done_when": "`pnpm --filter @swarm/ground-control exec vitest run test/config` passes; `pnpm --filter @swarm/ground-control exec eslint src/config` passes.",
+    "wave": 3
+  },
+  {
+    "id": "K17",
+    "title": "ground-control: the image (multi-stage Dockerfile, unprivileged nginx serving the app, config.json and self-hosted tiles)",
+    "agent": "frontend-implementer",
+    "depends_on": [
+      "K06",
+      "K07",
+      "K09"
+    ],
+    "files": [
+      "frontend/apps/ground-control/Dockerfile",
+      "frontend/apps/ground-control/nginx.conf"
+    ],
+    "brief": "Write the image of Ground control (AGENT.md, Docker images: one image per front end, a multi-stage Dockerfile in its folder, built from the repository root because the shared lock files are there; CI discovers it through .github/scripts/detect_changes.py and scans it with Trivy, so use current, pinned base images). Specs: docs/specs/technical/10-frontends.md#apps, docs/specs/technical/10-frontends.md#maps (self-hosted PMTiles), docs/specs/technical/10-frontends.md#performance (the apps cache their shell), docs/specs/technical/09-deployment.md, ticket docs/tickets/T0.19/TICKET.md criterion 1. The e2e test frontend/apps/ground-control/e2e/ (K06) and tests/ci/e2e/test_compose_e2e.py (K07) use it.\n\n- Build stage: node 22 with corepack and the pnpm version of the root package.json packageManager; copy the workspace manifests and pnpm-lock.yaml, `pnpm install --frozen-lockfile --filter @swarm/ground-control...`, copy frontend/, then `pnpm --filter @swarm/ground-control build`.\n- Run stage: an unprivileged nginx image (non-root, listening on 8080) serving dist/ from /usr/share/nginx/html with nginx.conf: index.html fallback for the app; config.json served with no-store so a deployment's replacement is read; hashed assets cached long; location /tiles/ served from /srv/tiles (a volume a deployment mounts; no PMTiles file is committed) with the .pmtiles MIME type application/octet-stream and HTTP range requests; a 404 when a tile file is missing.\n- No secret, no build argument holding one. Report each base image and version you picked as a decision.",
+    "done_when": "`docker build -f frontend/apps/ground-control/Dockerfile -t ghcr.io/gpbcom/swarm/ground-control:local .` succeeds from the repository root (environment check: skipped if docker is missing); the container started from it answers 200 on / and on /config.json at port 8080.",
+    "wave": 3
+  },
+  {
+    "id": "K18",
+    "title": "Docs: AGENT.md names the live worker, the maps package, the ground-control image and its e2e command",
     "agent": "doc-writer",
     "depends_on": [
       "K09"
@@ -1130,61 +1031,103 @@ In both cases, finish with `python3 .claude/skills/write-specs/scripts/specs.py 
     "files": [
       "AGENT.md"
     ],
-    "brief": "Update the Mono-repo section of `AGENT.md`, the paragraph that lists the packages, to describe the TypeScript pieces this ticket adds. Specification: [🗂️ GUI and WebUI: apps and shared packages](docs/specs/technical/10-frontends.md#apps), [📨 GUI and WebUI: live data in the browser](docs/specs/technical/10-frontends.md#live-data), [🗺️ GUI and WebUI: maps and 3D](docs/specs/technical/10-frontends.md#maps) and [🩺 Observability: signals](docs/specs/technical/08-observability.md#signals).\n\nDescribe these three pieces:\n- `packages/ts/live` (`@swarm/live`) holds the generated models, the `SquadStore` decoder and the Web Worker (`LiveWorkerCore`), which decodes MessagePack off the main thread and posts at most 30 transferable snapshots per second. It also holds the main-thread `LiveClient` and the `LatencyMeter` (histogram `swarm.live.telemetry_latency`, in ms). It is imported through subpath exports.\n- `packages/ts/maps` (`@swarm/maps`) holds the MapLibre base map on self-hosted PMTiles and the deck.gl Drone layer with binary attributes updated in place.\n- `frontends/ground-control` reads a runtime `config.json` (`liveUrl`, `pmtilesUrl`, `otlpMetricsUrl`, `cell`) and the Mission from `?mission=`. Its Grafana dashboard is in `observability/`, and its Playwright tests in `e2e/` use a stand-in live server.\n\nKeep AGENT.md's style: plain British English, no em dash, lines up to 120 characters. Do not invent commands: use the scripts K09 defined in the three `package.json` files.",
-    "done_when": "`AGENT.md` describes the three pieces in its Mono-repo section. `grep -n 'packages/ts/maps' AGENT.md` finds the new text, and the text has no em dash.",
+    "brief": "Update AGENT.md for what T0.19 adds, in plain British English, no em dash, keeping its style. Specs: docs/specs/technical/10-frontends.md#apps, docs/specs/technical/10-frontends.md#live-data, docs/specs/technical/10-frontends.md#maps, docs/specs/technical/08-observability.md#signals, ticket docs/tickets/T0.19/TICKET.md.\n\n- In the Mono-repo paragraph on the front-end packages (it names frontend/packages/tokens and frontend/packages/ui), add frontend/packages/live (@swarm/live): the generated models, the MessagePack protocol, the Web Worker that owns the live socket and posts typed-array snapshots at most 30 times a second, the main-thread LiveClient, and the Telemetry latency histograms exported as OTLP/HTTP JSON; and frontend/packages/maps (@swarm/maps): the MapLibre base style on self-hosted PMTiles, the deck.gl Drone layer with binary attributes and the SquadMap component, coloured from the tokens.\n- In Commands, next to the qa/e2e Playwright command, add the end-to-end test of Ground control: `SWARM_IMAGE_TAG=<tag> pnpm --filter @swarm/ground-control run e2e`, which starts the ground-control service of infra/compose/e2e.yaml (port 8180) and feeds it a stand-in live socket.\n- Say that Ground control reads its runtime configuration from config.json beside index.html (live URL, Mission, tiles, metrics endpoint, cell, edge or cell path), and that the image serves PMTiles files from /tiles/, mounted by the deployment.\n- Say that infra/charts/observability/dashboards/ holds the Grafana dashboards, the first being the Telemetry latency.\nChange nothing else.",
+    "done_when": "`grep -n '@swarm/maps' AGENT.md` and `grep -n 'pnpm --filter @swarm/ground-control run e2e' AGENT.md` each find a line; `grep -c '—' AGENT.md` prints 0.",
     "wave": 3
   },
   {
-    "id": "K16",
-    "title": "Implement the Web Worker live client: LiveWorkerCore, worker entry and main-thread LiveClient",
+    "id": "K19",
+    "title": "live: the Web Worker core and entry, the LiveClient, and the package index",
     "agent": "frontend-implementer",
     "depends_on": [
       "K02",
-      "K10"
+      "K12",
+      "K13"
     ],
     "files": [
-      "packages/ts/live/src/worker/live-worker-core.ts",
-      "packages/ts/live/src/worker/live-messages.ts",
-      "packages/ts/live/src/worker/live-worker.ts",
-      "packages/ts/live/src/client/live-client.ts",
-      "packages/ts/live/tsconfig.json"
+      "frontend/packages/live/src/worker/live-worker-messages.ts",
+      "frontend/packages/live/src/worker/live-worker-core.ts",
+      "frontend/packages/live/src/worker/live.worker.ts",
+      "frontend/packages/live/src/client/live-client.ts",
+      "frontend/packages/live/src/index.ts"
     ],
-    "brief": "Implement the live path of `packages/ts/live`, so that `packages/ts/live/test/live-worker-core.test.ts` and `test/live-client.test.ts` (K02) pass. Specification:\n- [📨 GUI and WebUI: live data in the browser](docs/specs/technical/10-frontends.md#live-data): WebSocket → Web Worker (decode, delta merge, typed arrays) → transferable snapshot at most 30 per second → main thread. The main thread never decodes frames.\n- [📨 API layer: live data over WebSocket](docs/specs/technical/05-api.md#live): one socket per client, the subscribe message per Mission topic, MessagePack frames.\n- [🗂️ GUI and WebUI: apps and shared packages](docs/specs/technical/10-frontends.md#apps)\n- [🎬 UC-025](docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md)\n- [📏 BR-014](docs/specs/functional/business-rules/BR-014-simulation-isolation.md): the client sends nothing but its subscription.\n\nMatch the gateway `/v1/live` of T0.18 in `services/gateway` for the subscribe encoding and the token.\n\n- `live-messages.ts` holds the message types fixed by K02.\n- `LiveWorkerCore(port, { maxSnapshotsPerSecond = 30 })`:\n  - On `start`, it opens one WebSocket with `binaryType = \"arraybuffer\"` and sends the subscribe message for `mission/<id>/squad` at full rate.\n  - It merges each message into a `SquadStore` (K10).\n  - It posts `{ kind: \"snapshot\" }` with the snapshot's buffers in the transfer list, at most `maxSnapshotsPerSecond` times per second and always ending on the latest state.\n  - It posts the statuses connecting, open, closed and error. On `stop`, it closes the socket.\n- `live-worker.ts` is the worker entry, `new LiveWorkerCore(self)`.\n- `live-client.ts` holds two things:\n  - `LiveClient(port)`, with `start`, `onSnapshot`, `onStatus` and `stop`. It only relays snapshots and statuses.\n  - `createLiveWorker()`, which returns `new Worker(new URL(\"../worker/live-worker.ts\", import.meta.url), { type: \"module\" })` for Vite.\n- Adjust `tsconfig.json` so that the worker entry type-checks with the WebWorker lib, without breaking the DOM code: use a triple-slash lib reference or a separate include.\n\nReport `blocked` if a K02 test is wrong (TKT-19).",
-    "done_when": "`pnpm --filter ./packages/ts/live run lint`, `typecheck` and `test` all pass, including the generator check and every test of K01 to K03.",
+    "brief": "Implement the worker and the client of @swarm/live so the tests of K02 (frontend/packages/live/test/worker/ and test/client/) pass, and the whole package test passes; read them first, they fix the contract (ToWorker, FromWorker, LiveStatus, LiveWorkerCore, SocketLike, LiveClient, WorkerLike). Specs: docs/specs/technical/10-frontends.md#live-data (\"The main thread never decodes frames\": the worker owns the WebSocket, decodes MessagePack, merges, and posts a transferable snapshot at most 30 times a second), docs/specs/technical/05-api.md#live (one socket per client, a MessagePack subscription per Mission topic), docs/specs/technical/10-frontends.md#performance (live frame to pixels < 50 ms), ticket docs/tickets/T0.19/TICKET.md criterion 1. Use the protocol and the SquadStore of src/protocol and src/snapshot (K12).\n\n- live-worker-core.ts: on connect, open the socket (binaryType arraybuffer), post status connecting then open, send encodeSquadSubscription(missionId) on open; on each binary message decode and merge with receivedAtMs = Date.now() through the clock; post a snapshot with its transferables when the store is dirty, at most maxSnapshotsPerS (30) times a second; skip an unreadable message; post closed on close and failed on error; no automatic reconnection.\n- live.worker.ts: the thin worker entry that builds a LiveWorkerCore with the real WebSocket, self.postMessage with the transfer list and real timers, and forwards messages to handle().\n- live-client.ts: the default createWorker is new Worker(new URL(\"../worker/live.worker.ts\", import.meta.url), {type: \"module\"}) (Vite bundles it); the client only forwards.\n- src/index.ts: keep `export type * from \"./generated/models.ts\"` and export the public API: squadTopic, encodeSquadSubscription, decodeSquadFrame, the errors, DRONE_STATES, SquadSnapshot, SquadStore, the worker message types, LiveClient, LatencyHistogram, LATENCY_BOUNDS_MS, TELEMETRY_METRICS, otlpMetricsBody, LatencyReporter (K13).\nAt most five code files per folder.",
+    "done_when": "`pnpm --filter @swarm/live test`, `pnpm --filter @swarm/live typecheck` and `pnpm --filter @swarm/live lint` pass.",
     "wave": 4
   },
   {
-    "id": "K17",
-    "title": "Wire the Ground control map: base map, Drone layer fed by the live worker, latency recorded and exported",
+    "id": "K20",
+    "title": "maps: the SquadMap component (MapLibre and the deck.gl overlay), its stylesheet and the package index",
     "agent": "frontend-implementer",
     "depends_on": [
+      "K04",
+      "K14",
+      "K15"
+    ],
+    "files": [
+      "frontend/packages/maps/src/map/SquadMap.tsx",
+      "frontend/packages/maps/src/styles.css",
+      "frontend/packages/maps/src/index.ts"
+    ],
+    "brief": "Implement SquadMap so frontend/packages/maps/test/map/squad-map.test.tsx (K04) passes, then the whole package test; read it first, it fixes the contract (generic SquadMap<T extends DroneLayerData> with tilesUrl, palette, label, source {current, subscribe}, onDrawn, createMap and MapHandle {setLayers, fitBounds, onAfterRender, remove}). Specs: docs/specs/technical/10-frontends.md#maps, docs/specs/technical/10-frontends.md#live-data (\"deck.gl attributes updated in place, React only for panels and Alerts\"; the map at the display rate), docs/specs/technical/10-frontends.md#design-system (tokens only), docs/specs/visual-identity.md#colours (light and dark), docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md (step 2, the map and the Squad), ticket docs/tickets/T0.19/TICKET.md criterion 1.\n\n- The default createMap registers the pmtiles protocol (K14), creates a maplibre-gl Map on the container with buildBaseStyle, and a MapboxOverlay of @deck.gl/mapbox (interleaved) holding the Drone layer of buildDroneLayer (K15); onAfterRender maps to the overlay's after-render callback. Import maplibre-gl's stylesheet here.\n- On a source notification, schedule one requestAnimationFrame that rebuilds the layer from source.current() (new layer instance over the same binary buffers, updateTriggers on version); never set React state per frame. Fit the map to squadBounds on the first non-empty data only. After each render, call onDrawn(data, Date.now()) once per new version.\n- The palette defaults to readMapPalette(container) and is read again when prefers-color-scheme changes (the style is rebuilt).\n- Render <div className=\"map\" role=\"region\" aria-label={label}>; src/styles.css gives .map position relative, flex 1, a minimum height and the background var(--color-background), using var(--...) tokens only and no raw colour or font.\n- src/index.ts exports SquadMap and its types, buildBaseStyle, registerPmtilesProtocol, readMapPalette, MapPalette, Rgba, MapPaletteError, buildDroneLayer, DroneLayerData, LOST_STATE and squadBounds.",
+    "done_when": "`pnpm --filter @swarm/maps test`, `pnpm --filter @swarm/maps typecheck` and `pnpm --filter @swarm/maps lint` pass.",
+    "wave": 4
+  },
+  {
+    "id": "K21",
+    "title": "CI: the ground-control service in infra/compose/e2e.yaml and the front ends' e2e step of images.yml",
+    "agent": "implementer",
+    "depends_on": [
       "K07",
-      "K08",
-      "K11",
+      "K17"
+    ],
+    "files": [
+      "infra/compose/e2e.yaml",
+      ".github/workflows/images.yml"
+    ],
+    "brief": "Wire the Ground control end-to-end test into the pipeline. Specs: AGENT.md sections CI/CD (\"Run Playwright against those images, and upload the HTML report if a test fails\"), Front-end tests (tests in frontend/apps/<frontend>/e2e/, against the real images of infra/compose/e2e.yaml) and Docker images; docs/specs/technical/10-frontends.md#apps; ticket docs/tickets/T0.19/TICKET.md criteria 1 and 3. The tests are tests/ci/e2e/test_compose_e2e.py and tests/ci/images/test_images_workflow.py (K07); read them first.\n\n- infra/compose/e2e.yaml: add the service ground-control with image ${SWARM_IMAGE_REGISTRY:-ghcr.io/gpbcom/swarm}/ground-control:${SWARM_IMAGE_TAG:?SWARM_IMAGE_TAG names the images of a pipeline run}, pull_policy missing, restart \"no\", ports \"8180:8080\"; no build, no mount of source code, no development server. Its Dockerfile is frontend/apps/ground-control/Dockerfile (K17).\n- .github/workflows/images.yml, job e2e: keep the step that runs `pnpm --filter ./qa/e2e run e2e`; after it add a step that runs the e2e script of every front end that has one: `pnpm --filter \"./frontend/apps/*\" --if-present run e2e` (the Chromium already installed through qa/e2e serves the same @playwright/test version); extend the report upload path to qa/e2e/playwright-report/ and frontend/apps/*/playwright-report/. Change nothing else.",
+    "done_when": "`uv run pytest tests/ci/e2e/test_compose_e2e.py tests/ci/images/test_images_workflow.py -n 2` passes; `docker compose -f infra/compose/e2e.yaml config --services` with SWARM_IMAGE_TAG=local lists gateway and ground-control.",
+    "wave": 4
+  },
+  {
+    "id": "K22",
+    "title": "ground-control: the Flight view (lazy SquadMap fed by the live worker, measured latency) in the frame with Hold the Squad and Abort",
+    "agent": "frontend-implementer",
+    "depends_on": [
+      "K05",
+      "K06",
+      "K10",
+      "K16",
+      "K19",
+      "K20"
+    ],
+    "files": [
+      "frontend/apps/ground-control/src/App.tsx",
+      "frontend/apps/ground-control/src/main.tsx",
+      "frontend/apps/ground-control/src/flight/FlightView.tsx",
+      "frontend/apps/ground-control/src/flight/squad-feed.ts",
+      "frontend/apps/ground-control/src/flight/flight-view.css"
+    ],
+    "brief": "Build the first screen of Ground control so the Vitest tests of K05 (frontend/apps/ground-control/test/) pass, and the Playwright test of K06 passes against the image; read both first, they fix the contract (SquadFeed, FlightView with config, createLiveClient and loadMap, App with config, section.flight-map with data-drone-count, the region labelled by flight.map.label). Specs: docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md (step 2 and #screen-a1: the map and the Squad; Hold the Squad and Abort in the title bar), docs/specs/functional/business-rules/BR-023-fixed-safety-controls.md (both always visible), docs/specs/functional/business-rules/BR-014-simulation-isolation.md (the screen only reads the live data and sends no command), docs/specs/technical/10-frontends.md#live-data (the main thread never decodes; React only for panels; the map at the display rate), docs/specs/technical/10-frontends.md#performance (first route JavaScript < 300 kB compressed: the map is loaded on demand; live frame to pixels < 50 ms), docs/specs/technical/10-frontends.md#design-system, docs/specs/technical/08-observability.md#signals and docs/specs/technical/07-scalability.md#budgets (the measured latency), ticket docs/tickets/T0.19/TICKET.md criteria 1 to 3.\n\n- squad-feed.ts: SquadFeed bridges a LiveClient of @swarm/live (K19) to the DroneSource of SquadMap (@swarm/maps, K20) without React state per frame, keeps the latest SquadSnapshot, and records the latency into two LatencyHistograms on drawn(): drawnAtMs - tUs / 1000 for each updated slot (drone to screen), drawnAtMs - receivedAtMs once (frame to pixels).\n- FlightView.tsx: React.lazy over loadMap (default () => import(\"@swarm/maps\")) inside Suspense; the tiles URL resolved against document.baseURI; connects only when config.missionId is set; data-drone-count refreshed at most a few times a second; starts a LatencyReporter (K13) when config.metricsUrl is set, with missionId, cell, livePath and the two histograms keyed by TELEMETRY_METRICS; cleans up on unmount. flight-view.css lays out section.flight-map to fill main.content, var(--...) tokens only, and imports @swarm/maps/styles.css.\n- App.tsx: GroundControlFrame with the existing status items, FlightView as its child, onHold and onAbort left as no-ops (the controls are shown, not yet wired).\n- main.tsx: keep the token and ui stylesheets and the I18nProvider; load the runtime configuration with loadAppConfig (K16) before rendering App; on an AppConfigError render nothing in the content and log the error to the console.\nAt most five code files per folder.",
+    "done_when": "`pnpm --filter @swarm/ground-control test`, `typecheck`, `lint` and `build` pass; `docker build -f frontend/apps/ground-control/Dockerfile -t ghcr.io/gpbcom/swarm/ground-control:local . && SWARM_IMAGE_TAG=local pnpm --filter @swarm/ground-control run e2e` passes (environment check: skipped if docker is missing).",
+    "wave": 5
+  },
+  {
+    "id": "K23",
+    "title": "Screens: UC-025 A1 brought in line with the first Ground control screen (mock-up updated, T0.20 not merged)",
+    "agent": "mockup-writer",
+    "depends_on": [
+      "K09",
+      "K10",
       "K12",
       "K13",
       "K14",
       "K15",
-      "K16"
-    ],
-    "files": [
-      "frontends/ground-control/src/flight/flight-map.tsx",
-      "frontends/ground-control/src/flight/drone-colours.ts",
-      "frontends/ground-control/src/telemetry/latency-metrics.ts",
-      "frontends/ground-control/src/flight/flight-screen.tsx",
-      "frontends/ground-control/src/App.tsx"
-    ],
-    "brief": "Put the simulated Squad on the Ground control map, so that `frontends/ground-control/test/latency-metrics.test.ts` (K08) and the Playwright spec `e2e/flight-map.spec.ts` (K07) pass, and every earlier test stays green. Specification:\n- [🎬 UC-025 step 2 and screen A1](docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md#screen-a1)\n- [🗺️ GUI and WebUI: maps and 3D](docs/specs/technical/10-frontends.md#maps)\n- [📨 GUI and WebUI: live data in the browser](docs/specs/technical/10-frontends.md#live-data): React only for panels, the map at the display rate, deck.gl attributes in place.\n- [⏱️ GUI and WebUI: front-end budgets](docs/specs/technical/10-frontends.md#performance): live frame to pixels under 50 ms.\n- [🩺 Observability: signals](docs/specs/technical/08-observability.md#signals)\n- the budget [⏱️ Telemetry, Drone to Pilot's screen](docs/specs/technical/07-scalability.md#budgets)\n- [📏 BR-014](docs/specs/functional/business-rules/BR-014-simulation-isolation.md) and [📏 BR-023](docs/specs/functional/business-rules/BR-023-fixed-safety-controls.md)\n\nWhat to build:\n- `drone-colours.ts` resolves, from the CSS variables of `packages/ts/tokens` at run time, the base-map palette and one RGBA colour per Drone state code, in light and dark mode. Use the tokens only.\n- `flight-map.tsx`:\n  - It calls `registerPmtilesProtocol()` and `createBaseMap()` from `@swarm/maps/base-map` with `buildBaseMapStyle()` on `config.pmtilesUrl`.\n  - It starts `LiveClient` from `@swarm/live/client` on `createLiveWorker()` with `config.liveUrl` and the Mission.\n  - On each snapshot, it updates `DroneAttributes` and sets the Drone layer on the overlay, outside React state.\n  - After deck.gl has drawn (`onAfterRender`), it records `LatencyMeter.record(snapshot.frameTimesUs, performance.timeOrigin + performance.now())`.\n  - It keeps `data-drone-count` and `data-snapshot-count` up to date on the `[data-testid=\"flight-map\"]` element.\n  - It switches the base-map style when the colour scheme changes.\n- `latency-metrics.ts` holds `createLatencyMeterProvider(config)` as K08 fixes it: a `MeterProvider` with a periodic `OTLPMetricExporter` (HTTP) to `otlpMetricsUrl`, the resource `service.name=ground-control`, `cell` and `mission_id`, or null when no URL is set.\n- `flight-screen.tsx` and `App.tsx` render `FlightMap` in the map slot and shut the client and the provider down on unmount.\n\nDo not wire Hold the Squad or Abort. Report `blocked` with the file and the change if a test of K07 or K08 is wrong (TKT-19).",
-    "done_when": "`pnpm --filter ./frontends/ground-control run lint`, `typecheck` and `test` pass. `pnpm --filter ./frontends/ground-control exec playwright test e2e/flight-map.spec.ts` passes against the app's image with the stand-in live server, or reports not applicable if T0.10's Playwright scaffold is missing.",
-    "wave": 5
-  },
-  {
-    "id": "K18",
-    "title": "Capture UC-025 A1 from the running app (or update its mock-up before T0.20)",
-    "agent": "mockup-writer",
-    "depends_on": [
-      "K15",
-      "K17"
+      "K16",
+      "K17",
+      "K19",
+      "K20",
+      "K22"
     ],
     "files": [
       "docs/specs/screens/UC-025/a1.png",
@@ -1192,8 +1135,8 @@ In both cases, finish with `python3 .claude/skills/write-specs/scripts/specs.py 
       "docs/specs/screens/mockups/UC-025/a1.html",
       "docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md"
     ],
-    "brief": "Carry out TKT-21 for the one screen listed under Screens touched of `docs/tickets/T0.19/TICKET.md`: [🖼️ UC-025 A1](docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md#screen-a1). Rules: SPEC-12 and SPEC-13 of `.claude/rules/specs.md`, [📏 BR-023](docs/specs/functional/business-rules/BR-023-fixed-safety-controls.md) (Hold the Squad and Abort in the title bar) and [🎨 GUI and WebUI: design system](docs/specs/technical/10-frontends.md#design-system) (visual tests and screenshots).\n\nFirst decide whether T0.20 is done: its `EXPLAIN.md` is on `origin/develop`, which is the definition of `done_tickets()` in `.claude/scripts/tickets/tickets.py`.\n\n**If T0.20 is done:**\n1. Run Ground control with the stand-in live server of `frontends/ground-control/e2e/live-stand-in-server.ts`, sending 10 airborne Drones.\n2. Capture the A1 screen in light and dark mode with T0.20's screenshot pipeline, at the screen size of the visual identity, as 256-colour palette PNGs at `docs/specs/screens/UC-025/a1.png` and `a1.dark.png`.\n3. Set the A1 row's source to `📸 Screenshot`.\n4. Delete `docs/specs/screens/mockups/UC-025/a1.html`.\n\n**If T0.20 is not done:**\n1. Update `docs/specs/screens/mockups/UC-025/a1.html` to what the app shows. Use only the classes of `components.css` and keep the frame of the visual identity: the title bar with Ground control, the Mission, `✋ Hold the Squad` and `🛑 Abort`, and the map with the Squad's Drones.\n2. Keep the areas that UC-025 step 2 requires and that the app does not show yet (video, Alerts and Co-pilot, progress), because the use case is approved.\n3. Leave the row `✏️ Mock-up`.\n4. Run `python3 .claude/skills/write-specs/scripts/specs.py render`.\n\nIn both cases, finish with `python3 .claude/skills/write-specs/scripts/specs.py build`, then `specs.py check`.",
-    "done_when": "`python3 .claude/skills/write-specs/scripts/specs.py check` prints nothing. If T0.20 is done, the A1 row reads `📸 Screenshot`, both PNGs were written by this task and `docs/specs/screens/mockups/UC-025/a1.html` is gone.",
+    "brief": "Capture task for the screen listed under Screens touched of docs/tickets/T0.19/TICKET.md: docs/specs/functional/use-cases/UC-025-monitor-a-mission-in-ground-control.md#screen-a1 (TKT-21 in .claude/rules/tickets.md, SPEC-12 and SPEC-13 in .claude/rules/specs.md). Other specs: docs/specs/functional/business-rules/BR-023-fixed-safety-controls.md, docs/specs/visual-identity.md#screens, docs/specs/technical/10-frontends.md#design-system.\n\nT0.20 (the screenshot pipeline) is not merged, so the screenshot check is not applicable yet. If T0.20 is merged when you run: capture the A1 screen from the running app (the ground-control image with the stand-in live socket of frontend/apps/ground-control/e2e/) in light and dark mode with the T0.20 pipeline into docs/specs/screens/UC-025/a1.png and a1.dark.png, set the A1 row's Source cell to 📸 Screenshot and delete docs/specs/screens/mockups/UC-025/a1.html. Otherwise (the expected case): update the mock-up docs/specs/screens/mockups/UC-025/a1.html so that the parts the app now shows match it: the title bar (⚙️ Swarm, Ground control, ✋ Hold the Squad, 🛑 Abort), the side bar items, the status bar, and the map area showing the Squad as 🛸 markers of the Drones; keep the areas the app does not show yet (Squad panel, live video, Alerts and Co-pilot, progress) as they are, because UC-025 still requires them for later tickets. Use only the classes of docs/specs/screens/mockups/components.css, no style attribute, glossary names only (SPEC-2). Then run `python3 .claude/skills/write-specs/scripts/specs.py render` and `python3 .claude/skills/write-specs/scripts/specs.py build`; the A1 row stays ✏️ Mock-up. Change no other screen and no other row of the page.",
+    "done_when": "`python3 .claude/skills/write-specs/scripts/specs.py check` prints nothing, and both docs/specs/screens/UC-025/a1.png and a1.dark.png are rendered from the updated mock-up (or captured as 📸 Screenshot if T0.20 is merged).",
     "wave": 6
   }
 ]

@@ -17,6 +17,17 @@ from tests.conventions.mono_repo.helpers import repo_root
 class TestFrontendWorkspace:
     TOKENS: ClassVar[str] = "frontend/packages/tokens"
     UI: ClassVar[str] = "frontend/packages/ui"
+    MAPS: ClassVar[str] = "frontend/packages/maps"
+    LIVE: ClassVar[str] = "frontend/packages/live"
+    GROUND_CONTROL: ClassVar[str] = "frontend/apps/ground-control"
+    E2E: ClassVar[str] = "qa/e2e"
+    MAP_DEPENDENCIES: ClassVar[List[str]] = [
+        "maplibre-gl",
+        "pmtiles",
+        "@deck.gl/core",
+        "@deck.gl/layers",
+        "@deck.gl/mapbox",
+    ]
     DESKTOP: ClassVar[str] = "frontend/apps/desktop"
     APPS: ClassVar[List[str]] = [
         "frontend/apps/ground-control",
@@ -27,6 +38,8 @@ class TestFrontendWorkspace:
     NAMES: ClassVar[Dict[str, str]] = {
         "frontend/packages/tokens": "@swarm/tokens",
         "frontend/packages/ui": "@swarm/ui",
+        "frontend/packages/maps": "@swarm/maps",
+        "frontend/packages/live": "@swarm/live",
         "frontend/apps/ground-control": "@swarm/ground-control",
         "frontend/apps/mission-studio": "@swarm/mission-studio",
         "frontend/apps/back-office": "@swarm/back-office",
@@ -163,3 +176,46 @@ class TestFrontendWorkspace:
 
     def test_the_desktop_shell_exposes_the_tauri_script(self) -> None:
         assert self.section(self.DESKTOP, "scripts").get("tauri") == "tauri"
+
+    def test_the_maps_package_exports_its_entry_point_and_styles(self) -> None:
+        exports = self.section(self.MAPS, "exports")
+        assert exports.get(".") == "./src/index.ts"
+        assert exports.get("./styles.css") == "./src/styles.css"
+
+    @pytest.mark.parametrize("name", MAP_DEPENDENCIES)
+    def test_the_maps_package_depends_on_the_map_libraries_with_exact_versions(self, name: str) -> None:
+        version = self.section(self.MAPS, "dependencies").get(name)
+        assert isinstance(version, str), f"{self.MAPS} does not depend on {name}."
+        assert re.fullmatch(self.EXACT_VERSION, version)
+
+    @pytest.mark.parametrize("name", ["react", "react-dom"])
+    def test_the_maps_package_uses_react_19(self, name: str) -> None:
+        peers = self.section(self.MAPS, "peerDependencies")
+        version = peers.get(name)
+        assert isinstance(version, str), f"{self.MAPS} does not declare {name} as a peer."
+        assert re.fullmatch(self.REACT_19, version)
+
+    def test_the_maps_package_tests_with_vitest(self) -> None:
+        assert "vitest" in str(self.section(self.MAPS, "scripts").get("test"))
+
+    def test_the_live_package_depends_on_msgpack_with_an_exact_version(self) -> None:
+        version = self.section(self.LIVE, "dependencies").get("@msgpack/msgpack")
+        assert isinstance(version, str)
+        assert re.fullmatch(self.EXACT_VERSION, version)
+
+    def test_the_live_package_tests_the_files_of_its_sub_folders(self) -> None:
+        assert "test/**/*.test.ts" in str(self.section(self.LIVE, "scripts").get("test"))
+
+    @pytest.mark.parametrize("name", ["@swarm/live", "@swarm/maps"])
+    def test_ground_control_depends_on_the_live_and_maps_packages(self, name: str) -> None:
+        assert self.section(self.GROUND_CONTROL, "dependencies").get(name) == self.WORKSPACE
+
+    def test_ground_control_has_an_e2e_script_running_playwright(self) -> None:
+        assert "playwright test" in str(self.section(self.GROUND_CONTROL, "scripts").get("e2e"))
+
+    def test_ground_control_dev_depends_on_the_e2e_package_and_its_playwright_version(self) -> None:
+        dev = self.section(self.GROUND_CONTROL, "devDependencies")
+        assert dev.get("@swarm/e2e") == self.WORKSPACE
+        expected = self.section(self.E2E, "devDependencies").get("@playwright/test")
+        assert isinstance(expected, str)
+        assert dev.get("@playwright/test") == expected

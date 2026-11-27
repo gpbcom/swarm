@@ -20,5 +20,6 @@
   "nav.alarms": "Alarmes",
   "nav.operators": "Opérateurs",
   "action.hold": "Mettre l'escadrille en attente",
-  "action.abort": "Interrompre"
+  "action.abort": "Interrompre",
+  "flight.map.label": "Carte de l'Escadrille"
 }
