@@ -102,18 +102,6 @@ AREA = re.compile(
     r"(?<![\w/.-])(backend/(?:apps|libs)/[\w-]+|backend/libs|backend/swarm-[\w-]+|frontend/apps/[\w-]+"
     r"|frontend/packages(?:/[\w-]+)?|rust(?:/[\w-]+)?(?![\w-])|infra/[\w-]+|qa/e2e|tests/[\w-]+|\.github|\.claude)"
 )
-# The ticket graph still names its areas in the layout from before the refactor, until phase 7 of the refactor plan
-# rewrites it: each of those folders is read as its target-layout folder, most specific first.
-GRAPH_FOLDERS = {
-    "packages/python/swarm-models": "backend/swarm-models",
-    "packages/python": "backend/libs",
-    "packages/rust": "rust",
-    "packages/ts/e2e": "qa/e2e",
-    "packages/ts": "frontend/packages",
-    "frontends/": "frontend/apps/",
-    "services/": "backend/apps/",
-    "deploy/": "infra/",
-}
 TICKET_ID = re.compile(r"T(\d+)\.(\d+)")
 
 
@@ -218,16 +206,8 @@ def measured(done: Set[str]) -> Tuple[float, float]:
     return (sum(minutes) / len(minutes) if minutes else 0.0, sum(tokens) / len(tokens) if tokens else 0.0)
 
 
-def target_layout(text: str) -> str:
-    """Return a ticket's area text with the graph's folders of the old layout written as target-layout folders."""
-    for old, new in GRAPH_FOLDERS.items():
-        text = re.sub(rf"(?<![\w/.-]){re.escape(old)}", new, text)
-    return text
-
-
 def areas(text: str) -> Set[str]:
     """Return the areas a ticket changes, as target-layout folders; ``*`` when it may change any of them."""
-    text = target_layout(text)
     found = {area.rstrip("/") for area in AREA.findall(text)}
     found |= {f"backend/apps/{name}" for name in SERVICES if re.search(rf"(?<![/\w-]){name}\b", text)}
     found |= {path for name, path in APPS.items() if name in text.lower()}
