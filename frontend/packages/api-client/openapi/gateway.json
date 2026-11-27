@@ -1,6 +1,315 @@
 {
   "components": {
     "schemas": {
+      "Anchoring": {
+        "description": "How the Evidence records of an Operator are anchored in time.\n\nAttributes:\n    QUALIFIED_TIMESTAMPING: A qualified timestamping authority seals the records.\n    PUBLIC_BLOCKCHAIN: A public blockchain seals the records.\n    NONE: The records are not anchored.",
+        "enum": [
+          "qualified_timestamping",
+          "public_blockchain",
+          "none"
+        ],
+        "title": "Anchoring",
+        "type": "string"
+      },
+      "CellAssignment": {
+        "additionalProperties": false,
+        "description": "The cell an operator belongs to, and since when.\n\nAttributes:\n    model_config (ConfigDict): Forbids unknown keys.\n    operator_id (UUID): The version 7 identifier of the operator.\n    cell (str): The name of the cell.\n    assigned_at (datetime): The moment of the assignment, in UTC.\n\nNotes:\n    - An operator lives in exactly one cell.\n    - No field has a default, so ``None`` is refused.",
+        "properties": {
+          "assigned_at": {
+            "description": "The moment of the assignment, in UTC.",
+            "format": "date-time",
+            "title": "Assigned At",
+            "type": "string"
+          },
+          "cell": {
+            "description": "The name of the cell.",
+            "title": "Cell",
+            "type": "string"
+          },
+          "operator_id": {
+            "description": "The version 7 identifier of the operator.",
+            "format": "uuid",
+            "title": "Operator Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "operator_id",
+          "cell",
+          "assigned_at"
+        ],
+        "title": "CellAssignment",
+        "type": "object"
+      },
+      "Deployment": {
+        "description": "Where an Operator's Swarm runs.\n\nAttributes:\n    CLOUD: The Swarm runs in a cloud cell.\n    ON_PREMISES: The Swarm runs on the Operator's own premises.",
+        "enum": [
+          "cloud",
+          "on_premises"
+        ],
+        "title": "Deployment",
+        "type": "string"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "Jurisdiction": {
+        "description": "A regulatory jurisdiction an Operator flies under.\n\nAttributes:\n    EU_EASA: The European Union, under EASA rules.\n    US_FAA: The United States, under FAA rules.",
+        "enum": [
+          "eu_easa",
+          "us_faa"
+        ],
+        "title": "Jurisdiction",
+        "type": "string"
+      },
+      "Language": {
+        "description": "A language in which Swarm shows its screens.\n\nAttributes:\n    ENGLISH: English, the default language.\n    FRENCH: French.\n    GERMAN: German.\n    SPANISH: Spanish.",
+        "enum": [
+          "en",
+          "fr",
+          "de",
+          "es"
+        ],
+        "title": "Language",
+        "type": "string"
+      },
+      "LlmProvider": {
+        "description": "The kind of language model the AI agents of an Operator use.\n\nAttributes:\n    CLAUDE: The Claude models.\n    OPEN_WEIGHT: An open-weight model run by the Operator.",
+        "enum": [
+          "claude",
+          "open_weight"
+        ],
+        "title": "LlmProvider",
+        "type": "string"
+      },
+      "Operator": {
+        "additionalProperties": false,
+        "description": "The organisation that flies Missions for its Clients, global to every cell.\n\nAttributes:\n    model_config (ConfigDict): Forbids unknown keys.\n    BEFORE (ClassVar[Literal[\"before\"]]): The validator mode that runs before Pydantic's own validation.\n    ID_FIELD (ClassVar[str]): The name of the ``id`` field.\n    NAME_FIELD (ClassVar[str]): The name of the ``name`` field.\n    DEPLOYMENT_FIELD (ClassVar[str]): The name of the ``deployment`` field.\n    JURISDICTIONS_FIELD (ClassVar[str]): The name of the ``jurisdictions`` field.\n    LLM_PROVIDER_FIELD (ClassVar[str]): The name of the ``llm_provider`` field.\n    ANCHORING_FIELD (ClassVar[str]): The name of the ``anchoring`` field.\n    id (UUID): The version 7 identifier of the Operator.\n    name (str): The name of the Operator.\n    deployment (Deployment): Where the Operator's Swarm runs.\n    jurisdictions (List[Jurisdiction]): The jurisdictions the Operator flies under, at least one, no duplicate.\n    llm_provider (LlmProvider): The kind of language model of its AI agents, Claude by default.\n    anchoring (Anchoring): How its Evidence records are anchored, qualified timestamping by default.\n\nNotes:\n    - An Operator lives in exactly one cell, given by its ``CellAssignment``.\n    - ``id``, ``name``, ``deployment`` and ``jurisdictions`` have no default, so ``None`` is refused for them.\n    - ``None`` becomes the default for ``llm_provider`` and ``anchoring``.",
+        "properties": {
+          "anchoring": {
+            "$ref": "#/components/schemas/Anchoring",
+            "default": "qualified_timestamping",
+            "description": "How the Operator's Evidence records are anchored."
+          },
+          "deployment": {
+            "$ref": "#/components/schemas/Deployment",
+            "description": "Where the Operator's Swarm runs."
+          },
+          "id": {
+            "description": "The version 7 identifier of the operator.",
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "jurisdictions": {
+            "description": "The jurisdictions the Operator flies under, at least one and no duplicate.",
+            "items": {
+              "$ref": "#/components/schemas/Jurisdiction"
+            },
+            "title": "Jurisdictions",
+            "type": "array"
+          },
+          "llm_provider": {
+            "$ref": "#/components/schemas/LlmProvider",
+            "default": "claude",
+            "description": "The kind of language model of the Operator's AI agents."
+          },
+          "name": {
+            "description": "The name of the operator.",
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "deployment",
+          "jurisdictions"
+        ],
+        "title": "Operator",
+        "type": "object"
+      },
+      "OperatorCreated": {
+        "additionalProperties": false,
+        "description": "What the creation of an Operator answers: the Operator, its cell and its first Mission planner.\n\nAttributes:\n    model_config (ConfigDict): Forbids unknown keys.\n    operator (Operator): The new Operator.\n    cell_assignment (CellAssignment): The cell the Operator lives in.\n    first_mission_planner (Person): The first Mission planner, who belongs to the Operator.\n\nNotes:\n    The cell assignment and the person must belong to the Operator.",
+        "properties": {
+          "cell_assignment": {
+            "$ref": "#/components/schemas/CellAssignment",
+            "description": "The cell the Operator lives in."
+          },
+          "first_mission_planner": {
+            "$ref": "#/components/schemas/Person",
+            "description": "The first Mission planner of the Operator."
+          },
+          "operator": {
+            "$ref": "#/components/schemas/Operator",
+            "description": "The new Operator."
+          }
+        },
+        "required": [
+          "operator",
+          "cell_assignment",
+          "first_mission_planner"
+        ],
+        "title": "OperatorCreated",
+        "type": "object"
+      },
+      "OperatorDirectoryEntry": {
+        "additionalProperties": false,
+        "description": "An Operator with its cell, as the directory of the gateway holds it.\n\nAttributes:\n    model_config (ConfigDict): Forbids unknown keys.\n    operator (Operator): The Operator.\n    cell_assignment (CellAssignment): The cell the Operator lives in.\n\nNotes:\n    The cell assignment must be the Operator's own.",
+        "properties": {
+          "cell_assignment": {
+            "$ref": "#/components/schemas/CellAssignment",
+            "description": "The cell the Operator lives in."
+          },
+          "operator": {
+            "$ref": "#/components/schemas/Operator",
+            "description": "The Operator."
+          }
+        },
+        "required": [
+          "operator",
+          "cell_assignment"
+        ],
+        "title": "OperatorDirectoryEntry",
+        "type": "object"
+      },
+      "OperatorEntry": {
+        "additionalProperties": false,
+        "description": "The body of the request that creates an Operator.\n\nAttributes:\n    model_config (ConfigDict): Forbids unknown keys.\n    BEFORE (ClassVar[Literal[\"before\"]]): The validator mode that runs before Pydantic's own validation.\n    NAME_FIELD (ClassVar[str]): The name of the ``name`` field.\n    DEPLOYMENT_FIELD (ClassVar[str]): The name of the ``deployment`` field.\n    JURISDICTIONS_FIELD (ClassVar[str]): The name of the ``jurisdictions`` field.\n    LLM_PROVIDER_FIELD (ClassVar[str]): The name of the ``llm_provider`` field.\n    ANCHORING_FIELD (ClassVar[str]): The name of the ``anchoring`` field.\n    PLANNER_NAME_FIELD (ClassVar[str]): The name of the ``first_mission_planner_name`` field.\n    PLANNER_EMAIL_FIELD (ClassVar[str]): The name of the ``first_mission_planner_email`` field.\n    EMAIL_SEPARATOR (ClassVar[str]): The character between the local part and the domain of an address.\n    DOMAIN_SEPARATOR (ClassVar[str]): The character that must appear in the domain of an address.\n    name (Optional[str]): The name of the Operator, if given.\n    deployment (Optional[Deployment]): Where its Swarm runs, if given.\n    jurisdictions (List[Jurisdiction]): The jurisdictions it flies under, without duplicate.\n    llm_provider (Optional[LlmProvider]): The kind of language model of its AI agents, if given.\n    anchoring (Anchoring): How its Evidence records are anchored.\n    first_mission_planner_name (Optional[str]): The name of its first Mission planner, if given.\n    first_mission_planner_email (Optional[str]): The email address of its first Mission planner, if given.\n\nNotes:\n    - It is lenient on presence, so that the service can name every field that is missing.\n    - A blank text becomes ``None``, and ``None`` becomes the default.",
+        "properties": {
+          "anchoring": {
+            "$ref": "#/components/schemas/Anchoring",
+            "default": "qualified_timestamping",
+            "description": "How the Operator's Evidence records are anchored."
+          },
+          "deployment": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Deployment"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Where the Operator's Swarm runs."
+          },
+          "first_mission_planner_email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The email address of the first Mission planner.",
+            "title": "First Mission Planner Email"
+          },
+          "first_mission_planner_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The name of the first Mission planner.",
+            "title": "First Mission Planner Name"
+          },
+          "jurisdictions": {
+            "description": "The jurisdictions the Operator flies under.",
+            "items": {
+              "$ref": "#/components/schemas/Jurisdiction"
+            },
+            "title": "Jurisdictions",
+            "type": "array"
+          },
+          "llm_provider": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LlmProvider"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The kind of language model of the Operator's AI agents."
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The name of the Operator.",
+            "title": "Name"
+          }
+        },
+        "title": "OperatorEntry",
+        "type": "object"
+      },
+      "Person": {
+        "additionalProperties": false,
+        "description": "A person known to Swarm.\n\nAttributes:\n    model_config (ConfigDict): Forbids unknown keys.\n    id (UUID): The version 7 identifier of the person.\n    operator_id (Optional[UUID]): The Operator the person belongs to, ``None`` for a Swarm administrator.\n    name (str): The full name of the person.\n    email (str): The email address of the person.\n    language (Language): The language of the screens the person sees, English by default.\n    LANGUAGE_FIELD (ClassVar[str]): The name of the ``language`` field.\n    EMAIL_SEPARATOR (ClassVar[str]): The character that splits an email address into its local part and domain.\n\nNotes:\n    The email check is structural only: one separator, a local part and a domain, and no whitespace.",
+        "properties": {
+          "email": {
+            "description": "The email address of the person.",
+            "title": "Email",
+            "type": "string"
+          },
+          "id": {
+            "description": "The version 7 identifier of the person.",
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language",
+            "default": "en",
+            "description": "The language of the screens the person sees."
+          },
+          "name": {
+            "description": "The full name of the person.",
+            "title": "Name",
+            "type": "string"
+          },
+          "operator_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The Operator the person belongs to, if any.",
+            "title": "Operator Id"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "email"
+        ],
+        "title": "Person",
+        "type": "object"
+      },
       "Problem": {
         "additionalProperties": false,
         "description": "A problem document, as RFC 9457 defines it, answered as ``application/problem+json``.\n\nAttributes:\n    model_config (ConfigDict): Forbids unknown keys and freezes the document.\n    MEDIA_TYPE (ClassVar[str]): The media type of the document.\n    TYPE_FIELD (ClassVar[str]): The name of the ``type`` field.\n    TITLE_FIELD (ClassVar[str]): The name of the ``title`` field.\n    STATUS_FIELD (ClassVar[str]): The name of the ``status`` field.\n    DETAIL_FIELD (ClassVar[str]): The name of the ``detail`` field.\n    INSTANCE_FIELD (ClassVar[str]): The name of the ``instance`` field.\n    DEFAULT_TYPE (ClassVar[str]): The ``type`` of a problem with no more meaning than its status.\n    STATUS_MIN (ClassVar[int]): The lowest status of an error.\n    STATUS_MAX (ClassVar[int]): The highest status of an error.\n    BEFORE (ClassVar[Literal[\"before\"]]): The mode of the validators.\n    type (str): A URI reference that identifies the kind of problem.\n    title (str): A short, human-readable summary of the kind of problem.\n    status (int): The HTTP status of the answer.\n    detail (Optional[str]): A human-readable explanation of this occurrence.\n    instance (Optional[str]): A URI reference that identifies this occurrence.\n\nNotes:\n    - ``None`` for ``detail`` and ``instance`` means the member is left out of the document.\n    - A built problem never changes, so it can be shared between handlers.",
@@ -54,6 +363,46 @@
         ],
         "title": "Problem",
         "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
       }
     }
   },
@@ -62,5 +411,176 @@
     "version": "0.1.0"
   },
   "openapi": "3.1.0",
-  "paths": {}
+  "paths": {
+    "/v1/operators": {
+      "get": {
+        "description": "List the Operators of the directory.\n\nArgs:\n    after (Optional[UUID]): The last Operator of the previous page.\n    limit (int): The size of the page.\n\nReturns:\n    List[OperatorDirectoryEntry]: One page of the directory.",
+        "operationId": "list_operators_v1_operators_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "after",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "After"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/OperatorDirectoryEntry"
+                  },
+                  "title": "Response List Operators V1 Operators Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "The problem document of any error."
+          }
+        },
+        "summary": "List Operators"
+      },
+      "post": {
+        "description": "Create one Operator.\n\nArgs:\n    entry (OperatorEntry): The entry form.\n\nReturns:\n    OperatorCreated: The Operator, its cell assignment and its first Mission planner.",
+        "operationId": "create_operator_v1_operators_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OperatorEntry"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperatorCreated"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "The problem document of any error."
+          }
+        },
+        "summary": "Create Operator"
+      }
+    },
+    "/v1/operators/{operator_id}": {
+      "get": {
+        "description": "Read one Operator.\n\nArgs:\n    operator_id (UUID): The Operator.\n\nReturns:\n    Operator: The Operator.",
+        "operationId": "read_operator_v1_operators__operator_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "operator_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Operator Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Operator"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "The problem document of any error."
+          }
+        },
+        "summary": "Read Operator"
+      }
+    }
+  }
 }

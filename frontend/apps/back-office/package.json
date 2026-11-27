@@ -9,9 +9,12 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@swarm/api-client": "workspace:*",
     "@swarm/i18n": "workspace:*",
     "@swarm/tokens": "workspace:*",
     "@swarm/ui": "workspace:*",
+    "@tanstack/react-query": "5.108.4",
+    "oidc-client-ts": "3.5.0",
     "react": "19.3.1",
     "react-dom": "19.3.1",
     "react-intl": "8.1.3"

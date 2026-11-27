@@ -248,6 +248,22 @@
         "swarm"
       ],
       "optionalClientScopes": []
+    },
+    {
+      "clientId": "swarm-gateway-admin",
+      "name": "swarm-gateway-admin",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "clientAuthenticatorType": "client-secret",
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "redirectUris": [],
+      "webOrigins": [],
+      "defaultClientScopes": [],
+      "optionalClientScopes": []
     }
   ],
   "browserFlow": "swarm browser",
@@ -512,5 +528,18 @@
         }
       }
     ]
-  }
+  },
+  "users": [
+    {
+      "username": "service-account-swarm-gateway-admin",
+      "enabled": true,
+      "serviceAccountClientId": "swarm-gateway-admin",
+      "clientRoles": {
+        "realm-management": [
+          "manage-users",
+          "manage-realm"
+        ]
+      }
+    }
+  ]
 }

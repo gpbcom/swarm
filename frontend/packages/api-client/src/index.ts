@@ -7,6 +7,12 @@ import type { paths as SimulatorPaths } from "./generated/simulator.ts";
 
 export type { FleetPaths, GatewayComponents, GatewayPaths, MissionsPaths, SimulatorPaths };
 export type Problem = GatewayComponents["schemas"]["Problem"];
+export type Operator = GatewayComponents["schemas"]["Operator"];
+export type OperatorEntry = GatewayComponents["schemas"]["OperatorEntry"];
+export type OperatorDirectoryEntry = GatewayComponents["schemas"]["OperatorDirectoryEntry"];
+export type OperatorCreated = GatewayComponents["schemas"]["OperatorCreated"];
+export type CellAssignment = GatewayComponents["schemas"]["CellAssignment"];
+export type Person = GatewayComponents["schemas"]["Person"];
 
 export function createGatewayClient(options?: ClientOptions): Client<GatewayPaths> {
   return createClient<GatewayPaths>(options);

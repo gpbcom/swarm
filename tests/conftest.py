@@ -15,7 +15,8 @@ from nats.aio.client import Client
 
 # First-party imports
 from swarm_models.auth.auth_config import AuthConfig
-from tests.fakes.keycloak.helpers import AUDIENCE
+from tests.fakes.keycloak.helpers import AUDIENCE, SECRET_ENVIRONMENT_ENTRY
+from tests.fakes.keycloak.keycloak_admin_stand_in import KeycloakAdminStandIn
 from tests.fakes.keycloak.keycloak_stand_in import KeycloakStandIn
 from tests.fakes.mavlink.stand_in_drone import StandInDrone
 from tests.fakes.mavlink.stand_in_drones import StandInDrones
@@ -76,6 +77,13 @@ async def nats_client(nats_url: str) -> AsyncIterator[Client]:
 @pytest.fixture
 def keycloak_stand_in() -> Iterator[KeycloakStandIn]:
     with KeycloakStandIn() as stand_in:
+        yield stand_in
+
+
+@pytest.fixture
+def keycloak_admin_stand_in(monkeypatch: pytest.MonkeyPatch) -> Iterator[KeycloakAdminStandIn]:
+    with KeycloakAdminStandIn() as stand_in:
+        monkeypatch.setenv(SECRET_ENVIRONMENT_ENTRY, stand_in.client_secret)
         yield stand_in
 
 

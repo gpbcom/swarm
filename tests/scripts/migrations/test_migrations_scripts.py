@@ -6,7 +6,7 @@ import subprocess
 import sys
 from importlib.metadata import entry_points
 from pathlib import Path
-from typing import ClassVar, Dict
+from typing import ClassVar, Dict, List
 
 # Third-party imports
 import asyncpg
@@ -25,6 +25,8 @@ class TestMigrationsScripts:
     SCRIPT: ClassVar[str] = "swarm-migrations-migrate"
     TARGET: ClassVar[str] = "swarm_scripts.migrations.migrate:main"
     OUTBOX_QUERY: ClassVar[str] = "SELECT to_regclass('gateway.outbox') IS NOT NULL"
+    DIRECTORY_TABLES: ClassVar[List[str]] = ["operators", "cell_assignments", "people"]
+    TABLE_QUERY: ClassVar[str] = "SELECT to_regclass($1) IS NOT NULL"
     UNKNOWN_APP: ClassVar[str] = "nowhere"
     ENCODING: ClassVar[str] = "utf-8"
     TIMEOUT_S: ClassVar[int] = 120
@@ -77,5 +79,20 @@ class TestMigrationsScripts:
         connection = await asyncpg.connect(postgres_dsn)
         try:
             assert await connection.fetchval(self.OUTBOX_QUERY) is True
+        finally:
+            await connection.close()
+
+    async def test_the_migration_of_the_app_creates_the_operator_directory(
+        self, tmp_path: Path, postgres_dsn: str
+    ) -> None:
+        result = self.run_script(
+            tmp_path, {SwarmApps.APP_KEY: AppName.GATEWAY.value, GatewayConfig.DSN_KEY: postgres_dsn}
+        )
+
+        assert result.returncode == 0, result.stderr
+        connection = await asyncpg.connect(postgres_dsn)
+        try:
+            for table in self.DIRECTORY_TABLES:
+                assert await connection.fetchval(self.TABLE_QUERY, f"gateway.{table}") is True
         finally:
             await connection.close()

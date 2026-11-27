@@ -29,3 +29,12 @@ live:
     request_deadline_s: 5.0
   session:
     status_interval_s: 5.0
+operators:
+  cell: dev
+  keycloak:
+    server_url: http://keycloak.global.svc.cluster.local:8080
+    realm: swarm
+    client_id: swarm-gateway-admin
+    client_secret_key: SWARM_GATEWAY_KEYCLOAK_CLIENT_SECRET
+    sign_in_client_id: back-office
+    request_timeout_s: 5.0

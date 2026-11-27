@@ -60,6 +60,21 @@ docker build -f backend/apps/<app>/Dockerfile -t <name>:local .
 The image sets `SWARM_APP` and `SWARM_APP_ROOT`, so the same image migrates its schema when run with the entrypoint
 `swarm-migrations-migrate`.
 
+## The gateway's Operator directory
+
+The `gateway` domain holds the Operator directory, used by the Swarm administrator to create Operators and by their
+people to read their own Operator. It is served by `swarm-gateway-serve` under `/v1/operators` and
+`/v1/operators/{id}`.
+
+- The `operators` and `cell_assignments` tables are global: they are not filtered by Operator, and they hold no
+  person data.
+- The `people` table is under row-level security: a unit of work sets `swarm.operator_id`, so a person is visible only
+  inside the transaction of its own Operator.
+- The `operators` entry of `conf/app.yaml` names the cell the Operators are assigned to and the Keycloak admin client
+  used to create their organisations and invite their first Mission planner.
+- The client secret of that Keycloak admin client is not in `conf/app.yaml`. It comes from the environment entry
+  `SWARM_GATEWAY_KEYCLOAK_CLIENT_SECRET`, filled from the vault.
+
 ## Add a domain
 
 1. Create the domain's folder in each layer it needs: `swarm_models/<domain>/`, `swarm_storage/<domain>/`,

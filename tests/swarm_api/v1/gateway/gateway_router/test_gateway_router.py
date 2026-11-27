@@ -27,6 +27,9 @@ class TestGatewayRouter:
     COMPONENTS_FIELD: ClassVar[str] = "components"
     SCHEMAS_FIELD: ClassVar[str] = "schemas"
     ENCODING: ClassVar[str] = "utf-8"
+    PATHS_FIELD: ClassVar[str] = "paths"
+    OPERATORS_PATH: ClassVar[str] = "/v1/operators"
+    OPERATOR_PATH: ClassVar[str] = "/v1/operators/{operator_id}"
 
     def build_client(self) -> TestClient:
         return TestClient(GatewayRouter(GatewayConfig()).application())
@@ -42,6 +45,12 @@ class TestGatewayRouter:
         assert document[self.OPENAPI_FIELD].startswith(self.OPENAPI_VERSION_PREFIX)
         assert document[self.INFO_FIELD][self.TITLE_FIELD] == GatewayRouter.TITLE
         assert self.PROBLEM_SCHEMA in document[self.COMPONENTS_FIELD][self.SCHEMAS_FIELD]
+
+    def test_the_openapi_document_lists_the_operator_routes(self) -> None:
+        document = self.build_client().get(self.OPENAPI_PATH).json()
+
+        assert self.OPERATORS_PATH in document[self.PATHS_FIELD]
+        assert self.OPERATOR_PATH in document[self.PATHS_FIELD]
 
     def test_an_unknown_path_is_a_problem_json_404(self) -> None:
         response = self.build_client().get(self.UNKNOWN_PATH)
