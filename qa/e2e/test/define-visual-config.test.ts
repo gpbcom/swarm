@@ -5,8 +5,11 @@ import { describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
 
 import {
+  BROWSER_IMAGE,
+  BROWSER_WS_ENDPOINT,
   DARK_PROJECT,
   LIGHT_PROJECT,
+  PLAYWRIGHT_VERSION,
   VISUAL_MAX_DIFF_PIXEL_RATIO,
   VISUAL_THRESHOLD,
   defineVisualConfig,
@@ -22,6 +25,7 @@ const OPTIONS = { testDir: TEST_DIR, composeService: SERVICE };
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const REPOSITORY_ROOT = path.resolve(HERE, "../../..");
 const TOKENS_FILE = path.join(REPOSITORY_ROOT, "frontend/packages/tokens/src/tokens.css");
+const SHARED_PACKAGE = path.join(REPOSITORY_ROOT, "qa/e2e/package.json");
 
 function token(name: string): number {
   const match = new RegExp(`--${name}:\\s*(\\d+)px`).exec(readFileSync(TOKENS_FILE, "utf-8"));
@@ -115,6 +119,22 @@ describe("the shared visual Playwright configuration", () => {
       assert.equal(path.basename(value as string), file);
       assert.ok(existsSync(value as string));
     }
+  });
+
+  for (const name of ["light", "dark"]) {
+    it(`renders the ${name} project in the browser of the pinned Playwright image`, () => {
+      assert.deepEqual(projectNamed(name).use?.connectOptions, { wsEndpoint: BROWSER_WS_ENDPOINT });
+    });
+  }
+
+  it("pins the browser image to the Playwright version of the shared set-up", () => {
+    const shared = JSON.parse(readFileSync(SHARED_PACKAGE, "utf-8")) as { devDependencies: Record<string, string> };
+    assert.equal(PLAYWRIGHT_VERSION, shared.devDependencies["@playwright/test"]);
+    assert.equal(BROWSER_IMAGE, `mcr.microsoft.com/playwright:v${PLAYWRIGHT_VERSION}-noble`);
+  });
+
+  it("reaches the browser server on the loopback", () => {
+    assert.match(BROWSER_WS_ENDPOINT, /^ws:\/\/127\.0\.0\.1:\d+\/$/);
   });
 
   it("uses the base URL of the environment when it is set", () => {

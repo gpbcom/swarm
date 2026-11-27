@@ -2,6 +2,7 @@ from __future__ import annotations
 
 # Standard library imports
 import re
+from functools import partial
 from typing import ClassVar, Literal, Pattern, Type, Union
 
 # Third-party imports
@@ -17,6 +18,7 @@ from swarm_models.config.fleet.exceptions import (
 )
 from swarm_models.config.postgres.postgres_config import PostgresConfig
 from swarm_web.models.config.rest_config import RestConfig
+from swarm_web.models.config.signals_config import SignalsConfig
 
 
 class FleetConfig(AppConfig):
@@ -27,6 +29,8 @@ class FleetConfig(AppConfig):
         postgres (PostgresConfig): The PostgreSQL pool settings, which name the environment entry of the DSN.
         rest (RestConfig): The settings of the REST server.
         UNREADABLE (type[Exception]): The exception raised when the file cannot be read.
+        SERVICE_NAME (str): The service name of the app's signals.
+        signals (SignalsConfig): The settings of the app's signals, named after the app by default.
         DSN_KEY (str): The environment entry that holds the DSN of the service.
         DEFAULT_SCHEMA_NAME (str): The default schema.
         DEFAULT_POSTGRES (PostgresConfig): The default pool settings, with the DSN entry of the service.
@@ -43,6 +47,7 @@ class FleetConfig(AppConfig):
     """
 
     UNREADABLE: ClassVar[Type[Exception]] = SEFleetConfigUnreadable
+    SERVICE_NAME: ClassVar[str] = "swarm-fleet"
     DSN_KEY: ClassVar[str] = "SWARM_FLEET_POSTGRES_DSN"
     DEFAULT_SCHEMA_NAME: ClassVar[str] = "fleet"
     DEFAULT_POSTGRES: ClassVar[PostgresConfig] = PostgresConfig(dsn_key=DSN_KEY)
@@ -54,6 +59,10 @@ class FleetConfig(AppConfig):
 
     model_config = ConfigDict(validate_default=True)
 
+    signals: SignalsConfig = Field(
+        default_factory=partial(SignalsConfig, service_name=SERVICE_NAME),
+        description="The settings of the signals (traces, metrics and logs) the app exports, named after the app.",
+    )
     schema_name: str = Field(
         default=DEFAULT_SCHEMA_NAME, description="The PostgreSQL schema of the service. Defaults to fleet."
     )

@@ -8,6 +8,14 @@ export interface WorkerLike {
   terminate(): void;
 }
 
+/** The optional collector the worker sends the browser spans to. */
+export interface LiveClientOptions {
+  endpoint?: string;
+  cell?: string;
+}
+
+const DEFAULT_CELL = "unknown";
+
 export type WorkerFactory = () => WorkerLike;
 
 function defaultWorker(): WorkerLike {
@@ -26,7 +34,7 @@ export class LiveClient {
   }
 
   /** Start the worker and ask it to connect to `url` and follow the squad of `missionId`. */
-  connect(url: string, missionId: string): void {
+  connect(url: string, missionId: string, options: LiveClientOptions = {}): void {
     const worker = this.createWorker();
     this.worker = worker;
     worker.onmessage = (event) => {
@@ -37,7 +45,17 @@ export class LiveClient {
         for (const listener of this.statusListeners) listener(message.status);
       }
     };
-    worker.postMessage({ kind: "connect", url, missionId });
+    if (options.endpoint === undefined) {
+      worker.postMessage({ kind: "connect", url, missionId });
+    } else {
+      worker.postMessage({
+        kind: "connect",
+        url,
+        missionId,
+        endpoint: options.endpoint,
+        cell: options.cell ?? DEFAULT_CELL,
+      });
+    }
   }
 
   /** Listen to snapshots; the result removes the listener. */

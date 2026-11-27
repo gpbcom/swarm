@@ -6,6 +6,7 @@ from typing import ClassVar, Dict, List
 
 # Third-party imports
 import pytest
+import yaml
 from pydantic import JsonValue, ValidationError
 
 # First-party imports
@@ -19,6 +20,7 @@ from swarm_models.config.missions.exceptions import (
 from swarm_models.config.missions.missions_config import MissionsConfig
 from swarm_models.config.postgres.postgres_config import PostgresConfig
 from swarm_web.models.config.rest_config import RestConfig
+from swarm_web.models.config.signals_config import SignalsConfig
 
 
 class TestMissionsConfig:
@@ -44,6 +46,7 @@ class TestMissionsConfig:
         assert config.schema_name == "missions"
         assert config.postgres == PostgresConfig(dsn_key=MissionsConfig.DSN_KEY)
         assert config.rest == RestConfig()
+        assert config.signals == SignalsConfig(service_name=MissionsConfig.SERVICE_NAME)
 
     def test_full_valid_construction(self) -> None:
         config = MissionsConfig.model_validate(self.FULL_CONFIGURATION)
@@ -51,7 +54,7 @@ class TestMissionsConfig:
         assert config.postgres == PostgresConfig(dsn_key="SWARM_OTHER_DSN")
         assert config.rest == RestConfig(port=9000)
 
-    @pytest.mark.parametrize("name", ["schema_name", "postgres", "rest"])
+    @pytest.mark.parametrize("name", ["schema_name", "postgres", "rest", "signals"])
     def test_none_becomes_the_default(self, name: str) -> None:
         config = MissionsConfig.model_validate({name: None})
         default = MissionsConfig.model_fields[name].get_default(call_default_factory=True)
@@ -129,3 +132,8 @@ class TestMissionsConfig:
     def test_a_missing_file_is_unreadable(self, tmp_path: Path) -> None:
         with pytest.raises(SEMissionsConfigUnreadable):
             MissionsConfig.load(tmp_path / MissionsConfig.APP_FILE)
+
+    def test_a_signals_mapping_is_read_from_yaml(self, tmp_path: Path) -> None:
+        path = tmp_path / "app.yaml"
+        path.write_text(yaml.safe_dump({"signals": {"enabled": True, "cell": "eu_west"}}), encoding="utf-8")
+        assert MissionsConfig.load(path).signals == SignalsConfig(enabled=True, cell="eu_west")

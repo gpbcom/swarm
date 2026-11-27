@@ -7,6 +7,8 @@ import { LiveMessageUnreadableError } from "../../src/protocol/live-protocol-err
 import { decodeSquadFrame } from "../../src/protocol/squad-frame-decoder.ts";
 import { MISSION_ID, aSquadFrame, droneId, encodedSquadFrame } from "./frames.ts";
 
+const TRACE_PARENT = "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01";
+
 function withFirstFrame(changes: Record<string, unknown>): Uint8Array {
   const frame = aSquadFrame(MISSION_ID, 2);
   return encode({ ...frame, frames: [{ ...frame.frames[0], ...changes }, frame.frames[1]] });
@@ -69,5 +71,20 @@ describe("the squad frame decoder", () => {
 
   it("refuses a boolean where a number is expected", () => {
     assert.throws(() => decodeSquadFrame(withFirstFrame({ seq: true })), LiveMessageUnreadableError);
+  });
+
+  it("keeps the trace parent of the frame", () => {
+    const frame = decodeSquadFrame(encode({ ...aSquadFrame(MISSION_ID, 2), trace_parent: TRACE_PARENT }));
+    assert.equal(frame.trace_parent, TRACE_PARENT);
+  });
+
+  it("leaves out a null trace parent", () => {
+    const frame = decodeSquadFrame(encode({ ...aSquadFrame(MISSION_ID, 2), trace_parent: null }));
+    assert.equal("trace_parent" in frame, false);
+  });
+
+  it("refuses a trace parent that is not a text", () => {
+    const bytes = encode({ ...aSquadFrame(MISSION_ID, 2), trace_parent: 7 });
+    assert.throws(() => decodeSquadFrame(bytes), LiveMessageUnreadableError);
   });
 });

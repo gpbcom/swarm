@@ -1,3 +1,4 @@
+export { BROWSER_IMAGE, BROWSER_WS_ENDPOINT, PLAYWRIGHT_VERSION } from "./browser-server.ts";
 export { defineE2eConfig } from "./define-e2e-config.ts";
 export type { E2eEnvironment } from "./define-e2e-config.ts";
 export {

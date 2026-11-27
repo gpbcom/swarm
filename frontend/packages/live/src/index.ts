@@ -11,4 +11,6 @@ export type { WorkerLike, WorkerFactory } from "./client/live-client.ts";
 export { LatencyHistogram, LATENCY_BOUNDS_MS } from "./latency/latency-histogram.ts";
 export { TELEMETRY_METRICS, otlpMetricsBody } from "./latency/otlp-metrics-body.ts";
 export type { LivePath, OtlpMetricsInput } from "./latency/otlp-metrics-body.ts";
+export { traceSquadFrame } from "./tracing/frame_tracing.ts";
+export type { LiveClientOptions } from "./client/live-client.ts";
 export { LatencyReporter } from "./latency/latency-reporter.ts";

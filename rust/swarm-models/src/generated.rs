@@ -1039,11 +1039,17 @@ Attributes:
     mission_id (UUID): The Mission of the frames.
     t_us (int): The moment of the tick, in microseconds since the epoch.
     frames (List[TelemetryFrame]): One frame per Drone.
+    trace_parent (Optional[str]): The W3C trace parent of the tick that built the frame.
     T_US_MIN (ClassVar[int]): The smallest accepted ``t_us``.
+    TRACE_PARENT_PATTERN (ClassVar[str]): The W3C ``traceparent`` format, in lower case.
+    TRACE_ID_ZEROS (ClassVar[str]): The all-zero trace id, which is invalid.
+    SPAN_ID_ZEROS (ClassVar[str]): The all-zero span id, which is invalid.
 
 Notes:
     - **Every frame must belong to the Mission, and each Drone appears once.**
-    - The list may be empty.*/
+    - The list may be empty.
+    - **A WebSocket message has no headers, so the trace parent travels in the frame:** the browser continues the
+      trace of the tick that built it. It is optional, and neither id may be all zeros.*/
 #[derive(::serde::Deserialize, ::serde::Serialize, Clone, Debug)]
 #[serde(deny_unknown_fields)]
 pub struct SquadFrame {
@@ -1053,6 +1059,9 @@ pub struct SquadFrame {
     pub mission_id: ::uuid::Uuid,
     ///The moment of the tick, in microseconds since the epoch.
     pub t_us: i64,
+    ///The W3C trace parent of the tick that built the frame.
+    #[serde(skip_serializing_if = "::std::option::Option::is_none")]
+    pub trace_parent: ::std::option::Option<::std::string::String>,
 }
 /**What one Drone reports at one tick.
 

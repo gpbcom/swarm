@@ -11,3 +11,10 @@ rest:
   status_interval_s: 5.0
   idempotency_ttl_s: 86400.0
   idempotency_max_entries: 10000
+signals:
+  enabled: false
+  endpoint: http://otel-collector:4318
+  service_name: swarm-missions
+  cell: local
+  metrics_interval_s: 60.0
+  redactions_path: null

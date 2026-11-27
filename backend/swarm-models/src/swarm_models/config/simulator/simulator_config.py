@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 # Standard library imports
+from functools import partial
 from typing import ClassVar, Literal, Self, Type, Union
 from uuid import UUID
 
@@ -23,6 +24,7 @@ from swarm_models.config.simulator.registry_config import RegistryConfig
 from swarm_models.config.simulator.route_config import RouteConfig
 from swarm_nats.models.config.nats_client_config import NatsClientConfig
 from swarm_web.models.config.rest_config import RestConfig
+from swarm_web.models.config.signals_config import SignalsConfig
 
 
 class SimulatorConfig(AppConfig):
@@ -38,6 +40,8 @@ class SimulatorConfig(AppConfig):
         flight_log_path (str): The path of the flight log.
         rest (RestConfig): The settings of the REST server of ``POST /v1/simulations``.
         UNREADABLE (type[Exception]): The exception raised when the file cannot be read.
+        SERVICE_NAME (str): The service name of the app's signals.
+        signals (SignalsConfig): The settings of the app's signals, named after the app by default.
         OPERATOR_ID_FIELD (str): The name of the ``operator_id`` field.
         FLIGHT_LOG_PATH_FIELD (str): The name of the ``flight_log_path`` field.
         REGISTRY_FIELD (str): The name of the ``registry`` field.
@@ -60,6 +64,7 @@ class SimulatorConfig(AppConfig):
     """
 
     UNREADABLE: ClassVar[Type[Exception]] = SESimulatorConfigUnreadable
+    SERVICE_NAME: ClassVar[str] = "swarm-simulator"
     OPERATOR_ID_FIELD: ClassVar[str] = "operator_id"
     FLIGHT_LOG_PATH_FIELD: ClassVar[str] = "flight_log_path"
     REGISTRY_FIELD: ClassVar[str] = "registry"
@@ -75,6 +80,10 @@ class SimulatorConfig(AppConfig):
 
     model_config = ConfigDict(validate_default=True)
 
+    signals: SignalsConfig = Field(
+        default_factory=partial(SignalsConfig, service_name=SERVICE_NAME),
+        description="The settings of the signals (traces, metrics and logs) the app exports, named after the app.",
+    )
     operator_id: UUID = Field(description="The Operator the simulated squad belongs to, a UUID version 7. Required.")
     nats: NatsClientConfig = Field(description="The connection to NATS, with credentials of kind simulated. Required.")
     responder: NatsResponderConfig = Field(description="The responder that serves the Operator's commands. Required.")

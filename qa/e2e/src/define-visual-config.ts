@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 
 import type { PlaywrightTestConfig } from "@playwright/test";
 
+import { BROWSER_WS_ENDPOINT } from "./browser-server.ts";
 import { defineE2eConfig } from "./define-e2e-config.ts";
 import type { E2eEnvironment } from "./define-e2e-config.ts";
 
@@ -51,6 +52,8 @@ export function screenshotName(useCase: string, node: string, project: string): 
 /**
  * Build the Playwright configuration shared by the visual tests of every front end: a light and a dark project at
  * the screen size of the tokens, screens stored in the specification folder, and the compose stack started around them.
+ * Both projects render in the browser of the pinned Playwright image, so that a screen captured on any machine has the
+ * pixels CI compares it with.
  */
 export function defineVisualConfig(
   options: VisualOptions,
@@ -59,7 +62,13 @@ export function defineVisualConfig(
   const { composeService, ...rest } = options;
   const css = readFileSync(TOKENS_FILE, "utf-8");
   const viewport = { width: pixelToken(css, "screen-width"), height: pixelToken(css, "screen-height") };
-  const common = { viewport, deviceScaleFactor: 1, locale: LOCALE, timezoneId: TIME_ZONE };
+  const common = {
+    viewport,
+    deviceScaleFactor: 1,
+    locale: LOCALE,
+    timezoneId: TIME_ZONE,
+    connectOptions: { wsEndpoint: BROWSER_WS_ENDPOINT },
+  };
   const config = defineE2eConfig(
     {
       ...rest,

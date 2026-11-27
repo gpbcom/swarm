@@ -20,6 +20,8 @@ from tests.fakes.keycloak.keycloak_admin_stand_in import KeycloakAdminStandIn
 from tests.fakes.keycloak.keycloak_stand_in import KeycloakStandIn
 from tests.fakes.mavlink.stand_in_drone import StandInDrone
 from tests.fakes.mavlink.stand_in_drones import StandInDrones
+from tests.fakes.otlp.otlp_stand_in_server import OtlpStandInServer
+from tests.fakes.signals.recorded_signals import RecordedSignals
 
 NATS_BINARY = "nats-server"
 LOCALHOST = "127.0.0.1"
@@ -110,3 +112,16 @@ def free_udp_port() -> int:
         probe.bind((LOCALHOST, 0))
         port: int = probe.getsockname()[1]
     return port
+
+
+@pytest.fixture
+def recorded_signals() -> RecordedSignals:
+    signals = RecordedSignals.get()
+    signals.clear()
+    return signals
+
+
+@pytest.fixture
+def otlp_stand_in() -> Iterator[OtlpStandInServer]:
+    with OtlpStandInServer() as server:
+        yield server

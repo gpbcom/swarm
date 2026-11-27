@@ -38,3 +38,10 @@ operators:
     client_secret_key: SWARM_GATEWAY_KEYCLOAK_CLIENT_SECRET
     sign_in_client_id: back-office
     request_timeout_s: 5.0
+signals:
+  enabled: false
+  endpoint: http://otel-collector:4318
+  service_name: swarm-gateway
+  cell: local
+  metrics_interval_s: 60.0
+  redactions_path: null

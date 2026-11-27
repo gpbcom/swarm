@@ -4,6 +4,8 @@ import { fileURLToPath } from "node:url";
 
 import type { FullConfig } from "@playwright/test";
 
+import { startBrowserServer } from "./browser-server.ts";
+
 const REPOSITORY_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
 const COMPOSE_FILE = "infra/compose/e2e.yaml";
 const COMPOSE_TIMEOUT_MS = 120_000;
@@ -13,7 +15,8 @@ const CALL_TIMEOUT_MS = 5_000;
 const HTTP_OK = 200;
 
 /**
- * Start the compose service under test, then wait until the base URL answers 200.
+ * Start the compose service under test and the browser server of the pinned Playwright image, then wait until the
+ * base URL answers 200.
  */
 export default async function composeUp(config: FullConfig): Promise<void> {
   const service: unknown = config.metadata["composeService"];
@@ -29,6 +32,7 @@ export default async function composeUp(config: FullConfig): Promise<void> {
   if (result.status !== 0) {
     throw new Error(`docker compose up failed:\n${output}`);
   }
+  await startBrowserServer();
   const baseURL = config.projects[0]?.use.baseURL;
   if (baseURL === undefined) {
     throw new Error("The first project has no baseURL to wait for.");

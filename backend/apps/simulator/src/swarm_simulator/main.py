@@ -10,6 +10,7 @@ from swarm_logging.models.logging_config import LoggingConfig
 from swarm_models.config.simulator.simulator_config import SimulatorConfig
 from swarm_service.simulation.factories.servers.simulator_server_factory import SimulatorServerFactory
 from swarm_web.factories.async_runnable_runner_factory import AsyncRunnableRunnerFactory
+from swarm_web.signals.signals_configurator import SignalsConfigurator
 
 
 def main() -> None:
@@ -17,7 +18,7 @@ def main() -> None:
 
     Notes:
         - The app's folder is ``SWARM_APP_ROOT``, which the image sets, or the current folder.
-        - Logging is configured once, here at the entry point.
+        - Logging is configured once, here at the entry point, then the OpenTelemetry signals from ``signals``.
         - The app serves ``POST /v1/simulations`` and, beside its application, answers the Commands of the bus.
           **It does not start without simulated credentials** (BR-014): the app stops with an error before anything
           connects or serves.
@@ -28,6 +29,7 @@ def main() -> None:
     folder = SimulatorConfig.conf_folder()
     config = SimulatorConfig.load(folder / SimulatorConfig.APP_FILE)
     LoggingConfigurator(LoggingConfig(path=str(folder / SimulatorConfig.LOGGER_FILE))).configure()
+    SignalsConfigurator(config.signals).configure()
     getLogger(__name__).info("Serving the simulator app on port %d.", config.rest.port)
     server = SimulatorServerFactory(config, SimulationRouter(config).application()).create()
     AsyncRunnableRunnerFactory(server).create().execute()

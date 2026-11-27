@@ -6,6 +6,9 @@ from math import hypot
 from typing import ClassVar, Dict, List, Optional
 from uuid import UUID
 
+# Third-party imports
+from opentelemetry import trace
+
 # First-party imports
 from swarm_models.flight.missions.drone_entry import DroneEntry
 from swarm_models.flight.missions.mission_entry import MissionEntry
@@ -34,6 +37,7 @@ class SquadFrameBuilder:
         BATTERY_UNKNOWN (int): The MAVLink battery value that means unknown.
         FULL_PCT (float): One hundred percent.
         UNKNOWN_VALUE (float): The battery and heading given when the Drone does not report them.
+        TRACEPARENT_TEMPLATE (str): The W3C ``traceparent`` format.
 
     Notes:
         - **A Drone appears in a SquadFrame only once its position is known**, and a sample of a system id outside
@@ -49,6 +53,7 @@ class SquadFrameBuilder:
     BATTERY_UNKNOWN: ClassVar[int] = -1
     FULL_PCT: ClassVar[float] = 100.0
     UNKNOWN_VALUE: ClassVar[float] = 0.0
+    TRACEPARENT_TEMPLATE: ClassVar[str] = "00-{trace_id:032x}-{span_id:016x}-{flags:02x}"
 
     def __init__(
         self,
@@ -75,6 +80,20 @@ class SquadFrameBuilder:
     ############################
     # Internal Helpers Methods #
     ############################
+
+    def _trace_parent(self) -> Optional[str]:
+        """Give the W3C ``traceparent`` of the current span, or None outside a valid span.
+
+        Returns:
+            Optional[str]: The trace parent.
+        """
+        context = trace.get_current_span().get_span_context()
+        if not context.is_valid:
+            self.logger.debug("No valid span: the SquadFrame has no trace parent.")
+            return None
+        return self.TRACEPARENT_TEMPLATE.format(
+            trace_id=context.trace_id, span_id=context.span_id, flags=int(context.trace_flags)
+        )
 
     def _heading_deg(self, sample: DroneSample) -> float:
         """Give the heading in degrees, or 0.0 when the Drone does not report it.
@@ -187,4 +206,6 @@ class SquadFrameBuilder:
                 continue
             frames.append(self._frame(drone, sample, now_us))
         self.logger.debug("Built a SquadFrame of %d frames.", len(frames))
-        return SquadFrame(mission_id=self.mission.mission_id, t_us=now_us, frames=frames)
+        return SquadFrame(
+            mission_id=self.mission.mission_id, t_us=now_us, frames=frames, trace_parent=self._trace_parent()
+        )

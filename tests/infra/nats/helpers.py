@@ -161,10 +161,14 @@ async def push_account(url: str, system_creds: Path, account: IssuedAccount, tim
 
 
 def connz_users(monitor_port: int) -> List[str]:
-    """Return the ``authorized_user`` of every connection the monitoring endpoint lists."""
+    """Return the ``authorized_user`` of every connection the monitoring endpoint lists.
+
+    A connection that has not authenticated yet has no ``authorized_user`` and is left out.
+    """
     with urllib.request.urlopen(CONNZ_URL.format(port=monitor_port), timeout=CONNECT_TIMEOUT_S) as response:
         body = json.loads(response.read().decode(ENCODING))
     users: List[str] = []
     for connection in body[CONNZ_CONNECTIONS_KEY]:
-        users.append(connection[CONNZ_USER_KEY])
+        if CONNZ_USER_KEY in connection:
+            users.append(connection[CONNZ_USER_KEY])
     return users

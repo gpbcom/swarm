@@ -1,0 +1,20 @@
+fragments:
+  - authorization
+  - cookie
+  - password
+  - passwd
+  - secret
+  - token
+  - credential
+  - api_key
+  - apikey
+  - private_key
+  - email
+  - phone
+  - enduser
+  - person.name
+  - url.query
+url_keys:
+  - url.full
+  - http.url
+  - http.target

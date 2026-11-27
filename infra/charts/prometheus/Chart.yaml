@@ -1,0 +1,6 @@
+apiVersion: v2
+name: prometheus
+description: The Prometheus of one cell, which keeps metrics for 15 days and takes remote write.
+type: application
+version: 0.1.0
+appVersion: "v3.5.0"

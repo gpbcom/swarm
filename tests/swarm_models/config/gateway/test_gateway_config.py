@@ -6,6 +6,7 @@ from typing import ClassVar, Dict, List
 
 # Third-party imports
 import pytest
+import yaml
 from pydantic import JsonValue, ValidationError
 
 # First-party imports
@@ -25,6 +26,7 @@ from swarm_models.config.postgres.postgres_config import PostgresConfig
 from swarm_models.keycloak.keycloak_admin_config import KeycloakAdminConfig
 from swarm_web.models.config.exceptions import SERestConfigInvalidPort
 from swarm_web.models.config.rest_config import RestConfig
+from swarm_web.models.config.signals_config import SignalsConfig
 
 
 class TestGatewayConfig:
@@ -51,6 +53,7 @@ class TestGatewayConfig:
         assert config.postgres == PostgresConfig(dsn_key=GatewayConfig.DSN_KEY)
         assert config.rest == RestConfig()
         assert config.operators == OperatorDirectoryConfig()
+        assert config.signals == SignalsConfig(service_name=GatewayConfig.SERVICE_NAME)
 
     def test_full_valid_construction(self) -> None:
         config = GatewayConfig.model_validate(self.FULL)
@@ -59,7 +62,7 @@ class TestGatewayConfig:
         assert config.rest == RestConfig(port=9001)
         assert config.operators == OperatorDirectoryConfig(cell="eu_west")
 
-    @pytest.mark.parametrize("name", ["schema_name", "postgres", "rest", "operators"])
+    @pytest.mark.parametrize("name", ["schema_name", "postgres", "rest", "operators", "signals"])
     def test_none_becomes_the_default(self, name: str) -> None:
         config = GatewayConfig.model_validate({name: None})
         default = GatewayConfig.model_fields[name].get_default(call_default_factory=True)
@@ -133,6 +136,9 @@ class TestGatewayConfig:
         assert GatewayConfig.conf_folder().is_dir()
         assert GatewayConfig.migrations_folder().is_dir()
 
+    def test_the_signals_name_the_gateway_by_default(self) -> None:
+        assert GatewayConfig().signals.service_name == GatewayConfig.SERVICE_NAME
+
     def test_app_yaml_writes_every_default_out(self) -> None:
         path = self.APP_FOLDER / GatewayConfig.CONF_FOLDER / GatewayConfig.APP_FILE
         assert GatewayConfig.load(path) == GatewayConfig()
@@ -146,3 +152,8 @@ class TestGatewayConfig:
     def test_an_unreadable_file_is_refused(self, tmp_path: Path) -> None:
         with pytest.raises(SEGatewayConfigUnreadable):
             GatewayConfig.load(tmp_path / "missing.yaml")
+
+    def test_a_signals_mapping_is_read_from_yaml(self, tmp_path: Path) -> None:
+        path = tmp_path / "app.yaml"
+        path.write_text(yaml.safe_dump({"signals": {"enabled": True, "cell": "eu_west"}}), encoding="utf-8")
+        assert GatewayConfig.load(path).signals == SignalsConfig(enabled=True, cell="eu_west")

@@ -75,6 +75,31 @@ people to read their own Operator. It is served by `swarm-gateway-serve` under `
 - The client secret of that Keycloak admin client is not in `conf/app.yaml`. It comes from the environment entry
   `SWARM_GATEWAY_KEYCLOAK_CLIENT_SECRET`, filled from the vault.
 
+## Observability: the `signals` section
+
+Every app's `conf/app.yaml` has a `signals` section, read by `swarm_web.models.config.SignalsConfig` and applied by
+`swarm_web.signals.SignalsConfigurator` in the app's `main()`, after logging. Its keys and defaults:
+
+| Key | Default | Meaning |
+| --- | --- | --- |
+| `enabled` | `false` | Whether the process exports its traces, metrics and logs. Off, nothing leaves the process |
+| `endpoint` | `http://otel-collector:4318` | The OTLP/HTTP endpoint of the collector, `http` or `https` |
+| `service_name` | the app's name, for example `swarm-gateway` | The service name of the signals |
+| `cell` | `local` | The cell that emits the signals, a resource attribute |
+| `metrics_interval_s` | `60.0` | The export interval of metrics, in seconds |
+| `redactions_path` | `null` | A redaction catalogue of your own, or `null` for the reference `swarm_web/conf/signal_redactions.yaml` |
+
+To point an app at a collector, set `enabled: true` and `endpoint` to the collector's OTLP/HTTP address. In the dev cell,
+the collector is `otel-collector` on port 4318, so the default endpoint is right there. Outside a cell, run a collector
+and give its address. The collector of the cell samples the traces: 100 % of the errors and of the requests over the slow
+threshold, and 5 % of the rest.
+
+**What never reaches a signal.** The redaction catalogue removes, before export, any attribute whose name contains a
+fragment such as `authorization`, `cookie`, `password`, `token`, `secret`, `credential`, `api_key`, `private_key`,
+`email`, `phone`, `enduser` or `person.name`, and the query string of a URL (`url.full`, `http.url`, `http.target`).
+No secret and no personal data goes into a trace, a metric or a log. A Drone identifier stays in traces and logs, and
+never becomes a metric label, which the metric label guard enforces.
+
 ## Add a domain
 
 1. Create the domain's folder in each layer it needs: `swarm_models/<domain>/`, `swarm_storage/<domain>/`,

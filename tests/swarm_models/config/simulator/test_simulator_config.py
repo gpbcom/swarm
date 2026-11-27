@@ -28,6 +28,7 @@ from swarm_models.config.simulator.route_config import RouteConfig
 from swarm_models.config.simulator.simulator_config import SimulatorConfig
 from swarm_nats.models.config.nats_client_config import NatsClientConfig
 from swarm_web.models.config.rest_config import RestConfig
+from swarm_web.models.config.signals_config import SignalsConfig
 
 
 class TestSimulatorConfig:
@@ -67,6 +68,7 @@ class TestSimulatorConfig:
         assert config.route == RouteConfig()
         assert config.flight == FlightConfig()
         assert config.flight_log_path == "data/flight_log.sqlite3"
+        assert config.signals == SignalsConfig(service_name=SimulatorConfig.SERVICE_NAME)
         assert config.nats.credentials_path == self.CREDENTIALS_PATH
         assert config.responder.subject == self.SUBJECT
 
@@ -85,7 +87,7 @@ class TestSimulatorConfig:
         assert config.flight.arm_timeout_s == 9.0
         assert config.flight_log_path == "other/log.sqlite3"
 
-    @pytest.mark.parametrize("name", ["flight_log_path", "rest"])
+    @pytest.mark.parametrize("name", ["flight_log_path", "rest", "signals"])
     def test_none_becomes_the_default(self, name: str) -> None:
         config = SimulatorConfig.model_validate({**self.required(), name: None})
         default = SimulatorConfig.model_fields[name].get_default(call_default_factory=True)
@@ -197,3 +199,9 @@ class TestSimulatorConfig:
         ignored = {self.SUBJECT_KEY, self.QUEUE_GROUP_KEY}
         responder_defaults = NatsResponderConfig(subject=self.SUBJECT, queue_group=config.responder.queue_group)
         assert config.responder.model_dump(exclude=ignored) == responder_defaults.model_dump(exclude=ignored)
+
+    def test_a_signals_mapping_is_read_from_yaml(self, tmp_path: Path) -> None:
+        path = tmp_path / "config.yaml"
+        data = {**self.required(), "signals": {"enabled": True, "cell": "eu_west"}}
+        path.write_text(yaml.safe_dump(data), encoding=self.ENCODING)
+        assert SimulatorConfig.load(path).signals == SignalsConfig(enabled=True, cell="eu_west")

@@ -7,15 +7,18 @@ requires-python = ">=3.12"
 dependencies = [
     "httpx>=0.28.1",
     "nats-py>=2.11.0",
+    "opentelemetry-api>=1.45.2",
     "pydantic>=2.14.3",
     "pymavlink>=2.4.49",
     "swarm-models",
     "swarm-nats",
+    "swarm-web",
 ]
 
 [tool.uv.sources]
 swarm-models = { workspace = true }
 swarm-nats = { workspace = true }
+swarm-web = { workspace = true }
 
 [tool.uv.build-backend]
 module-name = "swarm_clients"

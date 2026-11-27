@@ -1,0 +1,16 @@
+image:
+  repository: grafana/tempo
+  tag: "2.8.2"
+  pullPolicy: IfNotPresent
+ports:
+  http: 3200
+  otlpGrpc: 4317
+retention: 336h
+persistence:
+  size: 10Gi
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    memory: 1Gi

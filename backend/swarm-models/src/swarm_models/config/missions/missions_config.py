@@ -2,6 +2,7 @@ from __future__ import annotations
 
 # Standard library imports
 import re
+from functools import partial
 from typing import ClassVar, Literal, Pattern
 
 # Third-party imports
@@ -17,6 +18,7 @@ from swarm_models.config.missions.exceptions import (
 )
 from swarm_models.config.postgres.postgres_config import PostgresConfig
 from swarm_web.models.config.rest_config import RestConfig
+from swarm_web.models.config.signals_config import SignalsConfig
 
 
 class MissionsConfig(AppConfig):
@@ -25,6 +27,8 @@ class MissionsConfig(AppConfig):
     Attributes:
         model_config (ConfigDict): Forbids unknown keys, freezes the model and validates the defaults.
         UNREADABLE (type[Exception]): The exception raised when the file cannot be read.
+        SERVICE_NAME (str): The service name of the app's signals.
+        signals (SignalsConfig): The settings of the app's signals, named after the app by default.
         DSN_KEY (str): The environment entry that holds the PostgreSQL DSN.
         DEFAULT_SCHEMA_NAME (str): The default PostgreSQL schema of the service.
         SCHEMA_NAME_FIELD (str): The name of the ``schema_name`` field.
@@ -43,6 +47,7 @@ class MissionsConfig(AppConfig):
     """
 
     UNREADABLE: ClassVar[type[Exception]] = SEMissionsConfigUnreadable
+    SERVICE_NAME: ClassVar[str] = "swarm-missions"
     DSN_KEY: ClassVar[str] = "SWARM_MISSIONS_POSTGRES_DSN"
     DEFAULT_SCHEMA_NAME: ClassVar[str] = "missions"
     SCHEMA_NAME_FIELD: ClassVar[str] = "schema_name"
@@ -53,6 +58,10 @@ class MissionsConfig(AppConfig):
 
     model_config = ConfigDict(extra="forbid", frozen=True, validate_default=True)
 
+    signals: SignalsConfig = Field(
+        default_factory=partial(SignalsConfig, service_name=SERVICE_NAME),
+        description="The settings of the signals (traces, metrics and logs) the app exports, named after the app.",
+    )
     schema_name: str = Field(
         default=DEFAULT_SCHEMA_NAME, description="The PostgreSQL schema of the service. Defaults to missions."
     )

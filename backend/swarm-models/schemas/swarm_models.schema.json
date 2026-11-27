@@ -479,7 +479,7 @@
     },
     "SquadFrame": {
       "additionalProperties": false,
-      "description": "The frames of every Drone of one Mission at one tick.\n\nAttributes:\n    model_config (ConfigDict): Forbids unknown keys and freezes the squad frame.\n    mission_id (UUID): The Mission of the frames.\n    t_us (int): The moment of the tick, in microseconds since the epoch.\n    frames (List[TelemetryFrame]): One frame per Drone.\n    T_US_MIN (ClassVar[int]): The smallest accepted ``t_us``.\n\nNotes:\n    - **Every frame must belong to the Mission, and each Drone appears once.**\n    - The list may be empty.",
+      "description": "The frames of every Drone of one Mission at one tick.\n\nAttributes:\n    model_config (ConfigDict): Forbids unknown keys and freezes the squad frame.\n    mission_id (UUID): The Mission of the frames.\n    t_us (int): The moment of the tick, in microseconds since the epoch.\n    frames (List[TelemetryFrame]): One frame per Drone.\n    trace_parent (Optional[str]): The W3C trace parent of the tick that built the frame.\n    T_US_MIN (ClassVar[int]): The smallest accepted ``t_us``.\n    TRACE_PARENT_PATTERN (ClassVar[str]): The W3C ``traceparent`` format, in lower case.\n    TRACE_ID_ZEROS (ClassVar[str]): The all-zero trace id, which is invalid.\n    SPAN_ID_ZEROS (ClassVar[str]): The all-zero span id, which is invalid.\n\nNotes:\n    - **Every frame must belong to the Mission, and each Drone appears once.**\n    - The list may be empty.\n    - **A WebSocket message has no headers, so the trace parent travels in the frame:** the browser continues the\n      trace of the tick that built it. It is optional, and neither id may be all zeros.",
       "properties": {
         "frames": {
           "description": "One frame per Drone.",
@@ -499,6 +499,19 @@
           "description": "The moment of the tick, in microseconds since the epoch.",
           "title": "T Us",
           "type": "integer"
+        },
+        "trace_parent": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The W3C trace parent of the tick that built the frame.",
+          "title": "Trace Parent"
         }
       },
       "required": [

@@ -7,15 +7,22 @@ from uuid import UUID, uuid4
 import pytest
 from nats.aio.client import Client, Msg
 from nats.errors import TimeoutError as NatsTimeoutError
+from opentelemetry.trace import SpanKind
 
 # First-party imports
 from swarm_clients.flight.leaf.squad_frame_publisher import SquadFramePublisher
+from swarm_nats.models.bus.nats_headers import NatsHeaders
+from tests.fakes.signals.recorded_signals import RecordedSignals
 
 SUBJECT_TEMPLATE = "op.{operator_id}.mission.{mission_id}.squad"
 FRAME = b"\x82\xa4tick\x01\xa6drones\x90"
 OTHER_FRAME = b"\x80"
 WAIT_S = 2.0
 SETTLE_S = 0.3
+OPERATOR_ATTRIBUTE = "operator_id"
+MISSION_ATTRIBUTE = "mission_id"
+DRONE_ATTRIBUTE = "drone_id"
+FRAME_ENCODING = "latin-1"
 
 
 def a_uuid7() -> UUID:
@@ -70,3 +77,34 @@ class TestSquadFramePublisher:
         await nats_client.flush()
         await SquadFramePublisher(nats_client).publish(operator_id, mission_id, data)
         assert (await subscription.next_msg(timeout=WAIT_S)).data == data
+
+    async def test_a_frame_carries_the_trace_context_and_a_producer_span_names_its_mission(
+        self, nats_client: Client, recorded_signals: RecordedSignals
+    ) -> None:
+        operator_id, mission_id = a_uuid7(), a_uuid7()
+        subscription = await nats_client.subscribe(
+            SUBJECT_TEMPLATE.format(operator_id=operator_id, mission_id=mission_id)
+        )
+        await nats_client.flush()
+        await SquadFramePublisher(nats_client).publish(operator_id, mission_id, FRAME)
+        message: Msg = await subscription.next_msg(timeout=WAIT_S)
+        assert message.headers is not None
+        assert NatsHeaders.TRACE_PARENT in message.headers
+        producers = [span for span in recorded_signals.spans() if span.kind == SpanKind.PRODUCER]
+        assert len(producers) == 1
+        attributes = dict(producers[0].attributes or {})
+        assert attributes[OPERATOR_ATTRIBUTE] == str(operator_id)
+        assert attributes[MISSION_ATTRIBUTE] == str(mission_id)
+
+    async def test_no_span_attribute_holds_a_drone_or_the_frame_bytes(
+        self, nats_client: Client, recorded_signals: RecordedSignals
+    ) -> None:
+        operator_id, mission_id = a_uuid7(), a_uuid7()
+        await SquadFramePublisher(nats_client).publish(operator_id, mission_id, FRAME)
+        spans = recorded_signals.spans()
+        assert spans
+        for span in spans:
+            attributes = dict(span.attributes or {})
+            assert DRONE_ATTRIBUTE not in attributes
+            assert FRAME not in attributes.values()
+            assert FRAME.decode(FRAME_ENCODING) not in attributes.values()

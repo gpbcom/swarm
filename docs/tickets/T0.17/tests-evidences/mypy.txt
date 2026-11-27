@@ -1,0 +1,5 @@
+$ uv run mypy backend/apps/fleet/src backend/apps/flight-engine/src backend/apps/gateway/src backend/apps/missions/src backend/apps/simulator/src backend/libs/swarm-catalog/src backend/libs/swarm-lifecycle/src backend/libs/swarm-logging/src backend/libs/swarm-nats/src backend/libs/swarm-web/src backend/swarm-api/src backend/swarm-clients/src backend/swarm-models/src backend/swarm-service/src backend/swarm-storage/src scripts/src
+(cwd ., on the ticket's own files only)
+
+Success: no issues found in 957 source files
+warning: `VIRTUAL_ENV=/home/guillaume/Documents/Projects/PoC/swarm/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead

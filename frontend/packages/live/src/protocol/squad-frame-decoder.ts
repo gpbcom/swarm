@@ -72,9 +72,16 @@ export function decodeSquadFrame(bytes: Uint8Array | ArrayBuffer): SquadFrame {
   if (!Array.isArray(frames)) {
     throw new LiveMessageUnreadableError("frames is not a list");
   }
-  return {
+  const frame: SquadFrame = {
     mission_id: text(fields, "mission_id"),
     t_us: whole(fields, "t_us"),
     frames: frames.map(telemetry),
   };
+  const traceParent = fields["trace_parent"];
+  if (typeof traceParent === "string") {
+    frame.trace_parent = traceParent;
+  } else if (traceParent !== undefined && traceParent !== null) {
+    throw new LiveMessageUnreadableError("trace_parent is not a text");
+  }
+  return frame;
 }

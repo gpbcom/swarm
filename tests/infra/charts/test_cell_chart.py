@@ -20,37 +20,85 @@ class TestCellChart:
         {
             "name": "database",
             "repository": "file://../database",
+            "version": "0.1.0",
             "condition": "database.enabled",
         },
         {
             "name": "valkey",
             "repository": "file://../valkey",
+            "version": "0.1.0",
             "condition": "valkey.enabled",
         },
         {
             "name": "object-storage",
             "alias": "objectStorage",
             "repository": "file://../object-storage",
+            "version": "0.1.0",
             "condition": "objectStorage.enabled",
         },
         {
             "name": "vault-config",
             "alias": "vaultConfig",
             "repository": "file://../vault-config",
+            "version": "0.1.0",
             "condition": "vaultConfig.enabled",
         },
         {
             "name": "nats",
             "repository": "file://../nats",
+            "version": "0.1.0",
             "condition": "nats.enabled",
         },
         {
             "name": "simulator",
             "repository": "file://../simulator",
+            "version": "0.1.0",
             "condition": "simulator.enabled",
         },
+        {
+            "name": "otel-collector",
+            "alias": "otelCollector",
+            "repository": "file://../otel-collector",
+            "version": "0.1.0",
+            "condition": "otelCollector.enabled",
+        },
+        {
+            "name": "prometheus",
+            "repository": "file://../prometheus",
+            "version": "0.1.0",
+            "condition": "prometheus.enabled",
+        },
+        {
+            "name": "loki",
+            "repository": "file://../loki",
+            "version": "0.1.0",
+            "condition": "loki.enabled",
+        },
+        {
+            "name": "tempo",
+            "repository": "file://../tempo",
+            "version": "0.1.0",
+            "condition": "tempo.enabled",
+        },
+        {
+            "name": "grafana",
+            "repository": "file://../grafana",
+            "version": "0.1.0",
+            "condition": "grafana.enabled",
+        },
     ]
-    TOGGLES: ClassVar[List[str]] = ["database", "valkey", "objectStorage", "vaultConfig", "nats"]
+    TOGGLES: ClassVar[List[str]] = [
+        "database",
+        "valkey",
+        "objectStorage",
+        "vaultConfig",
+        "nats",
+        "otelCollector",
+        "prometheus",
+        "loki",
+        "tempo",
+        "grafana",
+    ]
     EXPECTED_RESOURCES: ClassVar[List[Tuple[str, str, str]]] = [
         ("postgresql.cnpg.io/v1", "Cluster", "database"),
         ("postgresql.cnpg.io/v1", "Pooler", "database-pooler-rw"),
@@ -65,6 +113,11 @@ class TestCellChart:
         ("v1", "Service", "nats-headless"),
         ("policy/v1", "PodDisruptionBudget", "nats"),
         ("networking.k8s.io/v1", "NetworkPolicy", "nats"),
+        ("apps/v1", "Deployment", "otel-collector"),
+        ("apps/v1", "Deployment", "grafana"),
+        ("apps/v1", "StatefulSet", "prometheus"),
+        ("apps/v1", "StatefulSet", "loki"),
+        ("apps/v1", "StatefulSet", "tempo"),
     ]
     FAKE_JWT: ClassVar[str] = "aGVhZGVy.cGF5bG9hZA.c2lnbmF0dXJl"
     FAKE_ACCOUNT: ClassVar[str] = "A" + "B" * 55

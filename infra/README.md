@@ -88,6 +88,42 @@ docker push registry.example.org/swarm/database:1
 Then set the same reference as `database_image` in the dev-branch variables file. The `cells/dev-branch` root passes it
 to the chart as `database.imageName`, and rendering fails when it is empty. The reference above is an example.
 
+## Observability in the cell
+
+A cell runs the observability charts beside the data services, all in the namespace of the cell, and the umbrella
+chart `charts/cell` enables them:
+
+| Chart | Port | Kept | Holds |
+| --- | --- | --- | --- |
+| `charts/otel-collector` | 4317 (OTLP gRPC), 4318 (OTLP/HTTP) | Buffers only | The collector the apps send to. It samples the traces: 100 % of the errors and of the requests over the slow threshold (250 ms), and 5 % of the rest |
+| `charts/tempo` | 3200 (HTTP), 4317 (OTLP gRPC) | 14 days (`retention: 336h`) | The traces |
+| `charts/prometheus` | 9090 | 15 days (`retention: 15d`) | The metrics |
+| `charts/loki` | 3100 | 30 days (`retention: 720h`) | The logs |
+| `charts/grafana` | 3000 | Its dashboards | The Grafana of the cell, with the datasources of the four backends and the dashboards of `charts/observability/dashboards/` |
+
+The collector forwards the traces to Tempo, the metrics to Prometheus and the logs to Loki. Its own list of
+redacted keys (`redactedKeys`) complements the redaction of the apps (see [`backend/README.md`](../backend/README.md#observability-the-signals-section)).
+
+Grafana reads its admin password from the Secret named by `adminSecretName` in its values, `grafana-admin` by default.
+Terraform and Argo CD do not write that Secret: the person who runs the cell creates it in the namespace before Grafana
+starts, under the keys `adminUserKey` and `adminPasswordKey` of its values, and never in a file of this repository.
+
+**To open Grafana in a dev cell**, forward its port to your workstation, then log in as `admin` with the password of
+the Secret:
+
+```bash
+export KUBECONFIG=/path/outside/repo/dev.kubeconfig
+kubectl -n cell-<branch name> port-forward svc/grafana 3000:3000
+```
+
+Open `http://localhost:3000`. The cell name is the one the script prints (see [Request a branch cell](#request-a-branch-cell)).
+
+**To follow one SquadFrame's trace** from the flight engine through the gateway, take the `trace_parent` of the frame
+(a W3C `traceparent`, `00-<trace id>-<span id>-<flags>`), which the frame carries to the browser. In Grafana, open
+Explore on the Tempo datasource and search the trace id, the middle part of that value. The trace shows the spans of the
+flight engine and those of the gateway that handled the same request, linked through the `traceparent` header of the
+NATS message.
+
 ## Request a branch cell
 
 A branch gets its cell with the script, or with the `dev-cell` workflow.

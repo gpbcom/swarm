@@ -1,9 +1,14 @@
+import { startSignals, type Signals } from "@swarm/observability";
+
+import { traceSquadFrame } from "../tracing/frame_tracing.ts";
 import { encodeSquadSubscription } from "../protocol/topics.ts";
 import { decodeSquadFrame } from "../protocol/squad-frame-decoder.ts";
 import { SquadStore } from "../snapshot/squad-store.ts";
 import type { FromWorker, LiveStatus, ToWorker } from "./live-worker-messages.ts";
 
 const MS_PER_S = 1000;
+const SERVICE_NAME = "swarm-ground-control";
+const DEFAULT_CELL = "unknown";
 
 /** The part of a WebSocket the worker uses. */
 export interface SocketLike {
@@ -32,6 +37,7 @@ export class LiveWorkerCore {
   private readonly post: PostFunction;
   private readonly clock: WorkerClock;
   private readonly intervalMs: number;
+  private signals: Signals | undefined = undefined;
   private socket: SocketLike | null = null;
   private store: SquadStore | null = null;
   private timer: number | null = null;
@@ -46,6 +52,14 @@ export class LiveWorkerCore {
   /** Handle a message of the main thread. */
   handle(message: ToWorker): void {
     if (message.kind === "connect") {
+      this.signals = undefined;
+      if (message.endpoint !== undefined) {
+        this.signals = startSignals({
+          endpoint: message.endpoint,
+          serviceName: SERVICE_NAME,
+          cell: message.cell ?? DEFAULT_CELL,
+        });
+      }
       this.connect(message.url, message.missionId);
     } else {
       this.close();
@@ -93,7 +107,10 @@ export class LiveWorkerCore {
     const store = this.store;
     if (!store) return;
     try {
-      store.merge(decodeSquadFrame(data), this.clock.nowMs());
+      const frame = decodeSquadFrame(data);
+      traceSquadFrame(this.signals, frame, () => {
+        store.merge(frame, this.clock.nowMs());
+      });
     } catch {
       return;
     }

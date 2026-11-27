@@ -17,5 +17,20 @@ dependencies:
 - name: simulator
   repository: file://../simulator
   version: 0.1.0
-digest: sha256:ddb2f727917682655104f5c3c29a493479a01bf2bf3d5e13699e7623916cc0d8
-generated: "2026-11-20T00:00:00.0000000+00:00"
+- name: otel-collector
+  repository: file://../otel-collector
+  version: 0.1.0
+- name: prometheus
+  repository: file://../prometheus
+  version: 0.1.0
+- name: loki
+  repository: file://../loki
+  version: 0.1.0
+- name: tempo
+  repository: file://../tempo
+  version: 0.1.0
+- name: grafana
+  repository: file://../grafana
+  version: 0.1.0
+digest: sha256:a9fe1dcb4c4ccea94967b5746f1353d4bcae535322470ee573dfec7ab20e6ffb
+generated: "2026-11-27T14:21:57.777164129+01:00"

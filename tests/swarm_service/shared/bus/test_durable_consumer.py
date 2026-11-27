@@ -9,6 +9,8 @@ from uuid import UUID
 # Third-party imports
 from nats.aio.client import Client
 from nats.js.api import StreamConfig
+from opentelemetry.sdk.trace import ReadableSpan
+from opentelemetry.trace import SpanKind
 
 # First-party imports
 from swarm_lifecycle.models.enums import RunnableStatus
@@ -17,6 +19,7 @@ from swarm_models.events.actor import Actor
 from swarm_models.events.enums import ActorKind
 from swarm_models.events.event import Event
 from swarm_service.shared.bus.durable_consumer import DurableConsumer
+from tests.fakes.signals.recorded_signals import RecordedSignals
 
 
 class TestDurableConsumer:
@@ -35,6 +38,9 @@ class TestDurableConsumer:
     WAIT_LIMIT_S: ClassVar[float] = 10.0
     POLL_S: ClassVar[float] = 0.05
     ACK_WAIT_S: ClassVar[float] = 1.0
+    TRACEPARENT_HEADER: ClassVar[str] = "traceparent"
+    TRACE_ID: ClassVar[int] = 0x4BF92F3577B34DA6A3CE929D0E0E4736
+    TRACEPARENT: ClassVar[str] = "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"
 
     def setup_method(self) -> None:
         self.handled: List[Event] = []
@@ -177,3 +183,24 @@ class TestDurableConsumer:
         await self.wait_running()
         await self.cancel(task)
         assert RunnableStatus.RUNNING in self.statuses
+
+    async def consumer_spans(self, recorded_signals: RecordedSignals) -> List[ReadableSpan]:
+        async with asyncio.timeout(self.WAIT_LIMIT_S):
+            while True:
+                found = [span for span in recorded_signals.spans() if span.kind == SpanKind.CONSUMER]
+                if found:
+                    return found
+                await asyncio.sleep(self.POLL_S)
+
+    async def test_a_message_with_a_traceparent_is_handled_in_a_consumer_span_of_that_trace(
+        self, nats_client: Client, recorded_signals: RecordedSignals
+    ) -> None:
+        await self.create_stream(nats_client)
+        event = self.event(1)
+        headers: Dict[str, str] = {self.MSG_ID_HEADER: str(event.id), self.TRACEPARENT_HEADER: self.TRACEPARENT}
+        await nats_client.jetstream().publish(self.subject(), event.model_dump_json().encode(), headers=headers)
+        task = asyncio.create_task(self.read(self.consumer(nats_client)))
+        await self.wait_handled(1)
+        spans = await self.consumer_spans(recorded_signals)
+        await self.cancel(task)
+        assert {span.context.trace_id for span in spans} == {self.TRACE_ID}

@@ -18,3 +18,7 @@ nats:
     - nats://nats:4222
   credentialsSecretName: simulator-nats-credentials
 resources: {}
+signals:
+  enabled: false
+  endpoint: http://otel-collector:4318
+  cell: local

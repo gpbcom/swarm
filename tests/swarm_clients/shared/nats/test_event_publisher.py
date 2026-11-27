@@ -9,6 +9,8 @@ from uuid import UUID
 import pytest
 from nats.aio.client import Client
 from nats.js.errors import NotFoundError
+from opentelemetry import trace
+from opentelemetry.trace import SpanKind
 from pydantic import JsonValue
 
 # First-party imports
@@ -21,6 +23,7 @@ from swarm_models.streams.stream_spec import StreamSpec
 from swarm_models.subjects.operator_subjects import OperatorSubjects
 from swarm_nats.models.bus.exceptions import SENatsPublishError
 from swarm_nats.models.bus.nats_headers import NatsHeaders
+from tests.fakes.signals.recorded_signals import RecordedSignals
 
 
 class TestEventPublisher:
@@ -37,6 +40,10 @@ class TestEventPublisher:
     FLEET_TYPE: ClassVar[str] = "drone.position"
     SINGLE_REPLICA: ClassVar[int] = 1
     ONE_MESSAGE: ClassVar[int] = 1
+    TRACE_ID_FORMAT: ClassVar[str] = "032x"
+    TRACE_PARENT_SEPARATOR: ClassVar[str] = "-"
+    TRACE_ID_INDEX: ClassVar[int] = 1
+    TEST_SPAN: ClassVar[str] = "test.parent"
 
     def build(self, event_type: str, mission_id: Optional[UUID]) -> Event:
         return Event(
@@ -92,3 +99,35 @@ class TestEventPublisher:
         event = self.build(self.MISSION_TYPE, self.MISSION_ID)
         with pytest.raises(SENatsPublishError):
             await EventPublisher(nats_client).publish(event)
+
+    def trace_id_of(self, traceparent: str) -> str:
+        return traceparent.split(self.TRACE_PARENT_SEPARATOR)[self.TRACE_ID_INDEX]
+
+    async def test_a_published_event_carries_the_trace_context_of_its_producer_span(
+        self, nats_client: Client, recorded_signals: RecordedSignals
+    ) -> None:
+        await self.create_stream(nats_client, self.STREAM_NAME, self.STREAM_SUBJECTS)
+        event = self.build(self.MISSION_TYPE, self.MISSION_ID)
+        sequence = await EventPublisher(nats_client).publish(event)
+        message = await nats_client.jetstream().get_msg(self.STREAM_NAME, seq=sequence)
+        assert message.headers is not None
+        assert message.headers[NatsHeaders.MSG_ID] == str(event.id)
+        producers = [span for span in recorded_signals.spans() if span.kind == SpanKind.PRODUCER]
+        assert len(producers) == self.ONE_MESSAGE
+        assert producers[0].context is not None
+        trace_id = format(producers[0].context.trace_id, self.TRACE_ID_FORMAT)
+        assert self.trace_id_of(message.headers[NatsHeaders.TRACE_PARENT]) == trace_id
+
+    async def test_the_producer_span_is_a_child_of_the_current_span(
+        self, nats_client: Client, recorded_signals: RecordedSignals
+    ) -> None:
+        await self.create_stream(nats_client, self.STREAM_NAME, self.STREAM_SUBJECTS)
+        event = self.build(self.MISSION_TYPE, self.MISSION_ID)
+        with trace.get_tracer(__name__).start_as_current_span(self.TEST_SPAN) as parent:
+            await EventPublisher(nats_client).publish(event)
+        producers = [span for span in recorded_signals.spans() if span.kind == SpanKind.PRODUCER]
+        assert len(producers) == self.ONE_MESSAGE
+        assert producers[0].parent is not None
+        assert producers[0].parent.span_id == parent.get_span_context().span_id
+        assert producers[0].context is not None
+        assert producers[0].context.trace_id == parent.get_span_context().trace_id

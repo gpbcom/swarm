@@ -1,0 +1,6 @@
+apiVersion: v2
+name: otel-collector
+description: The OpenTelemetry collector of one cell, which sends traces to Tempo, metrics to Prometheus and logs to Loki.
+type: application
+version: 0.1.0
+appVersion: "0.128.0"

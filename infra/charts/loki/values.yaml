@@ -1,0 +1,14 @@
+image:
+  repository: grafana/loki
+  tag: "3.5.1"
+  pullPolicy: IfNotPresent
+port: 3100
+retention: 720h
+persistence:
+  size: 10Gi
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    memory: 1Gi

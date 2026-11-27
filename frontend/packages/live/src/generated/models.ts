@@ -360,6 +360,10 @@ export type MissionId3 = string;
  * The moment of the tick, in microseconds since the epoch.
  */
 export type TUs1 = number;
+/**
+ * The W3C trace parent of the tick that built the frame.
+ */
+export type TraceParent = string | null;
 
 export interface SwarmModels {
   [k: string]: unknown;
@@ -597,11 +601,17 @@ export interface Role {
  *     mission_id (UUID): The Mission of the frames.
  *     t_us (int): The moment of the tick, in microseconds since the epoch.
  *     frames (List[TelemetryFrame]): One frame per Drone.
+ *     trace_parent (Optional[str]): The W3C trace parent of the tick that built the frame.
  *     T_US_MIN (ClassVar[int]): The smallest accepted ``t_us``.
+ *     TRACE_PARENT_PATTERN (ClassVar[str]): The W3C ``traceparent`` format, in lower case.
+ *     TRACE_ID_ZEROS (ClassVar[str]): The all-zero trace id, which is invalid.
+ *     SPAN_ID_ZEROS (ClassVar[str]): The all-zero span id, which is invalid.
  *
  * Notes:
  *     - **Every frame must belong to the Mission, and each Drone appears once.**
  *     - The list may be empty.
+ *     - **A WebSocket message has no headers, so the trace parent travels in the frame:** the browser continues the
+ *       trace of the tick that built it. It is optional, and neither id may be all zeros.
  *
  * This interface was referenced by `SwarmModels`'s JSON-Schema
  * via the `definition` "SquadFrame".
@@ -610,6 +620,7 @@ export interface SquadFrame {
   frames: Frames;
   mission_id: MissionId3;
   t_us: TUs1;
+  trace_parent?: TraceParent;
 }
 /**
  * What one Drone reports at one tick.

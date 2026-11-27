@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 # Standard library imports
+from functools import partial
 from typing import ClassVar, Literal
 
 # Third-party imports
@@ -21,6 +22,7 @@ from swarm_models.config.flight_engine.exceptions import (
 )
 from swarm_models.config.flight_engine.live_server_config import LiveServerConfig
 from swarm_nats.models.config.nats_client_config import NatsClientConfig
+from swarm_web.models.config.signals_config import SignalsConfig
 
 
 class FlightEngineConfig(AppConfig):
@@ -35,6 +37,8 @@ class FlightEngineConfig(AppConfig):
         nats (NatsClientConfig): The connection to NATS.
         live (LiveServerConfig): The live server.
         UNREADABLE (type[Exception]): The exception raised when the file cannot be read.
+        SERVICE_NAME (str): The service name of the app's signals.
+        signals (SignalsConfig): The settings of the app's signals, named after the app by default.
         TICK_INTERVAL_FIELD (str): The name of the ``tick_interval_ms`` field, for its validator.
         STATUS_INTERVAL_FIELD (str): The name of the ``status_interval_s`` field, for its validator.
         LINK_LOST_AFTER_FIELD (str): The name of the ``link_lost_after_ms`` field, for its validator.
@@ -58,6 +62,7 @@ class FlightEngineConfig(AppConfig):
     model_config = ConfigDict(extra="forbid", frozen=True, validate_default=True)
 
     UNREADABLE: ClassVar[type[Exception]] = SEFlightEngineConfigUnreadable
+    SERVICE_NAME: ClassVar[str] = "swarm-flight-engine"
     TICK_INTERVAL_FIELD: ClassVar[str] = "tick_interval_ms"
     STATUS_INTERVAL_FIELD: ClassVar[str] = "status_interval_s"
     LINK_LOST_AFTER_FIELD: ClassVar[str] = "link_lost_after_ms"
@@ -72,6 +77,10 @@ class FlightEngineConfig(AppConfig):
     DEFAULT_DRONE_STATES_CATALOG_PATH: ClassVar[str] = "conf/catalogs/drone_states.yaml"
     BEFORE: ClassVar[Literal["before"]] = "before"
 
+    signals: SignalsConfig = Field(
+        default_factory=partial(SignalsConfig, service_name=SERVICE_NAME),
+        description="The settings of the signals (traces, metrics and logs) the app exports, named after the app.",
+    )
     tick_interval_ms: int = Field(
         default=DEFAULT_TICK_INTERVAL_MS,
         description="The interval between two safety ticks of a Mission, in milliseconds. Defaults to 50.",

@@ -10,7 +10,18 @@ use std::net::IpAddr;
 use std::process::ExitCode;
 use std::str::FromStr;
 
+use opentelemetry::trace::{Span, Tracer};
+use swarm_observability::{Signals, SignalsConfig};
 use swarm_synthetic_drones::link::{Fleet, FleetConfig};
+
+/// The `service.name` of the signals of this process.
+const SERVICE_NAME: &str = "swarm-synthetic-drones";
+
+/// The name of the span that covers the flight run.
+const RUN_SPAN: &str = "swarm.synthetic_drones.run";
+
+/// The name of the counter of the `MAVLink` frames the Drones sent.
+const FRAMES_SENT_METRIC: &str = "swarm.mavlink.frames_sent";
 
 /// The exit code of a refused argument or a fleet that could not start.
 const EXIT_REFUSED: u8 = 2;
@@ -86,7 +97,33 @@ fn main() -> ExitCode {
     if writeln!(stdout, "ready").and_then(|()| stdout.flush()).is_err() {
         return refuse("cannot write on the standard output");
     }
-    fleet.run()
+    fly(&mut fleet);
+    ExitCode::SUCCESS
+}
+
+/// Runs the fleet with its signals: one span for the run and the count of the frames sent, with no `drone_id`.
+///
+/// A collector that is missing, unreachable or slow only costs the signals: they are exported from background
+/// threads, and a signals set-up that fails is logged on the standard error and the flight goes on without it.
+fn fly(fleet: &mut Fleet) {
+    let signals = match Signals::start(&SignalsConfig::from_env(SERVICE_NAME)) {
+        Ok(signals) => signals,
+        Err(error) => {
+            eprintln!("swarm-synthetic-drones: signals disabled: {error}");
+            fleet.run();
+        }
+    };
+    let mut span = signals.tracer().start(RUN_SPAN);
+    let frames = signals.meter().u64_counter(FRAMES_SENT_METRIC).build();
+    fleet.run_until(|fleet| {
+        let sent = fleet.take_frames_sent();
+        if sent > 0 {
+            frames.add(sent, &[]);
+        }
+        true
+    });
+    span.end();
+    signals.shutdown();
 }
 
 #[cfg(test)]

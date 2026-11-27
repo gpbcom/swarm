@@ -46,6 +46,16 @@ class TestSimulatorChart:
     SECRET_PATTERN: ClassVar[Pattern[str]] = re.compile(r"seed|jwt|password|secret", re.IGNORECASE)
     DOCKERFILE: ClassVar[Path] = ROOT / "backend" / "apps" / "simulator" / "Dockerfile"
     APP_ROOT_PATTERN: ClassVar[Pattern[str]] = re.compile(r"SWARM_APP_ROOT=(\S+)")
+    SIGNALS_ENDPOINT: ClassVar[str] = "http://otel-collector:4318"
+    SIGNALS_SERVICE: ClassVar[str] = "swarm-simulator"
+    SIGNALS_CELL: ClassVar[str] = "dev"
+    ENDPOINT_ENV: ClassVar[str] = "OTEL_EXPORTER_OTLP_ENDPOINT"
+    ATTRIBUTES_ENV: ClassVar[str] = "OTEL_RESOURCE_ATTRIBUTES"
+    SIGNALS_ON: ClassVar[List[Tuple[str, str]]] = [
+        ("signals.enabled", "true"),
+        ("signals.endpoint", "http://collector.example:4318"),
+        ("signals.cell", "dev"),
+    ]
     SEMVER_PATTERN: ClassVar[Pattern[str]] = re.compile(r"^\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$")
 
     def _load(self, name: str) -> JsonValue:
@@ -83,14 +93,14 @@ class TestSimulatorChart:
     def _sets(self) -> List[Tuple[str, str]]:
         return [(self.OPERATOR_VALUE, self.OPERATOR_ID), *self.TAGS]
 
-    def _render(self, tmp_path: Path) -> List[JsonValue]:
-        result = self._helm(tmp_path, self._sets())
+    def _render(self, tmp_path: Path, extra: Optional[List[Tuple[str, str]]] = None) -> List[JsonValue]:
+        result = self._helm(tmp_path, [*self._sets(), *(extra or [])])
         assert result.returncode == 0, result.stderr
         return [cast(JsonValue, d) for d in yaml.safe_load_all(result.stdout) if d]
 
-    def _find(self, tmp_path: Path, kind: str, name: str) -> JsonValue:
+    def _find(self, tmp_path: Path, kind: str, name: str, extra: Optional[List[Tuple[str, str]]] = None) -> JsonValue:
         found: Optional[JsonValue] = None
-        for document in self._render(tmp_path):
+        for document in self._render(tmp_path, extra):
             if self._section(document, "kind") == kind and self._mapping(document, "metadata")["name"] == name:
                 found = document
         assert found is not None
@@ -113,8 +123,8 @@ class TestSimulatorChart:
             words.extend(str(word) for word in listed)
         return words
 
-    def _app_config(self, tmp_path: Path) -> Dict[str, JsonValue]:
-        config_map = self._find(tmp_path, "ConfigMap", self.CONFIG_MAP)
+    def _app_config(self, tmp_path: Path, extra: Optional[List[Tuple[str, str]]] = None) -> Dict[str, JsonValue]:
+        config_map = self._find(tmp_path, "ConfigMap", self.CONFIG_MAP, extra)
         text = self._mapping(config_map, "data")[self.CONFIG_FILE]
         assert isinstance(text, str)
         loaded = yaml.safe_load(text)
@@ -247,3 +257,48 @@ class TestSimulatorChart:
         mounts = self._items(self._container(tmp_path, self.NAME), "volumeMounts")
         mounted = [m["mountPath"] for m in mounts if isinstance(m, dict) and m.get("subPath") == self.CONFIG_FILE]
         assert mounted == [read]
+
+    def _env_names(self, tmp_path: Path, extra: List[Tuple[str, str]]) -> Dict[str, JsonValue]:
+        spec = self._mapping(self._find(tmp_path, "Deployment", self.DRONES, extra), "spec")
+        pod = self._mapping(spec, "template")["spec"]
+        container = self._items(pod, "containers")[0]
+        assert isinstance(container, dict)
+        listed = container.get("env", [])
+        assert isinstance(listed, list)
+        return {str(e["name"]): e.get("value") for e in listed if isinstance(e, dict)}
+
+    def test_values_leave_the_signals_disabled_by_default(self) -> None:
+        assert self._values("signals", "enabled") is False
+        assert self._values("signals", "endpoint") == self.SIGNALS_ENDPOINT
+
+    @pytest.mark.skipif(HELM_MISSING, reason="helm is not installed")
+    def test_the_configuration_holds_a_disabled_signals_section_by_default(self, tmp_path: Path) -> None:
+        signals = self._app_config(tmp_path)["signals"]
+        assert isinstance(signals, dict)
+        assert signals["enabled"] is False
+        assert signals["endpoint"] == self.SIGNALS_ENDPOINT
+        assert signals["service_name"] == self.SIGNALS_SERVICE
+        assert "cell" in signals
+
+    @pytest.mark.skipif(HELM_MISSING, reason="helm is not installed")
+    def test_the_configuration_takes_its_signals_from_the_values(self, tmp_path: Path) -> None:
+        signals = self._app_config(tmp_path, self.SIGNALS_ON)["signals"]
+        assert isinstance(signals, dict)
+        assert signals["enabled"] is True
+        assert signals["endpoint"] == "http://collector.example:4318"
+        assert signals["service_name"] == self.SIGNALS_SERVICE
+        assert signals["cell"] == self.SIGNALS_CELL
+
+    @pytest.mark.skipif(HELM_MISSING, reason="helm is not installed")
+    def test_the_synthetic_drones_export_to_the_collector_when_signals_are_enabled(self, tmp_path: Path) -> None:
+        env = self._env_names(tmp_path, self.SIGNALS_ON)
+        assert env[self.ENDPOINT_ENV] == "http://collector.example:4318"
+        attributes = env[self.ATTRIBUTES_ENV]
+        assert isinstance(attributes, str)
+        assert f"cell={self.SIGNALS_CELL}" in attributes
+
+    @pytest.mark.skipif(HELM_MISSING, reason="helm is not installed")
+    def test_the_synthetic_drones_export_nothing_when_signals_are_disabled(self, tmp_path: Path) -> None:
+        env = self._env_names(tmp_path, [])
+        assert self.ENDPOINT_ENV not in env
+        assert self.ATTRIBUTES_ENV not in env

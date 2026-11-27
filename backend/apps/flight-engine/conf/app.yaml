@@ -17,3 +17,10 @@ live:
   host: 127.0.0.1
   port: 8080
   status_interval_s: 5.0
+signals:
+  enabled: false
+  endpoint: http://otel-collector:4318
+  service_name: swarm-flight-engine
+  cell: local
+  metrics_interval_s: 60.0
+  redactions_path: null

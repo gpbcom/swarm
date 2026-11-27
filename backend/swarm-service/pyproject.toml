@@ -10,6 +10,7 @@ dependencies = [
     "nats-py>=2.11.0",
     "nkeys>=0.2.1",
     "ormsgpack>=1.7.0",
+    "opentelemetry-api>=1.45.2",
     "pydantic>=2.14.3",
     "pyjwt[crypto]>=2.15.1",
     "swarm-clients",

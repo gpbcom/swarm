@@ -11,6 +11,8 @@ from nats.aio.client import Client
 from nats.errors import Error as NatsError
 from nats.errors import NoRespondersError
 from nats.errors import TimeoutError as NatsTimeoutError
+from opentelemetry import trace
+from opentelemetry.trace import Span, SpanKind, Status, StatusCode
 from pydantic import BaseModel, ValidationError
 
 # First-party imports
@@ -24,6 +26,7 @@ from swarm_nats.models.bus.exceptions import (
 )
 from swarm_nats.models.bus.nats_headers import NatsHeaders
 from swarm_nats.models.config.nats_client_config import NatsClientConfig
+from swarm_nats.tracing.nats_trace_context import NatsTraceContext
 
 
 class NatsRequester:
@@ -34,6 +37,8 @@ class NatsRequester:
         TIMESPEC (ClassVar[str]): The precision of the deadline header, so that it carries microseconds.
         IDEMPOTENCY_KEY_KEY (ClassVar[str]): The header carrying the idempotency key.
         DEADLINE_KEY (ClassVar[str]): The header carrying the absolute deadline.
+        REQUEST_SPAN (ClassVar[str]): The name of the client span.
+        SUBJECT_ATTRIBUTE (ClassVar[str]): The span attribute that holds the subject.
         connection (Client): The connected NATS client.
         config (NatsClientConfig): The settings, whose ``request_deadline_s`` is the default deadline.
         logger (Logger): Logger instance.
@@ -43,6 +48,8 @@ class NatsRequester:
           its own clock and stops working on a request nobody waits for any more, whatever the hops in between.
         - **It never retries.** The caller owns the retry and reuses the same idempotency key, so one layer owns each
           retry and the responder can recognise a repeat.
+        - Each request runs in a client span, whose trace context travels in the headers, and every failure sets its
+          status to error. **The span records the subject and never the body.**
         - A payload and the secret part of a key are never logged.
     """
 
@@ -50,6 +57,8 @@ class NatsRequester:
     TIMESPEC: ClassVar[str] = "microseconds"
     IDEMPOTENCY_KEY_KEY: ClassVar[str] = NatsHeaders.IDEMPOTENCY_KEY
     DEADLINE_KEY: ClassVar[str] = NatsHeaders.DEADLINE
+    REQUEST_SPAN: ClassVar[str] = "swarm.nats.request"
+    SUBJECT_ATTRIBUTE: ClassVar[str] = "messaging.destination.name"
 
     def __init__(self, connection: Client, config: NatsClientConfig, logger: Optional[Logger] = None) -> None:
         """Keep the connection and the settings.
@@ -88,6 +97,16 @@ class NatsRequester:
             raise SENatsInvalidDeadlineError(f"Invalid deadline: {deadline_s!r}. Must be a positive number of seconds.")
         self.logger.debug("The key and the deadline are valid.")
 
+    def _fail(self, span: Span, reason: str) -> None:
+        """Set the status of a span to error.
+
+        Args:
+            span (Span): The client span.
+            reason (str): The class of the failure, never a payload.
+        """
+        self.logger.debug("Marking the request span as failed with %s.", reason)
+        span.set_status(Status(StatusCode.ERROR, reason))
+
     ############################
     # Publicly Exposed Methods #
     ############################
@@ -125,33 +144,44 @@ class NatsRequester:
             deadline_s = self.config.request_deadline_s
         self._validate(idempotency_key, deadline_s)
         deadline = (datetime.now(UTC) + timedelta(seconds=deadline_s)).isoformat(timespec=self.TIMESPEC)
-        headers: Dict[str, str] = {self.IDEMPOTENCY_KEY_KEY: idempotency_key, self.DEADLINE_KEY: deadline}
         self.logger.debug("Requesting %s with a deadline of %s.", subject, deadline)
-        try:
-            message = await self.connection.request(
-                subject, payload.model_dump_json().encode(self.ENCODING), timeout=deadline_s, headers=headers
+        with trace.get_tracer(__name__).start_as_current_span(self.REQUEST_SPAN, kind=SpanKind.CLIENT) as span:
+            span.set_attribute(self.SUBJECT_ATTRIBUTE, subject)
+            headers: Dict[str, str] = NatsTraceContext().inject(
+                {self.IDEMPOTENCY_KEY_KEY: idempotency_key, self.DEADLINE_KEY: deadline}
             )
-        except NoRespondersError as error:
-            self.logger.error("Nobody answers %s.", subject)
-            raise SENatsNoResponderError(f"Invalid subject: {subject!r}. Nobody answers it.") from error
-        except NatsTimeoutError as error:
-            self.logger.error("The request to %s exceeded its deadline of %s s.", subject, deadline_s)
-            raise SENatsRequestDeadlineExceededError(
-                f"The request to {subject!r} had no reply within {deadline_s} s."
-            ) from error
-        except NatsError as error:
-            self.logger.error("The request to %s failed: %s.", subject, type(error).__name__)
-            raise SENatsRequestFailedError(f"The request to {subject!r} failed with {type(error).__name__}.") from error
-        if message.headers and NatsHeaders.ERROR in message.headers:
-            error_class = message.headers[NatsHeaders.ERROR]
-            self.logger.error("The responder of %s failed with %s.", subject, error_class)
-            raise SENatsRequestFailedError(f"The responder of {subject!r} failed with {error_class}.")
-        try:
-            reply = reply_type.model_validate_json(message.data.decode(self.ENCODING))
-        except (ValidationError, UnicodeDecodeError) as error:
-            self.logger.error("The reply of %s is not a %s.", subject, reply_type.__name__)
-            raise SENatsReplyInvalidError(
-                f"Invalid reply: from {subject!r}. Must be a {reply_type.__name__}."
-            ) from error
+            try:
+                message = await self.connection.request(
+                    subject, payload.model_dump_json().encode(self.ENCODING), timeout=deadline_s, headers=headers
+                )
+            except NoRespondersError as error:
+                self._fail(span, type(error).__name__)
+                self.logger.error("Nobody answers %s.", subject)
+                raise SENatsNoResponderError(f"Invalid subject: {subject!r}. Nobody answers it.") from error
+            except NatsTimeoutError as error:
+                self._fail(span, type(error).__name__)
+                self.logger.error("The request to %s exceeded its deadline of %s s.", subject, deadline_s)
+                raise SENatsRequestDeadlineExceededError(
+                    f"The request to {subject!r} had no reply within {deadline_s} s."
+                ) from error
+            except NatsError as error:
+                self._fail(span, type(error).__name__)
+                self.logger.error("The request to %s failed: %s.", subject, type(error).__name__)
+                raise SENatsRequestFailedError(
+                    f"The request to {subject!r} failed with {type(error).__name__}."
+                ) from error
+            if message.headers and NatsHeaders.ERROR in message.headers:
+                error_class = message.headers[NatsHeaders.ERROR]
+                self._fail(span, error_class)
+                self.logger.error("The responder of %s failed with %s.", subject, error_class)
+                raise SENatsRequestFailedError(f"The responder of {subject!r} failed with {error_class}.")
+            try:
+                reply = reply_type.model_validate_json(message.data.decode(self.ENCODING))
+            except (ValidationError, UnicodeDecodeError) as error:
+                self._fail(span, type(error).__name__)
+                self.logger.error("The reply of %s is not a %s.", subject, reply_type.__name__)
+                raise SENatsReplyInvalidError(
+                    f"Invalid reply: from {subject!r}. Must be a {reply_type.__name__}."
+                ) from error
         self.logger.info("Received the reply of %s.", subject)
         return reply

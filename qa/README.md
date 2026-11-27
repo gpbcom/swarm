@@ -11,6 +11,7 @@ test what ships.
 | [e2e/src/define-visual-config.ts](e2e/src/define-visual-config.ts) | `defineVisualConfig`, the configuration of the visual tests: a light and a dark project, the screen size from the tokens, and the screens stored in `docs/specs/screens` |
 | [e2e/src/compose-up.ts](e2e/src/compose-up.ts) | Starts the compose service of a front end's tests, from `infra/compose/e2e.yaml`, before they run |
 | [e2e/src/compose-down.ts](e2e/src/compose-down.ts) | Stops that compose service once the tests are done |
+| [e2e/src/browser-server.ts](e2e/src/browser-server.ts) | Starts and stops the browser server of the pinned Playwright image, in which every visual test renders |
 | [e2e/test/](e2e/test/) | The unit tests of the configuration, run with Node's test runner |
 
 `defineE2eConfig` refuses to run without `SWARM_IMAGE_TAG`, the tag of the images under test, and refuses a
@@ -52,6 +53,13 @@ string name into `-`.
 
 A front end's Playwright set-up starts its own compose service, named by `composeService`, through `compose-up.ts`,
 and stops it through `compose-down.ts`. The tests therefore run against the real image, never a development server.
+
+Every visual test renders in the same browser, wherever it runs: `compose-up.ts` also starts the browser server of the
+official image `mcr.microsoft.com/playwright:v<version>-noble`, where `<version>` is the `@playwright/test` version of
+`qa/e2e/package.json`, on the host network and listening on `ws://127.0.0.1:8190/`, and both projects connect to it.
+Its Chromium and its fonts are the same on a laptop and in CI, so a screen captured on any machine has the pixels CI
+compares it with. A browser installed on the machine would render text with that machine's fonts and miss the 2 %
+tolerance in CI. Docker must run, and the first run pulls the image.
 
 Build the image of the Back office, then run its tests against it from the repository root:
 
