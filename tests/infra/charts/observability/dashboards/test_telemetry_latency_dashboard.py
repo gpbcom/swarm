@@ -10,7 +10,7 @@ from pydantic import JsonValue
 
 
 class TestTelemetryLatencyDashboard:
-    ROOT: ClassVar[Path] = Path(__file__).resolve().parents[4]
+    ROOT: ClassVar[Path] = Path(__file__).resolve().parents[5]
     DASHBOARD: ClassVar[Path] = ROOT / "infra" / "charts" / "observability" / "dashboards" / "telemetry-latency.json"
     ENCODING: ClassVar[str] = "utf-8"
     UID: ClassVar[str] = "swarm-telemetry-latency"
