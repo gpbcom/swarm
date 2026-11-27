@@ -75,6 +75,15 @@ this page keeps what happened, so that each problem is closed once and never met
 | [L-49](#l-49) | 2026-11-27 | The group report counted a fixed task twice, and showed 32/23 tasks | 🟢 Closed |
 | [L-50](#l-50) | 2026-11-27 | The verifier ran checks.py with the 2-minute default, then waited 10 minutes for a finished run | 🟢 Closed |
 | [L-51](#l-51) | 2026-11-27 | Two tickets running at once both needed pnpm-lock.yaml, and neither could pass its checks | 🟢 Closed |
+| [L-52](#l-52) | 2026-11-27 | The git guard refused every commit and merge the person asked for while a ticket was open | 🔴 Open |
+| [L-53](#l-53) | 2026-11-27 | The ticket checks never ran the PostgreSQL tests or the image e2e, so CI found the failures | 🔴 Open |
+| [L-54](#l-54) | 2026-11-27 | The shared branch ran an older harness than develop, and the start rule let a ticket clash on the lock file | 🔴 Open |
+| [L-55](#l-55) | 2026-11-27 | The git guard refused the read-only `git merge-base` as a merge | 🔴 Open |
+| [L-56](#l-56) | 2026-11-27 | The group report kept a stopped ticket as running | 🔴 Open |
+| [L-57](#l-57) | 2026-11-27 | A task needed files no task owned, and the run stopped only after a wasted retry | 🔴 Open |
+| [L-58](#l-58) | 2026-11-27 | A fixer of the verify rounds reported the file to fix, and nothing sent it to its owner | 🔴 Open |
+| [L-59](#l-59) | 2026-11-27 | A pytest failure was named after the folder `tests` with a warning for detail, so it had no owner | 🔴 Open |
+| [L-60](#l-60) | 2026-11-27 | The five-files rule counted only committed files, so a ticket's new files passed its checks and failed CI | 🔴 Open |
 
 ## <a id="lessons"></a>📋 Lessons
 
@@ -958,6 +967,123 @@ this page keeps what happened, so that each problem is closed once and never met
   settings' environment leaves the lock file alone).
 - **Rule:** [TKT-16](../../.claude/rules/tickets.md#tkt-16) (the shared file lock, no pnpm script installs) and
   [TKT-3](../../.claude/rules/tickets.md#tkt-3) (a task that changes a manifest owns its lock file).
+
+### <a id="l-52"></a>L-52: The git guard refused every commit and merge the person asked for while a ticket was open
+
+- **Seen:** the image fix of #409 and the merge of #410, 2026-11-27.
+- **What happened:** the person asked Claude to commit a fix and to merge #410. `.claude/hooks/guard_git.py` refused
+  `git commit` and `gh pr merge` on `feature/tickets`, even run from `/tmp`, so the person typed each command by hand.
+- **Cause:** the guard knows only one writer on the shared branch, `ticket_tree.py finish`; it has no way to tell a
+  fix the person asked for from an agent stepping outside TKT-5.
+- **Also:** 2026-11-27 17:00, `gh pr merge 409` was refused at the person's word with no ticket open at all: the guard
+  reads the branch `feature/tickets`, not the open tickets, so the last merge of a group always needs the person.
+- **Fix:** to do, with a test in `tests/harness/gitflow/`: the guard answers `ask` (the person confirms in the
+  dialog) instead of refusing, for the main session only, never for a worker.
+- **Rule:** [TKT-5](../../.claude/rules/tickets.md#tkt-5) and [TKT-15](../../.claude/rules/tickets.md#tkt-15).
+
+### <a id="l-53"></a>L-53: The ticket checks never ran the PostgreSQL tests or the image e2e, so CI found the failures
+
+- **Seen:** T0.16 and T0.19 in #409, 2026-11-27.
+- **What happened:** the verifier passed both tickets, then CI failed on `test_schema_service.py` (the gateway's
+  revision was hard-coded as `0001` while T0.16 added `0002`) and on Ground control's Playwright run against its
+  image (the map did not render in the built image).
+- **Cause:** `checks.py` runs pytest only on the changed tests, where the PostgreSQL tests skip without the binaries,
+  and never builds the images nor runs `infra/compose/e2e.yaml`.
+- **Fix:** to do, with a test in `tests/harness/checks/`: a ticket that changes migrations runs every test of their
+  app, the PostgreSQL ones reported `environment` when the binaries are missing; a ticket that changes a front end
+  builds its image and runs its e2e.
+- **Also:** T0.20 in #409, 2026-11-27. The UC-029 screens, captured with this machine's Chromium, differed by 3 to 5 % in CI (`images / e2e`). Fixed at the person's word: every visual test and every capture renders in the browser server of the pinned image `mcr.microsoft.com/playwright:v<version>-noble` ([`browser-server.ts`](../../qa/e2e/src/browser-server.ts)), and the eight screens were recaptured in it. The ticket checks still never run the visual tests.
+- **Rule:** [TKT-6](../../.claude/rules/tickets.md#tkt-6) (done means every applicable check passed).
+
+### <a id="l-54"></a>L-54: The shared branch ran an older harness than develop, and the start rule let a ticket clash on the lock file
+
+- **Seen:** the group T0.16 T0.17 T0.19 T0.20, 2026-11-27, after #410 merged.
+- **What happened:** #410 added the shared-file lock of [L-51](#l-51) on `develop`, but `feature/tickets` was
+  branched before it, so the main checkout's `tickets.py` had no such lock. `tickets.py watch` printed
+  `▶️ CAN START T0.17` and `tickets.py check --ticket T0.17` exited 0, though T0.17's plan and the open T0.20 both own
+  `pnpm-lock.yaml`. T0.17 was held back by hand.
+- **Cause:** the harness runs from the checked-out branch, and the shared branch is never rebased while tickets are
+  open (TKT-5), so a harness fix reaches it only when every open ticket is merged.
+- **Fix:** to do, with a test in `tests/harness/tickets/`: the start rule and the workflows read the harness of
+  `origin/develop` when it is newer, or `ticket_tree.py prepare` refuses to start a ticket while `.claude/` on the
+  shared branch is behind `origin/develop`, and says so.
+- **Rule:** [TKT-16](../../.claude/rules/tickets.md#tkt-16) and [TKT-24](../../.claude/rules/tickets.md#tkt-24).
+
+### <a id="l-55"></a>L-55: The git guard refused the read-only `git merge-base` as a merge
+
+- **Seen:** 2026-11-27, checking whether #410 was on `feature/tickets`.
+- **What happened:** `git merge-base --is-ancestor` was refused as "`git merge` is not run by hand".
+- **Cause:** the pattern `WRITES` of [`guard_git.py`](../../.claude/hooks/guard_git.py) ends with `\b`, which matches
+  between `merge` and `-base`.
+- **Fix:** to do, with a test in `tests/harness/gitflow/`: end the verb with `(?![-\w])`, and test that
+  `git merge-base`, `git commit-tree` and `git stash list` (read-only) are not taken for writes.
+- **Rule:** [TKT-5](../../.claude/rules/tickets.md#tkt-5).
+
+### <a id="l-56"></a>L-56: The group report kept a stopped ticket as running
+
+- **Seen:** T0.20 (run `wf_5d5c1231-418`), 2026-11-27.
+- **What happened:** the run ended, stopped after three verification rounds, and `tickets.py watch` kept showing
+  `🔄 T0.20 · running` with `16/13 tasks`, with nothing telling the person it waited for them.
+- **Cause:** the state comes from the ticket being open in `.git/swarm/`, not from its last run; a stopped run
+  leaves no mark the report reads. The task count repeats [L-49](#l-49).
+- **Fix:** to do, with a test in `tests/harness/tickets/`: the run writes its end (stopped, why, next step) in
+  `.git/swarm/<ID>/state.json`, and the report shows `✋ stopped` with that reason.
+- **Rule:** [TKT-9](../../.claude/rules/tickets.md#tkt-9) and [TKT-17](../../.claude/rules/tickets.md#tkt-17).
+
+### <a id="l-57"></a>L-57: A task needed files no task owned, and the run stopped only after a wasted retry
+
+- **Seen:** T0.17 (run `wf_7d6c388f-e31`), 2026-11-27, wave 4.
+- **What happened:** K31 had to wire `traceSquadFrame` into the live Web Worker, but its `files` held only
+  `frontend/packages/live/src/tracing/frame_tracing.ts`, `index.ts` and `package.json`. It reported
+  `live-worker-core.ts` and the live `tsconfig.json` as blockers. The workflow logged "not sent, because no earlier
+  task owns them", retried K31 unchanged, and K31 was blocked again on the same files, so the run stopped.
+- **Cause:** the planner gave the task a brief wider than its files, and `check_plan.py` cannot see that. The
+  workflow treats a blocker no task owns like a missing file of a later wave, and retries.
+- **Fix:** to do, with a test in `tests/harness/`: a blocker in a file that no task of the plan owns stops the
+  run at once, without a retry, and names the plan change to approve (the file, the task that needs it). A wider
+  check of the planner's output could compare each brief's named paths with its `files`.
+- **Rule:** [TKT-3](../../.claude/rules/tickets.md#tkt-3), [TKT-11](../../.claude/rules/tickets.md#tkt-11) and
+  [TKT-19](../../.claude/rules/tickets.md#tkt-19).
+
+### <a id="l-58"></a>L-58: A fixer of the verify rounds reported the file to fix, and nothing sent it to its owner
+
+- **Seen:** T0.17 (run `wf_44762818-4a1`), 2026-11-27, verification rounds 1 and 2.
+- **What happened:** `test_cell_chart.py` failed because the new `infra/charts/cell/Chart.lock` has a digest that
+  does not match `Chart.yaml`, and `helm dependency update` refuses dependencies without a `version`. The failure was
+  sent to K13, the owner of the test. K13 reported `blocked` both times, naming `Chart.lock` and what to change, but
+  the file belongs to K37 and no fixer ever received it, so every round failed the same way.
+- **Cause:** `fixRound` in [`ticket-run.js`](../../.claude/workflows/ticket-run.js) integrates the fixers' hand-offs
+  but never reads their `blocked_by`. Only the waves send a blocked file back to its owner (TKT-19).
+- **Fix:** to do, with a test in `tests/harness/`: after a fix round, every `blocked_by` of a fixer goes to the
+  owner of that file, in the same round, before the next verification.
+- **Rule:** [TKT-6](../../.claude/rules/tickets.md#tkt-6) and [TKT-19](../../.claude/rules/tickets.md#tkt-19).
+
+### <a id="l-59"></a>L-59: A pytest failure was named after the folder `tests` with a warning for detail, so it had no owner
+
+- **Seen:** T0.17 (run `wf_cb1354f7-4ab`), 2026-11-27, verification.
+- **What happened:** one test failed out of 5,398, `tests/scripts/test_swarm_apps.py::TestSwarmApps::test_the_gateway_configuration_is_its_default`.
+  `checks.py` reported the failure with the file `tests` (the folder pytest was given) and, for detail, the first
+  lines of the output: a `PytestDeprecationWarning` of pytest-asyncio, truncated. No task owns `tests`, so the
+  workflow sent it to nobody and stopped after one round. The real failure was only in
+  `docs/tickets/T0.17/tests-evidences/pytest.txt`.
+- **Cause:** the failure parser of `checks.py` falls back to the target it ran when it finds no `FAILED <file>::`
+  line in the part of the output it keeps, and it keeps the head of the output instead of its summary.
+- **Fix:** to do, with a test in `tests/harness/checks/`: read the `FAILED` and `ERROR` lines of pytest's short
+  summary wherever they are, name each failing test's file, and drop warning lines from the detail.
+- **Rule:** [TKT-6](../../.claude/rules/tickets.md#tkt-6) (each failure names the file the tool reports it in).
+
+### <a id="l-60"></a>L-60: The five-files rule counted only committed files, so a ticket's new files passed its checks and failed CI
+
+- **Seen:** T0.17 in #409 (`6d05264`), 2026-11-27, `python / repository`.
+- **What happened:** T0.17 added five chart tests to `tests/infra/charts/observability/`, which already held T0.19's
+  `test_telemetry_latency_dashboard.py`: six code files. Its checks passed, and CI failed
+  `test_no_folder_of_the_repository_holds_more_than_five_code_files`.
+- **Cause:** the rule lists the files git tracks. In the clean tree of `checks.py` a ticket's own files are copied in,
+  not committed, so the rule never sees them. Every check built on `git ls-files` is blind to the ticket under test.
+- **Fix:** to do, with a test in `tests/conventions/repository/`: the rule counts tracked and untracked files that
+  are not ignored (`git ls-files --cached --others --exclude-standard`), or `checks.py` stages the own files in its
+  clean tree before the checks run. The folder was fixed by moving the dashboard test into `dashboards/`.
+- **Rule:** [TKT-6](../../.claude/rules/tickets.md#tkt-6) and AGENT.md, File shape.
 
 ## <a id="already-ruled"></a>📜 Lessons already turned into rules
 
