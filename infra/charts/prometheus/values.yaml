@@ -1,0 +1,15 @@
+image:
+  repository: prom/prometheus
+  tag: "v3.5.0"
+  pullPolicy: IfNotPresent
+port: 9090
+retention: 15d
+scrapeInterval: 15s
+persistence:
+  size: 10Gi
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    memory: 1Gi

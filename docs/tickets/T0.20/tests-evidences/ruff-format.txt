@@ -1,0 +1,5 @@
+$ uv run ruff format --check tests/ci/e2e/test_compose_e2e.py tests/ci/images/test_images_workflow.py tests/conventions/mono_repo/frontend/test_frontend_e2e.py tests/harness/write_specs/helpers.py tests/harness/write_specs/test_palettise.py tests/infra/images/test_back_office_image.py
+(cwd ., on the ticket's own files only)
+
+6 files already formatted
+warning: `VIRTUAL_ENV=/home/guillaume/Documents/Projects/PoC/swarm/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead

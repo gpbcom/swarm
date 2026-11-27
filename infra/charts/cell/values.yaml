@@ -13,3 +13,13 @@ nats:
   enabled: true
 simulator:
   enabled: false
+otelCollector:
+  enabled: true
+prometheus:
+  enabled: true
+loki:
+  enabled: true
+tempo:
+  enabled: true
+grafana:
+  enabled: true

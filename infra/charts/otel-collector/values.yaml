@@ -1,0 +1,33 @@
+image:
+  repository: otel/opentelemetry-collector-contrib
+  tag: "0.128.0"
+  pullPolicy: IfNotPresent
+cell: local
+sampling:
+  slowThresholdMs: 250
+  percentage: 5
+redactedKeys:
+  - authorization
+  - cookie
+  - password
+  - token
+  - secret
+  - email
+cors:
+  allowedOrigins: []
+exporters:
+  tempo:
+    endpoint: tempo:4317
+  prometheus:
+    endpoint: http://prometheus:9090/api/v1/write
+  loki:
+    endpoint: http://loki:3100/otlp
+ports:
+  grpc: 4317
+  http: 4318
+resources:
+  requests:
+    cpu: 50m
+    memory: 128Mi
+  limits:
+    memory: 512Mi

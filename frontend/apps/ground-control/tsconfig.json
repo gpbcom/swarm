@@ -19,7 +19,9 @@
   "include": [
     "eslint.config.js",
     "vite.config.ts",
+    "playwright.config.ts",
     "src",
-    "test"
+    "test",
+    "e2e"
   ]
 }

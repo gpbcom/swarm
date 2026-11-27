@@ -11,6 +11,9 @@ workspace = true
 [dependencies]
 mavlink = { version = "=0.21.0", default-features = false, features = ["std", "dialect-common", "transport-udp", "mav2-message-extensions"] }
 
+opentelemetry = { version = "=0.33.1", default-features = false, features = ["trace", "metrics"] }
+swarm-observability = { path = "../swarm-observability" }
+
 [dev-dependencies]
 criterion.workspace = true
 

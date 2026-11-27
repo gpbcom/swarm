@@ -4,7 +4,11 @@ from __future__ import annotations
 import asyncio
 from logging import Logger, getLogger
 from time import monotonic, time_ns
-from typing import ClassVar, Optional
+from typing import ClassVar, Dict, Optional
+
+# Third-party imports
+from opentelemetry import baggage, metrics, trace
+from opentelemetry.context import Context, attach, detach
 
 # First-party imports
 from swarm_clients.flight.leaf.frame_sink import FrameSink
@@ -18,6 +22,7 @@ from swarm_models.live.live_subscription import LiveSubscription
 from swarm_service.flight.missions.squad_frame_builder import SquadFrameBuilder
 from swarm_service.shared.live.hub.live_hub import LiveHub
 from swarm_service.shared.live.live_codec import LiveCodec
+from swarm_web.models.enums import SignalAttribute
 
 
 class MissionActor(AsyncRunnable):
@@ -34,6 +39,12 @@ class MissionActor(AsyncRunnable):
         ticks (int): How many ticks the actor has run.
         logger (Logger): Logger instance.
         NS_PER_US (int): The nanoseconds in a microsecond.
+        TICK_SPAN (str): The name of the span of a tick.
+        FRAMES_METRIC (str): The counter of the SquadFrames built.
+        TICK_DURATION_METRIC (str): The histogram of the tick durations, in milliseconds.
+        MS_UNIT (str): The unit of the tick duration.
+        frames_counter (Counter): Counts the SquadFrames.
+        tick_duration (Histogram): Records the duration of a tick.
         MS_PER_S (float): The milliseconds in a second.
 
     Notes:
@@ -48,6 +59,10 @@ class MissionActor(AsyncRunnable):
 
     NS_PER_US: ClassVar[int] = 1000
     MS_PER_S: ClassVar[float] = 1000.0
+    TICK_SPAN: ClassVar[str] = "swarm.tick"
+    FRAMES_METRIC: ClassVar[str] = "swarm.squad_frames"
+    TICK_DURATION_METRIC: ClassVar[str] = "swarm.tick.duration"
+    MS_UNIT: ClassVar[str] = "ms"
 
     def __init__(
         self,
@@ -82,13 +97,42 @@ class MissionActor(AsyncRunnable):
         self.hub = hub
         self.codec = codec
         self.ticks = 0
+        meter = metrics.get_meter(__name__)
+        self.frames_counter = meter.create_counter(self.FRAMES_METRIC)
+        self.tick_duration = meter.create_histogram(self.TICK_DURATION_METRIC, unit=self.MS_UNIT)
 
     ############################
     # Internal Helpers Methods #
     ############################
 
     async def _tick(self) -> None:
-        """Run one tick: snapshot, build, encode, publish to the hub, then to the sink."""
+        """Run one tick inside a new root span, then count it and record its duration."""
+        operator = str(self.mission.operator_id)
+        mission = str(self.mission.mission_id)
+        context = baggage.set_baggage(SignalAttribute.OPERATOR_ID.value, operator, Context())
+        context = baggage.set_baggage(SignalAttribute.MISSION_ID.value, mission, context)
+        attributes: Dict[str, str] = {
+            SignalAttribute.OPERATOR_ID.value: operator,
+            SignalAttribute.MISSION_ID.value: mission,
+        }
+        started = monotonic()
+        token = attach(context)
+        try:
+            with trace.get_tracer(__name__).start_as_current_span(
+                self.TICK_SPAN, context=context, attributes=attributes
+            ):
+                await self._publish()
+        except asyncio.CancelledError:
+            self.logger.debug("Cancelled the tick of Mission %s.", self.mission.mission_id)
+            raise
+        finally:
+            detach(token)
+        self.frames_counter.add(1, attributes)
+        self.tick_duration.record((monotonic() - started) * self.MS_PER_S, attributes)
+        self.logger.debug("Traced tick %d of Mission %s.", self.ticks, self.mission.mission_id)
+
+    async def _publish(self) -> None:
+        """Snapshot, build, encode, publish to the hub, then to the sink."""
         now_us = time_ns() // self.NS_PER_US
         frame = self.builder.build(self.source.snapshot(), now_us)
         data = self.codec.encode_squad_frame(frame)

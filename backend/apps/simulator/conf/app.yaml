@@ -6,6 +6,13 @@
 #   responder.subject: op.<operator_id>.mission.*.command
 operator_id: null
 flight_log_path: data/flight_log.sqlite3
+signals:
+  enabled: false
+  endpoint: http://otel-collector:4318
+  service_name: swarm-simulator
+  cell: local
+  metrics_interval_s: 60.0
+  redactions_path: null
 rest:
   host: 0.0.0.0
   port: 8000

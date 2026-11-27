@@ -4,10 +4,13 @@ from __future__ import annotations
 import asyncio
 import logging
 from contextlib import suppress
-from typing import Callable, ClassVar, List
+from typing import Callable, ClassVar, List, Optional, Set, Tuple
+from uuid import UUID
 
 # Third-party imports
 import pytest
+from opentelemetry import baggage, trace
+from opentelemetry.sdk.trace import ReadableSpan
 
 # First-party imports
 from swarm_lifecycle.models.enums import RunnableStatus
@@ -21,6 +24,7 @@ from swarm_service.flight.missions.mission_actor import MissionActor
 from swarm_service.flight.missions.squad_frame_builder import SquadFrameBuilder
 from swarm_service.shared.live.hub.live_hub import LiveHub
 from swarm_service.shared.live.live_codec import LiveCodec
+from tests.fakes.signals.recorded_signals import RecordedSignals
 from tests.swarm_service.flight.flight_engine_recording_sink import RecordingFrameSink
 from tests.swarm_service.flight.flight_engine_stand_in_source import StandInSampleSource
 
@@ -31,6 +35,12 @@ class TestMissionActor:
     MAX_TICKS: ClassVar[int] = 12
     SLOW_SINK_S: ClassVar[float] = 0.2
     TEN_DRONES: ClassVar[int] = 10
+    OPERATOR_KEY: ClassVar[str] = "operator_id"
+    MISSION_KEY: ClassVar[str] = "mission_id"
+    FORBIDDEN_KEYS: ClassVar[Set[str]] = {"drone_id", "latitude", "longitude", "lat", "lon", "lat_e7", "lon_e7"}
+
+    def setup_method(self) -> None:
+        self.contexts: List[Tuple[Optional[str], Optional[str], int]] = []
 
     def actor(
         self,
@@ -206,3 +216,154 @@ class TestMissionActor:
         actor = self.actor(flight_engine_config, mission, states, stand_in_source, recording_sink, hub, codec)
         await self.run_for(actor, self.RUN_S)
         assert stand_in_source.closed
+
+    async def capture_publish(self, sink: RecordingFrameSink, operator_id: UUID, mission_id: UUID, data: bytes) -> None:
+        operator = baggage.get_baggage(self.OPERATOR_KEY)
+        mission = baggage.get_baggage(self.MISSION_KEY)
+        self.contexts.append(
+            (
+                None if operator is None else str(operator),
+                None if mission is None else str(mission),
+                trace.get_current_span().get_span_context().span_id,
+            )
+        )
+        await RecordingFrameSink.publish(sink, operator_id, mission_id, data)
+
+    def root_spans(self, recorded_signals: RecordedSignals) -> List[ReadableSpan]:
+        return [span for span in recorded_signals.spans() if span.parent is None]
+
+    async def traced_run(
+        self,
+        config: FlightEngineConfig,
+        mission: MissionEntry,
+        states: DroneStateCatalog,
+        source: StandInSampleSource,
+        sink: RecordingFrameSink,
+        hub: LiveHub,
+        codec: LiveCodec,
+        sample: DroneSample,
+    ) -> MissionActor:
+        source.samples = [sample]
+        actor = self.actor(config, mission, states, source, sink, hub, codec)
+        await self.run_for(actor, self.RUN_S)
+        return actor
+
+    async def test_each_tick_produces_one_root_span_with_the_operator_and_the_mission(
+        self,
+        flight_engine_config: FlightEngineConfig,
+        mission: MissionEntry,
+        states: DroneStateCatalog,
+        stand_in_source: StandInSampleSource,
+        recording_sink: RecordingFrameSink,
+        hub: LiveHub,
+        codec: LiveCodec,
+        sample_factory: Callable[..., DroneSample],
+        recorded_signals: RecordedSignals,
+    ) -> None:
+        actor = await self.traced_run(
+            flight_engine_config,
+            mission,
+            states,
+            stand_in_source,
+            recording_sink,
+            hub,
+            codec,
+            sample_factory(system_id=1),
+        )
+        roots = self.root_spans(recorded_signals)
+        assert len(roots) == actor.ticks
+        for span in roots:
+            assert span.attributes is not None
+            assert span.attributes[self.OPERATOR_KEY] == str(mission.operator_id)
+            assert span.attributes[self.MISSION_KEY] == str(mission.mission_id)
+
+    async def test_the_sink_is_called_inside_the_tick_span_with_the_baggage_of_the_mission(
+        self,
+        flight_engine_config: FlightEngineConfig,
+        mission: MissionEntry,
+        states: DroneStateCatalog,
+        stand_in_source: StandInSampleSource,
+        recording_sink: RecordingFrameSink,
+        hub: LiveHub,
+        codec: LiveCodec,
+        sample_factory: Callable[..., DroneSample],
+        recorded_signals: RecordedSignals,
+    ) -> None:
+        recording_sink.publish = lambda *args: self.capture_publish(recording_sink, *args)
+        await self.traced_run(
+            flight_engine_config,
+            mission,
+            states,
+            stand_in_source,
+            recording_sink,
+            hub,
+            codec,
+            sample_factory(system_id=1),
+        )
+        root_ids = {span.context.span_id for span in self.root_spans(recorded_signals)}
+        assert self.contexts
+        for operator, mission_id, span_id in self.contexts:
+            assert operator == str(mission.operator_id)
+            assert mission_id == str(mission.mission_id)
+            assert span_id in root_ids
+
+    async def test_no_span_or_metric_attribute_is_a_drone_or_a_position(
+        self,
+        flight_engine_config: FlightEngineConfig,
+        mission: MissionEntry,
+        states: DroneStateCatalog,
+        stand_in_source: StandInSampleSource,
+        recording_sink: RecordingFrameSink,
+        hub: LiveHub,
+        codec: LiveCodec,
+        sample_factory: Callable[..., DroneSample],
+        recorded_signals: RecordedSignals,
+    ) -> None:
+        await self.traced_run(
+            flight_engine_config,
+            mission,
+            states,
+            stand_in_source,
+            recording_sink,
+            hub,
+            codec,
+            sample_factory(system_id=1),
+        )
+        keys: Set[str] = set()
+        for span in recorded_signals.spans():
+            keys |= set(span.attributes or {})
+        for name in (MissionActor.FRAMES_METRIC, MissionActor.TICK_DURATION_METRIC):
+            for point in recorded_signals.metric_points(name):
+                keys |= set(point.attributes)
+        assert keys
+        assert keys.isdisjoint(self.FORBIDDEN_KEYS)
+
+    async def test_the_tick_metrics_carry_the_operator_and_the_mission_only(
+        self,
+        flight_engine_config: FlightEngineConfig,
+        mission: MissionEntry,
+        states: DroneStateCatalog,
+        stand_in_source: StandInSampleSource,
+        recording_sink: RecordingFrameSink,
+        hub: LiveHub,
+        codec: LiveCodec,
+        sample_factory: Callable[..., DroneSample],
+        recorded_signals: RecordedSignals,
+    ) -> None:
+        actor = await self.traced_run(
+            flight_engine_config,
+            mission,
+            states,
+            stand_in_source,
+            recording_sink,
+            hub,
+            codec,
+            sample_factory(system_id=1),
+        )
+        frames = recorded_signals.metric_points(MissionActor.FRAMES_METRIC)
+        durations = recorded_signals.metric_points(MissionActor.TICK_DURATION_METRIC)
+        assert sum(point.value for point in frames) == actor.ticks
+        assert sum(point.count for point in durations) == actor.ticks
+        expected = {self.OPERATOR_KEY: str(mission.operator_id), self.MISSION_KEY: str(mission.mission_id)}
+        for point in [*frames, *durations]:
+            assert dict(point.attributes) == expected

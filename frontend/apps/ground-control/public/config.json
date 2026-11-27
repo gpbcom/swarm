@@ -1,0 +1,9 @@
+{
+  "liveUrl": "ws://127.0.0.1:8080/v1/live",
+  "missionId": null,
+  "tilesUrl": "tiles/basemap.pmtiles",
+  "metricsUrl": null,
+  "metricsIntervalS": 60,
+  "cell": null,
+  "livePath": "edge"
+}

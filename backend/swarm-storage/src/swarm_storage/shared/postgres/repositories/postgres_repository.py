@@ -4,7 +4,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from datetime import datetime
 from logging import Logger, getLogger
-from typing import ClassVar, Dict, List, Optional, Union
+from typing import ClassVar, Dict, List, Mapping, Optional, Union
 from uuid import UUID
 
 # Third-party imports
@@ -104,14 +104,14 @@ class PostgresRepository[ModelT: BaseModel](ABC):
     ############################
 
     @abstractmethod
-    def to_values(self, model: ModelT) -> Dict[str, Union[str, int, UUID, datetime]]:
+    def to_values(self, model: ModelT) -> Mapping[str, Union[str, int, UUID, datetime, List[str]]]:
         """Map a model to the columns it writes, the identifier first.
 
         Args:
             model (ModelT): The model.
 
         Returns:
-            Dict[str, Union[str, int, UUID, datetime]]: Column names and values, without the version.
+            Mapping[str, Union[str, int, UUID, datetime, List[str]]]: Column names and values, without the version.
         """
 
     @abstractmethod
@@ -252,7 +252,7 @@ class PostgresRepository[ModelT: BaseModel](ABC):
             SEStorageVersionConflictError: If the row changed, or is not visible to the Operator.
             SEStorageOperatorRefusedError: If the policy refuses the new row.
         """
-        values = self.to_values(model)
+        values = dict(self.to_values(model))
         security = RowLevelSecurity()
         identifier = values.pop(self.ID_COLUMN)
         assignments = [

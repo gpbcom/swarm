@@ -19,6 +19,9 @@ class TestImagesWorkflow:
     OIDC_ISSUER: ClassVar[str] = "https://token.actions.githubusercontent.com"
     UNTRUSTED_EXPRESSIONS: ClassVar[List[str]] = ["${{ github.event", "${{ inputs.", "${{ matrix."]
     PINNED_REFERENCE: ClassVar[re.Pattern[str]] = re.compile(r"@(v\d|[0-9a-f]{40}$)")
+    FRONT_END_E2E_RUN: ClassVar[str] = 'pnpm --filter "./frontend/apps/*" --if-present run e2e'
+    FRONT_END_REPORTS_NAME: ClassVar[str] = "frontend-playwright-reports"
+    FRONT_END_REPORTS_PATH: ClassVar[str] = "frontend/apps/*/playwright-report/"
     TEXT_KEYS: ClassVar[List[str]] = ["uses", "with", "run", "env", "if"]
 
     def workflow(self) -> Dict[Union[str, bool], JsonValue]:
@@ -70,6 +73,10 @@ class TestImagesWorkflow:
         value = step.get("with", {})
         assert isinstance(value, dict)
         return value
+
+    def is_compose_down(self, step: Dict[str, JsonValue]) -> bool:
+        run = str(step.get("run", ""))
+        return "docker compose" in run and "down" in run
 
     def test_it_is_a_reusable_workflow_only(self) -> None:
         assert list(self.trigger()) == ["workflow_call"]
@@ -202,6 +209,43 @@ class TestImagesWorkflow:
     def test_e2e_runs_playwright_through_pnpm(self) -> None:
         runs = [run for run in self.runs("e2e") if "pnpm" in run and "./qa/e2e" in run]
         assert any("e2e" in run.split("./qa/e2e")[1] for run in runs)
+
+    def test_e2e_runs_the_front_end_e2e_scripts_after_the_shared_suite(self) -> None:
+        shared = self.index_where(
+            "e2e", lambda step: "pnpm" in str(step.get("run", "")) and "./qa/e2e" in str(step.get("run", ""))
+        )
+        self.index_where(
+            "e2e",
+            lambda step: all(word in str(step.get("run", "")) for word in ["pnpm", "./frontend/apps/", "e2e"]),
+            after=shared,
+        )
+
+    @pytest.mark.parametrize("path", ["qa/e2e/playwright-report/", "frontend/apps/*/playwright-report/"])
+    def test_e2e_uploads_the_reports_of_the_shared_suite_and_the_front_ends(self, path: str) -> None:
+        uploads = [
+            step for step in self.steps("e2e") if str(step.get("uses", "")).startswith("actions/upload-artifact")
+        ]
+        assert any(path in str(self.with_of(upload)["path"]) for upload in uploads)
+
+    def test_e2e_runs_the_front_ends_visual_tests(self) -> None:
+        shared = self.index_where(
+            "e2e", lambda step: "pnpm" in str(step.get("run", "")) and "./qa/e2e" in str(step.get("run", ""))
+        )
+        visual = self.index_where(
+            "e2e", lambda step: str(step.get("run", "")).strip() == self.FRONT_END_E2E_RUN, after=shared
+        )
+        self.index_where("e2e", lambda step: self.is_compose_down(step), after=visual)
+
+    def test_e2e_uploads_the_front_end_reports_on_failure(self) -> None:
+        uploads = [
+            step
+            for step in self.steps("e2e")
+            if str(step.get("uses", "")).startswith("actions/upload-artifact")
+            and self.with_of(step).get("name") == self.FRONT_END_REPORTS_NAME
+        ]
+        assert uploads
+        assert "failure()" in str(uploads[0]["if"])
+        assert self.with_of(uploads[0])["path"] == self.FRONT_END_REPORTS_PATH
 
     def test_e2e_uploads_the_report_on_failure(self) -> None:
         upload = self.uses_step("e2e", "actions/upload-artifact")

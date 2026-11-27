@@ -163,6 +163,16 @@
     "kind": "script",
     "path": ".claude/scripts/tickets/checks.py",
     "what": "front-end tickets capture their screens as screenshots (TKT-21)"
+   },
+   {
+    "kind": "test",
+    "path": "frontend/apps/back-office/e2e/create-an-operator.spec.ts",
+    "what": "the Back office's screens are compared with their PNGs in light and dark mode"
+   },
+   {
+    "kind": "ci",
+    "path": ".github/workflows/images.yml",
+    "what": "the e2e job runs the front ends' visual tests against the real images"
    }
   ],
   "SPEC-13": [
@@ -175,6 +185,11 @@
     "kind": "ci",
     "path": ".github/workflows/specs.yml",
     "what": "CI runs specs.py check on every change of the specifications"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/write_specs/test_palettise.py",
+    "what": "screenshots are turned into 256-colour palette PNGs"
    }
   ],
   "TKT-1": [

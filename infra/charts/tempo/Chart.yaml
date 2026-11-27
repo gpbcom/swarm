@@ -1,0 +1,6 @@
+apiVersion: v2
+name: tempo
+description: The Tempo of one cell, a single binary that keeps traces for 14 days.
+type: application
+version: 0.1.0
+appVersion: "2.8.2"

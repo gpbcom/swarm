@@ -5,3 +5,15 @@ services:
     image: ${SWARM_IMAGE_REGISTRY:-ghcr.io/gpbcom/swarm}/gateway:${SWARM_IMAGE_TAG:?SWARM_IMAGE_TAG names the images of a pipeline run}
     pull_policy: missing
     restart: "no"
+  ground-control:
+    image: ${SWARM_IMAGE_REGISTRY:-ghcr.io/gpbcom/swarm}/ground-control:${SWARM_IMAGE_TAG:?SWARM_IMAGE_TAG names the images of a pipeline run}
+    pull_policy: missing
+    restart: "no"
+    ports:
+      - "8180:8080"
+  back-office:
+    image: ${SWARM_IMAGE_REGISTRY:-ghcr.io/gpbcom/swarm}/back-office:${SWARM_IMAGE_TAG:?SWARM_IMAGE_TAG names the images of a pipeline run}
+    pull_policy: missing
+    restart: "no"
+    ports:
+      - "127.0.0.1:8181:8080"

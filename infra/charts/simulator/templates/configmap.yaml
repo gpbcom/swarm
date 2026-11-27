@@ -26,3 +26,8 @@ data:
         - px4-sitl
         - 127.0.0.1
         - localhost
+    signals:
+      enabled: {{ .Values.signals.enabled }}
+      endpoint: {{ .Values.signals.endpoint | quote }}
+      service_name: swarm-simulator
+      cell: {{ .Values.signals.cell | quote }}

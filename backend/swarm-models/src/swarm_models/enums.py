@@ -244,3 +244,74 @@ class MessageProblem(StrEnum):
     MISSING = "missing"
     EMPTY = "empty"
     FUZZY = "fuzzy"
+
+
+@unique
+class Deployment(StrEnum):
+    """Where an Operator's Swarm runs.
+
+    Attributes:
+        CLOUD: The Swarm runs in a cloud cell.
+        ON_PREMISES: The Swarm runs on the Operator's own premises.
+    """
+
+    CLOUD = "cloud"
+    ON_PREMISES = "on_premises"
+
+
+@unique
+class Jurisdiction(StrEnum):
+    """A regulatory jurisdiction an Operator flies under.
+
+    Attributes:
+        EU_EASA: The European Union, under EASA rules.
+        US_FAA: The United States, under FAA rules.
+    """
+
+    EU_EASA = "eu_easa"
+    US_FAA = "us_faa"
+
+
+@unique
+class LlmProvider(StrEnum):
+    """The kind of language model the AI agents of an Operator use.
+
+    Attributes:
+        CLAUDE: The Claude models.
+        OPEN_WEIGHT: An open-weight model run by the Operator.
+    """
+
+    CLAUDE = "claude"
+    OPEN_WEIGHT = "open_weight"
+
+
+@unique
+class Anchoring(StrEnum):
+    """How the Evidence records of an Operator are anchored in time.
+
+    Attributes:
+        QUALIFIED_TIMESTAMPING: A qualified timestamping authority seals the records.
+        PUBLIC_BLOCKCHAIN: A public blockchain seals the records.
+        NONE: The records are not anchored.
+    """
+
+    QUALIFIED_TIMESTAMPING = "qualified_timestamping"
+    PUBLIC_BLOCKCHAIN = "public_blockchain"
+    NONE = "none"
+
+
+@unique
+class OperatorField(StrEnum):
+    """A field of the request that creates an Operator, named in a refusal.
+
+    Attributes:
+        NAME: The name of the Operator.
+        DEPLOYMENT: Where the Operator's Swarm runs.
+        JURISDICTIONS: The jurisdictions the Operator flies under.
+        FIRST_MISSION_PLANNER_EMAIL: The email address of the first Mission planner.
+    """
+
+    NAME = "name"
+    DEPLOYMENT = "deployment"
+    JURISDICTIONS = "jurisdictions"
+    FIRST_MISSION_PLANNER_EMAIL = "first_mission_planner_email"

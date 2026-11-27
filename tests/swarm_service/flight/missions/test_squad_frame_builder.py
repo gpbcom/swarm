@@ -6,6 +6,7 @@ from uuid import UUID
 
 # Third-party imports
 import pytest
+from opentelemetry import trace
 
 # First-party imports
 from swarm_models.flight.missions.mission_entry import MissionEntry
@@ -15,6 +16,7 @@ from swarm_models.telemetry.enums.drone_state import DroneState
 from swarm_models.telemetry.squad_frame import SquadFrame
 from swarm_models.telemetry.telemetry_frame import TelemetryFrame
 from swarm_service.flight.missions.squad_frame_builder import SquadFrameBuilder
+from tests.fakes.signals.recorded_signals import RecordedSignals
 
 
 class TestSquadFrameBuilder:
@@ -22,6 +24,8 @@ class TestSquadFrameBuilder:
     NOW_US: ClassVar[int] = 2_000_000
     TEN_DRONES: ClassVar[int] = 10
     UNKNOWN_SYSTEM_ID: ClassVar[int] = 200
+    TRACEPARENT_TEMPLATE: ClassVar[str] = "00-{trace_id:032x}-{span_id:016x}-{flags:02x}"
+    SPAN_NAME: ClassVar[str] = "test.span"
 
     def builder(self, mission: MissionEntry, states: DroneStateCatalog) -> SquadFrameBuilder:
         return SquadFrameBuilder(mission, states, self.LINK_LOST_AFTER_MS)
@@ -183,3 +187,24 @@ class TestSquadFrameBuilder:
         squad = builder.build([sample_factory(system_id=1), sample_factory(system_id=2)], self.NOW_US)
         assert self.frame_of(squad, first).seq == 1
         assert self.frame_of(squad, second).seq == 0
+
+    def test_inside_a_span_the_squad_frame_carries_its_traceparent(
+        self,
+        mission: MissionEntry,
+        states: DroneStateCatalog,
+        sample_factory: Callable[..., DroneSample],
+        recorded_signals: RecordedSignals,
+    ) -> None:
+        with trace.get_tracer(__name__).start_as_current_span(self.SPAN_NAME) as span:
+            squad = self.builder(mission, states).build([sample_factory(system_id=1)], self.NOW_US)
+            context = span.get_span_context()
+        expected = self.TRACEPARENT_TEMPLATE.format(
+            trace_id=context.trace_id, span_id=context.span_id, flags=int(context.trace_flags)
+        )
+        assert squad.trace_parent == expected
+
+    def test_outside_any_span_the_squad_frame_has_no_traceparent(
+        self, mission: MissionEntry, states: DroneStateCatalog, sample_factory: Callable[..., DroneSample]
+    ) -> None:
+        squad = self.builder(mission, states).build([sample_factory(system_id=1)], self.NOW_US)
+        assert squad.trace_parent is None

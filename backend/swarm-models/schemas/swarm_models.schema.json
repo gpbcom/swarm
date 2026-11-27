@@ -52,6 +52,16 @@
       "title": "ActorKind",
       "type": "string"
     },
+    "Anchoring": {
+      "description": "How the Evidence records of an Operator are anchored in time.\n\nAttributes:\n    QUALIFIED_TIMESTAMPING: A qualified timestamping authority seals the records.\n    PUBLIC_BLOCKCHAIN: A public blockchain seals the records.\n    NONE: The records are not anchored.",
+      "enum": [
+        "qualified_timestamping",
+        "public_blockchain",
+        "none"
+      ],
+      "title": "Anchoring",
+      "type": "string"
+    },
     "CellAssignment": {
       "additionalProperties": false,
       "description": "The cell an operator belongs to, and since when.\n\nAttributes:\n    model_config (ConfigDict): Forbids unknown keys.\n    operator_id (UUID): The version 7 identifier of the operator.\n    cell (str): The name of the cell.\n    assigned_at (datetime): The moment of the assignment, in UTC.\n\nNotes:\n    - An operator lives in exactly one cell.\n    - No field has a default, so ``None`` is refused.",
@@ -157,6 +167,15 @@
       "title": "CommandLane",
       "type": "string"
     },
+    "Deployment": {
+      "description": "Where an Operator's Swarm runs.\n\nAttributes:\n    CLOUD: The Swarm runs in a cloud cell.\n    ON_PREMISES: The Swarm runs on the Operator's own premises.",
+      "enum": [
+        "cloud",
+        "on_premises"
+      ],
+      "title": "Deployment",
+      "type": "string"
+    },
     "DroneState": {
       "description": "The state of a Drone, with the names of the glossary.\n\nAttributes:\n    READY (str): The Drone is airworthy, charged and available for a Squad.\n    GROUNDED (str): The Drone may not fly.\n    AIRBORNE (str): The Drone is flying its part of a Mission.\n    RETURNING (str): The Drone is flying back to its take-off point or its Dock.\n    LANDED (str): The Drone is on the ground after a flight.\n    LOST (str): Ground control has no Link to the Drone, through any path.",
       "enum": [
@@ -242,6 +261,15 @@
       "type": "object"
     },
     "JsonValue": {},
+    "Jurisdiction": {
+      "description": "A regulatory jurisdiction an Operator flies under.\n\nAttributes:\n    EU_EASA: The European Union, under EASA rules.\n    US_FAA: The United States, under FAA rules.",
+      "enum": [
+        "eu_easa",
+        "us_faa"
+      ],
+      "title": "Jurisdiction",
+      "type": "string"
+    },
     "Language": {
       "description": "A language in which Swarm shows its screens.\n\nAttributes:\n    ENGLISH: English, the default language.\n    FRENCH: French.\n    GERMAN: German.\n    SPANISH: Spanish.",
       "enum": [
@@ -295,15 +323,46 @@
       "title": "LiveSubscription",
       "type": "object"
     },
+    "LlmProvider": {
+      "description": "The kind of language model the AI agents of an Operator use.\n\nAttributes:\n    CLAUDE: The Claude models.\n    OPEN_WEIGHT: An open-weight model run by the Operator.",
+      "enum": [
+        "claude",
+        "open_weight"
+      ],
+      "title": "LlmProvider",
+      "type": "string"
+    },
     "Operator": {
       "additionalProperties": false,
-      "description": "A person who pilots drones, global to every cell.\n\nAttributes:\n    model_config (ConfigDict): Forbids unknown keys.\n    id (UUID): The version 7 identifier of the operator.\n    name (str): The name of the operator.\n\nNotes:\n    - An operator lives in exactly one cell, given by its ``CellAssignment``.\n    - No field has a default, so ``None`` is refused.",
+      "description": "The organisation that flies Missions for its Clients, global to every cell.\n\nAttributes:\n    model_config (ConfigDict): Forbids unknown keys.\n    BEFORE (ClassVar[Literal[\"before\"]]): The validator mode that runs before Pydantic's own validation.\n    ID_FIELD (ClassVar[str]): The name of the ``id`` field.\n    NAME_FIELD (ClassVar[str]): The name of the ``name`` field.\n    DEPLOYMENT_FIELD (ClassVar[str]): The name of the ``deployment`` field.\n    JURISDICTIONS_FIELD (ClassVar[str]): The name of the ``jurisdictions`` field.\n    LLM_PROVIDER_FIELD (ClassVar[str]): The name of the ``llm_provider`` field.\n    ANCHORING_FIELD (ClassVar[str]): The name of the ``anchoring`` field.\n    id (UUID): The version 7 identifier of the Operator.\n    name (str): The name of the Operator.\n    deployment (Deployment): Where the Operator's Swarm runs.\n    jurisdictions (List[Jurisdiction]): The jurisdictions the Operator flies under, at least one, no duplicate.\n    llm_provider (LlmProvider): The kind of language model of its AI agents, Claude by default.\n    anchoring (Anchoring): How its Evidence records are anchored, qualified timestamping by default.\n\nNotes:\n    - An Operator lives in exactly one cell, given by its ``CellAssignment``.\n    - ``id``, ``name``, ``deployment`` and ``jurisdictions`` have no default, so ``None`` is refused for them.\n    - ``None`` becomes the default for ``llm_provider`` and ``anchoring``.",
       "properties": {
+        "anchoring": {
+          "$ref": "#/$defs/Anchoring",
+          "default": "qualified_timestamping",
+          "description": "How the Operator's Evidence records are anchored."
+        },
+        "deployment": {
+          "$ref": "#/$defs/Deployment",
+          "description": "Where the Operator's Swarm runs."
+        },
         "id": {
           "description": "The version 7 identifier of the operator.",
           "format": "uuid",
           "title": "Id",
           "type": "string"
+        },
+        "jurisdictions": {
+          "description": "The jurisdictions the Operator flies under, at least one and no duplicate.",
+          "items": {
+            "$ref": "#/$defs/Jurisdiction"
+          },
+          "title": "Jurisdictions",
+          "type": "array"
+        },
+        "llm_provider": {
+          "$ref": "#/$defs/LlmProvider",
+          "default": "claude",
+          "description": "The kind of language model of the Operator's AI agents."
         },
         "name": {
           "description": "The name of the operator.",
@@ -313,7 +372,9 @@
       },
       "required": [
         "id",
-        "name"
+        "name",
+        "deployment",
+        "jurisdictions"
       ],
       "title": "Operator",
       "type": "object"
@@ -418,7 +479,7 @@
     },
     "SquadFrame": {
       "additionalProperties": false,
-      "description": "The frames of every Drone of one Mission at one tick.\n\nAttributes:\n    model_config (ConfigDict): Forbids unknown keys and freezes the squad frame.\n    mission_id (UUID): The Mission of the frames.\n    t_us (int): The moment of the tick, in microseconds since the epoch.\n    frames (List[TelemetryFrame]): One frame per Drone.\n    T_US_MIN (ClassVar[int]): The smallest accepted ``t_us``.\n\nNotes:\n    - **Every frame must belong to the Mission, and each Drone appears once.**\n    - The list may be empty.",
+      "description": "The frames of every Drone of one Mission at one tick.\n\nAttributes:\n    model_config (ConfigDict): Forbids unknown keys and freezes the squad frame.\n    mission_id (UUID): The Mission of the frames.\n    t_us (int): The moment of the tick, in microseconds since the epoch.\n    frames (List[TelemetryFrame]): One frame per Drone.\n    trace_parent (Optional[str]): The W3C trace parent of the tick that built the frame.\n    T_US_MIN (ClassVar[int]): The smallest accepted ``t_us``.\n    TRACE_PARENT_PATTERN (ClassVar[str]): The W3C ``traceparent`` format, in lower case.\n    TRACE_ID_ZEROS (ClassVar[str]): The all-zero trace id, which is invalid.\n    SPAN_ID_ZEROS (ClassVar[str]): The all-zero span id, which is invalid.\n\nNotes:\n    - **Every frame must belong to the Mission, and each Drone appears once.**\n    - The list may be empty.\n    - **A WebSocket message has no headers, so the trace parent travels in the frame:** the browser continues the\n      trace of the tick that built it. It is optional, and neither id may be all zeros.",
       "properties": {
         "frames": {
           "description": "One frame per Drone.",
@@ -438,6 +499,19 @@
           "description": "The moment of the tick, in microseconds since the epoch.",
           "title": "T Us",
           "type": "integer"
+        },
+        "trace_parent": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The W3C trace parent of the tick that built the frame.",
+          "title": "Trace Parent"
         }
       },
       "required": [

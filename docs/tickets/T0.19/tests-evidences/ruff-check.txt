@@ -1,0 +1,43 @@
+$ uv run ruff check tests/ci/e2e/test_compose_e2e.py tests/ci/images/test_images_workflow.py tests/conventions/mono_repo/frontend/test_frontend_workspace.py tests/infra/charts/observability/test_telemetry_latency_dashboard.py
+(cwd ., on the ticket's own files only)
+
+All checks passed!
+warning: `VIRTUAL_ENV=/home/guillaume/Documents/Projects/PoC/swarm/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead
+Using CPython 3.12.14
+Creating virtual environment at: .venv
+   Building swarm-api @ file:///tmp/swarm-checks-xcfeq5wa/backend/swarm-api
+   Building swarm-catalog @ file:///tmp/swarm-checks-xcfeq5wa/backend/libs/swarm-catalog
+   Building swarm-clients @ file:///tmp/swarm-checks-xcfeq5wa/backend/swarm-clients
+   Building swarm-fleet @ file:///tmp/swarm-checks-xcfeq5wa/backend/apps/fleet
+   Building swarm-gateway @ file:///tmp/swarm-checks-xcfeq5wa/backend/apps/gateway
+   Building swarm-flight-engine @ file:///tmp/swarm-checks-xcfeq5wa/backend/apps/flight-engine
+   Building swarm-missions @ file:///tmp/swarm-checks-xcfeq5wa/backend/apps/missions
+   Building swarm-models @ file:///tmp/swarm-checks-xcfeq5wa/backend/swarm-models
+   Building swarm-lifecycle @ file:///tmp/swarm-checks-xcfeq5wa/backend/libs/swarm-lifecycle
+   Building swarm-logging @ file:///tmp/swarm-checks-xcfeq5wa/backend/libs/swarm-logging
+   Building swarm-nats @ file:///tmp/swarm-checks-xcfeq5wa/backend/libs/swarm-nats
+   Building swarm-service @ file:///tmp/swarm-checks-xcfeq5wa/backend/swarm-service
+   Building swarm-scripts @ file:///tmp/swarm-checks-xcfeq5wa/scripts
+   Building swarm-simulator @ file:///tmp/swarm-checks-xcfeq5wa/backend/apps/simulator
+   Building swarm-storage @ file:///tmp/swarm-checks-xcfeq5wa/backend/swarm-storage
+   Building swarm-web @ file:///tmp/swarm-checks-xcfeq5wa/backend/libs/swarm-web
+      Built swarm-catalog @ file:///tmp/swarm-checks-xcfeq5wa/backend/libs/swarm-catalog
+      Built swarm-api @ file:///tmp/swarm-checks-xcfeq5wa/backend/swarm-api
+      Built swarm-nats @ file:///tmp/swarm-checks-xcfeq5wa/backend/libs/swarm-nats
+      Built swarm-storage @ file:///tmp/swarm-checks-xcfeq5wa/backend/swarm-storage
+      Built swarm-logging @ file:///tmp/swarm-checks-xcfeq5wa/backend/libs/swarm-logging
+      Built swarm-web @ file:///tmp/swarm-checks-xcfeq5wa/backend/libs/swarm-web
+      Built swarm-clients @ file:///tmp/swarm-checks-xcfeq5wa/backend/swarm-clients
+      Built swarm-lifecycle @ file:///tmp/swarm-checks-xcfeq5wa/backend/libs/swarm-lifecycle
+      Built swarm-gateway @ file:///tmp/swarm-checks-xcfeq5wa/backend/apps/gateway
+      Built swarm-fleet @ file:///tmp/swarm-checks-xcfeq5wa/backend/apps/fleet
+      Built swarm-simulator @ file:///tmp/swarm-checks-xcfeq5wa/backend/apps/simulator
+      Built swarm-models @ file:///tmp/swarm-checks-xcfeq5wa/backend/swarm-models
+      Built swarm-flight-engine @ file:///tmp/swarm-checks-xcfeq5wa/backend/apps/flight-engine
+      Built swarm-scripts @ file:///tmp/swarm-checks-xcfeq5wa/scripts
+      Built swarm-missions @ file:///tmp/swarm-checks-xcfeq5wa/backend/apps/missions
+      Built swarm-service @ file:///tmp/swarm-checks-xcfeq5wa/backend/swarm-service
+warning: Failed to hardlink files; falling back to full copy. This may lead to degraded performance.
+         If the cache and target directories are on different filesystems, hardlinking may not be supported.
+         If this is intentional, set `export UV_LINK_MODE=copy` or use `--link-mode=copy` to suppress this warning.
+Installed 75 packages in 62ms

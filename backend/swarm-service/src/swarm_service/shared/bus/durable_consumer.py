@@ -2,7 +2,7 @@ from __future__ import annotations
 
 # Standard library imports
 from logging import Logger, getLogger
-from typing import Awaitable, Callable, List, Optional, Type
+from typing import Awaitable, Callable, ClassVar, List, Optional, Type
 
 # Third-party imports
 from nats.aio.client import Client
@@ -10,11 +10,14 @@ from nats.aio.msg import Msg
 from nats.errors import TimeoutError as NatsTimeoutError
 from nats.js.api import AckPolicy, ConsumerConfig
 from nats.js.client import JetStreamContext
+from opentelemetry import trace
+from opentelemetry.trace import SpanKind, Status, StatusCode
 from pydantic import BaseModel, ValidationError
 
 # First-party imports
 from swarm_lifecycle.runnables.async_runnable import AsyncRunnable
 from swarm_models.config.nats.durable_consumer_config import DurableConsumerConfig
+from swarm_nats.tracing.nats_trace_context import NatsTraceContext
 
 
 class DurableConsumer[M: BaseModel](AsyncRunnable):
@@ -26,6 +29,8 @@ class DurableConsumer[M: BaseModel](AsyncRunnable):
         message_type (Type[M]): The model each message is decoded into.
         handler (Callable[[M], Awaitable[None]]): What is done with each decoded message.
         subscription (Optional[JetStreamContext.PullSubscription]): The pull subscription, set by ``initialize``.
+        SPAN_NAME (str): The name of the consumer span of one message.
+        trace_context (NatsTraceContext): Extracts the trace context of a message from its headers.
 
     Notes:
         - **Delivery is at least once, and handlers must be idempotent by event id.** The publisher's ``Nats-Msg-Id``
@@ -34,9 +39,12 @@ class DurableConsumer[M: BaseModel](AsyncRunnable):
         - A message that does not decode is terminated, so the server never redelivers it.
         - ``close`` only drops the subscription: the durable consumer stays on the server, so a new consumer with the
           same name resumes after the last acknowledged message.
+        - The handler runs inside a consumer span that continues the trace of the publisher. **No payload is recorded.**
         - The broad ``except`` is around the handler only, because any failure of the handler must be reported and
           answered with a negative acknowledgement.
     """
+
+    SPAN_NAME: ClassVar[str] = "nats.consume"
 
     def __init__(
         self,
@@ -62,6 +70,7 @@ class DurableConsumer[M: BaseModel](AsyncRunnable):
         self.message_type = message_type
         self.handler = handler
         self.subscription: Optional[JetStreamContext.PullSubscription] = None
+        self.trace_context = NatsTraceContext()
 
     ############################
     # Internal Helpers Methods #
@@ -84,16 +93,26 @@ class DurableConsumer[M: BaseModel](AsyncRunnable):
             )
             await message.term()
             return
-        try:
-            await self.handler(decoded)
-        except Exception as error:  # noqa: BLE001
-            self.logger.error(
-                "The handler of %s failed with %s, so the message is delivered again.",
-                self.config.durable_name,
-                type(error).__name__,
-            )
-            await message.nak()
-            return
+        context = self.trace_context.extract(message.headers)
+        tracer = trace.get_tracer(__name__)
+        with tracer.start_as_current_span(
+            self.SPAN_NAME,
+            context=context,
+            kind=SpanKind.CONSUMER,
+            record_exception=False,
+            set_status_on_exception=False,
+        ) as span:
+            try:
+                await self.handler(decoded)
+            except Exception as error:  # noqa: BLE001
+                self.logger.error(
+                    "The handler of %s failed with %s, so the message is delivered again.",
+                    self.config.durable_name,
+                    type(error).__name__,
+                )
+                span.set_status(Status(StatusCode.ERROR, type(error).__name__))
+                await message.nak()
+                return
         await message.ack()
         self.logger.debug("Acknowledged a message of %s.", self.config.durable_name)
 

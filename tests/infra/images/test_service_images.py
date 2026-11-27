@@ -44,6 +44,11 @@ class TestServiceImages:
     ENTRYPOINT: ClassVar[str] = "ENTRYPOINT"
     CMD: ClassVar[str] = "CMD"
     LATEST: ClassVar[str] = "latest"
+    RUN: ClassVar[str] = "RUN"
+    DEBIAN_BASE: ClassVar[str] = "bookworm"
+    ALPINE_BASE: ClassVar[str] = "alpine"
+    DEBIAN_UPGRADE: ClassVar[str] = "apt-get upgrade"
+    ALPINE_UPGRADE: ClassVar[str] = "apk upgrade"
     ROOT_USERS: ClassVar[Tuple[str, ...]] = ("root", "0")
     IGNORED: ClassVar[Tuple[str, ...]] = (".git", "node_modules", ".venv", "target", ".env")
 
@@ -119,6 +124,18 @@ class TestServiceImages:
                 assert "@sha256:" in base or (tag and tag != self.LATEST), base
             if len(words) >= 3:
                 stages.append(words[2])
+
+    @pytest.mark.parametrize("dockerfile", DOCKERFILES, ids=lambda path: str(path.parent.name))
+    def test_the_final_stage_takes_the_security_updates_of_its_base(self, dockerfile: Path) -> None:
+        stage = self._final_stage(dockerfile)
+        base = self._instructions(stage, self.FROM)[0].split()[0]
+        runs = " ".join(self._instructions(stage, self.RUN))
+        if self.DEBIAN_BASE in base:
+            assert self.DEBIAN_UPGRADE in runs, f"{dockerfile} ships its Debian base without its security updates."
+        elif self.ALPINE_BASE in base:
+            assert self.ALPINE_UPGRADE in runs, f"{dockerfile} ships its Alpine base without its security updates."
+        else:
+            pytest.skip(f"{base} is neither Debian nor Alpine.")
 
     @pytest.mark.parametrize("dockerfile", DOCKERFILES, ids=lambda path: str(path.parent.name))
     def test_the_final_stage_runs_as_a_non_root_user(self, dockerfile: Path) -> None:

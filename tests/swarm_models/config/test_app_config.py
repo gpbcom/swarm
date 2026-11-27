@@ -2,17 +2,50 @@ from __future__ import annotations
 
 # Standard library imports
 from pathlib import Path
-from typing import Optional
+from typing import ClassVar, Dict, Optional
 
 # Third-party imports
 import pytest
+from pydantic import JsonValue
 
 # First-party imports
 from swarm_catalog.models.yaml_catalog import YamlCatalog
 from swarm_models.config.app_config import AppConfig
+from swarm_models.config.exceptions import SEAppConfigInvalidSignals
+from swarm_web.models.config.exceptions import SESignalsConfigInvalidMetricsInterval
+from swarm_web.models.config.signals_config import SignalsConfig
 
 
 class TestAppConfig:
+    SIGNALS: ClassVar[Dict[str, JsonValue]] = {"enabled": True, "cell": "eu_west", "metrics_interval_s": 15.0}
+
+    def test_the_signals_default_to_a_default_signals_config(self) -> None:
+        assert AppConfig().signals == SignalsConfig()
+
+    def test_a_signals_mapping_becomes_a_signals_config(self) -> None:
+        config = AppConfig.model_validate({"signals": self.SIGNALS})
+        assert config.signals == SignalsConfig(enabled=True, cell="eu_west", metrics_interval_s=15.0)
+
+    def test_a_signals_config_is_kept(self) -> None:
+        signals = SignalsConfig(enabled=True)
+        assert AppConfig(signals=signals).signals == signals
+
+    def test_none_becomes_the_default_signals(self) -> None:
+        assert AppConfig.model_validate({"signals": None}).signals == SignalsConfig()
+
+    @pytest.mark.parametrize("value", ["on", 3, True, [1], 1.5])
+    def test_signals_that_are_not_a_mapping_are_refused(self, value: JsonValue) -> None:
+        with pytest.raises(SEAppConfigInvalidSignals):
+            AppConfig.model_validate({"signals": value})
+
+    def test_a_signals_error_is_raised_unchanged(self) -> None:
+        with pytest.raises(SESignalsConfigInvalidMetricsInterval):
+            AppConfig.model_validate({"signals": {"metrics_interval_s": 0}})
+
+    def test_the_signals_round_trip(self) -> None:
+        config = AppConfig.model_validate({"signals": self.SIGNALS})
+        assert AppConfig.model_validate(config.model_dump()) == config
+
     def test_it_is_a_yaml_catalog(self) -> None:
         assert issubclass(AppConfig, YamlCatalog)
 

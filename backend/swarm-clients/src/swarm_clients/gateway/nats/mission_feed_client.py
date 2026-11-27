@@ -2,16 +2,19 @@ from __future__ import annotations
 
 # Standard library imports
 from logging import Logger, getLogger
-from typing import Callable, Dict, List, Optional
+from typing import Callable, ClassVar, Dict, List, Optional
 
 # Third-party imports
 from nats.aio.client import Client
 from nats.aio.msg import Msg
 from nats.aio.subscription import Subscription
 from nats.errors import Error as NatsError
+from opentelemetry import trace
+from opentelemetry.trace import SpanKind, Status, StatusCode
 
 # First-party imports
 from swarm_models.live.feed.exceptions import SEMissionFeedError
+from swarm_nats.tracing.nats_trace_context import NatsTraceContext
 
 
 class MissionFeedClient:
@@ -22,12 +25,19 @@ class MissionFeedClient:
         subscriptions (Dict[str, Subscription]): The core subscription of each subject.
         handlers (Dict[str, Callable[[str, bytes], None]]): The handler of each subject.
         logger (Logger): Logger instance.
+        CONSUME_SPAN (str): Name of the span a frame is delivered in.
+        SUBJECT_ATTRIBUTE (str): Span attribute holding the subject.
 
     Notes:
         - One core subscription is made per subject, and every message goes through ``_on_message``.
         - **NATS errors are wrapped** in ``SEMissionFeedError``, so the service catches one type.
         - A frame is handed over as it came, without being decoded.
+        - **The trace of the frame is continued**: the handler runs in a CONSUMER span whose parent is the context the
+          headers carry, or in a root span when there is none.
     """
+
+    CONSUME_SPAN: ClassVar[str] = "mission_feed.consume"
+    SUBJECT_ATTRIBUTE: ClassVar[str] = "messaging.destination.name"
 
     def __init__(self, client: Client, logger: Optional[Logger] = None) -> None:
         """Keep the client.
@@ -55,7 +65,21 @@ class MissionFeedClient:
         if handler is None:
             self.logger.debug("No handler for %s.", msg.subject)
             return
-        handler(msg.subject, msg.data)
+        context = NatsTraceContext().extract(msg.headers)
+        with trace.get_tracer(__name__).start_as_current_span(
+            self.CONSUME_SPAN,
+            context=context,
+            kind=SpanKind.CONSUMER,
+            attributes={self.SUBJECT_ATTRIBUTE: msg.subject},
+            record_exception=False,
+            set_status_on_exception=False,
+        ) as span:
+            try:
+                handler(msg.subject, msg.data)
+            except Exception as error:
+                span.set_status(Status(StatusCode.ERROR, type(error).__name__))
+                self.logger.error("Handler of %s failed: %s.", msg.subject, type(error).__name__)
+                raise
 
     ############################
     # Publicly Exposed Methods #

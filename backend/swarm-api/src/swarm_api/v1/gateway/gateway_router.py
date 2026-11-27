@@ -3,7 +3,7 @@ from __future__ import annotations
 # Standard library imports
 from importlib.metadata import version
 from logging import Logger, getLogger
-from typing import ClassVar, Optional
+from typing import ClassVar, List, Optional
 
 # Third-party imports
 from fastapi import APIRouter, FastAPI
@@ -12,10 +12,13 @@ from fastapi import APIRouter, FastAPI
 from swarm_api.handlers.access_handlers import AccessHandlers
 from swarm_api.handlers.problem_handlers import ProblemHandlers
 from swarm_api.middleware.idempotency_middleware import IdempotencyMiddleware
+from swarm_api.v1.gateway.operator_router import OperatorRouter
 from swarm_api.v1.live.live_router import LiveRouter
 from swarm_models.config.gateway.gateway_config import GatewayConfig
 from swarm_service.gateway.factories.live.live_feed_factory import LiveFeedFactory
+from swarm_service.gateway.factories.operators.operator_service_factory import OperatorServiceFactory
 from swarm_service.gateway.live.live_feed_lifespan import LiveFeedLifespan
+from swarm_service.gateway.operators.operator_lifespan import OperatorLifespan
 from swarm_service.shared.idempotency.factories.idempotency_service_factory import IdempotencyServiceFactory
 
 
@@ -29,8 +32,10 @@ class GatewayRouter(APIRouter):
         logger (Logger): Logger instance.
 
     Notes:
-        - **No resource is served yet**: the router has no ``/v1`` route, so none carries a ``RouteAccess`` yet.
-          Each route added later takes ``Depends(RouteAccess([...]))`` with the roles of the security page.
+        - The ``/v1/operators`` routes are served by ``OperatorRouter``, each with its ``RouteAccess``. Each route
+          added later takes ``Depends(RouteAccess([...]))`` with the roles of the security page.
+        - **Nothing is opened at build time**: the Operator service opens its pool on its first call, and its
+          lifespan closes it, so the OpenAPI document builds with no database and no Keycloak.
         - ``application`` is the one place that wires the gateway, so that its app and the OpenAPI script build the
           same application.
     """
@@ -61,11 +66,13 @@ class GatewayRouter(APIRouter):
         """
         self.logger.debug("Building the gateway application.")
         feed = LiveFeedFactory(self.gateway_config.live).create()
-        app = ProblemHandlers().application(self.TITLE, version(self.DISTRIBUTION), [self])
+        service = OperatorServiceFactory(self.gateway_config).create()
+        routers: List[APIRouter] = [self, OperatorRouter(service)]
+        app = ProblemHandlers().application(self.TITLE, version(self.DISTRIBUTION), routers)
         app.add_middleware(IdempotencyMiddleware, service=IdempotencyServiceFactory(self.gateway_config.rest).create())
         self.logger.debug("The problem handlers and the idempotency middleware are installed.")
         app.include_router(LiveRouter(feed.source_for, self.gateway_config.live.session))
-        app.router.lifespan_context = LiveFeedLifespan(feed).lifespan
+        app.router.lifespan_context = OperatorLifespan(service, LiveFeedLifespan(feed).lifespan).lifespan
         self.logger.debug("The live socket and its feed are wired on the gateway application.")
         AccessHandlers().install(app, self.gateway_config.auth)
         self.logger.debug("The access check is installed on the gateway application.")

@@ -114,6 +114,9 @@ class TestSimulatorServer:
         uvicorn_server.should_exit = True
         await asyncio.wait_for(task, timeout=self.TIMEOUT_S)
 
+        closed_by = asyncio.get_running_loop().time() + self.TIMEOUT_S
+        while connz_users(monitor_port) and asyncio.get_running_loop().time() < closed_by:
+            await asyncio.sleep(self.POLL_S)
         assert connz_users(monitor_port) == []
         assert not self.answers(servers.config.port)
 

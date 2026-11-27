@@ -35,7 +35,22 @@ class TestDevEnvironment:
         ("keda-http-add-on.yaml", "keda-add-ons-http", "https://kedacore.github.io/charts", "keda"),
     ]
     SERVICES: ClassVar[List[str]] = ["missions", "fleet", "processing", "evidence", "notifier"]
-    ALLOWED_TOP_KEYS: ClassVar[List[str]] = ["global", "database", "valkey", "objectStorage", "vaultConfig", "nats"]
+    ALLOWED_TOP_KEYS: ClassVar[List[str]] = [
+        "global",
+        "database",
+        "valkey",
+        "objectStorage",
+        "vaultConfig",
+        "nats",
+        "otelCollector",
+        "prometheus",
+        "loki",
+        "tempo",
+        "grafana",
+    ]
+    DEV_CELL: ClassVar[str] = "dev"
+    CELL_DIR: ClassVar[Path] = ROOT / "infra" / "terraform" / "cells" / "dev"
+    STORED: ClassVar[List[str]] = ["prometheus", "loki", "tempo"]
     FORBIDDEN_KEYS: ClassVar[List[str]] = [
         "password",
         "rootpassword",
@@ -130,3 +145,15 @@ class TestDevEnvironment:
         keys = self.keys_of(self.load(self.VALUES))
         for key in self.NATS_JWT_KEYS:
             assert key not in keys
+
+    def test_the_dev_values_name_the_cell_of_the_collector_after_its_terraform_root(self) -> None:
+        assert self.CELL_DIR.is_dir()
+        assert self.CELL_DIR.name == self.DEV_CELL
+        assert self.section(self.load(self.VALUES), "otelCollector")["cell"] == self.DEV_CELL
+
+    @pytest.mark.parametrize("name", STORED)
+    def test_the_dev_values_size_the_storage_of_the_observability_base(self, name: str) -> None:
+        persistence = self.section(self.section(self.load(self.VALUES), name), "persistence")
+        size = persistence["size"]
+        assert isinstance(size, str)
+        assert size.strip()

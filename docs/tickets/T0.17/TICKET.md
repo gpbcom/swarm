@@ -1,6 +1,6 @@
 # T0.17: Observability base
 
-**Status:** 🟡 Planned
+**Status:** ✅ Done
 
 ## Roadmap
 
@@ -11,8 +11,8 @@
 
 ## What it delivers
 
-- OpenTelemetry SDKs in Python, Rust and TypeScript, in `packages/python/`, `packages/rust` and `packages/ts`, as [🩺 Observability: signals](../../specs/technical/08-observability.md#signals).
-- The OpenTelemetry collector, and Prometheus, Loki, Tempo and Grafana in the dev cell, in `deploy/charts`, as [🩺 Observability: signals](../../specs/technical/08-observability.md#signals).
+- OpenTelemetry SDKs in Python, Rust and TypeScript, in `backend/`, `rust` and `frontend/packages`, as [🩺 Observability: signals](../../specs/technical/08-observability.md#signals).
+- The OpenTelemetry collector, and Prometheus, Loki, Tempo and Grafana in the dev cell, in `infra/charts`, as [🩺 Observability: signals](../../specs/technical/08-observability.md#signals).
 - Trace context carried in NATS headers, as [🩺 Observability: signals](../../specs/technical/08-observability.md#signals).
 - `operator_id`, `mission_id` and `cell` as resource attributes, and `drone_id` never a metric label, as [🩺 Observability: signals](../../specs/technical/08-observability.md#signals).
 

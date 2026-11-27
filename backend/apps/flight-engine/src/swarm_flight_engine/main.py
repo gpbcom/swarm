@@ -14,6 +14,7 @@ from swarm_logging.models.logging_config import LoggingConfig
 from swarm_models.config.flight_engine.flight_engine_config import FlightEngineConfig
 from swarm_service.flight.factories.engine.flight_engine_server_factory import FlightEngineServerFactory
 from swarm_web.factories.async_runnable_runner_factory import AsyncRunnableRunnerFactory
+from swarm_web.signals.signals_configurator import SignalsConfigurator
 
 
 def main() -> None:
@@ -21,7 +22,8 @@ def main() -> None:
 
     Notes:
         - The app's folder is ``SWARM_APP_ROOT``, which the image sets, or the current folder.
-        - Logging is configured once, here at the entry point.
+        - Logging, then the OpenTelemetry signals (traces of each tick included), are configured once, here at the
+          entry point.
         - The event loop is uvloop's: the engine and its live socket run in one asyncio process.
         - **``SIGINT`` and ``SIGTERM`` stop the app cleanly and the process exits with status 0**, because
           ``FlightEngineServer`` logs the signal that uvicorn raises again after its graceful stop. A failure of the
@@ -30,6 +32,7 @@ def main() -> None:
     folder = FlightEngineConfig.conf_folder()
     config = FlightEngineConfig.load(folder / FlightEngineConfig.APP_FILE)
     LoggingConfigurator(LoggingConfig(path=str(folder / FlightEngineConfig.LOGGER_FILE))).configure()
+    SignalsConfigurator(config.signals).configure()
     getLogger(__name__).info("Serving the flight engine app on port %d.", config.live.port)
     router = FlightEngineRouter(config)
     server = FlightEngineServerFactory(config, router.application(), router.hub, router.codec).create()

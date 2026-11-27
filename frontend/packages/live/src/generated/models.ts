@@ -29,6 +29,18 @@ export type PersonId = string | null;
  */
 export type ActorKind1 = "person" | "swarm_agent" | "outside_agent";
 /**
+ * How the Evidence records of an Operator are anchored in time.
+ *
+ * Attributes:
+ *     QUALIFIED_TIMESTAMPING: A qualified timestamping authority seals the records.
+ *     PUBLIC_BLOCKCHAIN: A public blockchain seals the records.
+ *     NONE: The records are not anchored.
+ *
+ * This interface was referenced by `SwarmModels`'s JSON-Schema
+ * via the `definition` "Anchoring".
+ */
+export type Anchoring = "qualified_timestamping" | "public_blockchain" | "none";
+/**
  * The moment of the assignment, in UTC.
  */
 export type AssignedAt = string;
@@ -89,6 +101,17 @@ export type CommandKind1 = "hold" | "abort" | "return_home" | "manual_control";
  */
 export type CommandLane1 = "safety" | "normal";
 /**
+ * Where an Operator's Swarm runs.
+ *
+ * Attributes:
+ *     CLOUD: The Swarm runs in a cloud cell.
+ *     ON_PREMISES: The Swarm runs on the Operator's own premises.
+ *
+ * This interface was referenced by `SwarmModels`'s JSON-Schema
+ * via the `definition` "Deployment".
+ */
+export type Deployment = "cloud" | "on_premises";
+/**
  * The state of a Drone, with the names of the glossary.
  *
  * Attributes:
@@ -132,6 +155,17 @@ export type Type = string;
  * The version of the type.
  */
 export type Version = number;
+/**
+ * A regulatory jurisdiction an Operator flies under.
+ *
+ * Attributes:
+ *     EU_EASA: The European Union, under EASA rules.
+ *     US_FAA: The United States, under FAA rules.
+ *
+ * This interface was referenced by `SwarmModels`'s JSON-Schema
+ * via the `definition` "Jurisdiction".
+ */
+export type Jurisdiction = "eu_easa" | "us_faa";
 /**
  * A language in which Swarm shows its screens.
  *
@@ -178,9 +212,36 @@ export type LiveRate1 = "full";
  */
 export type Topic = string;
 /**
+ * The kind of language model the AI agents of an Operator use.
+ *
+ * Attributes:
+ *     CLAUDE: The Claude models.
+ *     OPEN_WEIGHT: An open-weight model run by the Operator.
+ *
+ * This interface was referenced by `SwarmModels`'s JSON-Schema
+ * via the `definition` "LlmProvider".
+ */
+export type LlmProvider = "claude" | "open_weight";
+/**
+ * How the Operator's Evidence records are anchored.
+ */
+export type Anchoring1 = "qualified_timestamping" | "public_blockchain" | "none";
+/**
+ * Where the Operator's Swarm runs.
+ */
+export type Deployment1 = "cloud" | "on_premises";
+/**
  * The version 7 identifier of the operator.
  */
 export type Id2 = string;
+/**
+ * The jurisdictions the Operator flies under, at least one and no duplicate.
+ */
+export type Jurisdictions = Jurisdiction[];
+/**
+ * The kind of language model of the Operator's AI agents.
+ */
+export type LlmProvider1 = "claude" | "open_weight";
 /**
  * The name of the operator.
  */
@@ -299,6 +360,10 @@ export type MissionId3 = string;
  * The moment of the tick, in microseconds since the epoch.
  */
 export type TUs1 = number;
+/**
+ * The W3C trace parent of the tick that built the frame.
+ */
+export type TraceParent = string | null;
 
 export interface SwarmModels {
   [k: string]: unknown;
@@ -447,22 +512,38 @@ export interface LiveSubscription {
   topic: Topic;
 }
 /**
- * A person who pilots drones, global to every cell.
+ * The organisation that flies Missions for its Clients, global to every cell.
  *
  * Attributes:
  *     model_config (ConfigDict): Forbids unknown keys.
- *     id (UUID): The version 7 identifier of the operator.
- *     name (str): The name of the operator.
+ *     BEFORE (ClassVar[Literal["before"]]): The validator mode that runs before Pydantic's own validation.
+ *     ID_FIELD (ClassVar[str]): The name of the ``id`` field.
+ *     NAME_FIELD (ClassVar[str]): The name of the ``name`` field.
+ *     DEPLOYMENT_FIELD (ClassVar[str]): The name of the ``deployment`` field.
+ *     JURISDICTIONS_FIELD (ClassVar[str]): The name of the ``jurisdictions`` field.
+ *     LLM_PROVIDER_FIELD (ClassVar[str]): The name of the ``llm_provider`` field.
+ *     ANCHORING_FIELD (ClassVar[str]): The name of the ``anchoring`` field.
+ *     id (UUID): The version 7 identifier of the Operator.
+ *     name (str): The name of the Operator.
+ *     deployment (Deployment): Where the Operator's Swarm runs.
+ *     jurisdictions (List[Jurisdiction]): The jurisdictions the Operator flies under, at least one, no duplicate.
+ *     llm_provider (LlmProvider): The kind of language model of its AI agents, Claude by default.
+ *     anchoring (Anchoring): How its Evidence records are anchored, qualified timestamping by default.
  *
  * Notes:
- *     - An operator lives in exactly one cell, given by its ``CellAssignment``.
- *     - No field has a default, so ``None`` is refused.
+ *     - An Operator lives in exactly one cell, given by its ``CellAssignment``.
+ *     - ``id``, ``name``, ``deployment`` and ``jurisdictions`` have no default, so ``None`` is refused for them.
+ *     - ``None`` becomes the default for ``llm_provider`` and ``anchoring``.
  *
  * This interface was referenced by `SwarmModels`'s JSON-Schema
  * via the `definition` "Operator".
  */
 export interface Operator {
+  anchoring?: Anchoring1;
+  deployment: Deployment1;
   id: Id2;
+  jurisdictions: Jurisdictions;
+  llm_provider?: LlmProvider1;
   name: Name;
 }
 /**
@@ -520,11 +601,17 @@ export interface Role {
  *     mission_id (UUID): The Mission of the frames.
  *     t_us (int): The moment of the tick, in microseconds since the epoch.
  *     frames (List[TelemetryFrame]): One frame per Drone.
+ *     trace_parent (Optional[str]): The W3C trace parent of the tick that built the frame.
  *     T_US_MIN (ClassVar[int]): The smallest accepted ``t_us``.
+ *     TRACE_PARENT_PATTERN (ClassVar[str]): The W3C ``traceparent`` format, in lower case.
+ *     TRACE_ID_ZEROS (ClassVar[str]): The all-zero trace id, which is invalid.
+ *     SPAN_ID_ZEROS (ClassVar[str]): The all-zero span id, which is invalid.
  *
  * Notes:
  *     - **Every frame must belong to the Mission, and each Drone appears once.**
  *     - The list may be empty.
+ *     - **A WebSocket message has no headers, so the trace parent travels in the frame:** the browser continues the
+ *       trace of the tick that built it. It is optional, and neither id may be all zeros.
  *
  * This interface was referenced by `SwarmModels`'s JSON-Schema
  * via the `definition` "SquadFrame".
@@ -533,6 +620,7 @@ export interface SquadFrame {
   frames: Frames;
   mission_id: MissionId3;
   t_us: TUs1;
+  trace_parent?: TraceParent;
 }
 /**
  * What one Drone reports at one tick.

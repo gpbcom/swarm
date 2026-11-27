@@ -2,6 +2,8 @@
 
 **Plan:** 🟢 Approved
 
+**Push:** 🟢 Approved
+
 <!-- ticket:specs -->
 ## 📚 Specifications
 
@@ -21,36 +23,37 @@ The technical pages, features, use cases and business rules of [TICKET.md](TICKE
 - [🖼️ UC-029 OK: Operator created and isolated](../../specs/functional/use-cases/UC-029-create-an-operator.md#screen-ok)
 <!-- /ticket:specs -->
 
-## 🧭 Summary
+## Summary
 
-T0.16 delivers UC-029 (Create an Operator) end to end. Work starts with eight test-writer tasks in wave 1, one per layer or app: the shared Operator model, the gateway's models, storage, Keycloak client, service and /v1 API (the API tests include the two-Operator isolation test for FS-012 AC-3 and BR-008), the Back office's Vitest tests and its Playwright e2e tests. The implementation then climbs the gateway's layers in order. First the shared Operator model in swarm-models gains deployment, Jurisdictions, LLM provider and Anchoring, and its generated JSON Schema, Rust and TypeScript types are regenerated. Next come the gateway models, configuration and exceptions, then the Operator directory repositories with their cell assignment, beside the Keycloak admin client. After them come the OperatorService (checks A1 and A2 together, creation with compensation, listing by role), then the /v1/operators routes, then the regenerated api-client. The Keycloak realm (organisations, the gateway's admin account, SMTP) and compose.e2e.yaml run beside them, as does the Back office sign-in. The Back office then gets its data hooks and draft store, the three pages A1/KO, A2 and OK in parallel, its routes and frame, and its four-language messages. A final mockup-writer capture task (TKT-21) owns the four UC-029 screens: T0.20 depends on this ticket, so it cannot be merged yet, and the task updates the mock-ups to what the app shows and renders them again, with screenshots as the path once the T0.20 pipeline exists. The graph has 25 tasks in 12 waves. Several file paths created by prerequisites T0.11, T0.12, T0.14 and T0.15, which are not merged yet, are assumed and listed under the assumptions.
+T0.16 delivers UC-029 (Create an Operator) end to end. The 25 tasks split by layer: shared models and config, gateway storage (Operator directory tables plus a people table under row-level security), a Keycloak admin client, an OperatorService, and /v1/operators routes on the gateway. The back-office app gets OIDC sign-in and the create wizard (A1, then KO, then A2, then OK), and the Mission planner's first sign-in shows her own Operator. Generated artefacts are regenerated: the JSON Schema bundle, Rust structs, TypeScript live models, the OpenAPI document and the api-client. Wave 1 holds 8 test-writer tasks: models, config, storage, the Keycloak admin client with its stand-in, the service, the API with the two-Operator isolation test (FS-012 AC-3), the realm, and the back-office front end. The implementation waves follow layer order. A doc-writer task updates the REST resource list and backend/README.md. A mockup-writer capture task, which depends on every frontend-implementer task, owns the UC-029 screens. T0.20 is not merged yet, so the task updates the four mock-ups to what the app shows and re-renders them. If T0.20 is merged by run time, it captures screenshots instead.
 
-## 🧩 Assumptions
+## Assumptions
 
-- The roadmap row has no anchor of its own, so the ticket links to the S04 section that holds it, and the epic to the epics table.
-- The three acceptance criteria are drawn from AC-3 of FS-012 and from alternative flows A1 and A2 of UC-029, which the roadmap row names as 'done when'.
-- The screens are listed as touched because the ticket changes frontends/back-office (TKT-21); the capture is planned by this ticket's plan.
-- check_ticket.py was not run by me; the workflow runs it next.
-- T0.16's prerequisites are not merged yet: T0.11 and T0.14, T0.15, and T0.12 through T0.15. So several paths their tickets create are assumed: deploy/charts/keycloak/ (realm), services/gateway/src/gateway/models/config/gateway_config.py, services/gateway/src/gateway/api/rest/gateway_rest_app.py, services/gateway/migrations/versions/, services/gateway/openapi/, packages/ts/api-client/src/generated/, frontends/back-office/src/App.tsx and frontends/back-office/src/messages/<lang>.json. The same goes for the gateway's test fixtures: PostgreSQL, the T0.11 token helper and the caller model. Before /ticket-run, the plan's file lists are checked against what those tickets delivered and amended (TKT-11). A task that finds another path reports blocked.
-- AGENT.md says shared models live only in swarm-models, so the shared Operator model is extended there, and its JSON Schema, Rust and TypeScript types are regenerated. That touches packages/python/swarm-models, packages/rust/swarm-models and packages/ts/live/src/generated, outside the ticket graph's area ('frontends/back-office, services/gateway, Keycloak'). T0.17 (packages/python) and T0.19 (packages/ts/live) are not locked out by the area check, so the integrator watches for conflicts in the generated files.
-- The four new enums go in swarm_models/models/enums.py, following the CLAUDE.md rule of one enums.py per models module. The package's older enums stay in their per-concern enums/ folders.
-- Enum values: Jurisdiction eu_easa and us_faa (glossary); Deployment cloud and on_premises; AnchoringChoice qualified_timestamping_authority, public_blockchain and none (UC-029 step 2). LlmProvider has claude and open_weight, because the specifications name only Claude and 'an open-weight model'. No model names per provider are specified, so only the provider is stored. The default is Claude whatever the deployment, since an on-premises default belongs to A3 (P7).
-- The Operator directory and the cell assignments are stored in the gateway's own PostgreSQL schema, through its Alembic migrations. They are global-layer tables, not Operator-owned rows, so they get no row-level security. The gateway service enforces the role and the Operator: a Swarm administrator lists every Operator's directory entry, anyone else only their own Operator. The Operators' data keeps T0.12's row-level security.
-- Every new Operator is assigned to one configured default cell (DirectoryConfig.default_cell, the dev cell's name), because P0 has only the dev cell.
-- A name is taken when it matches an existing one after trimming, in any case. This is the conservative reading of 'no Operator has that name'.
-- A1 and A2 come back together as one 422 application/problem+json with an errors list of {field, reason}, because the KO mock-up shows both at once and the specifications give no status code. The Back office shows its own translated text from the field and the reason, not the server's English detail.
-- Step 3 runs before step 4 (the checks show on the A1 screen), so a POST /v1/operators:validate endpoint checks the entry. POST /v1/operators checks everything again, the first Mission planner's e-mail included.
-- The invitation uses Keycloak itself. The Operator's organisation has the Operator's id as its alias. The user is a member with the mission_planner realm role, and Keycloak's execute-actions e-mail asks her to set her password and second factor and to verify her e-mail. The invitation is read as accepted once no required action remains.
-- The Operator is created only if the Keycloak steps succeed. Otherwise the directory transaction is rolled back, any organisation already created is deleted, and the gateway answers 502.
-- The gateway's Keycloak admin client is a confidential service-account client of the realm with the least realm-management roles that suffice. Its secret, and the SMTP password, come from the vault, never from a file.
-- The end-to-end test uses an SMTP sink container and a seeded Swarm administrator test account. Both exist only in compose.e2e.yaml and the e2e realm overlay, never in a deployed cell.
-- The Back office sign-in (PKCE) may not be wired by T0.11 or T0.14, so K12 adds what is missing and reuses what exists.
-- The OK screen shows the first Mission planner's invitation state when the list loads. The mock-up's live toast ('Léa Martin signed in…') is not built, because no live notification is specified for P0.
-- The default Keycloak admin timeout of 10 seconds is a configuration default written in conf/app.yaml, not a specified budget.
-- The name of the second Operator in the isolation tests is test data, not a fact of the specifications.
-- T0.20 depends on T0.16, so its screenshot pipeline cannot be merged when this ticket runs. The capture task K25 updates the four UC-029 mock-ups to what the app shows and renders them again, keeping them as ✏️ Mock-up. T0.20 then captures the screenshots.
-- There is no doc-writer task: the ticket changes no documentation or specification page other than the UC-029 screens, which the capture task owns.
-- BR-017 (four languages) is not listed in TICKET.md, but epic E0.5 names 'UC-029 screens in four languages' and T0.15's CI check enforces it, so K24 writes the four catalogues.
+- TICKET.md and PROGRESS.md already existed and were complete; kept them. Only the paths were updated to the new layout (backend/apps/gateway, frontend/apps/back-office) as in the phase 7 roadmap.
+- The roadmap row has no anchor of its own, so the ticket links to the S04 section and the epic to the epics table.
+- The three acceptance criteria come from AC-3 of FS-012 and alternative flows A1 and A2 of UC-029, which the roadmap row names as done-when.
+- Screens are listed as touched because the ticket changes frontend/apps/back-office (TKT-21).
+- I could not run check_ticket.py (no shell tool available), so the check is still to run by the workflow.
+- tests-evidences/ was created with a .gitkeep file, since no shell was available to make an empty folder.
+- Operator itself, the shared model, gains deployment, Jurisdictions, LLM provider and Anchoring. No separate model holds them, because the glossary and UC-029 say the Operator is created with them. The schema bundle, the Rust structs and the TypeScript live models are regenerated (K20, K21, K22).
+- The Jurisdiction values are EU (EASA) and US (FAA), the two that the glossary names.
+- Only the LLM provider is stored, as claude or open_weight. Its default is Claude in the cloud and an open-weight model on premises (FS-012 details, glossary). The specification gives no list of models, so choosing models is left for later.
+- The Anchoring choices are the qualified timestamping authority (the default), a public blockchain through an aggregator, or none, as UC-029 step 2 says.
+- The Operator directory tables (operators, cell_assignments) sit in the gateway schema, are global and have no row-level security. The Swarm administrator has no Operator and must write and list them. The first Mission planner is stored as a Person in a people table under row-level security (BR-008, checked in two places).
+- The security page says the Swarm administrator has no access to Operators' data. So the directory list leaves out the first Mission planner, and the OK screen shows the invitation as sent. The capture task adjusts the OK mock-up to this.
+- Two names are the same Operator name when they match case-insensitively after trimming. This is the stricter reading of 'no Operator has that name'.
+- The service checks the required fields first and answers 422, naming every missing field. It then checks the name and answers 409. The Back office runs the same checks before it submits, against the directory list, so the KO screen can show both errors at once. Problem details stay in English like the existing ones, and the Back office shows its own translated messages.
+- The first Mission planner's name is optional, because UC-029 A2 lists only her e-mail as required. When no name is given, her Person record takes her e-mail address as its name.
+- If Keycloak already has an account for the first Mission planner's e-mail, the request is refused with 409 and nothing is created. This is the conservative choice, since the specification is silent.
+- The invitation uses the Keycloak admin API, in this order: create the user with the attribute operator_id and the required actions UPDATE_PASSWORD and CONFIGURE_TOTP (multi-factor authentication is required for Mission planners), give her the realm role mission_planner, add her to the Operator's organisation, then send the actions e-mail back to the back-office client. Accepting the invitation means completing those actions.
+- The gateway calls Keycloak through a new confidential client, swarm-gateway-admin, with a service account that has the realm-management roles manage-users and manage-realm. Keycloak generates its secret, and the gateway reads it from the environment entry SWARM_GATEWAY_KEYCLOAK_CLIENT_SECRET, filled from the vault. KeycloakAdminClient is a separate class from KeycloakJwksClient because it uses a different API (the admin API).
+- New Operators are assigned to the cell named in conf/app.yaml, which is dev by default. P0 has one cell per deployment.
+- The specification does not give the realm's SMTP server or the back-office redirect URIs for each environment, so the realm file sets neither. They are follow-ups for the dev cell.
+- Back office sign-in uses oidc-client-ts (code flow with PKCE S256) and server data uses TanStack Query, as the front-end stack says. The identity and gateway URLs come from the Vite variables VITE_SWARM_IDENTITY_URL and VITE_SWARM_GATEWAY_URL.
+- GET /v1/operators/{operator_id} can be read by every role of that Operator. On her first sign-in, the Mission planner sees the Back office with her own Operator's name, and gets 404 for any other Operator.
+- The Operator service opens its PostgreSQL pool on the first call. So the OpenAPI export, the existing router tests and the e2e images still run with no database.
+- If a Keycloak call fails part-way through a creation, the database transaction rolls back and the service removes the organisation and user it created, as far as it can. The failure is answered 503, through the existing identity-unavailable handling.
+- T0.20 is not merged at plan time. The capture task therefore updates the four UC-029 mock-ups to what the app shows (TKT-21). If T0.20 is merged by run time, the task captures screenshots instead and deletes the mock-ups.
 
 <!-- plan:graph -->
 
@@ -63,45 +66,41 @@ T0.16 delivers UC-029 (Create an Operator) end to end. Work starts with eight te
 | Wave | Tasks | Agents running at once |
 | --- | --- | --- |
 | 1 | [K01](#k01), [K02](#k02), [K03](#k03), [K04](#k04), [K05](#k05), [K06](#k06), [K07](#k07), [K08](#k08) | 8 of 8 |
-| 2 | [K09](#k09), [K10](#k10), [K12](#k12) | 3 of 3 |
-| 3 | [K11](#k11), [K13](#k13) | 2 of 2 |
-| 4 | [K14](#k14), [K15](#k15) | 2 of 2 |
-| 5 | [K16](#k16) | 1 of 1 |
-| 6 | [K17](#k17) | 1 of 1 |
-| 7 | [K18](#k18) | 1 of 1 |
-| 8 | [K19](#k19) | 1 of 1 |
-| 9 | [K20](#k20), [K21](#k21), [K22](#k22) | 3 of 3 |
-| 10 | [K23](#k23) | 1 of 1 |
-| 11 | [K24](#k24) | 1 of 1 |
-| 12 | [K25](#k25) | 1 of 1 |
+| 2 | [K09](#k09), [K10](#k10), [K11](#k11), [K12](#k12), [K13](#k13), [K26](#k26) | 6 of 6 |
+| 3 | [K14](#k14), [K15](#k15), [K18](#k18), [K20](#k20) | 4 of 4 |
+| 4 | [K16](#k16), [K21](#k21), [K22](#k22) | 3 of 3 |
+| 5 | [K17](#k17) | 1 of 1 |
+| 6 | [K23](#k23) | 1 of 1 |
+| 7 | [K24](#k24) | 1 of 1 |
+| 8 | [K27](#k27) | 1 of 1 |
 
 | Wave | Task | Agent | Depends on | Unblocks |
 | --- | --- | --- | --- | --- |
-| 1 | [K01](#k01) Tests: shared Operator model with deployment, Jurisdictions, LLM provider and Anchoring | 🧪 test-writer | none | [K09](#k09) |
-| 1 | [K02](#k02) Tests: gateway models for the Operator entry, the directory and the Keycloak configuration | 🧪 test-writer | none | [K13](#k13) |
-| 1 | [K03](#k03) Tests: Operator directory repositories in PostgreSQL | 🧪 test-writer | none | [K13](#k13), [K14](#k14) |
-| 1 | [K04](#k04) Tests: Keycloak admin client and the stand-in Keycloak | 🧪 test-writer | none | [K13](#k13), [K15](#k15) |
-| 1 | [K05](#k05) Tests: OperatorService checks A1 and A2, creates, invites and isolates | 🧪 test-writer | none | [K13](#k13), [K16](#k16) |
-| 1 | [K06](#k06) Tests: /v1/operators routes and the two-Operator isolation test (FS-012 AC-3) | 🧪 test-writer | none | [K13](#k13), [K17](#k17) |
-| 1 | [K07](#k07) Tests: Back office screens A1, KO, A2 and OK (Vitest) | 🧪 test-writer | none | [K19](#k19), [K20](#k20), [K21](#k21), [K22](#k22) |
-| 1 | [K08](#k08) Tests: UC-029 end to end in Playwright (create, A1, A2, invitation, first sign-in, isolation) | 🧪 test-writer | none | [K10](#k10), [K12](#k12), [K11](#k11) |
-| 2 | [K09](#k09) Shared Operator model: deployment, Jurisdictions, LLM provider, Anchoring, and regenerated types | 🐍 implementer | [K01](#k01) | [K13](#k13) |
-| 2 | [K10](#k10) Keycloak realm: organisations, the gateway's admin account, invitation e-mail | 🐍 implementer | [K08](#k08) | [K11](#k11) |
-| 2 | [K12](#k12) Back office sign-in with Keycloak (PKCE) and the session | 🖥️ frontend-implementer | [K08](#k08) | [K19](#k19), [K23](#k23), [K25](#k25) |
-| 3 | [K11](#k11) compose.e2e.yaml: Keycloak, gateway, PostgreSQL, Back office and an SMTP sink for UC-029 | 🐍 implementer | [K08](#k08), [K10](#k10) | [K24](#k24), [K25](#k25) |
-| 3 | [K13](#k13) Gateway models: Operator entry, directory, Keycloak configuration, enums and exceptions | 🐍 implementer | [K02](#k02), [K03](#k03), [K04](#k04), [K05](#k05), [K06](#k06), [K09](#k09) | [K14](#k14), [K15](#k15) |
-| 4 | [K14](#k14) Operator directory: repositories and Alembic migration | 🐍 implementer | [K03](#k03), [K13](#k13) | [K16](#k16) |
-| 4 | [K15](#k15) Keycloak admin client: organisation, invitation and its state | 🐍 implementer | [K04](#k04), [K13](#k13) | [K16](#k16) |
-| 5 | [K16](#k16) OperatorService: checks of step 3, creation with its invitation, listing by role | 🐍 implementer | [K05](#k05), [K14](#k14), [K15](#k15) | [K17](#k17) |
-| 6 | [K17](#k17) Gateway /v1/operators routes with problem+json | 🐍 implementer | [K06](#k06), [K16](#k16) | [K18](#k18) |
-| 7 | [K18](#k18) OpenAPI document and generated api-client with the operators endpoints | 🖥️ frontend-implementer | [K17](#k17) | [K19](#k19), [K25](#k25) |
-| 8 | [K19](#k19) Back office: operators data hooks and the draft store | 🖥️ frontend-implementer | [K07](#k07), [K12](#k12), [K18](#k18) | [K20](#k20), [K21](#k21), [K22](#k22), [K25](#k25) |
-| 9 | [K20](#k20) Back office screen A1 and KO: ➕ Create an Operator | 🖥️ frontend-implementer | [K07](#k07), [K19](#k19) | [K23](#k23), [K24](#k24), [K25](#k25) |
-| 9 | [K21](#k21) Back office screen A2: invite the first Mission planner | 🖥️ frontend-implementer | [K07](#k07), [K19](#k19) | [K23](#k23), [K24](#k24), [K25](#k25) |
-| 9 | [K22](#k22) Back office screen OK: the Operators list | 🖥️ frontend-implementer | [K07](#k07), [K19](#k19) | [K23](#k23), [K24](#k24), [K25](#k25) |
-| 10 | [K23](#k23) Back office routes, side bar and frame for Operators | 🖥️ frontend-implementer | [K12](#k12), [K20](#k20), [K21](#k21), [K22](#k22) | [K24](#k24), [K25](#k25) |
-| 11 | [K24](#k24) Back office UC-029 messages in English, French, German and Spanish | 🖥️ frontend-implementer | [K11](#k11), [K20](#k20), [K21](#k21), [K22](#k22), [K23](#k23) | [K25](#k25) |
-| 12 | [K25](#k25) Capture the UC-029 screens (TKT-21) | ✏️ mockup-writer | [K11](#k11), [K12](#k12), [K18](#k18), [K19](#k19), [K20](#k20), [K21](#k21), [K22](#k22), [K23](#k23), [K24](#k24) | none |
+| 1 | [K01](#k01) Tests: Operator models, enums and REST refusals | 🧪 test-writer | none | [K09](#k09) |
+| 1 | [K02](#k02) Tests: Keycloak admin and Operator directory configuration | 🧪 test-writer | none | [K10](#k10), [K18](#k18) |
+| 1 | [K03](#k03) Tests: Operator directory storage and its migration | 🧪 test-writer | none | [K14](#k14) |
+| 1 | [K04](#k04) Tests: Keycloak admin client and its stand-in | 🧪 test-writer | none | [K15](#k15) |
+| 1 | [K05](#k05) Tests: OperatorService rules (creation, A1, A2, invitation, isolation) | 🧪 test-writer | none | [K16](#k16) |
+| 1 | [K06](#k06) Tests: /v1/operators routes and the two-Operator isolation test | 🧪 test-writer | none | [K26](#k26), [K17](#k17) |
+| 1 | [K07](#k07) Tests: the realm holds the gateway's admin service account | 🧪 test-writer | none | [K11](#k11) |
+| 1 | [K08](#k08) Tests: back-office sign-in, Create an Operator wizard and Operators list | 🧪 test-writer | none | [K12](#k12), [K13](#k13), [K24](#k24) |
+| 2 | [K09](#k09) Models: Operator fields, entry, directory entry, refusals and enums | 🐍 implementer | [K01](#k01) | [K14](#k14), [K15](#k15), [K20](#k20), [K16](#k16) |
+| 2 | [K10](#k10) Models: Keycloak admin and Operator directory configuration | 🐍 implementer | [K02](#k02) | [K15](#k15), [K18](#k18), [K16](#k16) |
+| 2 | [K11](#k11) Realm: confidential admin client of the gateway | 🐍 implementer | [K07](#k07) | none |
+| 2 | [K12](#k12) Messages: UC-029 screens in four languages | 🖥️ frontend-implementer | [K08](#k08) | [K24](#k24), [K27](#k27) |
+| 2 | [K13](#k13) Back office: sign-in session and gateway client | 🖥️ frontend-implementer | [K08](#k08) | [K24](#k24), [K27](#k27) |
+| 2 | [K26](#k26) Docs: the /v1/operators resource and the gateway's directory | 📝 doc-writer | [K06](#k06) | none |
+| 3 | [K14](#k14) Storage: Operator directory tables, repositories and gateway migration | 🐍 implementer | [K03](#k03), [K09](#k09) | [K16](#k16) |
+| 3 | [K15](#k15) Clients: Keycloak admin client (organisation and invitation) | 🐍 implementer | [K04](#k04), [K09](#k09), [K10](#k10) | [K16](#k16) |
+| 3 | [K18](#k18) Gateway app: operators section of conf/app.yaml | 🐍 implementer | [K02](#k02), [K10](#k10) | none |
+| 3 | [K20](#k20) Schema bundle: export the extended Operator | 🐍 implementer | [K09](#k09) | [K21](#k21), [K22](#k22) |
+| 4 | [K16](#k16) Service: OperatorService, its lifespan and its factory | 🐍 implementer | [K05](#k05), [K09](#k09), [K10](#k10), [K14](#k14), [K15](#k15) | [K17](#k17) |
+| 4 | [K21](#k21) Rust: regenerate the shared model structs | 🦀 rust-implementer | [K20](#k20) | none |
+| 4 | [K22](#k22) Live package: regenerate the TypeScript models | 🖥️ frontend-implementer | [K20](#k20) | [K27](#k27) |
+| 5 | [K17](#k17) API: /v1/operators routes, gateway wiring and OpenAPI document | 🐍 implementer | [K06](#k06), [K16](#k16) | [K23](#k23) |
+| 6 | [K23](#k23) API client: regenerate the gateway types | 🖥️ frontend-implementer | [K17](#k17) | [K24](#k24), [K27](#k27) |
+| 7 | [K24](#k24) Back office: Create an Operator screens and App wiring | 🖥️ frontend-implementer | [K08](#k08), [K12](#k12), [K13](#k13), [K23](#k23) | [K27](#k27) |
+| 8 | [K27](#k27) Screens: UC-029 A1, KO, A2 and OK as the app shows them | ✏️ mockup-writer | [K12](#k12), [K13](#k13), [K22](#k22), [K23](#k23), [K24](#k24) | none |
 
 ## Dependency graph
 
@@ -109,122 +108,97 @@ T0.16 delivers UC-029 (Create an Operator) end to end. Work starts with eight te
 flowchart LR
   subgraph W1["Wave 1"]
     direction TB
-    K01["K01 · 🧪 test-writer<br/>Tests: shared Operator model with deployment, Jurisdictions, LLM provider and Anchoring"]:::test_writer
-    K02["K02 · 🧪 test-writer<br/>Tests: gateway models for the Operator entry, the directory and the Keycloak configuration"]:::test_writer
-    K03["K03 · 🧪 test-writer<br/>Tests: Operator directory repositories in PostgreSQL"]:::test_writer
-    K04["K04 · 🧪 test-writer<br/>Tests: Keycloak admin client and the stand-in Keycloak"]:::test_writer
-    K05["K05 · 🧪 test-writer<br/>Tests: OperatorService checks A1 and A2, creates, invites and isolates"]:::test_writer
-    K06["K06 · 🧪 test-writer<br/>Tests: /v1/operators routes and the two-Operator isolation test (FS-012 AC-3)"]:::test_writer
-    K07["K07 · 🧪 test-writer<br/>Tests: Back office screens A1, KO, A2 and OK (Vitest)"]:::test_writer
-    K08["K08 · 🧪 test-writer<br/>Tests: UC-029 end to end in Playwright (create, A1, A2, invitation, first sign-in, isolation)"]:::test_writer
+    K01["K01 · 🧪 test-writer<br/>Tests: Operator models, enums and REST refusals"]:::test_writer
+    K02["K02 · 🧪 test-writer<br/>Tests: Keycloak admin and Operator directory configuration"]:::test_writer
+    K03["K03 · 🧪 test-writer<br/>Tests: Operator directory storage and its migration"]:::test_writer
+    K04["K04 · 🧪 test-writer<br/>Tests: Keycloak admin client and its stand-in"]:::test_writer
+    K05["K05 · 🧪 test-writer<br/>Tests: OperatorService rules (creation, A1, A2, invitation, isolation)"]:::test_writer
+    K06["K06 · 🧪 test-writer<br/>Tests: /v1/operators routes and the two-Operator isolation test"]:::test_writer
+    K07["K07 · 🧪 test-writer<br/>Tests: the realm holds the gateway's admin service account"]:::test_writer
+    K08["K08 · 🧪 test-writer<br/>Tests: back-office sign-in, Create an Operator wizard and Operators list"]:::test_writer
   end
   subgraph W2["Wave 2"]
     direction TB
-    K09["K09 · 🐍 implementer<br/>Shared Operator model: deployment, Jurisdictions, LLM provider, Anchoring, and regenerated types"]:::implementer
-    K10["K10 · 🐍 implementer<br/>Keycloak realm: organisations, the gateway's admin account, invitation e-mail"]:::implementer
-    K12["K12 · 🖥️ frontend-implementer<br/>Back office sign-in with Keycloak (PKCE) and the session"]:::frontend_implementer
+    K09["K09 · 🐍 implementer<br/>Models: Operator fields, entry, directory entry, refusals and enums"]:::implementer
+    K10["K10 · 🐍 implementer<br/>Models: Keycloak admin and Operator directory configuration"]:::implementer
+    K11["K11 · 🐍 implementer<br/>Realm: confidential admin client of the gateway"]:::implementer
+    K12["K12 · 🖥️ frontend-implementer<br/>Messages: UC-029 screens in four languages"]:::frontend_implementer
+    K13["K13 · 🖥️ frontend-implementer<br/>Back office: sign-in session and gateway client"]:::frontend_implementer
+    K26["K26 · 📝 doc-writer<br/>Docs: the /v1/operators resource and the gateway's directory"]:::doc_writer
   end
   subgraph W3["Wave 3"]
     direction TB
-    K11["K11 · 🐍 implementer<br/>compose.e2e.yaml: Keycloak, gateway, PostgreSQL, Back office and an SMTP sink for UC-029"]:::implementer
-    K13["K13 · 🐍 implementer<br/>Gateway models: Operator entry, directory, Keycloak configuration, enums and exceptions"]:::implementer
+    K14["K14 · 🐍 implementer<br/>Storage: Operator directory tables, repositories and gateway migration"]:::implementer
+    K15["K15 · 🐍 implementer<br/>Clients: Keycloak admin client (organisation and invitation)"]:::implementer
+    K18["K18 · 🐍 implementer<br/>Gateway app: operators section of conf/app.yaml"]:::implementer
+    K20["K20 · 🐍 implementer<br/>Schema bundle: export the extended Operator"]:::implementer
   end
   subgraph W4["Wave 4"]
     direction TB
-    K14["K14 · 🐍 implementer<br/>Operator directory: repositories and Alembic migration"]:::implementer
-    K15["K15 · 🐍 implementer<br/>Keycloak admin client: organisation, invitation and its state"]:::implementer
+    K16["K16 · 🐍 implementer<br/>Service: OperatorService, its lifespan and its factory"]:::implementer
+    K21["K21 · 🦀 rust-implementer<br/>Rust: regenerate the shared model structs"]:::rust_implementer
+    K22["K22 · 🖥️ frontend-implementer<br/>Live package: regenerate the TypeScript models"]:::frontend_implementer
   end
   subgraph W5["Wave 5"]
     direction TB
-    K16["K16 · 🐍 implementer<br/>OperatorService: checks of step 3, creation with its invitation, listing by role"]:::implementer
+    K17["K17 · 🐍 implementer<br/>API: /v1/operators routes, gateway wiring and OpenAPI document"]:::implementer
   end
   subgraph W6["Wave 6"]
     direction TB
-    K17["K17 · 🐍 implementer<br/>Gateway /v1/operators routes with problem+json"]:::implementer
+    K23["K23 · 🖥️ frontend-implementer<br/>API client: regenerate the gateway types"]:::frontend_implementer
   end
   subgraph W7["Wave 7"]
     direction TB
-    K18["K18 · 🖥️ frontend-implementer<br/>OpenAPI document and generated api-client with the operators endpoints"]:::frontend_implementer
+    K24["K24 · 🖥️ frontend-implementer<br/>Back office: Create an Operator screens and App wiring"]:::frontend_implementer
   end
   subgraph W8["Wave 8"]
     direction TB
-    K19["K19 · 🖥️ frontend-implementer<br/>Back office: operators data hooks and the draft store"]:::frontend_implementer
-  end
-  subgraph W9["Wave 9"]
-    direction TB
-    K20["K20 · 🖥️ frontend-implementer<br/>Back office screen A1 and KO: ➕ Create an Operator"]:::frontend_implementer
-    K21["K21 · 🖥️ frontend-implementer<br/>Back office screen A2: invite the first Mission planner"]:::frontend_implementer
-    K22["K22 · 🖥️ frontend-implementer<br/>Back office screen OK: the Operators list"]:::frontend_implementer
-  end
-  subgraph W10["Wave 10"]
-    direction TB
-    K23["K23 · 🖥️ frontend-implementer<br/>Back office routes, side bar and frame for Operators"]:::frontend_implementer
-  end
-  subgraph W11["Wave 11"]
-    direction TB
-    K24["K24 · 🖥️ frontend-implementer<br/>Back office UC-029 messages in English, French, German and Spanish"]:::frontend_implementer
-  end
-  subgraph W12["Wave 12"]
-    direction TB
-    K25["K25 · ✏️ mockup-writer<br/>Capture the UC-029 screens (TKT-21)"]:::mockup_writer
+    K27["K27 · ✏️ mockup-writer<br/>Screens: UC-029 A1, KO, A2 and OK as the app shows them"]:::mockup_writer
   end
   K01 --> K09
-  K08 --> K10
+  K02 --> K10
+  K07 --> K11
   K08 --> K12
-  K08 --> K11
-  K10 --> K11
-  K02 --> K13
-  K03 --> K13
-  K04 --> K13
-  K05 --> K13
-  K06 --> K13
-  K09 --> K13
+  K08 --> K13
+  K06 --> K26
   K03 --> K14
-  K13 --> K14
+  K09 --> K14
   K04 --> K15
-  K13 --> K15
+  K09 --> K15
+  K10 --> K15
+  K02 --> K18
+  K10 --> K18
+  K09 --> K20
   K05 --> K16
+  K09 --> K16
+  K10 --> K16
   K14 --> K16
   K15 --> K16
+  K20 --> K21
+  K20 --> K22
   K06 --> K17
   K16 --> K17
-  K17 --> K18
-  K07 --> K19
-  K12 --> K19
-  K18 --> K19
-  K07 --> K20
-  K19 --> K20
-  K07 --> K21
-  K19 --> K21
-  K07 --> K22
-  K19 --> K22
-  K12 --> K23
-  K20 --> K23
-  K21 --> K23
-  K22 --> K23
-  K11 --> K24
-  K20 --> K24
-  K21 --> K24
-  K22 --> K24
+  K17 --> K23
+  K08 --> K24
+  K12 --> K24
+  K13 --> K24
   K23 --> K24
-  K11 --> K25
-  K12 --> K25
-  K18 --> K25
-  K19 --> K25
-  K20 --> K25
-  K21 --> K25
-  K22 --> K25
-  K23 --> K25
-  K24 --> K25
+  K12 --> K27
+  K13 --> K27
+  K22 --> K27
+  K23 --> K27
+  K24 --> K27
+  classDef doc_writer fill:#e5e7eb,stroke:#4b5563,color:#111827
   classDef frontend_implementer fill:#e0f2f1,stroke:#0f766e,color:#053b36
   classDef implementer fill:#dbeafe,stroke:#1d4ed8,color:#0b1f4d
   classDef mockup_writer fill:#f3e8ff,stroke:#7e22ce,color:#2e0b4f
+  classDef rust_implementer fill:#fde2d4,stroke:#c2410c,color:#4a1a05
   classDef test_writer fill:#fff4d6,stroke:#b8860b,color:#3d2e00
 ```
 
 ## Tasks
 
-### <a id="k01"></a>K01: Tests: shared Operator model with deployment, Jurisdictions, LLM provider and Anchoring
+### <a id="k01"></a>K01: Tests: Operator models, enums and REST refusals
 
 | Agent | Wave | Depends on | Unblocks |
 | --- | --- | --- | --- |
@@ -232,732 +206,577 @@ flowchart LR
 
 **Files** (only this task may change them in its wave):
 
-- `packages/python/swarm-models/tests/models/test_enums.py`
-- `packages/python/swarm-models/tests/models/operators/test_operator.py`
-- `packages/python/swarm-models/tests/service/schemas/test_schema_exporter.py`
+- `tests/swarm_models/enums/operators/test_operator_enums.py`
+- `tests/swarm_models/operators/test_operator.py`
+- `tests/swarm_models/operators/test_operator_entry.py`
+- `tests/swarm_models/operators/test_operator_directory_entry.py`
+- `tests/swarm_models/operators/test_operator_created.py`
+- `tests/swarm_models/operators/exceptions/test_operator_refusals.py`
 
-**Done when:** `uv run ruff format --check` and `uv run ruff check` pass on the three files. `uv run pytest packages/python/swarm-models/tests/models/test_enums.py packages/python/swarm-models/tests/models/operators/test_operator.py` fails only because swarm_models.models.enums and the new exceptions do not exist yet.
+**Done when:** `uv run ruff check tests/swarm_models/operators tests/swarm_models/enums/operators` and `uv run ruff format --check` on the listed files pass; `uv run pytest tests/swarm_models/operators tests/swarm_models/enums/operators -n 2` fails only because the new models, enums and exceptions do not exist yet.
 
 **Brief:**
 
-Write the tests first for the shared Operator model, which the Swarm administrator creates with its name, deployment, Jurisdictions, LLM provider and Anchoring. Spec: docs/specs/functional/use-cases/UC-029-create-an-operator.md (steps 1 and 2, alternative flow A2: required are the name, the deployment and at least one Jurisdiction; the LLM provider and the Anchoring have defaults), docs/specs/functional/features/FS-012-operators-deployment-and-languages.md ('Required to create an Operator': LLM provider Claude in the cloud, Anchoring a qualified timestamping authority by default), docs/specs/technical/02-data-models.md#conventions (Operator is a global model of swarm-models), docs/specs/technical/01-architecture.md#cells. Ticket: docs/tickets/T0.16/TICKET.md.
+Write the failing tests of the shared models that UC-029 needs, before any code exists (TKT-4). Specification: [UC-029 main flow and alternative flows](docs/specs/functional/use-cases/UC-029-create-an-operator.md#alternative-flows), [FS-012 details (required fields and defaults)](docs/specs/functional/features/FS-012-operators-deployment-and-languages.md#details), [glossary: Jurisdiction](docs/specs/glossary.md#term-jurisdiction), [LLM provider](docs/specs/glossary.md#term-llm-provider), [Anchoring](docs/specs/glossary.md#term-anchoring), [BR-008](docs/specs/functional/business-rules/BR-008-operator-isolation.md), [API layer: REST errors as problem+json](docs/specs/technical/05-api.md#rest). Follow AGENT.md Tests (one `Test<Subject>` class per file, sentence names, the six model tests: defaults, full valid construction, none becomes the default, rejects bad values with the specific exception, rejects unknown keys, round trip; compare with enums and constants, never raw values).
 
-1) packages/python/swarm-models/tests/models/test_enums.py, class TestEnums. It pins the four new enums of swarm_models.models.enums (the one enums.py of the models module, CLAUDE.md rule). Pin them the way tests/models/people/test_role_name.py pins RoleName: exact members, StrEnum, @unique, values in lower snake case with no hyphen.
-   - Deployment: CLOUD='cloud', ON_PREMISES='on_premises'.
-   - Jurisdiction: EU_EASA='eu_easa', US_FAA='us_faa'.
-   - LlmProvider: CLAUDE='claude', OPEN_WEIGHT='open_weight'.
-   - AnchoringChoice: QUALIFIED_TIMESTAMPING_AUTHORITY='qualified_timestamping_authority', PUBLIC_BLOCKCHAIN='public_blockchain', NONE='none'.
-2) Extend TestOperator in packages/python/swarm-models/tests/models/operators/test_operator.py and keep the six model tests of AGENT.md (Tests). Its valid() becomes Aerowing Services, deployment 'cloud', jurisdictions ['eu_easa'].
-   - Required fields: id, name, deployment, jurisdictions.
-   - Defaults: llm_provider is LlmProvider.CLAUDE and anchoring is AnchoringChoice.QUALIFIED_TIMESTAMPING_AUTHORITY, and None becomes the default for both. None on id, name, deployment or jurisdictions raises that field's exception.
-   - Refused deployment values (an unknown string, a bool, an int) raise SEOperatorInvalidDeployment.
-   - Refused jurisdictions values (missing, empty list, not a list, unknown member, a duplicate, a bool) raise SEOperatorInvalidJurisdictions.
-   - Unknown llm_provider and anchoring values raise SEOperatorInvalidLlmProvider and SEOperatorInvalidAnchoring.
-   - Enum values given as strings are accepted.
-   - Round trip through model_dump and JSON.
-   - Every field exception, the four new ones included, imports from swarm_models.models.operators.exceptions and subclasses SEInvalidOperatorException, not ValueError.
-3) packages/python/swarm-models/tests/service/schemas/test_schema_exporter.py: add 'Deployment', 'Jurisdiction', 'LlmProvider' and 'AnchoringChoice' to EXPECTED_DEFS, and rename the test that counts them to the new count. Change nothing else.
-Rules: AGENT.md Tests (one Test class per file, sentence names, parametrize, specific exceptions, no unittest.mock). Compare with enum members, never raw values, except where a test pins an enum's values.
+Contract the implementer (K09) will satisfy:
+- New enums in `swarm_models/enums.py` (import `from swarm_models.enums import ...`): `Deployment` {CLOUD="cloud", ON_PREMISES="on_premises"}, `Jurisdiction` {EU_EASA="eu_easa", US_FAA="us_faa"}, `LlmProvider` {CLAUDE="claude", OPEN_WEIGHT="open_weight"}, `Anchoring` {QUALIFIED_TIMESTAMPING="qualified_timestamping", PUBLIC_BLOCKCHAIN="public_blockchain", NONE="none"}, `OperatorField` {NAME="name", DEPLOYMENT="deployment", JURISDICTIONS="jurisdictions", FIRST_MISSION_PLANNER_EMAIL="first_mission_planner_email"}. Test: unique, lower snake case values without hyphens.
+- `swarm_models.operators.operator.Operator` gains `deployment: Deployment` (required), `jurisdictions: List[Jurisdiction]` (required, at least one, no duplicates), `llm_provider: LlmProvider` (default CLAUDE), `anchoring: Anchoring` (default QUALIFIED_TIMESTAMPING), beside `id` (UUID v7) and `name`. Update the existing `tests/swarm_models/operators/test_operator.py` accordingly; each bad field raises its own `SEOperatorInvalid<Field>` from `swarm_models.operators.exceptions`.
+- `swarm_models.operators.operator_entry.OperatorEntry`, the body of the create request, lenient on presence so that the service can name what is missing: `name: Optional[str]` (stripped, blank becomes None), `deployment: Optional[Deployment]`, `jurisdictions: List[Jurisdiction]` (default empty, duplicates refused), `llm_provider: Optional[LlmProvider]` (default None), `anchoring: Anchoring` (default QUALIFIED_TIMESTAMPING), `first_mission_planner_name: Optional[str]` (blank becomes None), `first_mission_planner_email: Optional[str]` (blank becomes None; when given, an address without one `@` and a dot in its domain is refused). Its exceptions derive from `SEInvalidOperatorEntryException`, which is a `ValueError` (so FastAPI answers 422 for a wrong type).
+- `swarm_models.operators.operator_directory_entry.OperatorDirectoryEntry(operator: Operator, cell_assignment: CellAssignment)`: refused when `cell_assignment.operator_id != operator.id`.
+- `swarm_models.operators.operator_created.OperatorCreated(operator: Operator, cell_assignment: CellAssignment, first_mission_planner: Person)`: refused when the cell assignment or the person does not belong to the Operator.
+- REST refusals, `SERestError` subclasses importable from `swarm_models.operators.exceptions`: `SEOperatorFieldMissingError` (STATUS 422), `SEOperatorNameTakenError` (409), `SEOperatorPlannerEmailTakenError` (409), `SEOperatorNotFoundError` (404). Test their STATUS and that each is an `SERestError` (`swarm_web.models.rest.exceptions`).
 
-### <a id="k02"></a>K02: Tests: gateway models for the Operator entry, the directory and the Keycloak configuration
+The folder `tests/swarm_models/enums/` already holds five files, so the enum tests go in `tests/swarm_models/enums/operators/`. Test file base names must be unique across the workspace. Use Aerowing Services, the sample Operator of the visual identity.
+
+### <a id="k02"></a>K02: Tests: Keycloak admin and Operator directory configuration
 
 | Agent | Wave | Depends on | Unblocks |
 | --- | --- | --- | --- |
-| 🧪 test-writer | 1 | none | [K13](#k13) |
+| 🧪 test-writer | 1 | none | [K10](#k10), [K18](#k18) |
 
 **Files** (only this task may change them in its wave):
 
-- `services/gateway/tests/models/test_enums.py`
-- `services/gateway/tests/models/operators/test_operator_entry.py`
-- `services/gateway/tests/models/operators/test_first_mission_planner_entry.py`
-- `services/gateway/tests/models/operators/test_operator_creation.py`
-- `services/gateway/tests/models/operators/test_operator_entry_problem.py`
-- `services/gateway/tests/models/operators/test_operator_directory_entry.py`
-- `services/gateway/tests/models/keycloak/test_keycloak_admin_config.py`
-- `services/gateway/tests/models/keycloak/test_mission_planner_invitation.py`
-- `services/gateway/tests/models/directory/test_directory_config.py`
+- `tests/swarm_models/keycloak/test_keycloak_admin_config.py`
+- `tests/swarm_models/config/gateway/test_operator_directory_config.py`
+- `tests/swarm_models/config/gateway/test_gateway_config.py`
 
-**Done when:** `uv run ruff format --check` and `uv run ruff check` pass on the nine files. `uv run pytest services/gateway/tests/models -n 2` fails only because the new gateway models, enums and exceptions do not exist yet.
+**Done when:** `uv run ruff check tests/swarm_models/keycloak tests/swarm_models/config/gateway` passes; `uv run pytest tests/swarm_models/keycloak/test_keycloak_admin_config.py tests/swarm_models/config/gateway -n 2` fails only because the new configuration models and the `operators` section do not exist yet.
 
 **Brief:**
 
-Write the tests first for the gateway models that carry UC-029. Spec: docs/specs/functional/use-cases/UC-029-create-an-operator.md (steps 1 to 5, A1 name taken, A2 required field missing: name, deployment, at least one Jurisdiction, the first Mission planner's e-mail; the LLM provider and the Anchoring have defaults), docs/specs/functional/features/FS-012-operators-deployment-and-languages.md, docs/specs/technical/01-architecture.md#cells (Operator directory and cell assignment), docs/specs/technical/06-security.md#identity (Keycloak, each Operator an organisation), docs/specs/technical/02-data-models.md#conventions. Ticket: docs/tickets/T0.16/TICKET.md.
+Write the failing tests of the configuration that the Operator directory of the gateway needs. Specification: [Architecture: cells and the global layer (Operator directory, routing of each Operator to its cell)](docs/specs/technical/01-architecture.md#cells), [Security: identity (Keycloak, each Operator an organisation)](docs/specs/technical/06-security.md#identity), [UC-029](docs/specs/functional/use-cases/UC-029-create-an-operator.md#main-flow). Follow AGENT.md Tests and Pydantic models (six model tests each, `None` becomes the default, `bool` refused for numbers, blank strings refused, `extra="forbid"`, configuration sections `validate_default=True`; a field ending in `_key` names an environment or secret store entry and never holds a secret).
 
-Every model gets the six model tests of AGENT.md. Each field exception subclasses its model base and not ValueError. Bool is refused where a number is expected. Strings are stripped and empty ones refused. The new enums Deployment, Jurisdiction, LlmProvider and AnchoringChoice come from swarm_models.models.enums.
-- tests/models/test_enums.py (gateway.models.enums; extend the file if T0.11 or T0.12 created it):
-  - InvitationState: INVITED='invited', ACCEPTED='accepted'.
-  - OperatorField: NAME='name', DEPLOYMENT='deployment', JURISDICTIONS='jurisdictions', LLM_PROVIDER='llm_provider', ANCHORING='anchoring', FIRST_MISSION_PLANNER_NAME='first_mission_planner_name', FIRST_MISSION_PLANNER_EMAIL='first_mission_planner_email'.
-  - OperatorProblemReason: REQUIRED='required', TAKEN='taken', INVALID='invalid'.
-- OperatorEntry (gateway.models.operators.operator_entry), frozen, extra forbid. Base SEInvalidOperatorEntryException.
-  - name: SEOperatorEntryInvalidName.
-  - deployment: required, SEOperatorEntryInvalidDeployment.
-  - jurisdictions: at least one, no duplicates, SEOperatorEntryInvalidJurisdictions.
-  - llm_provider: default CLAUDE, SEOperatorEntryInvalidLlmProvider.
-  - anchoring: default QUALIFIED_TIMESTAMPING_AUTHORITY, SEOperatorEntryInvalidAnchoring.
-  - to_operator(operator_id) returns the shared swarm_models Operator with the same values.
-- FirstMissionPlannerEntry. Base SEInvalidFirstMissionPlannerEntryException.
-  - name: SEFirstMissionPlannerEntryInvalidName.
-  - email: stripped, one '@' with text on both sides, no space, SEFirstMissionPlannerEntryInvalidEmail.
-- OperatorCreation: operator (OperatorEntry) and first_mission_planner (FirstMissionPlannerEntry). Exceptions SEOperatorCreationInvalidOperator and SEOperatorCreationInvalidFirstMissionPlanner, base SEInvalidOperatorCreationException.
-- OperatorEntryProblem, frozen: field (OperatorField) and reason (OperatorProblemReason). Exceptions SEOperatorEntryProblemInvalidField and SEOperatorEntryProblemInvalidReason, base SEInvalidOperatorEntryProblemException.
-- MissionPlannerInvitation (gateway.models.keycloak.mission_planner_invitation): name (str) and state (InvitationState). Exceptions SEMissionPlannerInvitationInvalidName and SEMissionPlannerInvitationInvalidState, base SEInvalidMissionPlannerInvitationException.
-- OperatorDirectoryEntry, frozen: operator (swarm_models Operator), cell_assignment (swarm_models CellAssignment), first_mission_planner (Optional[MissionPlannerInvitation], default None).
-  - Field exceptions SEOperatorDirectoryEntryInvalidOperator, SEOperatorDirectoryEntryInvalidCellAssignment and SEOperatorDirectoryEntryInvalidFirstMissionPlanner.
-  - A cell_assignment.operator_id other than operator.id raises SEOperatorDirectoryEntryCellMismatch.
-  - Base SEInvalidOperatorDirectoryEntryException.
-- DirectoryConfig (gateway.models.directory.directory_config), validate_default: default_cell (str, required: the cell every new Operator is assigned to). Exception SEDirectoryConfigInvalidDefaultCell, base SEInvalidDirectoryConfigException.
-- KeycloakAdminConfig (gateway.models.keycloak.keycloak_admin_config), validate_default. Base SEInvalidKeycloakAdminConfigException.
-  - base_url: http or https, trailing slash stripped.
-  - realm, client_id.
-  - client_secret_key: names a secret store entry and never holds the secret.
-  - timeout_s: float above 0, default 10.0.
-  - Exceptions SEKeycloakAdminConfigInvalidBaseUrl, SEKeycloakAdminConfigInvalidRealm, SEKeycloakAdminConfigInvalidClientId, SEKeycloakAdminConfigInvalidClientSecretKey and SEKeycloakAdminConfigInvalidTimeoutS.
-The exceptions import from the package next to each model: gateway.models.operators.exceptions, gateway.models.keycloak.exceptions, gateway.models.directory.exceptions.
-Rules: AGENT.md Tests and Pydantic models; compare with enums and ClassVar constants.
+Contract the implementer (K10) will satisfy:
+- `swarm_models.keycloak.keycloak_admin_config.KeycloakAdminConfig`: `server_url` (default `http://keycloak.global.svc.cluster.local:8080`, no trailing slash kept), `realm` (default `swarm`), `client_id` (default `swarm-gateway-admin`), `client_secret_key` (default `SWARM_GATEWAY_KEYCLOAK_CLIENT_SECRET`, the environment entry of the secret), `sign_in_client_id` (default `back-office`, the client the invitation link returns to), `request_timeout_s` (default 5.0, a positive number). Each bad field raises its own `SEKeycloakAdminConfigInvalid<Field>` from `swarm_models.keycloak.exceptions`.
+- `swarm_models.config.gateway.operator_directory_config.OperatorDirectoryConfig`: `cell` (default `dev`, the cell new Operators are assigned to, a non-blank lower case name) and `keycloak` (a `KeycloakAdminConfig`, default section when None).
+- `GatewayConfig` gains `operators: OperatorDirectoryConfig` (default section when None, a non-mapping raises `SEGatewayConfigInvalidOperators` from `swarm_models.config.gateway.exceptions`). Update `tests/swarm_models/config/gateway/test_gateway_config.py`: the new section, its default, and that `backend/apps/gateway/conf/app.yaml` loads and writes out every default of the `operators` section (load the file with `GatewayConfig.load` and compare with `GatewayConfig()`; find the file from the repository root as the existing tests do, without `Path(__file__).parents[N]`).
 
-### <a id="k03"></a>K03: Tests: Operator directory repositories in PostgreSQL
+### <a id="k03"></a>K03: Tests: Operator directory storage and its migration
 
 | Agent | Wave | Depends on | Unblocks |
 | --- | --- | --- | --- |
-| 🧪 test-writer | 1 | none | [K13](#k13), [K14](#k14) |
+| 🧪 test-writer | 1 | none | [K14](#k14) |
 
 **Files** (only this task may change them in its wave):
 
-- `services/gateway/tests/storage/postgres/directory/conftest.py`
-- `services/gateway/tests/storage/postgres/directory/test_operator_repository.py`
-- `services/gateway/tests/storage/postgres/directory/test_cell_assignment_repository.py`
+- `tests/swarm_storage/gateway/operators/test_operator_repository.py`
+- `tests/swarm_storage/gateway/operators/test_cell_assignment_repository.py`
+- `tests/swarm_storage/gateway/people/test_person_repository.py`
+- `tests/swarm_storage/gateway/ddl/test_operator_directory_tables.py`
+- `tests/scripts/migrations/test_migrations_scripts.py`
 
-**Done when:** `uv run ruff format --check` and `uv run ruff check` pass on the three files. `uv run pytest services/gateway/tests/storage/postgres/directory` fails or is skipped only because the repositories and exceptions do not exist yet.
+**Done when:** `uv run ruff check tests/swarm_storage/gateway tests/scripts/migrations` passes; `uv run pytest tests/swarm_storage/gateway tests/scripts/migrations -n 2` fails (or skips without PostgreSQL) only because the storage classes and the migration do not exist yet.
 
 **Brief:**
 
-Write the tests first for the two repositories of the Operator directory. The directory is part of the global layer, and each Operator is assigned to exactly one cell (docs/specs/technical/01-architecture.md#cells). Each repository holds one entity in storage/postgres/ (docs/specs/technical/03-storage.md#repositories, docs/specs/technical/03-storage.md#postgresql). A name already taken is refused (A1 of docs/specs/functional/use-cases/UC-029-create-an-operator.md). Ticket: docs/tickets/T0.16/TICKET.md.
+Write the failing tests of the gateway storage of the Operator directory. Specification: [Architecture: the Operator directory in the global layer](docs/specs/technical/01-architecture.md#cells), [Security: checks in the gateway and in PostgreSQL row-level security](docs/specs/technical/06-security.md#authorisation), [BR-008: Operator isolation](docs/specs/functional/business-rules/BR-008-operator-isolation.md), [UC-029 step 3 (no Operator has that name)](docs/specs/functional/use-cases/UC-029-create-an-operator.md#main-flow). Use the real PostgreSQL fixtures `postgres_dsn` of the root conftest (they skip without the binaries) and follow `tests/swarm_storage/shared/postgres/repositories/test_outbox_repository.py` for the pool, the schema set-up and the Operator constants.
 
-Use the real PostgreSQL fixtures and transaction pattern T0.12 left for the gateway's storage tests (read services/gateway/tests/storage/ and services/gateway/src/gateway/storage/). Skip the tests without a database, as those do. The fixture runs the gateway's Alembic migrations. conftest.py gives a clean directory per test.
-- OperatorRepository (gateway.storage.postgres.directory.operator_repository), async:
-  - add(operator) stores a swarm_models Operator with all its fields (deployment, jurisdictions, llm_provider, anchoring).
-  - get(operator_id) returns it equal to what was added, or raises SEDirectoryOperatorNotFoundError.
-  - list_all() returns every Operator ordered by name.
-  - name_taken(name) is True for the same name after stripping, in any case ('aerowing services ' matches 'Aerowing Services').
-  - add with a taken name raises SEDirectoryOperatorNameTakenError, even when name_taken was not asked (unique index, to cover a race).
-- CellAssignmentRepository (gateway.storage.postgres.directory.cell_assignment_repository), async:
-  - assign(assignment) stores a swarm_models CellAssignment.
-  - of(operator_id) returns it, assigned_at in UTC to the microsecond, or raises SEDirectoryOperatorNotFoundError.
-  - A second assign for the same Operator raises SEDirectoryCellAlreadyAssignedError.
-- A rolled-back transaction leaves neither the Operator nor its assignment.
-Exceptions import from gateway.models.directory.exceptions, all subclasses of SEDirectoryError. Sample data: Aerowing Services, cloud, EU (EASA). Rules: AGENT.md Tests; no unittest.mock.
+Contract the implementer (K14) will satisfy:
+- `swarm_storage.gateway.ddl.operator_directory_tables.OperatorDirectoryTables` with `create(schema) -> List[str]` and `drop(schema) -> List[str]`, like `OutboxTable`: tables `operators` (one row per `Operator`, a unique index on the trimmed lower-case name), `cell_assignments` (one row per Operator, `CellAssignment`), both global and **without** row-level security because the Swarm administrator, who has no Operator, writes and lists them; and `people` (one row per `Person`, with `operator_id`) **with** the row-level security of `RowLevelSecurity().enable`.
+- `swarm_storage.gateway.operators.operator_repository.OperatorRepository(unit_of_work, schema)`, a `PostgresRepository[Operator]`: `add` (round trip of every field, the Jurisdictions list included), `get`, `list`, and `find_by_name(name) -> Optional[Operator]` matching trimmed and case-insensitively; adding a second Operator whose name differs only by case or spaces raises `SEStorageDuplicateError` from `swarm_models.storage.exceptions`.
+- `swarm_storage.gateway.operators.cell_assignment_repository.CellAssignmentRepository(unit_of_work, schema)`: `add`, `get(operator_id)`, `list`.
+- `swarm_storage.gateway.people.person_repository.PersonRepository(unit_of_work, schema)`: `add`, `get`, `list`; a person of Operator A is invisible in a unit of work of Operator B and in one without an Operator, and adding a person of B in A's unit of work raises `SEStorageOperatorRefusedError` (BR-008, two Operators).
+- Update `tests/scripts/migrations/test_migrations_scripts.py`: migrating the gateway also creates `gateway.operators`, `gateway.cell_assignments` and `gateway.people` (migration `0002` of `backend/apps/gateway/migrations/versions/`).
 
-### <a id="k04"></a>K04: Tests: Keycloak admin client and the stand-in Keycloak
+### <a id="k04"></a>K04: Tests: Keycloak admin client and its stand-in
 
 | Agent | Wave | Depends on | Unblocks |
 | --- | --- | --- | --- |
-| 🧪 test-writer | 1 | none | [K13](#k13), [K15](#k15) |
+| 🧪 test-writer | 1 | none | [K15](#k15) |
 
 **Files** (only this task may change them in its wave):
 
-- `services/gateway/tests/clients/keycloak/conftest.py`
-- `services/gateway/tests/clients/keycloak/stand_in_keycloak.py`
-- `services/gateway/tests/clients/keycloak/test_keycloak_admin_client.py`
+- `tests/fakes/keycloak/keycloak_admin_stand_in.py`
+- `tests/fakes/keycloak/admin_request_handler.py`
+- `tests/fakes/keycloak/helpers.py`
+- `tests/conftest.py`
+- `tests/swarm_clients/gateway/keycloak/test_keycloak_admin_client.py`
 
-**Done when:** `uv run ruff format --check` and `uv run ruff check` pass on the three files. `uv run pytest services/gateway/tests/clients/keycloak` fails only because gateway.clients.keycloak and the gateway models do not exist yet.
+**Done when:** `uv run ruff check tests/fakes/keycloak tests/conftest.py tests/swarm_clients/gateway/keycloak` passes; the stand-in starts and answers its token endpoint in a quick check; `uv run pytest tests/swarm_clients/gateway/keycloak/test_keycloak_admin_client.py -n 2` fails only because `KeycloakAdminClient` and its new exception do not exist yet, and the existing tests of `tests/swarm_clients/gateway/keycloak` and `tests/swarm_api` still pass.
 
 **Brief:**
 
-Write the tests first for the gateway's client of the Keycloak admin API, and the stand-in server they run against. Spec: docs/specs/technical/06-security.md#identity (Keycloak, one realm, each Operator an organisation, multi-factor authentication for Mission planners), docs/specs/technical/06-security.md#authorisation (roles per persona), docs/specs/functional/use-cases/UC-029-create-an-operator.md (steps 4 to 6: the invitation by e-mail and the first sign-in), docs/specs/technical/01-architecture.md#cells. Ticket: docs/tickets/T0.16/TICKET.md.
+Write a local stand-in of the Keycloak admin REST API and the failing tests of the client that creates an Operator's organisation and invites its first Mission planner by e-mail. Specification: [Security: identity (Keycloak, one realm, each Operator an organisation, multi-factor authentication for Mission planners)](docs/specs/technical/06-security.md#identity), [UC-029 steps 4 to 6](docs/specs/functional/use-cases/UC-029-create-an-operator.md#main-flow), [Architecture: Keycloak identity in the global layer](docs/specs/technical/01-architecture.md#cells). Prefer real things to mocks (AGENT.md Tests): a real local HTTP server, like `tests/fakes/keycloak/keycloak_stand_in.py`. The folder `tests/fakes/keycloak/` may hold at most five code files.
 
-1) stand_in_keycloak.py: class StandInKeycloak (AGENT.md Tests: a helper class in its own file), a context manager (no start or stop methods; the lifecycle rule covers tests). It serves on 127.0.0.1 and a free port, in a thread, the subset of the Keycloak 26 API the client uses:
-   - the client-credentials token endpoint, checking client_id and client_secret;
-   - organisations: create, delete, get by alias, members;
-   - users: create, get, required actions;
-   - realm role mapping;
-   - the execute-actions e-mail.
-   Exact public API, which K05 and K06 use too:
-   - attributes base_url, realm, client_id, client_secret;
-   - organizations: Dict[str, Dict[str, JsonValue]], keyed by alias;
-   - users: Dict[str, Dict[str, JsonValue]], keyed by e-mail;
-   - invitations: List[str], the e-mails an execute-actions e-mail went to;
-   - fail_invitations: bool; when True the execute-actions e-mail answers 500;
-   - accept_invitation(email) clears that user's required actions, as her first sign-in does.
-   Its constants are UPPER_CASE ClassVars. conftest.py yields a running StandInKeycloak and a KeycloakAdminConfig pointing at it.
-2) test_keycloak_admin_client.py, class TestKeycloakAdminClient, for KeycloakAdminClient(config: KeycloakAdminConfig, client_secret: str, logger) in gateway.clients.keycloak.keycloak_admin_client. All methods are async.
-   - create_organization(operator) creates an organisation named after the Operator, with alias str(operator.id) and an operator_id attribute, and returns its id.
-   - invite_mission_planner(organization_id, entry: FirstMissionPlannerEntry) does four things: it creates the user (e-mail, name, enabled), makes her a member, maps the realm role named RoleName.MISSION_PLANNER, and sends one execute-actions e-mail with the required actions of a new Mission planner.
-   - delete_organization(organization_id) removes the organisation.
-   - mission_planner_invitation(operator_id) returns a MissionPlannerInvitation: INVITED while required actions remain, ACCEPTED after accept_invitation. It returns None when there is no member.
-   - An unreachable server or a timeout raises SEKeycloakAdminUnavailableError, and an error status raises SEKeycloakAdminRefusedError, both subclasses of SEKeycloakAdminError from gateway.models.keycloak.exceptions.
-   - No log record holds the client secret, a token or the e-mail address (caplog).
-Rules: AGENT.md Tests; no unittest.mock, the stand-in is the real thing tested against.
+Stand-in contract, which K05 and K06 use in the same wave, so keep exactly these names:
+- `tests.fakes.keycloak.keycloak_admin_stand_in.KeycloakAdminStandIn`, a context manager on `127.0.0.1` and a free port, with `server_url` (`http://127.0.0.1:<port>`), `realm` (`swarm`), `client_id` (`swarm-gateway-admin`) and `client_secret` (a random string); the fixture `keycloak_admin_stand_in` in `tests/conftest.py` yields one and sets the environment entry `SWARM_GATEWAY_KEYCLOAK_CLIENT_SECRET` to its secret (monkeypatch).
+- It answers: `POST /realms/swarm/protocol/openid-connect/token` (client credentials, the right secret only), and, with that bearer token only, `POST /admin/realms/swarm/organizations` (201, `Location` with the id), `DELETE /admin/realms/swarm/organizations/{id}`, `POST /admin/realms/swarm/users` (201 with `Location`; 409 when the e-mail is already used), `DELETE /admin/realms/swarm/users/{id}`, `GET /admin/realms/swarm/roles/{name}`, `POST /admin/realms/swarm/users/{id}/role-mappings/realm`, `POST /admin/realms/swarm/organizations/{id}/members` (body: the user id), `PUT /admin/realms/swarm/users/{id}/execute-actions-email?client_id=...` (204).
+- It records what it holds: `organisations` (id to representation), `users` (id to representation: email, username, firstName, attributes, requiredActions), `realm_roles` (user id to role names), `members` (organisation id to user ids), `action_emails` (list of (user id, actions, client_id)); `fail_path(fragment)` makes the next request whose path contains it answer 500, and `existing_email(address)` pre-registers a user.
 
-### <a id="k05"></a>K05: Tests: OperatorService checks A1 and A2, creates, invites and isolates
+Client contract the implementer (K15) will satisfy: `swarm_clients.gateway.keycloak.keycloak_admin_client.KeycloakAdminClient(config: KeycloakAdminConfig)` with `async create_organisation(operator: Operator) -> str` (named after the Operator, attribute `operator_id`), `async invite_mission_planner(organisation_id: str, person: Person) -> str` (creates the user with the e-mail as username, the person's name, the attribute `operator_id`, the required actions `UPDATE_PASSWORD` and `CONFIGURE_TOTP`; gives the realm role `mission_planner`; adds it to the organisation; sends the actions e-mail returning to `sign_in_client_id`; returns the user id), `async delete_organisation(organisation_id)`, `async delete_user(user_id)`. A 409 on the user raises `SEKeycloakConflictError`, any other failure, an unreachable server or a missing secret entry raises `SEKeycloakUnreachableError` (both from `swarm_models.keycloak.exceptions`); the secret is never logged.
+
+### <a id="k05"></a>K05: Tests: OperatorService rules (creation, A1, A2, invitation, isolation)
 
 | Agent | Wave | Depends on | Unblocks |
 | --- | --- | --- | --- |
-| 🧪 test-writer | 1 | none | [K13](#k13), [K16](#k16) |
+| 🧪 test-writer | 1 | none | [K16](#k16) |
 
 **Files** (only this task may change them in its wave):
 
-- `services/gateway/tests/service/operators/conftest.py`
-- `services/gateway/tests/service/operators/test_operator_entry_checker.py`
-- `services/gateway/tests/service/operators/test_operator_service.py`
+- `tests/swarm_service/gateway/operators/operator_service/test_operator_creation.py`
+- `tests/swarm_service/gateway/operators/operator_service/test_operator_entry_checks.py`
+- `tests/swarm_service/gateway/operators/operator_service/test_operator_directory_reads.py`
+- `tests/swarm_service/gateway/operators/operator_service/conftest.py`
+- `tests/swarm_service/gateway/operators/operator_service/helpers.py`
+- `tests/swarm_service/gateway/operators/test_operator_lifespan.py`
+- `tests/swarm_service/gateway/factories/operators/test_operator_service_factory.py`
 
-**Done when:** `uv run ruff format --check` and `uv run ruff check` pass on the three files. `uv run pytest services/gateway/tests/service/operators` fails or is skipped only because the service, the repositories, the client or the models do not exist yet.
+**Done when:** `uv run ruff check tests/swarm_service/gateway/operators tests/swarm_service/gateway/factories/operators` passes; `uv run pytest tests/swarm_service/gateway/operators tests/swarm_service/gateway/factories/operators -n 2` fails (or skips without PostgreSQL) only because the service, its lifespan and its factory do not exist yet.
 
 **Brief:**
 
-Write the tests first for the business rules of UC-029 in the gateway's service layer. Spec: docs/specs/functional/use-cases/UC-029-create-an-operator.md (steps 3 and 5, A1, A2, postconditions), docs/specs/functional/business-rules/BR-008-operator-isolation.md (data visible to its own Operator only; another Operator's attempt gets not found and is logged), docs/specs/functional/features/FS-012-operators-deployment-and-languages.md (AC-3, required fields), docs/specs/technical/06-security.md#authorisation (the Swarm administrator creates Operators and their first accounts; the gateway checks the role and the Operator of every call), docs/specs/technical/01-architecture.md#cells. Ticket: docs/tickets/T0.16/TICKET.md.
+Write the failing tests of the business rules of UC-029 in the service layer. Specification: [UC-029 main flow](docs/specs/functional/use-cases/UC-029-create-an-operator.md#main-flow), [alternative flows A1 and A2](docs/specs/functional/use-cases/UC-029-create-an-operator.md#alternative-flows), [postconditions](docs/specs/functional/use-cases/UC-029-create-an-operator.md#postconditions), [FS-012 details and AC-3](docs/specs/functional/features/FS-012-operators-deployment-and-languages.md#acceptance), [BR-008](docs/specs/functional/business-rules/BR-008-operator-isolation.md), [Architecture: cell assignment](docs/specs/technical/01-architecture.md#cells), [Security: identity](docs/specs/technical/06-security.md#identity). Use real PostgreSQL (`postgres_dsn`; create the schema and run `OperatorDirectoryTables().create(schema)`) and the fixture `keycloak_admin_stand_in` (the stand-in of K04, contract in K04's brief). No mocks. Use the models of K01's brief (`OperatorEntry`, `Operator`, `OperatorCreated`, `OperatorDirectoryEntry`, the enums and the four REST refusals).
 
-1) OperatorEntryChecker(logger) in gateway.service.operators.operator_entry_checker. It is pure: problems(entry: Dict[str, JsonValue], with_first_mission_planner: bool) returns List[OperatorEntryProblem] with every problem at once.
-   - REQUIRED for a missing or empty name, deployment or jurisdictions, and, when with_first_mission_planner, for the first Mission planner's name or e-mail.
-   - INVALID for a value present but wrong.
-   - No problem for a missing llm_provider or anchoring, which have defaults.
-   - Fields are OperatorField members.
-2) OperatorService in gateway.service.operators.operator_service, async. Build it with real repositories on the PostgreSQL fixtures of T0.12 (skip without a database, as they do) and a real KeycloakAdminClient. The client points at StandInKeycloak, imported by its full path from services/gateway/tests/clients/keycloak/stand_in_keycloak.py (written in parallel by K04 with this API: base_url, realm, client_id, client_secret, organizations, users, invitations, fail_invitations, accept_invitation(email)). Constructor: OperatorService(config: DirectoryConfig, operators: OperatorRepository, cells: CellAssignmentRepository, keycloak: KeycloakAdminClient, plus the transaction handle T0.12's repositories take, logger). The caller is the verified caller model T0.11 gives the gateway (person, Operator, roles). Behaviours:
-   - check(caller, entry) for a Swarm administrator: [] for Aerowing Services, cloud, EU (EASA). Once Aerowing Services exists, entering it again gives TAKEN on NAME, in any case (A1). Taken name and no Jurisdiction together give both problems (A2, as the KO screen shows both).
-   - create(caller, creation) succeeds. The Operator has a UUIDv7 id and is stored with its defaults (Claude, qualified timestamping authority). It is assigned to config.default_cell, with assigned_at in UTC. A Keycloak organisation exists for it, and exactly one invitation went to the first Mission planner's e-mail. The returned OperatorDirectoryEntry shows her invitation INVITED.
-   - create with problems raises SEOperatorEntryRefusedError carrying the problems, and creates nothing: no row, no organisation, no e-mail.
-   - create when the invitation fails (fail_invitations) raises SEOperatorCreationFailedError and leaves no directory row and no organisation.
-   - A caller without RoleName.SWARM_ADMINISTRATOR gets SEOperatorForbiddenError from check and create.
-   - list(caller): a Swarm administrator gets every Operator. The Mission planner of Aerowing Services gets only Aerowing Services, even with a second Operator present. After accept_invitation her invitation reads ACCEPTED.
-   - get(caller, id): her own Operator is returned. Another Operator's id raises SEOperatorNotFoundError and the attempt is logged (caplog), as BR-008 example 2 says.
-Exceptions import from gateway.models.operators.exceptions, subclasses of SEOperatorError. The second Operator's name is test data. Rules: AGENT.md Tests; no unittest.mock.
+Contract the implementer (K16) will satisfy:
+- `swarm_service.gateway.operators.operator_service.OperatorService(pool: PostgresPool, schema_name: str, cell: str, keycloak: KeycloakAdminClient)` with `async create(entry: OperatorEntry) -> OperatorCreated`, `async list(after: Optional[UUID] = None, limit: int = 100) -> List[OperatorDirectoryEntry]`, `async get(operator_id: UUID) -> Operator`, `async close()`. The pool opens on the first call (so building the service needs no database) and `close` is safe before any call and twice.
+- `create`: checks the required fields first and raises `SEOperatorFieldMissingError` whose message names every missing `OperatorField` value (name, deployment, at least one Jurisdiction, the first Mission planner's e-mail; parametrise each); then raises `SEOperatorNameTakenError` when an Operator of that name exists (same name, other case, extra spaces). Neither stores a row nor calls Keycloak. Otherwise, in one transaction, it stores the Operator (new UUID v7; `llm_provider` from the entry, or CLAUDE in the cloud and OPEN_WEIGHT on premises; `anchoring` from the entry, QUALIFIED_TIMESTAMPING by default), its `CellAssignment` to the configured cell, and the first Mission planner as a `Person` of that Operator (name entered, or the e-mail when none). It creates the Keycloak organisation and invites her: in the stand-in, one organisation, one user with the e-mail, attribute `operator_id` equal to the new Operator, realm role `mission_planner`, member of the organisation, and one actions e-mail.
+- An e-mail Keycloak already knows raises `SEOperatorPlannerEmailTakenError`. A Keycloak failure (`fail_path`) raises `SEKeycloakUnreachableError`. In both cases no row is left and the organisation and the user it created are removed from the stand-in.
+- `list` returns the directory entries in identifier order. `get` returns the Operator and raises `SEOperatorNotFoundError` for an unknown one.
+- With two Operators created, the person of each is visible only in a unit of work of its own Operator (BR-008).
+- `swarm_service.gateway.operators.operator_lifespan.OperatorLifespan(service, inner)` where `inner` is a lifespan callable `(FastAPI) -> async context manager`: `lifespan(app)` enters `inner`, yields, then closes the service, also when the block raises.
+- `swarm_service.gateway.factories.operators.operator_service_factory.OperatorServiceFactory(config: GatewayConfig).create()` returns an `OperatorService` on `config.postgres`, `config.schema_name` and `config.operators`, without opening anything or reading the secret.
 
-### <a id="k06"></a>K06: Tests: /v1/operators routes and the two-Operator isolation test (FS-012 AC-3)
+Shared fixtures go in the `conftest.py` and helpers in `helpers.py` of `operator_service/`, imported by their full path. Test base names must be unique across the workspace.
+
+### <a id="k06"></a>K06: Tests: /v1/operators routes and the two-Operator isolation test
 
 | Agent | Wave | Depends on | Unblocks |
 | --- | --- | --- | --- |
-| 🧪 test-writer | 1 | none | [K13](#k13), [K17](#k17) |
+| 🧪 test-writer | 1 | none | [K26](#k26), [K17](#k17) |
 
 **Files** (only this task may change them in its wave):
 
-- `services/gateway/tests/api/rest/v1/operators/conftest.py`
-- `services/gateway/tests/api/rest/v1/operators/test_operator_routes.py`
-- `services/gateway/tests/api/rest/v1/operators/test_operator_isolation.py`
+- `tests/swarm_api/v1/gateway/operator_router/test_operator_router.py`
+- `tests/swarm_api/v1/gateway/operator_router/test_operator_isolation.py`
+- `tests/swarm_api/v1/gateway/operator_router/conftest.py`
+- `tests/swarm_api/v1/gateway/operator_router/helpers.py`
+- `tests/swarm_api/v1/gateway/gateway_router/test_gateway_router.py`
 
-**Done when:** `uv run ruff format --check` and `uv run ruff check` pass on the three files. `uv run pytest services/gateway/tests/api/rest/v1/operators` fails or is skipped only because the routes and the layers below them do not exist yet.
+**Done when:** `uv run ruff check tests/swarm_api/v1/gateway` passes; `uv run pytest tests/swarm_api/v1/gateway -n 2` fails (or skips without PostgreSQL) only because the operator routes and their wiring do not exist yet.
 
 **Brief:**
 
-Write the tests first for the gateway's REST API of UC-029, and the acceptance test with two Operators. Spec: docs/specs/technical/05-api.md#rest (/v1, Idempotency-Key on every POST, errors as application/problem+json), docs/specs/technical/06-security.md#authorisation (the gateway checks the role and the Operator of every call), docs/specs/technical/06-security.md#identity, docs/specs/functional/use-cases/UC-029-create-an-operator.md (A1, A2), docs/specs/functional/business-rules/BR-008-operator-isolation.md, docs/specs/functional/features/FS-012-operators-deployment-and-languages.md (AC-3). Ticket: docs/tickets/T0.16/TICKET.md, criteria 1 to 3.
+Write the failing tests of the gateway REST routes of UC-029 and the acceptance test of the ticket: FS-012 AC-3 as an automated test with two Operators. Specification: [API layer: REST (`/v1`, `Idempotency-Key` on every POST, errors as problem+json)](docs/specs/technical/05-api.md#rest), [Security: roles (Swarm administrator creates Operators, no access to their data; gateway checks role and Operator)](docs/specs/technical/06-security.md#authorisation), [Security: identity (tokens carry person, Operator, roles)](docs/specs/technical/06-security.md#identity), [UC-029 alternative flows](docs/specs/functional/use-cases/UC-029-create-an-operator.md#alternative-flows), [FS-012 AC-3](docs/specs/functional/features/FS-012-operators-deployment-and-languages.md#acceptance), [BR-008 examples (another Operator's resource is not found)](docs/specs/functional/business-rules/BR-008-operator-isolation.md#examples).
 
-Build the gateway's FastAPI app as T0.12's API tests do, with the token helper T0.11 left for the gateway tests. Use the PostgreSQL fixtures (skip without a database, as they do) and StandInKeycloak, imported by its full path from services/gateway/tests/clients/keycloak/stand_in_keycloak.py. K04 writes it in parallel with this API: base_url, realm, client_id, client_secret, organizations, users, invitations, fail_invitations, accept_invitation(email). conftest.py wires them. Every POST sends an Idempotency-Key.
-1) test_operator_routes.py, class TestOperatorRoutes:
-   - POST /v1/operators:validate with the Operator's fields answers 204. A taken name answers 422 problem+json with errors [{field: name, reason: taken}] (A1). No Jurisdiction answers 422 with [{field: jurisdictions, reason: required}] (A2). Both at once list both.
-   - POST /v1/operators with {operator: {...}, first_mission_planner: {name, email}} answers 201 with the OperatorDirectoryEntry and a Location of /v1/operators/{id}. The stand-in received one invitation.
-   - A missing first Mission planner e-mail answers 422 naming first_mission_planner_email. The same Idempotency-Key replays the first answer and creates nothing twice.
-   - A Mission planner token on either POST answers 403. No token answers 401 (T0.11).
-   - fail_invitations answers 502 problem+json and creates nothing.
-   - GET /v1/operators and GET /v1/operators/{id} return directory entries.
-2) test_operator_isolation.py, class TestOperatorIsolation, for acceptance criterion 1 (FS-012 AC-3, BR-008):
-   - The Swarm administrator creates Aerowing Services and a second Operator through the API, and each first Mission planner accepts her invitation.
-   - With each one's token, GET /v1/operators lists only her own Operator. GET /v1/operators/{the other id} answers 404 problem+json, and the attempt is logged (caplog).
-   - The Swarm administrator lists both.
-Compare with the gateway enums and constants. Rules: AGENT.md Tests; no unittest.mock.
+Set-up: build the real application with `GatewayRouter(config).application()` where `config` is a `GatewayConfig` whose `auth.issuer_url` is the `keycloak_stand_in` (tokens minted with `tests.fakes.keycloak.helpers.claims_for`), whose `operators.keycloak.server_url` is the `keycloak_admin_stand_in` (K04's brief), and whose `postgres.dsn_key` entry holds `postgres_dsn` with the gateway tables created (`OperatorDirectoryTables` of K03's brief). Use `httpx.AsyncClient(transport=ASGITransport(app=app))` in async tests so the pool stays on one event loop, and close the service at the end (`OperatorRouter.operators.close()`). Every POST sends an `Idempotency-Key`.
 
-### <a id="k07"></a>K07: Tests: Back office screens A1, KO, A2 and OK (Vitest)
+Contract the implementer (K17) will satisfy, in `swarm_api.v1.gateway.operator_router.OperatorRouter` included by `GatewayRouter`:
+- `POST /v1/operators`, Swarm administrator only, body `OperatorEntry` (JSON fields: name, deployment, jurisdictions, llm_provider, anchoring, first_mission_planner_name, first_mission_planner_email): 201 with `OperatorCreated` (operator, cell_assignment, first_mission_planner); 422 problem+json whose `detail` names `jurisdictions` when no Jurisdiction is given (A2); 409 problem+json when the name is taken (A1); 401 without a token; 403 for a Mission planner; 400 without `Idempotency-Key`.
+- `GET /v1/operators`, Swarm administrator only: 200 with the list of `OperatorDirectoryEntry`; 403 for a Mission planner.
+- `GET /v1/operators/{operator_id}`, every role of an Operator: 200 with the `Operator` for its own people; 404 for another Operator's id (BR-008). For the Swarm administrator, assert the refusal that `swarm_service/gateway/auth/access_service.py` gives (read it).
+- Acceptance (`test_operator_isolation.py`): the Swarm administrator creates Aerowing Services and a second Operator. Each first Mission planner is invited (her user, role, `operator_id` attribute and actions e-mail are in the admin stand-in). A token for Aerowing Services' Mission planner (`sub` = her stand-in user id, `operator_id` = the new Operator, role `mission_planner`) reads her Operator and gets 404 for the other and 403 for the directory list. The reverse holds for the other Operator's Mission planner.
+- Update `test_gateway_router.py`: the OpenAPI document lists `/v1/operators` and `/v1/operators/{operator_id}`, and the application still builds and serves its document with no database and no Keycloak.
+
+### <a id="k07"></a>K07: Tests: the realm holds the gateway's admin service account
 
 | Agent | Wave | Depends on | Unblocks |
 | --- | --- | --- | --- |
-| 🧪 test-writer | 1 | none | [K19](#k19), [K20](#k20), [K21](#k21), [K22](#k22) |
+| 🧪 test-writer | 1 | none | [K11](#k11) |
 
 **Files** (only this task may change them in its wave):
 
-- `frontends/back-office/src/operators/testing/standInGateway.ts`
-- `frontends/back-office/src/operators/state/operatorDraftStore.test.ts`
-- `frontends/back-office/src/operators/create/CreateOperatorPage.test.tsx`
-- `frontends/back-office/src/operators/invite/InviteFirstMissionPlannerPage.test.tsx`
-- `frontends/back-office/src/operators/list/OperatorsPage.test.tsx`
+- `tests/infra/charts/keycloak/test_swarm_realm.py`
 
-**Done when:** `pnpm --filter ./frontends/back-office exec eslint src/operators` passes on the five files. `pnpm --filter ./frontends/back-office exec vitest run src/operators` fails only because the pages and the store do not exist yet.
+**Done when:** `uv run ruff check tests/infra/charts/keycloak` passes; `uv run pytest tests/infra/charts/keycloak -n 2` fails only on the new expectations about `swarm-gateway-admin`.
 
 **Brief:**
 
-Write the Vitest component tests first for the four UC-029 screens of the Back office. Spec: docs/specs/functional/use-cases/UC-029-create-an-operator.md (main flow, screens A1, KO, A2 and OK, A1 and A2), the mock-ups docs/specs/screens/mockups/UC-029/a1.html, ko.html, a2.html and ok.html (wording and layout), docs/specs/technical/10-frontends.md#apps (back-office, React 19, TanStack Query, Zustand, Vitest), docs/specs/technical/05-api.md#rest. Ticket: docs/tickets/T0.16/TICKET.md.
+Update the realm tests for the confidential client that the gateway uses to create organisations and invite people. Specification: [Security: identity (one realm per deployment, each Operator an organisation)](docs/specs/technical/06-security.md#identity), [Security: Swarm administrator creates Operators and their first accounts](docs/specs/technical/06-security.md#authorisation), [UC-029 steps 4 and 5](docs/specs/functional/use-cases/UC-029-create-an-operator.md#main-flow). Edit `tests/infra/charts/keycloak/test_swarm_realm.py`, the tests of `infra/charts/keycloak/files/swarm-realm.json`:
+- the clients are the five front ends **and** `swarm-gateway-admin`; the five front ends stay public PKCE S256 code-flow clients, as now;
+- `swarm-gateway-admin` is confidential (`publicClient` false), with only the client credentials grant (`serviceAccountsEnabled` true; standard, implicit and direct access flows false), no redirect URI or web origin, and **no `secret` in the file** (Keycloak generates it, and the gateway reads it from its environment entry);
+- the realm holds no user except the service account of `swarm-gateway-admin` (`serviceAccountClientId`), with exactly the `realm-management` client roles `manage-users` and `manage-realm`, no password and no credential;
+- no client accepts a wildcard redirect or origin, as now.
+Keep every other test of the file.
 
-Use the test setup T0.14 and T0.15 left in frontends/back-office: providers, router, English messages. No hand-written module mocks.
-- standInGateway.ts answers fetch for the /v1/operators routes from in-memory state:
-  - POST /v1/operators:validate gives 204 or 422 problem+json {errors: [{field, reason}]};
-  - POST /v1/operators gives 201 with a directory entry;
-  - GET /v1/operators gives the list.
-  It records each request and its Idempotency-Key.
-Components and modules, with named exports:
-- CreateOperatorPage at src/operators/create/CreateOperatorPage.tsx, route /operators/new.
-- InviteFirstMissionPlannerPage at src/operators/invite/InviteFirstMissionPlannerPage.tsx, route /operators/new/first-mission-planner.
-- OperatorsPage at src/operators/list/OperatorsPage.tsx, route /operators.
-- useOperatorDraft, a Zustand store at src/operators/state/operatorDraftStore.ts, with entry, firstMissionPlanner, problems, setEntry, setFirstMissionPlanner, setProblems and reset.
-Behaviours:
-- A1. The page shows these fields:
-  - Operator name;
-  - Deployment (Cloud or On premises), with none chosen first, because it is required;
-  - Jurisdictions (EU (EASA), US (FAA)), several allowed;
-  - LLM provider and models (Claude (default), an open-weight model), with Claude preselected and the hint for on premises;
-  - Anchoring (Qualified timestamping authority (eIDAS, RFC 3161), the default, preselected; Public blockchain, through an aggregator; No Anchoring: signed and chained only).
-  'Next: first Mission planner' posts :validate, and on 204 goes to the A2 route with the draft kept.
-- KO (A1 and A2). On 422 the page stays and shows a banner starting '❌ Operator not created'. A taken name shows 'An Operator named Aerowing Services already exists.' under the name. No Jurisdiction shows 'Choose at least one Jurisdiction: it is required.'. Each missing field is named.
-- A2. Name, E-mail address and a fixed Role of Mission planner, with a summary card of the Operator from the draft. '◀️ Back' returns to A1 with the draft. 'Create the Operator and send the invitation' posts /v1/operators once, with an Idempotency-Key. A 422 shows the KO banner naming the field. A 201 resets the draft and goes to /operators with the banner '✅ Aerowing Services created. Its data is isolated: no other Operator can see it.'.
-- OK. The table has the columns Operator, Deployment, Jurisdictions, Anchoring, First Mission planner (name and invitation state: Invitation sent or Invitation accepted) and State.
-Query by role and accessible name. On-screen words use the glossary names (docs/specs/glossary.md). Its 'Do not say' words (tenant, superuser, admin console, notarisation) never appear.
-
-### <a id="k08"></a>K08: Tests: UC-029 end to end in Playwright (create, A1, A2, invitation, first sign-in, isolation)
+### <a id="k08"></a>K08: Tests: back-office sign-in, Create an Operator wizard and Operators list
 
 | Agent | Wave | Depends on | Unblocks |
 | --- | --- | --- | --- |
-| 🧪 test-writer | 1 | none | [K10](#k10), [K12](#k12), [K11](#k11) |
+| 🧪 test-writer | 1 | none | [K12](#k12), [K13](#k13), [K24](#k24) |
 
 **Files** (only this task may change them in its wave):
 
-- `frontends/back-office/e2e/create-an-operator.spec.ts`
-- `frontends/back-office/e2e/support/mailbox.ts`
-- `frontends/back-office/e2e/support/second-factor.ts`
+- `frontend/apps/back-office/test/app.test.tsx`
+- `frontend/apps/back-office/test/auth/session.test.tsx`
+- `frontend/apps/back-office/test/operators/create-operator.test.tsx`
+- `frontend/apps/back-office/test/operators/operators-list.test.tsx`
+- `frontend/apps/back-office/test/stand-ins/stand-in-gateway.ts`
 
-**Done when:** `pnpm --filter ./frontends/back-office exec eslint e2e` passes on the three files. `pnpm --filter ./frontends/back-office exec playwright test --list e2e/create-an-operator.spec.ts` lists the five tests.
+**Done when:** `pnpm --filter @swarm/back-office exec eslint test` passes; `pnpm --filter @swarm/back-office test` fails only because the modules of `src/auth`, `src/api` and `src/operators` and the new messages do not exist yet.
 
 **Brief:**
 
-Write the Playwright tests first for UC-029 against the real images started by compose.e2e.yaml (AGENT.md, Front-end tests). Spec: docs/specs/functional/use-cases/UC-029-create-an-operator.md (every step, A1, A2), docs/specs/functional/business-rules/BR-008-operator-isolation.md, docs/specs/functional/features/FS-012-operators-deployment-and-languages.md (AC-3), docs/specs/technical/06-security.md#identity (PKCE sign-in, multi-factor authentication for Mission planners), docs/specs/technical/10-frontends.md#apps. Ticket: docs/tickets/T0.16/TICKET.md, criteria 1 to 3.
+Write the failing Vitest tests of UC-029 in the Back office. Specification: [UC-029 main flow, flow chart and screens A1, KO, A2, OK](docs/specs/functional/use-cases/UC-029-create-an-operator.md#screens), [alternative flows A1 and A2](docs/specs/functional/use-cases/UC-029-create-an-operator.md#alternative-flows), [FS-012 details](docs/specs/functional/features/FS-012-operators-deployment-and-languages.md#details), [GUI and WebUI: apps and shared packages (back-office, React 19, TanStack Query)](docs/specs/technical/10-frontends.md#apps), [Security: identity (authorisation code flow with PKCE; tokens carry the Operator and the roles)](docs/specs/technical/06-security.md#identity), [API layer: REST](docs/specs/technical/05-api.md#rest). The mock-ups `docs/specs/screens/mockups/UC-029/{a1,ko,a2,ok}.html` show the words. No real network: a stand-in `fetch`.
 
-K11 adds to compose.e2e.yaml a Keycloak with the e2e realm, its seeded Swarm administrator test account, and an SMTP sink with an HTTP API. Read their addresses and credentials from environment variables with defaults named in the spec file's constants: E2E_BACK_OFFICE_URL, E2E_ADMIN_USERNAME, E2E_ADMIN_PASSWORD, E2E_MAILBOX_URL.
-- support/mailbox.ts finds the last e-mail sent to an address in the SMTP sink and returns its action link.
-- support/second-factor.ts computes the TOTP code from the secret Keycloak shows when the second factor is configured.
-create-an-operator.spec.ts:
-1. The Swarm administrator signs in, opens ➕ Operators and ➕ Create an Operator, and enters Aerowing Services, Cloud and EU (EASA), leaving the defaults. She goes to the first Mission planner, enters Léa Martin and her e-mail, and creates the Operator. The Operators list shows Aerowing Services with Invitation sent.
-2. A1: entering Aerowing Services again shows that the name is taken, and nothing is created.
-3. A2: submitting without a Jurisdiction names the Jurisdiction, and nothing is created.
-4. Invitation and first sign-in: the e-mail reaches Léa Martin. She opens the link, sets her password and second factor, and signs in to the Back office of Aerowing Services.
-5. Isolation (BR-008): with a second Operator created and its Mission planner signed in, each sees only her own Operator, and opening the other's /operators/{id} shows not found.
-Use role and accessible-name locators, the English locale, and the mock-ups' wording.
+Contract the implementers (K13, K24) will satisfy, under `frontend/apps/back-office/src/`:
+- `auth/session.ts`: `interface Session { accessToken: string; roles: readonly string[]; operatorId: string | null }`, `sessionFromToken(accessToken): Session` (reads, without checking it, the payload's `realm_access.roles` and `operator_id`), `isSwarmAdministrator(session): boolean`.
+- `auth/SessionProvider.tsx`: `SessionProvider({ session, children })` and `useSession()`.
+- `api/gateway.ts`: `createBackOfficeGateway({ baseUrl, accessToken, fetch })`, an `@swarm/api-client` gateway client that adds `Authorization: Bearer <token>` to every request and a fresh `Idempotency-Key` to every POST.
+- `api/GatewayProvider.tsx`: `GatewayProvider({ client, children })` (it also provides a TanStack `QueryClient`), and `useGateway()`.
+- `App` (no props) reads both: a Swarm administrator sees the Swarm administration frame (`➕ Operators` active) with the Operators screen; another person sees the Back office frame with her Operator's name in the title bar, read from `GET /v1/operators/{operatorId}`.
+- `stand-ins/stand-in-gateway.ts` (yours): a `fetch` that answers `GET /v1/operators` (a list of `{operator, cell_assignment}`), `POST /v1/operators` (201 `{operator, cell_assignment, first_mission_planner}`; 409 or 422 `application/problem+json` on demand), `GET /v1/operators/{id}`, and records each request (method, URL, headers, JSON body). JSON fields and enum values: Operator `{id, name, deployment: cloud|on_premises, jurisdictions: [eu_easa|us_faa], llm_provider: claude|open_weight, anchoring: qualified_timestamping|public_blockchain|none}`; CellAssignment `{operator_id, cell, assigned_at}`; Person `{id, operator_id, name, email, language}`; entry body `{name, deployment, jurisdictions, llm_provider, anchoring, first_mission_planner_name, first_mission_planner_email}`.
 
-### <a id="k09"></a>K09: Shared Operator model: deployment, Jurisdictions, LLM provider, Anchoring, and regenerated types
+Behaviours, rendered in English (`I18nProvider language="en"`) with `SessionProvider` and `GatewayProvider`:
+- `session.test.tsx`: token to session, Swarm administrator detection.
+- `create-operator.test.tsx`: A1 shows `➕ Create an Operator`, `Operator name`, `Deployment` (`Cloud`, `On premises`), `Jurisdictions` (`EU (EASA)`, `US (FAA)`), `LLM provider and models` (Claude by default), `🔏 Anchoring` with `Qualified timestamping authority (eIDAS, RFC 3161)` chosen by default, `Public blockchain, through an aggregator` and `No Anchoring: signed and chained only`, and `Next: first Mission planner ▶️`. Next without a Jurisdiction stays on A1, shows `❌ Operator not created.` and `Choose at least one Jurisdiction: it is required.`, and sends nothing (A2). Next with the name of a listed Operator (any case) shows `An Operator named Aerowing Services already exists.` (A1). Valid entry moves to `👥 First Mission planner of Aerowing Services` with `E-mail address`. Submitting without an e-mail names it as required. `Create the Operator and send the invitation` sends one POST with the entry, the bearer token and an `Idempotency-Key`. A 409 answer brings back A1 with the name error.
+- `operators-list.test.tsx`: after creation, `✅ Aerowing Services created. Its data is isolated: no other Operator can see it.` and the table `🗃️ Operators` with columns Operator, Deployment, Jurisdictions, Anchoring, Cell and State.
+- Update `app.test.tsx`: keep the frame tests (title bar, light and dark, tokens, root). A person of an Operator sees the six Back office items with her Operator's name in the title bar and an empty content area. A Swarm administrator sees `➕ Operators`, `👥 People` and `🔧 Settings`.
+At most five code files per folder.
+
+### <a id="k09"></a>K09: Models: Operator fields, entry, directory entry, refusals and enums
 
 | Agent | Wave | Depends on | Unblocks |
 | --- | --- | --- | --- |
-| 🐍 implementer | 2 | [K01](#k01) | [K13](#k13) |
+| 🐍 implementer | 2 | [K01](#k01) | [K14](#k14), [K15](#k15), [K20](#k20), [K16](#k16) |
 
 **Files** (only this task may change them in its wave):
 
-- `packages/python/swarm-models/src/swarm_models/models/enums.py`
-- `packages/python/swarm-models/src/swarm_models/models/operators/operator.py`
-- `packages/python/swarm-models/src/swarm_models/models/operators/exceptions/__init__.py`
-- `packages/python/swarm-models/src/swarm_models/models/operators/exceptions/operator/`
-- `packages/python/swarm-models/schemas/swarm_models.schema.json`
-- `packages/rust/swarm-models/src/generated.rs`
-- `packages/ts/live/src/generated/models.ts`
+- `backend/swarm-models/src/swarm_models/enums.py`
+- `backend/swarm-models/src/swarm_models/operators/operator.py`
+- `backend/swarm-models/src/swarm_models/operators/operator_entry.py`
+- `backend/swarm-models/src/swarm_models/operators/operator_directory_entry.py`
+- `backend/swarm-models/src/swarm_models/operators/operator_created.py`
+- `backend/swarm-models/src/swarm_models/operators/exceptions/`
+- `backend/swarm-models/src/swarm_models/storage/exceptions/`
 
-**Done when:** These pass:
-- `uv run pytest packages/python/swarm-models/tests -n 2`
-- `uv run mypy packages/python/swarm-models/src`
-- `uv run ruff check packages/python/swarm-models`
-- `uv run pytest tests/conventions/packages -n 2`
-- `uv run swarm-models-schemas --check`
-- `cargo test -p swarm-models` (in packages/rust)
-- `pnpm --filter ./packages/ts/live run test`
+**Done when:** `uv run pytest tests/swarm_models -n 2` passes; `uv run ruff check backend/swarm-models` and `uv run mypy backend/swarm-models/src` pass; `uv run pytest tests/conventions/backend -n 2` passes.
 
 **Brief:**
 
-Extend the shared Operator model exactly as packages/python/swarm-models/tests/models/test_enums.py, tests/models/operators/test_operator.py and tests/service/schemas/test_schema_exporter.py expect. Spec: docs/specs/functional/use-cases/UC-029-create-an-operator.md (steps 1 and 2, A2), docs/specs/functional/features/FS-012-operators-deployment-and-languages.md ('Required to create an Operator'), docs/specs/technical/02-data-models.md#conventions, docs/specs/technical/01-architecture.md#cells. Ticket: docs/tickets/T0.16/TICKET.md.
+Implement the shared models of UC-029 so that K01's tests pass. The contract (enums, `Operator` fields and defaults, `OperatorEntry`, `OperatorDirectoryEntry`, `OperatorCreated`, the four REST refusals) is in K01's brief and its tests. Specification: [UC-029](docs/specs/functional/use-cases/UC-029-create-an-operator.md#alternative-flows), [FS-012 details](docs/specs/functional/features/FS-012-operators-deployment-and-languages.md#details), [glossary: Operator](docs/specs/glossary.md#ent-operator), [Jurisdiction](docs/specs/glossary.md#term-jurisdiction), [LLM provider](docs/specs/glossary.md#term-llm-provider), [Anchoring](docs/specs/glossary.md#term-anchoring), [API layer: REST errors](docs/specs/technical/05-api.md#rest).
+- The enums `Deployment`, `Jurisdiction`, `LlmProvider`, `Anchoring` and `OperatorField` go in `swarm_models/enums.py` only (`@unique StrEnum`, members under `Attributes:`, no hyphen).
+- Extend `Operator` (and fix its docstring: an Operator is the organisation that flies Missions for its Clients, as the glossary says). Each new field has `Field(description=...)` and a `validate_<field>` before-validator raising its own `SEOperatorInvalid<Field>`.
+- `OperatorEntry` exceptions derive from `SEInvalidOperatorEntryException(ValueError)`. The refusals subclass `SERestError` (`swarm_web.models.rest.exceptions`), with their STATUS (422, 409, 409, 404) and TITLE, as `SESimulationRunningError` does.
+- Also add `SEStorageDuplicateError` ("Raised when a row breaks a unique constraint.") to `swarm_models/storage/exceptions/`, for the storage task K14.
+- Every exceptions folder holds at most five files: dispatch them into themed sub-folders (`operator/fields/`, `entry/`, `errors/`). Each `exceptions/__init__.py` re-exports through a sorted `__all__`, and `swarm_models.operators.exceptions` exposes every one.
+- Follow AGENT.md: Pydantic models, Exceptions, Typing, no raw strings, `models` never logs. Do not regenerate the schema bundle (K20 does).
 
-1) Create swarm_models/models/enums.py holding only the four new enums: Deployment, Jurisdiction, LlmProvider and AnchoringChoice. Each is @unique and documents its members under Attributes. Values are lower snake case with no hyphen. This follows the CLAUDE.md rule of one enums.py at the root of the models module; leave the older per-concern enums/ folders as they are.
-2) Add to Operator, one validator each, mode before, each raising its own exception:
-   - deployment and jurisdictions, required; jurisdictions is a non-empty List[Jurisdiction] without duplicates.
-   - llm_provider, default LlmProvider.CLAUDE.
-   - anchoring, default AnchoringChoice.QUALIFIED_TIMESTAMPING_AUTHORITY.
-   - None becomes the default, bool is refused, and every field has a Field(description).
-   Field-name strings become ClassVar constants (CLAUDE.md, no raw strings). Fix the class docstring to the glossary's Operator: the organisation that uses Swarm to fly Missions, whose data is isolated. It now wrongly reads 'a person who pilots drones'.
-3) Add the four field exceptions: SEOperatorInvalidDeployment, SEOperatorInvalidJurisdictions, SEOperatorInvalidLlmProvider and SEOperatorInvalidAnchoring, one file each, subclasses of SEInvalidOperatorException. Keep at most five Python files per folder: split exceptions/operator/ into sub-folders (for example identity/ for id and name, choices/ for the four new ones). Re-export through sorted __all__ lists up to operators/exceptions/__init__.py, so every import from swarm_models.models.operators.exceptions still works.
-4) Regenerate the generated types in the AGENT.md order and never edit them by hand:
-   - `uv run swarm-models-schemas`;
-   - `cargo run -p swarm-models-codegen`, run in packages/rust;
-   - `pnpm --filter ./packages/ts/live run generate`.
-   If Rust or TypeScript code that uses Operator stops compiling, report it as blocked; do not edit it.
-Rules: AGENT.md Pydantic models, Exceptions, Docstrings, Data and enums.
-
-### <a id="k10"></a>K10: Keycloak realm: organisations, the gateway's admin account, invitation e-mail
+### <a id="k10"></a>K10: Models: Keycloak admin and Operator directory configuration
 
 | Agent | Wave | Depends on | Unblocks |
 | --- | --- | --- | --- |
-| 🐍 implementer | 2 | [K08](#k08) | [K11](#k11) |
+| 🐍 implementer | 2 | [K02](#k02) | [K15](#k15), [K18](#k18), [K16](#k16) |
 
 **Files** (only this task may change them in its wave):
 
-- `deploy/charts/keycloak/`
+- `backend/swarm-models/src/swarm_models/keycloak/keycloak_admin_config.py`
+- `backend/swarm-models/src/swarm_models/keycloak/exceptions/`
+- `backend/swarm-models/src/swarm_models/config/gateway/operator_directory_config.py`
+- `backend/swarm-models/src/swarm_models/config/gateway/gateway_config.py`
+- `backend/swarm-models/src/swarm_models/config/gateway/exceptions/`
 
-**Done when:** `helm lint deploy/charts/keycloak` passes and every realm JSON file parses (`python3 -m json.tool` on each). `uv run pytest tests/deploy -n 2` passes.
+**Done when:** `uv run pytest tests/swarm_models/keycloak tests/swarm_models/config -n 2` passes, except the app.yaml defaults test left to K18; `uv run ruff check backend/swarm-models` and `uv run mypy backend/swarm-models/src` pass; `uv run pytest tests/conventions/backend -n 2` passes.
 
 **Brief:**
 
-Extend the Keycloak realm that T0.11 delivered (global layer) so the gateway can create an Operator's organisation and invite its first Mission planner by e-mail. Spec: docs/specs/technical/06-security.md#identity (one realm, each Operator an organisation; multi-factor authentication for Mission planners; PKCE clients), docs/specs/technical/06-security.md#authorisation (the Swarm administrator creates Operators and their first accounts, with no access to Operators' data), docs/specs/technical/01-architecture.md#cells (Keycloak in the global layer), docs/specs/functional/use-cases/UC-029-create-an-operator.md (steps 4 to 6). Ticket: docs/tickets/T0.16/TICKET.md.
+Implement the configuration models of K02's brief so that its tests pass, except the test that reads `backend/apps/gateway/conf/app.yaml`, which K18 completes. Specification: [Architecture: cells and the global layer](docs/specs/technical/01-architecture.md#cells), [Security: identity](docs/specs/technical/06-security.md#identity), [UC-029](docs/specs/functional/use-cases/UC-029-create-an-operator.md#main-flow). Work in `swarm_models/keycloak/keycloak_admin_config.py` (`KeycloakAdminConfig`), `swarm_models/config/gateway/operator_directory_config.py` (`OperatorDirectoryConfig`) and the new `operators` section of `GatewayConfig` (a validator like `validate_live`, raising `SEGatewayConfigInvalidOperators` for a non-mapping). Also add to `swarm_models/keycloak/exceptions/` the error `SEKeycloakConflictError`, a subclass of `SEKeycloakError` raised when Keycloak answers 409 (for example an e-mail already used), for the client task K15. Every field has its description and its own validator exception. `client_secret_key` names the environment entry and never holds the secret. The folder `config/gateway/exceptions/` already holds five files: move them into themed sub-folders and keep every import from `swarm_models.config.gateway.exceptions` working. Follow AGENT.md Pydantic models, Exceptions and Naming (durations end in `_s`).
 
-Work inside the Keycloak chart and realm files T0.11 left. This plan assumes deploy/charts/keycloak/; if T0.11 put them elsewhere, report blocked with the real path so the plan is amended.
-- Turn on Organizations in the realm.
-- Add a confidential client for the gateway with a service account, holding only the realm-management roles it needs: create and delete organisations, create users, add members, map the mission_planner realm role, send the execute-actions e-mail. Report the roles you chose as a decision. Its secret comes from the vault (T0.08), never from a file.
-- Make a new Mission planner's required actions the ones T0.11's realm demands: password, second factor, verified e-mail.
-- Configure the realm's SMTP server from chart values, with its password from the vault.
-- Add an e2e realm overlay at deploy/charts/keycloak/realm/e2e/. It holds one seeded Swarm administrator test account and SMTP pointing at the e2e SMTP sink, for compose.e2e.yaml only, never in a deployed cell. frontends/back-office/e2e/create-an-operator.spec.ts (K08) shows what the e2e run needs.
-Rules: no secret in any file (AGENT.md, Data and enums); the role names are those of RoleName in swarm-models.
-
-### <a id="k12"></a>K12: Back office sign-in with Keycloak (PKCE) and the session
+### <a id="k11"></a>K11: Realm: confidential admin client of the gateway
 
 | Agent | Wave | Depends on | Unblocks |
 | --- | --- | --- | --- |
-| 🖥️ frontend-implementer | 2 | [K08](#k08) | [K19](#k19), [K23](#k23), [K25](#k25) |
+| 🐍 implementer | 2 | [K07](#k07) | none |
 
 **Files** (only this task may change them in its wave):
 
-- `frontends/back-office/src/session/`
+- `infra/charts/keycloak/files/swarm-realm.json`
 
-**Done when:** `pnpm --filter ./frontends/back-office run lint` and `pnpm --filter ./frontends/back-office run typecheck` pass.
+**Done when:** `uv run pytest tests/infra/charts/keycloak -n 2` passes and the file is valid JSON (`python3 -m json.tool infra/charts/keycloak/files/swarm-realm.json` succeeds).
 
 **Brief:**
 
-Give the Back office its sign-in, so that the Swarm administrator can work and the invited Mission planner can make her first sign-in (UC-029 step 6). Spec: docs/specs/technical/06-security.md#identity (authorisation code flow with PKCE, 5-minute access tokens with the person, the Operator and the roles, rotated refresh tokens), docs/specs/technical/06-security.md#authorisation, docs/specs/technical/10-frontends.md#apps (back-office, web browser, React 19), docs/specs/functional/use-cases/UC-029-create-an-operator.md. Ticket: docs/tickets/T0.16/TICKET.md.
+Add to the Swarm realm the confidential client that the gateway uses to create each Operator's organisation and to invite its first Mission planner, so that K07's tests pass. Specification: [Security: identity (one realm, each Operator an organisation)](docs/specs/technical/06-security.md#identity), [Security: roles (Swarm administrator creates Operators and their first accounts)](docs/specs/technical/06-security.md#authorisation), [UC-029 steps 4 and 5](docs/specs/functional/use-cases/UC-029-create-an-operator.md#main-flow). In `infra/charts/keycloak/files/swarm-realm.json`:
+- add the client `swarm-gateway-admin`: confidential, service account only, no redirect URI or origin, and no secret in the file (Keycloak generates it; it reaches the gateway through the vault as `SWARM_GATEWAY_KEYCLOAK_CLIENT_SECRET`);
+- add its service-account user (`serviceAccountClientId`) with exactly the `realm-management` client roles `manage-users` and `manage-realm`.
+Change nothing else. The back-office redirect URIs and the realm's SMTP server depend on each environment, and the specification does not give them, so they stay out of the file (recorded as an assumption).
 
-First read what T0.11 (the PKCE client of back-office) and T0.14 (the back-office shell) already provide, and reuse it. Build only what is missing, under frontends/back-office/src/session/:
-- sign in and sign out through Keycloak with PKCE;
-- refresh the token;
-- a useSession() hook giving the person's name, her Operator id (from her organisation) and her roles, so the frame can tell a Swarm administrator from a Mission planner;
-- a way for the generated api-client (packages/ts/api-client) to send the bearer token with every call.
-Report the OIDC library you use, or why none, as a decision. If the app's root must change to mount the session provider, report blocked with the file and the change; K23 owns the routes. Keep the tokens in memory only.
-
-### <a id="k11"></a>K11: compose.e2e.yaml: Keycloak, gateway, PostgreSQL, Back office and an SMTP sink for UC-029
+### <a id="k12"></a>K12: Messages: UC-029 screens in four languages
 
 | Agent | Wave | Depends on | Unblocks |
 | --- | --- | --- | --- |
-| 🐍 implementer | 3 | [K08](#k08), [K10](#k10) | [K24](#k24), [K25](#k25) |
+| 🖥️ frontend-implementer | 2 | [K08](#k08) | [K24](#k24), [K27](#k27) |
 
 **Files** (only this task may change them in its wave):
 
-- `compose.e2e.yaml`
+- `frontend/packages/i18n/src/messages/en.json`
+- `frontend/packages/i18n/src/messages/fr.json`
+- `frontend/packages/i18n/src/messages/de.json`
+- `frontend/packages/i18n/src/messages/es.json`
 
-**Done when:** `docker compose -f compose.e2e.yaml config --quiet` passes, and `uv run pytest tests/ci -n 2` passes.
+**Done when:** `pnpm --filter ./frontend/packages/i18n run check-messages` and `pnpm --filter ./frontend/packages/i18n test` pass.
 
 **Brief:**
 
-Make compose.e2e.yaml start everything the UC-029 Playwright test (frontends/back-office/e2e/create-an-operator.spec.ts) needs, from the real images (AGENT.md, Front-end tests: never a development server). Spec: docs/specs/technical/10-frontends.md#apps, docs/specs/technical/06-security.md#identity, docs/specs/technical/01-architecture.md#cells, docs/specs/functional/use-cases/UC-029-create-an-operator.md. Ticket: docs/tickets/T0.16/TICKET.md.
+Add the FormatJS messages of the UC-029 screens in English, French, German and Spanish. Specification: [BR-017: every screen in four languages](docs/specs/functional/business-rules/BR-017-every-screen-in-four-languages.md), [UC-029 screens](docs/specs/functional/use-cases/UC-029-create-an-operator.md#screens) and their mock-ups in `docs/specs/screens/mockups/UC-029/`, [glossary](docs/specs/glossary.md) (write the glossary names; never a **Do not say** word such as tenant, superuser or admin console), [GUI and WebUI: i18n package](docs/specs/technical/10-frontends.md#apps). Use ids under `operators.` (and `people.` for the first Mission planner step). Cover:
+- the A1 entry: title, field labels, the deployment, Jurisdiction, LLM provider and Anchoring options, the hints, `Cancel` and `Next: first Mission planner ▶️`;
+- the KO errors: banner `❌ Operator not created.`, the name taken (`An Operator named {name} already exists.`), and one required-field message per required field (name, deployment, `Choose at least one Jurisdiction: it is required.`, the first Mission planner's e-mail);
+- the A2 step: `👥 First Mission planner of {name}`, `Name`, `E-mail address`, `Role`, the Operator summary, `◀️ Back`, `Create the Operator and send the invitation`;
+- the OK list: `✅ {name} created. Its data is isolated: no other Operator can see it.`, `🗃️ Operators`, the columns Operator, Deployment, Jurisdictions, Anchoring, Cell and State, and `✅ Invitation sent to {email}.`
+The English texts must be exactly those K08's tests assert (read them in `frontend/apps/back-office/test/`). Keep the existing messages unchanged.
 
-Start from the file T0.10 created and add or complete:
-- the PostgreSQL image of deploy/images, with the gateway's Alembic migrations run before the gateway starts;
-- Keycloak, importing the realm and its e2e overlay from deploy/charts/keycloak/realm/ (K10);
-- the gateway image, configured by environment, including its Keycloak admin client and its secret;
-- the back-office image;
-- an SMTP sink with an HTTP API, used by Keycloak for the invitation e-mail.
-Set the environment the spec file reads (E2E_BACK_OFFICE_URL, E2E_ADMIN_USERNAME, E2E_ADMIN_PASSWORD, E2E_MAILBOX_URL) as service outputs, and document them in a comment. Pick the SMTP sink image and report it as a decision. Add health checks so Playwright starts once every service is ready. No real secret: e2e-only values.
-
-### <a id="k13"></a>K13: Gateway models: Operator entry, directory, Keycloak configuration, enums and exceptions
+### <a id="k13"></a>K13: Back office: sign-in session and gateway client
 
 | Agent | Wave | Depends on | Unblocks |
 | --- | --- | --- | --- |
-| 🐍 implementer | 3 | [K02](#k02), [K03](#k03), [K04](#k04), [K05](#k05), [K06](#k06), [K09](#k09) | [K14](#k14), [K15](#k15) |
+| 🖥️ frontend-implementer | 2 | [K08](#k08) | [K24](#k24), [K27](#k27) |
 
 **Files** (only this task may change them in its wave):
 
-- `services/gateway/src/gateway/models/enums.py`
-- `services/gateway/src/gateway/models/operators/`
-- `services/gateway/src/gateway/models/directory/`
-- `services/gateway/src/gateway/models/keycloak/`
-- `services/gateway/src/gateway/models/config/gateway_config.py`
-- `services/gateway/conf/app.yaml`
-- `services/gateway/pyproject.toml`
-- `uv.lock`
+- `frontend/apps/back-office/package.json`
+- `pnpm-lock.yaml`
+- `frontend/apps/back-office/src/config.ts`
+- `frontend/apps/back-office/src/vite-env.d.ts`
+- `frontend/apps/back-office/src/auth/session.ts`
+- `frontend/apps/back-office/src/auth/SessionProvider.tsx`
+- `frontend/apps/back-office/src/auth/oidc.ts`
+- `frontend/apps/back-office/src/auth/SignInGate.tsx`
+- `frontend/apps/back-office/src/api/gateway.ts`
+- `frontend/apps/back-office/src/api/GatewayProvider.tsx`
 
-**Done when:** These pass:
-- `uv run pytest services/gateway/tests/models -n 2`
-- `uv run mypy services/gateway/src`
-- `uv run ruff check services/gateway`
-- `uv run pytest tests/conventions/services -n 2`
+**Done when:** `pnpm --filter @swarm/back-office exec vitest run test/auth` passes; `pnpm --filter @swarm/back-office exec eslint src/auth src/api src/config.ts` passes; `pnpm install --frozen-lockfile` succeeds from the root.
 
 **Brief:**
 
-Write the gateway's models for UC-029, exactly as services/gateway/tests/models/ expects. Also write every layer exception that tests/storage/postgres/directory, tests/clients/keycloak, tests/service/operators and tests/api/rest/v1/operators name. Spec: docs/specs/functional/use-cases/UC-029-create-an-operator.md (A1, A2, required fields and defaults), docs/specs/functional/features/FS-012-operators-deployment-and-languages.md, docs/specs/technical/01-architecture.md#cells, docs/specs/technical/06-security.md#identity, docs/specs/technical/02-data-models.md#conventions. Ticket: docs/tickets/T0.16/TICKET.md.
+Build the sign-in and server-data foundation of the Back office, so that the Swarm administrator signs in to create Operators and the invited Mission planner signs in for the first time (UC-029 step 6). Specification: [Security: identity (Keycloak OpenID Connect, authorisation code flow with PKCE for the web, 5-minute access tokens carrying the Operator and the roles)](docs/specs/technical/06-security.md#identity), [GUI and WebUI: back-office app, api-client package, TanStack Query](docs/specs/technical/10-frontends.md#apps), [API layer: REST (`Idempotency-Key` on every POST)](docs/specs/technical/05-api.md#rest), [UC-029 main flow](docs/specs/functional/use-cases/UC-029-create-an-operator.md#main-flow). The module contract (`auth/session.ts`, `auth/SessionProvider.tsx`, `api/gateway.ts`, `api/GatewayProvider.tsx`) is in K08's brief and its tests.
+- Add the dependencies `@swarm/api-client` (workspace), `@tanstack/react-query` and `oidc-client-ts` to `frontend/apps/back-office/package.json`, pinned exactly like the others, and update `pnpm-lock.yaml` with `pnpm install` from the root.
+- `auth/oidc.ts`: a `UserManager` of oidc-client-ts for the public client `back-office` of the realm `swarm` (code flow, PKCE S256), whose authority and redirect come from `config.ts`. `config.ts` reads `import.meta.env.VITE_SWARM_IDENTITY_URL` and `VITE_SWARM_GATEWAY_URL`, typed in `vite-env.d.ts`.
+- `auth/SignInGate.tsx`: completes the redirect when it comes back, shows its children with a `SessionProvider` once there is a user, and starts the sign-in redirect otherwise.
+- The token is never logged or stored outside the oidc-client-ts store.
+Do not touch `src/App.tsx` or `src/main.tsx` (K24 wires them). The generated gateway types arrive with K23, so type the client with `Client<GatewayPaths>` from `@swarm/api-client`.
 
-- gateway/models/enums.py gets InvitationState, OperatorField and OperatorProblemReason (add them to the file if T0.11 or T0.12 created it).
-- models/operators/ holds OperatorEntry (with to_operator), FirstMissionPlannerEntry, OperatorCreation, OperatorEntryProblem and OperatorDirectoryEntry, at most five files per folder. Its exceptions/ holds the model exceptions and the service-layer errors: SEOperatorError, SEOperatorEntryRefusedError (with a problems attribute, List[OperatorEntryProblem]), SEOperatorForbiddenError, SEOperatorNotFoundError and SEOperatorCreationFailedError.
-- models/directory/ holds DirectoryConfig. Its exceptions/ holds the model exceptions and the storage errors: SEDirectoryError, SEDirectoryOperatorNameTakenError, SEDirectoryOperatorNotFoundError and SEDirectoryCellAlreadyAssignedError.
-- models/keycloak/ holds KeycloakAdminConfig and MissionPlannerInvitation. Its exceptions/ holds the model exceptions and the client errors: SEKeycloakAdminError, SEKeycloakAdminUnavailableError and SEKeycloakAdminRefusedError.
-- Every exception has its own file, in sub-folders of at most five files, re-exported through sorted __all__ lists.
-- Reuse the shared Operator, CellAssignment and RoleName and the four enums of swarm_models.models.enums; never redefine a shared model.
-- Add the directory and keycloak_admin sections to the gateway's root configuration model. This plan assumes T0.12 put it at models/config/gateway_config.py; if not, report blocked with the real path. Write every default in services/gateway/conf/app.yaml: default_cell is the dev cell's name as deploy/ names it, and client_secret_key names a secret store entry, never a secret.
-- Add swarm-models and an async HTTP client (httpx, unless T0.11 already chose one) to services/gateway/pyproject.toml, then `uv lock`.
-Rules: AGENT.md Pydantic models, Exceptions, Naming, Data and enums; models never log.
-
-### <a id="k14"></a>K14: Operator directory: repositories and Alembic migration
+### <a id="k26"></a>K26: Docs: the /v1/operators resource and the gateway's directory
 
 | Agent | Wave | Depends on | Unblocks |
 | --- | --- | --- | --- |
-| 🐍 implementer | 4 | [K03](#k03), [K13](#k13) | [K16](#k16) |
+| 📝 doc-writer | 2 | [K06](#k06) | none |
 
 **Files** (only this task may change them in its wave):
 
-- `services/gateway/src/gateway/storage/postgres/directory/`
-- `services/gateway/migrations/versions/`
+- `docs/specs/technical/05-api.md`
+- `backend/README.md`
 
-**Done when:** `uv run pytest services/gateway/tests/storage -n 2` passes (against a database, as T0.12's tests run), and `uv run mypy services/gateway/src` and `uv run ruff check services/gateway` pass.
+**Done when:** `python3 .claude/skills/write-specs/scripts/specs.py build` then `python3 .claude/skills/write-specs/scripts/specs.py check` prints nothing.
 
 **Brief:**
 
-Write OperatorRepository and CellAssignmentRepository, and the migration for their tables, exactly as services/gateway/tests/storage/postgres/directory/ expects. Spec: docs/specs/technical/01-architecture.md#cells (the Operator directory and the routing of each Operator to its cell, in the global layer; an Operator lives in exactly one cell), docs/specs/technical/03-storage.md#repositories (one repository per entity, in storage/postgres/), docs/specs/technical/03-storage.md#postgresql (asyncpg, Alembic, expand then contract), docs/specs/functional/use-cases/UC-029-create-an-operator.md (A1). Ticket: docs/tickets/T0.16/TICKET.md.
+Document what this ticket adds, in the pages that describe it, without inventing a fact (SPEC-10). Specification: [API layer: REST](docs/specs/technical/05-api.md#rest), [Architecture: cells and the global layer](docs/specs/technical/01-architecture.md#cells), [Security: identity](docs/specs/technical/06-security.md#identity), [UC-029](docs/specs/functional/use-cases/UC-029-create-an-operator.md#main-flow).
+- In `docs/specs/technical/05-api.md`, section REST: add `/v1/operators` and `/v1/operators/{id}` to the list of resources, and add [📘 FS-012](docs/specs/functional/features/FS-012-operators-deployment-and-languages.md) to the features the page implements if it is missing. Keep the page's sections, anchors and icons (SPEC-5, SPEC-8), plain British English, no em dash.
+- In `backend/README.md`, gateway part: the Operator directory of the gateway domain. Say that the `operators` and `cell_assignments` tables are global and the `people` table is under row-level security, that `operators` in `conf/app.yaml` names the cell and the Keycloak admin client, and that the client secret comes from the environment entry `SWARM_GATEWAY_KEYCLOAK_CLIENT_SECRET`, filled from the vault. The contract to describe is the one of K06's and K05's briefs.
+Then run `python3 .claude/skills/write-specs/scripts/specs.py build`.
 
-- Add a new Alembic revision after T0.12's head in the gateway's migrations (assumed services/gateway/migrations/versions/; report blocked if elsewhere) with two tables in the gateway's schema:
-  - the Operators: id, name, deployment, jurisdictions, llm_provider, anchoring, created_at, with a unique index on lower(trim(name)) so A1 also holds under a race;
-  - the cell assignments: operator_id as primary key and foreign key, cell, assigned_at.
-- These are global-layer directory tables, not Operator-owned rows, so they carry no row-level security. The gateway service checks the role and the Operator.
-- The repositories follow T0.12's repository and transaction pattern. They map the database's unique violations to SEDirectoryOperatorNameTakenError and SEDirectoryCellAlreadyAssignedError, and a missing row to SEDirectoryOperatorNotFoundError. They return swarm_models Operator and CellAssignment.
-- Column names, SQL fragments and keys are ClassVar constants (CLAUDE.md, no raw strings).
-- Every branch logs. Log at ERROR before raising, and never log a name typed by a person at INFO or above.
-Rules: AGENT.md Layout (storage imports models only), Lifecycle, Logging, Exceptions.
-
-### <a id="k15"></a>K15: Keycloak admin client: organisation, invitation and its state
+### <a id="k14"></a>K14: Storage: Operator directory tables, repositories and gateway migration
 
 | Agent | Wave | Depends on | Unblocks |
 | --- | --- | --- | --- |
-| 🐍 implementer | 4 | [K04](#k04), [K13](#k13) | [K16](#k16) |
+| 🐍 implementer | 3 | [K03](#k03), [K09](#k09) | [K16](#k16) |
 
 **Files** (only this task may change them in its wave):
 
-- `services/gateway/src/gateway/clients/keycloak/`
+- `backend/swarm-storage/src/swarm_storage/gateway/__init__.py`
+- `backend/swarm-storage/src/swarm_storage/gateway/ddl/__init__.py`
+- `backend/swarm-storage/src/swarm_storage/gateway/ddl/operator_directory_tables.py`
+- `backend/swarm-storage/src/swarm_storage/gateway/operators/__init__.py`
+- `backend/swarm-storage/src/swarm_storage/gateway/operators/operator_repository.py`
+- `backend/swarm-storage/src/swarm_storage/gateway/operators/cell_assignment_repository.py`
+- `backend/swarm-storage/src/swarm_storage/gateway/people/__init__.py`
+- `backend/swarm-storage/src/swarm_storage/gateway/people/person_repository.py`
+- `backend/swarm-storage/src/swarm_storage/shared/postgres/repositories/postgres_repository.py`
+- `backend/apps/gateway/migrations/versions/0002_create_operator_directory.py`
 
-**Done when:** `uv run pytest services/gateway/tests/clients -n 2` passes, and `uv run mypy services/gateway/src` and `uv run ruff check services/gateway` pass.
+**Done when:** `uv run pytest tests/swarm_storage tests/scripts/migrations -n 2` passes (with PostgreSQL binaries on the machine); `uv run ruff check backend/swarm-storage backend/apps/gateway` and `uv run mypy backend/swarm-storage/src` pass; `uv run pytest tests/conventions/backend -n 2` passes.
 
 **Brief:**
 
-Write KeycloakAdminClient in gateway.clients.keycloak.keycloak_admin_client, exactly as services/gateway/tests/clients/keycloak/test_keycloak_admin_client.py expects against StandInKeycloak. Spec: docs/specs/technical/06-security.md#identity (each Operator an organisation; multi-factor authentication for Mission planners), docs/specs/technical/06-security.md#authorisation (roles per persona), docs/specs/technical/01-architecture.md#cells (Keycloak in the global layer), docs/specs/functional/use-cases/UC-029-create-an-operator.md (steps 4 to 6). Ticket: docs/tickets/T0.16/TICKET.md.
+Implement the gateway storage of the Operator directory so that K03's tests pass. The contract is in K03's brief. Specification: [Architecture: the Operator directory and the cell assignment in the global layer](docs/specs/technical/01-architecture.md#cells), [Security: row-level security on every row of an Operator](docs/specs/technical/06-security.md#authorisation), [BR-008](docs/specs/functional/business-rules/BR-008-operator-isolation.md), [UC-029 step 3](docs/specs/functional/use-cases/UC-029-create-an-operator.md#main-flow).
+- `OperatorDirectoryTables` builds the statements like `OutboxTable`, names checked with `RowLevelSecurity().check`. The `operators` and `cell_assignments` tables are global: no row-level security, because the Swarm administrator writes them without an Operator (say why in `Notes:`). `people` has `RowLevelSecurity().enable`. The unique index on `lower(btrim(name))` makes a duplicate raise `SEStorageDuplicateError` (from asyncpg's `UniqueViolationError`, logged at ERROR first).
+- The three repositories subclass `PostgresRepository` (one class per entity, AGENT.md Layout). `OperatorRepository.find_by_name` matches trimmed and case-insensitively. Jurisdictions are stored as a PostgreSQL text array. Widen the value type of `PostgresRepository.to_values` to also accept `List[str]`, and change nothing else in that base class: `tests/swarm_storage/shared/postgres` must still pass.
+- Migration `0002_create_operator_directory.py` (down revision `0001`) runs `OperatorDirectoryTables().create(schema)` on upgrade and `drop` on downgrade, like `0001_create_outbox.py`.
+- Every branch logs (AGENT.md Logging), no raw strings, every `try` has an `except`, at most five code files per folder.
 
-- It takes a client-credentials token for the gateway's service account and reuses it until shortly before it expires.
-- create_organization(operator): name, alias str(operator.id), operator_id attribute.
-- invite_mission_planner(organization_id, entry):
-  - creates the user;
-  - makes her a member;
-  - maps the realm role named RoleName.MISSION_PLANNER;
-  - sends the execute-actions e-mail with the required actions of a new Mission planner.
-- delete_organization(organization_id).
-- mission_planner_invitation(operator_id): INVITED while required actions remain, ACCEPTED otherwise, None without a member.
-- Connection errors and timeouts (config.timeout_s) raise SEKeycloakAdminUnavailableError, and error statuses raise SEKeycloakAdminRefusedError, each logged at ERROR with type(error).__name__ and the status.
-- Never log the secret, a token or an e-mail address.
-- URL paths, JSON keys and action names are ClassVar constants or enum members (CLAUDE.md).
-- The HTTP client is closed safely after use. Report how you hold it as a decision.
-Rules: AGENT.md Layout (clients import models only; one class per remote system), Logging (every branch), Exceptions, Typing (JsonValue for parsed JSON, no Any).
-
-### <a id="k16"></a>K16: OperatorService: checks of step 3, creation with its invitation, listing by role
+### <a id="k15"></a>K15: Clients: Keycloak admin client (organisation and invitation)
 
 | Agent | Wave | Depends on | Unblocks |
 | --- | --- | --- | --- |
-| 🐍 implementer | 5 | [K05](#k05), [K14](#k14), [K15](#k15) | [K17](#k17) |
+| 🐍 implementer | 3 | [K04](#k04), [K09](#k09), [K10](#k10) | [K16](#k16) |
 
 **Files** (only this task may change them in its wave):
 
-- `services/gateway/src/gateway/service/operators/`
+- `backend/swarm-clients/src/swarm_clients/gateway/keycloak/keycloak_admin_client.py`
 
-**Done when:** `uv run pytest services/gateway/tests/service -n 2` passes, and `uv run mypy services/gateway/src`, `uv run ruff check services/gateway` and `uv run pytest tests/conventions/services -n 2` pass.
+**Done when:** `uv run pytest tests/swarm_clients/gateway/keycloak -n 2` passes; `uv run ruff check backend/swarm-clients` and `uv run mypy backend/swarm-clients/src` pass; `uv run pytest tests/conventions/backend -n 2` passes.
 
 **Brief:**
 
-Write OperatorEntryChecker and OperatorService in gateway.service.operators, exactly as services/gateway/tests/service/operators/ expects. Spec: docs/specs/functional/use-cases/UC-029-create-an-operator.md (step 3 checks, step 5 creation and isolation, A1, A2, postconditions: on failure no Operator is created), docs/specs/functional/business-rules/BR-008-operator-isolation.md (another Operator's attempt: not found, logged), docs/specs/functional/features/FS-012-operators-deployment-and-languages.md (AC-3), docs/specs/technical/06-security.md#authorisation (the Swarm administrator creates Operators and first accounts, with no access to Operators' data; the gateway checks the role and the Operator of every call), docs/specs/technical/01-architecture.md#cells. Ticket: docs/tickets/T0.16/TICKET.md.
+Implement `KeycloakAdminClient` so that K04's client tests pass. The contract (methods, Keycloak admin paths, required actions, errors) is in K04's brief and its tests. Specification: [Security: identity (Keycloak, each Operator an organisation, multi-factor authentication required for Mission planners)](docs/specs/technical/06-security.md#identity), [UC-029 steps 4 to 6 (invitation by e-mail, first sign-in)](docs/specs/functional/use-cases/UC-029-create-an-operator.md#main-flow), [Architecture: Keycloak in the global layer](docs/specs/technical/01-architecture.md#cells).
+- Follow `keycloak_jwks_client.py`: a short-lived `httpx.AsyncClient` per call with `config.request_timeout_s`, and the endpoint paths, required actions and role names as `ClassVar` constants.
+- Get a service-account token with the client credentials of `config.client_id`, the secret read from the environment entry `config.client_secret_key` when the call is made, never at construction. A missing entry raises `SEKeycloakUnreachableError`. **Never log the secret or a token.**
+- Map a 409 on the user to `SEKeycloakConflictError` and every other failure to `SEKeycloakUnreachableError`, each logged at ERROR with `type(error).__name__`.
+- It is a short request, so not an `AsyncRunnable`, like the JWKS client. One class, beside `KeycloakJwksClient`, because it speaks to the admin API.
 
-- OperatorEntryChecker.problems returns every REQUIRED and INVALID problem at once, field by field, so the KO screen can name each one. A missing llm_provider or anchoring takes its default.
-- check(caller, entry) requires RoleName.SWARM_ADMINISTRATOR, adds TAKEN through OperatorRepository.name_taken, and returns the problems.
-- create(caller, creation):
-  - It runs the same checks plus the first Mission planner's name and e-mail, and raises SEOperatorEntryRefusedError when any problem is found.
-  - Otherwise, in one transaction, it adds the Operator (UUIDv7 id) and its CellAssignment to config.default_cell (now, UTC), creates the Keycloak organisation and invites the Mission planner, then commits.
-  - If Keycloak fails, it rolls back, deletes any organisation it created, and raises SEOperatorCreationFailedError. A name taken in a race (SEDirectoryOperatorNameTakenError) becomes SEOperatorEntryRefusedError with TAKEN.
-- list(caller): every Operator for a Swarm administrator; only the caller's own Operator for anyone else.
-- get(caller, id): another Operator's id raises SEOperatorNotFoundError after logging the attempt (BR-008 example 2).
-- Each returned OperatorDirectoryEntry holds the first Mission planner's invitation from the client.
-- A from_config classmethod (under the public banner) builds the service with its repositories and client from the gateway's configuration and secret reader, so the api layer never imports storage or clients.
-Rules: AGENT.md Layout (service imports storage, clients and models), Logging (every branch, ERROR before each raise, no typed value or e-mail in logs), Exceptions (every try has an except; raise from error), File shape (no hard-coded-key dicts, banners).
-
-### <a id="k17"></a>K17: Gateway /v1/operators routes with problem+json
+### <a id="k18"></a>K18: Gateway app: operators section of conf/app.yaml
 
 | Agent | Wave | Depends on | Unblocks |
 | --- | --- | --- | --- |
-| 🐍 implementer | 6 | [K06](#k06), [K16](#k16) | [K18](#k18) |
+| 🐍 implementer | 3 | [K02](#k02), [K10](#k10) | none |
 
 **Files** (only this task may change them in its wave):
 
-- `services/gateway/src/gateway/api/rest/v1/operators/`
-- `services/gateway/src/gateway/api/rest/gateway_rest_app.py`
+- `backend/apps/gateway/conf/app.yaml`
 
-**Done when:** `uv run pytest services/gateway/tests -n 2` passes (with a database, as T0.12's tests run), and `uv run mypy services/gateway/src`, `uv run ruff check services/gateway` and `uv run pytest tests/conventions/services -n 2` pass.
+**Done when:** `uv run pytest tests/swarm_models/config/gateway tests/swarm_gateway -n 2` passes.
 
 **Brief:**
 
-Expose UC-029 through the gateway's /v1 API, exactly as services/gateway/tests/api/rest/v1/operators/ expects. Spec: docs/specs/technical/05-api.md#rest (resources follow the glossary, Idempotency-Key on every POST, ETag, errors as application/problem+json with the AGENT.md message rules, the OpenAPI document generated), docs/specs/technical/06-security.md#authorisation (role and Operator checked on every call), docs/specs/functional/use-cases/UC-029-create-an-operator.md (A1, A2), docs/specs/functional/business-rules/BR-008-operator-isolation.md, docs/specs/functional/features/FS-012-operators-deployment-and-languages.md (AC-3). Ticket: docs/tickets/T0.16/TICKET.md.
+Write the new `operators` section of the gateway configuration into `backend/apps/gateway/conf/app.yaml`, with every default written out (AGENT.md Layout: `app.yaml`, the configuration with every default written out): `cell: dev` and the `keycloak` subsection (`server_url`, `realm`, `client_id`, `client_secret_key: SWARM_GATEWAY_KEYCLOAK_CLIENT_SECRET`, `sign_in_client_id`, `request_timeout_s`), exactly as the defaults of `OperatorDirectoryConfig` and `KeycloakAdminConfig` (K10). The secret itself is never in the file. Specification: [Architecture: cells and the global layer (routing of each Operator to its cell)](docs/specs/technical/01-architecture.md#cells), [Security: identity](docs/specs/technical/06-security.md#identity), [UC-029](docs/specs/functional/use-cases/UC-029-create-an-operator.md#main-flow).
 
-- In gateway/api/rest/v1/operators/, a class (no module-level functions, AGENT.md File shape) builds the APIRouter. Its methods are the handlers, which call OperatorService only and never storage or clients.
-- Routes:
-  - POST /v1/operators:validate answers 204, or 422.
-  - POST /v1/operators answers 201 with a Location header, or 422, 403 or 502.
-  - GET /v1/operators.
-  - GET /v1/operators/{operator_id}, which answers 404 for another Operator's id.
-- Map SEOperatorEntryRefusedError to 422 problem+json with an errors list of {field, reason} from OperatorEntryProblem, SEOperatorForbiddenError to 403, SEOperatorNotFoundError to 404, and SEOperatorCreationFailedError to 502. Use T0.12's problem+json and Idempotency-Key machinery and T0.11's caller dependency.
-- Register the router in the gateway's FastAPI application. This plan assumes T0.12 builds it in services/gateway/src/gateway/api/rest/gateway_rest_app.py; if it is elsewhere, report blocked with the path.
-- Route paths, problem types and keys are constants or enum members (CLAUDE.md).
-Rules: AGENT.md Layout (api imports service and models only), Logging, Messages.
-
-### <a id="k18"></a>K18: OpenAPI document and generated api-client with the operators endpoints
+### <a id="k20"></a>K20: Schema bundle: export the extended Operator
 
 | Agent | Wave | Depends on | Unblocks |
 | --- | --- | --- | --- |
-| 🖥️ frontend-implementer | 7 | [K17](#k17) | [K19](#k19), [K25](#k25) |
+| 🐍 implementer | 3 | [K09](#k09) | [K21](#k21), [K22](#k22) |
 
 **Files** (only this task may change them in its wave):
 
-- `services/gateway/openapi/`
-- `packages/ts/api-client/src/generated/`
+- `backend/swarm-models/schemas/swarm_models.schema.json`
 
-**Done when:** The api-client's up-to-date check that T0.12 put in CI passes, and `pnpm --filter ./packages/ts/api-client run typecheck` passes.
+**Done when:** `uv run swarm-schemas-check` passes and `uv run pytest tests/swarm_service/shared/schema -n 2` passes.
 
 **Brief:**
 
-Publish the gateway's OpenAPI document with the new /v1/operators endpoints, and regenerate packages/ts/api-client from it, never by hand. Spec: docs/specs/technical/05-api.md#rest ('the OpenAPI document is generated and published; the TypeScript client in packages/ts/api-client is generated from it in CI'), docs/specs/technical/10-frontends.md#apps (api-client: generated REST client and types), docs/specs/functional/use-cases/UC-029-create-an-operator.md. Ticket: docs/tickets/T0.16/TICKET.md.
+Regenerate the JSON Schema bundle after the change to the shared model `Operator` (K09). AGENT.md (Commands, Shared models) says the bundle is generated, never edited by hand: run `uv run swarm-schemas-export` from the root, then check it. Do not add the new request and response models to the exporter's list: only the models it already exports. Specification: [UC-029: the Operator is created with its name, deployment, Jurisdictions, LLM provider and Anchoring choice](docs/specs/functional/use-cases/UC-029-create-an-operator.md#actors), [FS-012](docs/specs/functional/features/FS-012-operators-deployment-and-languages.md#details).
 
-Run the export and generate commands T0.12 put in place. This plan assumes the document lives in services/gateway/openapi/ and the client's output in packages/ts/api-client/src/generated/; if the paths differ, report blocked with them. Check the generated types: OperatorDirectoryEntry, the 422 problem with its errors list, and the enum values of the deployment, Jurisdictions, LLM provider and Anchoring. Change nothing outside the generated output.
-
-### <a id="k19"></a>K19: Back office: operators data hooks and the draft store
+### <a id="k16"></a>K16: Service: OperatorService, its lifespan and its factory
 
 | Agent | Wave | Depends on | Unblocks |
 | --- | --- | --- | --- |
-| 🖥️ frontend-implementer | 8 | [K07](#k07), [K12](#k12), [K18](#k18) | [K20](#k20), [K21](#k21), [K22](#k22), [K25](#k25) |
+| 🐍 implementer | 4 | [K05](#k05), [K09](#k09), [K10](#k10), [K14](#k14), [K15](#k15) | [K17](#k17) |
 
 **Files** (only this task may change them in its wave):
 
-- `frontends/back-office/src/operators/api/`
-- `frontends/back-office/src/operators/state/operatorDraftStore.ts`
+- `backend/swarm-service/src/swarm_service/gateway/operators/__init__.py`
+- `backend/swarm-service/src/swarm_service/gateway/operators/operator_service.py`
+- `backend/swarm-service/src/swarm_service/gateway/operators/operator_lifespan.py`
+- `backend/swarm-service/src/swarm_service/gateway/factories/operators/__init__.py`
+- `backend/swarm-service/src/swarm_service/gateway/factories/operators/operator_service_factory.py`
 
-**Done when:** `pnpm --filter ./frontends/back-office exec vitest run src/operators/state` passes, and `pnpm --filter ./frontends/back-office run lint` and `pnpm --filter ./frontends/back-office run typecheck` pass.
+**Done when:** `uv run pytest tests/swarm_service/gateway -n 2` passes (with PostgreSQL binaries); `uv run ruff check backend/swarm-service` and `uv run mypy backend/swarm-service/src` pass; `uv run pytest tests/conventions/backend -n 2` passes.
 
 **Brief:**
 
-Write the data layer of the UC-029 screens, as frontends/back-office/src/operators/state/operatorDraftStore.test.ts and the page tests (with src/operators/testing/standInGateway.ts) expect. Spec: docs/specs/technical/10-frontends.md#apps (TanStack Query for server data, Zustand for UI state, api-client generated), docs/specs/technical/05-api.md#rest (Idempotency-Key on every POST, problem+json), docs/specs/functional/use-cases/UC-029-create-an-operator.md (steps 1 to 5, A1, A2). Ticket: docs/tickets/T0.16/TICKET.md.
+Implement the business rules of UC-029 so that K05's tests pass. The contract (constructor, `create`, `list`, `get`, `close`, the order of the checks, the defaults, the compensation, `OperatorLifespan`, `OperatorServiceFactory`) is in K05's brief and its tests. Specification: [UC-029 main flow](docs/specs/functional/use-cases/UC-029-create-an-operator.md#main-flow), [alternative flows A1 and A2](docs/specs/functional/use-cases/UC-029-create-an-operator.md#alternative-flows), [FS-012 details (required fields; LLM provider and Anchoring defaults)](docs/specs/functional/features/FS-012-operators-deployment-and-languages.md#details), [BR-008](docs/specs/functional/business-rules/BR-008-operator-isolation.md), [Architecture: Operator directory and cell assignment](docs/specs/technical/01-architecture.md#cells), [Security: identity](docs/specs/technical/06-security.md#identity).
+- Check the required fields first (`SEOperatorFieldMissingError` naming every missing `OperatorField`), then the name (`SEOperatorNameTakenError`). Keep both in this service, the one place for the rules (AGENT.md Layout).
+- Create in one unit of work opened for the new Operator (`pool.unit_of_work(operator_id)`), so that row-level security accepts its person and the global tables take its Operator and cell assignment. Inside it, call Keycloak (organisation, then invitation). On `SEKeycloakConflictError` raise `SEOperatorPlannerEmailTakenError`. On any Keycloak failure, remove what was created in Keycloak (a failed removal is logged at WARNING), let the transaction roll back, and raise again. A `SEStorageDuplicateError` from a race on the name becomes `SEOperatorNameTakenError`.
+- `list` and `get` use a unit of work without an Operator, which reads only the global directory tables (the Swarm administrator has no access to Operators' data).
+- Open the pool on the first call, under an `asyncio.Lock`, so that building the application, the OpenAPI export and the e2e images need no database.
+- `OperatorLifespan` follows `live/live_feed_lifespan.py`. `OperatorServiceFactory` mirrors the existing service factories of `swarm_service/simulation/factories/`.
+- AGENT.md: no logger handed on, every branch logs, every `try` has an `except`, no raw strings, Google docstrings.
 
-- src/operators/api/operatorsApi.ts uses the generated api-client with the session token (K12) and exports three TanStack Query hooks:
-  - useOperators();
-  - useValidateOperatorEntry(), posting /v1/operators:validate;
-  - useCreateOperator(), posting /v1/operators.
-  Each POST sends a fresh Idempotency-Key (crypto.randomUUID) per submission and reuses it on a retry of the same submission. A 422 problem becomes a typed list of {field, reason}.
-- src/operators/state/operatorDraftStore.ts exports useOperatorDraft, a Zustand store with entry, firstMissionPlanner, problems, setEntry, setFirstMissionPlanner, setProblems and reset. The LLM provider defaults to Claude and the Anchoring to the qualified timestamping authority, and no deployment or Jurisdiction is preselected.
-Use only the generated types; no hand-written copy of the API's shapes.
-
-### <a id="k20"></a>K20: Back office screen A1 and KO: ➕ Create an Operator
+### <a id="k21"></a>K21: Rust: regenerate the shared model structs
 
 | Agent | Wave | Depends on | Unblocks |
 | --- | --- | --- | --- |
-| 🖥️ frontend-implementer | 9 | [K07](#k07), [K19](#k19) | [K23](#k23), [K24](#k24), [K25](#k25) |
+| 🦀 rust-implementer | 4 | [K20](#k20) | none |
 
 **Files** (only this task may change them in its wave):
 
-- `frontends/back-office/src/operators/create/`
+- `rust/swarm-models/src/generated.rs`
+- `rust/swarm-models/src/lib.rs`
 
-**Done when:** `pnpm --filter ./frontends/back-office exec vitest run src/operators/create` passes, and `pnpm --filter ./frontends/back-office run lint` and `pnpm --filter ./frontends/back-office run typecheck` pass.
+**Done when:** In `rust/`: `cargo fmt --all --check`, `cargo clippy -p swarm-models --all-targets -- -D warnings` and `cargo test -p swarm-models` (with `generated_is_current`) pass.
 
 **Brief:**
 
-Build CreateOperatorPage (route /operators/new), which shows states A1 and KO, as frontends/back-office/src/operators/create/CreateOperatorPage.test.tsx expects. Do not change the test. Spec: docs/specs/functional/use-cases/UC-029-create-an-operator.md (steps 1 to 3, screens A1 and KO, A1 name taken, A2 required field missing), the mock-ups docs/specs/screens/mockups/UC-029/a1.html and ko.html (layout and wording), docs/specs/visual-identity.md#components, docs/specs/technical/10-frontends.md#apps (packages/ts/ui components on Radix, tokens only). Ticket: docs/tickets/T0.16/TICKET.md, criteria 2 and 3.
+Regenerate the Rust structs from the updated schema bundle (K20), which now gives `Operator` its deployment, Jurisdictions, LLM provider and Anchoring. AGENT.md (Commands, Shared models): run `cargo run -p swarm-models-codegen` in `rust/`. It writes `rust/swarm-models/src/generated.rs`, which is never edited by hand. Then re-export from `rust/swarm-models/src/lib.rs` the new enum types beside `Operator`, the way it re-exports `RoleName`. Specification: [UC-029: the Operator's fields](docs/specs/functional/use-cases/UC-029-create-an-operator.md#actors), [FS-012 details](docs/specs/functional/features/FS-012-operators-deployment-and-languages.md#details).
 
-- Two cards, as in the mock-up:
-  - Operator name, Deployment (Cloud, On premises), Jurisdictions (EU (EASA), US (FAA)), and LLM provider and models (Claude (default), an open-weight model) with the on-premises hint;
-  - 🔏 Anchoring, with three choices (default marked) and the hint 'Only fingerprints of the Evidence records leave Swarm, never the data.'.
-- Cancel. 'Next: first Mission planner ▶️' calls useValidateOperatorEntry, then goes to /operators/new/first-mission-planner with the draft kept.
-- On problems, show the failure banner '❌ Operator not created: …' and an error under each named field, using the mock-up's wording.
-- Every text is a FormatJS message (T0.15) with its English default; K24 writes the four catalogues.
-- Use only packages/ts/ui components and tokens: no raw colour or size. Use glossary names, never the glossary's 'Do not say' words.
-
-### <a id="k21"></a>K21: Back office screen A2: invite the first Mission planner
+### <a id="k22"></a>K22: Live package: regenerate the TypeScript models
 
 | Agent | Wave | Depends on | Unblocks |
 | --- | --- | --- | --- |
-| 🖥️ frontend-implementer | 9 | [K07](#k07), [K19](#k19) | [K23](#k23), [K24](#k24), [K25](#k25) |
+| 🖥️ frontend-implementer | 4 | [K20](#k20) | [K27](#k27) |
 
 **Files** (only this task may change them in its wave):
 
-- `frontends/back-office/src/operators/invite/`
+- `frontend/packages/live/src/generated/models.ts`
 
-**Done when:** `pnpm --filter ./frontends/back-office exec vitest run src/operators/invite` passes, and `pnpm --filter ./frontends/back-office run lint` and `pnpm --filter ./frontends/back-office run typecheck` pass.
+**Done when:** `pnpm --filter ./frontend/packages/live test`, `lint` and `typecheck` pass (the test script runs `generate.ts --check`).
 
 **Brief:**
 
-Build InviteFirstMissionPlannerPage (route /operators/new/first-mission-planner), which shows state A2, as frontends/back-office/src/operators/invite/InviteFirstMissionPlannerPage.test.tsx expects. Do not change the test. Spec: docs/specs/functional/use-cases/UC-029-create-an-operator.md (steps 4 and 5, screen A2, A2 missing e-mail), the mock-up docs/specs/screens/mockups/UC-029/a2.html, docs/specs/functional/business-rules/BR-008-operator-isolation.md, docs/specs/technical/10-frontends.md#apps. Ticket: docs/tickets/T0.16/TICKET.md, criteria 1 and 3.
+Regenerate the TypeScript types of the shared models from the updated schema bundle (K20): run `pnpm --filter ./frontend/packages/live run generate` from the root (AGENT.md Commands, Shared models). The file `frontend/packages/live/src/generated/models.ts` is generated and never edited by hand. Specification: [UC-029: the Operator's fields](docs/specs/functional/use-cases/UC-029-create-an-operator.md#actors), [GUI and WebUI: the live package](docs/specs/technical/10-frontends.md#apps).
 
-- Title '👥 First Mission planner of &lt;Operator name>'.
-- A card with Name, E-mail address and a fixed Role of 👤 Mission planner, with the hint from the mock-up.
-- A 🗃️ Operator summary card from the draft: Name, Deployment, Jurisdictions, LLM provider, Anchoring.
-- '◀️ Back' returns to /operators/new with the draft.
-- 'Create the Operator and send the invitation' calls useCreateOperator once. On 422 it shows the failure banner naming each field. On 201 it resets the draft and goes to /operators carrying the created Operator's name for the success banner.
-- Every text is a FormatJS message with its English default. Use packages/ts/ui components and tokens only.
-
-### <a id="k22"></a>K22: Back office screen OK: the Operators list
+### <a id="k17"></a>K17: API: /v1/operators routes, gateway wiring and OpenAPI document
 
 | Agent | Wave | Depends on | Unblocks |
 | --- | --- | --- | --- |
-| 🖥️ frontend-implementer | 9 | [K07](#k07), [K19](#k19) | [K23](#k23), [K24](#k24), [K25](#k25) |
+| 🐍 implementer | 5 | [K06](#k06), [K16](#k16) | [K23](#k23) |
 
 **Files** (only this task may change them in its wave):
 
-- `frontends/back-office/src/operators/list/`
+- `backend/swarm-api/src/swarm_api/v1/gateway/operator_router.py`
+- `backend/swarm-api/src/swarm_api/v1/gateway/gateway_router.py`
+- `frontend/packages/api-client/openapi/gateway.json`
 
-**Done when:** `pnpm --filter ./frontends/back-office exec vitest run src/operators/list` passes, and `pnpm --filter ./frontends/back-office run lint` and `pnpm --filter ./frontends/back-office run typecheck` pass.
+**Done when:** `uv run pytest tests/swarm_api tests/scripts/openapi tests/swarm_gateway -n 2` passes (with PostgreSQL binaries); `uv run swarm-openapi-check` passes; `uv run ruff check backend/swarm-api` and `uv run mypy backend/swarm-api/src` pass; `uv run pytest tests/conventions/backend -n 2` passes.
 
 **Brief:**
 
-Build OperatorsPage (route /operators), which shows state OK, as frontends/back-office/src/operators/list/OperatorsPage.test.tsx expects. Do not change the test. Spec: docs/specs/functional/use-cases/UC-029-create-an-operator.md (step 5, screen OK, postconditions), the mock-up docs/specs/screens/mockups/UC-029/ok.html, docs/specs/functional/business-rules/BR-008-operator-isolation.md (a Mission planner sees only her own Operator), docs/specs/technical/06-security.md#authorisation, docs/specs/technical/10-frontends.md#apps. Ticket: docs/tickets/T0.16/TICKET.md, criterion 1.
+Expose UC-029 on the gateway so that K06's tests pass. The contract (paths, roles, status codes, models) is in K06's brief and its tests. Specification: [API layer: REST (`/v1`, resources named after the glossary, `Idempotency-Key` on every POST, problem+json, the OpenAPI contract)](docs/specs/technical/05-api.md#rest), [Security: roles and Operator isolation (the gateway checks the role and the Operator of every call)](docs/specs/technical/06-security.md#authorisation), [UC-029 alternative flows](docs/specs/functional/use-cases/UC-029-create-an-operator.md#alternative-flows), [BR-008 (another Operator's resource is not found)](docs/specs/functional/business-rules/BR-008-operator-isolation.md#examples), [FS-012 AC-3](docs/specs/functional/features/FS-012-operators-deployment-and-languages.md#acceptance).
+- `swarm_api/v1/gateway/operator_router.py`: `OperatorRouter(APIRouter)` taking the `OperatorService` in its constructor (attribute `operators`). Its routes add `Depends(RouteAccess([...]))` with the roles of the security page: `[RoleName.SWARM_ADMINISTRATOR]` for `GET` and `POST /operators`, and every Operator role for `GET /operators/{operator_id}`. Each route delegates to the service in one line. POST answers 201 with `response_model=OperatorCreated`. Paths and methods are `ClassVar` constants. The api layer holds only endpoints (AGENT.md Layout).
+- `gateway_router.py`: in `application`, build the service with `OperatorServiceFactory(self.gateway_config).create()`, serve `OperatorRouter` under `/v1` beside `self` through `ProblemHandlers().application`, and set the lifespan to `OperatorLifespan(service, LiveFeedLifespan(feed).lifespan).lifespan`. Update the class `Notes:`.
+- The application must still build and serve its OpenAPI document with no database and no Keycloak.
+- Then regenerate the published contract: `uv run swarm-openapi-export` writes `frontend/packages/api-client/openapi/gateway.json`.
 
-- Title '🗃️ Operators'.
-- After a creation, the success banner '✅ &lt;name> created. Its data is isolated: no other Operator can see it.'.
-- A table from useOperators with the columns Operator, Deployment, Jurisdictions, Anchoring, First Mission planner (👤 name and the invitation state, Invitation sent or Invitation accepted) and State (✅ Created).
-- A '➕ Create an Operator' action, shown to a Swarm administrator only (useSession).
-- The list refreshes when the page is opened again. There is no live toast: the sign-in of the Mission planner shows as Invitation accepted.
-- Every text is a FormatJS message with its English default. Use packages/ts/ui components and tokens only.
-
-### <a id="k23"></a>K23: Back office routes, side bar and frame for Operators
+### <a id="k23"></a>K23: API client: regenerate the gateway types
 
 | Agent | Wave | Depends on | Unblocks |
 | --- | --- | --- | --- |
-| 🖥️ frontend-implementer | 10 | [K12](#k12), [K20](#k20), [K21](#k21), [K22](#k22) | [K24](#k24), [K25](#k25) |
+| 🖥️ frontend-implementer | 6 | [K17](#k17) | [K24](#k24), [K27](#k27) |
 
 **Files** (only this task may change them in its wave):
 
-- `frontends/back-office/src/operators/operatorRoutes.tsx`
-- `frontends/back-office/src/App.tsx`
+- `frontend/packages/api-client/src/generated/gateway.ts`
+- `frontend/packages/api-client/src/index.ts`
 
-**Done when:** `pnpm --filter ./frontends/back-office run test`, `pnpm --filter ./frontends/back-office run lint` and `pnpm --filter ./frontends/back-office run typecheck` pass.
+**Done when:** `pnpm --filter ./frontend/packages/api-client test` (with `generate.ts --check`), `lint` and `typecheck` pass.
 
 **Brief:**
 
-Wire the UC-029 screens into the back-office shell of T0.14. Spec: docs/specs/functional/use-cases/UC-029-create-an-operator.md (step 1 'opens ➕ Operators', step 4 'opens 👥 People', step 6 'signs in to the Back office of Aerowing Services'), the mock-ups docs/specs/screens/mockups/UC-029/*.html (title bar 'Back office · Swarm administration', side bar ➕ Operators, 👥 People, 🔧 Settings, status bar with the persona and the deployment), docs/specs/visual-identity.md#components (the frame of each part of Swarm), docs/specs/technical/10-frontends.md#apps, docs/specs/technical/06-security.md#authorisation. Ticket: docs/tickets/T0.16/TICKET.md.
+Regenerate the TypeScript gateway client from the new OpenAPI document (K17): run `pnpm --filter ./frontend/packages/api-client run generate` from the root (AGENT.md Commands). It writes `src/generated/gateway.ts`, which is never edited by hand. In `src/index.ts`, export type aliases of the new schemas beside `Problem`: `Operator`, `OperatorEntry`, `OperatorDirectoryEntry`, `OperatorCreated`, `CellAssignment` and `Person`. Specification: [API layer: REST contract (the TypeScript client generated from the OpenAPI document, checked in CI)](docs/specs/technical/05-api.md#rest), [GUI and WebUI: api-client package](docs/specs/technical/10-frontends.md#apps), [UC-029](docs/specs/functional/use-cases/UC-029-create-an-operator.md#main-flow).
 
-- src/operators/operatorRoutes.tsx declares the routes /operators, /operators/new and /operators/new/first-mission-planner, open to a Swarm administrator. A Mission planner reaches /operators and her own Operator only.
-- Mount the routes and the session provider of src/session in the app. This plan assumes the root is src/App.tsx; if T0.14 put the router or the side bar elsewhere, report blocked with the path.
-- In the frame:
-  - side bar: ➕ Operators is active on /operators and /operators/new, and 👥 People on the first Mission planner step;
-  - title bar: 'Back office · Swarm administration' for a Swarm administrator, 'Back office · &lt;her Operator's name>' for a Mission planner;
-  - status bar: the persona.
-- Every text is a FormatJS message with its English default.
-
-### <a id="k24"></a>K24: Back office UC-029 messages in English, French, German and Spanish
+### <a id="k24"></a>K24: Back office: Create an Operator screens and App wiring
 
 | Agent | Wave | Depends on | Unblocks |
 | --- | --- | --- | --- |
-| 🖥️ frontend-implementer | 11 | [K11](#k11), [K20](#k20), [K21](#k21), [K22](#k22), [K23](#k23) | [K25](#k25) |
+| 🖥️ frontend-implementer | 7 | [K08](#k08), [K12](#k12), [K13](#k13), [K23](#k23) | [K27](#k27) |
 
 **Files** (only this task may change them in its wave):
 
-- `frontends/back-office/src/messages/en.json`
-- `frontends/back-office/src/messages/fr.json`
-- `frontends/back-office/src/messages/de.json`
-- `frontends/back-office/src/messages/es.json`
+- `frontend/apps/back-office/src/App.tsx`
+- `frontend/apps/back-office/src/main.tsx`
+- `frontend/apps/back-office/src/operators/OperatorsScreen.tsx`
+- `frontend/apps/back-office/src/operators/OperatorEntryStep.tsx`
+- `frontend/apps/back-office/src/operators/FirstMissionPlannerStep.tsx`
+- `frontend/apps/back-office/src/operators/OperatorsTable.tsx`
+- `frontend/apps/back-office/src/operators/entry-checks.ts`
 
-**Done when:** T0.15's message check passes. `pnpm --filter ./frontends/back-office run test` passes. `docker compose -f compose.e2e.yaml up -d --build --wait` followed by `pnpm --filter ./frontends/back-office exec playwright test e2e/create-an-operator.spec.ts` passes.
+**Done when:** `pnpm --filter @swarm/back-office test`, `lint`, `typecheck` and `build` pass.
 
 **Brief:**
 
-Write every message the UC-029 screens use in the four languages, so T0.15's CI check passes. Spec: docs/specs/functional/business-rules/BR-017-every-screen-in-four-languages.md (named by epic E0.5 as 'UC-029 screens in four languages'), docs/specs/technical/10-frontends.md#apps (i18n: FormatJS messages in English, French, German and Spanish), docs/specs/functional/use-cases/UC-029-create-an-operator.md, docs/specs/glossary.md (the names, and the 'Do not say' words never used). Ticket: docs/tickets/T0.16/TICKET.md.
+Build the UC-029 screens of the Back office and wire the app, so that every test of K08 passes. Specification: [UC-029 screens A1, KO, A2 and OK](docs/specs/functional/use-cases/UC-029-create-an-operator.md#screens) and their mock-ups `docs/specs/screens/mockups/UC-029/*.html`, [UC-029 main flow and alternative flows](docs/specs/functional/use-cases/UC-029-create-an-operator.md#alternative-flows), [FS-012 details (required fields and defaults)](docs/specs/functional/features/FS-012-operators-deployment-and-languages.md#details), [BR-008](docs/specs/functional/business-rules/BR-008-operator-isolation.md), [GUI and WebUI: apps and shared packages](docs/specs/technical/10-frontends.md#apps), [visual identity: screens](docs/specs/visual-identity.md#screens).
+- Use only the components of `@swarm/ui` (Field, Button, Badge, Banner, Toast, Table, Card, Grid2, Stack, Row, the frames), styled by tokens. No colour or font of your own.
+- Every word comes from the messages of `@swarm/i18n` that K12 added (read `frontend/packages/i18n/src/messages/en.json`). Use the generated types of `@swarm/api-client` (K23) and TanStack Query through `useGateway()` (K13).
+- `OperatorsScreen`: the directory table (`GET /v1/operators`) and `➕ Create an Operator`. `OperatorEntryStep` (A1) has the defaults: Cloud, Claude in the cloud, the qualified timestamping authority. `entry-checks.ts` holds the required-field and name checks of step 3: the name is compared trimmed and case-insensitively with the directory, and every error is shown under its field with the KO banner. `FirstMissionPlannerStep` (A2, `👥 People` active) checks the e-mail, then sends one POST. A 409 brings back A1 with the name error, a 422 shows the KO banner, and success shows the OK banner, the invitation toast and the table.
+- `App.tsx`: a Swarm administrator gets `SwarmAdministrationFrame`; anyone else gets `BackOfficeFrame` with `operatorName` from `GET /v1/operators/{operatorId}` and an empty content area. Keep the language status item.
+- `main.tsx`: keep the tokens and styles imports and `#root`, and mount `I18nProvider`, `SignInGate`, then `GatewayProvider` (client from `createBackOfficeGateway` with `config.ts` and the session token), then `App`.
+- At most five code files per folder.
 
-- Extract every message id used under src/operators/ and by the routes and frame of K23. Write them in the back-office catalogues T0.15 set up, assumed at src/messages/&lt;lang>.json; report blocked with the path if T0.15 chose another.
-- English is the defaults, unchanged. Translate French, German and Spanish faithfully. Keep the glossary's names (Operator, Mission planner, Jurisdiction, Anchoring, LLM provider) consistent with how the existing catalogues render them, and the placeholders identical.
-- Then run the Playwright test of UC-029 against compose.e2e.yaml: it is the end-to-end proof of the whole ticket.
-
-### <a id="k25"></a>K25: Capture the UC-029 screens (TKT-21)
+### <a id="k27"></a>K27: Screens: UC-029 A1, KO, A2 and OK as the app shows them
 
 | Agent | Wave | Depends on | Unblocks |
 | --- | --- | --- | --- |
-| ✏️ mockup-writer | 12 | [K11](#k11), [K12](#k12), [K18](#k18), [K19](#k19), [K20](#k20), [K21](#k21), [K22](#k22), [K23](#k23), [K24](#k24) | none |
+| ✏️ mockup-writer | 8 | [K12](#k12), [K13](#k13), [K22](#k22), [K23](#k23), [K24](#k24) | none |
 
 **Files** (only this task may change them in its wave):
 
@@ -975,20 +794,14 @@ Write every message the UC-029 screens use in the four languages, so T0.15's CI 
 - `docs/specs/screens/mockups/UC-029/ok.html`
 - `docs/specs/functional/use-cases/UC-029-create-an-operator.md`
 
-**Done when:** `python3 .claude/skills/write-specs/scripts/specs.py check` prints nothing, and each of the four screens has both of its PNGs, each either captured from the app (📸 Screenshot) or rendered from its updated mock-up while T0.20 is not merged.
+**Done when:** `python3 .claude/skills/write-specs/scripts/specs.py check` prints nothing, and the four UC-029 screens (both modes) show the words and states of the back-office app.
 
 **Brief:**
 
-Capture the four screens TICKET.md lists under 'Screens touched': UC-029 A1 (Enter the Operator), KO (Operator not created), A2 (Invite the first Mission planner) and OK (Operator created and isolated). Their rows are on docs/specs/functional/use-cases/UC-029-create-an-operator.md#screens. Rules: SPEC-12 and SPEC-13 (.claude/rules/specs.md), TKT-21 (.claude/rules/tickets.md), docs/specs/visual-identity.md#screens (screen size and sample data), docs/specs/technical/10-frontends.md#design-system. Ticket: docs/tickets/T0.16/TICKET.md.
-
-If the screenshot pipeline of T0.20 is merged:
-1. Start the app with compose.e2e.yaml. Bring each state up with the sample data of the use case: Aerowing Services, cloud, EU (EASA), Léa Martin; for KO, the taken name and no Jurisdiction.
-2. Capture each screen in light and dark mode with that pipeline, at the visual identity's screen size, as 256-colour palette PNGs at docs/specs/screens/UC-029/&lt;node>.png and &lt;node>.dark.png.
-3. Set each row's source to '📸 Screenshot' and delete its mock-up.
-T0.20 is not merged yet, because it depends on this ticket. Until it is, the screens stay '✏️ Mock-up', and instead:
-1. Update each mock-up so it shows what the app now shows for that state, with components.css classes only and the app's wording. For example, the OK screen has no live toast; its list shows Invitation accepted.
-2. Run `python3 .claude/skills/write-specs/scripts/specs.py render` to write both PNGs of each.
-In both cases run `python3 .claude/skills/write-specs/scripts/specs.py build`. Change nothing else on the use case page.
+Capture task of TKT-21 for the four screens that `docs/tickets/T0.16/TICKET.md` lists under Screens touched: [UC-029 A1](docs/specs/functional/use-cases/UC-029-create-an-operator.md#screen-a1), [KO](docs/specs/functional/use-cases/UC-029-create-an-operator.md#screen-ko), [A2](docs/specs/functional/use-cases/UC-029-create-an-operator.md#screen-a2) and [OK](docs/specs/functional/use-cases/UC-029-create-an-operator.md#screen-ok). Specification: [SPEC-12 (a screen for every state, light and dark)](.claude/rules/specs.md), [visual identity: screens](docs/specs/visual-identity.md#screens), [BR-008](docs/specs/functional/business-rules/BR-008-operator-isolation.md), [GUI and WebUI: back-office](docs/specs/technical/10-frontends.md#apps).
+- **If T0.20 is merged** (its `docs/tickets/T0.20/EXPLAIN.md` is on `origin/develop` and its screenshot pipeline exists): capture each screen from the running back-office app, in light and dark mode, with that pipeline and the sample data of the visual identity (Aerowing Services, Léa Martin, `lea.martin@aerowing.example`). Write `docs/specs/screens/UC-029/<node>.png` and `<node>.dark.png`, set each row's source to `📸 Screenshot` on the use case page, and delete `docs/specs/screens/mockups/UC-029/<node>.html`.
+- **Otherwise (the case when this plan was written):** keep the mock-ups and change them to show what the app now shows. Read `frontend/apps/back-office/src/` and the English messages of `frontend/packages/i18n/src/messages/en.json`, and use their exact words, fields, defaults and errors. The OK directory table now has the columns Operator, Deployment, Jurisdictions, Anchoring, Cell and State, without the Mission planner column, because the Swarm administrator has no access to an Operator's people. It shows the invitation toast instead. Use only the classes of `components.css` and no style of your own (SPEC-13), and only glossary names (SPEC-2). Then run `specs.py render` for the two modes, and keep each row's source `✏️ Mock-up`.
+Run `python3 .claude/skills/write-specs/scripts/specs.py build`, then `render`, then `check`.
 
 <!-- /plan:graph -->
 
@@ -1001,403 +814,418 @@ In both cases run `python3 .claude/skills/write-specs/scripts/specs.py build`. C
 [
   {
     "id": "K01",
-    "title": "Tests: shared Operator model with deployment, Jurisdictions, LLM provider and Anchoring",
+    "title": "Tests: Operator models, enums and REST refusals",
     "agent": "test-writer",
     "depends_on": [],
     "files": [
-      "packages/python/swarm-models/tests/models/test_enums.py",
-      "packages/python/swarm-models/tests/models/operators/test_operator.py",
-      "packages/python/swarm-models/tests/service/schemas/test_schema_exporter.py"
+      "tests/swarm_models/enums/operators/test_operator_enums.py",
+      "tests/swarm_models/operators/test_operator.py",
+      "tests/swarm_models/operators/test_operator_entry.py",
+      "tests/swarm_models/operators/test_operator_directory_entry.py",
+      "tests/swarm_models/operators/test_operator_created.py",
+      "tests/swarm_models/operators/exceptions/test_operator_refusals.py"
     ],
-    "brief": "Write the tests first for the shared Operator model, which the Swarm administrator creates with its name, deployment, Jurisdictions, LLM provider and Anchoring. Spec: docs/specs/functional/use-cases/UC-029-create-an-operator.md (steps 1 and 2, alternative flow A2: required are the name, the deployment and at least one Jurisdiction; the LLM provider and the Anchoring have defaults), docs/specs/functional/features/FS-012-operators-deployment-and-languages.md ('Required to create an Operator': LLM provider Claude in the cloud, Anchoring a qualified timestamping authority by default), docs/specs/technical/02-data-models.md#conventions (Operator is a global model of swarm-models), docs/specs/technical/01-architecture.md#cells. Ticket: docs/tickets/T0.16/TICKET.md.\n\n1) packages/python/swarm-models/tests/models/test_enums.py, class TestEnums. It pins the four new enums of swarm_models.models.enums (the one enums.py of the models module, CLAUDE.md rule). Pin them the way tests/models/people/test_role_name.py pins RoleName: exact members, StrEnum, @unique, values in lower snake case with no hyphen.\n   - Deployment: CLOUD='cloud', ON_PREMISES='on_premises'.\n   - Jurisdiction: EU_EASA='eu_easa', US_FAA='us_faa'.\n   - LlmProvider: CLAUDE='claude', OPEN_WEIGHT='open_weight'.\n   - AnchoringChoice: QUALIFIED_TIMESTAMPING_AUTHORITY='qualified_timestamping_authority', PUBLIC_BLOCKCHAIN='public_blockchain', NONE='none'.\n2) Extend TestOperator in packages/python/swarm-models/tests/models/operators/test_operator.py and keep the six model tests of AGENT.md (Tests). Its valid() becomes Aerowing Services, deployment 'cloud', jurisdictions ['eu_easa'].\n   - Required fields: id, name, deployment, jurisdictions.\n   - Defaults: llm_provider is LlmProvider.CLAUDE and anchoring is AnchoringChoice.QUALIFIED_TIMESTAMPING_AUTHORITY, and None becomes the default for both. None on id, name, deployment or jurisdictions raises that field's exception.\n   - Refused deployment values (an unknown string, a bool, an int) raise SEOperatorInvalidDeployment.\n   - Refused jurisdictions values (missing, empty list, not a list, unknown member, a duplicate, a bool) raise SEOperatorInvalidJurisdictions.\n   - Unknown llm_provider and anchoring values raise SEOperatorInvalidLlmProvider and SEOperatorInvalidAnchoring.\n   - Enum values given as strings are accepted.\n   - Round trip through model_dump and JSON.\n   - Every field exception, the four new ones included, imports from swarm_models.models.operators.exceptions and subclasses SEInvalidOperatorException, not ValueError.\n3) packages/python/swarm-models/tests/service/schemas/test_schema_exporter.py: add 'Deployment', 'Jurisdiction', 'LlmProvider' and 'AnchoringChoice' to EXPECTED_DEFS, and rename the test that counts them to the new count. Change nothing else.\nRules: AGENT.md Tests (one Test class per file, sentence names, parametrize, specific exceptions, no unittest.mock). Compare with enum members, never raw values, except where a test pins an enum's values.",
-    "done_when": "`uv run ruff format --check` and `uv run ruff check` pass on the three files. `uv run pytest packages/python/swarm-models/tests/models/test_enums.py packages/python/swarm-models/tests/models/operators/test_operator.py` fails only because swarm_models.models.enums and the new exceptions do not exist yet.",
+    "brief": "Write the failing tests of the shared models that UC-029 needs, before any code exists (TKT-4). Specification: [UC-029 main flow and alternative flows](docs/specs/functional/use-cases/UC-029-create-an-operator.md#alternative-flows), [FS-012 details (required fields and defaults)](docs/specs/functional/features/FS-012-operators-deployment-and-languages.md#details), [glossary: Jurisdiction](docs/specs/glossary.md#term-jurisdiction), [LLM provider](docs/specs/glossary.md#term-llm-provider), [Anchoring](docs/specs/glossary.md#term-anchoring), [BR-008](docs/specs/functional/business-rules/BR-008-operator-isolation.md), [API layer: REST errors as problem+json](docs/specs/technical/05-api.md#rest). Follow AGENT.md Tests (one `Test<Subject>` class per file, sentence names, the six model tests: defaults, full valid construction, none becomes the default, rejects bad values with the specific exception, rejects unknown keys, round trip; compare with enums and constants, never raw values).\n\nContract the implementer (K09) will satisfy:\n- New enums in `swarm_models/enums.py` (import `from swarm_models.enums import ...`): `Deployment` {CLOUD=\"cloud\", ON_PREMISES=\"on_premises\"}, `Jurisdiction` {EU_EASA=\"eu_easa\", US_FAA=\"us_faa\"}, `LlmProvider` {CLAUDE=\"claude\", OPEN_WEIGHT=\"open_weight\"}, `Anchoring` {QUALIFIED_TIMESTAMPING=\"qualified_timestamping\", PUBLIC_BLOCKCHAIN=\"public_blockchain\", NONE=\"none\"}, `OperatorField` {NAME=\"name\", DEPLOYMENT=\"deployment\", JURISDICTIONS=\"jurisdictions\", FIRST_MISSION_PLANNER_EMAIL=\"first_mission_planner_email\"}. Test: unique, lower snake case values without hyphens.\n- `swarm_models.operators.operator.Operator` gains `deployment: Deployment` (required), `jurisdictions: List[Jurisdiction]` (required, at least one, no duplicates), `llm_provider: LlmProvider` (default CLAUDE), `anchoring: Anchoring` (default QUALIFIED_TIMESTAMPING), beside `id` (UUID v7) and `name`. Update the existing `tests/swarm_models/operators/test_operator.py` accordingly; each bad field raises its own `SEOperatorInvalid<Field>` from `swarm_models.operators.exceptions`.\n- `swarm_models.operators.operator_entry.OperatorEntry`, the body of the create request, lenient on presence so that the service can name what is missing: `name: Optional[str]` (stripped, blank becomes None), `deployment: Optional[Deployment]`, `jurisdictions: List[Jurisdiction]` (default empty, duplicates refused), `llm_provider: Optional[LlmProvider]` (default None), `anchoring: Anchoring` (default QUALIFIED_TIMESTAMPING), `first_mission_planner_name: Optional[str]` (blank becomes None), `first_mission_planner_email: Optional[str]` (blank becomes None; when given, an address without one `@` and a dot in its domain is refused). Its exceptions derive from `SEInvalidOperatorEntryException`, which is a `ValueError` (so FastAPI answers 422 for a wrong type).\n- `swarm_models.operators.operator_directory_entry.OperatorDirectoryEntry(operator: Operator, cell_assignment: CellAssignment)`: refused when `cell_assignment.operator_id != operator.id`.\n- `swarm_models.operators.operator_created.OperatorCreated(operator: Operator, cell_assignment: CellAssignment, first_mission_planner: Person)`: refused when the cell assignment or the person does not belong to the Operator.\n- REST refusals, `SERestError` subclasses importable from `swarm_models.operators.exceptions`: `SEOperatorFieldMissingError` (STATUS 422), `SEOperatorNameTakenError` (409), `SEOperatorPlannerEmailTakenError` (409), `SEOperatorNotFoundError` (404). Test their STATUS and that each is an `SERestError` (`swarm_web.models.rest.exceptions`).\n\nThe folder `tests/swarm_models/enums/` already holds five files, so the enum tests go in `tests/swarm_models/enums/operators/`. Test file base names must be unique across the workspace. Use Aerowing Services, the sample Operator of the visual identity.",
+    "done_when": "`uv run ruff check tests/swarm_models/operators tests/swarm_models/enums/operators` and `uv run ruff format --check` on the listed files pass; `uv run pytest tests/swarm_models/operators tests/swarm_models/enums/operators -n 2` fails only because the new models, enums and exceptions do not exist yet.",
     "wave": 1
   },
   {
     "id": "K02",
-    "title": "Tests: gateway models for the Operator entry, the directory and the Keycloak configuration",
+    "title": "Tests: Keycloak admin and Operator directory configuration",
     "agent": "test-writer",
     "depends_on": [],
     "files": [
-      "services/gateway/tests/models/test_enums.py",
-      "services/gateway/tests/models/operators/test_operator_entry.py",
-      "services/gateway/tests/models/operators/test_first_mission_planner_entry.py",
-      "services/gateway/tests/models/operators/test_operator_creation.py",
-      "services/gateway/tests/models/operators/test_operator_entry_problem.py",
-      "services/gateway/tests/models/operators/test_operator_directory_entry.py",
-      "services/gateway/tests/models/keycloak/test_keycloak_admin_config.py",
-      "services/gateway/tests/models/keycloak/test_mission_planner_invitation.py",
-      "services/gateway/tests/models/directory/test_directory_config.py"
+      "tests/swarm_models/keycloak/test_keycloak_admin_config.py",
+      "tests/swarm_models/config/gateway/test_operator_directory_config.py",
+      "tests/swarm_models/config/gateway/test_gateway_config.py"
     ],
-    "brief": "Write the tests first for the gateway models that carry UC-029. Spec: docs/specs/functional/use-cases/UC-029-create-an-operator.md (steps 1 to 5, A1 name taken, A2 required field missing: name, deployment, at least one Jurisdiction, the first Mission planner's e-mail; the LLM provider and the Anchoring have defaults), docs/specs/functional/features/FS-012-operators-deployment-and-languages.md, docs/specs/technical/01-architecture.md#cells (Operator directory and cell assignment), docs/specs/technical/06-security.md#identity (Keycloak, each Operator an organisation), docs/specs/technical/02-data-models.md#conventions. Ticket: docs/tickets/T0.16/TICKET.md.\n\nEvery model gets the six model tests of AGENT.md. Each field exception subclasses its model base and not ValueError. Bool is refused where a number is expected. Strings are stripped and empty ones refused. The new enums Deployment, Jurisdiction, LlmProvider and AnchoringChoice come from swarm_models.models.enums.\n- tests/models/test_enums.py (gateway.models.enums; extend the file if T0.11 or T0.12 created it):\n  - InvitationState: INVITED='invited', ACCEPTED='accepted'.\n  - OperatorField: NAME='name', DEPLOYMENT='deployment', JURISDICTIONS='jurisdictions', LLM_PROVIDER='llm_provider', ANCHORING='anchoring', FIRST_MISSION_PLANNER_NAME='first_mission_planner_name', FIRST_MISSION_PLANNER_EMAIL='first_mission_planner_email'.\n  - OperatorProblemReason: REQUIRED='required', TAKEN='taken', INVALID='invalid'.\n- OperatorEntry (gateway.models.operators.operator_entry), frozen, extra forbid. Base SEInvalidOperatorEntryException.\n  - name: SEOperatorEntryInvalidName.\n  - deployment: required, SEOperatorEntryInvalidDeployment.\n  - jurisdictions: at least one, no duplicates, SEOperatorEntryInvalidJurisdictions.\n  - llm_provider: default CLAUDE, SEOperatorEntryInvalidLlmProvider.\n  - anchoring: default QUALIFIED_TIMESTAMPING_AUTHORITY, SEOperatorEntryInvalidAnchoring.\n  - to_operator(operator_id) returns the shared swarm_models Operator with the same values.\n- FirstMissionPlannerEntry. Base SEInvalidFirstMissionPlannerEntryException.\n  - name: SEFirstMissionPlannerEntryInvalidName.\n  - email: stripped, one '@' with text on both sides, no space, SEFirstMissionPlannerEntryInvalidEmail.\n- OperatorCreation: operator (OperatorEntry) and first_mission_planner (FirstMissionPlannerEntry). Exceptions SEOperatorCreationInvalidOperator and SEOperatorCreationInvalidFirstMissionPlanner, base SEInvalidOperatorCreationException.\n- OperatorEntryProblem, frozen: field (OperatorField) and reason (OperatorProblemReason). Exceptions SEOperatorEntryProblemInvalidField and SEOperatorEntryProblemInvalidReason, base SEInvalidOperatorEntryProblemException.\n- MissionPlannerInvitation (gateway.models.keycloak.mission_planner_invitation): name (str) and state (InvitationState). Exceptions SEMissionPlannerInvitationInvalidName and SEMissionPlannerInvitationInvalidState, base SEInvalidMissionPlannerInvitationException.\n- OperatorDirectoryEntry, frozen: operator (swarm_models Operator), cell_assignment (swarm_models CellAssignment), first_mission_planner (Optional[MissionPlannerInvitation], default None).\n  - Field exceptions SEOperatorDirectoryEntryInvalidOperator, SEOperatorDirectoryEntryInvalidCellAssignment and SEOperatorDirectoryEntryInvalidFirstMissionPlanner.\n  - A cell_assignment.operator_id other than operator.id raises SEOperatorDirectoryEntryCellMismatch.\n  - Base SEInvalidOperatorDirectoryEntryException.\n- DirectoryConfig (gateway.models.directory.directory_config), validate_default: default_cell (str, required: the cell every new Operator is assigned to). Exception SEDirectoryConfigInvalidDefaultCell, base SEInvalidDirectoryConfigException.\n- KeycloakAdminConfig (gateway.models.keycloak.keycloak_admin_config), validate_default. Base SEInvalidKeycloakAdminConfigException.\n  - base_url: http or https, trailing slash stripped.\n  - realm, client_id.\n  - client_secret_key: names a secret store entry and never holds the secret.\n  - timeout_s: float above 0, default 10.0.\n  - Exceptions SEKeycloakAdminConfigInvalidBaseUrl, SEKeycloakAdminConfigInvalidRealm, SEKeycloakAdminConfigInvalidClientId, SEKeycloakAdminConfigInvalidClientSecretKey and SEKeycloakAdminConfigInvalidTimeoutS.\nThe exceptions import from the package next to each model: gateway.models.operators.exceptions, gateway.models.keycloak.exceptions, gateway.models.directory.exceptions.\nRules: AGENT.md Tests and Pydantic models; compare with enums and ClassVar constants.",
-    "done_when": "`uv run ruff format --check` and `uv run ruff check` pass on the nine files. `uv run pytest services/gateway/tests/models -n 2` fails only because the new gateway models, enums and exceptions do not exist yet.",
+    "brief": "Write the failing tests of the configuration that the Operator directory of the gateway needs. Specification: [Architecture: cells and the global layer (Operator directory, routing of each Operator to its cell)](docs/specs/technical/01-architecture.md#cells), [Security: identity (Keycloak, each Operator an organisation)](docs/specs/technical/06-security.md#identity), [UC-029](docs/specs/functional/use-cases/UC-029-create-an-operator.md#main-flow). Follow AGENT.md Tests and Pydantic models (six model tests each, `None` becomes the default, `bool` refused for numbers, blank strings refused, `extra=\"forbid\"`, configuration sections `validate_default=True`; a field ending in `_key` names an environment or secret store entry and never holds a secret).\n\nContract the implementer (K10) will satisfy:\n- `swarm_models.keycloak.keycloak_admin_config.KeycloakAdminConfig`: `server_url` (default `http://keycloak.global.svc.cluster.local:8080`, no trailing slash kept), `realm` (default `swarm`), `client_id` (default `swarm-gateway-admin`), `client_secret_key` (default `SWARM_GATEWAY_KEYCLOAK_CLIENT_SECRET`, the environment entry of the secret), `sign_in_client_id` (default `back-office`, the client the invitation link returns to), `request_timeout_s` (default 5.0, a positive number). Each bad field raises its own `SEKeycloakAdminConfigInvalid<Field>` from `swarm_models.keycloak.exceptions`.\n- `swarm_models.config.gateway.operator_directory_config.OperatorDirectoryConfig`: `cell` (default `dev`, the cell new Operators are assigned to, a non-blank lower case name) and `keycloak` (a `KeycloakAdminConfig`, default section when None).\n- `GatewayConfig` gains `operators: OperatorDirectoryConfig` (default section when None, a non-mapping raises `SEGatewayConfigInvalidOperators` from `swarm_models.config.gateway.exceptions`). Update `tests/swarm_models/config/gateway/test_gateway_config.py`: the new section, its default, and that `backend/apps/gateway/conf/app.yaml` loads and writes out every default of the `operators` section (load the file with `GatewayConfig.load` and compare with `GatewayConfig()`; find the file from the repository root as the existing tests do, without `Path(__file__).parents[N]`).",
+    "done_when": "`uv run ruff check tests/swarm_models/keycloak tests/swarm_models/config/gateway` passes; `uv run pytest tests/swarm_models/keycloak/test_keycloak_admin_config.py tests/swarm_models/config/gateway -n 2` fails only because the new configuration models and the `operators` section do not exist yet.",
     "wave": 1
   },
   {
     "id": "K03",
-    "title": "Tests: Operator directory repositories in PostgreSQL",
+    "title": "Tests: Operator directory storage and its migration",
     "agent": "test-writer",
     "depends_on": [],
     "files": [
-      "services/gateway/tests/storage/postgres/directory/conftest.py",
-      "services/gateway/tests/storage/postgres/directory/test_operator_repository.py",
-      "services/gateway/tests/storage/postgres/directory/test_cell_assignment_repository.py"
+      "tests/swarm_storage/gateway/operators/test_operator_repository.py",
+      "tests/swarm_storage/gateway/operators/test_cell_assignment_repository.py",
+      "tests/swarm_storage/gateway/people/test_person_repository.py",
+      "tests/swarm_storage/gateway/ddl/test_operator_directory_tables.py",
+      "tests/scripts/migrations/test_migrations_scripts.py"
     ],
-    "brief": "Write the tests first for the two repositories of the Operator directory. The directory is part of the global layer, and each Operator is assigned to exactly one cell (docs/specs/technical/01-architecture.md#cells). Each repository holds one entity in storage/postgres/ (docs/specs/technical/03-storage.md#repositories, docs/specs/technical/03-storage.md#postgresql). A name already taken is refused (A1 of docs/specs/functional/use-cases/UC-029-create-an-operator.md). Ticket: docs/tickets/T0.16/TICKET.md.\n\nUse the real PostgreSQL fixtures and transaction pattern T0.12 left for the gateway's storage tests (read services/gateway/tests/storage/ and services/gateway/src/gateway/storage/). Skip the tests without a database, as those do. The fixture runs the gateway's Alembic migrations. conftest.py gives a clean directory per test.\n- OperatorRepository (gateway.storage.postgres.directory.operator_repository), async:\n  - add(operator) stores a swarm_models Operator with all its fields (deployment, jurisdictions, llm_provider, anchoring).\n  - get(operator_id) returns it equal to what was added, or raises SEDirectoryOperatorNotFoundError.\n  - list_all() returns every Operator ordered by name.\n  - name_taken(name) is True for the same name after stripping, in any case ('aerowing services ' matches 'Aerowing Services').\n  - add with a taken name raises SEDirectoryOperatorNameTakenError, even when name_taken was not asked (unique index, to cover a race).\n- CellAssignmentRepository (gateway.storage.postgres.directory.cell_assignment_repository), async:\n  - assign(assignment) stores a swarm_models CellAssignment.\n  - of(operator_id) returns it, assigned_at in UTC to the microsecond, or raises SEDirectoryOperatorNotFoundError.\n  - A second assign for the same Operator raises SEDirectoryCellAlreadyAssignedError.\n- A rolled-back transaction leaves neither the Operator nor its assignment.\nExceptions import from gateway.models.directory.exceptions, all subclasses of SEDirectoryError. Sample data: Aerowing Services, cloud, EU (EASA). Rules: AGENT.md Tests; no unittest.mock.",
-    "done_when": "`uv run ruff format --check` and `uv run ruff check` pass on the three files. `uv run pytest services/gateway/tests/storage/postgres/directory` fails or is skipped only because the repositories and exceptions do not exist yet.",
+    "brief": "Write the failing tests of the gateway storage of the Operator directory. Specification: [Architecture: the Operator directory in the global layer](docs/specs/technical/01-architecture.md#cells), [Security: checks in the gateway and in PostgreSQL row-level security](docs/specs/technical/06-security.md#authorisation), [BR-008: Operator isolation](docs/specs/functional/business-rules/BR-008-operator-isolation.md), [UC-029 step 3 (no Operator has that name)](docs/specs/functional/use-cases/UC-029-create-an-operator.md#main-flow). Use the real PostgreSQL fixtures `postgres_dsn` of the root conftest (they skip without the binaries) and follow `tests/swarm_storage/shared/postgres/repositories/test_outbox_repository.py` for the pool, the schema set-up and the Operator constants.\n\nContract the implementer (K14) will satisfy:\n- `swarm_storage.gateway.ddl.operator_directory_tables.OperatorDirectoryTables` with `create(schema) -> List[str]` and `drop(schema) -> List[str]`, like `OutboxTable`: tables `operators` (one row per `Operator`, a unique index on the trimmed lower-case name), `cell_assignments` (one row per Operator, `CellAssignment`), both global and **without** row-level security because the Swarm administrator, who has no Operator, writes and lists them; and `people` (one row per `Person`, with `operator_id`) **with** the row-level security of `RowLevelSecurity().enable`.\n- `swarm_storage.gateway.operators.operator_repository.OperatorRepository(unit_of_work, schema)`, a `PostgresRepository[Operator]`: `add` (round trip of every field, the Jurisdictions list included), `get`, `list`, and `find_by_name(name) -> Optional[Operator]` matching trimmed and case-insensitively; adding a second Operator whose name differs only by case or spaces raises `SEStorageDuplicateError` from `swarm_models.storage.exceptions`.\n- `swarm_storage.gateway.operators.cell_assignment_repository.CellAssignmentRepository(unit_of_work, schema)`: `add`, `get(operator_id)`, `list`.\n- `swarm_storage.gateway.people.person_repository.PersonRepository(unit_of_work, schema)`: `add`, `get`, `list`; a person of Operator A is invisible in a unit of work of Operator B and in one without an Operator, and adding a person of B in A's unit of work raises `SEStorageOperatorRefusedError` (BR-008, two Operators).\n- Update `tests/scripts/migrations/test_migrations_scripts.py`: migrating the gateway also creates `gateway.operators`, `gateway.cell_assignments` and `gateway.people` (migration `0002` of `backend/apps/gateway/migrations/versions/`).",
+    "done_when": "`uv run ruff check tests/swarm_storage/gateway tests/scripts/migrations` passes; `uv run pytest tests/swarm_storage/gateway tests/scripts/migrations -n 2` fails (or skips without PostgreSQL) only because the storage classes and the migration do not exist yet.",
     "wave": 1
   },
   {
     "id": "K04",
-    "title": "Tests: Keycloak admin client and the stand-in Keycloak",
+    "title": "Tests: Keycloak admin client and its stand-in",
     "agent": "test-writer",
     "depends_on": [],
     "files": [
-      "services/gateway/tests/clients/keycloak/conftest.py",
-      "services/gateway/tests/clients/keycloak/stand_in_keycloak.py",
-      "services/gateway/tests/clients/keycloak/test_keycloak_admin_client.py"
+      "tests/fakes/keycloak/keycloak_admin_stand_in.py",
+      "tests/fakes/keycloak/admin_request_handler.py",
+      "tests/fakes/keycloak/helpers.py",
+      "tests/conftest.py",
+      "tests/swarm_clients/gateway/keycloak/test_keycloak_admin_client.py"
     ],
-    "brief": "Write the tests first for the gateway's client of the Keycloak admin API, and the stand-in server they run against. Spec: docs/specs/technical/06-security.md#identity (Keycloak, one realm, each Operator an organisation, multi-factor authentication for Mission planners), docs/specs/technical/06-security.md#authorisation (roles per persona), docs/specs/functional/use-cases/UC-029-create-an-operator.md (steps 4 to 6: the invitation by e-mail and the first sign-in), docs/specs/technical/01-architecture.md#cells. Ticket: docs/tickets/T0.16/TICKET.md.\n\n1) stand_in_keycloak.py: class StandInKeycloak (AGENT.md Tests: a helper class in its own file), a context manager (no start or stop methods; the lifecycle rule covers tests). It serves on 127.0.0.1 and a free port, in a thread, the subset of the Keycloak 26 API the client uses:\n   - the client-credentials token endpoint, checking client_id and client_secret;\n   - organisations: create, delete, get by alias, members;\n   - users: create, get, required actions;\n   - realm role mapping;\n   - the execute-actions e-mail.\n   Exact public API, which K05 and K06 use too:\n   - attributes base_url, realm, client_id, client_secret;\n   - organizations: Dict[str, Dict[str, JsonValue]], keyed by alias;\n   - users: Dict[str, Dict[str, JsonValue]], keyed by e-mail;\n   - invitations: List[str], the e-mails an execute-actions e-mail went to;\n   - fail_invitations: bool; when True the execute-actions e-mail answers 500;\n   - accept_invitation(email) clears that user's required actions, as her first sign-in does.\n   Its constants are UPPER_CASE ClassVars. conftest.py yields a running StandInKeycloak and a KeycloakAdminConfig pointing at it.\n2) test_keycloak_admin_client.py, class TestKeycloakAdminClient, for KeycloakAdminClient(config: KeycloakAdminConfig, client_secret: str, logger) in gateway.clients.keycloak.keycloak_admin_client. All methods are async.\n   - create_organization(operator) creates an organisation named after the Operator, with alias str(operator.id) and an operator_id attribute, and returns its id.\n   - invite_mission_planner(organization_id, entry: FirstMissionPlannerEntry) does four things: it creates the user (e-mail, name, enabled), makes her a member, maps the realm role named RoleName.MISSION_PLANNER, and sends one execute-actions e-mail with the required actions of a new Mission planner.\n   - delete_organization(organization_id) removes the organisation.\n   - mission_planner_invitation(operator_id) returns a MissionPlannerInvitation: INVITED while required actions remain, ACCEPTED after accept_invitation. It returns None when there is no member.\n   - An unreachable server or a timeout raises SEKeycloakAdminUnavailableError, and an error status raises SEKeycloakAdminRefusedError, both subclasses of SEKeycloakAdminError from gateway.models.keycloak.exceptions.\n   - No log record holds the client secret, a token or the e-mail address (caplog).\nRules: AGENT.md Tests; no unittest.mock, the stand-in is the real thing tested against.",
-    "done_when": "`uv run ruff format --check` and `uv run ruff check` pass on the three files. `uv run pytest services/gateway/tests/clients/keycloak` fails only because gateway.clients.keycloak and the gateway models do not exist yet.",
+    "brief": "Write a local stand-in of the Keycloak admin REST API and the failing tests of the client that creates an Operator's organisation and invites its first Mission planner by e-mail. Specification: [Security: identity (Keycloak, one realm, each Operator an organisation, multi-factor authentication for Mission planners)](docs/specs/technical/06-security.md#identity), [UC-029 steps 4 to 6](docs/specs/functional/use-cases/UC-029-create-an-operator.md#main-flow), [Architecture: Keycloak identity in the global layer](docs/specs/technical/01-architecture.md#cells). Prefer real things to mocks (AGENT.md Tests): a real local HTTP server, like `tests/fakes/keycloak/keycloak_stand_in.py`. The folder `tests/fakes/keycloak/` may hold at most five code files.\n\nStand-in contract, which K05 and K06 use in the same wave, so keep exactly these names:\n- `tests.fakes.keycloak.keycloak_admin_stand_in.KeycloakAdminStandIn`, a context manager on `127.0.0.1` and a free port, with `server_url` (`http://127.0.0.1:<port>`), `realm` (`swarm`), `client_id` (`swarm-gateway-admin`) and `client_secret` (a random string); the fixture `keycloak_admin_stand_in` in `tests/conftest.py` yields one and sets the environment entry `SWARM_GATEWAY_KEYCLOAK_CLIENT_SECRET` to its secret (monkeypatch).\n- It answers: `POST /realms/swarm/protocol/openid-connect/token` (client credentials, the right secret only), and, with that bearer token only, `POST /admin/realms/swarm/organizations` (201, `Location` with the id), `DELETE /admin/realms/swarm/organizations/{id}`, `POST /admin/realms/swarm/users` (201 with `Location`; 409 when the e-mail is already used), `DELETE /admin/realms/swarm/users/{id}`, `GET /admin/realms/swarm/roles/{name}`, `POST /admin/realms/swarm/users/{id}/role-mappings/realm`, `POST /admin/realms/swarm/organizations/{id}/members` (body: the user id), `PUT /admin/realms/swarm/users/{id}/execute-actions-email?client_id=...` (204).\n- It records what it holds: `organisations` (id to representation), `users` (id to representation: email, username, firstName, attributes, requiredActions), `realm_roles` (user id to role names), `members` (organisation id to user ids), `action_emails` (list of (user id, actions, client_id)); `fail_path(fragment)` makes the next request whose path contains it answer 500, and `existing_email(address)` pre-registers a user.\n\nClient contract the implementer (K15) will satisfy: `swarm_clients.gateway.keycloak.keycloak_admin_client.KeycloakAdminClient(config: KeycloakAdminConfig)` with `async create_organisation(operator: Operator) -> str` (named after the Operator, attribute `operator_id`), `async invite_mission_planner(organisation_id: str, person: Person) -> str` (creates the user with the e-mail as username, the person's name, the attribute `operator_id`, the required actions `UPDATE_PASSWORD` and `CONFIGURE_TOTP`; gives the realm role `mission_planner`; adds it to the organisation; sends the actions e-mail returning to `sign_in_client_id`; returns the user id), `async delete_organisation(organisation_id)`, `async delete_user(user_id)`. A 409 on the user raises `SEKeycloakConflictError`, any other failure, an unreachable server or a missing secret entry raises `SEKeycloakUnreachableError` (both from `swarm_models.keycloak.exceptions`); the secret is never logged.",
+    "done_when": "`uv run ruff check tests/fakes/keycloak tests/conftest.py tests/swarm_clients/gateway/keycloak` passes; the stand-in starts and answers its token endpoint in a quick check; `uv run pytest tests/swarm_clients/gateway/keycloak/test_keycloak_admin_client.py -n 2` fails only because `KeycloakAdminClient` and its new exception do not exist yet, and the existing tests of `tests/swarm_clients/gateway/keycloak` and `tests/swarm_api` still pass.",
     "wave": 1
   },
   {
     "id": "K05",
-    "title": "Tests: OperatorService checks A1 and A2, creates, invites and isolates",
+    "title": "Tests: OperatorService rules (creation, A1, A2, invitation, isolation)",
     "agent": "test-writer",
     "depends_on": [],
     "files": [
-      "services/gateway/tests/service/operators/conftest.py",
-      "services/gateway/tests/service/operators/test_operator_entry_checker.py",
-      "services/gateway/tests/service/operators/test_operator_service.py"
+      "tests/swarm_service/gateway/operators/operator_service/test_operator_creation.py",
+      "tests/swarm_service/gateway/operators/operator_service/test_operator_entry_checks.py",
+      "tests/swarm_service/gateway/operators/operator_service/test_operator_directory_reads.py",
+      "tests/swarm_service/gateway/operators/operator_service/conftest.py",
+      "tests/swarm_service/gateway/operators/operator_service/helpers.py",
+      "tests/swarm_service/gateway/operators/test_operator_lifespan.py",
+      "tests/swarm_service/gateway/factories/operators/test_operator_service_factory.py"
     ],
-    "brief": "Write the tests first for the business rules of UC-029 in the gateway's service layer. Spec: docs/specs/functional/use-cases/UC-029-create-an-operator.md (steps 3 and 5, A1, A2, postconditions), docs/specs/functional/business-rules/BR-008-operator-isolation.md (data visible to its own Operator only; another Operator's attempt gets not found and is logged), docs/specs/functional/features/FS-012-operators-deployment-and-languages.md (AC-3, required fields), docs/specs/technical/06-security.md#authorisation (the Swarm administrator creates Operators and their first accounts; the gateway checks the role and the Operator of every call), docs/specs/technical/01-architecture.md#cells. Ticket: docs/tickets/T0.16/TICKET.md.\n\n1) OperatorEntryChecker(logger) in gateway.service.operators.operator_entry_checker. It is pure: problems(entry: Dict[str, JsonValue], with_first_mission_planner: bool) returns List[OperatorEntryProblem] with every problem at once.\n   - REQUIRED for a missing or empty name, deployment or jurisdictions, and, when with_first_mission_planner, for the first Mission planner's name or e-mail.\n   - INVALID for a value present but wrong.\n   - No problem for a missing llm_provider or anchoring, which have defaults.\n   - Fields are OperatorField members.\n2) OperatorService in gateway.service.operators.operator_service, async. Build it with real repositories on the PostgreSQL fixtures of T0.12 (skip without a database, as they do) and a real KeycloakAdminClient. The client points at StandInKeycloak, imported by its full path from services/gateway/tests/clients/keycloak/stand_in_keycloak.py (written in parallel by K04 with this API: base_url, realm, client_id, client_secret, organizations, users, invitations, fail_invitations, accept_invitation(email)). Constructor: OperatorService(config: DirectoryConfig, operators: OperatorRepository, cells: CellAssignmentRepository, keycloak: KeycloakAdminClient, plus the transaction handle T0.12's repositories take, logger). The caller is the verified caller model T0.11 gives the gateway (person, Operator, roles). Behaviours:\n   - check(caller, entry) for a Swarm administrator: [] for Aerowing Services, cloud, EU (EASA). Once Aerowing Services exists, entering it again gives TAKEN on NAME, in any case (A1). Taken name and no Jurisdiction together give both problems (A2, as the KO screen shows both).\n   - create(caller, creation) succeeds. The Operator has a UUIDv7 id and is stored with its defaults (Claude, qualified timestamping authority). It is assigned to config.default_cell, with assigned_at in UTC. A Keycloak organisation exists for it, and exactly one invitation went to the first Mission planner's e-mail. The returned OperatorDirectoryEntry shows her invitation INVITED.\n   - create with problems raises SEOperatorEntryRefusedError carrying the problems, and creates nothing: no row, no organisation, no e-mail.\n   - create when the invitation fails (fail_invitations) raises SEOperatorCreationFailedError and leaves no directory row and no organisation.\n   - A caller without RoleName.SWARM_ADMINISTRATOR gets SEOperatorForbiddenError from check and create.\n   - list(caller): a Swarm administrator gets every Operator. The Mission planner of Aerowing Services gets only Aerowing Services, even with a second Operator present. After accept_invitation her invitation reads ACCEPTED.\n   - get(caller, id): her own Operator is returned. Another Operator's id raises SEOperatorNotFoundError and the attempt is logged (caplog), as BR-008 example 2 says.\nExceptions import from gateway.models.operators.exceptions, subclasses of SEOperatorError. The second Operator's name is test data. Rules: AGENT.md Tests; no unittest.mock.",
-    "done_when": "`uv run ruff format --check` and `uv run ruff check` pass on the three files. `uv run pytest services/gateway/tests/service/operators` fails or is skipped only because the service, the repositories, the client or the models do not exist yet.",
+    "brief": "Write the failing tests of the business rules of UC-029 in the service layer. Specification: [UC-029 main flow](docs/specs/functional/use-cases/UC-029-create-an-operator.md#main-flow), [alternative flows A1 and A2](docs/specs/functional/use-cases/UC-029-create-an-operator.md#alternative-flows), [postconditions](docs/specs/functional/use-cases/UC-029-create-an-operator.md#postconditions), [FS-012 details and AC-3](docs/specs/functional/features/FS-012-operators-deployment-and-languages.md#acceptance), [BR-008](docs/specs/functional/business-rules/BR-008-operator-isolation.md), [Architecture: cell assignment](docs/specs/technical/01-architecture.md#cells), [Security: identity](docs/specs/technical/06-security.md#identity). Use real PostgreSQL (`postgres_dsn`; create the schema and run `OperatorDirectoryTables().create(schema)`) and the fixture `keycloak_admin_stand_in` (the stand-in of K04, contract in K04's brief). No mocks. Use the models of K01's brief (`OperatorEntry`, `Operator`, `OperatorCreated`, `OperatorDirectoryEntry`, the enums and the four REST refusals).\n\nContract the implementer (K16) will satisfy:\n- `swarm_service.gateway.operators.operator_service.OperatorService(pool: PostgresPool, schema_name: str, cell: str, keycloak: KeycloakAdminClient)` with `async create(entry: OperatorEntry) -> OperatorCreated`, `async list(after: Optional[UUID] = None, limit: int = 100) -> List[OperatorDirectoryEntry]`, `async get(operator_id: UUID) -> Operator`, `async close()`. The pool opens on the first call (so building the service needs no database) and `close` is safe before any call and twice.\n- `create`: checks the required fields first and raises `SEOperatorFieldMissingError` whose message names every missing `OperatorField` value (name, deployment, at least one Jurisdiction, the first Mission planner's e-mail; parametrise each); then raises `SEOperatorNameTakenError` when an Operator of that name exists (same name, other case, extra spaces). Neither stores a row nor calls Keycloak. Otherwise, in one transaction, it stores the Operator (new UUID v7; `llm_provider` from the entry, or CLAUDE in the cloud and OPEN_WEIGHT on premises; `anchoring` from the entry, QUALIFIED_TIMESTAMPING by default), its `CellAssignment` to the configured cell, and the first Mission planner as a `Person` of that Operator (name entered, or the e-mail when none). It creates the Keycloak organisation and invites her: in the stand-in, one organisation, one user with the e-mail, attribute `operator_id` equal to the new Operator, realm role `mission_planner`, member of the organisation, and one actions e-mail.\n- An e-mail Keycloak already knows raises `SEOperatorPlannerEmailTakenError`. A Keycloak failure (`fail_path`) raises `SEKeycloakUnreachableError`. In both cases no row is left and the organisation and the user it created are removed from the stand-in.\n- `list` returns the directory entries in identifier order. `get` returns the Operator and raises `SEOperatorNotFoundError` for an unknown one.\n- With two Operators created, the person of each is visible only in a unit of work of its own Operator (BR-008).\n- `swarm_service.gateway.operators.operator_lifespan.OperatorLifespan(service, inner)` where `inner` is a lifespan callable `(FastAPI) -> async context manager`: `lifespan(app)` enters `inner`, yields, then closes the service, also when the block raises.\n- `swarm_service.gateway.factories.operators.operator_service_factory.OperatorServiceFactory(config: GatewayConfig).create()` returns an `OperatorService` on `config.postgres`, `config.schema_name` and `config.operators`, without opening anything or reading the secret.\n\nShared fixtures go in the `conftest.py` and helpers in `helpers.py` of `operator_service/`, imported by their full path. Test base names must be unique across the workspace.",
+    "done_when": "`uv run ruff check tests/swarm_service/gateway/operators tests/swarm_service/gateway/factories/operators` passes; `uv run pytest tests/swarm_service/gateway/operators tests/swarm_service/gateway/factories/operators -n 2` fails (or skips without PostgreSQL) only because the service, its lifespan and its factory do not exist yet.",
     "wave": 1
   },
   {
     "id": "K06",
-    "title": "Tests: /v1/operators routes and the two-Operator isolation test (FS-012 AC-3)",
+    "title": "Tests: /v1/operators routes and the two-Operator isolation test",
     "agent": "test-writer",
     "depends_on": [],
     "files": [
-      "services/gateway/tests/api/rest/v1/operators/conftest.py",
-      "services/gateway/tests/api/rest/v1/operators/test_operator_routes.py",
-      "services/gateway/tests/api/rest/v1/operators/test_operator_isolation.py"
+      "tests/swarm_api/v1/gateway/operator_router/test_operator_router.py",
+      "tests/swarm_api/v1/gateway/operator_router/test_operator_isolation.py",
+      "tests/swarm_api/v1/gateway/operator_router/conftest.py",
+      "tests/swarm_api/v1/gateway/operator_router/helpers.py",
+      "tests/swarm_api/v1/gateway/gateway_router/test_gateway_router.py"
     ],
-    "brief": "Write the tests first for the gateway's REST API of UC-029, and the acceptance test with two Operators. Spec: docs/specs/technical/05-api.md#rest (/v1, Idempotency-Key on every POST, errors as application/problem+json), docs/specs/technical/06-security.md#authorisation (the gateway checks the role and the Operator of every call), docs/specs/technical/06-security.md#identity, docs/specs/functional/use-cases/UC-029-create-an-operator.md (A1, A2), docs/specs/functional/business-rules/BR-008-operator-isolation.md, docs/specs/functional/features/FS-012-operators-deployment-and-languages.md (AC-3). Ticket: docs/tickets/T0.16/TICKET.md, criteria 1 to 3.\n\nBuild the gateway's FastAPI app as T0.12's API tests do, with the token helper T0.11 left for the gateway tests. Use the PostgreSQL fixtures (skip without a database, as they do) and StandInKeycloak, imported by its full path from services/gateway/tests/clients/keycloak/stand_in_keycloak.py. K04 writes it in parallel with this API: base_url, realm, client_id, client_secret, organizations, users, invitations, fail_invitations, accept_invitation(email). conftest.py wires them. Every POST sends an Idempotency-Key.\n1) test_operator_routes.py, class TestOperatorRoutes:\n   - POST /v1/operators:validate with the Operator's fields answers 204. A taken name answers 422 problem+json with errors [{field: name, reason: taken}] (A1). No Jurisdiction answers 422 with [{field: jurisdictions, reason: required}] (A2). Both at once list both.\n   - POST /v1/operators with {operator: {...}, first_mission_planner: {name, email}} answers 201 with the OperatorDirectoryEntry and a Location of /v1/operators/{id}. The stand-in received one invitation.\n   - A missing first Mission planner e-mail answers 422 naming first_mission_planner_email. The same Idempotency-Key replays the first answer and creates nothing twice.\n   - A Mission planner token on either POST answers 403. No token answers 401 (T0.11).\n   - fail_invitations answers 502 problem+json and creates nothing.\n   - GET /v1/operators and GET /v1/operators/{id} return directory entries.\n2) test_operator_isolation.py, class TestOperatorIsolation, for acceptance criterion 1 (FS-012 AC-3, BR-008):\n   - The Swarm administrator creates Aerowing Services and a second Operator through the API, and each first Mission planner accepts her invitation.\n   - With each one's token, GET /v1/operators lists only her own Operator. GET /v1/operators/{the other id} answers 404 problem+json, and the attempt is logged (caplog).\n   - The Swarm administrator lists both.\nCompare with the gateway enums and constants. Rules: AGENT.md Tests; no unittest.mock.",
-    "done_when": "`uv run ruff format --check` and `uv run ruff check` pass on the three files. `uv run pytest services/gateway/tests/api/rest/v1/operators` fails or is skipped only because the routes and the layers below them do not exist yet.",
+    "brief": "Write the failing tests of the gateway REST routes of UC-029 and the acceptance test of the ticket: FS-012 AC-3 as an automated test with two Operators. Specification: [API layer: REST (`/v1`, `Idempotency-Key` on every POST, errors as problem+json)](docs/specs/technical/05-api.md#rest), [Security: roles (Swarm administrator creates Operators, no access to their data; gateway checks role and Operator)](docs/specs/technical/06-security.md#authorisation), [Security: identity (tokens carry person, Operator, roles)](docs/specs/technical/06-security.md#identity), [UC-029 alternative flows](docs/specs/functional/use-cases/UC-029-create-an-operator.md#alternative-flows), [FS-012 AC-3](docs/specs/functional/features/FS-012-operators-deployment-and-languages.md#acceptance), [BR-008 examples (another Operator's resource is not found)](docs/specs/functional/business-rules/BR-008-operator-isolation.md#examples).\n\nSet-up: build the real application with `GatewayRouter(config).application()` where `config` is a `GatewayConfig` whose `auth.issuer_url` is the `keycloak_stand_in` (tokens minted with `tests.fakes.keycloak.helpers.claims_for`), whose `operators.keycloak.server_url` is the `keycloak_admin_stand_in` (K04's brief), and whose `postgres.dsn_key` entry holds `postgres_dsn` with the gateway tables created (`OperatorDirectoryTables` of K03's brief). Use `httpx.AsyncClient(transport=ASGITransport(app=app))` in async tests so the pool stays on one event loop, and close the service at the end (`OperatorRouter.operators.close()`). Every POST sends an `Idempotency-Key`.\n\nContract the implementer (K17) will satisfy, in `swarm_api.v1.gateway.operator_router.OperatorRouter` included by `GatewayRouter`:\n- `POST /v1/operators`, Swarm administrator only, body `OperatorEntry` (JSON fields: name, deployment, jurisdictions, llm_provider, anchoring, first_mission_planner_name, first_mission_planner_email): 201 with `OperatorCreated` (operator, cell_assignment, first_mission_planner); 422 problem+json whose `detail` names `jurisdictions` when no Jurisdiction is given (A2); 409 problem+json when the name is taken (A1); 401 without a token; 403 for a Mission planner; 400 without `Idempotency-Key`.\n- `GET /v1/operators`, Swarm administrator only: 200 with the list of `OperatorDirectoryEntry`; 403 for a Mission planner.\n- `GET /v1/operators/{operator_id}`, every role of an Operator: 200 with the `Operator` for its own people; 404 for another Operator's id (BR-008). For the Swarm administrator, assert the refusal that `swarm_service/gateway/auth/access_service.py` gives (read it).\n- Acceptance (`test_operator_isolation.py`): the Swarm administrator creates Aerowing Services and a second Operator. Each first Mission planner is invited (her user, role, `operator_id` attribute and actions e-mail are in the admin stand-in). A token for Aerowing Services' Mission planner (`sub` = her stand-in user id, `operator_id` = the new Operator, role `mission_planner`) reads her Operator and gets 404 for the other and 403 for the directory list. The reverse holds for the other Operator's Mission planner.\n- Update `test_gateway_router.py`: the OpenAPI document lists `/v1/operators` and `/v1/operators/{operator_id}`, and the application still builds and serves its document with no database and no Keycloak.",
+    "done_when": "`uv run ruff check tests/swarm_api/v1/gateway` passes; `uv run pytest tests/swarm_api/v1/gateway -n 2` fails (or skips without PostgreSQL) only because the operator routes and their wiring do not exist yet.",
     "wave": 1
   },
   {
     "id": "K07",
-    "title": "Tests: Back office screens A1, KO, A2 and OK (Vitest)",
+    "title": "Tests: the realm holds the gateway's admin service account",
     "agent": "test-writer",
     "depends_on": [],
     "files": [
-      "frontends/back-office/src/operators/testing/standInGateway.ts",
-      "frontends/back-office/src/operators/state/operatorDraftStore.test.ts",
-      "frontends/back-office/src/operators/create/CreateOperatorPage.test.tsx",
-      "frontends/back-office/src/operators/invite/InviteFirstMissionPlannerPage.test.tsx",
-      "frontends/back-office/src/operators/list/OperatorsPage.test.tsx"
+      "tests/infra/charts/keycloak/test_swarm_realm.py"
     ],
-    "brief": "Write the Vitest component tests first for the four UC-029 screens of the Back office. Spec: docs/specs/functional/use-cases/UC-029-create-an-operator.md (main flow, screens A1, KO, A2 and OK, A1 and A2), the mock-ups docs/specs/screens/mockups/UC-029/a1.html, ko.html, a2.html and ok.html (wording and layout), docs/specs/technical/10-frontends.md#apps (back-office, React 19, TanStack Query, Zustand, Vitest), docs/specs/technical/05-api.md#rest. Ticket: docs/tickets/T0.16/TICKET.md.\n\nUse the test setup T0.14 and T0.15 left in frontends/back-office: providers, router, English messages. No hand-written module mocks.\n- standInGateway.ts answers fetch for the /v1/operators routes from in-memory state:\n  - POST /v1/operators:validate gives 204 or 422 problem+json {errors: [{field, reason}]};\n  - POST /v1/operators gives 201 with a directory entry;\n  - GET /v1/operators gives the list.\n  It records each request and its Idempotency-Key.\nComponents and modules, with named exports:\n- CreateOperatorPage at src/operators/create/CreateOperatorPage.tsx, route /operators/new.\n- InviteFirstMissionPlannerPage at src/operators/invite/InviteFirstMissionPlannerPage.tsx, route /operators/new/first-mission-planner.\n- OperatorsPage at src/operators/list/OperatorsPage.tsx, route /operators.\n- useOperatorDraft, a Zustand store at src/operators/state/operatorDraftStore.ts, with entry, firstMissionPlanner, problems, setEntry, setFirstMissionPlanner, setProblems and reset.\nBehaviours:\n- A1. The page shows these fields:\n  - Operator name;\n  - Deployment (Cloud or On premises), with none chosen first, because it is required;\n  - Jurisdictions (EU (EASA), US (FAA)), several allowed;\n  - LLM provider and models (Claude (default), an open-weight model), with Claude preselected and the hint for on premises;\n  - Anchoring (Qualified timestamping authority (eIDAS, RFC 3161), the default, preselected; Public blockchain, through an aggregator; No Anchoring: signed and chained only).\n  'Next: first Mission planner' posts :validate, and on 204 goes to the A2 route with the draft kept.\n- KO (A1 and A2). On 422 the page stays and shows a banner starting '❌ Operator not created'. A taken name shows 'An Operator named Aerowing Services already exists.' under the name. No Jurisdiction shows 'Choose at least one Jurisdiction: it is required.'. Each missing field is named.\n- A2. Name, E-mail address and a fixed Role of Mission planner, with a summary card of the Operator from the draft. '◀️ Back' returns to A1 with the draft. 'Create the Operator and send the invitation' posts /v1/operators once, with an Idempotency-Key. A 422 shows the KO banner naming the field. A 201 resets the draft and goes to /operators with the banner '✅ Aerowing Services created. Its data is isolated: no other Operator can see it.'.\n- OK. The table has the columns Operator, Deployment, Jurisdictions, Anchoring, First Mission planner (name and invitation state: Invitation sent or Invitation accepted) and State.\nQuery by role and accessible name. On-screen words use the glossary names (docs/specs/glossary.md). Its 'Do not say' words (tenant, superuser, admin console, notarisation) never appear.",
-    "done_when": "`pnpm --filter ./frontends/back-office exec eslint src/operators` passes on the five files. `pnpm --filter ./frontends/back-office exec vitest run src/operators` fails only because the pages and the store do not exist yet.",
+    "brief": "Update the realm tests for the confidential client that the gateway uses to create organisations and invite people. Specification: [Security: identity (one realm per deployment, each Operator an organisation)](docs/specs/technical/06-security.md#identity), [Security: Swarm administrator creates Operators and their first accounts](docs/specs/technical/06-security.md#authorisation), [UC-029 steps 4 and 5](docs/specs/functional/use-cases/UC-029-create-an-operator.md#main-flow). Edit `tests/infra/charts/keycloak/test_swarm_realm.py`, the tests of `infra/charts/keycloak/files/swarm-realm.json`:\n- the clients are the five front ends **and** `swarm-gateway-admin`; the five front ends stay public PKCE S256 code-flow clients, as now;\n- `swarm-gateway-admin` is confidential (`publicClient` false), with only the client credentials grant (`serviceAccountsEnabled` true; standard, implicit and direct access flows false), no redirect URI or web origin, and **no `secret` in the file** (Keycloak generates it, and the gateway reads it from its environment entry);\n- the realm holds no user except the service account of `swarm-gateway-admin` (`serviceAccountClientId`), with exactly the `realm-management` client roles `manage-users` and `manage-realm`, no password and no credential;\n- no client accepts a wildcard redirect or origin, as now.\nKeep every other test of the file.",
+    "done_when": "`uv run ruff check tests/infra/charts/keycloak` passes; `uv run pytest tests/infra/charts/keycloak -n 2` fails only on the new expectations about `swarm-gateway-admin`.",
     "wave": 1
   },
   {
     "id": "K08",
-    "title": "Tests: UC-029 end to end in Playwright (create, A1, A2, invitation, first sign-in, isolation)",
+    "title": "Tests: back-office sign-in, Create an Operator wizard and Operators list",
     "agent": "test-writer",
     "depends_on": [],
     "files": [
-      "frontends/back-office/e2e/create-an-operator.spec.ts",
-      "frontends/back-office/e2e/support/mailbox.ts",
-      "frontends/back-office/e2e/support/second-factor.ts"
+      "frontend/apps/back-office/test/app.test.tsx",
+      "frontend/apps/back-office/test/auth/session.test.tsx",
+      "frontend/apps/back-office/test/operators/create-operator.test.tsx",
+      "frontend/apps/back-office/test/operators/operators-list.test.tsx",
+      "frontend/apps/back-office/test/stand-ins/stand-in-gateway.ts"
     ],
-    "brief": "Write the Playwright tests first for UC-029 against the real images started by compose.e2e.yaml (AGENT.md, Front-end tests). Spec: docs/specs/functional/use-cases/UC-029-create-an-operator.md (every step, A1, A2), docs/specs/functional/business-rules/BR-008-operator-isolation.md, docs/specs/functional/features/FS-012-operators-deployment-and-languages.md (AC-3), docs/specs/technical/06-security.md#identity (PKCE sign-in, multi-factor authentication for Mission planners), docs/specs/technical/10-frontends.md#apps. Ticket: docs/tickets/T0.16/TICKET.md, criteria 1 to 3.\n\nK11 adds to compose.e2e.yaml a Keycloak with the e2e realm, its seeded Swarm administrator test account, and an SMTP sink with an HTTP API. Read their addresses and credentials from environment variables with defaults named in the spec file's constants: E2E_BACK_OFFICE_URL, E2E_ADMIN_USERNAME, E2E_ADMIN_PASSWORD, E2E_MAILBOX_URL.\n- support/mailbox.ts finds the last e-mail sent to an address in the SMTP sink and returns its action link.\n- support/second-factor.ts computes the TOTP code from the secret Keycloak shows when the second factor is configured.\ncreate-an-operator.spec.ts:\n1. The Swarm administrator signs in, opens ➕ Operators and ➕ Create an Operator, and enters Aerowing Services, Cloud and EU (EASA), leaving the defaults. She goes to the first Mission planner, enters Léa Martin and her e-mail, and creates the Operator. The Operators list shows Aerowing Services with Invitation sent.\n2. A1: entering Aerowing Services again shows that the name is taken, and nothing is created.\n3. A2: submitting without a Jurisdiction names the Jurisdiction, and nothing is created.\n4. Invitation and first sign-in: the e-mail reaches Léa Martin. She opens the link, sets her password and second factor, and signs in to the Back office of Aerowing Services.\n5. Isolation (BR-008): with a second Operator created and its Mission planner signed in, each sees only her own Operator, and opening the other's /operators/{id} shows not found.\nUse role and accessible-name locators, the English locale, and the mock-ups' wording.",
-    "done_when": "`pnpm --filter ./frontends/back-office exec eslint e2e` passes on the three files. `pnpm --filter ./frontends/back-office exec playwright test --list e2e/create-an-operator.spec.ts` lists the five tests.",
+    "brief": "Write the failing Vitest tests of UC-029 in the Back office. Specification: [UC-029 main flow, flow chart and screens A1, KO, A2, OK](docs/specs/functional/use-cases/UC-029-create-an-operator.md#screens), [alternative flows A1 and A2](docs/specs/functional/use-cases/UC-029-create-an-operator.md#alternative-flows), [FS-012 details](docs/specs/functional/features/FS-012-operators-deployment-and-languages.md#details), [GUI and WebUI: apps and shared packages (back-office, React 19, TanStack Query)](docs/specs/technical/10-frontends.md#apps), [Security: identity (authorisation code flow with PKCE; tokens carry the Operator and the roles)](docs/specs/technical/06-security.md#identity), [API layer: REST](docs/specs/technical/05-api.md#rest). The mock-ups `docs/specs/screens/mockups/UC-029/{a1,ko,a2,ok}.html` show the words. No real network: a stand-in `fetch`.\n\nContract the implementers (K13, K24) will satisfy, under `frontend/apps/back-office/src/`:\n- `auth/session.ts`: `interface Session { accessToken: string; roles: readonly string[]; operatorId: string | null }`, `sessionFromToken(accessToken): Session` (reads, without checking it, the payload's `realm_access.roles` and `operator_id`), `isSwarmAdministrator(session): boolean`.\n- `auth/SessionProvider.tsx`: `SessionProvider({ session, children })` and `useSession()`.\n- `api/gateway.ts`: `createBackOfficeGateway({ baseUrl, accessToken, fetch })`, an `@swarm/api-client` gateway client that adds `Authorization: Bearer <token>` to every request and a fresh `Idempotency-Key` to every POST.\n- `api/GatewayProvider.tsx`: `GatewayProvider({ client, children })` (it also provides a TanStack `QueryClient`), and `useGateway()`.\n- `App` (no props) reads both: a Swarm administrator sees the Swarm administration frame (`➕ Operators` active) with the Operators screen; another person sees the Back office frame with her Operator's name in the title bar, read from `GET /v1/operators/{operatorId}`.\n- `stand-ins/stand-in-gateway.ts` (yours): a `fetch` that answers `GET /v1/operators` (a list of `{operator, cell_assignment}`), `POST /v1/operators` (201 `{operator, cell_assignment, first_mission_planner}`; 409 or 422 `application/problem+json` on demand), `GET /v1/operators/{id}`, and records each request (method, URL, headers, JSON body). JSON fields and enum values: Operator `{id, name, deployment: cloud|on_premises, jurisdictions: [eu_easa|us_faa], llm_provider: claude|open_weight, anchoring: qualified_timestamping|public_blockchain|none}`; CellAssignment `{operator_id, cell, assigned_at}`; Person `{id, operator_id, name, email, language}`; entry body `{name, deployment, jurisdictions, llm_provider, anchoring, first_mission_planner_name, first_mission_planner_email}`.\n\nBehaviours, rendered in English (`I18nProvider language=\"en\"`) with `SessionProvider` and `GatewayProvider`:\n- `session.test.tsx`: token to session, Swarm administrator detection.\n- `create-operator.test.tsx`: A1 shows `➕ Create an Operator`, `Operator name`, `Deployment` (`Cloud`, `On premises`), `Jurisdictions` (`EU (EASA)`, `US (FAA)`), `LLM provider and models` (Claude by default), `🔏 Anchoring` with `Qualified timestamping authority (eIDAS, RFC 3161)` chosen by default, `Public blockchain, through an aggregator` and `No Anchoring: signed and chained only`, and `Next: first Mission planner ▶️`. Next without a Jurisdiction stays on A1, shows `❌ Operator not created.` and `Choose at least one Jurisdiction: it is required.`, and sends nothing (A2). Next with the name of a listed Operator (any case) shows `An Operator named Aerowing Services already exists.` (A1). Valid entry moves to `👥 First Mission planner of Aerowing Services` with `E-mail address`. Submitting without an e-mail names it as required. `Create the Operator and send the invitation` sends one POST with the entry, the bearer token and an `Idempotency-Key`. A 409 answer brings back A1 with the name error.\n- `operators-list.test.tsx`: after creation, `✅ Aerowing Services created. Its data is isolated: no other Operator can see it.` and the table `🗃️ Operators` with columns Operator, Deployment, Jurisdictions, Anchoring, Cell and State.\n- Update `app.test.tsx`: keep the frame tests (title bar, light and dark, tokens, root). A person of an Operator sees the six Back office items with her Operator's name in the title bar and an empty content area. A Swarm administrator sees `➕ Operators`, `👥 People` and `🔧 Settings`.\nAt most five code files per folder.",
+    "done_when": "`pnpm --filter @swarm/back-office exec eslint test` passes; `pnpm --filter @swarm/back-office test` fails only because the modules of `src/auth`, `src/api` and `src/operators` and the new messages do not exist yet.",
     "wave": 1
   },
   {
     "id": "K09",
-    "title": "Shared Operator model: deployment, Jurisdictions, LLM provider, Anchoring, and regenerated types",
+    "title": "Models: Operator fields, entry, directory entry, refusals and enums",
     "agent": "implementer",
     "depends_on": [
       "K01"
     ],
     "files": [
-      "packages/python/swarm-models/src/swarm_models/models/enums.py",
-      "packages/python/swarm-models/src/swarm_models/models/operators/operator.py",
-      "packages/python/swarm-models/src/swarm_models/models/operators/exceptions/__init__.py",
-      "packages/python/swarm-models/src/swarm_models/models/operators/exceptions/operator/",
-      "packages/python/swarm-models/schemas/swarm_models.schema.json",
-      "packages/rust/swarm-models/src/generated.rs",
-      "packages/ts/live/src/generated/models.ts"
+      "backend/swarm-models/src/swarm_models/enums.py",
+      "backend/swarm-models/src/swarm_models/operators/operator.py",
+      "backend/swarm-models/src/swarm_models/operators/operator_entry.py",
+      "backend/swarm-models/src/swarm_models/operators/operator_directory_entry.py",
+      "backend/swarm-models/src/swarm_models/operators/operator_created.py",
+      "backend/swarm-models/src/swarm_models/operators/exceptions/",
+      "backend/swarm-models/src/swarm_models/storage/exceptions/"
     ],
-    "brief": "Extend the shared Operator model exactly as packages/python/swarm-models/tests/models/test_enums.py, tests/models/operators/test_operator.py and tests/service/schemas/test_schema_exporter.py expect. Spec: docs/specs/functional/use-cases/UC-029-create-an-operator.md (steps 1 and 2, A2), docs/specs/functional/features/FS-012-operators-deployment-and-languages.md ('Required to create an Operator'), docs/specs/technical/02-data-models.md#conventions, docs/specs/technical/01-architecture.md#cells. Ticket: docs/tickets/T0.16/TICKET.md.\n\n1) Create swarm_models/models/enums.py holding only the four new enums: Deployment, Jurisdiction, LlmProvider and AnchoringChoice. Each is @unique and documents its members under Attributes. Values are lower snake case with no hyphen. This follows the CLAUDE.md rule of one enums.py at the root of the models module; leave the older per-concern enums/ folders as they are.\n2) Add to Operator, one validator each, mode before, each raising its own exception:\n   - deployment and jurisdictions, required; jurisdictions is a non-empty List[Jurisdiction] without duplicates.\n   - llm_provider, default LlmProvider.CLAUDE.\n   - anchoring, default AnchoringChoice.QUALIFIED_TIMESTAMPING_AUTHORITY.\n   - None becomes the default, bool is refused, and every field has a Field(description).\n   Field-name strings become ClassVar constants (CLAUDE.md, no raw strings). Fix the class docstring to the glossary's Operator: the organisation that uses Swarm to fly Missions, whose data is isolated. It now wrongly reads 'a person who pilots drones'.\n3) Add the four field exceptions: SEOperatorInvalidDeployment, SEOperatorInvalidJurisdictions, SEOperatorInvalidLlmProvider and SEOperatorInvalidAnchoring, one file each, subclasses of SEInvalidOperatorException. Keep at most five Python files per folder: split exceptions/operator/ into sub-folders (for example identity/ for id and name, choices/ for the four new ones). Re-export through sorted __all__ lists up to operators/exceptions/__init__.py, so every import from swarm_models.models.operators.exceptions still works.\n4) Regenerate the generated types in the AGENT.md order and never edit them by hand:\n   - `uv run swarm-models-schemas`;\n   - `cargo run -p swarm-models-codegen`, run in packages/rust;\n   - `pnpm --filter ./packages/ts/live run generate`.\n   If Rust or TypeScript code that uses Operator stops compiling, report it as blocked; do not edit it.\nRules: AGENT.md Pydantic models, Exceptions, Docstrings, Data and enums.",
-    "done_when": "These pass:\n- `uv run pytest packages/python/swarm-models/tests -n 2`\n- `uv run mypy packages/python/swarm-models/src`\n- `uv run ruff check packages/python/swarm-models`\n- `uv run pytest tests/conventions/packages -n 2`\n- `uv run swarm-models-schemas --check`\n- `cargo test -p swarm-models` (in packages/rust)\n- `pnpm --filter ./packages/ts/live run test`",
+    "brief": "Implement the shared models of UC-029 so that K01's tests pass. The contract (enums, `Operator` fields and defaults, `OperatorEntry`, `OperatorDirectoryEntry`, `OperatorCreated`, the four REST refusals) is in K01's brief and its tests. Specification: [UC-029](docs/specs/functional/use-cases/UC-029-create-an-operator.md#alternative-flows), [FS-012 details](docs/specs/functional/features/FS-012-operators-deployment-and-languages.md#details), [glossary: Operator](docs/specs/glossary.md#ent-operator), [Jurisdiction](docs/specs/glossary.md#term-jurisdiction), [LLM provider](docs/specs/glossary.md#term-llm-provider), [Anchoring](docs/specs/glossary.md#term-anchoring), [API layer: REST errors](docs/specs/technical/05-api.md#rest).\n- The enums `Deployment`, `Jurisdiction`, `LlmProvider`, `Anchoring` and `OperatorField` go in `swarm_models/enums.py` only (`@unique StrEnum`, members under `Attributes:`, no hyphen).\n- Extend `Operator` (and fix its docstring: an Operator is the organisation that flies Missions for its Clients, as the glossary says). Each new field has `Field(description=...)` and a `validate_<field>` before-validator raising its own `SEOperatorInvalid<Field>`.\n- `OperatorEntry` exceptions derive from `SEInvalidOperatorEntryException(ValueError)`. The refusals subclass `SERestError` (`swarm_web.models.rest.exceptions`), with their STATUS (422, 409, 409, 404) and TITLE, as `SESimulationRunningError` does.\n- Also add `SEStorageDuplicateError` (\"Raised when a row breaks a unique constraint.\") to `swarm_models/storage/exceptions/`, for the storage task K14.\n- Every exceptions folder holds at most five files: dispatch them into themed sub-folders (`operator/fields/`, `entry/`, `errors/`). Each `exceptions/__init__.py` re-exports through a sorted `__all__`, and `swarm_models.operators.exceptions` exposes every one.\n- Follow AGENT.md: Pydantic models, Exceptions, Typing, no raw strings, `models` never logs. Do not regenerate the schema bundle (K20 does).",
+    "done_when": "`uv run pytest tests/swarm_models -n 2` passes; `uv run ruff check backend/swarm-models` and `uv run mypy backend/swarm-models/src` pass; `uv run pytest tests/conventions/backend -n 2` passes.",
     "wave": 2
   },
   {
     "id": "K10",
-    "title": "Keycloak realm: organisations, the gateway's admin account, invitation e-mail",
+    "title": "Models: Keycloak admin and Operator directory configuration",
     "agent": "implementer",
     "depends_on": [
-      "K08"
+      "K02"
     ],
     "files": [
-      "deploy/charts/keycloak/"
+      "backend/swarm-models/src/swarm_models/keycloak/keycloak_admin_config.py",
+      "backend/swarm-models/src/swarm_models/keycloak/exceptions/",
+      "backend/swarm-models/src/swarm_models/config/gateway/operator_directory_config.py",
+      "backend/swarm-models/src/swarm_models/config/gateway/gateway_config.py",
+      "backend/swarm-models/src/swarm_models/config/gateway/exceptions/"
     ],
-    "brief": "Extend the Keycloak realm that T0.11 delivered (global layer) so the gateway can create an Operator's organisation and invite its first Mission planner by e-mail. Spec: docs/specs/technical/06-security.md#identity (one realm, each Operator an organisation; multi-factor authentication for Mission planners; PKCE clients), docs/specs/technical/06-security.md#authorisation (the Swarm administrator creates Operators and their first accounts, with no access to Operators' data), docs/specs/technical/01-architecture.md#cells (Keycloak in the global layer), docs/specs/functional/use-cases/UC-029-create-an-operator.md (steps 4 to 6). Ticket: docs/tickets/T0.16/TICKET.md.\n\nWork inside the Keycloak chart and realm files T0.11 left. This plan assumes deploy/charts/keycloak/; if T0.11 put them elsewhere, report blocked with the real path so the plan is amended.\n- Turn on Organizations in the realm.\n- Add a confidential client for the gateway with a service account, holding only the realm-management roles it needs: create and delete organisations, create users, add members, map the mission_planner realm role, send the execute-actions e-mail. Report the roles you chose as a decision. Its secret comes from the vault (T0.08), never from a file.\n- Make a new Mission planner's required actions the ones T0.11's realm demands: password, second factor, verified e-mail.\n- Configure the realm's SMTP server from chart values, with its password from the vault.\n- Add an e2e realm overlay at deploy/charts/keycloak/realm/e2e/. It holds one seeded Swarm administrator test account and SMTP pointing at the e2e SMTP sink, for compose.e2e.yaml only, never in a deployed cell. frontends/back-office/e2e/create-an-operator.spec.ts (K08) shows what the e2e run needs.\nRules: no secret in any file (AGENT.md, Data and enums); the role names are those of RoleName in swarm-models.",
-    "done_when": "`helm lint deploy/charts/keycloak` passes and every realm JSON file parses (`python3 -m json.tool` on each). `uv run pytest tests/deploy -n 2` passes.",
+    "brief": "Implement the configuration models of K02's brief so that its tests pass, except the test that reads `backend/apps/gateway/conf/app.yaml`, which K18 completes. Specification: [Architecture: cells and the global layer](docs/specs/technical/01-architecture.md#cells), [Security: identity](docs/specs/technical/06-security.md#identity), [UC-029](docs/specs/functional/use-cases/UC-029-create-an-operator.md#main-flow). Work in `swarm_models/keycloak/keycloak_admin_config.py` (`KeycloakAdminConfig`), `swarm_models/config/gateway/operator_directory_config.py` (`OperatorDirectoryConfig`) and the new `operators` section of `GatewayConfig` (a validator like `validate_live`, raising `SEGatewayConfigInvalidOperators` for a non-mapping). Also add to `swarm_models/keycloak/exceptions/` the error `SEKeycloakConflictError`, a subclass of `SEKeycloakError` raised when Keycloak answers 409 (for example an e-mail already used), for the client task K15. Every field has its description and its own validator exception. `client_secret_key` names the environment entry and never holds the secret. The folder `config/gateway/exceptions/` already holds five files: move them into themed sub-folders and keep every import from `swarm_models.config.gateway.exceptions` working. Follow AGENT.md Pydantic models, Exceptions and Naming (durations end in `_s`).",
+    "done_when": "`uv run pytest tests/swarm_models/keycloak tests/swarm_models/config -n 2` passes, except the app.yaml defaults test left to K18; `uv run ruff check backend/swarm-models` and `uv run mypy backend/swarm-models/src` pass; `uv run pytest tests/conventions/backend -n 2` passes.",
+    "wave": 2
+  },
+  {
+    "id": "K11",
+    "title": "Realm: confidential admin client of the gateway",
+    "agent": "implementer",
+    "depends_on": [
+      "K07"
+    ],
+    "files": [
+      "infra/charts/keycloak/files/swarm-realm.json"
+    ],
+    "brief": "Add to the Swarm realm the confidential client that the gateway uses to create each Operator's organisation and to invite its first Mission planner, so that K07's tests pass. Specification: [Security: identity (one realm, each Operator an organisation)](docs/specs/technical/06-security.md#identity), [Security: roles (Swarm administrator creates Operators and their first accounts)](docs/specs/technical/06-security.md#authorisation), [UC-029 steps 4 and 5](docs/specs/functional/use-cases/UC-029-create-an-operator.md#main-flow). In `infra/charts/keycloak/files/swarm-realm.json`:\n- add the client `swarm-gateway-admin`: confidential, service account only, no redirect URI or origin, and no secret in the file (Keycloak generates it; it reaches the gateway through the vault as `SWARM_GATEWAY_KEYCLOAK_CLIENT_SECRET`);\n- add its service-account user (`serviceAccountClientId`) with exactly the `realm-management` client roles `manage-users` and `manage-realm`.\nChange nothing else. The back-office redirect URIs and the realm's SMTP server depend on each environment, and the specification does not give them, so they stay out of the file (recorded as an assumption).",
+    "done_when": "`uv run pytest tests/infra/charts/keycloak -n 2` passes and the file is valid JSON (`python3 -m json.tool infra/charts/keycloak/files/swarm-realm.json` succeeds).",
     "wave": 2
   },
   {
     "id": "K12",
-    "title": "Back office sign-in with Keycloak (PKCE) and the session",
+    "title": "Messages: UC-029 screens in four languages",
     "agent": "frontend-implementer",
     "depends_on": [
       "K08"
     ],
     "files": [
-      "frontends/back-office/src/session/"
+      "frontend/packages/i18n/src/messages/en.json",
+      "frontend/packages/i18n/src/messages/fr.json",
+      "frontend/packages/i18n/src/messages/de.json",
+      "frontend/packages/i18n/src/messages/es.json"
     ],
-    "brief": "Give the Back office its sign-in, so that the Swarm administrator can work and the invited Mission planner can make her first sign-in (UC-029 step 6). Spec: docs/specs/technical/06-security.md#identity (authorisation code flow with PKCE, 5-minute access tokens with the person, the Operator and the roles, rotated refresh tokens), docs/specs/technical/06-security.md#authorisation, docs/specs/technical/10-frontends.md#apps (back-office, web browser, React 19), docs/specs/functional/use-cases/UC-029-create-an-operator.md. Ticket: docs/tickets/T0.16/TICKET.md.\n\nFirst read what T0.11 (the PKCE client of back-office) and T0.14 (the back-office shell) already provide, and reuse it. Build only what is missing, under frontends/back-office/src/session/:\n- sign in and sign out through Keycloak with PKCE;\n- refresh the token;\n- a useSession() hook giving the person's name, her Operator id (from her organisation) and her roles, so the frame can tell a Swarm administrator from a Mission planner;\n- a way for the generated api-client (packages/ts/api-client) to send the bearer token with every call.\nReport the OIDC library you use, or why none, as a decision. If the app's root must change to mount the session provider, report blocked with the file and the change; K23 owns the routes. Keep the tokens in memory only.",
-    "done_when": "`pnpm --filter ./frontends/back-office run lint` and `pnpm --filter ./frontends/back-office run typecheck` pass.",
+    "brief": "Add the FormatJS messages of the UC-029 screens in English, French, German and Spanish. Specification: [BR-017: every screen in four languages](docs/specs/functional/business-rules/BR-017-every-screen-in-four-languages.md), [UC-029 screens](docs/specs/functional/use-cases/UC-029-create-an-operator.md#screens) and their mock-ups in `docs/specs/screens/mockups/UC-029/`, [glossary](docs/specs/glossary.md) (write the glossary names; never a **Do not say** word such as tenant, superuser or admin console), [GUI and WebUI: i18n package](docs/specs/technical/10-frontends.md#apps). Use ids under `operators.` (and `people.` for the first Mission planner step). Cover:\n- the A1 entry: title, field labels, the deployment, Jurisdiction, LLM provider and Anchoring options, the hints, `Cancel` and `Next: first Mission planner ▶️`;\n- the KO errors: banner `❌ Operator not created.`, the name taken (`An Operator named {name} already exists.`), and one required-field message per required field (name, deployment, `Choose at least one Jurisdiction: it is required.`, the first Mission planner's e-mail);\n- the A2 step: `👥 First Mission planner of {name}`, `Name`, `E-mail address`, `Role`, the Operator summary, `◀️ Back`, `Create the Operator and send the invitation`;\n- the OK list: `✅ {name} created. Its data is isolated: no other Operator can see it.`, `🗃️ Operators`, the columns Operator, Deployment, Jurisdictions, Anchoring, Cell and State, and `✅ Invitation sent to {email}.`\nThe English texts must be exactly those K08's tests assert (read them in `frontend/apps/back-office/test/`). Keep the existing messages unchanged.",
+    "done_when": "`pnpm --filter ./frontend/packages/i18n run check-messages` and `pnpm --filter ./frontend/packages/i18n test` pass.",
     "wave": 2
   },
   {
-    "id": "K11",
-    "title": "compose.e2e.yaml: Keycloak, gateway, PostgreSQL, Back office and an SMTP sink for UC-029",
-    "agent": "implementer",
+    "id": "K13",
+    "title": "Back office: sign-in session and gateway client",
+    "agent": "frontend-implementer",
     "depends_on": [
-      "K08",
-      "K10"
+      "K08"
     ],
     "files": [
-      "compose.e2e.yaml"
+      "frontend/apps/back-office/package.json",
+      "pnpm-lock.yaml",
+      "frontend/apps/back-office/src/config.ts",
+      "frontend/apps/back-office/src/vite-env.d.ts",
+      "frontend/apps/back-office/src/auth/session.ts",
+      "frontend/apps/back-office/src/auth/SessionProvider.tsx",
+      "frontend/apps/back-office/src/auth/oidc.ts",
+      "frontend/apps/back-office/src/auth/SignInGate.tsx",
+      "frontend/apps/back-office/src/api/gateway.ts",
+      "frontend/apps/back-office/src/api/GatewayProvider.tsx"
     ],
-    "brief": "Make compose.e2e.yaml start everything the UC-029 Playwright test (frontends/back-office/e2e/create-an-operator.spec.ts) needs, from the real images (AGENT.md, Front-end tests: never a development server). Spec: docs/specs/technical/10-frontends.md#apps, docs/specs/technical/06-security.md#identity, docs/specs/technical/01-architecture.md#cells, docs/specs/functional/use-cases/UC-029-create-an-operator.md. Ticket: docs/tickets/T0.16/TICKET.md.\n\nStart from the file T0.10 created and add or complete:\n- the PostgreSQL image of deploy/images, with the gateway's Alembic migrations run before the gateway starts;\n- Keycloak, importing the realm and its e2e overlay from deploy/charts/keycloak/realm/ (K10);\n- the gateway image, configured by environment, including its Keycloak admin client and its secret;\n- the back-office image;\n- an SMTP sink with an HTTP API, used by Keycloak for the invitation e-mail.\nSet the environment the spec file reads (E2E_BACK_OFFICE_URL, E2E_ADMIN_USERNAME, E2E_ADMIN_PASSWORD, E2E_MAILBOX_URL) as service outputs, and document them in a comment. Pick the SMTP sink image and report it as a decision. Add health checks so Playwright starts once every service is ready. No real secret: e2e-only values.",
-    "done_when": "`docker compose -f compose.e2e.yaml config --quiet` passes, and `uv run pytest tests/ci -n 2` passes.",
-    "wave": 3
+    "brief": "Build the sign-in and server-data foundation of the Back office, so that the Swarm administrator signs in to create Operators and the invited Mission planner signs in for the first time (UC-029 step 6). Specification: [Security: identity (Keycloak OpenID Connect, authorisation code flow with PKCE for the web, 5-minute access tokens carrying the Operator and the roles)](docs/specs/technical/06-security.md#identity), [GUI and WebUI: back-office app, api-client package, TanStack Query](docs/specs/technical/10-frontends.md#apps), [API layer: REST (`Idempotency-Key` on every POST)](docs/specs/technical/05-api.md#rest), [UC-029 main flow](docs/specs/functional/use-cases/UC-029-create-an-operator.md#main-flow). The module contract (`auth/session.ts`, `auth/SessionProvider.tsx`, `api/gateway.ts`, `api/GatewayProvider.tsx`) is in K08's brief and its tests.\n- Add the dependencies `@swarm/api-client` (workspace), `@tanstack/react-query` and `oidc-client-ts` to `frontend/apps/back-office/package.json`, pinned exactly like the others, and update `pnpm-lock.yaml` with `pnpm install` from the root.\n- `auth/oidc.ts`: a `UserManager` of oidc-client-ts for the public client `back-office` of the realm `swarm` (code flow, PKCE S256), whose authority and redirect come from `config.ts`. `config.ts` reads `import.meta.env.VITE_SWARM_IDENTITY_URL` and `VITE_SWARM_GATEWAY_URL`, typed in `vite-env.d.ts`.\n- `auth/SignInGate.tsx`: completes the redirect when it comes back, shows its children with a `SessionProvider` once there is a user, and starts the sign-in redirect otherwise.\n- The token is never logged or stored outside the oidc-client-ts store.\nDo not touch `src/App.tsx` or `src/main.tsx` (K24 wires them). The generated gateway types arrive with K23, so type the client with `Client<GatewayPaths>` from `@swarm/api-client`.",
+    "done_when": "`pnpm --filter @swarm/back-office exec vitest run test/auth` passes; `pnpm --filter @swarm/back-office exec eslint src/auth src/api src/config.ts` passes; `pnpm install --frozen-lockfile` succeeds from the root.",
+    "wave": 2
   },
   {
-    "id": "K13",
-    "title": "Gateway models: Operator entry, directory, Keycloak configuration, enums and exceptions",
-    "agent": "implementer",
+    "id": "K26",
+    "title": "Docs: the /v1/operators resource and the gateway's directory",
+    "agent": "doc-writer",
     "depends_on": [
-      "K02",
-      "K03",
-      "K04",
-      "K05",
-      "K06",
-      "K09"
+      "K06"
     ],
     "files": [
-      "services/gateway/src/gateway/models/enums.py",
-      "services/gateway/src/gateway/models/operators/",
-      "services/gateway/src/gateway/models/directory/",
-      "services/gateway/src/gateway/models/keycloak/",
-      "services/gateway/src/gateway/models/config/gateway_config.py",
-      "services/gateway/conf/app.yaml",
-      "services/gateway/pyproject.toml",
-      "uv.lock"
+      "docs/specs/technical/05-api.md",
+      "backend/README.md"
     ],
-    "brief": "Write the gateway's models for UC-029, exactly as services/gateway/tests/models/ expects. Also write every layer exception that tests/storage/postgres/directory, tests/clients/keycloak, tests/service/operators and tests/api/rest/v1/operators name. Spec: docs/specs/functional/use-cases/UC-029-create-an-operator.md (A1, A2, required fields and defaults), docs/specs/functional/features/FS-012-operators-deployment-and-languages.md, docs/specs/technical/01-architecture.md#cells, docs/specs/technical/06-security.md#identity, docs/specs/technical/02-data-models.md#conventions. Ticket: docs/tickets/T0.16/TICKET.md.\n\n- gateway/models/enums.py gets InvitationState, OperatorField and OperatorProblemReason (add them to the file if T0.11 or T0.12 created it).\n- models/operators/ holds OperatorEntry (with to_operator), FirstMissionPlannerEntry, OperatorCreation, OperatorEntryProblem and OperatorDirectoryEntry, at most five files per folder. Its exceptions/ holds the model exceptions and the service-layer errors: SEOperatorError, SEOperatorEntryRefusedError (with a problems attribute, List[OperatorEntryProblem]), SEOperatorForbiddenError, SEOperatorNotFoundError and SEOperatorCreationFailedError.\n- models/directory/ holds DirectoryConfig. Its exceptions/ holds the model exceptions and the storage errors: SEDirectoryError, SEDirectoryOperatorNameTakenError, SEDirectoryOperatorNotFoundError and SEDirectoryCellAlreadyAssignedError.\n- models/keycloak/ holds KeycloakAdminConfig and MissionPlannerInvitation. Its exceptions/ holds the model exceptions and the client errors: SEKeycloakAdminError, SEKeycloakAdminUnavailableError and SEKeycloakAdminRefusedError.\n- Every exception has its own file, in sub-folders of at most five files, re-exported through sorted __all__ lists.\n- Reuse the shared Operator, CellAssignment and RoleName and the four enums of swarm_models.models.enums; never redefine a shared model.\n- Add the directory and keycloak_admin sections to the gateway's root configuration model. This plan assumes T0.12 put it at models/config/gateway_config.py; if not, report blocked with the real path. Write every default in services/gateway/conf/app.yaml: default_cell is the dev cell's name as deploy/ names it, and client_secret_key names a secret store entry, never a secret.\n- Add swarm-models and an async HTTP client (httpx, unless T0.11 already chose one) to services/gateway/pyproject.toml, then `uv lock`.\nRules: AGENT.md Pydantic models, Exceptions, Naming, Data and enums; models never log.",
-    "done_when": "These pass:\n- `uv run pytest services/gateway/tests/models -n 2`\n- `uv run mypy services/gateway/src`\n- `uv run ruff check services/gateway`\n- `uv run pytest tests/conventions/services -n 2`",
-    "wave": 3
+    "brief": "Document what this ticket adds, in the pages that describe it, without inventing a fact (SPEC-10). Specification: [API layer: REST](docs/specs/technical/05-api.md#rest), [Architecture: cells and the global layer](docs/specs/technical/01-architecture.md#cells), [Security: identity](docs/specs/technical/06-security.md#identity), [UC-029](docs/specs/functional/use-cases/UC-029-create-an-operator.md#main-flow).\n- In `docs/specs/technical/05-api.md`, section REST: add `/v1/operators` and `/v1/operators/{id}` to the list of resources, and add [📘 FS-012](docs/specs/functional/features/FS-012-operators-deployment-and-languages.md) to the features the page implements if it is missing. Keep the page's sections, anchors and icons (SPEC-5, SPEC-8), plain British English, no em dash.\n- In `backend/README.md`, gateway part: the Operator directory of the gateway domain. Say that the `operators` and `cell_assignments` tables are global and the `people` table is under row-level security, that `operators` in `conf/app.yaml` names the cell and the Keycloak admin client, and that the client secret comes from the environment entry `SWARM_GATEWAY_KEYCLOAK_CLIENT_SECRET`, filled from the vault. The contract to describe is the one of K06's and K05's briefs.\nThen run `python3 .claude/skills/write-specs/scripts/specs.py build`.",
+    "done_when": "`python3 .claude/skills/write-specs/scripts/specs.py build` then `python3 .claude/skills/write-specs/scripts/specs.py check` prints nothing.",
+    "wave": 2
   },
   {
     "id": "K14",
-    "title": "Operator directory: repositories and Alembic migration",
+    "title": "Storage: Operator directory tables, repositories and gateway migration",
     "agent": "implementer",
     "depends_on": [
       "K03",
-      "K13"
+      "K09"
     ],
     "files": [
-      "services/gateway/src/gateway/storage/postgres/directory/",
-      "services/gateway/migrations/versions/"
+      "backend/swarm-storage/src/swarm_storage/gateway/__init__.py",
+      "backend/swarm-storage/src/swarm_storage/gateway/ddl/__init__.py",
+      "backend/swarm-storage/src/swarm_storage/gateway/ddl/operator_directory_tables.py",
+      "backend/swarm-storage/src/swarm_storage/gateway/operators/__init__.py",
+      "backend/swarm-storage/src/swarm_storage/gateway/operators/operator_repository.py",
+      "backend/swarm-storage/src/swarm_storage/gateway/operators/cell_assignment_repository.py",
+      "backend/swarm-storage/src/swarm_storage/gateway/people/__init__.py",
+      "backend/swarm-storage/src/swarm_storage/gateway/people/person_repository.py",
+      "backend/swarm-storage/src/swarm_storage/shared/postgres/repositories/postgres_repository.py",
+      "backend/apps/gateway/migrations/versions/0002_create_operator_directory.py"
     ],
-    "brief": "Write OperatorRepository and CellAssignmentRepository, and the migration for their tables, exactly as services/gateway/tests/storage/postgres/directory/ expects. Spec: docs/specs/technical/01-architecture.md#cells (the Operator directory and the routing of each Operator to its cell, in the global layer; an Operator lives in exactly one cell), docs/specs/technical/03-storage.md#repositories (one repository per entity, in storage/postgres/), docs/specs/technical/03-storage.md#postgresql (asyncpg, Alembic, expand then contract), docs/specs/functional/use-cases/UC-029-create-an-operator.md (A1). Ticket: docs/tickets/T0.16/TICKET.md.\n\n- Add a new Alembic revision after T0.12's head in the gateway's migrations (assumed services/gateway/migrations/versions/; report blocked if elsewhere) with two tables in the gateway's schema:\n  - the Operators: id, name, deployment, jurisdictions, llm_provider, anchoring, created_at, with a unique index on lower(trim(name)) so A1 also holds under a race;\n  - the cell assignments: operator_id as primary key and foreign key, cell, assigned_at.\n- These are global-layer directory tables, not Operator-owned rows, so they carry no row-level security. The gateway service checks the role and the Operator.\n- The repositories follow T0.12's repository and transaction pattern. They map the database's unique violations to SEDirectoryOperatorNameTakenError and SEDirectoryCellAlreadyAssignedError, and a missing row to SEDirectoryOperatorNotFoundError. They return swarm_models Operator and CellAssignment.\n- Column names, SQL fragments and keys are ClassVar constants (CLAUDE.md, no raw strings).\n- Every branch logs. Log at ERROR before raising, and never log a name typed by a person at INFO or above.\nRules: AGENT.md Layout (storage imports models only), Lifecycle, Logging, Exceptions.",
-    "done_when": "`uv run pytest services/gateway/tests/storage -n 2` passes (against a database, as T0.12's tests run), and `uv run mypy services/gateway/src` and `uv run ruff check services/gateway` pass.",
-    "wave": 4
+    "brief": "Implement the gateway storage of the Operator directory so that K03's tests pass. The contract is in K03's brief. Specification: [Architecture: the Operator directory and the cell assignment in the global layer](docs/specs/technical/01-architecture.md#cells), [Security: row-level security on every row of an Operator](docs/specs/technical/06-security.md#authorisation), [BR-008](docs/specs/functional/business-rules/BR-008-operator-isolation.md), [UC-029 step 3](docs/specs/functional/use-cases/UC-029-create-an-operator.md#main-flow).\n- `OperatorDirectoryTables` builds the statements like `OutboxTable`, names checked with `RowLevelSecurity().check`. The `operators` and `cell_assignments` tables are global: no row-level security, because the Swarm administrator writes them without an Operator (say why in `Notes:`). `people` has `RowLevelSecurity().enable`. The unique index on `lower(btrim(name))` makes a duplicate raise `SEStorageDuplicateError` (from asyncpg's `UniqueViolationError`, logged at ERROR first).\n- The three repositories subclass `PostgresRepository` (one class per entity, AGENT.md Layout). `OperatorRepository.find_by_name` matches trimmed and case-insensitively. Jurisdictions are stored as a PostgreSQL text array. Widen the value type of `PostgresRepository.to_values` to also accept `List[str]`, and change nothing else in that base class: `tests/swarm_storage/shared/postgres` must still pass.\n- Migration `0002_create_operator_directory.py` (down revision `0001`) runs `OperatorDirectoryTables().create(schema)` on upgrade and `drop` on downgrade, like `0001_create_outbox.py`.\n- Every branch logs (AGENT.md Logging), no raw strings, every `try` has an `except`, at most five code files per folder.",
+    "done_when": "`uv run pytest tests/swarm_storage tests/scripts/migrations -n 2` passes (with PostgreSQL binaries on the machine); `uv run ruff check backend/swarm-storage backend/apps/gateway` and `uv run mypy backend/swarm-storage/src` pass; `uv run pytest tests/conventions/backend -n 2` passes.",
+    "wave": 3
   },
   {
     "id": "K15",
-    "title": "Keycloak admin client: organisation, invitation and its state",
+    "title": "Clients: Keycloak admin client (organisation and invitation)",
     "agent": "implementer",
     "depends_on": [
       "K04",
-      "K13"
+      "K09",
+      "K10"
     ],
     "files": [
-      "services/gateway/src/gateway/clients/keycloak/"
+      "backend/swarm-clients/src/swarm_clients/gateway/keycloak/keycloak_admin_client.py"
     ],
-    "brief": "Write KeycloakAdminClient in gateway.clients.keycloak.keycloak_admin_client, exactly as services/gateway/tests/clients/keycloak/test_keycloak_admin_client.py expects against StandInKeycloak. Spec: docs/specs/technical/06-security.md#identity (each Operator an organisation; multi-factor authentication for Mission planners), docs/specs/technical/06-security.md#authorisation (roles per persona), docs/specs/technical/01-architecture.md#cells (Keycloak in the global layer), docs/specs/functional/use-cases/UC-029-create-an-operator.md (steps 4 to 6). Ticket: docs/tickets/T0.16/TICKET.md.\n\n- It takes a client-credentials token for the gateway's service account and reuses it until shortly before it expires.\n- create_organization(operator): name, alias str(operator.id), operator_id attribute.\n- invite_mission_planner(organization_id, entry):\n  - creates the user;\n  - makes her a member;\n  - maps the realm role named RoleName.MISSION_PLANNER;\n  - sends the execute-actions e-mail with the required actions of a new Mission planner.\n- delete_organization(organization_id).\n- mission_planner_invitation(operator_id): INVITED while required actions remain, ACCEPTED otherwise, None without a member.\n- Connection errors and timeouts (config.timeout_s) raise SEKeycloakAdminUnavailableError, and error statuses raise SEKeycloakAdminRefusedError, each logged at ERROR with type(error).__name__ and the status.\n- Never log the secret, a token or an e-mail address.\n- URL paths, JSON keys and action names are ClassVar constants or enum members (CLAUDE.md).\n- The HTTP client is closed safely after use. Report how you hold it as a decision.\nRules: AGENT.md Layout (clients import models only; one class per remote system), Logging (every branch), Exceptions, Typing (JsonValue for parsed JSON, no Any).",
-    "done_when": "`uv run pytest services/gateway/tests/clients -n 2` passes, and `uv run mypy services/gateway/src` and `uv run ruff check services/gateway` pass.",
-    "wave": 4
+    "brief": "Implement `KeycloakAdminClient` so that K04's client tests pass. The contract (methods, Keycloak admin paths, required actions, errors) is in K04's brief and its tests. Specification: [Security: identity (Keycloak, each Operator an organisation, multi-factor authentication required for Mission planners)](docs/specs/technical/06-security.md#identity), [UC-029 steps 4 to 6 (invitation by e-mail, first sign-in)](docs/specs/functional/use-cases/UC-029-create-an-operator.md#main-flow), [Architecture: Keycloak in the global layer](docs/specs/technical/01-architecture.md#cells).\n- Follow `keycloak_jwks_client.py`: a short-lived `httpx.AsyncClient` per call with `config.request_timeout_s`, and the endpoint paths, required actions and role names as `ClassVar` constants.\n- Get a service-account token with the client credentials of `config.client_id`, the secret read from the environment entry `config.client_secret_key` when the call is made, never at construction. A missing entry raises `SEKeycloakUnreachableError`. **Never log the secret or a token.**\n- Map a 409 on the user to `SEKeycloakConflictError` and every other failure to `SEKeycloakUnreachableError`, each logged at ERROR with `type(error).__name__`.\n- It is a short request, so not an `AsyncRunnable`, like the JWKS client. One class, beside `KeycloakJwksClient`, because it speaks to the admin API.",
+    "done_when": "`uv run pytest tests/swarm_clients/gateway/keycloak -n 2` passes; `uv run ruff check backend/swarm-clients` and `uv run mypy backend/swarm-clients/src` pass; `uv run pytest tests/conventions/backend -n 2` passes.",
+    "wave": 3
+  },
+  {
+    "id": "K18",
+    "title": "Gateway app: operators section of conf/app.yaml",
+    "agent": "implementer",
+    "depends_on": [
+      "K02",
+      "K10"
+    ],
+    "files": [
+      "backend/apps/gateway/conf/app.yaml"
+    ],
+    "brief": "Write the new `operators` section of the gateway configuration into `backend/apps/gateway/conf/app.yaml`, with every default written out (AGENT.md Layout: `app.yaml`, the configuration with every default written out): `cell: dev` and the `keycloak` subsection (`server_url`, `realm`, `client_id`, `client_secret_key: SWARM_GATEWAY_KEYCLOAK_CLIENT_SECRET`, `sign_in_client_id`, `request_timeout_s`), exactly as the defaults of `OperatorDirectoryConfig` and `KeycloakAdminConfig` (K10). The secret itself is never in the file. Specification: [Architecture: cells and the global layer (routing of each Operator to its cell)](docs/specs/technical/01-architecture.md#cells), [Security: identity](docs/specs/technical/06-security.md#identity), [UC-029](docs/specs/functional/use-cases/UC-029-create-an-operator.md#main-flow).",
+    "done_when": "`uv run pytest tests/swarm_models/config/gateway tests/swarm_gateway -n 2` passes.",
+    "wave": 3
+  },
+  {
+    "id": "K20",
+    "title": "Schema bundle: export the extended Operator",
+    "agent": "implementer",
+    "depends_on": [
+      "K09"
+    ],
+    "files": [
+      "backend/swarm-models/schemas/swarm_models.schema.json"
+    ],
+    "brief": "Regenerate the JSON Schema bundle after the change to the shared model `Operator` (K09). AGENT.md (Commands, Shared models) says the bundle is generated, never edited by hand: run `uv run swarm-schemas-export` from the root, then check it. Do not add the new request and response models to the exporter's list: only the models it already exports. Specification: [UC-029: the Operator is created with its name, deployment, Jurisdictions, LLM provider and Anchoring choice](docs/specs/functional/use-cases/UC-029-create-an-operator.md#actors), [FS-012](docs/specs/functional/features/FS-012-operators-deployment-and-languages.md#details).",
+    "done_when": "`uv run swarm-schemas-check` passes and `uv run pytest tests/swarm_service/shared/schema -n 2` passes.",
+    "wave": 3
   },
   {
     "id": "K16",
-    "title": "OperatorService: checks of step 3, creation with its invitation, listing by role",
+    "title": "Service: OperatorService, its lifespan and its factory",
     "agent": "implementer",
     "depends_on": [
       "K05",
+      "K09",
+      "K10",
       "K14",
       "K15"
     ],
     "files": [
-      "services/gateway/src/gateway/service/operators/"
+      "backend/swarm-service/src/swarm_service/gateway/operators/__init__.py",
+      "backend/swarm-service/src/swarm_service/gateway/operators/operator_service.py",
+      "backend/swarm-service/src/swarm_service/gateway/operators/operator_lifespan.py",
+      "backend/swarm-service/src/swarm_service/gateway/factories/operators/__init__.py",
+      "backend/swarm-service/src/swarm_service/gateway/factories/operators/operator_service_factory.py"
     ],
-    "brief": "Write OperatorEntryChecker and OperatorService in gateway.service.operators, exactly as services/gateway/tests/service/operators/ expects. Spec: docs/specs/functional/use-cases/UC-029-create-an-operator.md (step 3 checks, step 5 creation and isolation, A1, A2, postconditions: on failure no Operator is created), docs/specs/functional/business-rules/BR-008-operator-isolation.md (another Operator's attempt: not found, logged), docs/specs/functional/features/FS-012-operators-deployment-and-languages.md (AC-3), docs/specs/technical/06-security.md#authorisation (the Swarm administrator creates Operators and first accounts, with no access to Operators' data; the gateway checks the role and the Operator of every call), docs/specs/technical/01-architecture.md#cells. Ticket: docs/tickets/T0.16/TICKET.md.\n\n- OperatorEntryChecker.problems returns every REQUIRED and INVALID problem at once, field by field, so the KO screen can name each one. A missing llm_provider or anchoring takes its default.\n- check(caller, entry) requires RoleName.SWARM_ADMINISTRATOR, adds TAKEN through OperatorRepository.name_taken, and returns the problems.\n- create(caller, creation):\n  - It runs the same checks plus the first Mission planner's name and e-mail, and raises SEOperatorEntryRefusedError when any problem is found.\n  - Otherwise, in one transaction, it adds the Operator (UUIDv7 id) and its CellAssignment to config.default_cell (now, UTC), creates the Keycloak organisation and invites the Mission planner, then commits.\n  - If Keycloak fails, it rolls back, deletes any organisation it created, and raises SEOperatorCreationFailedError. A name taken in a race (SEDirectoryOperatorNameTakenError) becomes SEOperatorEntryRefusedError with TAKEN.\n- list(caller): every Operator for a Swarm administrator; only the caller's own Operator for anyone else.\n- get(caller, id): another Operator's id raises SEOperatorNotFoundError after logging the attempt (BR-008 example 2).\n- Each returned OperatorDirectoryEntry holds the first Mission planner's invitation from the client.\n- A from_config classmethod (under the public banner) builds the service with its repositories and client from the gateway's configuration and secret reader, so the api layer never imports storage or clients.\nRules: AGENT.md Layout (service imports storage, clients and models), Logging (every branch, ERROR before each raise, no typed value or e-mail in logs), Exceptions (every try has an except; raise from error), File shape (no hard-coded-key dicts, banners).",
-    "done_when": "`uv run pytest services/gateway/tests/service -n 2` passes, and `uv run mypy services/gateway/src`, `uv run ruff check services/gateway` and `uv run pytest tests/conventions/services -n 2` pass.",
-    "wave": 5
+    "brief": "Implement the business rules of UC-029 so that K05's tests pass. The contract (constructor, `create`, `list`, `get`, `close`, the order of the checks, the defaults, the compensation, `OperatorLifespan`, `OperatorServiceFactory`) is in K05's brief and its tests. Specification: [UC-029 main flow](docs/specs/functional/use-cases/UC-029-create-an-operator.md#main-flow), [alternative flows A1 and A2](docs/specs/functional/use-cases/UC-029-create-an-operator.md#alternative-flows), [FS-012 details (required fields; LLM provider and Anchoring defaults)](docs/specs/functional/features/FS-012-operators-deployment-and-languages.md#details), [BR-008](docs/specs/functional/business-rules/BR-008-operator-isolation.md), [Architecture: Operator directory and cell assignment](docs/specs/technical/01-architecture.md#cells), [Security: identity](docs/specs/technical/06-security.md#identity).\n- Check the required fields first (`SEOperatorFieldMissingError` naming every missing `OperatorField`), then the name (`SEOperatorNameTakenError`). Keep both in this service, the one place for the rules (AGENT.md Layout).\n- Create in one unit of work opened for the new Operator (`pool.unit_of_work(operator_id)`), so that row-level security accepts its person and the global tables take its Operator and cell assignment. Inside it, call Keycloak (organisation, then invitation). On `SEKeycloakConflictError` raise `SEOperatorPlannerEmailTakenError`. On any Keycloak failure, remove what was created in Keycloak (a failed removal is logged at WARNING), let the transaction roll back, and raise again. A `SEStorageDuplicateError` from a race on the name becomes `SEOperatorNameTakenError`.\n- `list` and `get` use a unit of work without an Operator, which reads only the global directory tables (the Swarm administrator has no access to Operators' data).\n- Open the pool on the first call, under an `asyncio.Lock`, so that building the application, the OpenAPI export and the e2e images need no database.\n- `OperatorLifespan` follows `live/live_feed_lifespan.py`. `OperatorServiceFactory` mirrors the existing service factories of `swarm_service/simulation/factories/`.\n- AGENT.md: no logger handed on, every branch logs, every `try` has an `except`, no raw strings, Google docstrings.",
+    "done_when": "`uv run pytest tests/swarm_service/gateway -n 2` passes (with PostgreSQL binaries); `uv run ruff check backend/swarm-service` and `uv run mypy backend/swarm-service/src` pass; `uv run pytest tests/conventions/backend -n 2` passes.",
+    "wave": 4
+  },
+  {
+    "id": "K21",
+    "title": "Rust: regenerate the shared model structs",
+    "agent": "rust-implementer",
+    "depends_on": [
+      "K20"
+    ],
+    "files": [
+      "rust/swarm-models/src/generated.rs",
+      "rust/swarm-models/src/lib.rs"
+    ],
+    "brief": "Regenerate the Rust structs from the updated schema bundle (K20), which now gives `Operator` its deployment, Jurisdictions, LLM provider and Anchoring. AGENT.md (Commands, Shared models): run `cargo run -p swarm-models-codegen` in `rust/`. It writes `rust/swarm-models/src/generated.rs`, which is never edited by hand. Then re-export from `rust/swarm-models/src/lib.rs` the new enum types beside `Operator`, the way it re-exports `RoleName`. Specification: [UC-029: the Operator's fields](docs/specs/functional/use-cases/UC-029-create-an-operator.md#actors), [FS-012 details](docs/specs/functional/features/FS-012-operators-deployment-and-languages.md#details).",
+    "done_when": "In `rust/`: `cargo fmt --all --check`, `cargo clippy -p swarm-models --all-targets -- -D warnings` and `cargo test -p swarm-models` (with `generated_is_current`) pass.",
+    "wave": 4
+  },
+  {
+    "id": "K22",
+    "title": "Live package: regenerate the TypeScript models",
+    "agent": "frontend-implementer",
+    "depends_on": [
+      "K20"
+    ],
+    "files": [
+      "frontend/packages/live/src/generated/models.ts"
+    ],
+    "brief": "Regenerate the TypeScript types of the shared models from the updated schema bundle (K20): run `pnpm --filter ./frontend/packages/live run generate` from the root (AGENT.md Commands, Shared models). The file `frontend/packages/live/src/generated/models.ts` is generated and never edited by hand. Specification: [UC-029: the Operator's fields](docs/specs/functional/use-cases/UC-029-create-an-operator.md#actors), [GUI and WebUI: the live package](docs/specs/technical/10-frontends.md#apps).",
+    "done_when": "`pnpm --filter ./frontend/packages/live test`, `lint` and `typecheck` pass (the test script runs `generate.ts --check`).",
+    "wave": 4
   },
   {
     "id": "K17",
-    "title": "Gateway /v1/operators routes with problem+json",
+    "title": "API: /v1/operators routes, gateway wiring and OpenAPI document",
     "agent": "implementer",
     "depends_on": [
       "K06",
       "K16"
     ],
     "files": [
-      "services/gateway/src/gateway/api/rest/v1/operators/",
-      "services/gateway/src/gateway/api/rest/gateway_rest_app.py"
+      "backend/swarm-api/src/swarm_api/v1/gateway/operator_router.py",
+      "backend/swarm-api/src/swarm_api/v1/gateway/gateway_router.py",
+      "frontend/packages/api-client/openapi/gateway.json"
     ],
-    "brief": "Expose UC-029 through the gateway's /v1 API, exactly as services/gateway/tests/api/rest/v1/operators/ expects. Spec: docs/specs/technical/05-api.md#rest (resources follow the glossary, Idempotency-Key on every POST, ETag, errors as application/problem+json with the AGENT.md message rules, the OpenAPI document generated), docs/specs/technical/06-security.md#authorisation (role and Operator checked on every call), docs/specs/functional/use-cases/UC-029-create-an-operator.md (A1, A2), docs/specs/functional/business-rules/BR-008-operator-isolation.md, docs/specs/functional/features/FS-012-operators-deployment-and-languages.md (AC-3). Ticket: docs/tickets/T0.16/TICKET.md.\n\n- In gateway/api/rest/v1/operators/, a class (no module-level functions, AGENT.md File shape) builds the APIRouter. Its methods are the handlers, which call OperatorService only and never storage or clients.\n- Routes:\n  - POST /v1/operators:validate answers 204, or 422.\n  - POST /v1/operators answers 201 with a Location header, or 422, 403 or 502.\n  - GET /v1/operators.\n  - GET /v1/operators/{operator_id}, which answers 404 for another Operator's id.\n- Map SEOperatorEntryRefusedError to 422 problem+json with an errors list of {field, reason} from OperatorEntryProblem, SEOperatorForbiddenError to 403, SEOperatorNotFoundError to 404, and SEOperatorCreationFailedError to 502. Use T0.12's problem+json and Idempotency-Key machinery and T0.11's caller dependency.\n- Register the router in the gateway's FastAPI application. This plan assumes T0.12 builds it in services/gateway/src/gateway/api/rest/gateway_rest_app.py; if it is elsewhere, report blocked with the path.\n- Route paths, problem types and keys are constants or enum members (CLAUDE.md).\nRules: AGENT.md Layout (api imports service and models only), Logging, Messages.",
-    "done_when": "`uv run pytest services/gateway/tests -n 2` passes (with a database, as T0.12's tests run), and `uv run mypy services/gateway/src`, `uv run ruff check services/gateway` and `uv run pytest tests/conventions/services -n 2` pass.",
-    "wave": 6
+    "brief": "Expose UC-029 on the gateway so that K06's tests pass. The contract (paths, roles, status codes, models) is in K06's brief and its tests. Specification: [API layer: REST (`/v1`, resources named after the glossary, `Idempotency-Key` on every POST, problem+json, the OpenAPI contract)](docs/specs/technical/05-api.md#rest), [Security: roles and Operator isolation (the gateway checks the role and the Operator of every call)](docs/specs/technical/06-security.md#authorisation), [UC-029 alternative flows](docs/specs/functional/use-cases/UC-029-create-an-operator.md#alternative-flows), [BR-008 (another Operator's resource is not found)](docs/specs/functional/business-rules/BR-008-operator-isolation.md#examples), [FS-012 AC-3](docs/specs/functional/features/FS-012-operators-deployment-and-languages.md#acceptance).\n- `swarm_api/v1/gateway/operator_router.py`: `OperatorRouter(APIRouter)` taking the `OperatorService` in its constructor (attribute `operators`). Its routes add `Depends(RouteAccess([...]))` with the roles of the security page: `[RoleName.SWARM_ADMINISTRATOR]` for `GET` and `POST /operators`, and every Operator role for `GET /operators/{operator_id}`. Each route delegates to the service in one line. POST answers 201 with `response_model=OperatorCreated`. Paths and methods are `ClassVar` constants. The api layer holds only endpoints (AGENT.md Layout).\n- `gateway_router.py`: in `application`, build the service with `OperatorServiceFactory(self.gateway_config).create()`, serve `OperatorRouter` under `/v1` beside `self` through `ProblemHandlers().application`, and set the lifespan to `OperatorLifespan(service, LiveFeedLifespan(feed).lifespan).lifespan`. Update the class `Notes:`.\n- The application must still build and serve its OpenAPI document with no database and no Keycloak.\n- Then regenerate the published contract: `uv run swarm-openapi-export` writes `frontend/packages/api-client/openapi/gateway.json`.",
+    "done_when": "`uv run pytest tests/swarm_api tests/scripts/openapi tests/swarm_gateway -n 2` passes (with PostgreSQL binaries); `uv run swarm-openapi-check` passes; `uv run ruff check backend/swarm-api` and `uv run mypy backend/swarm-api/src` pass; `uv run pytest tests/conventions/backend -n 2` passes.",
+    "wave": 5
   },
   {
-    "id": "K18",
-    "title": "OpenAPI document and generated api-client with the operators endpoints",
+    "id": "K23",
+    "title": "API client: regenerate the gateway types",
     "agent": "frontend-implementer",
     "depends_on": [
       "K17"
     ],
     "files": [
-      "services/gateway/openapi/",
-      "packages/ts/api-client/src/generated/"
+      "frontend/packages/api-client/src/generated/gateway.ts",
+      "frontend/packages/api-client/src/index.ts"
     ],
-    "brief": "Publish the gateway's OpenAPI document with the new /v1/operators endpoints, and regenerate packages/ts/api-client from it, never by hand. Spec: docs/specs/technical/05-api.md#rest ('the OpenAPI document is generated and published; the TypeScript client in packages/ts/api-client is generated from it in CI'), docs/specs/technical/10-frontends.md#apps (api-client: generated REST client and types), docs/specs/functional/use-cases/UC-029-create-an-operator.md. Ticket: docs/tickets/T0.16/TICKET.md.\n\nRun the export and generate commands T0.12 put in place. This plan assumes the document lives in services/gateway/openapi/ and the client's output in packages/ts/api-client/src/generated/; if the paths differ, report blocked with them. Check the generated types: OperatorDirectoryEntry, the 422 problem with its errors list, and the enum values of the deployment, Jurisdictions, LLM provider and Anchoring. Change nothing outside the generated output.",
-    "done_when": "The api-client's up-to-date check that T0.12 put in CI passes, and `pnpm --filter ./packages/ts/api-client run typecheck` passes.",
-    "wave": 7
-  },
-  {
-    "id": "K19",
-    "title": "Back office: operators data hooks and the draft store",
-    "agent": "frontend-implementer",
-    "depends_on": [
-      "K07",
-      "K12",
-      "K18"
-    ],
-    "files": [
-      "frontends/back-office/src/operators/api/",
-      "frontends/back-office/src/operators/state/operatorDraftStore.ts"
-    ],
-    "brief": "Write the data layer of the UC-029 screens, as frontends/back-office/src/operators/state/operatorDraftStore.test.ts and the page tests (with src/operators/testing/standInGateway.ts) expect. Spec: docs/specs/technical/10-frontends.md#apps (TanStack Query for server data, Zustand for UI state, api-client generated), docs/specs/technical/05-api.md#rest (Idempotency-Key on every POST, problem+json), docs/specs/functional/use-cases/UC-029-create-an-operator.md (steps 1 to 5, A1, A2). Ticket: docs/tickets/T0.16/TICKET.md.\n\n- src/operators/api/operatorsApi.ts uses the generated api-client with the session token (K12) and exports three TanStack Query hooks:\n  - useOperators();\n  - useValidateOperatorEntry(), posting /v1/operators:validate;\n  - useCreateOperator(), posting /v1/operators.\n  Each POST sends a fresh Idempotency-Key (crypto.randomUUID) per submission and reuses it on a retry of the same submission. A 422 problem becomes a typed list of {field, reason}.\n- src/operators/state/operatorDraftStore.ts exports useOperatorDraft, a Zustand store with entry, firstMissionPlanner, problems, setEntry, setFirstMissionPlanner, setProblems and reset. The LLM provider defaults to Claude and the Anchoring to the qualified timestamping authority, and no deployment or Jurisdiction is preselected.\nUse only the generated types; no hand-written copy of the API's shapes.",
-    "done_when": "`pnpm --filter ./frontends/back-office exec vitest run src/operators/state` passes, and `pnpm --filter ./frontends/back-office run lint` and `pnpm --filter ./frontends/back-office run typecheck` pass.",
-    "wave": 8
-  },
-  {
-    "id": "K20",
-    "title": "Back office screen A1 and KO: ➕ Create an Operator",
-    "agent": "frontend-implementer",
-    "depends_on": [
-      "K07",
-      "K19"
-    ],
-    "files": [
-      "frontends/back-office/src/operators/create/"
-    ],
-    "brief": "Build CreateOperatorPage (route /operators/new), which shows states A1 and KO, as frontends/back-office/src/operators/create/CreateOperatorPage.test.tsx expects. Do not change the test. Spec: docs/specs/functional/use-cases/UC-029-create-an-operator.md (steps 1 to 3, screens A1 and KO, A1 name taken, A2 required field missing), the mock-ups docs/specs/screens/mockups/UC-029/a1.html and ko.html (layout and wording), docs/specs/visual-identity.md#components, docs/specs/technical/10-frontends.md#apps (packages/ts/ui components on Radix, tokens only). Ticket: docs/tickets/T0.16/TICKET.md, criteria 2 and 3.\n\n- Two cards, as in the mock-up:\n  - Operator name, Deployment (Cloud, On premises), Jurisdictions (EU (EASA), US (FAA)), and LLM provider and models (Claude (default), an open-weight model) with the on-premises hint;\n  - 🔏 Anchoring, with three choices (default marked) and the hint 'Only fingerprints of the Evidence records leave Swarm, never the data.'.\n- Cancel. 'Next: first Mission planner ▶️' calls useValidateOperatorEntry, then goes to /operators/new/first-mission-planner with the draft kept.\n- On problems, show the failure banner '❌ Operator not created: …' and an error under each named field, using the mock-up's wording.\n- Every text is a FormatJS message (T0.15) with its English default; K24 writes the four catalogues.\n- Use only packages/ts/ui components and tokens: no raw colour or size. Use glossary names, never the glossary's 'Do not say' words.",
-    "done_when": "`pnpm --filter ./frontends/back-office exec vitest run src/operators/create` passes, and `pnpm --filter ./frontends/back-office run lint` and `pnpm --filter ./frontends/back-office run typecheck` pass.",
-    "wave": 9
-  },
-  {
-    "id": "K21",
-    "title": "Back office screen A2: invite the first Mission planner",
-    "agent": "frontend-implementer",
-    "depends_on": [
-      "K07",
-      "K19"
-    ],
-    "files": [
-      "frontends/back-office/src/operators/invite/"
-    ],
-    "brief": "Build InviteFirstMissionPlannerPage (route /operators/new/first-mission-planner), which shows state A2, as frontends/back-office/src/operators/invite/InviteFirstMissionPlannerPage.test.tsx expects. Do not change the test. Spec: docs/specs/functional/use-cases/UC-029-create-an-operator.md (steps 4 and 5, screen A2, A2 missing e-mail), the mock-up docs/specs/screens/mockups/UC-029/a2.html, docs/specs/functional/business-rules/BR-008-operator-isolation.md, docs/specs/technical/10-frontends.md#apps. Ticket: docs/tickets/T0.16/TICKET.md, criteria 1 and 3.\n\n- Title '👥 First Mission planner of <Operator name>'.\n- A card with Name, E-mail address and a fixed Role of 👤 Mission planner, with the hint from the mock-up.\n- A 🗃️ Operator summary card from the draft: Name, Deployment, Jurisdictions, LLM provider, Anchoring.\n- '◀️ Back' returns to /operators/new with the draft.\n- 'Create the Operator and send the invitation' calls useCreateOperator once. On 422 it shows the failure banner naming each field. On 201 it resets the draft and goes to /operators carrying the created Operator's name for the success banner.\n- Every text is a FormatJS message with its English default. Use packages/ts/ui components and tokens only.",
-    "done_when": "`pnpm --filter ./frontends/back-office exec vitest run src/operators/invite` passes, and `pnpm --filter ./frontends/back-office run lint` and `pnpm --filter ./frontends/back-office run typecheck` pass.",
-    "wave": 9
-  },
-  {
-    "id": "K22",
-    "title": "Back office screen OK: the Operators list",
-    "agent": "frontend-implementer",
-    "depends_on": [
-      "K07",
-      "K19"
-    ],
-    "files": [
-      "frontends/back-office/src/operators/list/"
-    ],
-    "brief": "Build OperatorsPage (route /operators), which shows state OK, as frontends/back-office/src/operators/list/OperatorsPage.test.tsx expects. Do not change the test. Spec: docs/specs/functional/use-cases/UC-029-create-an-operator.md (step 5, screen OK, postconditions), the mock-up docs/specs/screens/mockups/UC-029/ok.html, docs/specs/functional/business-rules/BR-008-operator-isolation.md (a Mission planner sees only her own Operator), docs/specs/technical/06-security.md#authorisation, docs/specs/technical/10-frontends.md#apps. Ticket: docs/tickets/T0.16/TICKET.md, criterion 1.\n\n- Title '🗃️ Operators'.\n- After a creation, the success banner '✅ <name> created. Its data is isolated: no other Operator can see it.'.\n- A table from useOperators with the columns Operator, Deployment, Jurisdictions, Anchoring, First Mission planner (👤 name and the invitation state, Invitation sent or Invitation accepted) and State (✅ Created).\n- A '➕ Create an Operator' action, shown to a Swarm administrator only (useSession).\n- The list refreshes when the page is opened again. There is no live toast: the sign-in of the Mission planner shows as Invitation accepted.\n- Every text is a FormatJS message with its English default. Use packages/ts/ui components and tokens only.",
-    "done_when": "`pnpm --filter ./frontends/back-office exec vitest run src/operators/list` passes, and `pnpm --filter ./frontends/back-office run lint` and `pnpm --filter ./frontends/back-office run typecheck` pass.",
-    "wave": 9
-  },
-  {
-    "id": "K23",
-    "title": "Back office routes, side bar and frame for Operators",
-    "agent": "frontend-implementer",
-    "depends_on": [
-      "K12",
-      "K20",
-      "K21",
-      "K22"
-    ],
-    "files": [
-      "frontends/back-office/src/operators/operatorRoutes.tsx",
-      "frontends/back-office/src/App.tsx"
-    ],
-    "brief": "Wire the UC-029 screens into the back-office shell of T0.14. Spec: docs/specs/functional/use-cases/UC-029-create-an-operator.md (step 1 'opens ➕ Operators', step 4 'opens 👥 People', step 6 'signs in to the Back office of Aerowing Services'), the mock-ups docs/specs/screens/mockups/UC-029/*.html (title bar 'Back office · Swarm administration', side bar ➕ Operators, 👥 People, 🔧 Settings, status bar with the persona and the deployment), docs/specs/visual-identity.md#components (the frame of each part of Swarm), docs/specs/technical/10-frontends.md#apps, docs/specs/technical/06-security.md#authorisation. Ticket: docs/tickets/T0.16/TICKET.md.\n\n- src/operators/operatorRoutes.tsx declares the routes /operators, /operators/new and /operators/new/first-mission-planner, open to a Swarm administrator. A Mission planner reaches /operators and her own Operator only.\n- Mount the routes and the session provider of src/session in the app. This plan assumes the root is src/App.tsx; if T0.14 put the router or the side bar elsewhere, report blocked with the path.\n- In the frame:\n  - side bar: ➕ Operators is active on /operators and /operators/new, and 👥 People on the first Mission planner step;\n  - title bar: 'Back office · Swarm administration' for a Swarm administrator, 'Back office · <her Operator's name>' for a Mission planner;\n  - status bar: the persona.\n- Every text is a FormatJS message with its English default.",
-    "done_when": "`pnpm --filter ./frontends/back-office run test`, `pnpm --filter ./frontends/back-office run lint` and `pnpm --filter ./frontends/back-office run typecheck` pass.",
-    "wave": 10
+    "brief": "Regenerate the TypeScript gateway client from the new OpenAPI document (K17): run `pnpm --filter ./frontend/packages/api-client run generate` from the root (AGENT.md Commands). It writes `src/generated/gateway.ts`, which is never edited by hand. In `src/index.ts`, export type aliases of the new schemas beside `Problem`: `Operator`, `OperatorEntry`, `OperatorDirectoryEntry`, `OperatorCreated`, `CellAssignment` and `Person`. Specification: [API layer: REST contract (the TypeScript client generated from the OpenAPI document, checked in CI)](docs/specs/technical/05-api.md#rest), [GUI and WebUI: api-client package](docs/specs/technical/10-frontends.md#apps), [UC-029](docs/specs/functional/use-cases/UC-029-create-an-operator.md#main-flow).",
+    "done_when": "`pnpm --filter ./frontend/packages/api-client test` (with `generate.ts --check`), `lint` and `typecheck` pass.",
+    "wave": 6
   },
   {
     "id": "K24",
-    "title": "Back office UC-029 messages in English, French, German and Spanish",
+    "title": "Back office: Create an Operator screens and App wiring",
     "agent": "frontend-implementer",
     "depends_on": [
-      "K11",
-      "K20",
-      "K21",
-      "K22",
+      "K08",
+      "K12",
+      "K13",
       "K23"
     ],
     "files": [
-      "frontends/back-office/src/messages/en.json",
-      "frontends/back-office/src/messages/fr.json",
-      "frontends/back-office/src/messages/de.json",
-      "frontends/back-office/src/messages/es.json"
+      "frontend/apps/back-office/src/App.tsx",
+      "frontend/apps/back-office/src/main.tsx",
+      "frontend/apps/back-office/src/operators/OperatorsScreen.tsx",
+      "frontend/apps/back-office/src/operators/OperatorEntryStep.tsx",
+      "frontend/apps/back-office/src/operators/FirstMissionPlannerStep.tsx",
+      "frontend/apps/back-office/src/operators/OperatorsTable.tsx",
+      "frontend/apps/back-office/src/operators/entry-checks.ts"
     ],
-    "brief": "Write every message the UC-029 screens use in the four languages, so T0.15's CI check passes. Spec: docs/specs/functional/business-rules/BR-017-every-screen-in-four-languages.md (named by epic E0.5 as 'UC-029 screens in four languages'), docs/specs/technical/10-frontends.md#apps (i18n: FormatJS messages in English, French, German and Spanish), docs/specs/functional/use-cases/UC-029-create-an-operator.md, docs/specs/glossary.md (the names, and the 'Do not say' words never used). Ticket: docs/tickets/T0.16/TICKET.md.\n\n- Extract every message id used under src/operators/ and by the routes and frame of K23. Write them in the back-office catalogues T0.15 set up, assumed at src/messages/<lang>.json; report blocked with the path if T0.15 chose another.\n- English is the defaults, unchanged. Translate French, German and Spanish faithfully. Keep the glossary's names (Operator, Mission planner, Jurisdiction, Anchoring, LLM provider) consistent with how the existing catalogues render them, and the placeholders identical.\n- Then run the Playwright test of UC-029 against compose.e2e.yaml: it is the end-to-end proof of the whole ticket.",
-    "done_when": "T0.15's message check passes. `pnpm --filter ./frontends/back-office run test` passes. `docker compose -f compose.e2e.yaml up -d --build --wait` followed by `pnpm --filter ./frontends/back-office exec playwright test e2e/create-an-operator.spec.ts` passes.",
-    "wave": 11
+    "brief": "Build the UC-029 screens of the Back office and wire the app, so that every test of K08 passes. Specification: [UC-029 screens A1, KO, A2 and OK](docs/specs/functional/use-cases/UC-029-create-an-operator.md#screens) and their mock-ups `docs/specs/screens/mockups/UC-029/*.html`, [UC-029 main flow and alternative flows](docs/specs/functional/use-cases/UC-029-create-an-operator.md#alternative-flows), [FS-012 details (required fields and defaults)](docs/specs/functional/features/FS-012-operators-deployment-and-languages.md#details), [BR-008](docs/specs/functional/business-rules/BR-008-operator-isolation.md), [GUI and WebUI: apps and shared packages](docs/specs/technical/10-frontends.md#apps), [visual identity: screens](docs/specs/visual-identity.md#screens).\n- Use only the components of `@swarm/ui` (Field, Button, Badge, Banner, Toast, Table, Card, Grid2, Stack, Row, the frames), styled by tokens. No colour or font of your own.\n- Every word comes from the messages of `@swarm/i18n` that K12 added (read `frontend/packages/i18n/src/messages/en.json`). Use the generated types of `@swarm/api-client` (K23) and TanStack Query through `useGateway()` (K13).\n- `OperatorsScreen`: the directory table (`GET /v1/operators`) and `➕ Create an Operator`. `OperatorEntryStep` (A1) has the defaults: Cloud, Claude in the cloud, the qualified timestamping authority. `entry-checks.ts` holds the required-field and name checks of step 3: the name is compared trimmed and case-insensitively with the directory, and every error is shown under its field with the KO banner. `FirstMissionPlannerStep` (A2, `👥 People` active) checks the e-mail, then sends one POST. A 409 brings back A1 with the name error, a 422 shows the KO banner, and success shows the OK banner, the invitation toast and the table.\n- `App.tsx`: a Swarm administrator gets `SwarmAdministrationFrame`; anyone else gets `BackOfficeFrame` with `operatorName` from `GET /v1/operators/{operatorId}` and an empty content area. Keep the language status item.\n- `main.tsx`: keep the tokens and styles imports and `#root`, and mount `I18nProvider`, `SignInGate`, then `GatewayProvider` (client from `createBackOfficeGateway` with `config.ts` and the session token), then `App`.\n- At most five code files per folder.",
+    "done_when": "`pnpm --filter @swarm/back-office test`, `lint`, `typecheck` and `build` pass.",
+    "wave": 7
   },
   {
-    "id": "K25",
-    "title": "Capture the UC-029 screens (TKT-21)",
+    "id": "K27",
+    "title": "Screens: UC-029 A1, KO, A2 and OK as the app shows them",
     "agent": "mockup-writer",
     "depends_on": [
-      "K11",
       "K12",
-      "K18",
-      "K19",
-      "K20",
-      "K21",
+      "K13",
       "K22",
       "K23",
       "K24"
@@ -1417,9 +1245,9 @@ In both cases run `python3 .claude/skills/write-specs/scripts/specs.py build`. C
       "docs/specs/screens/mockups/UC-029/ok.html",
       "docs/specs/functional/use-cases/UC-029-create-an-operator.md"
     ],
-    "brief": "Capture the four screens TICKET.md lists under 'Screens touched': UC-029 A1 (Enter the Operator), KO (Operator not created), A2 (Invite the first Mission planner) and OK (Operator created and isolated). Their rows are on docs/specs/functional/use-cases/UC-029-create-an-operator.md#screens. Rules: SPEC-12 and SPEC-13 (.claude/rules/specs.md), TKT-21 (.claude/rules/tickets.md), docs/specs/visual-identity.md#screens (screen size and sample data), docs/specs/technical/10-frontends.md#design-system. Ticket: docs/tickets/T0.16/TICKET.md.\n\nIf the screenshot pipeline of T0.20 is merged:\n1. Start the app with compose.e2e.yaml. Bring each state up with the sample data of the use case: Aerowing Services, cloud, EU (EASA), Léa Martin; for KO, the taken name and no Jurisdiction.\n2. Capture each screen in light and dark mode with that pipeline, at the visual identity's screen size, as 256-colour palette PNGs at docs/specs/screens/UC-029/<node>.png and <node>.dark.png.\n3. Set each row's source to '📸 Screenshot' and delete its mock-up.\nT0.20 is not merged yet, because it depends on this ticket. Until it is, the screens stay '✏️ Mock-up', and instead:\n1. Update each mock-up so it shows what the app now shows for that state, with components.css classes only and the app's wording. For example, the OK screen has no live toast; its list shows Invitation accepted.\n2. Run `python3 .claude/skills/write-specs/scripts/specs.py render` to write both PNGs of each.\nIn both cases run `python3 .claude/skills/write-specs/scripts/specs.py build`. Change nothing else on the use case page.",
-    "done_when": "`python3 .claude/skills/write-specs/scripts/specs.py check` prints nothing, and each of the four screens has both of its PNGs, each either captured from the app (📸 Screenshot) or rendered from its updated mock-up while T0.20 is not merged.",
-    "wave": 12
+    "brief": "Capture task of TKT-21 for the four screens that `docs/tickets/T0.16/TICKET.md` lists under Screens touched: [UC-029 A1](docs/specs/functional/use-cases/UC-029-create-an-operator.md#screen-a1), [KO](docs/specs/functional/use-cases/UC-029-create-an-operator.md#screen-ko), [A2](docs/specs/functional/use-cases/UC-029-create-an-operator.md#screen-a2) and [OK](docs/specs/functional/use-cases/UC-029-create-an-operator.md#screen-ok). Specification: [SPEC-12 (a screen for every state, light and dark)](.claude/rules/specs.md), [visual identity: screens](docs/specs/visual-identity.md#screens), [BR-008](docs/specs/functional/business-rules/BR-008-operator-isolation.md), [GUI and WebUI: back-office](docs/specs/technical/10-frontends.md#apps).\n- **If T0.20 is merged** (its `docs/tickets/T0.20/EXPLAIN.md` is on `origin/develop` and its screenshot pipeline exists): capture each screen from the running back-office app, in light and dark mode, with that pipeline and the sample data of the visual identity (Aerowing Services, Léa Martin, `lea.martin@aerowing.example`). Write `docs/specs/screens/UC-029/<node>.png` and `<node>.dark.png`, set each row's source to `📸 Screenshot` on the use case page, and delete `docs/specs/screens/mockups/UC-029/<node>.html`.\n- **Otherwise (the case when this plan was written):** keep the mock-ups and change them to show what the app now shows. Read `frontend/apps/back-office/src/` and the English messages of `frontend/packages/i18n/src/messages/en.json`, and use their exact words, fields, defaults and errors. The OK directory table now has the columns Operator, Deployment, Jurisdictions, Anchoring, Cell and State, without the Mission planner column, because the Swarm administrator has no access to an Operator's people. It shows the invitation toast instead. Use only the classes of `components.css` and no style of your own (SPEC-13), and only glossary names (SPEC-2). Then run `specs.py render` for the two modes, and keep each row's source `✏️ Mock-up`.\nRun `python3 .claude/skills/write-specs/scripts/specs.py build`, then `render`, then `check`.",
+    "done_when": "`python3 .claude/skills/write-specs/scripts/specs.py check` prints nothing, and the four UC-029 screens (both modes) show the words and states of the back-office app.",
+    "wave": 8
   }
 ]
 ```

@@ -15,6 +15,8 @@ from nats.errors import Error as NatsError
 from nats.js.api import KeyValueConfig
 from nats.js.errors import BadRequestError, KeyNotFoundError
 from nats.js.kv import KeyValue
+from opentelemetry import trace
+from opentelemetry.trace import SpanKind, Status, StatusCode
 from pydantic import BaseModel, ValidationError
 
 # First-party imports
@@ -26,6 +28,7 @@ from swarm_nats.models.bus.exceptions import (
     SENatsRequestInvalidError,
 )
 from swarm_nats.models.bus.nats_headers import NatsHeaders
+from swarm_nats.tracing.nats_trace_context import NatsTraceContext
 
 
 class NatsResponder[Q: BaseModel, R: BaseModel](AsyncRunnable):
@@ -41,6 +44,8 @@ class NatsResponder[Q: BaseModel, R: BaseModel](AsyncRunnable):
         stopped (asyncio.Event): Set by ``close`` to end ``run``.
         HISTORY (int): The history of the bucket, only the last reply of a key is useful.
         KEY_PATTERN (Pattern[str]): The shape of an idempotency key.
+        SPAN_NAME (str): The name of the server span of one request.
+        trace_context (NatsTraceContext): Extracts the trace context of a request from its headers.
         logger (Logger): Logger instance.
 
     Notes:
@@ -49,10 +54,12 @@ class NatsResponder[Q: BaseModel, R: BaseModel](AsyncRunnable):
         - **A failed request is never stored**, so that a retry with the same key calls the handler again: only a
           reply that succeeded must be replayed.
         - The error name of a reply is the class name of the error, so that the caller can map it back.
+        - The handler runs inside a server span that continues the trace of the caller. **No payload is recorded.**
         - One layer owns each retry: this class never retries, the caller does.
     """
 
     HISTORY: ClassVar[int] = 1
+    SPAN_NAME: ClassVar[str] = "nats.respond"
     KEY_PATTERN: ClassVar[Pattern[str]] = re.compile(NatsHeaders.IDEMPOTENCY_KEY_PATTERN)
 
     def __init__(
@@ -81,6 +88,7 @@ class NatsResponder[Q: BaseModel, R: BaseModel](AsyncRunnable):
         self.bucket: Optional[KeyValue] = None
         self.subscription: Optional[Subscription] = None
         self.stopped = asyncio.Event()
+        self.trace_context = NatsTraceContext()
 
     ############################
     # Internal Helpers Methods #
@@ -233,12 +241,18 @@ class NatsResponder[Q: BaseModel, R: BaseModel](AsyncRunnable):
             self.logger.error("Refused a request body that is not a valid %s.", self.request_type.__name__)
             await self._reply(msg, str(error).encode(), SENatsRequestInvalidError.__name__)
             return
-        try:
-            result = await self.handler(request)
-        except Exception as error:  # noqa: BLE001
-            self.logger.error("Handler failed with %s, the failure is not stored.", type(error).__name__)
-            await self._reply(msg, b"", type(error).__name__)
-            return
+        context = self.trace_context.extract(headers)
+        tracer = trace.get_tracer(__name__)
+        with tracer.start_as_current_span(
+            self.SPAN_NAME, context=context, kind=SpanKind.SERVER, record_exception=False, set_status_on_exception=False
+        ) as span:
+            try:
+                result = await self.handler(request)
+            except Exception as error:  # noqa: BLE001
+                self.logger.error("Handler failed with %s, the failure is not stored.", type(error).__name__)
+                span.set_status(Status(StatusCode.ERROR, type(error).__name__))
+                await self._reply(msg, b"", type(error).__name__)
+                return
         data = result.model_dump_json().encode()
         await bucket.put(key, data)
         self.logger.debug("Stored the reply under its idempotency key.")

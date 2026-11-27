@@ -5,6 +5,7 @@ from swarm_models.telemetry.exceptions.squad_frame import (
     SESquadFrameDuplicateDrone,
     SESquadFrameInvalidFrames,
     SESquadFrameInvalidMissionId,
+    SESquadFrameInvalidTraceParent,
     SESquadFrameInvalidTUs,
     SESquadFrameMissionMismatch,
 )
@@ -31,6 +32,7 @@ __all__ = [
     "SESquadFrameInvalidFrames",
     "SESquadFrameInvalidMissionId",
     "SESquadFrameInvalidTUs",
+    "SESquadFrameInvalidTraceParent",
     "SESquadFrameMissionMismatch",
     "SETelemetryFrameInvalidAltitudeM",
     "SETelemetryFrameInvalidBatteryPct",

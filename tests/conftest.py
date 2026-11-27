@@ -15,10 +15,13 @@ from nats.aio.client import Client
 
 # First-party imports
 from swarm_models.auth.auth_config import AuthConfig
-from tests.fakes.keycloak.helpers import AUDIENCE
+from tests.fakes.keycloak.helpers import AUDIENCE, SECRET_ENVIRONMENT_ENTRY
+from tests.fakes.keycloak.keycloak_admin_stand_in import KeycloakAdminStandIn
 from tests.fakes.keycloak.keycloak_stand_in import KeycloakStandIn
 from tests.fakes.mavlink.stand_in_drone import StandInDrone
 from tests.fakes.mavlink.stand_in_drones import StandInDrones
+from tests.fakes.otlp.otlp_stand_in_server import OtlpStandInServer
+from tests.fakes.signals.recorded_signals import RecordedSignals
 
 NATS_BINARY = "nats-server"
 LOCALHOST = "127.0.0.1"
@@ -80,6 +83,13 @@ def keycloak_stand_in() -> Iterator[KeycloakStandIn]:
 
 
 @pytest.fixture
+def keycloak_admin_stand_in(monkeypatch: pytest.MonkeyPatch) -> Iterator[KeycloakAdminStandIn]:
+    with KeycloakAdminStandIn() as stand_in:
+        monkeypatch.setenv(SECRET_ENVIRONMENT_ENTRY, stand_in.client_secret)
+        yield stand_in
+
+
+@pytest.fixture
 def auth_config(keycloak_stand_in: KeycloakStandIn) -> AuthConfig:
     return AuthConfig(issuer_url=keycloak_stand_in.issuer_url, audience=AUDIENCE)
 
@@ -102,3 +112,16 @@ def free_udp_port() -> int:
         probe.bind((LOCALHOST, 0))
         port: int = probe.getsockname()[1]
     return port
+
+
+@pytest.fixture
+def recorded_signals() -> RecordedSignals:
+    signals = RecordedSignals.get()
+    signals.clear()
+    return signals
+
+
+@pytest.fixture
+def otlp_stand_in() -> Iterator[OtlpStandInServer]:
+    with OtlpStandInServer() as server:
+        yield server

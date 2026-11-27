@@ -6,11 +6,13 @@ from typing import ClassVar, Dict, List
 
 # Third-party imports
 import pytest
+import yaml
 from pydantic import JsonValue, ValidationError
 
 # First-party imports
 from swarm_catalog.models.yaml_catalog import YamlCatalog
 from swarm_models.config.gateway.exceptions import (
+    SEGatewayConfigInvalidOperators,
     SEGatewayConfigInvalidPostgres,
     SEGatewayConfigInvalidRest,
     SEGatewayConfigInvalidSchemaName,
@@ -18,10 +20,13 @@ from swarm_models.config.gateway.exceptions import (
     SEInvalidGatewayConfigException,
 )
 from swarm_models.config.gateway.gateway_config import GatewayConfig
+from swarm_models.config.gateway.operator_directory_config import OperatorDirectoryConfig
 from swarm_models.config.postgres.exceptions import SEPostgresConfigInvalidDsnKey
 from swarm_models.config.postgres.postgres_config import PostgresConfig
+from swarm_models.keycloak.keycloak_admin_config import KeycloakAdminConfig
 from swarm_web.models.config.exceptions import SERestConfigInvalidPort
 from swarm_web.models.config.rest_config import RestConfig
+from swarm_web.models.config.signals_config import SignalsConfig
 
 
 class TestGatewayConfig:
@@ -30,11 +35,13 @@ class TestGatewayConfig:
         SEGatewayConfigInvalidSchemaName,
         SEGatewayConfigInvalidPostgres,
         SEGatewayConfigInvalidRest,
+        SEGatewayConfigInvalidOperators,
     ]
     FULL: ClassVar[Dict[str, JsonValue]] = {
         "schema_name": "gateway_two",
         "postgres": {"dsn_key": "SWARM_OTHER_DSN", "pool_max_size": 7},
         "rest": {"port": 9001},
+        "operators": {"cell": "eu_west"},
     }
     UNKNOWN_KEY_CONFIGURATION: ClassVar[Dict[str, JsonValue]] = {"colour": "red"}
     BAD_DSN_KEY_CONFIGURATION: ClassVar[Dict[str, JsonValue]] = {"postgres": {"dsn_key": "lower"}}
@@ -45,14 +52,17 @@ class TestGatewayConfig:
         assert config.schema_name == "gateway"
         assert config.postgres == PostgresConfig(dsn_key=GatewayConfig.DSN_KEY)
         assert config.rest == RestConfig()
+        assert config.operators == OperatorDirectoryConfig()
+        assert config.signals == SignalsConfig(service_name=GatewayConfig.SERVICE_NAME)
 
     def test_full_valid_construction(self) -> None:
         config = GatewayConfig.model_validate(self.FULL)
         assert config.schema_name == "gateway_two"
         assert config.postgres == PostgresConfig(dsn_key="SWARM_OTHER_DSN", pool_max_size=7)
         assert config.rest == RestConfig(port=9001)
+        assert config.operators == OperatorDirectoryConfig(cell="eu_west")
 
-    @pytest.mark.parametrize("name", ["schema_name", "postgres", "rest"])
+    @pytest.mark.parametrize("name", ["schema_name", "postgres", "rest", "operators", "signals"])
     def test_none_becomes_the_default(self, name: str) -> None:
         config = GatewayConfig.model_validate({name: None})
         default = GatewayConfig.model_fields[name].get_default(call_default_factory=True)
@@ -75,6 +85,9 @@ class TestGatewayConfig:
             ("rest", "0.0.0.0", SEGatewayConfigInvalidRest),
             ("rest", 8000, SEGatewayConfigInvalidRest),
             ("rest", [1], SEGatewayConfigInvalidRest),
+            ("operators", "dev", SEGatewayConfigInvalidOperators),
+            ("operators", 3, SEGatewayConfigInvalidOperators),
+            ("operators", [1], SEGatewayConfigInvalidOperators),
         ],
     )
     def test_rejects_bad_values(self, name: str, value: JsonValue, error: type[Exception]) -> None:
@@ -123,10 +136,24 @@ class TestGatewayConfig:
         assert GatewayConfig.conf_folder().is_dir()
         assert GatewayConfig.migrations_folder().is_dir()
 
+    def test_the_signals_name_the_gateway_by_default(self) -> None:
+        assert GatewayConfig().signals.service_name == GatewayConfig.SERVICE_NAME
+
     def test_app_yaml_writes_every_default_out(self) -> None:
         path = self.APP_FOLDER / GatewayConfig.CONF_FOLDER / GatewayConfig.APP_FILE
         assert GatewayConfig.load(path) == GatewayConfig()
 
+    def test_app_yaml_writes_every_operators_default_out(self) -> None:
+        path = self.APP_FOLDER / GatewayConfig.CONF_FOLDER / GatewayConfig.APP_FILE
+        operators = GatewayConfig.load(path).operators
+        assert operators == OperatorDirectoryConfig()
+        assert operators.keycloak == KeycloakAdminConfig()
+
     def test_an_unreadable_file_is_refused(self, tmp_path: Path) -> None:
         with pytest.raises(SEGatewayConfigUnreadable):
             GatewayConfig.load(tmp_path / "missing.yaml")
+
+    def test_a_signals_mapping_is_read_from_yaml(self, tmp_path: Path) -> None:
+        path = tmp_path / "app.yaml"
+        path.write_text(yaml.safe_dump({"signals": {"enabled": True, "cell": "eu_west"}}), encoding="utf-8")
+        assert GatewayConfig.load(path).signals == SignalsConfig(enabled=True, cell="eu_west")

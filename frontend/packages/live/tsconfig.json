@@ -5,7 +5,19 @@
     "allowJs": true,
     "checkJs": true,
     "noEmit": true,
-    "types": ["node"]
+    "types": [
+      "node"
+    ],
+    "lib": [
+      "ES2023",
+      "DOM",
+      "DOM.Iterable"
+    ]
   },
-  "include": ["eslint.config.js", "scripts", "test", "src"]
+  "include": [
+    "eslint.config.js",
+    "scripts",
+    "test",
+    "src"
+  ]
 }

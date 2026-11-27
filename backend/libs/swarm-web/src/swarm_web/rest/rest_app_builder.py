@@ -3,11 +3,15 @@ from __future__ import annotations
 # Standard library imports
 from functools import partial
 from logging import Logger, getLogger
-from typing import ClassVar, Dict, List, Optional, Type
+from typing import ClassVar, Dict, List, Literal, Optional, Tuple, Type
 
 # Third-party imports
 from fastapi import APIRouter, FastAPI
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from opentelemetry.sdk.trace import ReadableSpan
+from opentelemetry.trace import Span
 from pydantic import BaseModel, JsonValue
+from starlette.types import Scope
 
 
 class RestAppBuilder:
@@ -29,6 +33,11 @@ class RestAppBuilder:
         REF_KEY (ClassVar[str]): The ``$ref`` key of a reference.
         SCHEMA_REF_PREFIX (ClassVar[str]): The prefix of a reference to a schema of the components.
         PROBLEM_DESCRIPTION (ClassVar[str]): The description of the default response.
+        URL_KEYS (ClassVar[Tuple[str, ...]]): The span attributes that hold a URL, whose query string is cut.
+        QUERY_KEY (ClassVar[str]): The span attribute that holds a query string, emptied.
+        QUERY_SEPARATOR (ClassVar[str]): The character that starts a query string.
+        EMPTY (ClassVar[str]): The empty text.
+        EXCLUDED_SPANS (ClassVar[List[str]]): The internal spans of the ASGI messages, left out of the hot paths.
         logger (Logger): Logger instance.
 
     Notes:
@@ -54,6 +63,11 @@ class RestAppBuilder:
     REF_KEY: ClassVar[str] = "$ref"
     SCHEMA_REF_PREFIX: ClassVar[str] = "#/components/schemas/"
     PROBLEM_DESCRIPTION: ClassVar[str] = "The problem document of any error."
+    URL_KEYS: ClassVar[Tuple[str, ...]] = ("url.full", "http.url", "http.target")
+    QUERY_KEY: ClassVar[str] = "url.query"
+    QUERY_SEPARATOR: ClassVar[str] = "?"
+    EMPTY: ClassVar[str] = ""
+    EXCLUDED_SPANS: ClassVar[List[Literal["receive", "send"]]] = ["receive", "send"]
 
     def __init__(self, logger: Optional[Logger] = None) -> None:
         """Initialise the builder.
@@ -66,6 +80,28 @@ class RestAppBuilder:
     ############################
     # Internal Helpers Methods #
     ############################
+
+    def _cut_query(self, span: Span, scope: Scope) -> None:
+        """Remove the query string from the attributes of a server span, so that a token in it never reaches a span.
+
+        Args:
+            span (Span): The server span of the request.
+            scope (Scope): The ASGI scope of the request, ignored.
+        """
+        if not isinstance(span, ReadableSpan):
+            self.logger.debug("The span is not an SDK span, so its attributes are left as they are.")
+            return
+        attributes = span.attributes or {}
+        for key in self.URL_KEYS:
+            value = attributes.get(key)
+            if isinstance(value, str) and self.QUERY_SEPARATOR in value:
+                span.set_attribute(key, value.split(self.QUERY_SEPARATOR, 1)[0])
+                self.logger.debug("Cut the query of %s.", key)
+            else:
+                self.logger.debug("No query in %s.", key)
+        if self.QUERY_KEY in attributes:
+            span.set_attribute(self.QUERY_KEY, self.EMPTY)
+            self.logger.debug("Emptied the query attribute.")
 
     def _default_response(self, problem: Type[BaseModel], media_type: str) -> Dict[str, JsonValue]:
         """Build the ``default`` response of an operation.
@@ -142,6 +178,7 @@ class RestAppBuilder:
         )
         for router in routers:
             app.include_router(router, prefix=self.PREFIX)
+        FastAPIInstrumentor.instrument_app(app, server_request_hook=self._cut_query, exclude_spans=self.EXCLUDED_SPANS)
         setattr(app, self.OPENAPI_ATTRIBUTE, partial(self._document, app, problem, problem_media_type))
         self.logger.info("Built the application %s %s with %d routers.", title, version, len(routers))
         return app

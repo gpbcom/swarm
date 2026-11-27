@@ -24,6 +24,7 @@ from swarm_models.config.flight_engine.exceptions import (
 from swarm_models.config.flight_engine.flight_engine_config import FlightEngineConfig
 from swarm_models.config.flight_engine.live_server_config import LiveServerConfig
 from swarm_nats.models.config.nats_client_config import NatsClientConfig
+from swarm_web.models.config.signals_config import SignalsConfig
 
 
 class TestFlightEngineConfig:
@@ -37,6 +38,7 @@ class TestFlightEngineConfig:
         "drone_states_catalog_path",
         "nats",
         "live",
+        "signals",
     ]
     FIELD_ERRORS: ClassVar[List[type[Exception]]] = [
         SEFlightEngineConfigInvalidTickInterval,
@@ -67,6 +69,7 @@ class TestFlightEngineConfig:
         assert config.drone_states_catalog_path == "conf/catalogs/drone_states.yaml"
         assert config.nats == NatsClientConfig()
         assert config.live == LiveServerConfig()
+        assert config.signals == SignalsConfig(service_name=FlightEngineConfig.SERVICE_NAME)
 
     def test_full_valid_construction(self) -> None:
         config = FlightEngineConfig.model_validate(self.FULL_CONFIGURATION)
@@ -150,3 +153,9 @@ class TestFlightEngineConfig:
         assert set(written) == set(self.FIELDS)
         assert set(written["nats"]) == set(NatsClientConfig.model_fields)
         assert set(written["live"]) == set(LiveServerConfig.model_fields)
+        assert set(written["signals"]) == set(SignalsConfig.model_fields)
+
+    def test_a_signals_mapping_is_read_from_yaml(self, tmp_path: Path) -> None:
+        path = tmp_path / "app.yaml"
+        path.write_text(yaml.safe_dump({"signals": {"enabled": True, "cell": "eu_west"}}), encoding="utf-8")
+        assert FlightEngineConfig.load(path).signals == SignalsConfig(enabled=True, cell="eu_west")

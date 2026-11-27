@@ -4,7 +4,7 @@
 > [🏠 Index](../../README.md) · [◀️ UC-028: Assess a Mission against the request](UC-028-assess-a-mission-against-the-request.md) · 📄 **Page 57 / 120** · [UC-030: Focus on a Drone ▶️](UC-030-focus-on-a-drone.md)
 <!-- /spec:nav-top -->
 
-**Status:** 🟢 Approved · **Updated:** 2026-11-18
+**Status:** 🟢 Approved · **Updated:** 2026-11-27
 
 > [!NOTE]
 > The [👤 Swarm administrator](../../glossary.md#per-swarm-administrator) creates an [🗃️ Operator](../../glossary.md#ent-operator) in the [⚙️ Back office](../../glossary.md#sys-back-office) and invites its first [👤 Mission planner](../../glossary.md#per-mission-planner), who gets a Back office whose data no other Operator can see.
@@ -92,10 +92,10 @@ One row per state of the flow chart: every action, success and failure node. Cli
 
 | State | Persona | Entity | Source | Screen |
 | --- | --- | --- | --- | --- |
-| <a id="screen-a1"></a>A1: Enter the Operator | [👤 Swarm administrator](../../glossary.md#per-swarm-administrator) | [🗃️ Operator](../../glossary.md#ent-operator) | ✏️ Mock-up | [![UC-029 A1: Enter the Operator](../../screens/UC-029/a1.png)](../../screens/UC-029/a1.png) [![UC-029 A1: Enter the Operator (dark)](../../screens/UC-029/a1.dark.png)](../../screens/UC-029/a1.dark.png) |
-| <a id="screen-ko"></a>KO: Operator not created | [👤 Swarm administrator](../../glossary.md#per-swarm-administrator) | [🗃️ Operator](../../glossary.md#ent-operator) | ✏️ Mock-up | [![UC-029 KO: Operator not created](../../screens/UC-029/ko.png)](../../screens/UC-029/ko.png) [![UC-029 KO: Operator not created (dark)](../../screens/UC-029/ko.dark.png)](../../screens/UC-029/ko.dark.png) |
-| <a id="screen-a2"></a>A2: Invite the first Mission planner | [👤 Swarm administrator](../../glossary.md#per-swarm-administrator) | [🗃️ Operator](../../glossary.md#ent-operator) | ✏️ Mock-up | [![UC-029 A2: Invite the first Mission planner](../../screens/UC-029/a2.png)](../../screens/UC-029/a2.png) [![UC-029 A2: Invite the first Mission planner (dark)](../../screens/UC-029/a2.dark.png)](../../screens/UC-029/a2.dark.png) |
-| <a id="screen-ok"></a>OK: Operator created and isolated | [👤 Swarm administrator](../../glossary.md#per-swarm-administrator)<br>[👤 Mission planner](../../glossary.md#per-mission-planner) | [🗃️ Operator](../../glossary.md#ent-operator) | ✏️ Mock-up | [![UC-029 OK: Operator created and isolated](../../screens/UC-029/ok.png)](../../screens/UC-029/ok.png) [![UC-029 OK: Operator created and isolated (dark)](../../screens/UC-029/ok.dark.png)](../../screens/UC-029/ok.dark.png) |
+| <a id="screen-a1"></a>A1: Enter the Operator | [👤 Swarm administrator](../../glossary.md#per-swarm-administrator) | [🗃️ Operator](../../glossary.md#ent-operator) | 📸 Screenshot | [![UC-029 A1: Enter the Operator](../../screens/UC-029/a1.png)](../../screens/UC-029/a1.png) [![UC-029 A1: Enter the Operator (dark)](../../screens/UC-029/a1.dark.png)](../../screens/UC-029/a1.dark.png) |
+| <a id="screen-ko"></a>KO: Operator not created | [👤 Swarm administrator](../../glossary.md#per-swarm-administrator) | [🗃️ Operator](../../glossary.md#ent-operator) | 📸 Screenshot | [![UC-029 KO: Operator not created](../../screens/UC-029/ko.png)](../../screens/UC-029/ko.png) [![UC-029 KO: Operator not created (dark)](../../screens/UC-029/ko.dark.png)](../../screens/UC-029/ko.dark.png) |
+| <a id="screen-a2"></a>A2: Invite the first Mission planner | [👤 Swarm administrator](../../glossary.md#per-swarm-administrator) | [🗃️ Operator](../../glossary.md#ent-operator) | 📸 Screenshot | [![UC-029 A2: Invite the first Mission planner](../../screens/UC-029/a2.png)](../../screens/UC-029/a2.png) [![UC-029 A2: Invite the first Mission planner (dark)](../../screens/UC-029/a2.dark.png)](../../screens/UC-029/a2.dark.png) |
+| <a id="screen-ok"></a>OK: Operator created and isolated | [👤 Swarm administrator](../../glossary.md#per-swarm-administrator)<br>[👤 Mission planner](../../glossary.md#per-mission-planner) | [🗃️ Operator](../../glossary.md#ent-operator) | 📸 Screenshot | [![UC-029 OK: Operator created and isolated](../../screens/UC-029/ok.png)](../../screens/UC-029/ok.png) [![UC-029 OK: Operator created and isolated (dark)](../../screens/UC-029/ok.dark.png)](../../screens/UC-029/ok.dark.png) |
 
 ## <a id="alternative-flows"></a>↪️ Alternative and error flows
 

@@ -209,6 +209,8 @@ struct Scratch {
     datagram: [u8; DATAGRAM_BYTES],
     out: Vec<MavMessage>,
     frame: MAVLinkV2MessageRaw,
+    /// The frames the system accepted since [`Fleet::take_frames_sent`] last emptied it.
+    frames_sent: u64,
 }
 
 /// One Drone with its socket, the peer it answers and its `MAVLink` sequence number.
@@ -265,7 +267,9 @@ impl Slot {
                 };
                 self.sequence = self.sequence.wrapping_add(1);
                 scratch.frame.serialize_message(header, message);
-                let _ = self.socket.send_to(scratch.frame.raw_bytes(), peer);
+                if self.socket.send_to(scratch.frame.raw_bytes(), peer).is_ok() {
+                    scratch.frames_sent += 1;
+                }
             }
         }
         scratch.out.clear();
@@ -321,6 +325,7 @@ impl Fleet {
                 datagram: [0; DATAGRAM_BYTES],
                 out: Vec::with_capacity(8),
                 frame: MAVLinkV2MessageRaw::default(),
+                frames_sent: 0,
             },
             tick: Duration::from_millis(u64::from(config.tick_ms)),
             since_heartbeat_s: HEARTBEAT_PERIOD_S,
@@ -354,10 +359,27 @@ impl Fleet {
         }
     }
 
+    /// The number of `MAVLink` frames the system accepted since the last call, and empties the count.
+    ///
+    /// The count is a plain integer kept by the send loop, so that observing it costs nothing per frame.
+    pub fn take_frames_sent(&mut self) -> u64 {
+        std::mem::take(&mut self.scratch.frames_sent)
+    }
+
     /// Runs a tick every `tick_ms` for ever, on the calling thread.
     ///
     /// A tick that starts late simulates the time that really went by, up to five ticks.
     pub fn run(&mut self) -> ! {
+        loop {
+            self.run_until(|_| true);
+        }
+    }
+
+    /// Runs a tick every `tick_ms` on the calling thread, and calls `after_tick` with the fleet after each one.
+    ///
+    /// It returns when `after_tick` returns `false`. A tick that starts late simulates the time that really went
+    /// by, up to five ticks.
+    pub fn run_until(&mut self, mut after_tick: impl FnMut(&mut Self) -> bool) {
         let mut last = Instant::now();
         let mut next = last + self.tick;
         loop {
@@ -368,6 +390,9 @@ impl Fleet {
             let elapsed = now.duration_since(last).min(self.tick * MAX_CATCH_UP_TICKS);
             last = now;
             self.step(elapsed.as_secs_f32());
+            if !after_tick(self) {
+                return;
+            }
             next += self.tick;
             if next < now {
                 next = now + self.tick;

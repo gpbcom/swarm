@@ -21,6 +21,10 @@ class TestSwarmRealm:
     KEYCLOAK_ROLES: ClassVar[Set[str]] = {"offline_access", "uma_authorization", "default-roles-swarm"}
     ACCESS_TOKEN_SECONDS: ClassVar[int] = 300
     CLIENT_IDS: ClassVar[Set[str]] = {"ground-control", "mission-studio", "back-office", "client-portal", "desktop"}
+    ADMIN_CLIENT_ID: ClassVar[str] = "swarm-gateway-admin"
+    REALM_MANAGEMENT: ClassVar[str] = "realm-management"
+    ADMIN_CLIENT_ROLES: ClassVar[Set[str]] = {"manage-users", "manage-realm"}
+    CREDENTIAL_KEYS: ClassVar[Set[str]] = {"credentials", "secret", "password"}
     CLIENT_SCOPES: ClassVar[Set[str]] = {"swarm", "roles", "basic"}
     PKCE_ATTRIBUTE: ClassVar[str] = "pkce.code.challenge.method"
     PKCE_METHOD: ClassVar[str] = "S256"
@@ -71,6 +75,14 @@ class TestSwarmRealm:
         swarm = [c for c in self._items(self._realm()["clients"]) if c["clientId"] in self.CLIENT_IDS]
         assert {c["clientId"] for c in swarm} == self.CLIENT_IDS
         return swarm
+
+    def _admin_client(self) -> Dict[str, JsonValue]:
+        found = [c for c in self._items(self._realm()["clients"]) if c["clientId"] == self.ADMIN_CLIENT_ID]
+        assert len(found) == 1
+        return found[0]
+
+    def _users(self) -> List[Dict[str, JsonValue]]:
+        return self._items(self._realm().get("users", []))
 
     def _scope(self, name: str) -> Dict[str, JsonValue]:
         found = [s for s in self._items(self._realm()["clientScopes"]) if s["name"] == name]
@@ -161,8 +173,12 @@ class TestSwarmRealm:
         assert realm["revokeRefreshToken"] is True
         assert realm["refreshTokenMaxReuse"] == 0
 
-    def test_the_swarm_clients_are_the_five_front_ends(self) -> None:
-        assert {c["clientId"] for c in self._clients()} == self.CLIENT_IDS
+    def test_the_swarm_clients_are_the_five_front_ends_and_the_gateway_admin(self) -> None:
+        ids = {cast(str, c["clientId"]) for c in self._items(self._realm()["clients"])}
+        assert self.CLIENT_IDS | {self.ADMIN_CLIENT_ID} <= ids
+        assert {i for i in ids if i in self.CLIENT_IDS or i == self.ADMIN_CLIENT_ID} == self.CLIENT_IDS | {
+            self.ADMIN_CLIENT_ID
+        }
 
     @pytest.mark.parametrize(
         ("field", "expected"),
@@ -182,12 +198,43 @@ class TestSwarmRealm:
         for client in self._clients():
             assert self._section(client["attributes"])[self.PKCE_ATTRIBUTE] == self.PKCE_METHOD
 
+    @pytest.mark.parametrize(
+        ("field", "expected"),
+        [
+            ("publicClient", False),
+            ("serviceAccountsEnabled", True),
+            ("standardFlowEnabled", False),
+            ("implicitFlowEnabled", False),
+            ("directAccessGrantsEnabled", False),
+        ],
+    )
+    def test_the_gateway_admin_is_a_confidential_client_credentials_client(self, field: str, expected: bool) -> None:
+        assert self._admin_client()[field] is expected
+
+    def test_the_gateway_admin_has_no_redirect_uri_and_no_web_origin(self) -> None:
+        client = self._admin_client()
+        assert not client.get("redirectUris")
+        assert not client.get("webOrigins")
+
     def test_no_client_holds_a_secret(self) -> None:
-        for client in self._clients():
+        for client in self._items(self._realm()["clients"]):
             assert "secret" not in client
 
+    def test_the_service_account_is_the_only_user_and_manages_users_and_the_realm(self) -> None:
+        users = self._users()
+        assert len(users) == 1
+        user = users[0]
+        assert user["serviceAccountClientId"] == self.ADMIN_CLIENT_ID
+        roles = self._section(user["clientRoles"])
+        assert set(roles) == {self.REALM_MANAGEMENT}
+        assert set(cast(List[str], roles[self.REALM_MANAGEMENT])) == self.ADMIN_CLIENT_ROLES
+
+    def test_the_service_account_has_no_password_and_no_credential(self) -> None:
+        for user in self._users():
+            assert not (self._keys(user) & self.CREDENTIAL_KEYS)
+
     def test_no_client_accepts_a_wildcard_redirect_or_origin(self) -> None:
-        for client in self._clients():
+        for client in self._items(self._realm()["clients"]):
             assert "*" not in self._list(client.get("redirectUris", []))
             assert "*" not in self._list(client.get("webOrigins", []))
 
@@ -248,9 +295,8 @@ class TestSwarmRealm:
         assert len(actions) == 1
         assert actions[0]["enabled"] is True
 
-    def test_the_realm_holds_no_user_and_no_secret(self) -> None:
+    def test_the_realm_holds_no_secret(self) -> None:
         realm = self._realm()
-        assert not realm.get("users")
         assert not (self._keys(realm) & self.FORBIDDEN_KEYS)
 
     def test_the_operator_attribute_is_declared_and_only_an_administrator_can_see_or_change_it(self) -> None:

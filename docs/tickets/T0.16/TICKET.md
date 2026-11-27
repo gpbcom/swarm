@@ -1,18 +1,18 @@
 # T0.16: Create an Operator (UC-029)
 
-**Status:** 🟡 Planned
+**Status:** ✅ Done
 
 ## Roadmap
 
 - **Ticket:** [T0.16](../../specs/roadmap/01-p0-foundations.md#s04) in [🛣️ P0: Foundations](../../specs/roadmap/01-p0-foundations.md)
 - **Phase:** [🛣️ P0: Foundations](../../specs/roadmap/01-p0-foundations.md)
 - **Sprint:** [S04](../../specs/roadmap/01-p0-foundations.md#s04), 15 to 26 Feb 2027: first use case and M0 (M0: Foundations ready)
-- **Epic:** [E0.5 Identity and Operators](../../specs/roadmap/01-p0-foundations.md#epics): UC-029, BR-008 and FS-012 AC-3, on Keycloak (global layer), `services/gateway`, `services/missions`, `services/fleet` (skeletons) and `frontends/back-office`
+- **Epic:** [E0.5 Identity and Operators](../../specs/roadmap/01-p0-foundations.md#epics): UC-029, BR-008 and FS-012 AC-3, on Keycloak (global layer), `backend/apps/gateway`, `backend/apps/missions`, `backend/apps/fleet` (skeletons) and `frontend/apps/back-office`
 
 ## What it delivers
 
-- UC-029 in the Back office: ➕ Create an Operator with its name, deployment, Jurisdictions, LLM provider and Anchoring with their defaults, in `frontends/back-office`, as [🖥️ GUI and WebUI: apps and shared packages](../../specs/technical/10-frontends.md#apps).
-- The checks of step 3: name taken (A1) and required field missing (A2), refused as specified, in `services/gateway`, as [🔌 API layer: REST](../../specs/technical/05-api.md#rest).
+- UC-029 in the Back office: ➕ Create an Operator with its name, deployment, Jurisdictions, LLM provider and Anchoring with their defaults, in `frontend/apps/back-office`, as [🖥️ GUI and WebUI: apps and shared packages](../../specs/technical/10-frontends.md#apps).
+- The checks of step 3: name taken (A1) and required field missing (A2), refused as specified, in `backend/apps/gateway`, as [🔌 API layer: REST](../../specs/technical/05-api.md#rest).
 - The Operator directory and its cell assignment, in the global layer, as [🏗️ Architecture: cells and the global layer](../../specs/technical/01-architecture.md#cells).
 - The invitation of the first Mission planner by e-mail and her first sign-in, with Keycloak, as [🔐 Security: identity](../../specs/technical/06-security.md#identity).
 
@@ -57,4 +57,4 @@
 
 - The roadmap row has no anchor of its own, so the ticket links to the S04 section that holds it, and the epic to the epics table.
 - The three acceptance criteria are drawn from AC-3 of FS-012 and from alternative flows A1 and A2 of UC-029, which the roadmap row names as "done when".
-- The screens are listed as touched because the ticket changes `frontends/back-office` (TKT-21); the screen capture itself is planned by this ticket's plan, with the pipeline of T0.20.
+- The screens are listed as touched because the ticket changes `frontend/apps/back-office` (TKT-21); the screen capture itself is planned by this ticket's plan, with the pipeline of T0.20.

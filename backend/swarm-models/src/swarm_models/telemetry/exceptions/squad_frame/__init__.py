@@ -12,6 +12,9 @@ from swarm_models.telemetry.exceptions.squad_frame.se_squad_frame_invalid_missio
     SESquadFrameInvalidMissionId,
 )
 from swarm_models.telemetry.exceptions.squad_frame.se_squad_frame_invalid_t_us import SESquadFrameInvalidTUs
+from swarm_models.telemetry.exceptions.squad_frame.se_squad_frame_invalid_trace_parent import (
+    SESquadFrameInvalidTraceParent,
+)
 
 __all__ = [
     "SEInvalidSquadFrameException",
@@ -19,5 +22,6 @@ __all__ = [
     "SESquadFrameInvalidFrames",
     "SESquadFrameInvalidMissionId",
     "SESquadFrameInvalidTUs",
+    "SESquadFrameInvalidTraceParent",
     "SESquadFrameMissionMismatch",
 ]

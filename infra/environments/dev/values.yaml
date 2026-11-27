@@ -25,3 +25,18 @@ nats:
   jetstream:
     fileStorage:
       size: 1Gi
+
+otelCollector:
+  cell: dev
+
+prometheus:
+  persistence:
+    size: 1Gi
+
+loki:
+  persistence:
+    size: 1Gi
+
+tempo:
+  persistence:
+    size: 1Gi

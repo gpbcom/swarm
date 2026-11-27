@@ -9,6 +9,7 @@ from typing import ClassVar, Dict, List, Optional
 import pytest
 from nats.aio.client import Client
 from nats.aio.msg import Msg
+from opentelemetry.trace import SpanKind, StatusCode
 
 # First-party imports
 from swarm_clients.shared.nats.nats_requester import NatsRequester
@@ -23,6 +24,7 @@ from swarm_nats.models.bus.exceptions import (
 )
 from swarm_nats.models.bus.nats_headers import NatsHeaders
 from swarm_nats.models.config.nats_client_config import NatsClientConfig
+from tests.fakes.signals.recorded_signals import RecordedSignals
 
 
 class TestNatsRequester:
@@ -131,3 +133,26 @@ class TestNatsRequester:
             await self.requester(nats_client).request(
                 self.SUBJECT, self.PAYLOAD, StreamSource, self.KEY, deadline_s=deadline_s
             )
+
+    async def test_the_responder_receives_the_trace_context_next_to_the_other_headers(
+        self, nats_client: Client, recorded_signals: RecordedSignals
+    ) -> None:
+        await nats_client.subscribe(self.SUBJECT, cb=self.record_and_reply)
+        await self.requester(nats_client).request(self.SUBJECT, self.PAYLOAD, StreamSource, self.KEY)
+        headers = self.received[0].headers
+        assert headers is not None
+        assert headers[NatsHeaders.IDEMPOTENCY_KEY] == self.KEY
+        assert NatsHeaders.DEADLINE in headers
+        assert NatsHeaders.TRACE_PARENT in headers
+        clients = [span for span in recorded_signals.spans() if span.kind == SpanKind.CLIENT]
+        assert len(clients) == 1
+
+    async def test_a_reply_with_the_error_header_sets_the_span_status_to_error(
+        self, nats_client: Client, recorded_signals: RecordedSignals
+    ) -> None:
+        await nats_client.subscribe(self.SUBJECT, cb=self.reply_with_error)
+        with pytest.raises(SENatsRequestFailedError):
+            await self.requester(nats_client).request(self.SUBJECT, self.PAYLOAD, StreamSource, self.KEY)
+        clients = [span for span in recorded_signals.spans() if span.kind == SpanKind.CLIENT]
+        assert len(clients) == 1
+        assert clients[0].status.status_code == StatusCode.ERROR

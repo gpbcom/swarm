@@ -12,6 +12,9 @@ from swarm_models.storage.exceptions.connection.se_storage_not_open_error import
 from swarm_models.storage.exceptions.connection.se_storage_operator_refused_error import (
     SEStorageOperatorRefusedError,
 )
+from swarm_models.storage.exceptions.constraint.se_storage_duplicate_error import (
+    SEStorageDuplicateError,
+)
 from swarm_models.storage.exceptions.query.se_storage_invalid_identifier_error import (
     SEStorageInvalidIdentifierError,
 )
@@ -31,6 +34,7 @@ from swarm_models.storage.exceptions.se_storage_error import (
 __all__ = [
     "SEStorageConnectionError",
     "SEStorageDsnMissingError",
+    "SEStorageDuplicateError",
     "SEStorageError",
     "SEStorageInvalidIdentifierError",
     "SEStorageInvalidPageError",

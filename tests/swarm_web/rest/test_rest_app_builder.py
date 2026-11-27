@@ -7,11 +7,13 @@ from typing import ClassVar, Dict, List
 # Third-party imports
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
+from opentelemetry.trace import SpanKind
 from pydantic import JsonValue
 
 # First-party imports
 from swarm_models.rest.problems.problem import Problem
 from swarm_web.rest.rest_app_builder import RestAppBuilder
+from tests.fakes.signals.recorded_signals import RecordedSignals
 from tests.swarm_web.rest.sample_resource import SampleResource
 
 
@@ -29,6 +31,11 @@ class TestRestAppBuilder:
     PROBLEM_PROPERTIES: ClassVar[List[str]] = ["type", "title", "status", "detail", "instance"]
     OTHER_MEDIA_TYPE: ClassVar[str] = "application/sample+json"
     BODY: ClassVar[Dict[str, JsonValue]] = {"name": "first"}
+    TRACE_ID: ClassVar[str] = "0af7651916cd43dd8448eb211c80319c"
+    TRACEPARENT: ClassVar[Dict[str, str]] = {"traceparent": "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01"}
+    SECRET: ClassVar[str] = "s3cret"
+    BEARER: ClassVar[Dict[str, str]] = {"Authorization": "Bearer s3cret"}
+    TOKEN_QUERY: ClassVar[Dict[str, str]] = {"token": "s3cret"}
 
     def build(self, routers: bool = True, media_type: str = Problem.MEDIA_TYPE) -> FastAPI:
         resources = [SampleResource().router] if routers else []
@@ -95,3 +102,34 @@ class TestRestAppBuilder:
         response = TestClient(self.build()).post(self.ANYTHING_PATH, json=self.BODY)
         assert response.status_code == HTTPStatus.NOT_FOUND
         assert response.headers[self.CONTENT_TYPE] != Problem.MEDIA_TYPE
+
+    def test_a_request_with_a_traceparent_gives_a_server_span_in_that_trace(
+        self, recorded_signals: RecordedSignals
+    ) -> None:
+        client = TestClient(self.build())
+        response = client.post(self.PREFIX + SampleResource.SAMPLES_PATH, json=self.BODY, headers=self.TRACEPARENT)
+        assert response.status_code == HTTPStatus.CREATED
+        servers = [span for span in recorded_signals.spans() if span.kind == SpanKind.SERVER]
+        assert servers
+        assert {format(span.context.trace_id, "032x") for span in servers} == {self.TRACE_ID}
+
+    def test_a_secret_in_a_header_or_a_query_reaches_no_span(self, recorded_signals: RecordedSignals) -> None:
+        client = TestClient(self.build())
+        client.post(
+            self.PREFIX + SampleResource.SAMPLES_PATH,
+            json=self.BODY,
+            headers=self.BEARER,
+            params=self.TOKEN_QUERY,
+        )
+        spans = recorded_signals.spans()
+        assert spans
+        values = [
+            str(value)
+            for span in spans
+            for value in [
+                *(span.attributes or {}).values(),
+                *(v for e in span.events for v in (e.attributes or {}).values()),
+            ]
+        ]
+        assert values
+        assert not [value for value in values if self.SECRET in value]

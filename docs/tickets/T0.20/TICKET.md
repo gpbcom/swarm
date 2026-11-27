@@ -1,6 +1,6 @@
 # T0.20: Visual tests and UC-029 screenshots
 
-**Status:** 🟡 Planned
+**Status:** ✅ Done
 
 ## Roadmap
 
@@ -13,7 +13,7 @@
 
 - Playwright renders each screen with the sample data of the visual identity and compares it with the mock-up PNG in light and dark mode, and a large difference fails the build, as [🖥️ GUI and WebUI: design system](../../specs/technical/10-frontends.md#design-system).
 - The four screens of UC-029 (A1, KO, A2, OK) captured as 📸 Screenshot and their mock-ups deleted, as [🎨 Visual identity: screens and screenshots](../../specs/visual-identity.md#screens).
-- The work sits in `frontends/back-office`, `tests/` and `docs/specs/screens/`.
+- The work sits in `frontend/apps/back-office`, `tests/` and `docs/specs/screens/`.
 
 ## Features, use cases and business rules
 

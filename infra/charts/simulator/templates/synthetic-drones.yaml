@@ -32,6 +32,13 @@ spec:
             - {{ .Values.syntheticDrones.speedMS | quote }}
             - --tick-ms
             - {{ .Values.syntheticDrones.tickMs | quote }}
+          {{- if .Values.signals.enabled }}
+          env:
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: {{ .Values.signals.endpoint | quote }}
+            - name: OTEL_RESOURCE_ATTRIBUTES
+              value: {{ printf "cell=%s" .Values.signals.cell | quote }}
+          {{- end }}
           ports:
             {{- range $index := until (int .Values.syntheticDrones.count) }}
             - containerPort: {{ add (int $.Values.syntheticDrones.basePort) $index }}

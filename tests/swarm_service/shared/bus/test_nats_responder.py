@@ -10,6 +10,8 @@ import pytest
 from nats.aio.client import Client
 from nats.aio.msg import Msg
 from nats.errors import TimeoutError as NatsTimeoutError
+from opentelemetry.sdk.trace import ReadableSpan
+from opentelemetry.trace import SpanKind, StatusCode
 
 # First-party imports
 from swarm_lifecycle.models.enums import RunnableStatus
@@ -17,6 +19,7 @@ from swarm_models.config.nats.nats_responder_config import NatsResponderConfig
 from swarm_models.streams.stream_source import StreamSource
 from swarm_nats.models.bus.nats_headers import NatsHeaders
 from swarm_service.shared.bus.nats_responder import NatsResponder
+from tests.fakes.signals.recorded_signals import RecordedSignals
 
 
 class TestNatsResponder:
@@ -38,6 +41,10 @@ class TestNatsResponder:
     INVALID_DEADLINE_ERROR: ClassVar[str] = "SENatsInvalidDeadlineError"
     INVALID_REQUEST_ERROR: ClassVar[str] = "SENatsRequestInvalidError"
     HANDLER_ERROR: ClassVar[str] = "ValueError"
+    TRACEPARENT_HEADER: ClassVar[str] = "traceparent"
+    TRACE_ID: ClassVar[int] = 0x4BF92F3577B34DA6A3CE929D0E0E4736
+    PARENT_SPAN_ID: ClassVar[int] = 0x00F067AA0BA902B7
+    TRACEPARENT: ClassVar[str] = "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"
 
     calls: List[StreamSource]
     tasks: List[asyncio.Task[None]]
@@ -207,3 +214,34 @@ class TestNatsResponder:
         await self.launch(nats_client, config)
         await asyncio.sleep(self.STATUS_INTERVAL_S * 3)
         assert RunnableStatus.RUNNING in self.statuses
+
+    async def traced_ask(self, client: Client, name: str) -> Msg:
+        headers = self.headers(self.KEY, self.deadline(self.DEADLINE_S))
+        headers[self.TRACEPARENT_HEADER] = self.TRACEPARENT
+        return await client.request(self.SUBJECT, self.body(name), timeout=self.TIMEOUT_S, headers=headers)
+
+    async def server_spans(self, recorded_signals: RecordedSignals) -> List[ReadableSpan]:
+        async with asyncio.timeout(self.TIMEOUT_S):
+            while True:
+                found = [span for span in recorded_signals.spans() if span.kind == SpanKind.SERVER]
+                if found:
+                    return found
+                await asyncio.sleep(self.STATUS_INTERVAL_S)
+
+    async def test_a_request_with_a_traceparent_is_handled_in_a_server_span_of_that_trace(
+        self, nats_client: Client, config: NatsResponderConfig, recorded_signals: RecordedSignals
+    ) -> None:
+        await self.launch(nats_client, config)
+        await self.traced_ask(nats_client, self.REQUEST_NAME)
+        spans = await self.server_spans(recorded_signals)
+        assert [span.context.trace_id for span in spans] == [self.TRACE_ID]
+        assert spans[0].parent is not None
+        assert spans[0].parent.span_id == self.PARENT_SPAN_ID
+
+    async def test_a_handler_failure_sets_the_server_span_status_to_error(
+        self, nats_client: Client, config: NatsResponderConfig, recorded_signals: RecordedSignals
+    ) -> None:
+        await self.launch(nats_client, config)
+        await self.traced_ask(nats_client, self.FAILING_NAME)
+        spans = await self.server_spans(recorded_signals)
+        assert spans[0].status.status_code == StatusCode.ERROR

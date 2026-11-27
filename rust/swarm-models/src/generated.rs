@@ -87,6 +87,70 @@ impl ::std::convert::TryFrom<::std::string::String> for ActorKind {
         value.parse()
     }
 }
+/**How the Evidence records of an Operator are anchored in time.
+
+Attributes:
+    QUALIFIED_TIMESTAMPING: A qualified timestamping authority seals the records.
+    PUBLIC_BLOCKCHAIN: A public blockchain seals the records.
+    NONE: The records are not anchored.*/
+#[derive(
+    ::serde::Deserialize,
+    ::serde::Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd
+)]
+pub enum Anchoring {
+    #[serde(rename = "qualified_timestamping")]
+    QualifiedTimestamping,
+    #[serde(rename = "public_blockchain")]
+    PublicBlockchain,
+    #[serde(rename = "none")]
+    None,
+}
+impl ::std::fmt::Display for Anchoring {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::QualifiedTimestamping => f.write_str("qualified_timestamping"),
+            Self::PublicBlockchain => f.write_str("public_blockchain"),
+            Self::None => f.write_str("none"),
+        }
+    }
+}
+impl ::std::str::FromStr for Anchoring {
+    type Err = self::error::ConversionError;
+    fn from_str(
+        value: &str,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "qualified_timestamping" => Ok(Self::QualifiedTimestamping),
+            "public_blockchain" => Ok(Self::PublicBlockchain),
+            "none" => Ok(Self::None),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for Anchoring {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &str,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for Anchoring {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
 /**The cell an operator belongs to, and since when.
 
 Attributes:
@@ -268,6 +332,65 @@ impl ::std::convert::TryFrom<::std::string::String> for CommandLane {
         value.parse()
     }
 }
+/**Where an Operator's Swarm runs.
+
+Attributes:
+    CLOUD: The Swarm runs in a cloud cell.
+    ON_PREMISES: The Swarm runs on the Operator's own premises.*/
+#[derive(
+    ::serde::Deserialize,
+    ::serde::Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd
+)]
+pub enum Deployment {
+    #[serde(rename = "cloud")]
+    Cloud,
+    #[serde(rename = "on_premises")]
+    OnPremises,
+}
+impl ::std::fmt::Display for Deployment {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Cloud => f.write_str("cloud"),
+            Self::OnPremises => f.write_str("on_premises"),
+        }
+    }
+}
+impl ::std::str::FromStr for Deployment {
+    type Err = self::error::ConversionError;
+    fn from_str(
+        value: &str,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "cloud" => Ok(Self::Cloud),
+            "on_premises" => Ok(Self::OnPremises),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for Deployment {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &str,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for Deployment {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
 /**The state of a Drone, with the names of the glossary.
 
 Attributes:
@@ -406,6 +529,65 @@ impl ::std::convert::From<JsonValue> for ::serde_json::Value {
 impl ::std::convert::From<::serde_json::Value> for JsonValue {
     fn from(value: ::serde_json::Value) -> Self {
         Self(value)
+    }
+}
+/**A regulatory jurisdiction an Operator flies under.
+
+Attributes:
+    EU_EASA: The European Union, under EASA rules.
+    US_FAA: The United States, under FAA rules.*/
+#[derive(
+    ::serde::Deserialize,
+    ::serde::Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd
+)]
+pub enum Jurisdiction {
+    #[serde(rename = "eu_easa")]
+    EuEasa,
+    #[serde(rename = "us_faa")]
+    UsFaa,
+}
+impl ::std::fmt::Display for Jurisdiction {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::EuEasa => f.write_str("eu_easa"),
+            Self::UsFaa => f.write_str("us_faa"),
+        }
+    }
+}
+impl ::std::str::FromStr for Jurisdiction {
+    type Err = self::error::ConversionError;
+    fn from_str(
+        value: &str,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "eu_easa" => Ok(Self::EuEasa),
+            "us_faa" => Ok(Self::UsFaa),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for Jurisdiction {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &str,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for Jurisdiction {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
     }
 }
 /**A language in which Swarm shows its screens.
@@ -611,21 +793,102 @@ pub struct LiveSubscription {
     ///The topic followed, mission/<version 7 UUID>/<kind>.
     pub topic: ::std::string::String,
 }
-/**A person who pilots drones, global to every cell.
+/**The kind of language model the AI agents of an Operator use.
+
+Attributes:
+    CLAUDE: The Claude models.
+    OPEN_WEIGHT: An open-weight model run by the Operator.*/
+#[derive(
+    ::serde::Deserialize,
+    ::serde::Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd
+)]
+pub enum LlmProvider {
+    #[serde(rename = "claude")]
+    Claude,
+    #[serde(rename = "open_weight")]
+    OpenWeight,
+}
+impl ::std::fmt::Display for LlmProvider {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match *self {
+            Self::Claude => f.write_str("claude"),
+            Self::OpenWeight => f.write_str("open_weight"),
+        }
+    }
+}
+impl ::std::str::FromStr for LlmProvider {
+    type Err = self::error::ConversionError;
+    fn from_str(
+        value: &str,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        match value {
+            "claude" => Ok(Self::Claude),
+            "open_weight" => Ok(Self::OpenWeight),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl ::std::convert::TryFrom<&str> for LlmProvider {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: &str,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl ::std::convert::TryFrom<::std::string::String> for LlmProvider {
+    type Error = self::error::ConversionError;
+    fn try_from(
+        value: ::std::string::String,
+    ) -> ::std::result::Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+/**The organisation that flies Missions for its Clients, global to every cell.
 
 Attributes:
     model_config (ConfigDict): Forbids unknown keys.
-    id (UUID): The version 7 identifier of the operator.
-    name (str): The name of the operator.
+    BEFORE (ClassVar[Literal["before"]]): The validator mode that runs before Pydantic's own validation.
+    ID_FIELD (ClassVar[str]): The name of the ``id`` field.
+    NAME_FIELD (ClassVar[str]): The name of the ``name`` field.
+    DEPLOYMENT_FIELD (ClassVar[str]): The name of the ``deployment`` field.
+    JURISDICTIONS_FIELD (ClassVar[str]): The name of the ``jurisdictions`` field.
+    LLM_PROVIDER_FIELD (ClassVar[str]): The name of the ``llm_provider`` field.
+    ANCHORING_FIELD (ClassVar[str]): The name of the ``anchoring`` field.
+    id (UUID): The version 7 identifier of the Operator.
+    name (str): The name of the Operator.
+    deployment (Deployment): Where the Operator's Swarm runs.
+    jurisdictions (List[Jurisdiction]): The jurisdictions the Operator flies under, at least one, no duplicate.
+    llm_provider (LlmProvider): The kind of language model of its AI agents, Claude by default.
+    anchoring (Anchoring): How its Evidence records are anchored, qualified timestamping by default.
 
 Notes:
-    - An operator lives in exactly one cell, given by its ``CellAssignment``.
-    - No field has a default, so ``None`` is refused.*/
+    - An Operator lives in exactly one cell, given by its ``CellAssignment``.
+    - ``id``, ``name``, ``deployment`` and ``jurisdictions`` have no default, so ``None`` is refused for them.
+    - ``None`` becomes the default for ``llm_provider`` and ``anchoring``.*/
 #[derive(::serde::Deserialize, ::serde::Serialize, Clone, Debug)]
 #[serde(deny_unknown_fields)]
 pub struct Operator {
+    ///How the Operator's Evidence records are anchored.
+    #[serde(default = "defaults::operator_anchoring")]
+    pub anchoring: Anchoring,
+    ///Where the Operator's Swarm runs.
+    pub deployment: Deployment,
     ///The version 7 identifier of the operator.
     pub id: ::uuid::Uuid,
+    ///The jurisdictions the Operator flies under, at least one and no duplicate.
+    pub jurisdictions: ::std::vec::Vec<Jurisdiction>,
+    ///The kind of language model of the Operator's AI agents.
+    #[serde(default = "defaults::operator_llm_provider")]
+    pub llm_provider: LlmProvider,
     ///The name of the operator.
     pub name: ::std::string::String,
 }
@@ -776,11 +1039,17 @@ Attributes:
     mission_id (UUID): The Mission of the frames.
     t_us (int): The moment of the tick, in microseconds since the epoch.
     frames (List[TelemetryFrame]): One frame per Drone.
+    trace_parent (Optional[str]): The W3C trace parent of the tick that built the frame.
     T_US_MIN (ClassVar[int]): The smallest accepted ``t_us``.
+    TRACE_PARENT_PATTERN (ClassVar[str]): The W3C ``traceparent`` format, in lower case.
+    TRACE_ID_ZEROS (ClassVar[str]): The all-zero trace id, which is invalid.
+    SPAN_ID_ZEROS (ClassVar[str]): The all-zero span id, which is invalid.
 
 Notes:
     - **Every frame must belong to the Mission, and each Drone appears once.**
-    - The list may be empty.*/
+    - The list may be empty.
+    - **A WebSocket message has no headers, so the trace parent travels in the frame:** the browser continues the
+      trace of the tick that built it. It is optional, and neither id may be all zeros.*/
 #[derive(::serde::Deserialize, ::serde::Serialize, Clone, Debug)]
 #[serde(deny_unknown_fields)]
 pub struct SquadFrame {
@@ -790,6 +1059,9 @@ pub struct SquadFrame {
     pub mission_id: ::uuid::Uuid,
     ///The moment of the tick, in microseconds since the epoch.
     pub t_us: i64,
+    ///The W3C trace parent of the tick that built the frame.
+    #[serde(skip_serializing_if = "::std::option::Option::is_none")]
+    pub trace_parent: ::std::option::Option<::std::string::String>,
 }
 /**What one Drone reports at one tick.
 
@@ -864,6 +1136,12 @@ pub mod defaults {
     }
     pub(super) fn live_subscription_rate() -> super::LiveRate {
         super::LiveRate::Full
+    }
+    pub(super) fn operator_anchoring() -> super::Anchoring {
+        super::Anchoring::QualifiedTimestamping
+    }
+    pub(super) fn operator_llm_provider() -> super::LlmProvider {
+        super::LlmProvider::Claude
     }
     pub(super) fn person_language() -> super::Language {
         super::Language::En

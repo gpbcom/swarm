@@ -1,0 +1,991 @@
+$ pnpm -r --if-present test
+(cwd ., on the ticket's own files only)
+
+Scope: 13 of 14 workspace projects
+frontend/packages/i18n test$ vitest run
+frontend/packages/api-client test$ node --experimental-strip-types --test test/*.test.ts && node --experimental-strip-types scripts/generate.ts --check
+frontend/packages/live test$ node --experimental-strip-types --test "test/**/*.test.ts" && node --experimental-strip-types scripts/generate.ts --check
+frontend/packages/maps test$ vitest run
+frontend/packages/api-client test: TAP version 13
+frontend/packages/live test: TAP version 13
+frontend/packages/live test: # (node:4078129) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+frontend/packages/live test: # (Use `node --trace-warnings ...` to show where the warning was created)
+frontend/packages/live test: # Subtest: the live client
+frontend/packages/live test:     # Subtest: posts connect to the worker with the url and the mission
+frontend/packages/live test:     ok 1 - posts connect to the worker with the url and the mission
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 1.203356
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: forwards a snapshot of the worker to its listeners as it is
+frontend/packages/live test:     ok 2 - forwards a snapshot of the worker to its listeners as it is
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.290149
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: forwards a status of the worker to its listeners
+frontend/packages/live test:     ok 3 - forwards a status of the worker to its listeners
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.17042
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: keeps snapshots and statuses apart
+frontend/packages/live test:     ok 4 - keeps snapshots and statuses apart
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.229884
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: delivers to every listener
+frontend/packages/live test:     ok 5 - delivers to every listener
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.353455
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: stops delivering to a snapshot listener once it unsubscribes
+frontend/packages/live test:     ok 6 - stops delivering to a snapshot listener once it unsubscribes
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 1.155834
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: stops delivering to a status listener once it unsubscribes
+frontend/packages/live test:     ok 7 - stops delivering to a status listener once it unsubscribes
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.161742
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: posts close to the worker and terminates it on close
+frontend/packages/live test:     ok 8 - posts close to the worker and terminates it on close
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.123718
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: only posts connect and close to the worker
+frontend/packages/live test:     ok 9 - only posts connect and close to the worker
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.243717
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     1..9
+frontend/packages/live test: ok 1 - the live client
+frontend/packages/live test:   ---
+frontend/packages/live test:   duration_ms: 4.873737
+frontend/packages/live test:   type: 'suite'
+frontend/packages/live test:   ...
+frontend/packages/live test: # (node:4078135) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+frontend/packages/live test: # (Use `node --trace-warnings ...` to show where the warning was created)
+frontend/packages/live test: # Subtest: the latency histogram
+frontend/packages/live test:     # Subtest: has the bounds of the Telemetry latency budgets
+frontend/packages/live test:     ok 1 - has the bounds of the Telemetry latency budgets
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 1.055469
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: starts empty with one more bucket than bounds
+frontend/packages/live test:     ok 2 - starts empty with one more bucket than bounds
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.254318
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: puts a value equal to a bound in that bound's bucket
+frontend/packages/live test:     ok 3 - puts a value equal to a bound in that bound's bucket
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.179061
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: puts a value between two bounds in the upper bound's bucket
+frontend/packages/live test:     ok 4 - puts a value between two bounds in the upper bound's bucket
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.097018
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: puts a value above the last bound in the overflow bucket
+frontend/packages/live test:     ok 5 - puts a value above the last bound in the overflow bucket
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.139834
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: keeps count, sum, min and max
+frontend/packages/live test:     ok 6 - keeps count, sum, min and max
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.158015
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: skips negative and non-finite values
+frontend/packages/live test:     ok 7 - skips negative and non-finite values
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.172442
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: records zero
+frontend/packages/live test:     ok 8 - records zero
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.163779
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: accepts custom bounds
+frontend/packages/live test:     ok 9 - accepts custom bounds
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.180295
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     1..9
+frontend/packages/live test: ok 2 - the latency histogram
+frontend/packages/live test:   ---
+frontend/packages/live test:   duration_ms: 3.568623
+frontend/packages/live test:   type: 'suite'
+frontend/packages/live test:   ...
+frontend/packages/live test: # (node:4078136) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+frontend/packages/live test: # (Use `node --trace-warnings ...` to show where the warning was created)
+frontend/packages/api-client test: # (node:4078127) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+frontend/packages/api-client test: # (Use `node --trace-warnings ...` to show where the warning was created)
+frontend/packages/live test: # Subtest: the latency reporter
+frontend/packages/live test:     # Subtest: posts a JSON body to the url every interval
+frontend/packages/live test:     ok 1 - posts a JSON body to the url every interval
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 11.346479
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test: # The latency report was not accepted (status 503). It is tried again at the next interval.
+frontend/packages/live test:     # Subtest: posts nothing when no sample was recorded
+frontend/packages/live test:     ok 2 - posts nothing when no sample was recorded
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 1.259867
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test: # The latency report was not accepted (Error). It is tried again at the next interval.
+frontend/packages/live test:     # Subtest: keeps running after a refused post
+frontend/packages/live test:     ok 3 - keeps running after a refused post
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 1.35988
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: keeps running after a rejected post
+frontend/packages/live test:     ok 4 - keeps running after a rejected post
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 1.236812
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: clears its interval when stopped
+frontend/packages/live test:     ok 5 - clears its interval when stopped
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 1.363218
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: posts at once on flush
+frontend/packages/live test:     ok 6 - posts at once on flush
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.488824
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     1..6
+frontend/packages/live test: ok 3 - the latency reporter
+frontend/packages/live test:   ---
+frontend/packages/live test:   duration_ms: 21.731455
+frontend/packages/live test:   type: 'suite'
+frontend/packages/live test:   ...
+frontend/packages/live test: # (node:4078142) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+frontend/packages/live test: # (Use `node --trace-warnings ...` to show where the warning was created)
+frontend/packages/live test: # Subtest: the OTLP metrics body
+frontend/packages/live test:     # Subtest: names the two latency metrics
+frontend/packages/live test:     ok 1 - names the two latency metrics
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.647922
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: holds one resource, one scope and one histogram per entry
+frontend/packages/live test:     ok 2 - holds one resource, one scope and one histogram per entry
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.94997
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: carries the resource attributes when they are set
+frontend/packages/live test:     ok 3 - carries the resource attributes when they are set
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.236306
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: leaves out mission_id and cell when they are not set
+frontend/packages/live test:     ok 4 - leaves out mission_id and cell when they are not set
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.211125
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: writes cumulative millisecond histograms with the data point
+frontend/packages/live test:     ok 5 - writes cumulative millisecond histograms with the data point
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.233334
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: tags each data point with the path
+frontend/packages/live test:     ok 6 - tags each data point with the path
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.341309
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: never holds drone_id
+frontend/packages/live test:     ok 7 - never holds drone_id
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.145522
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     1..7
+frontend/packages/live test: ok 4 - the OTLP metrics body
+frontend/packages/live test:   ---
+frontend/packages/live test:   duration_ms: 3.747147
+frontend/packages/live test:   type: 'suite'
+frontend/packages/live test:   ...
+frontend/packages/live test: # (node:4078148) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+frontend/packages/live test: # (Use `node --trace-warnings ...` to show where the warning was created)
+frontend/packages/live test: # Subtest: the squad frame decoder
+frontend/packages/live test:     # Subtest: decodes a valid frame of ten drones
+frontend/packages/live test:     ok 1 - decodes a valid frame of ten drones
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 5.761311
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: decodes a frame given as an array buffer
+frontend/packages/live test:     ok 2 - decodes a frame given as an array buffer
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.690602
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: decodes a frame without drones
+frontend/packages/live test:     ok 3 - decodes a frame without drones
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.285064
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: refuses bytes that are not message pack
+frontend/packages/live test:     ok 4 - refuses bytes that are not message pack
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.727885
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: refuses a message pack value that is not a map
+frontend/packages/live test:     ok 5 - refuses a message pack value that is not a map
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.256514
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: refuses a frame without its mission id
+frontend/packages/live test:     ok 6 - refuses a frame without its mission id
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.466411
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: refuses a drone frame with a missing field
+frontend/packages/live test:     ok 7 - refuses a drone frame with a missing field
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.575535
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: refuses a drone frame with a mistyped field
+frontend/packages/live test:     ok 8 - refuses a drone frame with a mistyped field
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.52437
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: refuses a state outside the drone states
+frontend/packages/live test:     ok 9 - refuses a state outside the drone states
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.567293
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: refuses a boolean where a number is expected
+frontend/packages/live test:     ok 10 - refuses a boolean where a number is expected
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.739919
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     1..10
+frontend/packages/live test: ok 5 - the squad frame decoder
+frontend/packages/live test:   ---
+frontend/packages/live test:   duration_ms: 12.246948
+frontend/packages/live test:   type: 'suite'
+frontend/packages/live test:   ...
+frontend/packages/live test: # (node:4078159) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+frontend/packages/live test: # (Use `node --trace-warnings ...` to show where the warning was created)
+frontend/packages/live test: # Subtest: the squad topic and subscription
+frontend/packages/live test:     # Subtest: names the squad topic of a mission
+frontend/packages/live test:     ok 1 - names the squad topic of a mission
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 1.084849
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: encodes a subscribe message that decodes to the expected map
+frontend/packages/live test:     ok 2 - encodes a subscribe message that decodes to the expected map
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 2.354801
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: returns the subscription as bytes
+frontend/packages/live test:     ok 3 - returns the subscription as bytes
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.278427
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: refuses the topic of the mission id ""
+frontend/packages/live test:     ok 4 - refuses the topic of the mission id ""
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.455496
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: refuses to subscribe to the mission id ""
+frontend/packages/live test:     ok 5 - refuses to subscribe to the mission id ""
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.165373
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: refuses the topic of the mission id "not-a-uuid"
+frontend/packages/live test:     ok 6 - refuses the topic of the mission id "not-a-uuid"
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.102113
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: refuses to subscribe to the mission id "not-a-uuid"
+frontend/packages/live test:     ok 7 - refuses to subscribe to the mission id "not-a-uuid"
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.115322
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: refuses the topic of the mission id "01943c5e-8a4b-4c2d-9e1f-0a1b2c3d4e01"
+frontend/packages/live test:     ok 8 - refuses the topic of the mission id "01943c5e-8a4b-4c2d-9e1f-0a1b2c3d4e01"
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.253903
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: refuses to subscribe to the mission id "01943c5e-8a4b-4c2d-9e1f-0a1b2c3d4e01"
+frontend/packages/live test:     ok 9 - refuses to subscribe to the mission id "01943c5e-8a4b-4c2d-9e1f-0a1b2c3d4e01"
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.253092
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: refuses the topic of the mission id "mission/../squad"
+frontend/packages/live test:     ok 10 - refuses the topic of the mission id "mission/../squad"
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.382735
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: refuses to subscribe to the mission id "mission/../squad"
+frontend/packages/live test:     ok 11 - refuses to subscribe to the mission id "mission/../squad"
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.115953
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     1..11
+frontend/packages/live test: ok 6 - the squad topic and subscription
+frontend/packages/live test:   ---
+frontend/packages/live test:   duration_ms: 7.119027
+frontend/packages/live test:   type: 'suite'
+frontend/packages/live test:   ...
+frontend/packages/live test: # (node:4078165) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+frontend/packages/live test: # (Use `node --trace-warnings ...` to show where the warning was created)
+frontend/packages/maps test: 
+frontend/packages/maps test:  RUN  v5.1.1 /tmp/swarm-checks-l4hd_kc5/frontend/packages/maps
+frontend/packages/maps test: 
+frontend/packages/live test: # Subtest: the live models generator
+frontend/packages/live test:     # Subtest: starts the render with the banner
+frontend/packages/live test:     ok 1 - starts the render with the banner
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 73.518818
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: renders one exported type per definition
+frontend/packages/live test:     ok 2 - renders one exported type per definition
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 6.877306
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: renders the same text twice
+frontend/packages/live test:     ok 3 - renders the same text twice
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 7.270708
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: rejects invalid JSON
+frontend/packages/live test:     ok 4 - rejects invalid JSON
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.304228
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: is stale when the output is missing
+frontend/packages/live test:     ok 5 - is stale when the output is missing
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 10.266315
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/i18n test: 
+frontend/packages/i18n test:  RUN  v5.1.1 /tmp/swarm-checks-l4hd_kc5/frontend/packages/i18n
+frontend/packages/i18n test: 
+frontend/packages/live test:     # Subtest: writes into missing folders and is then fresh
+frontend/packages/live test:     ok 6 - writes into missing folders and is then fresh
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 9.34445
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: is stale again after the output is edited
+frontend/packages/live test:     ok 7 - is stale again after the output is edited
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 8.029385
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: points at the schema and the generated file
+frontend/packages/live test:     ok 8 - points at the schema and the generated file
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.242006
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     1..8
+frontend/packages/live test: ok 7 - the live models generator
+frontend/packages/live test:   ---
+frontend/packages/live test:   duration_ms: 120.315065
+frontend/packages/live test:   type: 'suite'
+frontend/packages/live test:   ...
+frontend/packages/live test: # (node:4078171) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+frontend/packages/live test: # (Use `node --trace-warnings ...` to show where the warning was created)
+frontend/packages/live test: # Subtest: the squad store
+frontend/packages/live test:     # Subtest: starts clean with no drone
+frontend/packages/live test:     ok 1 - starts clean with no drone
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 1.493575
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: lists the drone states in the order of their codes
+frontend/packages/live test:     ok 2 - lists the drone states in the order of their codes
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.960672
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: places each drone in a slot in order of first appearance
+frontend/packages/live test:     ok 3 - places each drone in a slot in order of first appearance
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.642647
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: keeps the slot of a drone when a later frame lists drones in another order
+frontend/packages/live test:     ok 4 - keeps the slot of a drone when a later frame lists drones in another order
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.540366
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: converts the coordinates by 1e-7 into longitude, latitude and altitude
+frontend/packages/live test:     ok 5 - converts the coordinates by 1e-7 into longitude, latitude and altitude
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.692829
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: stores state codes, battery, link, heading, speed and time
+frontend/packages/live test:     ok 6 - stores state codes, battery, link, heading, speed and time
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.391596
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: ignores a frame of another mission
+frontend/packages/live test:     ok 7 - ignores a frame of another mission
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.229106
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: ignores a drone frame whose sequence is not greater than the last seen
+frontend/packages/live test:     ok 8 - ignores a drone frame whose sequence is not greater than the last seen
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.287923
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: keeps the last values of a drone absent from a frame
+frontend/packages/live test:     ok 9 - keeps the last values of a drone absent from a frame
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.439967
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: returns fresh buffers so that later merges do not change a snapshot already taken
+frontend/packages/live test:     ok 10 - returns fresh buffers so that later merges do not change a snapshot already taken
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.477136
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: increments the version at each snapshot
+frontend/packages/live test:     ok 11 - increments the version at each snapshot
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.256028
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: marks as updated only the slots changed since the previous snapshot
+frontend/packages/live test:     ok 12 - marks as updated only the slots changed since the previous snapshot
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.23616
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: carries the newest reception time
+frontend/packages/live test:     ok 13 - carries the newest reception time
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.183966
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: is dirty after a merge and clean after a snapshot
+frontend/packages/live test:     ok 14 - is dirty after a merge and clean after a snapshot
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.151204
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: lists the distinct array buffers of a snapshot as transferables
+frontend/packages/live test:     ok 15 - lists the distinct array buffers of a snapshot as transferables
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.221368
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     1..15
+frontend/packages/live test: ok 8 - the squad store
+frontend/packages/live test:   ---
+frontend/packages/live test:   duration_ms: 10.072856
+frontend/packages/live test:   type: 'suite'
+frontend/packages/live test:   ...
+frontend/packages/live test: # (node:4078178) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+frontend/packages/live test: # (Use `node --trace-warnings ...` to show where the warning was created)
+frontend/packages/live test: # Subtest: the live worker core
+frontend/packages/live test:     # Subtest: opens one socket for the url with binary type arraybuffer
+frontend/packages/live test:     ok 1 - opens one socket for the url with binary type arraybuffer
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 1.792281
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: posts connecting at once and open when the socket opens
+frontend/packages/live test:     ok 2 - posts connecting at once and open when the socket opens
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 1.86203
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: sends exactly one subscription for the squad topic on open
+frontend/packages/live test:     ok 3 - sends exactly one subscription for the squad topic on open
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 1.647745
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: posts a snapshot of the decoded frame with its buffers in the transfer list
+frontend/packages/live test:     ok 4 - posts a snapshot of the decoded frame with its buffers in the transfer list
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 2.549596
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: gives one snapshot for several frames arriving within one interval
+frontend/packages/live test:     ok 5 - gives one snapshot for several frames arriving within one interval
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 1.590133
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: never posts more than thirty snapshots in one second
+frontend/packages/live test:     ok 6 - never posts more than thirty snapshots in one second
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 9.404356
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: posts no snapshot when nothing changed
+frontend/packages/live test:     ok 7 - posts no snapshot when nothing changed
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.252941
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: posts no snapshot before any frame
+frontend/packages/live test:     ok 8 - posts no snapshot before any frame
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.117757
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: skips an unreadable message and keeps the socket open
+frontend/packages/live test:     ok 9 - skips an unreadable message and keeps the socket open
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.619308
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: closes the socket and posts closed when told to close
+frontend/packages/live test:     ok 10 - closes the socket and posts closed when told to close
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.28646
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: stops the timer on close
+frontend/packages/live test:     ok 11 - stops the timer on close
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.218374
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: posts closed and stops the timer when the socket closes
+frontend/packages/live test:     ok 12 - posts closed and stops the timer when the socket closes
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.16119
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: posts failed when the socket errors
+frontend/packages/live test:     ok 13 - posts failed when the socket errors
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.086777
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: does not reconnect after the socket closes
+frontend/packages/live test:     ok 14 - does not reconnect after the socket closes
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.077376
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     # Subtest: does not reconnect after an error
+frontend/packages/live test:     ok 15 - does not reconnect after an error
+frontend/packages/live test:       ---
+frontend/packages/live test:       duration_ms: 0.067413
+frontend/packages/live test:       type: 'test'
+frontend/packages/live test:       ...
+frontend/packages/live test:     1..15
+frontend/packages/live test: ok 9 - the live worker core
+frontend/packages/live test:   ---
+frontend/packages/live test:   duration_ms: 22.322936
+frontend/packages/live test:   type: 'suite'
+frontend/packages/live test:   ...
+frontend/packages/live test: 1..9
+frontend/packages/live test: # tests 90
+frontend/packages/live test: # suites 9
+frontend/packages/live test: # pass 90
+frontend/packages/live test: # fail 0
+frontend/packages/live test: # cancelled 0
+frontend/packages/live test: # skipped 0
+frontend/packages/live test: # todo 0
+frontend/packages/live test: # duration_ms 309.329025
+frontend/packages/live test: (node:4078482) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+frontend/packages/live test: (Use `node --trace-warnings ...` to show where the warning was created)
+frontend/packages/live test: Done
+qa/e2e test$ node --experimental-strip-types --test test/*.test.ts
+qa/e2e test: TAP version 13
+frontend/packages/api-client test: # Subtest: the api client generator
+frontend/packages/api-client test:     # Subtest: writes one file per document
+frontend/packages/api-client test:     ok 1 - writes one file per document
+frontend/packages/api-client test:       ---
+frontend/packages/api-client test:       duration_ms: 575.561074
+frontend/packages/api-client test:       type: 'test'
+frontend/packages/api-client test:       ...
+qa/e2e test: # (node:4078555) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+qa/e2e test: # (Use `node --trace-warnings ...` to show where the warning was created)
+qa/e2e test: # Subtest: the shared Playwright configuration
+qa/e2e test:     # Subtest: keeps the test folder, has no web server and writes an html report
+qa/e2e test:     ok 1 - keeps the test folder, has no web server and writes an html report
+qa/e2e test:       ---
+qa/e2e test:       duration_ms: 1.854895
+qa/e2e test:       type: 'test'
+qa/e2e test:       ...
+frontend/packages/i18n test: 
+frontend/packages/i18n test:  Test Files  5 passed (5)
+frontend/packages/i18n test:       Tests  37 passed (37)
+frontend/packages/i18n test:    Start at  14:09:29
+frontend/packages/i18n test:    Duration  780ms (environment 33%, tests 31%, transform 17%, import 16%, worker 2%)
+qa/e2e test:     # Subtest: uses the base URL of the environment when it is set
+qa/e2e test:     ok 2 - uses the base URL of the environment when it is set
+qa/e2e test:       ---
+qa/e2e test:       duration_ms: 0.225286
+qa/e2e test:       type: 'test'
+qa/e2e test:       ...
+frontend/packages/i18n test: 
+qa/e2e test:     # Subtest: has no base URL when the environment has none
+qa/e2e test:     ok 3 - has no base URL when the environment has none
+qa/e2e test:       ---
+qa/e2e test:       duration_ms: 0.256941
+qa/e2e test:       type: 'test'
+qa/e2e test:       ...
+qa/e2e test:     # Subtest: refuses a missing image tag
+qa/e2e test:     ok 4 - refuses a missing image tag
+qa/e2e test:       ---
+qa/e2e test:       duration_ms: 0.598759
+qa/e2e test:       type: 'test'
+qa/e2e test:       ...
+qa/e2e test:     # Subtest: refuses a blank image tag
+qa/e2e test:     ok 5 - refuses a blank image tag
+qa/e2e test:       ---
+qa/e2e test:       duration_ms: 0.190275
+qa/e2e test:       type: 'test'
+qa/e2e test:       ...
+qa/e2e test:     # Subtest: refuses a development server
+qa/e2e test:     ok 6 - refuses a development server
+qa/e2e test:       ---
+qa/e2e test:       duration_ms: 0.321274
+qa/e2e test:       type: 'test'
+qa/e2e test:       ...
+qa/e2e test:     # Subtest: forbids test.only on CI
+qa/e2e test:     ok 7 - forbids test.only on CI
+qa/e2e test:       ---
+qa/e2e test:       duration_ms: 0.158868
+qa/e2e test:       type: 'test'
+qa/e2e test:       ...
+qa/e2e test:     1..7
+qa/e2e test: ok 1 - the shared Playwright configuration
+qa/e2e test:   ---
+qa/e2e test:   duration_ms: 4.879442
+qa/e2e test:   type: 'suite'
+qa/e2e test:   ...
+frontend/packages/i18n test: Done
+frontend/packages/ui test$ vitest run
+qa/e2e test: # (node:4078556) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+qa/e2e test: # (Use `node --trace-warnings ...` to show where the warning was created)
+qa/e2e test: # Subtest: the shared visual Playwright configuration
+qa/e2e test:     # Subtest: refuses a missing image tag
+qa/e2e test:     ok 1 - refuses a missing image tag
+qa/e2e test:       ---
+qa/e2e test:       duration_ms: 1.070164
+qa/e2e test:       type: 'test'
+qa/e2e test:       ...
+qa/e2e test:     # Subtest: refuses a development server
+qa/e2e test:     ok 2 - refuses a development server
+qa/e2e test:       ---
+qa/e2e test:       duration_ms: 0.217825
+qa/e2e test:       type: 'test'
+qa/e2e test:       ...
+qa/e2e test:     # Subtest: has a light and a dark project and nothing else
+qa/e2e test:     ok 3 - has a light and a dark project and nothing else
+qa/e2e test:       ---
+qa/e2e test:       duration_ms: 0.77223
+qa/e2e test:       type: 'test'
+qa/e2e test:       ...
+qa/e2e test:     # Subtest: names the two projects light and dark
+qa/e2e test:     ok 4 - names the two projects light and dark
+qa/e2e test:       ---
+qa/e2e test:       duration_ms: 0.080577
+qa/e2e test:       type: 'test'
+qa/e2e test:       ...
+qa/e2e test:     # Subtest: renders the light project at the screen size of the tokens
+qa/e2e test:     ok 5 - renders the light project at the screen size of the tokens
+qa/e2e test:       ---
+qa/e2e test:       duration_ms: 0.245297
+qa/e2e test:       type: 'test'
+qa/e2e test:       ...
+qa/e2e test:     # Subtest: fixes the scale, the locale and the time zone of the light project
+qa/e2e test:     ok 6 - fixes the scale, the locale and the time zone of the light project
+qa/e2e test:       ---
+qa/e2e test:       duration_ms: 0.131305
+qa/e2e test:       type: 'test'
+qa/e2e test:       ...
+qa/e2e test:     # Subtest: renders the dark project at the screen size of the tokens
+qa/e2e test:     ok 7 - renders the dark project at the screen size of the tokens
+qa/e2e test:       ---
+qa/e2e test:       duration_ms: 0.155173
+qa/e2e test:       type: 'test'
+qa/e2e test:       ...
+qa/e2e test:     # Subtest: fixes the scale, the locale and the time zone of the dark project
+qa/e2e test:     ok 8 - fixes the scale, the locale and the time zone of the dark project
+qa/e2e test:       ---
+qa/e2e test:       duration_ms: 0.157888
+qa/e2e test:       type: 'test'
+qa/e2e test:       ...
+qa/e2e test:     # Subtest: stores the screens in the specification folder
+qa/e2e test:     ok 9 - stores the screens in the specification folder
+qa/e2e test:       ---
+qa/e2e test:       duration_ms: 0.218472
+qa/e2e test:       type: 'test'
+qa/e2e test:       ...
+qa/e2e test:     # Subtest: never updates the screens of the specification
+qa/e2e test:     ok 10 - never updates the screens of the specification
+qa/e2e test:       ---
+qa/e2e test:       duration_ms: 0.32144
+qa/e2e test:       type: 'test'
+qa/e2e test:       ...
+qa/e2e test:     # Subtest: compares screenshots with the shared tolerance
+qa/e2e test:     ok 11 - compares screenshots with the shared tolerance
+qa/e2e test:       ---
+qa/e2e test:       duration_ms: 0.13466
+qa/e2e test:       type: 'test'
+qa/e2e test:       ...
+qa/e2e test:     # Subtest: states the tolerance constants
+qa/e2e test:     ok 12 - states the tolerance constants
+qa/e2e test:       ---
+qa/e2e test:       duration_ms: 0.067927
+qa/e2e test:       type: 'test'
+qa/e2e test:       ...
+qa/e2e test:     # Subtest: records the compose service in the metadata
+qa/e2e test:     ok 13 - records the compose service in the metadata
+qa/e2e test:       ---
+qa/e2e test:       duration_ms: 0.087681
+qa/e2e test:       type: 'test'
+qa/e2e test:       ...
+qa/e2e test:     # Subtest: starts and stops the compose stack with existing files
+qa/e2e test:     ok 14 - starts and stops the compose stack with existing files
+qa/e2e test:       ---
+qa/e2e test:       duration_ms: 0.114468
+qa/e2e test:       type: 'test'
+qa/e2e test:       ...
+qa/e2e test:     # Subtest: uses the base URL of the environment when it is set
+qa/e2e test:     ok 15 - uses the base URL of the environment when it is set
+qa/e2e test:       ---
+qa/e2e test:       duration_ms: 0.133379
+qa/e2e test:       type: 'test'
+qa/e2e test:       ...
+qa/e2e test:     # Subtest: has no base URL when the environment has none
+qa/e2e test:     ok 16 - has no base URL when the environment has none
+qa/e2e test:       ---
+qa/e2e test:       duration_ms: 0.077145
+qa/e2e test:       type: 'test'
+qa/e2e test:       ...
+qa/e2e test:     1..16
+qa/e2e test: ok 2 - the shared visual Playwright configuration
+qa/e2e test:   ---
+qa/e2e test:   duration_ms: 4.939865
+qa/e2e test:   type: 'suite'
+qa/e2e test:   ...
+qa/e2e test: # Subtest: the name of a screenshot
+qa/e2e test:     # Subtest: is the use case and the node in light mode
+qa/e2e test:     ok 1 - is the use case and the node in light mode
+qa/e2e test:       ---
+qa/e2e test:       duration_ms: 0.088021
+qa/e2e test:       type: 'test'
+qa/e2e test:       ...
+qa/e2e test:     # Subtest: ends with dark in dark mode
+qa/e2e test:     ok 2 - ends with dark in dark mode
+qa/e2e test:       ---
+qa/e2e test:       duration_ms: 0.047178
+qa/e2e test:       type: 'test'
+qa/e2e test:       ...
+qa/e2e test:     # Subtest: refuses another project name
+qa/e2e test:     ok 3 - refuses another project name
+qa/e2e test:       ---
+qa/e2e test:       duration_ms: 0.066319
+qa/e2e test:       type: 'test'
+qa/e2e test:       ...
+qa/e2e test:     1..3
+qa/e2e test: ok 3 - the name of a screenshot
+qa/e2e test:   ---
+qa/e2e test:   duration_ms: 0.273979
+qa/e2e test:   type: 'suite'
+qa/e2e test:   ...
+qa/e2e test: 1..3
+qa/e2e test: # tests 26
+qa/e2e test: # suites 3
+qa/e2e test: # pass 26
+qa/e2e test: # fail 0
+qa/e2e test: # cancelled 0
+qa/e2e test: # skipped 0
+qa/e2e test: # todo 0
+qa/e2e test: # duration_ms 437.011938
+qa/e2e test: Done
+frontend/packages/ui test: 
+frontend/packages/ui test:  RUN  v5.1.1 /tmp/swarm-checks-l4hd_kc5/frontend/packages/ui
+frontend/packages/ui test: 
+frontend/packages/maps test: 
+frontend/packages/maps test:  Test Files  6 passed (6)
+frontend/packages/maps test:       Tests  45 passed (45)
+frontend/packages/maps test:    Start at  14:09:29
+frontend/packages/maps test:    Duration  1.46s (environment 73%, import 19%, tests 4%, transform 3%, worker 1%)
+frontend/packages/maps test: 
+frontend/packages/maps test: Done
+frontend/packages/api-client test:     # Subtest: checks clean right after a generation
+frontend/packages/api-client test:     ok 2 - checks clean right after a generation
+frontend/packages/api-client test:       ---
+frontend/packages/api-client test:       duration_ms: 1215.651329
+frontend/packages/api-client test:       type: 'test'
+frontend/packages/api-client test:       ...
+frontend/packages/ui test: 
+frontend/packages/ui test:  Test Files  7 passed (7)
+frontend/packages/ui test:       Tests  155 passed (155)
+frontend/packages/ui test:    Start at  14:09:31
+frontend/packages/ui test:    Duration  1.12s (environment 61%, import 18%, tests 14%, transform 6%, worker 1%)
+frontend/packages/ui test: 
+frontend/packages/ui test: Done
+frontend/apps/ground-control test$ vitest run
+frontend/apps/mission-studio test$ vitest run
+frontend/apps/client-portal test$ vitest run
+frontend/apps/mission-studio test: 
+frontend/apps/mission-studio test:  RUN  v5.1.1 /tmp/swarm-checks-l4hd_kc5/frontend/apps/mission-studio
+frontend/apps/mission-studio test: 
+frontend/apps/ground-control test: 
+frontend/apps/ground-control test:  RUN  v5.1.1 /tmp/swarm-checks-l4hd_kc5/frontend/apps/ground-control
+frontend/apps/ground-control test: 
+frontend/apps/client-portal test: 
+frontend/apps/client-portal test:  RUN  v5.1.1 /tmp/swarm-checks-l4hd_kc5/frontend/apps/client-portal
+frontend/apps/client-portal test: 
+frontend/packages/api-client test:     # Subtest: fails the check and names the file after a generated file is edited
+frontend/packages/api-client test:     ok 3 - fails the check and names the file after a generated file is edited
+frontend/packages/api-client test:       ---
+frontend/packages/api-client test:       duration_ms: 953.457297
+frontend/packages/api-client test:       type: 'test'
+frontend/packages/api-client test:       ...
+frontend/apps/client-portal test: 
+frontend/apps/client-portal test:  Test Files  1 passed (1)
+frontend/apps/client-portal test:       Tests  9 passed (9)
+frontend/apps/client-portal test:    Start at  14:09:32
+frontend/apps/client-portal test:    Duration  1.07s (environment 38%, transform 35%, import 22%, tests 5%)
+frontend/apps/client-portal test: 
+frontend/apps/client-portal test: Done
+frontend/apps/mission-studio test: 
+frontend/apps/mission-studio test:  Test Files  1 passed (1)
+frontend/apps/mission-studio test:       Tests  8 passed (8)
+frontend/apps/mission-studio test:    Start at  14:09:32
+frontend/apps/mission-studio test:    Duration  1.19s (environment 43%, transform 30%, import 22%, tests 5%)
+frontend/apps/mission-studio test: 
+frontend/apps/mission-studio test: Done
+frontend/packages/api-client test:     # Subtest: fails the check when a generated file has no document
+frontend/packages/api-client test:     ok 4 - fails the check when a generated file has no document
+frontend/packages/api-client test:       ---
+frontend/packages/api-client test:       duration_ms: 1146.838552
+frontend/packages/api-client test:       type: 'test'
+frontend/packages/api-client test:       ...
+frontend/packages/api-client test:     # Subtest: checks the package's own generated clients with the default folders
+frontend/packages/api-client test:     ok 5 - checks the package's own generated clients with the default folders
+frontend/packages/api-client test:       ---
+frontend/packages/api-client test:       duration_ms: 449.736389
+frontend/packages/api-client test:       type: 'test'
+frontend/packages/api-client test:       ...
+frontend/packages/api-client test:     1..5
+frontend/packages/api-client test: ok 1 - the api client generator
+frontend/packages/api-client test:   ---
+frontend/packages/api-client test:   duration_ms: 4347.205175
+frontend/packages/api-client test:   type: 'suite'
+frontend/packages/api-client test:   ...
+frontend/packages/api-client test: # (node:4078128) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+frontend/packages/api-client test: # (Use `node --trace-warnings ...` to show where the warning was created)
+frontend/packages/api-client test: # Subtest: the api client renderer
+frontend/packages/api-client test:     # Subtest: starts the render with the generated banner
+frontend/packages/api-client test:     ok 1 - starts the render with the generated banner
+frontend/packages/api-client test:       ---
+frontend/packages/api-client test:       duration_ms: 28.442313
+frontend/packages/api-client test:       type: 'test'
+frontend/packages/api-client test:       ...
+frontend/packages/api-client test:     # Subtest: renders the paths, the components and the problem schema
+frontend/packages/api-client test:     ok 2 - renders the paths, the components and the problem schema
+frontend/packages/api-client test:       ---
+frontend/packages/api-client test:       duration_ms: 7.521711
+frontend/packages/api-client test:       type: 'test'
+frontend/packages/api-client test:       ...
+frontend/packages/api-client test:     # Subtest: renders the same text twice
+frontend/packages/api-client test:     ok 3 - renders the same text twice
+frontend/packages/api-client test:       ---
+frontend/packages/api-client test:       duration_ms: 6.073166
+frontend/packages/api-client test:       type: 'test'
+frontend/packages/api-client test:       ...
+frontend/packages/api-client test:     1..3
+frontend/packages/api-client test: ok 2 - the api client renderer
+frontend/packages/api-client test:   ---
+frontend/packages/api-client test:   duration_ms: 43.379269
+frontend/packages/api-client test:   type: 'suite'
+frontend/packages/api-client test:   ...
+frontend/packages/api-client test: 1..2
+frontend/packages/api-client test: # tests 8
+frontend/packages/api-client test: # suites 2
+frontend/packages/api-client test: # pass 8
+frontend/packages/api-client test: # fail 0
+frontend/packages/api-client test: # cancelled 0
+frontend/packages/api-client test: # skipped 0
+frontend/packages/api-client test: # todo 0
+frontend/packages/api-client test: # duration_ms 4486.361845
+frontend/packages/api-client test: (node:4079237) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+frontend/packages/api-client test: (Use `node --trace-warnings ...` to show where the warning was created)
+frontend/packages/api-client test: Done
+frontend/apps/back-office test$ vitest run
+frontend/apps/back-office test: 
+frontend/apps/back-office test:  RUN  v5.1.1 /tmp/swarm-checks-l4hd_kc5/frontend/apps/back-office
+frontend/apps/back-office test: 
+frontend/apps/back-office test: 
+frontend/apps/back-office test:  Test Files  4 passed (4)
+frontend/apps/back-office test:       Tests  28 passed (28)
+frontend/apps/back-office test:    Start at  14:09:34
+frontend/apps/back-office test:    Duration  2.41s (tests 47%, environment 28%, import 13%, transform 12%)
+frontend/apps/back-office test: 
+frontend/apps/back-office test: Done
+frontend/apps/ground-control test: 
+frontend/apps/ground-control test:  Test Files  4 passed (4)
+frontend/apps/ground-control test:       Tests  50 passed (50)
+frontend/apps/ground-control test:    Start at  14:09:32
+frontend/apps/ground-control test:    Duration  6.21s (tests 67%, environment 19%, transform 9%, import 5%)
+frontend/apps/ground-control test: 
+frontend/apps/ground-control test: Done

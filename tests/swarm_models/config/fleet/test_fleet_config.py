@@ -6,6 +6,7 @@ from typing import ClassVar, Dict, List
 
 # Third-party imports
 import pytest
+import yaml
 from pydantic import JsonValue, ValidationError
 
 # First-party imports
@@ -19,6 +20,7 @@ from swarm_models.config.fleet.exceptions import (
 from swarm_models.config.fleet.fleet_config import FleetConfig
 from swarm_models.config.postgres.postgres_config import PostgresConfig
 from swarm_web.models.config.rest_config import RestConfig
+from swarm_web.models.config.signals_config import SignalsConfig
 
 
 class TestFleetConfig:
@@ -36,6 +38,7 @@ class TestFleetConfig:
         assert config.schema_name == "fleet"
         assert config.postgres == PostgresConfig(dsn_key=FleetConfig.DSN_KEY)
         assert config.rest == RestConfig()
+        assert config.signals == SignalsConfig(service_name=FleetConfig.SERVICE_NAME)
 
     def test_the_class_constants(self) -> None:
         assert FleetConfig.UNREADABLE is SEFleetConfigUnreadable
@@ -63,7 +66,7 @@ class TestFleetConfig:
         assert config.postgres == postgres
         assert config.rest == RestConfig()
 
-    @pytest.mark.parametrize("name", ["schema_name", "postgres", "rest"])
+    @pytest.mark.parametrize("name", ["schema_name", "postgres", "rest", "signals"])
     def test_none_becomes_the_default(self, name: str) -> None:
         config = FleetConfig.model_validate({name: None})
         default = FleetConfig.model_fields[name].get_default(call_default_factory=True)
@@ -119,3 +122,8 @@ class TestFleetConfig:
     def test_an_unreadable_file_raises_the_unreadable_exception(self, tmp_path: Path) -> None:
         with pytest.raises(SEFleetConfigUnreadable):
             FleetConfig.load(tmp_path / FleetConfig.APP_FILE)
+
+    def test_a_signals_mapping_is_read_from_yaml(self, tmp_path: Path) -> None:
+        path = tmp_path / "app.yaml"
+        path.write_text(yaml.safe_dump({"signals": {"enabled": True, "cell": "eu_west"}}), encoding="utf-8")
+        assert FleetConfig.load(path).signals == SignalsConfig(enabled=True, cell="eu_west")

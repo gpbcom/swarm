@@ -22,6 +22,7 @@ python3 .claude/skills/write-specs/scripts/specs.py <command>
 | `new fs\|uc\|br "Title"` | Creates the next feature, use case or business rule from its template, then builds |
 | `mockup <UC-ID> <node>` | Creates the HTML mock-up of one state (a flow chart node) of a use case |
 | `render [--all] [<UC-ID>...]` | Builds, then renders every mock-up whose PNG is missing or out of date |
+| `palettise [<UC-ID>...]` | Turns the screenshots of the use cases (all, or the named ones) into 256-colour palette PNGs, in light and dark mode: the step after capturing a 📸 Screenshot |
 | `build` | Rewrites the generated content: page list, summaries, navigation, matrix, back links, palette, flow chart colours, `visual-identity.css`, `frontend/packages/tokens/src/tokens.css` |
 | `check` | Prints one line per breach, `<file>: SPEC-<n>: <message>`, and nothing when all is well |
 

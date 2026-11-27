@@ -40,7 +40,7 @@
 
 ## <a id="rest"></a>🔌 REST
 
-- **Resources** follow the glossary: `/v1/missions`, `/v1/missions/{id}/squad`, `/v1/missions/{id}/replans`, `/v1/drones`, `/v1/drone-models`, `/v1/payloads`, `/v1/authorisations`, `/v1/deliverables`, `/v1/defects`, `/v1/scorecards`, `/v1/evidence/{id}/verify`, `/v1/proposals/{id}:accept`.
+- **Resources** follow the glossary: `/v1/missions`, `/v1/missions/{id}/squad`, `/v1/missions/{id}/replans`, `/v1/drones`, `/v1/drone-models`, `/v1/payloads`, `/v1/authorisations`, `/v1/deliverables`, `/v1/defects`, `/v1/scorecards`, `/v1/evidence/{id}/verify`, `/v1/proposals/{id}:accept`, `/v1/operators` and `/v1/operators/{id}` (the Operator directory of the gateway, [📘 FS-012](../functional/features/FS-012-operators-deployment-and-languages.md): the Swarm administrator creates and lists Operators, and each Operator's people read their own).
 - **Conventions:** cursor pagination (`?after=`), `ETag` and `If-Match` on updates, `Idempotency-Key` on every POST, errors as `application/problem+json` with the message rules of AGENT.md, field selection (`?fields=`) for heavy lists.
 - **Performance:** responses serialised by Pydantic in Rust (`model_dump_json`), gzip or Brotli, read endpoints on replicas, short-lived cache in Valkey for lists that many people read (Fleet, Missions of the day).
 - **Budget:** p95 under 100 ms for reads and under 250 ms for writes inside a cell.
@@ -114,7 +114,7 @@ The API layer is one package of the backend, `backend/swarm-api` (`swarm_api`), 
 
 ## <a id="features"></a>🔗 Features implemented
 
-[📘 FS-008](../functional/features/FS-008-client-portal.md), [📘 FS-015](../functional/features/FS-015-patrol.md), [📘 FS-017](../functional/features/FS-017-mission-assistant.md), [📘 FS-021](../functional/features/FS-021-ground-control-monitoring.md), and every feature with a screen.
+[📘 FS-008](../functional/features/FS-008-client-portal.md), [📘 FS-012](../functional/features/FS-012-operators-deployment-and-languages.md), [📘 FS-015](../functional/features/FS-015-patrol.md), [📘 FS-017](../functional/features/FS-017-mission-assistant.md), [📘 FS-021](../functional/features/FS-021-ground-control-monitoring.md), and every feature with a screen.
 
 <!-- spec:nav-bottom -->
 ---
