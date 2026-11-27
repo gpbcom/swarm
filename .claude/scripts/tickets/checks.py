@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import fnmatch
 import json
 import os
 import re
@@ -18,7 +19,10 @@ from check_ticket import has_no_screen_reason, screens_of, screens_section, touc
 USAGE = """Run every applicable check of a ticket deterministically, save the evidence, and print the verdict as JSON.
 
 Usage, from the repository root, on the ticket branch:
-    python3 .claude/scripts/tickets/checks.py --ticket T0.01 [--base develop]
+    python3 .claude/scripts/tickets/checks.py --ticket T0.01 [--base develop] [--images]
+
+``--images`` runs only the image checks (L-53): the image of every front end the ticket changes, built and tested by
+its Playwright suite through ``infra/compose/e2e.yaml``, as CI does. The verifier runs it as a second call.
 
 Which checks apply is decided here, never by a model (TKT-6): a check whose target does not exist yet (a Cargo
 workspace with no member crate, no TypeScript workspace package, no Python source for mypy) is reported under
@@ -36,6 +40,7 @@ holding only the ticket's own changes (TKT-6), removed afterwards; the evidence 
 """
 
 ROOT = Path(__file__).resolve().parents[3]
+IMAGES_FLAG = "--images"
 PROJECT_PREFIXES = ("backend/", "scripts/", "frontend/", "rust/", "tests/", "infra/")
 # The source folders of the Python packages: the layer packages, the kernel libs, the apps and the scripts.
 MYPY_SOURCE_GLOBS = ("backend/*/src", "backend/libs/*/src", "backend/apps/*/src", "scripts/src")
@@ -274,6 +279,41 @@ def failing_files(out: str, changed: List[str]) -> List[Tuple[str, str]]:
     return sorted(found, key=lambda pair: order.get(pair[0], 0))[:FAILING_FILES_MAX]
 
 
+PYTEST_CHECK = "pytest"
+# L-59: pytest's short test summary names each failing test, wherever it sits in the output, and a warning is never a
+# failure's detail.
+PYTEST_SUMMARY = re.compile(r"^(?:FAILED|ERROR) (\S+?\.py)(?:::\S+)?(?: - .*)?$")
+WARNING_LINE = re.compile(r"\w+Warning\b|warnings\.warn\(")
+
+
+def without_warnings(out: str) -> List[str]:
+    """Return the lines of an output that are not warnings (L-59)."""
+    return [line for line in out.splitlines() if not WARNING_LINE.search(line)]
+
+
+def pytest_failures(out: str, root: Path = ROOT) -> List[Tuple[str, str]]:
+    """Return each test file pytest's short summary names as failing or in error, with its summary lines (L-59).
+
+    The failing test is rarely one of the ticket's changed files (a changed configuration fails an older test), so it
+    is named from pytest's own ``FAILED <file>::<test>`` and ``ERROR <file>`` lines rather than from the changed
+    files, and never falls back to the folder pytest was given.
+    """
+    found: Dict[str, List[str]] = {}
+    for raw in out.splitlines():
+        line = raw.strip()
+        match = PYTEST_SUMMARY.match(line)
+        if not match:
+            continue
+        name = match.group(1)
+        if Path(name).is_absolute():
+            try:
+                name = str(Path(name).relative_to(root))
+            except ValueError:
+                pass
+        found.setdefault(name, []).append(line)
+    return [(name, "\n".join(lines[:12])) for name, lines in found.items()][:FAILING_FILES_MAX]
+
+
 class Checks:
     def __init__(self, ticket: str, root: Path = ROOT, changed: Optional[List[str]] = None) -> None:
         self.root = root
@@ -298,9 +338,12 @@ class Checks:
         if code == 0:
             self.passed.append(name)
             return True
-        detail = "\n".join(out.splitlines()[-12:])
+        detail = "\n".join(without_warnings(out)[-12:])
         environment = environment_failure(code, out, self.root)
         named = [] if environment else failing_files(out, self.changed)
+        if name == PYTEST_CHECK and not environment:
+            tests = pytest_failures(out, self.root)
+            named = tests + [(path, lines) for path, lines in named if path not in {test for test, _ in tests}]
         if not named:
             self.failures.append({"check": name, "file": file, "detail": detail[:1500], "environment": environment})
             return False
@@ -328,7 +371,7 @@ def python_checks(checks: Checks, changed: List[str]) -> None:
         checks.check("mypy", ["uv", "run", "mypy", *sources], sources[0])
     else:
         checks.skip("mypy", f"not run, no source folder in the tree ({', '.join(MYPY_SOURCE_GLOBS)})")
-    checks.check("pytest", ["uv", "run", "pytest", "-q", "-n", "2"], "tests")
+    checks.check(PYTEST_CHECK, ["uv", "run", "pytest", "-q", "-n", "2"], "tests")
 
 
 def rust_checks(checks: Checks, changed: List[str]) -> None:
@@ -406,6 +449,88 @@ def terraform_checks(checks: Checks, changed: List[str]) -> None:
             checks.check(f"terraform test {folder}", ["terraform", "test"], folder, path)
 
 
+# L-53: the PostgreSQL tests skip without the binaries, so a ticket that changes what they test passed its checks and
+# failed in CI. These are the places whose tests need PostgreSQL, and where the root conftest finds the binaries.
+POSTGRES_GLOBS = ("backend/apps/*/migrations/**", "backend/swarm-storage/src/**")
+POSTGRES_BIN_ENV = "SWARM_POSTGRES_BIN_DIR"
+POSTGRES_BIN_GLOB = "/usr/lib/postgresql/*/bin/pg_ctl"
+IMAGE_REGISTRY = "ghcr.io/gpbcom/swarm"
+IMAGE_TAG = "local"
+IMAGE_TAG_ENV = "SWARM_IMAGE_TAG"
+FRONT_END = re.compile(r"^frontend/apps/([^/]+)/")
+
+
+def postgres_binaries() -> bool:
+    """Tell whether the PostgreSQL binaries the root conftest looks for are installed."""
+    folder = os.environ.get(POSTGRES_BIN_ENV, "")
+    if folder and (Path(folder) / "pg_ctl").is_file():
+        return True
+    return bool(shutil.which("pg_ctl")) or bool(sorted(Path("/").glob(POSTGRES_BIN_GLOB.lstrip("/"))))
+
+
+def postgres_checks(checks: Checks, changed: List[str]) -> None:
+    """Refuse to pass a ticket whose PostgreSQL tests would skip (L-53): it is the environment, the person installs them."""
+    touched = [f for f in changed if any(fnmatch.fnmatch(f, pattern) for pattern in POSTGRES_GLOBS)]
+    if not touched:
+        checks.skip("postgresql", "no migration and no storage code changed")
+        return
+    if postgres_binaries():
+        checks.passed.append("postgresql binaries")
+        return
+    checks.failures.append(
+        {
+            "check": "postgresql binaries",
+            "file": touched[0],
+            "detail": (
+                f"{touched[0]} is tested against PostgreSQL, whose binaries are not installed: those tests would skip "
+                f"and only CI would run them (L-53). Install PostgreSQL (pg_ctl, initdb, psql) or set {POSTGRES_BIN_ENV}."
+            ),
+            "environment": True,
+        }
+    )
+
+
+def front_ends(changed: List[str], root: Path) -> List[str]:
+    """Return the front ends of ``frontend/apps/`` the ticket changes that have an image and an e2e suite."""
+    names = sorted({m.group(1) for m in (FRONT_END.match(f) for f in changed) if m})
+    found: List[str] = []
+    for name in names:
+        folder = root / "frontend" / "apps" / name
+        manifest = folder / "package.json"
+        scripts = json.loads(manifest.read_text(encoding="utf-8")).get("scripts", {}) if manifest.is_file() else {}
+        if (folder / "Dockerfile").is_file() and "e2e" in scripts:
+            found.append(name)
+    return found
+
+
+def image_checks(checks: Checks, changed: List[str]) -> None:
+    """Build the image of every front end the ticket changes and run its Playwright suite against it (L-53).
+
+    CI tests what ships: the image, through ``infra/compose/e2e.yaml``, with the visual tests in the pinned browser
+    server. A change to a shared package is left to CI: building every front end would not fit the verifier's time.
+    """
+    names = front_ends(changed, checks.root)
+    if not names:
+        checks.skip("images", "no front end with an image and an e2e suite changed")
+        return
+    if not checks.check("pnpm install", ["pnpm", "install", "--frozen-lockfile"], "pnpm-lock.yaml"):
+        return
+    for name in names:
+        folder = f"frontend/apps/{name}"
+        built = checks.check(
+            f"image {name}",
+            ["docker", "build", "-f", f"{folder}/Dockerfile", "-t", f"{IMAGE_REGISTRY}/{name}:{IMAGE_TAG}", "."],
+            f"{folder}/Dockerfile",
+        )
+        if built:
+            checks.check(
+                f"e2e {name}",
+                ["pnpm", "--filter", f"@swarm/{name}", "run", "e2e"],
+                folder,
+                env={IMAGE_TAG_ENV: IMAGE_TAG},
+            )
+
+
 def main() -> int:
     args = sys.argv[1:]
     ticket = args[args.index("--ticket") + 1] if "--ticket" in args else ""
@@ -416,7 +541,7 @@ def main() -> int:
     changed = changed_files(base, ticket)
     tree = isolated_tree(changed) if own_paths(ticket) is not None else ROOT
     try:
-        verdict = run_checks(ticket, base, changed, tree)
+        verdict = run_image_checks(ticket, changed, tree) if IMAGES_FLAG in args else run_checks(ticket, base, changed, tree)
     except Exception as error:
         print(f"The checks stopped: {type(error).__name__}: {error}", file=sys.stderr)
         raise
@@ -427,12 +552,30 @@ def main() -> int:
     return 0 if verdict["passed"] else 1
 
 
+def run_image_checks(
+    ticket: str, changed: List[str], root: Path
+) -> Dict[str, Union[bool, List[str], List[Dict[str, Union[str, bool]]]]]:
+    """Run the image checks of the ticket in ``root`` and return their verdict (``--images``, L-53).
+
+    They run apart from the other checks, as a second call of the verifier, so that each call fits its 10 minutes.
+    """
+    checks = Checks(ticket, root, changed)
+    image_checks(checks, changed)
+    return {
+        "passed": not checks.failures,
+        "failures": checks.failures,
+        "not_applicable": checks.not_applicable,
+        "passed_checks": checks.passed,
+    }
+
+
 def run_checks(
     ticket: str, base: str, changed: List[str], root: Path
 ) -> Dict[str, Union[bool, List[str], List[Dict[str, Union[str, bool]]]]]:
     """Run every applicable check of the ticket in ``root`` and return the verdict."""
     checks = Checks(ticket, root, changed)
     python_checks(checks, changed)
+    postgres_checks(checks, changed)
     rust_checks(checks, changed)
     typescript_checks(checks, changed)
     terraform_checks(checks, changed)

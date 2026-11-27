@@ -290,6 +290,11 @@
     "kind": "test",
     "path": "tests/harness/ticket_tree/test_ticket_tree.py",
     "what": "integrate never applies a file another open ticket owns, and lists it under refused (L-34)"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/gitflow/test_gitflow.py",
+    "what": "the guard asks the person in the main session and refuses every agent on a ticket's branch (L-52); git merge-base, commit-tree and stash list are reads (L-55)"
    }
   ],
   "TKT-6": [
@@ -347,6 +352,26 @@
     "kind": "agent",
     "path": ".claude/agents/verifier.md",
     "what": "runs checks.py in the foreground with the Bash tool's 10-minute timeout (L-50)"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/checks/runs/test_checks_images.py",
+    "what": "a changed front end's image is built and its Playwright suite run with checks.py --images; storage or migration changes need the PostgreSQL binaries, missing ones are an environment failure (L-53)"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/checks/failures/test_checks_pytest_summary.py",
+    "what": "a pytest failure names the files of its short summary, never the tests folder, and no warning is a detail (L-59)"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/ticket_run/test_ticket_run_flow.py",
+    "what": "the workflow, run with stand-in agents, verifies the images in a second verifier call whose failures count (L-53)"
+   },
+   {
+    "kind": "test",
+    "path": "tests/conventions/repository/test_five_code_files.py",
+    "what": "the five-files rule counts the files not committed yet, as they sit in the clean tree of the checks (L-60)"
    }
   ],
   "TKT-7": [
@@ -505,6 +530,16 @@
     "kind": "test",
     "path": "tests/harness/ticket_tree/test_ticket_tree.py",
     "what": "finish updates an open pull request through the REST API, never gh pr edit, and removes the state once pushed (L-30, L-36)"
+   },
+   {
+    "kind": "test",
+    "path": "tests/ci/release/test_automerge.py",
+    "what": "automerge starts when the automerge label is added, not only when a check ends (L-61)"
+   },
+   {
+    "kind": "workflow",
+    "path": ".github/workflows/automerge.yml",
+    "what": "merges a labelled pull request once every check passed, on a check's end or on the labelling (L-61)"
    }
   ],
   "TKT-16": [
@@ -562,6 +597,11 @@
     "kind": "test",
     "path": "tests/harness/wiring/test_ticket_workflows.py",
     "what": "the last message of ticket-plan.js sends the ticket to the shared checkout and the group approval, never feature/<ID> (L-47)"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/ticket_tree/test_ticket_tree_prepare.py",
+    "what": "prepare refuses a new ticket while origin/develop holds a newer harness, and lets an open ticket continue (L-54)"
    }
   ],
   "TKT-17": [
@@ -584,6 +624,11 @@
     "kind": "test",
     "path": "tests/harness/statusline/test_statusline.py",
     "what": "the status line"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/tickets/test_groups.py",
+    "what": "a stopped run shows its ticket stopped with its reason and next step, and the next prepare clears it (L-56)"
    }
   ],
   "TKT-18": [
@@ -608,6 +653,16 @@
     "kind": "test",
     "path": "tests/harness/wiring/test_ticket_workflows.py",
     "what": "a task blocked only by files later waves write counts as done (L-37); a bare folder gets no fix task (L-34)"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/ticket_run/test_ticket_run_flow.py",
+    "what": "a fixer's blocked file goes to its owner in the same round (L-58); a file no task owns stops the wave at once with the plan change (L-57)"
+   },
+   {
+    "kind": "workflow",
+    "path": ".claude/workflows/ticket-run.js",
+    "what": "fixRound sends its fixers' blocked_by to their owners; unownedBlockers stops the run with the plan change"
    }
   ],
   "TKT-20": [

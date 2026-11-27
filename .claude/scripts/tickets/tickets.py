@@ -22,6 +22,7 @@ from ticket_tree import (
     DEVELOP,
     REMOTE,
     SHARED_BRANCH,
+    STOPPED_KEY,
     TICKET_SUBJECT,
     git,
     has_remote,
@@ -111,6 +112,7 @@ STATES = [
     ("merged", "🏁", "merged"),
     ("review", "👀", "in review"),
     ("code_review", "🔍", "awaits your code review"),
+    ("stopped", "✋", "stopped, waits for you"),
     ("running", "🔄", "running"),
     ("approved", "✅", "approved"),
     ("planned", "📝", "plan awaits approval"),
@@ -438,6 +440,9 @@ def rows(main: Path, group: List[str]) -> List[Dict[str, object]]:
             state = "review"
         elif ticket in running:
             state = "code_review" if plan_state(main, ticket) == "code_review" else "running"
+            # L-56: a run that stopped records it; the ticket waits for the person, it no longer runs.
+            if state == "running" and isinstance(load_state(main, ticket).get(STOPPED_KEY), dict):
+                state = "stopped"
         else:
             state = plan_state(main, ticket)
         blockers = problems(main, ticket, done) if state == "approved" else []
@@ -582,7 +587,7 @@ def report(main: Path, refs: List[str], group: List[str]) -> Tuple[str, List[str
     for row in found:
         ticket, state = str(row["ticket"]), str(row["state"])
         detail = LABEL[state]
-        if state in ("running", "code_review"):
+        if state in ("running", "code_review", "stopped"):
             # L-49: a task integrated again after its fix (TKT-6, TKT-19) is one task: count the plan's distinct ids.
             planned = plan_task_ids(main, ticket)
             total = len(planned)
@@ -592,6 +597,12 @@ def report(main: Path, refs: List[str], group: List[str]) -> Tuple[str, List[str
             refused = load_state(main, ticket).get("refused")
             if isinstance(refused, list) and refused:
                 detail += f" · ⚠️ {len(refused)} change(s) refused: another open ticket owns the file (L-51)"
+        if state == "stopped":
+            stopped = load_state(main, ticket).get(STOPPED_KEY)
+            if isinstance(stopped, dict):
+                detail += f" · ❌ {str(stopped.get('reason', ''))[:120]}"
+                if stopped.get("next"):
+                    detail += f" · ▶️ {str(stopped['next'])[:160]}"
         if state == "review":
             detail += pull_request_line(main, ticket)
         if row["waits_for"]:

@@ -21,10 +21,12 @@ from tests.harness.tickets.helpers import (
     PHASE,
     SAME_AREA,
     finish_on_shared_branch,
+    git,
     lines,
     make_repo,
     open_ticket,
     run,
+    run_ticket_tree,
     write_plan,
     write_plan_with_tasks,
 )
@@ -181,3 +183,26 @@ class TestGroups:
         open_ticket(main, NEXT, integrated=["K01", "K02", "K01", "FIX-a.py", "K02"])
         report = run(main, "watch", NEXT, "--once").stdout
         assert "🧩 2/3 tasks" in report
+
+    def test_watch_shows_a_stopped_ticket_as_waiting_for_the_person_with_its_reason(self, tmp_path: Path) -> None:
+        main = make_repo(tmp_path)
+        write_plan_with_tasks(main, NEXT, APPROVED, [("K01", ["a.py"])])
+        open_ticket(main, NEXT)
+        stopped = run_ticket_tree(
+            main, "stop", NEXT, "--reason", "Verify: 1 failure has no owner", "--next", "Fix tests"
+        )
+        assert stopped.returncode == 0, stopped.stderr
+        report = run(main, "watch", NEXT, "--once").stdout
+        assert f"✋ {NEXT}" in report
+        assert "running" not in report.split(NEXT, 2)[-1].split("\n", 1)[0]
+        assert "❌ Verify: 1 failure has no owner · ▶️ Fix tests" in report
+        assert "✋ Waiting for the person" in report
+
+    def test_the_next_prepare_clears_the_stop(self, tmp_path: Path) -> None:
+        main = make_repo(tmp_path)
+        write_plan_with_tasks(main, NEXT, APPROVED, [("K01", ["a.py"])])
+        open_ticket(main, NEXT)
+        run_ticket_tree(main, "stop", NEXT, "--reason", "Wave 2: K03 not done")
+        git(main, "checkout", "-q", "-b", "feature/tickets")
+        assert run_ticket_tree(main, "prepare", NEXT).returncode == 0
+        assert f"🔄 {NEXT}" in run(main, "watch", NEXT, "--once").stdout

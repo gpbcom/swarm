@@ -260,7 +260,9 @@ class TestTicketWorkflows:
         verify = text.split("const VERIFY = ", 1)[1].split("\n\n", 1)[0]
         assert "timeout set to 600000 ms" in verify
         assert "never with run_in_background" in verify
-        assert text.count("agent(inHome(VERIFY), { agentType: 'verifier'") == 2
+        assert text.count("agent(inHome(VERIFY), { agentType: 'verifier'") == 1
+        assert text.count("agent(inHome(VERIFY_IMAGES), { agentType: 'verifier'") == 1
+        assert text.count("verdict = await verifyAll(") == 2
         assert "checks.py --ticket ${ID} checks only its own files.`), { agentType: 'verifier'" not in text
         verifier = read_text(".claude/agents/verifier.md")
         assert "`timeout`\n   set to `600000` (10 minutes), never with `run_in_background`" in verifier

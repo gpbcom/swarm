@@ -7,10 +7,14 @@ name: automerge
 # then tagged v<version>, published as a GitHub release, and brought back to develop by a pull request of its own.
 # TKT-25: once merged into develop, the head branch is deleted (never develop or master), unless it moved since.
 
+# L-61: a label added after every check has passed starts no workflow_run, so the labelling itself starts it too.
+
 on:
   workflow_run:
     workflows: [ci, gitflow, terraform, desktop]
     types: [completed]
+  pull_request:
+    types: [labeled]
 
 permissions:
   contents: write
@@ -20,14 +24,18 @@ permissions:
   statuses: read
 
 concurrency:
-  group: automerge-${{ github.event.workflow_run.head_branch }}
+  group: automerge-${{ github.event.workflow_run.head_branch || github.event.pull_request.head.ref }}
   cancel-in-progress: false
 
 jobs:
   merge:
     # Any run of the commit, pull request or push: the last one to end is the one that may merge (TKT-26). A push to a
     # branch without an open pull request at that commit does nothing.
-    if: github.event.workflow_run.conclusion == 'success'
+    # A pull request labelled automerge is looked at once, at its head commit, whatever its checks say: the step
+    # waits for them, and the last run that ends merges it.
+    if: >-
+      github.event.workflow_run.conclusion == 'success' ||
+      (github.event_name == 'pull_request' && github.event.label.name == 'automerge')
     runs-on: ubuntu-latest
     steps:
       - name: Merge the pull request when every check passed
@@ -35,8 +43,8 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_TOKEN: ${{ secrets.RELEASE_TOKEN }}
           REPO: ${{ github.repository }}
-          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
-          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch || github.event.pull_request.head.ref }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha || github.event.pull_request.head.sha }}
         run: |
           found=$(gh pr list -R "$REPO" --head "$HEAD_BRANCH" --state open --json number,baseRefName,headRefOid,labels \
             --jq '[.[] | select((.baseRefName == "develop" or .baseRefName == "master") and .headRefOid == env.HEAD_SHA and any(.labels[]; .name == "automerge"))] | first | select(. != null) | "\(.number) \(.baseRefName)"')

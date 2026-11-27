@@ -17,6 +17,7 @@ from tests.ci.release.helpers import (
     calls_to,
     run_automerge,
     scenario,
+    steps,
     workflow,
 )
 
@@ -103,6 +104,19 @@ class TestAutomerge:
         condition = str(jobs["merge"]["if"])
         assert "github.event.workflow_run.conclusion == 'success'" in condition
         assert "workflow_run.event" not in condition
+
+    def test_labelling_a_pull_request_whose_checks_have_passed_starts_the_merge(self) -> None:
+        document = workflow("automerge.yml")
+        triggers = cast(Dict[str, Dict[str, JsonValue]], document[True])
+        assert triggers["pull_request"]["types"] == ["labeled"]
+        jobs = cast(Dict[str, Dict[str, JsonValue]], document["jobs"])
+        condition = str(jobs["merge"]["if"])
+        assert "github.event_name == 'pull_request' && github.event.label.name == 'automerge'" in condition
+        env = cast(Dict[str, str], steps("automerge.yml", "merge")[0]["env"])
+        assert env["HEAD_BRANCH"].endswith("|| github.event.pull_request.head.ref }}")
+        assert env["HEAD_SHA"].endswith("|| github.event.pull_request.head.sha }}")
+        concurrency = cast(Dict[str, str], document["concurrency"])
+        assert "github.event.pull_request.head.ref" in concurrency["group"]
 
     def test_no_pull_request_at_this_commit_does_nothing(self, tmp_path: Path) -> None:
         case = scenario("feature/x", "develop", [], self.GREEN)

@@ -137,8 +137,10 @@ ticket runs in parallel, the more tickets each sprint can close.
   starting with `docs/tickets/<ID>/`, where its documents stay.
 - **No intermediate commit.** Until the ticket is done, its work (code, tests, documents) stays **uncommitted** in the
   main checkout, beside the other running tickets' work. No agent runs `git commit`, `git merge`, `git rebase`, `git
-  stash`, `git reset` or `git push`: the PreToolUse hook `.claude/hooks/guard_git.py` refuses them on `feature/tickets`
-  and in a worker's worktree. Every step goes through
+  stash`, `git reset` or `git push`: the PreToolUse hook `.claude/hooks/guard_git.py` refuses them, and `gh pr merge`,
+  to every agent on `feature/tickets` and in a worker's worktree. In the main session it asks the person instead, who
+  confirms in the dialog what they asked for by hand (L-52); a worker's `worktree-*` branch refuses them to everyone. A
+  read-only neighbour (`git merge-base`, `git commit-tree`, `git stash list`) is not a write (L-55). Every step goes through
   `ticket_tree.py`, which compares git *trees* (never commits) on a temporary index.
 - Every worker runs in its own git worktree and changes only its task's files:
   - its first step, `ticket_tree.py start`, moves the worktree to the home's commit if `develop` moved since, copies
@@ -178,7 +180,12 @@ never edit the same checkout; parallel tickets share one, but each commits only 
    **The checks run in a clean temporary worktree of the shared branch's commit that holds only the ticket's own
    changes**, never in the shared checkout: `uv` and `pnpm -r` read the whole workspace, and the other running
    tickets' work is half built by design (tests first, TKT-4), so it would fail this ticket. The verifier runs
-   `checks.py` in the foreground with the Bash tool's 10-minute timeout (`600000` ms), never in the background (L-50);
+   `checks.py` in the foreground with the Bash tool's 10-minute timeout (`600000` ms), never in the background (L-50).
+   What CI runs, the checks run too (L-53): a ticket that changes a migration or the storage layer needs the PostgreSQL
+   binaries, whose absence is an `environment` failure rather than skipped tests; a ticket that changes a front end
+   with an image builds it and runs its Playwright suite against it, visual tests included, in a second verifier call
+   (`checks.py --images`) whose verdict the workflow merges with the first. The rules of the repository count the
+   ticket's files uncommitted, as they sit in the clean tree (L-60);
 2. the **reviewer** approves the diff against `TICKET.md`, the specifications and the rules (AGENT.md, SPEC, TKT), and
    returns a short review note, written to `REVIEW.md`;
 3. `EXPLAIN.md`, `IMPLEMENTATION.md` (TKT-14), `REVIEW.md` and `PROGRESS.md` are written, with the evidence in
@@ -192,7 +199,8 @@ stops and the person is told. A check that fails because of the environment (a m
 `environment` by `checks.py`) goes to no agent: the run stops at once and the person fixes the environment. A
 missing module of the project itself (`tests.…`, a service or a package of the repository) is a wrong import in the
 ticket's code, and goes to its owner like any failure. Each failure names the file the tool reports it in (not the first
-file the tool was given), so that it goes to the owner of that file.
+file the tool was given), so that it goes to the owner of that file: for pytest, each file of the `FAILED` and `ERROR`
+lines of its short summary, and never a warning as the detail (L-59).
 
 **Why:** "done" must mean merged code that works and that someone else can understand.
 
@@ -374,7 +382,8 @@ and the heading.
   same way.
 - `ticket_tree.py finish` labels the ticket's pull request `automerge`: the workflow `.github/workflows/automerge.yml`
   merges it once every check (`ci`, `gitflow`, `terraform`) has passed on its head commit, which closes its issue, then
-  deletes its head branch unless it moved since (TKT-25). A failing check leaves it open for the person.
+  deletes its head branch unless it moved since (TKT-25). It looks again when a check ends and when the label is added,
+  so that a label put on after the last check still merges (L-61). A failing check leaves it open for the person.
 - `.github/workflows/gitflow.yml` checks every pull request: the branch is a GitFlow branch, it targets the right base,
   and a ticket's title starts with its ID.
 - The git hooks of `.githooks/` (`python3 .claude/scripts/tickets/tickets.py setup`, once per clone) refuse a commit on
@@ -414,6 +423,10 @@ the work in progress. A private repository of a free account has no branch prote
     **shared file lock**, whatever the areas. The verdict names the file and the other ticket, and `tickets.py next`
     never starts two such tickets together (L-51);
   - a field ticket (the fixes of a campaign) starts once its campaign has flown.
+
+  `ticket_tree.py prepare` also refuses to start a new ticket while `origin/develop` holds a newer harness (`.claude/`)
+  than the shared branch, which is never rebased while tickets are open: the ticket would run the older start rule
+  and workflows (L-54). A ticket already open continues.
 
   `/ticket-run <ID> --force` starts anyway, on the person's decision, and logs the problems in `PROGRESS.md`. The verdict is the
   exit code of `tickets.py check`, reported unchanged by the `runner` agent: no agent judges the start rule (L-31).
@@ -458,6 +471,8 @@ last message of `ticket-plan.js`) pass.
 - Every ticket sits in one column: 📥 Backlog (a prerequisite is open), ✅ Ready, 📝 Planned (`/ticket-plan`),
   🔄 Running (`/ticket-run`), 👀 In review (pull request open), 🏁 Done (merged). The workflows move the card;
   `board.py sync` recomputes every column from the repository.
+- A run that stops records why and what comes next in the ticket's state (`ticket_tree.py stop`), and `tickets.py
+  watch` shows the ticket `✋ stopped, waits for you` with them, never running; the next run clears it (L-56).
 - The board shows in three places: the project's board view on GitHub, `python3 .claude/scripts/github/board.py show` (and
   `/board`) in a terminal, and the Claude Code status line (`.claude/scripts/reports/statusline.py`), which reads the local
   cache `.git/swarm/board.json` and never waits for GitHub.
@@ -507,6 +522,10 @@ Approved`; `grep -n 'tkt-18' .claude/rules/tickets.md` finds the summary row and
   corrected file.
 - Only files of tasks of earlier waves are sent: a file a later wave writes is missing, not wrong. The others are
   logged and left to the retry.
+- The fix rounds do the same: a fixer's `blocked_by` goes to the owner of each file in the same round, before the next
+  verification (L-58).
+- A file that **no task of the plan owns** cannot be fixed by any agent: the run stops at once, without a retry, and
+  names the plan change for the person to approve, the file and the task that needs it (TKT-3, TKT-11, L-57).
 
 **Why:** tests come first (TKT-4), so a wrong test only shows when an implementer runs it. Retrying the implementer
 alone fails the same way, and stopped T0.09 four times until the person fixed the tests by hand.

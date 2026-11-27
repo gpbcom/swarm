@@ -80,6 +80,9 @@ FINISH_LOCK = "finish.lock"
 PULL_REQUEST_ERROR = "pull_request_error"
 PATHS_KEY = "paths"
 REFUSED_KEY = "refused"
+STOPPED_KEY = "stopped"
+REASON_KEY = "reason"
+NEXT_KEY = "next"
 TICKET_SUBJECT = re.compile(r"^(T\d+\.\d{2})[: ]")
 AUTOMERGE_LABEL = "automerge"
 # L-30, L-36: ``gh pr edit`` reads the deprecated Projects (classic) and fails; the REST API does not. ``gh api`` fills in
@@ -87,6 +90,7 @@ AUTOMERGE_LABEL = "automerge"
 PULLS_API = "repos/{owner}/{repo}/pulls"
 ISSUES_API = "repos/{owner}/{repo}/issues"
 GITHUB_STATE = ".claude/github.json"
+HARNESS_FOLDER = ".claude/"
 # L-48: what /ticket-plan and /issue-plan write wherever the checkout stands, and the board cache: prepare carries these
 # changes of develop to the shared branch, where TKT-16 wants them uncommitted. Any other change is refused.
 CARRIED_PREFIXES = ("docs/tickets/", GITHUB_STATE)
@@ -395,6 +399,16 @@ def shared_start(main: Path) -> str:
     return DEVELOP
 
 
+def newer_harness(home: Path, start_point: str) -> List[str]:
+    """Return the harness files ``start_point`` changed since the shared branch left it (L-54).
+
+    The harness runs from the checked-out branch, and the shared branch is never rebased while tickets are open
+    (TKT-5): a harness fix merged on develop meanwhile would not reach the tickets started now.
+    """
+    code, out = git(home, "diff", "--name-only", f"HEAD...{start_point}", "--", HARNESS_FOLDER, check=False)
+    return [line for line in out.splitlines() if line] if code == 0 else []
+
+
 def prepare(top: Path, ticket: str) -> Dict[str, JsonData]:
     """Put the main checkout on the shared branch ``feature/tickets`` and record where the ticket starts (TKT-16)."""
     if is_worker(top):
@@ -425,12 +439,21 @@ def prepare(top: Path, ticket: str) -> Dict[str, JsonData]:
             caught_up = git(home, "merge-base", "--is-ancestor", "HEAD", start_point, check=False)[0] == 0
             if not others and caught_up:
                 git(home, "merge", "--quiet", "--ff-only", start_point, check=False)
+            newer = newer_harness(home, start_point)
+            if newer and ticket not in open_states(home):
+                raise TicketTreeError(
+                    f"{start_point} holds a newer harness than {SHARED_BRANCH} ({', '.join(newer[:5])}"
+                    f"{', ...' if len(newer) > 5 else ''}): this ticket's start rule and workflows would run the older "
+                    f"one (L-54). Let the open tickets ({', '.join(others) or 'none'}) be merged first, or bring "
+                    f"{start_point} into {SHARED_BRANCH} (the person runs `git merge {start_point}`), then run again."
+                )
         else:
             raise TicketTreeError(
                 f"The main checkout is on {branch or 'a detached HEAD'}: the tickets work on {SHARED_BRANCH}, "
                 f"started from {DEVELOP}. Switch it to {DEVELOP} or {SHARED_BRANCH}, then run again."
             )
     state = load_state(home, ticket)
+    state.pop(STOPPED_KEY, None)
     if not state.get("base"):
         state["base"] = head(home)
     if find_home(top, ticket) is None and PATHS_KEY not in state:
@@ -447,6 +470,21 @@ def prepare(top: Path, ticket: str) -> Dict[str, JsonData]:
         "integrated": integrated_ids(state),
         "paths": ticket_paths(state, ticket),
     }
+
+
+def stop(top: Path, ticket: str, reason: str, next_step: str) -> Dict[str, JsonData]:
+    """Record that the ticket's last run stopped, why and what the person does next (L-56).
+
+    The group report reads it and shows the ticket stopped instead of running; the next ``prepare`` clears it. A ticket
+    that was never prepared has no state and records nothing.
+    """
+    path = state_dir(top, ticket) / STATE_FILE
+    if not path.is_file():
+        return {"ticket": ticket, STOPPED_KEY: None}
+    state = load_state(top, ticket)
+    state[STOPPED_KEY] = {REASON_KEY: reason, NEXT_KEY: next_step}
+    save_state(top, ticket, state)
+    return {"ticket": ticket, STOPPED_KEY: state[STOPPED_KEY]}
 
 
 def status(top: Path, ticket: str) -> Dict[str, JsonData]:
@@ -1028,7 +1066,7 @@ def parser() -> argparse.ArgumentParser:
     """Return the command line parser."""
     root = argparse.ArgumentParser(description=USAGE, formatter_class=argparse.RawDescriptionHelpFormatter)
     commands = root.add_subparsers(dest="command", required=True)
-    for name in ("prepare", "home", "status", "start", "handoff", "integrate", "diff", "changes", "docs", "finish"):
+    for name in ("prepare", "home", "status", "start", "handoff", "integrate", "diff", "changes", "docs", "finish", "stop"):
         command = commands.add_parser(name)
         command.add_argument("--ticket", required=True)
         if name in ("handoff", "integrate"):
@@ -1040,6 +1078,9 @@ def parser() -> argparse.ArgumentParser:
             command.add_argument("--name-only", action="store_true")
         if name == "finish":
             command.add_argument("--no-pull-request", action="store_true")
+        if name == "stop":
+            command.add_argument("--reason", required=True)
+            command.add_argument("--next", dest="next_step", default="")
         if name == "changes":
             mode = command.add_mutually_exclusive_group()
             mode.add_argument("--write", action="store_true")
@@ -1075,6 +1116,8 @@ def main() -> int:
             output, code = changes(top, args.ticket, "write" if args.write else "check" if args.check else "print")
         elif args.command == "docs":
             output, code = documents(top, args.ticket)
+        elif args.command == "stop":
+            output = stop(top, args.ticket, args.reason, args.next_step)
         else:
             finished = finish(top, args.ticket, not args.no_pull_request)
             output = finished
