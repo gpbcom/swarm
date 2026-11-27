@@ -221,6 +221,26 @@
     "kind": "test",
     "path": "tests/harness/check_plan/test_check_plan.py",
     "what": "the checks of PLAN.md"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/check_plan/test_manifest_locks.py",
+    "what": "a task that changes a manifest owns its lock file, or the plan is refused (L-51)"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/check_plan/test_summary_counts.py",
+    "what": "a task or wave count in the summary that the graph does not hold is refused (L-45)"
+   },
+   {
+    "kind": "workflow",
+    "path": ".claude/workflows/ticket-plan.js",
+    "what": "the scribe gets the exact status line, alone on its line, and a failed check_plan.py goes back to it once (L-46)"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/wiring/test_ticket_workflows.py",
+    "what": "ticket-plan.js gives the status line and sends a failed plan check back to the scribe once (L-46)"
    }
   ],
   "TKT-4": [
@@ -302,6 +322,16 @@
     "kind": "test",
     "path": "tests/harness/wiring/test_ticket_workflows.py",
     "what": "the runner gets one command and the exit code it prints decides; environment failures do not hold back the others (L-35, L-40)"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/wiring/test_ticket_workflows.py",
+    "what": "the verifier runs checks.py in the foreground with the 600000 ms timeout, in its prompt and its instructions (L-50)"
+   },
+   {
+    "kind": "agent",
+    "path": ".claude/agents/verifier.md",
+    "what": "runs checks.py in the foreground with the Bash tool's 10-minute timeout (L-50)"
    }
   ],
   "TKT-7": [
@@ -357,6 +387,16 @@
     "kind": "test",
     "path": "tests/harness/ticket_tree/test_ticket_tree.py",
     "what": "status after a run"
+   },
+   {
+    "kind": "script",
+    "path": ".claude/scripts/tickets/tickets.py",
+    "what": "watch counts the distinct task ids of the plan that are integrated (L-49)"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/tickets/test_groups.py",
+    "what": "a task integrated twice counts once in the group report (L-49)"
    }
   ],
   "TKT-12": [
@@ -456,7 +496,7 @@
    {
     "kind": "script",
     "path": ".claude/scripts/tickets/tickets.py",
-    "what": "the start rule and the area locks"
+    "what": "the start rule, the area locks and the shared file lock (L-51)"
    },
    {
     "kind": "script",
@@ -471,7 +511,7 @@
    {
     "kind": "test",
     "path": "tests/harness/ticket_tree/test_ticket_tree.py",
-    "what": "two tickets in one checkout"
+    "what": "two tickets in one checkout; a refused file is reported on stderr and in the state, with its patch (L-51)"
    },
    {
     "kind": "test",
@@ -481,12 +521,32 @@
    {
     "kind": "test",
     "path": "tests/harness/tickets/test_tickets_area_lock.py",
-    "what": "an open ticket continuing its run passes the area lock, and next never starts two overlapping tickets (L-38)"
+    "what": "an open ticket continuing its run passes the area lock, next never starts two overlapping tickets (L-38), and a ticket waits while another open ticket's plan lists one of its shared files (L-51)"
    },
    {
     "kind": "test",
     "path": "tests/harness/roadmap_gantt/test_roadmap_gantt_areas.py",
     "what": "every area is a target-layout folder, and a folder the ticket graph still names in the old layout is read as its target-layout folder, for the lock and the board"
+   },
+   {
+    "kind": "script",
+    "path": ".claude/skills/ticket/scripts/check_plan.py",
+    "what": "the task that changes a manifest owns its lock file, so the plan lists the shared files the start rule locks (L-51)"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/ticket_tree/test_ticket_tree_prepare.py",
+    "what": "prepare carries the plans and the board cache written on develop to feature/tickets, and refuses any other change (L-48)"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/wiring/test_harness_settings.py",
+    "what": "every session runs pnpm scripts with pnpm_config_verify_deps_before_run=warn, and such a run leaves pnpm-lock.yaml alone (L-51)"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/wiring/test_ticket_workflows.py",
+    "what": "the last message of ticket-plan.js sends the ticket to the shared checkout and the group approval, never feature/<ID> (L-47)"
    }
   ],
   "TKT-17": [
@@ -550,6 +610,11 @@
     "kind": "test",
     "path": "tests/harness/tickets/test_groups.py",
     "what": "groups, done sub-issues left out"
+   },
+   {
+    "kind": "test",
+    "path": "tests/harness/wiring/test_ticket_workflows.py",
+    "what": "the last message of ticket-plan.js names the group approval and /issue-run (L-47)"
    }
   ],
   "TKT-21": [

@@ -32,8 +32,10 @@ GitFlow branch ``feature/<ID>`` (TKT-15). The main checkout stays on ``develop``
 (TKT-16). Nothing is committed before ``finish``: the ticket's work stays uncommitted in its home. Instead of commits,
 the script uses git *trees* (``git write-tree`` on a temporary index), which never appear in the history:
 
-- ``prepare`` creates the home from ``origin/develop`` (``develop`` without a remote) and moves the ticket's folder
-  ``docs/tickets/<ID>/`` into it from the checkout it runs in. Run again, it keeps the home and its work.
+- ``prepare`` puts the main checkout on ``feature/tickets`` (from ``origin/develop``, ``develop`` without a remote)
+  and records the ticket's own files. On ``develop``, it carries the uncommitted changes under ``docs/tickets/`` and
+  the board cache ``.claude/github.json`` (the plans ``/issue-plan`` wrote there, L-48), and refuses any other change.
+  Run again, it keeps the ticket's state and its work.
 - ``home`` prints the home's path.
 - ``start`` copies the home's uncommitted work into a fresh worker worktree, and records the tree it starts from in
   the worktree's git directory (``swarm-base-tree``, also read by ``.claude/hooks/check_touched.py``). A worker created
@@ -44,7 +46,8 @@ the script uses git *trees* (``git write-tree`` on a temporary index), which nev
   files to resolve by hand, then ``--resolved``), removes the integrated worktrees, and records the task ids (TKT-11).
   It prints the tree of the integrated work, which ``diff --from`` compares with later. A file that another open
   ticket already owns is never applied nor taken as this ticket's own (TKT-16, L-34): it is listed under ``refused``
-  with its owner, and the rest of the hand-off is integrated.
+  with its owner and the applied patch that keeps its change, recorded in the state, and printed on stderr (L-51);
+  the rest of the hand-off is integrated.
 - ``changes`` writes the table of changed files and line ranges between ``<!-- changes -->`` markers of
   ``EXPLAIN.md`` (TKT-14), leaving out the ticket's own folder. Every file and every line range in it is a link.
 - ``docs`` checks ``EXPLAIN.md`` and ``IMPLEMENTATION.md`` (TKT-14): the changes table is up to date, no placeholder
@@ -76,6 +79,7 @@ SHARED_BRANCH = "feature/tickets"
 FINISH_LOCK = "finish.lock"
 PULL_REQUEST_ERROR = "pull_request_error"
 PATHS_KEY = "paths"
+REFUSED_KEY = "refused"
 TICKET_SUBJECT = re.compile(r"^(T\d+\.\d{2})[: ]")
 AUTOMERGE_LABEL = "automerge"
 # L-30, L-36: ``gh pr edit`` reads the deprecated Projects (classic) and fails; the REST API does not. ``gh api`` fills in
@@ -83,6 +87,9 @@ AUTOMERGE_LABEL = "automerge"
 PULLS_API = "repos/{owner}/{repo}/pulls"
 ISSUES_API = "repos/{owner}/{repo}/issues"
 GITHUB_STATE = ".claude/github.json"
+# L-48: what /ticket-plan and /issue-plan write wherever the checkout stands, and the board cache: prepare carries these
+# changes of develop to the shared branch, where TKT-16 wants them uncommitted. Any other change is refused.
+CARRIED_PREFIXES = ("docs/tickets/", GITHUB_STATE)
 STATE_FOLDER = "swarm"
 STATE_FILE = "state.json"
 INTEGRATED_PATCH = "integrated.patch"
@@ -259,6 +266,17 @@ def is_clean(top: Path) -> bool:
     return not git(top, "status", "--porcelain", "--untracked-files=no")[1]
 
 
+def tracked_changes(top: Path) -> List[str]:
+    """Return the tracked files a checkout changed, staged or not, sorted."""
+    names = git(top, "diff", "--name-only", "HEAD")[1].splitlines()
+    return sorted({name for name in names if name})
+
+
+def is_carried(name: str) -> bool:
+    """Tell whether ``prepare`` carries a change of ``develop`` to the shared branch (L-48)."""
+    return any(name == prefix or name.startswith(prefix) for prefix in CARRIED_PREFIXES)
+
+
 def snapshot(top: Path) -> str:
     """Return the tree of every file of the checkout, tracked or not (ignored files excepted), without committing.
 
@@ -387,12 +405,21 @@ def prepare(top: Path, ticket: str) -> Dict[str, JsonData]:
         branch = current_branch(home)
         others = [other for other in open_states(home) if other != ticket]
         if branch == DEVELOP:
-            if not is_clean(home):
+            others_changed = [name for name in tracked_changes(home) if not is_carried(name)]
+            if others_changed:
                 raise TicketTreeError(
-                    f"{DEVELOP} has changes to tracked files in {home}: commit them on a feature branch or put them "
-                    f"aside, then run again. The tickets work on {SHARED_BRANCH}."
+                    f"{DEVELOP} has changes to tracked files in {home} ({', '.join(others_changed)}): commit them on a "
+                    f"feature branch or put them aside, then run again. The tickets work on {SHARED_BRANCH}; only "
+                    f"changes under {' and '.join(CARRIED_PREFIXES)} are carried there."
                 )
-            git(home, "checkout", "--quiet", "-B", SHARED_BRANCH, shared_start(home))
+            start_point = shared_start(home)
+            code, _ = git(home, "checkout", "--quiet", "-B", SHARED_BRANCH, start_point, check=False)
+            if code != 0:
+                raise TicketTreeError(
+                    f"The changes of {DEVELOP} under {' and '.join(CARRIED_PREFIXES)} in {home} touch files that "
+                    f"{start_point} changed, so they cannot be carried to {SHARED_BRANCH}: bring {DEVELOP} up to date "
+                    f"or put them aside, then run again."
+                )
         elif branch == SHARED_BRANCH:
             start_point = shared_start(home)
             caught_up = git(home, "merge-base", "--is-ancestor", "HEAD", start_point, check=False)[0] == 0
@@ -531,16 +558,26 @@ def integrate(top: Path, ticket: str, tasks: List[str], resolved: bool) -> Tuple
                 conflicts.append({"task": task, "rejects": rejects(top), "patch": str(patch)})
                 break
             git(top, *apply, str(patch))
-        for name, owner in sorted(foreign.items()):
-            refused.append({"task": task, "file": name, "owner": owner})
         applied = folder / APPLIED
         applied.mkdir(parents=True, exist_ok=True)
         number = len(list(applied.glob("*.patch"))) + 1
-        patch.replace(applied / f"{number:03d}-{slug(task)}.patch")
+        kept = applied / f"{number:03d}-{slug(task)}.patch"
+        for name, owner in sorted(foreign.items()):
+            refused.append({"task": task, "file": name, "owner": owner, "patch": str(kept)})
+            # L-51: never silent. The change stays in the applied patch, for the person to carry once ``owner`` is done.
+            print(
+                f"⚠️ {task}: {name} is owned by the open ticket {owner}, so its change was not applied (TKT-16). "
+                f"It is kept in {kept}.",
+                file=sys.stderr,
+            )
+        patch.replace(kept)
         if meta_path.is_file():
             meta_path.replace(applied / f"{number:03d}-{slug(task)}.json")
         integrated = state.get("integrated")
         state["integrated"] = [*(integrated if isinstance(integrated, list) else []), task]
+        if foreign:
+            earlier = state.get(REFUSED_KEY)
+            state[REFUSED_KEY] = [*(earlier if isinstance(earlier, list) else []), *refused[-len(foreign) :]]
         if isinstance(state.get(PATHS_KEY), list):
             state[PATHS_KEY] = sorted({*state[PATHS_KEY], *(name for name in names if name not in foreign)})
         remove_worktree(top, meta)
@@ -554,7 +591,7 @@ def integrate(top: Path, ticket: str, tasks: List[str], resolved: bool) -> Tuple
     result: Dict[str, JsonData] = {
         "integrated": done,
         "conflicts": conflicts,
-        "refused": refused,
+        REFUSED_KEY: refused,
         "remaining": remaining,
         "tree": state.get("tree") or "",
     }

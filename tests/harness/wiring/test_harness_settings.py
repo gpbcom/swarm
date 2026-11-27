@@ -1,10 +1,16 @@
 from __future__ import annotations
 
 # Standard library imports
+import json
+import os
 import re
-from typing import Dict, List
+import shutil
+import subprocess
+from pathlib import Path
+from typing import ClassVar, Dict, List
 
 # Third-party imports
+import pytest
 from pydantic import JsonValue
 
 # First-party imports
@@ -12,6 +18,21 @@ from tests.harness.wiring.helpers import read_json
 
 
 class TestHarnessSettings:
+    VERIFY_DEPS: ClassVar[str] = "pnpm_config_verify_deps_before_run"
+    NAME_KEY: ClassVar[str] = "name"
+    VERSION_KEY: ClassVar[str] = "version"
+    SCRIPTS_KEY: ClassVar[str] = "scripts"
+    DEPENDENCIES_KEY: ClassVar[str] = "dependencies"
+    SCRIPTS: ClassVar[Dict[str, str]] = {"t": "echo ran"}
+
+    def write_package(self, folder: Path, name: str, dependencies: Dict[str, str]) -> None:
+        folder.mkdir(parents=True, exist_ok=True)
+        package: Dict[str, JsonValue] = {self.NAME_KEY: name, self.VERSION_KEY: "1.0.0"}
+        package[self.SCRIPTS_KEY] = dict(self.SCRIPTS)
+        if dependencies:
+            package[self.DEPENDENCIES_KEY] = dict(dependencies)
+        (folder / "package.json").write_text(json.dumps(package), encoding="utf-8")
+
     def hook_commands(self, event: str, name: str = "") -> List[Dict[str, JsonValue]]:
         settings = read_json(".claude/settings.json")
         entries = settings.get("hooks", {}).get(event, [])  # type: ignore[attr-defined]
@@ -65,3 +86,34 @@ class TestHarnessSettings:
         status_line = settings["statusLine"]  # type: ignore[index]
         assert status_line["type"] == "command"  # type: ignore[index]
         assert ".claude/scripts/reports/statusline.py" in str(status_line["command"])  # type: ignore[index]
+
+    def test_every_session_runs_pnpm_scripts_without_installing(self) -> None:
+        env = read_json(".claude/settings.json").get("env")
+        assert isinstance(env, dict)
+        assert env.get(self.VERIFY_DEPS) == "warn"
+
+    def test_a_pnpm_script_run_with_the_settings_env_leaves_the_lock_file_alone(self, tmp_path: Path) -> None:
+        if shutil.which("pnpm") is None:
+            pytest.skip("pnpm is not installed")
+        env = read_json(".claude/settings.json").get("env")
+        assert isinstance(env, dict)
+        (tmp_path / "pnpm-workspace.yaml").write_text('packages:\n  - "*"\n', encoding="utf-8")
+        self.write_package(tmp_path, "root", {})
+        self.write_package(tmp_path / "a", "a", {})
+        self.write_package(tmp_path / "b", "b", {})
+        install = ["pnpm", "install", "--offline"]
+        subprocess.run(install, cwd=tmp_path, check=True, capture_output=True, timeout=120)
+        before = (tmp_path / "pnpm-lock.yaml").read_text(encoding="utf-8")
+        self.write_package(tmp_path / "a", "a", {"b": "workspace:*"})
+        settings_env = {str(key): str(value) for key, value in env.items()}
+        ran = subprocess.run(
+            ["pnpm", "--offline", "--filter", "a", "run", "t"],
+            cwd=tmp_path,
+            capture_output=True,
+            text=True,
+            env={**os.environ, **settings_env},
+            timeout=120,
+            check=False,
+        )
+        assert ran.returncode == 0, ran.stderr
+        assert (tmp_path / "pnpm-lock.yaml").read_text(encoding="utf-8") == before

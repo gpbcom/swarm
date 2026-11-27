@@ -26,6 +26,7 @@ from tests.harness.tickets.helpers import (
     open_ticket,
     run,
     write_plan,
+    write_plan_with_tasks,
 )
 
 
@@ -173,3 +174,10 @@ class TestGroups:
         for ticket in (NEXT, SAME_AREA, OTHER_AREA):
             assert ticket in report
         assert f"▶️ CAN START {NEXT}" in report
+
+    def test_watch_counts_a_task_integrated_again_after_its_fix_once(self, tmp_path: Path) -> None:
+        main = make_repo(tmp_path)
+        write_plan_with_tasks(main, NEXT, APPROVED, [("K01", ["a.py"]), ("K02", ["b.py"]), ("K03", ["c.py"])])
+        open_ticket(main, NEXT, integrated=["K01", "K02", "K01", "FIX-a.py", "K02"])
+        report = run(main, "watch", NEXT, "--once").stdout
+        assert "🧩 2/3 tasks" in report

@@ -29,7 +29,7 @@ These rules apply to every ticket of the roadmap (`docs/specs/roadmap/`), worked
 | [TKT-13](#tkt-13) | Hooks format the edited files and check the touched layer before a task is handed back |
 | [TKT-14](#tkt-14) | `EXPLAIN.md` explains how the work works, file by file and line by line; `IMPLEMENTATION.md` justifies each choice against its alternatives |
 | [TKT-15](#tkt-15) | GitFlow on GitHub: the tickets' branch `feature/tickets`, a pull request merged once CI passes, hooks that refuse the rest |
-| [TKT-16](#tkt-16) | Several tickets run at once in the main checkout, on one shared branch, under a start rule and area locks |
+| [TKT-16](#tkt-16) | Several tickets run at once in the main checkout, on one shared branch, under a start rule, area locks and shared file locks |
 | [TKT-17](#tkt-17) | The GitHub board mirrors the roadmap and every ticket's state, in Claude Code and VS Code too |
 | [TKT-18](#tkt-18) | The person reviews the code before anything is committed or pushed |
 | [TKT-19](#tkt-19) | A worker blocked by another task's file reports it, and that task's owner fixes it before the retry |
@@ -93,11 +93,24 @@ with every field; that view is never edited by hand, and `plan.py check` prints 
 from `depends_on`. **The person approves by changing the line to `**Plan:** 🟢 Approved`**; `/ticket-run` refuses any
 other status.
 
-**Why:** the person's single gate is the plan: once approved, the graph runs to the end without supervision.
+- **The status line is alone on its line**: exactly `**Plan:** 🟡 Awaiting approval`, with no link or other field on
+  it. A plan that fails `check_plan.py` goes back to the scribe once before `/ticket-plan` ends (L-46).
+- **A count in the summary is the graph's**: a number of tasks or waves the `## Summary` gives (`25 tasks in 12
+  waves`, `the 27 tasks`) must be the json block's (L-45).
+- **A task that changes a manifest owns its lock file**: a `package.json` (at the root, under `frontend/` or `qa/`)
+  `pnpm-lock.yaml`, a `pyproject.toml` of the uv workspace `uv.lock`, a `Cargo.toml` of `rust/` `rust/Cargo.lock`
+  (and of the desktop shell its own `Cargo.lock`), so that the plan lists the shared files the start rule locks
+  (TKT-16, L-51).
+
+**Why:** the person's single gate is the plan: once approved, the graph runs to the end without supervision. A plan
+whose summary said 27 tasks for a graph of 25 passed every check (L-45), a scribe's links on the status line kept a
+plan out of the group's approval (L-46), and a manifest changed without its lock file left the lock to whichever
+ticket owned it (L-51).
 
 **Check:** `/ticket-run` reads the status first and stops when it is not approved. `python3 .claude/skills/ticket/scripts/check_plan.py <ID>`
-prints nothing (graph, waves, file ownership and tests first): `/ticket-plan` runs it after writing `PLAN.md`, and
-`/ticket-run` runs it at the gate.
+prints nothing (graph, waves, file ownership, tests first, the summary's counts and the lock files of the manifests):
+`/ticket-plan` runs it after writing `PLAN.md`, sends a failure back to the scribe once, and `/ticket-run` runs it at
+the gate. The tests of `tests/harness/check_plan/` pass.
 
 ## <a id="tkt-4"></a>TKT-4: Parallel by design
 
@@ -164,7 +177,8 @@ never edit the same checkout; parallel tickets share one, but each commits only 
    pnpm, Terraform) and `specs.py check`; a check whose target does not exist yet is not applicable, never failed.
    **The checks run in a clean temporary worktree of the shared branch's commit that holds only the ticket's own
    changes**, never in the shared checkout: `uv` and `pnpm -r` read the whole workspace, and the other running
-   tickets' work is half built by design (tests first, TKT-4), so it would fail this ticket;
+   tickets' work is half built by design (tests first, TKT-4), so it would fail this ticket. The verifier runs
+   `checks.py` in the foreground with the Bash tool's 10-minute timeout (`600000` ms), never in the background (L-50);
 2. the **reviewer** approves the diff against `TICKET.md`, the specifications and the rules (AGENT.md, SPEC, TKT), and
    returns a short review note, written to `REVIEW.md`;
 3. `EXPLAIN.md`, `IMPLEMENTATION.md` (TKT-14), `REVIEW.md` and `PROGRESS.md` are written, with the evidence in
@@ -268,11 +282,14 @@ each with its time.
 as integrated (the integrator records it when it applies the task's hand-off, TKT-5), and starts from the first wave
 with work left. For a ticket started before TKT-5 dropped intermediate commits, a task with a commit
 `<ID> <task id>:` on `ticket/<ID>` counts as integrated too. A change to an approved plan (a task's brief or check) is approved by the person
-and recorded in 📝 Events before the re-run.
+and recorded in 📝 Events before the re-run. A task integrated again after its fix (TKT-6, TKT-19) is still one task:
+the progress of a ticket (`tickets.py watch`) counts the distinct task ids of its plan that are integrated (L-49).
 
-**Why:** a stop in wave 3 must not pay again for waves 1 and 2.
+**Why:** a stop in wave 3 must not pay again for waves 1 and 2. The group report once showed T0.19 at `32/23` tasks,
+counting every integration record.
 
-**Check:** the re-run's timings show no step for the skipped tasks.
+**Check:** the re-run's timings show no step for the skipped tasks; `tests/harness/tickets/test_groups.py` counts a
+task integrated twice once.
 
 ## <a id="tkt-12"></a>TKT-12: The review converges
 
@@ -381,16 +398,33 @@ the work in progress. A private repository of a free account has no branch prote
   documents in `docs/tickets/<ID>/`. `/ticket-plan` and `/ticket-run` of several tickets run at the same time; each
   touches only its own files, recorded in `.git/swarm/<ID>/state.json`, and commits only those when it finishes. A
   ticket started before this rule keeps its own worktree on `feature/<ID>` until it is merged.
+- `ticket_tree.py prepare` puts a main checkout on `develop` onto `feature/tickets`, carrying its uncommitted changes
+  under `docs/tickets/` and in the board cache `.claude/github.json` (the plans `/issue-plan` wrote there), and refuses
+  any other change to a tracked file (L-48).
 - **Start rule**, checked by `python3 .claude/scripts/tickets/tickets.py check --ticket <ID>` at the gate of `/ticket-run`:
   - every prerequisite of the ticket in `docs/specs/roadmap/gantt/ticket-graph.json` is **done**: merged on
     `origin/develop` (its `EXPLAIN.md` is there), or committed on `feature/tickets` (finished, its pull request open),
     since the shared branch already holds its code;
   - no open ticket changes one of the same areas (a service, a front end, a package): **area lock**, which keeps two
     tickets of the same checkout from changing the same files;
+  - no open ticket's plan, or recorded files, lists one of the **shared files** this ticket's plan lists: the lock
+    files (`pnpm-lock.yaml`, `uv.lock`, `rust/Cargo.lock`, the desktop shell's `Cargo.lock`) and the message
+    catalogues (`frontend/packages/i18n/src/messages/{en,fr,de,es}.json` and the `.pot` and `.po` files of
+    `backend/swarm-storage/src/swarm_storage/shared/i18n/locales/`), listed once in `SHARED_FILES` of `tickets.py`:
+    **shared file lock**, whatever the areas. The verdict names the file and the other ticket, and `tickets.py next`
+    never starts two such tickets together (L-51);
   - a field ticket (the fixes of a campaign) starts once its campaign has flown.
 
   `/ticket-run <ID> --force` starts anyway, on the person's decision, and logs the problems in `PROGRESS.md`. The verdict is the
   exit code of `tickets.py check`, reported unchanged by the `runner` agent: no agent judges the start rule (L-31).
+- A file another open ticket owns is never integrated (L-34): `ticket_tree.py integrate` lists it under `refused`,
+  prints it on stderr with its owner and the patch that keeps the change, and records it in the ticket's state, which
+  `tickets.py watch` shows (L-51).
+- **No pnpm script installs** (L-51): `.claude/settings.json` sets `pnpm_config_verify_deps_before_run=warn` for every
+  session and agent, so a pnpm script run in the main checkout, where several tickets' manifests sit uncommitted, never
+  rewrites `pnpm-lock.yaml`. Only `pnpm install`, by the task that owns the lock file (TKT-3), changes it.
+- The last message of `/ticket-plan` sends the ticket to this shared checkout: one approval (`tickets.py approve` for
+  a group, TKT-20), then `/ticket-run` or `/issue-run`, never a worktree of its own (L-47).
 - `python3 .claude/scripts/tickets/tickets.py list` shows the open tickets and the files each owns; `prune` removes the
   worktrees of tickets started before this rule once they are merged, and puts the main checkout back on `develop`
   once no ticket is open and `feature/tickets` is merged. VS Code's Source Control shows the uncommitted work of every
@@ -400,9 +434,18 @@ the work in progress. A private repository of a free account has no branch prote
 
 **Why:** most tickets do not need each other ([⛓️ Parallel plan](../../docs/specs/roadmap/14-parallel-plan.md)):
 running them one at a time leaves the agents idle while the person reviews. Area locks keep two tickets from changing
-the same code, so their pull requests merge without conflicts.
+the same code, so their pull requests merge without conflicts. T0.16 (the Back office) and T0.19 (Ground control) had
+no area in common and ran at once, but both added dependencies and messages. T0.19 owned `pnpm-lock.yaml` and the
+four catalogues: `integrate` kept T0.16's 132 lines of messages out of the checkout, and each ticket's clean tree
+failed `pnpm install --frozen-lockfile` on the other's lock entries, round after round. A `pnpm --filter
+@swarm/back-office test` run in the main checkout then installed by itself and put T0.16's entries back into T0.19's
+lock, which failed its push run again. The files every ticket appends to are locks of their own. Plans written on
+`develop` stopped every run of their group at `prepare` (L-48).
 
-**Check:** the tests of `tests/harness/tickets/` and `tests/harness/ticket_tree/` pass.
+**Check:** the tests of `tests/harness/tickets/` (`test_tickets_area_lock.py`: the shared file lock, in `check` and
+`next`), `tests/harness/ticket_tree/` (`test_ticket_tree_prepare.py`: what `prepare` carries from `develop`;
+`test_ticket_tree.py`: a refused file is reported) and `tests/harness/wiring/` (the settings' pnpm environment, the
+last message of `ticket-plan.js`) pass.
 
 ## <a id="tkt-17"></a>TKT-17: The board
 
@@ -490,7 +533,7 @@ logs the blockers it sends before its retry.
   theirs (TKT-3).
 - **`/issue-run <refs>`** starts, at once, every approved ticket of the group that the start rule allows
   (`tickets.py next`), with no fixed number of lanes; it follows the group with `tickets.py watch <refs>` (a report
-  every 2 minutes, TKT-9) and starts each ticket as soon as its `▶️ CAN START` line appears, until the group is merged.
+  every 2 minutes, TKT-9, whose task count is the distinct task ids of the plan that are integrated, L-49) and starts each ticket as soon as its `▶️ CAN START` line appears, until the group is merged.
   A ticket that stops is reported and the others go on; each still stops for the person's code review (TKT-18).
 
 **Why:** an epic or a phase is the unit the person thinks in; planning and approving it in one go, and letting the

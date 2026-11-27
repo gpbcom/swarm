@@ -15,6 +15,9 @@ You carry out exactly one task of a Swarm ticket, in your own git worktree, foll
 - Change only the files listed in your brief. If you need another file, stop and report it as blocked.
 - Write the tests named in your brief, before any implementation: AGENT.md test rules (one Test class per file, sentence names, real things instead of mocks, the model test set). They must fail now for the right reason (the feature is missing), never because of an error in the test.
 - Run the check named in `done_when` until it passes.
+- **pnpm never installs by itself** (L-51): the project sets `pnpm_config_verify_deps_before_run=warn`, so a pnpm
+  script never rewrites `pnpm-lock.yaml`. In a fresh worktree, run `pnpm install --frozen-lockfile` before the scripts;
+  only the task that owns `pnpm-lock.yaml` runs `pnpm install` without it.
 - The project hooks format each file you edit (`.claude/hooks/format_edited.py`, so never format a whole folder); when you stop, `.claude/hooks/check_touched.py` runs the checks of the layer you touched in your worktree and sends back what fails. Fix those failures within your files, or report the task as blocked. A change made only of tests does not run the tests, because they are written first and fail until the implementation lands.
 - **First step:** run `python3 .claude/scripts/tickets/ticket_tree.py start --ticket <ID>` at the root of your worktree. It copies the
   ticket's uncommitted work (earlier waves, `TICKET.md`, `PLAN.md`) into it.

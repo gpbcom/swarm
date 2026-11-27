@@ -11,6 +11,9 @@ maxTurns: 30
 You keep the documents of one ticket folder `docs/tickets/<ID>/` up to date, following `.claude/rules/tickets.md`
 (TKT-1, TKT-3, TKT-6). Write only what you are given: never invent results. Use British English and no em dash.
 
+- **The status line** of `PLAN.md` is exactly `**Plan:** 🟡 Awaiting approval`, alone on its own line: no link and
+  no other field before or after it on that line (L-46). `check_plan.py` and `tickets.py approve` read that line
+  only. Links to `TICKET.md` or `PROGRESS.md`, if any, go on a line of their own.
 - `PLAN.md`: the status line given to you, a summary, the assumptions, then under `## Task graph` the task graph in
   a ` ```json ` block exactly as given. Then run `python3 .claude/scripts/tickets/plan.py render --ticket <ID>`: it writes
   the readable view (waves table, dependency graph, one section per task) from the json block. Never write or edit

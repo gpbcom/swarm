@@ -68,6 +68,13 @@ this page keeps what happened, so that each problem is closed once and never met
 | [L-42](#l-42) | 2026-11-26 | Finishing one ticket made the next one's changes table stale, and its finish refused | 🟢 Closed |
 | [L-43](#l-43) | 2026-11-26 | The ticket checks run pytest on one worker, CI on two: a test only CI refuses passed every check | 🟢 Closed |
 | [L-44](#l-44) | 2026-11-26 | The 5 % bench gate refused a pull request that changes no Rust code | 🔴 Open |
+| [L-45](#l-45) | 2026-11-27 | A plan's summary gave a task count its graph did not hold, and no check saw it | 🟢 Closed |
+| [L-46](#l-46) | 2026-11-27 | A scribe put links on the status line, so the plan could not be approved | 🟢 Closed |
+| [L-47](#l-47) | 2026-11-27 | The plan workflow's last message still sends each ticket to its own worktree | 🟢 Closed |
+| [L-48](#l-48) | 2026-11-27 | Plans written on develop stopped every run of the group at its gate | 🟢 Closed |
+| [L-49](#l-49) | 2026-11-27 | The group report counted a fixed task twice, and showed 32/23 tasks | 🟢 Closed |
+| [L-50](#l-50) | 2026-11-27 | The verifier ran checks.py with the 2-minute default, then waited 10 minutes for a finished run | 🟢 Closed |
+| [L-51](#l-51) | 2026-11-27 | Two tickets running at once both needed pnpm-lock.yaml, and neither could pass its checks | 🟢 Closed |
 
 ## <a id="lessons"></a>📋 Lessons
 
@@ -806,6 +813,151 @@ this page keeps what happened, so that each problem is closed once and never met
   - run the bench job only when a Rust file changed;
   - or have the gate re-run a suspect benchmark, and refuse only when the slowdown repeats.
 - **Rule:** AGENT.md, CI/CD (`cargo bench` with the 5 % gate on pull requests).
+
+### <a id="l-45"></a>L-45: A plan's summary gave a task count its graph did not hold, and no check saw it
+
+- **Seen:** T0.16 re-planned after the layout refactor, 2026-11-27, `docs/tickets/T0.16/PLAN.md`.
+- **What happened:** the summary said "The 27 tasks" while the task graph held 25 (K01 to K27 without K19 and K25).
+  The scribe reported it, and `check_plan.py`, `plan.py check` and `ticket_refs.py check` all passed.
+- **Cause:** the planner wrote the summary before dropping two tasks, and the scribe writes the summary as given. No
+  check compares the prose of a plan with its graph.
+- **Fix:**
+  - Corrected by hand on the person's decision.
+  - [`check_plan.py`](../../.claude/skills/ticket/scripts/check_plan.py) refuses, in the `## Summary` section, a
+    count of tasks or waves the graph does not hold (`25 tasks in 12 waves`, `over 7 waves`, `the 27 tasks`); counts
+    per wave and numbers in words are left alone. Chosen over `plan.py render` writing the counts, which would leave
+    a wrong number in the prose and make every rendered plan stale. Run on the plans already merged, it finds two
+    more: T0.12 (31 tasks across 8 waves for 33 in 9) and T0.15 (19 tasks for 20).
+- **Closed:** 2026-11-27. Enforced by [`test_summary_counts.py`](../../tests/harness/check_plan/test_summary_counts.py).
+- **Rule:** [TKT-3](../../.claude/rules/tickets.md#tkt-3) (a count in the summary is the graph's).
+
+### <a id="l-46"></a>L-46: A scribe put links on the status line, so the plan could not be approved
+
+- **Seen:** T0.17 re-planned after the layout refactor, 2026-11-27, `docs/tickets/T0.17/PLAN.md`.
+- **What happened:** the status line read `**Plan:** 🟡 Awaiting approval · **Ticket:** [TICKET.md](TICKET.md) ·
+  **Progress:** [PROGRESS.md](PROGRESS.md)`. `check_plan.py` refused it, which is right, but the workflow still
+  ended "completed", and `tickets.py approve` would have left the plan out of the group's approval.
+- **Cause:** the scribe's prompt does not say that the status line holds the status alone, and the workflow does not
+  send a failed plan check back to the scribe.
+- **Fix:**
+  - The links moved to their own line by hand, on the person's decision.
+  - [`scribe.md`](../../.claude/agents/scribe.md) and the brief of
+    [`ticket-plan.js`](../../.claude/workflows/ticket-plan.js) (`STATUS_RULE`) give the exact status line, alone on
+    its line with no link or other field. A failed `check_plan.py` goes back to the scribe once (`scribe plan fix`),
+    then is checked again before the workflow ends; the json block stays the planner's.
+- **Closed:** 2026-11-27. Enforced by [`test_ticket_workflows.py`](../../tests/harness/wiring/test_ticket_workflows.py)
+  (`test_the_scribe_writes_the_status_line_alone_on_its_line`,
+  `test_a_failed_plan_check_goes_back_to_the_scribe_once_before_the_workflow_ends`).
+- **Rule:** [TKT-3](../../.claude/rules/tickets.md#tkt-3) (the status line is alone on its line).
+
+### <a id="l-47"></a>L-47: The plan workflow's last message still sends each ticket to its own worktree
+
+- **Seen:** the four plans of T0.16, T0.17, T0.19 and T0.20, 2026-11-27.
+- **What happened:** each run ended with "run /ticket-run <ID>: it gives the ticket its own worktree on
+  feature/<ID>, so other tickets can run at the same time (TKT-16)".
+- **Cause:** the `next` text of `.claude/workflows/ticket-plan.js` predates the rewrite of TKT-16, under which every
+  running ticket shares the main checkout on `feature/tickets`.
+- **Fix:** the `next` text of [`ticket-plan.js`](../../.claude/workflows/ticket-plan.js) follows TKT-16 and TKT-20:
+  approve the status line, or `tickets.py approve <refs>` once for a group, then `/ticket-run <ID>` or
+  `/issue-run <refs>`, in the main checkout on `feature/tickets`. A plan that still fails its check says so instead.
+- **Closed:** 2026-11-27. Enforced by [`test_ticket_workflows.py`](../../tests/harness/wiring/test_ticket_workflows.py)
+  (`test_the_last_message_of_ticket_plan_follows_the_shared_checkout_and_the_group_approval`, which refuses
+  `feature/${ID}` and "own worktree").
+- **Rule:** [TKT-16](../../.claude/rules/tickets.md#tkt-16) and [TKT-20](../../.claude/rules/tickets.md#tkt-20).
+
+### <a id="l-48"></a>L-48: Plans written on develop stopped every run of the group at its gate
+
+- **Seen:** `/issue-run T0.16 T0.17 T0.19 T0.20`, 2026-11-27, runs `wf_e21a0272-671` (T0.16) and `wf_eede6610-cb7`
+  (T0.19).
+- **What happened:** `/issue-plan` had written the four plans in the main checkout, uncommitted on `develop`, where it
+  stood. Both runs stopped at once: `ticket_tree.py prepare` refuses a `develop` with changes to tracked files.
+- **Cause:** `/issue-plan` and `/ticket-plan` write `docs/tickets/<ID>/` wherever the checkout is, and `prepare`
+  moves `develop` to `feature/tickets` only when it is clean, although TKT-16 wants exactly those files uncommitted
+  on `feature/tickets`.
+- **Fix:**
+  - The checkout was put on `feature/tickets` by hand (`git checkout -B feature/tickets origin/develop`, with
+    `develop` equal to `origin/develop`), as `prepare` does, then the runs were started again.
+  - [`ticket_tree.py`](../../.claude/scripts/tickets/ticket_tree.py) `prepare`, on `develop`, carries the uncommitted
+    changes under `docs/tickets/` (this page included) and in the board cache `.claude/github.json`
+    (`CARRIED_PREFIXES`) to `feature/tickets`, and still refuses any other change to a tracked file, naming it. When
+    `origin/develop` changed the same files, the checkout fails and `prepare` says so.
+- **Closed:** 2026-11-27. Enforced by
+  [`test_ticket_tree_prepare.py`](../../tests/harness/ticket_tree/test_ticket_tree_prepare.py).
+- **Rule:** [TKT-16](../../.claude/rules/tickets.md#tkt-16) (`prepare` carries the plans written on `develop`).
+
+### <a id="l-49"></a>L-49: The group report counted a fixed task twice, and showed 32/23 tasks
+
+- **Seen:** `tickets.py watch T0.16 T0.17 T0.19 T0.20`, 2026-11-27, from 10:27.
+- **What happened:** T0.19 showed `🧩 26/23`, then `32/23` tasks, and T0.16 `29/25`, once fixes and retries
+  (TKT-6, TKT-19) were integrated.
+- **Cause:** the count is the number of integration records, and a task integrated again after its fix adds a record.
+- **Fix:** [`tickets.py`](../../.claude/scripts/tickets/tickets.py) `watch` reads the task ids from the plan's json
+  block (`plan_task_ids`) and counts those found among the integrated records, so a task integrated again, or a
+  `FIX-` task, adds nothing. `resolve` and `list` show no task count.
+- **Closed:** 2026-11-27. Enforced by [`test_groups.py`](../../tests/harness/tickets/test_groups.py)
+  (`test_watch_counts_a_task_integrated_again_after_its_fix_once`).
+- **Rule:** [TKT-11](../../.claude/rules/tickets.md#tkt-11) (a task integrated twice is one task).
+
+### <a id="l-50"></a>L-50: The verifier ran checks.py with the 2-minute default, then waited 10 minutes for a finished run
+
+- **Seen:** T0.19, run `wf_fd50a6ce-232`, verification round 2, 2026-11-27, 10:38 to 10:49.
+- **What happened:** `checks.py` passed the Bash tool's 120-second default and went to the background. The checks
+  ended at 10:40, but the verifier waited for them until its own timeout, and reported at 10:49.
+- **Cause:** the verifier's instructions do not give the Bash call a timeout, and a ticket's checks (the clean tree,
+  `uv sync`, the wheel, pnpm and every suite) take several minutes.
+- **Fix:** [`verifier.md`](../../.claude/agents/verifier.md) and the brief of
+  [`ticket-run.js`](../../.claude/workflows/ticket-run.js) (`VERIFY`, used by both verifier calls) run `checks.py` in
+  the foreground with the Bash tool's timeout set to `600000` ms, never with `run_in_background`. The verdict file was
+  left out: in the foreground the verifier reads the verdict from the command's last line, as before.
+- **Closed:** 2026-11-27. Enforced by [`test_ticket_workflows.py`](../../tests/harness/wiring/test_ticket_workflows.py)
+  (`test_the_verifier_runs_checks_py_in_the_foreground_with_the_ten_minute_timeout`).
+- **Rule:** [TKT-6](../../.claude/rules/tickets.md#tkt-6) (the verifier runs `checks.py` with the 10-minute timeout).
+
+### <a id="l-51"></a>L-51: Two tickets running at once both needed pnpm-lock.yaml, and neither could pass its checks
+
+- **Seen:** T0.16 (run `wf_70b03198-2ef`) and T0.19 (run `wf_fd50a6ce-232`), 2026-11-27, verification.
+- **What happened:** the main checkout's `pnpm-lock.yaml` held the new dependencies of both tickets. T0.19 owned the
+  file, so its clean tree had T0.16's back-office entries without T0.16's `package.json`: "3 dependencies removed".
+  T0.16 could not own the file, so its clean tree had its `package.json` without the lock entries: "3 dependencies
+  added". Each fix task changed no file, and both tickets stopped after their fix rounds.
+- **Also:** the four message catalogues of `@swarm/i18n` (`frontend/packages/i18n/src/messages/*.json`). T0.19 owned
+  them for one map label, so `ticket_tree.py integrate` kept T0.16's 132 lines of Back office messages out of the
+  checkout (they stay in `.git/swarm/T0.16/applied/012-K12.patch`), and T0.16's tests ran with missing translations.
+- **And then:** at 11:07 a `pnpm --filter @swarm/back-office test` run in the main checkout rewrote `pnpm-lock.yaml`:
+  pnpm 12 checks the dependencies before a script and installs them, so it put T0.16's back-office entries back
+  into T0.19's lock, and T0.19's push run failed its frozen-lockfile check again at 12:06.
+- **Cause:** the start rule's area lock (TKT-16) covers apps, front ends and packages, not the shared files that
+  several tickets append to: the lock files (`pnpm-lock.yaml`, `uv.lock`, `rust/Cargo.lock`) and the message
+  catalogues. A file owned by one open ticket is refused to every other, with no report to the person. And a pnpm
+  script run where several tickets' manifests sit uncommitted rewrites the shared lock file by itself.
+- **Fix:**
+  - [`check_plan.py`](../../.claude/skills/ticket/scripts/check_plan.py) (`LOCK_FILES`): a task that changes a
+    `package.json` (root, `frontend/`, `qa/`) owns `pnpm-lock.yaml`, a `pyproject.toml` of the uv workspace `uv.lock`,
+    a `Cargo.toml` of `rust/` `rust/Cargo.lock`, the desktop shell's its own `Cargo.lock`; a plan that breaks it is
+    refused, naming the task and the lock file. The open plans of T0.16, T0.17, T0.19 and T0.20 already pass.
+  - [`tickets.py`](../../.claude/scripts/tickets/tickets.py) (`SHARED_FILES`, one constant): the lock files, the four
+    FormatJS catalogues and the `.pot` and `.po` files of `swarm_storage` are a **shared file lock**. `check` refuses a
+    ticket while another open ticket's plan, or its recorded files, lists one of the shared files its own plan lists,
+    naming the file and the ticket; `next` never starts two such tickets together. Chosen over regenerating the lock
+    in the clean tree: that would hide the other ticket's entries in the checkout and still leave the catalogues,
+    which no tool regenerates, to one ticket.
+  - [`ticket_tree.py`](../../.claude/scripts/tickets/ticket_tree.py) `integrate` already listed a refused file under
+    `refused` (L-34), and the workflow logged it. It now also prints it on stderr with its owner and the applied patch
+    that keeps the change, and records it in the ticket's state, which `tickets.py watch` shows.
+  - [`.claude/settings.json`](../../.claude/settings.json) sets `pnpm_config_verify_deps_before_run=warn` for every
+    session and agent: a pnpm script warns about missing dependencies and never installs, so it never rewrites the
+    lock. `frontend-implementer` and `test-writer` run `pnpm install --frozen-lockfile` in a fresh worktree, and only
+    the task that owns the lock runs `pnpm install` without it. A run from the person's own terminal is not covered:
+    `pnpm-workspace.yaml` could set `verifyDepsBeforeRun: warn` for every checkout, CI included, which is the person's
+    choice.
+- **Closed:** 2026-11-27. Enforced by [`test_manifest_locks.py`](../../tests/harness/check_plan/test_manifest_locks.py),
+  [`test_tickets_area_lock.py`](../../tests/harness/tickets/test_tickets_area_lock.py) (the shared file lock in `check`
+  and `next`), [`test_ticket_tree.py`](../../tests/harness/ticket_tree/test_ticket_tree.py)
+  (`test_integrate_refuses_a_file_another_open_ticket_owns`) and
+  [`test_harness_settings.py`](../../tests/harness/wiring/test_harness_settings.py) (a pnpm 12 script run with the
+  settings' environment leaves the lock file alone).
+- **Rule:** [TKT-16](../../.claude/rules/tickets.md#tkt-16) (the shared file lock, no pnpm script installs) and
+  [TKT-3](../../.claude/rules/tickets.md#tkt-3) (a task that changes a manifest owns its lock file).
 
 ## <a id="already-ruled"></a>📜 Lessons already turned into rules
 

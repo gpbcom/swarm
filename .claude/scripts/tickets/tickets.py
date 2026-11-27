@@ -87,7 +87,22 @@ TICKET_ID = re.compile(r"^T\d+\.\d{2}$")
 EPIC_ID = re.compile(r"^E\d+\.\d+$")
 PHASE_ID = re.compile(r"^P\d+$")
 ISSUE_REF = re.compile(r"^#(\d+)$")
-TASK_ID = re.compile(r'"id":\s*"K\d+"')
+PLAN_JSON = re.compile(r"^```json[ \t]*\n(.*?)^```[ \t]*$", re.MULTILINE | re.DOTALL)
+LANGUAGES = ("en", "fr", "de", "es")
+PYTHON_LOCALES = "backend/swarm-storage/src/swarm_storage/shared/i18n/locales"
+# L-51: the files every ticket appends to, whatever its area: the lock files and the message catalogues. ``integrate``
+# gives a file to one open ticket only, so two open tickets whose plans list one of them can never both pass their
+# checks: a ticket waits while another open ticket's plan lists one of its shared files (TKT-16). check_plan.py makes
+# the task that changes a manifest own its lock file, so that the plan lists it.
+SHARED_FILES = (
+    "pnpm-lock.yaml",
+    "uv.lock",
+    "rust/Cargo.lock",
+    "frontend/apps/desktop/src-tauri/Cargo.lock",
+    *(f"frontend/packages/i18n/src/messages/{language}.json" for language in LANGUAGES),
+    f"{PYTHON_LOCALES}/swarm.pot",
+    *(f"{PYTHON_LOCALES}/{language}/LC_MESSAGES/swarm.po" for language in LANGUAGES),
+)
 GIT_CONFIG = {"core.hooksPath": HOOKS_PATH, "push.autoSetupRemote": "true", "fetch.prune": "true"}
 PLAN_AWAITING = "**Plan:** 🟡 Awaiting approval"
 PLAN_APPROVED = "**Plan:** 🟢 Approved"
@@ -188,6 +203,40 @@ def plan_state(main: Path, ticket: str) -> str:
     return "approved" if PLAN_APPROVED in text else "planned"
 
 
+def plan_tasks(main: Path, ticket: str) -> List[Dict[str, object]]:
+    """Return the tasks of the json block of the ticket's PLAN.md, or an empty list without a readable one."""
+    plan = folder_of(main, ticket) / "PLAN.md"
+    if not plan.is_file():
+        return []
+    for block in reversed(PLAN_JSON.findall(plan.read_text(encoding="utf-8"))):
+        try:
+            tasks = json.loads(block)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(tasks, list) and all(isinstance(task, dict) for task in tasks):
+            return tasks
+    return []
+
+
+def plan_task_ids(main: Path, ticket: str) -> List[str]:
+    """Return the distinct task ids of the ticket's plan, in order."""
+    return list(dict.fromkeys(str(task.get("id")) for task in plan_tasks(main, ticket) if task.get("id")))
+
+
+def shared_files(main: Path, ticket: str) -> Set[str]:
+    """Return the shared files (L-51) the ticket's plan lists in its tasks' files, or that its state already owns."""
+    listed: Set[str] = set()
+    for task in plan_tasks(main, ticket):
+        files = task.get("files")
+        if isinstance(files, list):
+            listed.update(str(path) for path in files)
+    state = load_state(main, ticket)
+    owned = state.get("paths")
+    if isinstance(owned, list):
+        listed.update(str(path) for path in owned)
+    return {path for path in listed if path in SHARED_FILES}
+
+
 ##############
 # Start rule #
 ##############
@@ -230,6 +279,12 @@ def problems(main: Path, ticket: str, done: Optional[Set[str]] = None) -> List[s
         shared = shared_areas(mine, theirs)
         if shared:
             found.append(f"{other} is open in {home} and changes {', '.join(shared)}: wait for it (area lock).")
+        both = sorted(shared_files(main, ticket) & shared_files(main, other))
+        if both:
+            found.append(
+                f"{other} is open in {home} and its plan lists {', '.join(both)}, which {ticket}'s plan lists too: "
+                f"wait for it (shared file lock)."
+            )
     return found
 
 
@@ -356,6 +411,12 @@ def without_overlaps(main: Path, startable: List[str]) -> List[str]:
         clash = [o for o in kept if shared_areas(mine, areas(str(tickets.get(o, {}).get("area", ""))))]
         if clash:
             print(f"note: {ticket} waits for {clash[0]}, which starts now and changes the same area.", file=sys.stderr)
+            continue
+        files = shared_files(main, ticket)
+        clash = [o for o in kept if files & shared_files(main, o)]
+        if clash:
+            both = ", ".join(sorted(files & shared_files(main, clash[0])))
+            print(f"note: {ticket} waits for {clash[0]}, which starts now and also lists {both}.", file=sys.stderr)
             continue
         kept.append(ticket)
     return kept
@@ -522,10 +583,15 @@ def report(main: Path, refs: List[str], group: List[str]) -> Tuple[str, List[str
         ticket, state = str(row["ticket"]), str(row["state"])
         detail = LABEL[state]
         if state in ("running", "code_review"):
-            plan = folder_of(main, ticket) / "PLAN.md"
-            total = len(TASK_ID.findall(plan.read_text(encoding="utf-8"))) if plan.is_file() else 0
-            done_tasks = len(load_state(main, ticket).get("integrated") or [])  # type: ignore[arg-type]
+            # L-49: a task integrated again after its fix (TKT-6, TKT-19) is one task: count the plan's distinct ids.
+            planned = plan_task_ids(main, ticket)
+            total = len(planned)
+            integrated = {str(task) for task in load_state(main, ticket).get("integrated") or []}  # type: ignore[union-attr]
+            done_tasks = len(integrated & set(planned))
             detail += f" · 🧩 {done_tasks}/{total or '?'} tasks · 📄 {len(ticket_paths(load_state(main, ticket), ticket))} files"
+            refused = load_state(main, ticket).get("refused")
+            if isinstance(refused, list) and refused:
+                detail += f" · ⚠️ {len(refused)} change(s) refused: another open ticket owns the file (L-51)"
         if state == "review":
             detail += pull_request_line(main, ticket)
         if row["waits_for"]:

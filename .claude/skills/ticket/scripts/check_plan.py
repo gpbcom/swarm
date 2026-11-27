@@ -26,6 +26,25 @@ IMPLEMENTERS = ("implementer", "rust-implementer", "frontend-implementer")
 FRONT_END_AGENT = "frontend-implementer"
 CAPTURE_AGENT = "mockup-writer"
 USAGE = "usage: check_plan.py <ID> [--root <repo root>] [--min-parallel N]"
+# L-51: a task that changes a manifest also changes its lock file, so it owns it, and the start rule of tickets.py sees
+# the lock file among the plan's shared files (TKT-3, TKT-16). Each entry: the manifests it covers, then its lock file.
+LOCK_FILES = (
+    (re.compile(r"^(?:(?:frontend|qa)/(?:.+/)?)?package\.json$"), "pnpm-lock.yaml"),
+    (re.compile(r"^(?:(?:backend|scripts)/(?:.+/)?)?pyproject\.toml$"), "uv.lock"),
+    (re.compile(r"^rust/(?:.+/)?Cargo\.toml$"), "rust/Cargo.lock"),
+    (
+        re.compile(r"^frontend/apps/desktop/src-tauri/(?:.+/)?Cargo\.toml$"),
+        "frontend/apps/desktop/src-tauri/Cargo.lock",
+    ),
+)
+# L-45: the counts a summary gives must be the graph's. "25 tasks in 12 waves", "over 7 waves", "The 27 tasks".
+SUMMARY_HEADING = re.compile(r"^## (?:\S+ )?Summary[ \t]*$", re.MULTILINE)
+NEXT_SECTION = re.compile(r"^## |^<!-- plan:graph -->", re.MULTILINE)
+TASK_COUNTS = (
+    re.compile(r"\b(\d+) tasks (?:in|over|across) \d+ waves\b", re.IGNORECASE),
+    re.compile(r"\bthe (\d+) tasks\b(?! (?:of|in) (?:wave|the)\b)", re.IGNORECASE),
+)
+WAVE_COUNT = re.compile(r"\b(?:in|over|across) (\d+) waves\b", re.IGNORECASE)
 Task = Dict[str, object]
 
 
@@ -57,6 +76,64 @@ def check_fields(task: Task, label: str, known: Set[str]) -> List[str]:
     wave = task.get("wave")
     if not is_int(wave) or wave < 1:  # type: ignore[operator]
         problems.append(f"task {label}: wave must be an integer of 1 or more: {wave!r}.")
+    return problems
+
+
+def lock_of(path: str) -> Optional[str]:
+    """Return the lock file a manifest's change also changes, or None when ``path`` is no manifest (L-51)."""
+    for manifest, lock in LOCK_FILES:
+        if manifest.match(path):
+            return lock
+    return None
+
+
+def check_locks(tasks: List[Task]) -> List[str]:
+    """A task that changes a manifest owns its lock file too, so that no other task or ticket changes it (L-51)."""
+    problems: List[str] = []
+    for task in tasks:
+        files = task.get("files")
+        if not isinstance(files, list):
+            continue
+        owned = {f for f in files if isinstance(f, str)}
+        for path in sorted(owned):
+            lock = lock_of(path)
+            if lock and lock not in owned:
+                problems.append(
+                    f"task {task.get('id')}: changes {path!r} but does not own its lock file {lock!r}: add it to the "
+                    f"task's files (TKT-3)."
+                )
+    return problems
+
+
+def summary_of(text: str) -> str:
+    """Return the text of the plan's Summary section, or an empty string."""
+    heading = SUMMARY_HEADING.search(text)
+    if not heading:
+        return ""
+    rest = text[heading.end() :]
+    end = NEXT_SECTION.search(rest)
+    return rest[: end.start()] if end else rest
+
+
+def check_counts(text: str, tasks: List[Task]) -> List[str]:
+    """Refuse a task or wave count in the summary that differs from the task graph (L-45)."""
+    summary = summary_of(text)
+    total = len({str(t.get("id")) for t in tasks})
+    waves = len({t.get("wave") for t in tasks if is_int(t.get("wave"))})
+    problems: List[str] = []
+    for pattern in TASK_COUNTS:
+        for found in pattern.finditer(summary):
+            if int(found.group(1)) != total:
+                problems.append(
+                    f"the summary says {found.group(0)!r} but the task graph holds {total} tasks: the json block is "
+                    f"the only source of the graph (TKT-3)."
+                )
+    for found in WAVE_COUNT.finditer(summary):
+        if int(found.group(1)) != waves:
+            problems.append(
+                f"the summary says {found.group(0)!r} but the task graph has {waves} waves: the json block is the "
+                f"only source of the graph (TKT-3)."
+            )
     return problems
 
 
@@ -183,6 +260,8 @@ def check_plan(path: Path, min_parallel: int) -> List[str]:
         problems.append("the json block must be an array of objects.")
         return problems
     problems.extend(check_graph(data, min_parallel))
+    problems.extend(check_locks(data))
+    problems.extend(check_counts(text, data))
     problems.extend(check_capture(path, data))
     return problems
 

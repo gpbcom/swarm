@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 # Standard library imports
+import json
 from pathlib import Path
 
 # Third-party imports
@@ -38,6 +39,7 @@ from tests.harness.ticket_tree.helpers import (
     make_repo,
     run,
     run_json,
+    state_path,
     task_args,
     worker_writes,
 )
@@ -326,8 +328,18 @@ class TestTicketTree:
     def test_integrate_refuses_a_file_another_open_ticket_owns(self, tmp_path: Path) -> None:
         main = two_tickets(tmp_path)
         worker_writes(main, "w3", "K02", {"src/theirs.py": "y = 3\n", "src/mine2.py": "z = 1\n"})
-        result = run_json(main, "integrate", "--task", "K02")
-        assert result[REFUSED_KEY] == [{"task": "K02", "file": "src/theirs.py", "owner": OTHER}]
+        ran = run(main, "integrate", "--task", "K02")
+        assert ran.returncode == 0, ran.stderr
+        result = json.loads(ran.stdout)
+        kept = str(main / ".git" / "swarm" / TICKET / "applied" / "002-K02.patch")
+        refusal = {"task": "K02", "file": "src/theirs.py", "owner": OTHER, "patch": kept}
+        assert result[REFUSED_KEY] == [refusal]
+        assert "src/theirs.py" in ran.stderr
+        assert OTHER in ran.stderr
+        assert kept in ran.stderr
+        assert "src/theirs.py" in Path(kept).read_text(encoding="utf-8")
+        state = json.loads(state_path(main, TICKET).read_text(encoding="utf-8"))
+        assert state[REFUSED_KEY] == [refusal]
         assert result[INTEGRATED_KEY] == ["K02"]
         assert (main / "src" / "theirs.py").read_text(encoding="utf-8") == "y = 2\n"
         assert (main / "src" / "mine2.py").is_file()
