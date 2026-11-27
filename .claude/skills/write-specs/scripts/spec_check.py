@@ -360,7 +360,7 @@ class Checker:
             if info is None:
                 self.error(png, 12, "not a PNG file.")
             elif png_colour_type(png) != PALETTE_TYPE:
-                self.error(png, 13, "not a 256-colour palette PNG: run specs.py render --all, or palettise the screenshot.")
+                self.error(png, 13, "not a 256-colour palette PNG: run specs.py palettise <UC-ID> for a screenshot, or specs.py render --all for a mock-up.")
             elif size and tuple(info) != size:
                 self.error(png, 13, f"is {info[0]} x {info[1]} px, the visual identity sets {size[0]} x {size[1]} px.")
             mockup = mockup_for(png)

@@ -58,6 +58,14 @@ To build the image of an app locally, run this from the repository root, because
 docker build -f backend/apps/<app>/Dockerfile -t <name>:local .
 ```
 
+The Playwright tests of the Back office run against its image, from the root:
+
+```bash
+docker build -f frontend/apps/back-office/Dockerfile -t ghcr.io/gpbcom/swarm/back-office:local .
+SWARM_IMAGE_TAG=local pnpm --filter @swarm/back-office run e2e
+SWARM_IMAGE_TAG=local pnpm --filter @swarm/back-office run capture
+```
+
 To run the Playwright suite of `qa/e2e` against the images of a pipeline run, give the tag of those images:
 
 ```bash
@@ -379,6 +387,8 @@ and TypeScript with a Tauri desktop shell, images go to GHCR, and Argo CD deploy
   ships.
 - The shared Playwright configuration is `@swarm/e2e` in `qa/e2e`. It refuses a `webServer`, and it needs
   `SWARM_IMAGE_TAG`, the tag of the images to test.
+- The visual tests compare each screen with its PNG of `docs/specs/screens` in light and dark mode, and a capture
+  replaces a mock-up with the screen the application shows: see [`qa/README.md`](qa/README.md#visual-tests-and-the-capture-of-screens).
 
 **CI/CD**
 

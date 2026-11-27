@@ -25,6 +25,9 @@ class TestComposeE2e:
     GROUND_CONTROL: ClassVar[str] = "ground-control"
     PORTS_KEY: ClassVar[str] = "ports"
     GROUND_CONTROL_PORT: ClassVar[str] = "8180:8080"
+    BACK_OFFICE: ClassVar[str] = "back-office"
+    BACK_OFFICE_PORT: ClassVar[str] = "127.0.0.1:8181:8080"
+    PORT_SEPARATOR: ClassVar[str] = ":"
     DOCKERFILE: ClassVar[str] = "Dockerfile"
     APPS_FOLDER: ClassVar[str] = "backend/apps"
     FRONTEND_APPS_FOLDER: ClassVar[str] = "frontend/apps"
@@ -92,3 +95,17 @@ class TestComposeE2e:
         published = cast(List[JsonValue], services[self.GROUND_CONTROL].get(self.PORTS_KEY) or [])
         ports = [str(port).split("/")[0] for port in published]
         assert any(port.endswith(self.GROUND_CONTROL_PORT) for port in ports)
+
+    def test_the_back_office_is_served_on_its_local_port(self) -> None:
+        services = self.services()
+        assert self.BACK_OFFICE in services
+        published = cast(List[JsonValue], services[self.BACK_OFFICE].get(self.PORTS_KEY) or [])
+        ports = [str(port).split("/")[0] for port in published]
+        assert self.BACK_OFFICE_PORT in ports
+
+    def test_no_two_services_publish_the_same_host_port(self) -> None:
+        published: List[str] = []
+        for service in self.services().values():
+            for port in cast(List[JsonValue], service.get(self.PORTS_KEY) or []):
+                published.append(str(port).split("/")[0].split(self.PORT_SEPARATOR)[-2])
+        assert len(published) == len(set(published)), published

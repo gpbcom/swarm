@@ -11,7 +11,8 @@ from spec_check import Checker
 from spec_model import (FIXED_FILES, FIXED_PAGES, IDENTITY_CSS, TOKENS_CSS, IDENTITY_GROUP, ID_FILE, KINDS, MODES, MOCKUPS,
                         ROOT, SPECS, TEMPLATES, discover, flowchart, identity_css, nodes, parse_tokens, screen_size,
                         slugify)
-from spec_screens import SOURCE_KEY, find_browser, mockups, png_for, png_info, render, source_hash
+from spec_screens import (PALETTE_TYPE, SOURCE_KEY, find_browser, mockups, palettise, png_colour_type, png_for, png_info,
+                          render, screen_pngs, source_hash)
 
 USAGE = """Build and check the specifications under ``docs/specs`` against the SPEC rules (``.claude/rules/specs.md``).
 
@@ -20,6 +21,7 @@ Usage, from anywhere:
     python3 .claude/skills/write-specs/scripts/specs.py new fs|uc|br "Title"
     python3 .claude/skills/write-specs/scripts/specs.py mockup UC-001 A1
     python3 .claude/skills/write-specs/scripts/specs.py render [--all] [UC-001 ...]
+    python3 .claude/skills/write-specs/scripts/specs.py palettise [UC-001 ...]
     python3 .claude/skills/write-specs/scripts/specs.py build
     python3 .claude/skills/write-specs/scripts/specs.py check
 
@@ -27,6 +29,7 @@ Usage, from anywhere:
 ``new``     creates the next feature (FS), use case (UC) or business rule (BR) from its template, then builds.
 ``mockup``  creates the HTML mock-up of one state (a flow chart node) of a use case, to draw with components.css.
 ``render``  builds, then renders every mock-up whose PNG is missing or out of date (all of them with --all).
+``palettise`` turns the RGB screenshots of the groups named (all without a group) into 256-colour palette PNGs.
 ``build``   rewrites the generated content: summaries, navigation, page list, matrix, back links, palette, the
             flow chart colours, visual-identity.css and frontend/packages/tokens/src/tokens.css. It never touches other text.
 ``check``   prints one line per breach, ``<file>: SPEC-<n>: <message>``, and exits 1. It prints nothing and exits 0
@@ -123,6 +126,21 @@ def command_render(args: List[str]) -> int:
     return 1 if failures else 0
 
 
+def command_palettise(groups: List[str]) -> int:
+    unknown = [group for group in groups if not (SPECS / "screens" / group).is_dir()]
+    if unknown:
+        print(f"unknown group: {', '.join(unknown)}.", file=sys.stderr)
+        return 1
+    for png in screen_pngs():
+        if groups and png.parent.name not in groups:
+            continue
+        if png_colour_type(png) in (None, PALETTE_TYPE):
+            continue
+        palettise(png)
+        print(f"palettised {show(png)}")
+    return 0
+
+
 def command_build() -> int:
     pages, _ = discover()
     tokens = parse_tokens(pages)
@@ -157,6 +175,8 @@ def main() -> int:
             return command_mockup(group, node_id)
         case ["render", *args]:
             return command_render(args)
+        case ["palettise", *groups]:
+            return command_palettise(groups)
         case ["build"]:
             return command_build()
         case ["check"]:

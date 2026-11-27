@@ -212,9 +212,15 @@ importers:
       '@eslint/js':
         specifier: 10.0.1
         version: 10.0.1(eslint@10.15.0(supports-color@10.2.2))
+      '@playwright/test':
+        specifier: 1.65.1
+        version: 1.65.1
       '@swarm/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@swarm/e2e':
+        specifier: workspace:*
+        version: link:../../../qa/e2e
       '@testing-library/dom':
         specifier: 10.4.2
         version: 10.4.2

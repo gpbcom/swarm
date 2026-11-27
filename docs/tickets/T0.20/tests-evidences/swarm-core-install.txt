@@ -1,0 +1,10 @@
+$ uv pip install --no-deps --python /tmp/swarm-checks-l4hd_kc5/.venv/bin/python /tmp/swarm-core-wheel-h6dmanub/swarm_core-0.1.0-cp312-cp312-linux_x86_64.whl
+(cwd ., on the ticket's own files only)
+
+Resolved 1 package in 1ms
+Prepared 1 package in 5ms
+warning: Failed to hardlink files; falling back to full copy. This may lead to degraded performance.
+         If the cache and target directories are on different filesystems, hardlinking may not be supported.
+         If this is intentional, set `export UV_LINK_MODE=copy` or use `--link-mode=copy` to suppress this warning.
+Installed 1 package in 0.87ms
+ + swarm-core==0.1.0 (from file:///tmp/swarm-core-wheel-h6dmanub/swarm_core-0.1.0-cp312-cp312-linux_x86_64.whl)

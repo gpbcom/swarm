@@ -17,6 +17,7 @@ TOKENS_DIR_RELATIVE = Path("frontend/packages/tokens/src")
 TOKENS_CSS_RELATIVE = TOKENS_DIR_RELATIVE / "tokens.css"
 BUILD = "build"
 CHECK = "check"
+PALETTISE = "palettise"
 ENCODING = "utf-8"
 
 
@@ -31,10 +32,10 @@ def copy_project(destination: Path) -> Path:
     return destination
 
 
-def run_specs(root: Path, command: str) -> subprocess.CompletedProcess[str]:
-    """Run ``specs.py <command>`` of the copied tree, from its root."""
+def run_specs(root: Path, command: str, *args: str) -> subprocess.CompletedProcess[str]:
+    """Run ``specs.py <command> [args]`` of the copied tree, from its root."""
     return subprocess.run(
-        [sys.executable, str(root / SCRIPT_RELATIVE), command],
+        [sys.executable, str(root / SCRIPT_RELATIVE), command, *args],
         cwd=root,
         capture_output=True,
         text=True,
