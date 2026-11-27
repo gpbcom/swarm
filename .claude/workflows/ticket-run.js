@@ -181,6 +181,14 @@ function inHome(text) {
 // The tree of the integrated, uncommitted work after the last integration (TKT-5): the confirm-fixes review diffs from it.
 let currentTree = ''
 function note(event, by, result) { progress.push(`| ${event} | ${by} | ${result} |`) }
+// L-56: a run that stops records it in the ticket's state, so that the group report shows the ticket waiting for the
+// person instead of running. The next prepare clears it. Quotes, $ and backquotes are dropped: the text is a shell word.
+function shellText(text) { return JSON.stringify(String(text || '').replace(/["$`\\]/g, '').slice(0, 300)) }
+async function stopRun(result) {
+  await runExactly('', `python3 .claude/scripts/tickets/ticket_tree.py stop --ticket ${ID} --reason ${shellText(result.stopped)} --next ${shellText(result.next)}`,
+    { exit: 0, quiet: false }, { label: `record the stop ${ID}` })
+  return result
+}
 
 function workerPrompt(t, extra) {
   return `Ticket ${ID}, task ${t.id}: ${t.title}.\nThe ticket's work lives uncommitted in the main checkout ${HOME || 'on feature/tickets'} (TKT-5, TKT-16), not in yours. ` +
@@ -309,7 +317,28 @@ function groupFixes(items) {
   }
   return groups.map(g => ({ task: mergeTasks(g.tasks), items: g.items }))
 }
-async function fixRound(items, label) {
+// L-57: the tasks of the plan that own a file. ownersOf also makes up a FIX task for a file no task owns, which only a
+// plan change approved by the person can give to a task.
+function planOwners(file) {
+  return ownersOf({ file }).filter(o => tasks.includes(o))
+}
+// TKT-19: the files a worker reported in blocked_by, as problems for their owners. The blocked task is never named in
+// check, so that ownersOf does not send the problem back to it.
+function blockerItems(results) {
+  return results.flatMap(r => ((r.result && r.result.blocked_by) || []).map(b => ({
+    file: b.file, by: r.task.id, check: 'a file that stops another task', detail: `${b.problem} (reported by ${r.task.id}, which it blocks)`,
+  })))
+}
+// L-57: a blocker in a file that no task of the plan owns cannot be fixed by any agent, and a retry fails the same way:
+// the run stops at once and names the plan change for the person to approve (TKT-3, TKT-11).
+function unownedBlockers(items) {
+  return items.filter(b => normalise(b.file).includes('/') && planOwners(b.file).length === 0)
+}
+function planChange(unowned) {
+  return unowned.map(b => `add ${normalise(b.file)} to the files of ${b.by}`).join('; ')
+}
+let unownedInFixes = []
+async function fixRound(items, label, depth = 0) {
   const groups = groupFixes(items)
   log(`${label}: ${items.length} problem(s) sent to ${groups.length} fixer(s): ${groups.map(g => g.task.id).join(', ')}`)
   const results = await limited(groups, MAX_PARALLEL, g => {
@@ -326,6 +355,23 @@ async function fixRound(items, label) {
   const handed = results.filter(r => !r.direct)
   collect(handed)
   await integrate(handed, label)
+  // L-58: a fixer blocked by a file of another task names it in blocked_by. That file goes to its owner in the same
+  // round, before the next verification, as the waves do (TKT-19); otherwise every round failed the same way.
+  const fixers = handed.map(r => r.task.id)
+  const reported = blockerItems(handed)
+  const unowned = unownedBlockers(reported)
+  if (unowned.length) {
+    unownedInFixes = unownedInFixes.concat(unowned)
+    log(`${label}: ${unowned.length} blocking file(s) no task of the plan owns: ${unowned.map(b => b.file).join(', ')} (L-57)`)
+  }
+  const onward = reported.filter(b => !unowned.includes(b) && planOwners(b.file).some(o => !fixers.includes(o.id)))
+  if (onward.length && depth === 0) {
+    log(`${label}: ${onward.length} file(s) reported by the fixers go to their owners in this round (L-58): ${onward.map(b => b.file).join(', ')}`)
+    note(`${label}: blocking file(s) of the fixers sent to their owners: ${onward.map(b => b.file).join(', ')}`, 'workers', '🔁')
+    await fixRound(onward, label, depth + 1)
+  } else if (onward.length) {
+    log(`${label}: ${onward.length} file(s) reported by the fixers of the fixers are left to the next verification`)
+  }
 }
 
 // Gate ---------------------------------------------------------------------------------------------------------
@@ -341,13 +387,13 @@ const gate = await agent(
   { agentType: 'scribe', schema: GATE, label: `gate ${ID}` },
 )
 if (!gate || !gate.approved) {
-  return { ticket: ID, stopped: `Plan not approved (${gate ? gate.status : 'PLAN.md unreadable'}). Approve it in docs/tickets/${ID}/PLAN.md first.` }
+  return await stopRun({ ticket: ID, stopped: `Plan not approved (${gate ? gate.status : 'PLAN.md unreadable'}). Approve it in docs/tickets/${ID}/PLAN.md first.` })
 }
 const planCheck = await runExactly('', `python3 .claude/skills/ticket/scripts/check_plan.py ${ID}`, { exit: 0, quiet: true },
   { label: `plan check ${ID}` },
 )
 if (!planCheck || !planCheck.passed) {
-  return { ticket: ID, stopped: 'PLAN.md fails check_plan.py', problems: planCheck ? planCheck.problems : ['check_plan.py did not report'] }
+  return await stopRun({ ticket: ID, stopped: 'PLAN.md fails check_plan.py', problems: planCheck ? planCheck.problems : ['check_plan.py did not report'] })
 }
 // TKT-16: the start rule. Every prerequisite merged on develop, no open ticket on the same areas, no field ticket
 // before its campaign. --force (the person's choice) logs the problems and goes on. TKT-23: a ticket already done
@@ -356,8 +402,8 @@ const startRule = await runExactly('', `python3 .claude/scripts/tickets/tickets.
   { exit: 0, quiet: false }, { label: `start rule ${ID}` },
 )
 if (!startRule || !startRule.passed) {
-  return { ticket: ID, stopped: 'The start rule refuses this ticket for now (TKT-16)', problems: startRule ? startRule.problems : ['tickets.py check did not report'],
-    next: `Wait for what it names, or run /ticket-run ${ID} --force to start anyway.` }
+  return await stopRun({ ticket: ID, stopped: 'The start rule refuses this ticket for now (TKT-16)', problems: startRule ? startRule.problems : ['tickets.py check did not report'],
+    next: `Wait for what it names, or run /ticket-run ${ID} --force to start anyway.` })
 }
 if (startRule.problems.length) note(`Started with --force despite: ${startRule.problems.join(' / ')}`, '👤 person', '⚠️')
 const tasks = gate.tasks
@@ -380,7 +426,7 @@ const prepared = await agent(
   { agentType: 'integrator', schema: MERGE, label: `integrator prepare ${ID}` },
 )
 if (!prepared || prepared.blocked.length || !prepared.home) {
-  return { ticket: ID, stopped: `The main checkout could not take the ticket on feature/tickets (TKT-16)`, problems: prepared ? prepared.blocked : ['prepare did not report'] }
+  return await stopRun({ ticket: ID, stopped: `The main checkout could not take the ticket on feature/tickets (TKT-16)`, problems: prepared ? prepared.blocked : ['prepare did not report'] })
 }
 HOME = prepared.home
 log(`Ticket ${ID} works in ${HOME} on feature/tickets`)
@@ -421,9 +467,19 @@ for (let w = 1; w <= waveCount; w++) {
     // fixes it first and the fix is integrated, so that the retry starts from the corrected file instead of failing
     // the same way. The blocked task is never named in check, so that ownersOf does not send the problem back to it.
     // Only files of tasks of earlier waves are sent: a file a later wave writes is not wrong yet, only missing.
-    const reported = retry.flatMap(r => ((r.result && r.result.blocked_by) || []).map(b => ({
-      file: b.file, check: 'a file that stops another task', detail: `${b.problem} (reported by the task that it blocks)`,
-    })))
+    const reported = blockerItems(retry)
+    const unowned = unownedBlockers(reported)
+    if (unowned.length) {
+      collect(results)
+      await integrate(results, 'Waves')
+      const change = planChange(unowned)
+      log(`Wave ${w}: blocked by file(s) no task of the plan owns, no retry (L-57): ${change}`)
+      await agent(inHome(`Append to the Events table of docs/tickets/${ID}/PROGRESS.md these events (Event | By | Result): ${progress.join(' ')} and ` +
+        `"Stopped in wave ${w}: a task needs files no task of the plan owns; plan change to approve: ${change}" (❌). Then run ${TIMINGS}.`),
+        { agentType: 'scribe', label: `scribe ${ID}` })
+      return await stopRun({ ticket: ID, stopped: `Wave ${w}: blocked by files no task of the plan owns (L-57)`, assumptions,
+        next: `Approve a plan change in docs/tickets/${ID}/PLAN.md (TKT-11): ${change}; record it in PROGRESS.md, then /ticket-run ${ID} continues from wave ${w}.` })
+    }
     const blockers = reported.filter(b => ownersOf(b).every(o => Number.isInteger(o.wave) && o.wave < w))
     if (reported.length > blockers.length) {
       log(`Wave ${w}: ${reported.length - blockers.length} reported blocker(s) not sent, because no earlier task owns them: ${reported.filter(b => !blockers.includes(b)).map(b => b.file).join(', ')}`)
@@ -448,8 +504,8 @@ for (let w = 1; w <= waveCount; w++) {
     await agent(inHome(`Append to the Events table of docs/tickets/${ID}/PROGRESS.md these events (Event | By | Result): ${progress.join(' ')} and "Stopped in wave ${w}: ${failed.map(f => f.task.id).join(', ')} not done" (❌). ` +
       `Then run ${TIMINGS}.`),
       { agentType: 'scribe', label: `scribe ${ID}` })
-    return { ticket: ID, stopped: `Wave ${w}: ${failed.map(f => f.task.id).join(', ')} not done after one retry`, assumptions,
-      next: `The integrated work stays uncommitted in ${HOME} on feature/tickets; /ticket-run ${ID} continues from wave ${w} (TKT-11).` }
+    return await stopRun({ ticket: ID, stopped: `Wave ${w}: ${failed.map(f => f.task.id).join(', ')} not done after one retry`, assumptions,
+      next: `The integrated work stays uncommitted in ${HOME} on feature/tickets; /ticket-run ${ID} continues from wave ${w} (TKT-11).` })
   }
 }
 
@@ -457,10 +513,33 @@ for (let w = 1; w <= waveCount; w++) {
 // verifier waited 10 minutes for a run that had ended: it runs in the foreground with the 10-minute timeout.
 const VERIFY = `Verify ticket ${ID}: run python3 .claude/scripts/tickets/checks.py --ticket ${ID}, which checks only its own files, ` +
   `in the foreground with the Bash tool's timeout set to 600000 ms, never with run_in_background, and return its verdict.`
+// L-53: the images of the front ends the ticket changes are built and tested by their Playwright suite, as CI does, in a
+// second call of their own, so that each call fits the verifier's 10 minutes. The workflow merges the two verdicts.
+const VERIFY_IMAGES = `Verify ticket ${ID}: run python3 .claude/scripts/tickets/checks.py --ticket ${ID} --images, which checks only its own files, ` +
+  `in the foreground with the Bash tool's timeout set to 600000 ms, never with run_in_background, and return its verdict.`
+function mergeVerdicts(code, images) {
+  if (!code && !images) return null
+  const silent = !code || !images
+    ? [{ check: 'verifier', file: '', detail: `the ${code ? 'images' : 'code'} verifier call did not report`, environment: false }]
+    : []
+  const parts = [code, images].filter(Boolean)
+  return {
+    passed: !silent.length && parts.every(v => v.passed),
+    failures: parts.flatMap(v => v.failures || []).concat(silent),
+    not_applicable: parts.flatMap(v => v.not_applicable || []),
+  }
+}
+async function verifyAll(phaseName, label) {
+  const [code, images] = await parallel([
+    () => agent(inHome(VERIFY), { agentType: 'verifier', schema: VERDICT, phase: phaseName, label }),
+    () => agent(inHome(VERIFY_IMAGES), { agentType: 'verifier', schema: VERDICT, phase: phaseName, label: `${label} (images)` }),
+  ])
+  return mergeVerdicts(code, images)
+}
 phase('Verify')
 let verdict = null
 for (let round = 0; round <= MAX_FIX_ROUNDS; round++) {
-  verdict = await agent(inHome(VERIFY), { agentType: 'verifier', schema: VERDICT, phase: 'Verify', label: `verifier round ${round + 1}` })
+  verdict = await verifyAll('Verify', `verifier round ${round + 1}`)
   note(`Verify ${round + 1}${verdict && verdict.not_applicable && verdict.not_applicable.length ? ` (${verdict.not_applicable.length} not applicable)` : ''}`, 'verifier', verdict && verdict.passed ? '✅ passed' : `❌ ${verdict ? verdict.failures.length : '?'} failures`)
   if (!verdict || verdict.passed || round === MAX_FIX_ROUNDS) break
   // TKT-6: a missing tool or module is the environment's fault; fixers cannot repair it, so stop at once.
@@ -478,6 +557,10 @@ for (let round = 0; round <= MAX_FIX_ROUNDS; round++) {
     break
   }
   await fixRound(owned, 'Verify')
+  if (unownedInFixes.length) {
+    log(`Verify: the fixers are blocked by file(s) no task of the plan owns: no more rounds (L-57): ${planChange(unownedInFixes)}`)
+    break
+  }
 }
 const environmentFailure = Boolean(verdict && !verdict.passed && verdict.failures.some(f => f.environment))
 
@@ -516,7 +599,7 @@ if (verdict && verdict.passed && !pushOnly) {
     if (!blocking.length || round === MAX_FIX_ROUNDS) break
     reviewedTree = currentTree
     await fixRound(blocking.map(f => ({ file: f.file, check: f.rule, detail: f.change })), 'Review')
-    verdict = await agent(inHome(VERIFY), { agentType: 'verifier', schema: VERDICT, phase: 'Review', label: `verifier after review ${round + 1}` })
+    verdict = await verifyAll('Review', `verifier after review ${round + 1}`)
     if (!verdict || !verdict.passed) break
   }
 }
@@ -601,7 +684,7 @@ if (done) {
 const merged = Boolean(finished && !finished.blocked.length)
 const pullRequest = finished && finished.pull_request ? finished.pull_request : ''
 
-return {
+const outcome = {
   ticket: ID,
   done,
   published: merged,
@@ -629,3 +712,13 @@ return {
     : environmentFailure ? `Fix the environment (see the failing checks in ${HOME}/docs/tickets/${ID}/PROGRESS.md), then run /ticket-run ${ID} again. The work stays uncommitted in ${HOME}.`
     : `See ${HOME}/docs/tickets/${ID}/PROGRESS.md. The work stays uncommitted in ${HOME} on feature/tickets.`,
 }
+// L-56: a run that ends without the work done, or whose push stopped, records why for the group report.
+if (!done || (pushOnly && !merged)) {
+  const why = unownedInFixes.length ? `blocked by files no task of the plan owns (L-57): ${planChange(unownedInFixes)}`
+    : !done && environmentFailure ? 'environment problem: a missing tool or module'
+    : !done && verdict && !verdict.passed ? `${verdict.failures.length} check failure(s) left after the fix rounds`
+    : !done ? 'blocking review findings left after the fix rounds'
+    : 'the commit or the push stopped'
+  await stopRun({ ...outcome, stopped: why })
+}
+return outcome

@@ -10,6 +10,8 @@ PLANNED = "docs/tickets/T9.05/PLAN.md"
 LESSONS = "docs/tickets/LESSONS.md"
 BOARD_CACHE = ".claude/github.json"
 OTHER_FILE = "a.txt"
+HARNESS_FILE = ".claude/scripts/tickets/tickets.py"
+SECOND_TICKET = "T9.06"
 
 
 def commit_harness_files(main: Path) -> None:
@@ -50,3 +52,33 @@ class TestTicketTreePrepare:
         assert PLANNED not in result.stderr.split("(", 1)[1].split(")", 1)[0]
         assert git(main, "branch", "--show-current") == "develop"
         assert (main / OTHER_FILE).read_text(encoding="utf-8") == "after\n"
+
+    def develop_moves(self, main: Path, tmp_path: Path, relative: str) -> None:
+        """Commit a change on develop while the main checkout stays on the shared branch, as a merged pull request does."""
+        other = tmp_path / "develop-checkout"
+        git(main, "worktree", "add", "--quiet", str(other), "develop")
+        (other / relative).parent.mkdir(parents=True, exist_ok=True)
+        (other / relative).write_text("newer\n", encoding="utf-8")
+        git(other, "add", relative)
+        git(other, "commit", "-m", "develop moves")
+        git(main, "worktree", "remove", "--force", str(other))
+
+    def test_a_new_ticket_is_refused_while_develop_holds_a_newer_harness(self, tmp_path: Path) -> None:
+        main = make_repo(tmp_path)
+        assert run(main, "prepare").returncode == 0
+        self.develop_moves(main, tmp_path, HARNESS_FILE)
+        refused = run(main, "prepare", ticket=SECOND_TICKET)
+        assert refused.returncode == 1
+        assert "L-54" in refused.stderr
+        assert HARNESS_FILE in refused.stderr
+
+    def test_an_open_ticket_still_continues_and_a_change_outside_the_harness_does_not_hold_a_start(
+        self, tmp_path: Path
+    ) -> None:
+        main = make_repo(tmp_path)
+        assert run(main, "prepare").returncode == 0
+        self.develop_moves(main, tmp_path, "docs/other.md")
+        assert run(main, "prepare", ticket=SECOND_TICKET).returncode == 0
+        self.develop_moves(main, tmp_path, HARNESS_FILE)
+        continued = run(main, "prepare")
+        assert continued.returncode == 0, continued.stderr

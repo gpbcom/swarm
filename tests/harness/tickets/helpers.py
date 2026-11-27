@@ -188,3 +188,16 @@ def add_remote(main: Path, *branches: str) -> Path:
     git(main, "push", "-q", "origin", "develop", "master", *branches)
     git(main, "fetch", "-q", "origin")
     return remote
+
+
+def run_ticket_tree(main: Path, command: str, ticket: str, *args: str) -> subprocess.CompletedProcess[str]:
+    """Run a command of ticket_tree.py for a ticket in the test repository."""
+    script = repo_root() / ".claude" / "scripts" / "tickets" / "ticket_tree.py"
+    return subprocess.run(
+        [sys.executable, str(script), command, "--ticket", ticket, *args],
+        cwd=main,
+        capture_output=True,
+        text=True,
+        check=False,
+        env=os.environ.copy(),
+    )

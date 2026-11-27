@@ -105,6 +105,39 @@ class TestGuardHook:
         assert guard("git commit -m wip", main)["permissionDecision"] == "deny"
         assert guard("git push origin feature/tickets", main)["permissionDecision"] == "deny"
 
+    @pytest.mark.parametrize("command", ["git commit -m 'T0.17: fix'", "gh pr merge 409 --merge", "git merge develop"])
+    def test_the_main_session_on_the_shared_branch_asks_the_person(self, tmp_path: Path, command: str) -> None:
+        main = make_repo(tmp_path)
+        git(main, "checkout", "-b", "feature/tickets")
+        decision = guard(command, main, agent="")
+        assert decision["permissionDecision"] == "ask"
+        assert "TKT-5" in str(decision["permissionDecisionReason"])
+
+    def test_a_worker_s_branch_refuses_the_main_session_too(self, tmp_path: Path) -> None:
+        main = make_repo(tmp_path)
+        git(main, "checkout", "-b", "worktree-wf_3")
+        assert guard("git commit -m x", main, agent="")["permissionDecision"] == "deny"
+
+    @pytest.mark.parametrize(
+        "command",
+        [
+            "git merge-base --is-ancestor origin/develop HEAD",
+            "git commit-tree HEAD^{tree} -m probe",
+            "git stash list",
+            "git stash show -p",
+            "gh pr merge-queue",
+        ],
+    )
+    def test_read_only_neighbours_of_a_write_are_not_writes(self, tmp_path: Path, command: str) -> None:
+        main = make_repo(tmp_path)
+        git(main, "checkout", "-b", "feature/tickets")
+        assert guard(command, main) == {}
+
+    def test_a_read_before_a_write_does_not_hide_the_write(self, tmp_path: Path) -> None:
+        main = make_repo(tmp_path)
+        git(main, "checkout", "-b", "feature/tickets")
+        assert guard("git stash list && git commit -m x", main)["permissionDecision"] == "deny"
+
     def test_approving_a_group_of_plans_asks_the_person(self, tmp_path: Path) -> None:
         main = make_repo(tmp_path)
         decision = guard("python3 .claude/scripts/tickets/tickets.py approve '#12'", main)

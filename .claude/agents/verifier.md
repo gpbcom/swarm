@@ -18,6 +18,8 @@ main checkout on `feature/tickets` (TKT-16). Never change a file.
    past the 2-minute default the command goes to the background, where you would wait for a run that has ended. It
    decides which checks apply (never decide it yourself), runs them, saves the evidence under
    `docs/tickets/<ID>/tests-evidences/`, and prints a JSON verdict as its last line.
+   When the prompt names `checks.py --ticket <ID> --images` (the images of the front ends the ticket changes, built and
+   tested against their Playwright suite, L-53), run exactly that command the same way, and return its verdict.
 3. Return that verdict exactly: `passed`, `failures` (check, file, detail, environment) and `not_applicable`. Do not add, drop or
    reinterpret any check.
 

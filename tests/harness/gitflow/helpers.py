@@ -6,7 +6,7 @@ import os
 import subprocess
 import sys
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Union
 
 GIT_ENV: Dict[str, str] = {
     "GIT_AUTHOR_NAME": "Test",
@@ -15,6 +15,7 @@ GIT_ENV: Dict[str, str] = {
     "GIT_COMMITTER_EMAIL": "test@example.com",
 }
 BYPASS_ENV = "SWARM_GITFLOW_BYPASS"
+AGENT_ID = "a1b2c3d4e5f6"
 
 
 def repo_root() -> Path:
@@ -49,14 +50,19 @@ def commit(main: Path, message: str, **extra: str) -> subprocess.CompletedProces
     return git(main, "commit", "-m", message, **extra)
 
 
-def guard(command: str, cwd: Path) -> Dict[str, object]:
-    """Run the PreToolUse hook on a Bash command and return its decision (empty when it lets it run)."""
-    payload = {
+def guard(command: str, cwd: Path, agent: str = AGENT_ID) -> Dict[str, object]:
+    """Run the PreToolUse hook on a Bash command and return its decision (empty when it lets it run).
+
+    ``agent`` is the ``agent_id`` Claude Code puts in the hook input of a subagent; an empty one is the main session.
+    """
+    payload: Dict[str, Union[str, Dict[str, str]]] = {
         "hook_event_name": "PreToolUse",
         "tool_name": "Bash",
         "tool_input": {"command": command},
         "cwd": str(cwd),
     }
+    if agent:
+        payload["agent_id"] = agent
     result = subprocess.run(
         [sys.executable, str(repo_root() / ".claude" / "hooks" / "guard_git.py")],
         input=json.dumps(payload),

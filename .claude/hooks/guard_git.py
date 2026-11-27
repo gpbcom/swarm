@@ -12,8 +12,10 @@ QUOTED = re.compile(r"'[^']*'|\"(?:[^\"\\]|\\.)*\"")
 TICKET_CONTEXT = re.compile(r"^(feature/tickets|feature/T\d+\.\d{2}|ticket/T\d+\.\d{2}|worktree-.*)$")
 APPROVE = re.compile(r"\btickets\.py\s+approve\b")
 RELEASE = re.compile(r"\bgh\s+workflow\s+run\s+release(?:\.yml)?\b")
-WRITES = re.compile(r"\bgit\s+(?:-C\s+\S+\s+|-c\s+\S+\s+)*(commit|merge|rebase|reset|stash|push|cherry-pick|revert)\b")
-PR_MERGE = re.compile(r"\bgh\s+pr\s+merge\b")
+WRITES = re.compile(r"\bgit\s+(?:-C\s+\S+\s+|-c\s+\S+\s+)*(commit|merge|rebase|reset|stash|push|cherry-pick|revert)(?![-\w])")
+PR_MERGE = re.compile(r"\bgh\s+pr\s+merge(?![-\w])")
+WORKER = re.compile(r"^(worktree-.*)$")
+READ_ONLY_STASH = ("list", "show")
 NO_VERIFY = re.compile(r"\bgit\b[^|;&]*\s(--no-verify|commit\s+(?:[^|;&]*\s)?-n\b)")
 PROTECTED = ("develop", "master", "main")
 REBASE = re.compile(r"\bgit\s+(?:-C\s+\S+\s+|-c\s+\S+\s+)*rebase\b([^|;&]*)")
@@ -70,8 +72,23 @@ def rewritten_protected(command: str, branch: str) -> str:
     return ""
 
 
-def decide(command: str, cwd: str) -> Optional[Tuple[str, str]]:
-    """Return (decision, reason) for a Bash command, or None to let it run."""
+def first_write(command: str) -> Optional[re.Match[str]]:
+    """Return the first git write of a command, or None: ``git stash list`` and ``git stash show`` only read (L-55)."""
+    for found in WRITES.finditer(command):
+        after = command[found.end() :].split()
+        if found.group(1) == "stash" and after and after[0] in READ_ONLY_STASH:
+            continue
+        return found
+    return PR_MERGE.search(command)
+
+
+def decide(command: str, cwd: str, agent: str = "") -> Optional[Tuple[str, str]]:
+    """Return (decision, reason) for a Bash command, or None to let it run.
+
+    ``agent`` is the ``agent_id`` of the hook input, set when a subagent (a worker, the integrator) runs the command
+    and empty in the main session. A git write on a ticket's branch is refused to every agent, and asked of the
+    person in the main session (L-52): the person confirms in the dialog what they asked for by hand. A worker's
+    ``worktree-*`` branch refuses it to everyone."""
     command = code_of(command)
     if NO_VERIFY.search(command):
         return "deny", "Skipping the git hooks (--no-verify) is not allowed: they hold the GitFlow rules (TKT-15)."
@@ -80,7 +97,12 @@ def decide(command: str, cwd: str) -> Optional[Tuple[str, str]]:
     if protected:
         return "deny", REWRITE_REASON.format(target=protected)
     context = TICKET_CONTEXT.match(branch)
-    write = WRITES.search(command) or PR_MERGE.search(command)
+    write = first_write(command)
+    if context and write and not agent and not WORKER.match(branch):
+        return "ask", (
+            f"`{write.group(0)}` on {branch}, where only `ticket_tree.py finish` writes for the tickets (TKT-5). "
+            "The person asked for it by hand? Run it?"
+        )
     if context and write:
         return "deny", (
             f"`{write.group(0)}` is not run by hand in a ticket's or a worker's worktree (TKT-5): "
@@ -104,7 +126,7 @@ def main() -> int:
     payload: Dict[str, object] = json.loads(sys.stdin.read() or "{}")
     tool_input = payload.get("tool_input")
     command = str(tool_input.get("command", "")) if isinstance(tool_input, dict) else ""
-    found = decide(command, str(payload.get("cwd") or "."))
+    found = decide(command, str(payload.get("cwd") or "."), str(payload.get("agent_id") or ""))
     if found:
         decision, reason = found
         output = {
