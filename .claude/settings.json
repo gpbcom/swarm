@@ -1,4 +1,7 @@
 {
+    "env": {
+        "pnpm_config_verify_deps_before_run": "warn"
+    },
     "permissions": {
         "allow": [
             "Bash(python3 .claude/skills/write-specs/scripts/specs.py:*)",

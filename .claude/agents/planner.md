@@ -21,6 +21,11 @@ Read `TICKET.md`, the linked specifications, and the parts of the repository the
   (`rust/`), `frontend-implementer` (`frontend/apps/`, `frontend/packages`), `mockup-writer` (specification screens and
   mock-ups), `doc-writer` (documentation and specification pages).
 - **Files:** list the exact files each task may create or change; two tasks of the same wave never share a file.
+- **Manifests and lock files** (TKT-3, L-51): a task that changes a `package.json` also owns `pnpm-lock.yaml`, a
+  `pyproject.toml` owns `uv.lock`, a `Cargo.toml` of `rust/` owns `rust/Cargo.lock`; `check_plan.py` refuses a plan
+  that leaves the lock file out. Put the manifest changes of a ticket in one task, as the lock file and the message
+  catalogues are shared files: another open ticket that lists one makes this one wait (TKT-16).
+- **Summary:** any count of tasks or waves in the summary is the graph's; `check_plan.py` refuses another (L-45).
 - **Briefs:** each brief is self-contained: what to do, which specification sections and rules apply, the files, and
   `done_when` as a command or an observable result. Every brief links, as relative paths from the repository root,
   the technical pages, features, use cases or business rules of `TICKET.md` that its task applies (TKT-2).

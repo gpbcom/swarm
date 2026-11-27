@@ -13,9 +13,11 @@ main checkout on `feature/tickets` (TKT-16). Never change a file.
 
 1. Go to the ticket's home, printed by `python3 .claude/scripts/tickets/ticket_tree.py home --ticket <ID>` (the main checkout,
    or a worktree for a ticket started before TKT-16), and run every command from there.
-2. Run `python3 .claude/scripts/tickets/checks.py --ticket <ID>`. It decides which checks apply (never decide it yourself),
-   runs them, saves the evidence under `docs/tickets/<ID>/tests-evidences/`, and prints a JSON verdict as its last
-   line.
+2. Run `python3 .claude/scripts/tickets/checks.py --ticket <ID>` **in the foreground, with the Bash tool's `timeout`
+   set to `600000` (10 minutes), never with `run_in_background`** (L-50): a ticket's checks take several minutes, and
+   past the 2-minute default the command goes to the background, where you would wait for a run that has ended. It
+   decides which checks apply (never decide it yourself), runs them, saves the evidence under
+   `docs/tickets/<ID>/tests-evidences/`, and prints a JSON verdict as its last line.
 3. Return that verdict exactly: `passed`, `failures` (check, file, detail, environment) and `not_applicable`. Do not add, drop or
    reinterpret any check.
 

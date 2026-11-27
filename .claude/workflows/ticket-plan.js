@@ -193,8 +193,12 @@ const widest = Math.max(...Array.from({ length: waves }, (_, i) => graph.filter(
 log(`${graph.length} tasks in ${waves} waves, widest wave ${widest} (at most 8 agents run at once)`)
 
 phase('Write')
+// L-46: a scribe once put links after the status, and the plan could not be approved. The status line is given exactly,
+// alone on its line.
+const STATUS_LINE = '**Plan:** 🟡 Awaiting approval'
+const STATUS_RULE = `The status line is exactly "${STATUS_LINE}", alone on its own line, with nothing before or after it on that line (no link, no other field); put anything else on another line.`
 const written = await agent(
-  `Write docs/tickets/${ID}/PLAN.md for ticket ${ID} (${ticket.title}) with the status line "**Plan:** 🟡 Awaiting approval", ` +
+  `Write docs/tickets/${ID}/PLAN.md for ticket ${ID} (${ticket.title}). ${STATUS_RULE} ` +
   `this summary: ${JSON.stringify(plan.summary)}, the assumptions ${JSON.stringify([...ticket.assumptions, ...plan.assumptions])}, ` +
   `then a "## Task graph" heading and this task graph in a json block, exactly: ${JSON.stringify(graph)}. ` +
   `Then run python3 .claude/scripts/tickets/plan.py render --ticket ${ID}, which pretty-prints the json block and writes from it the waves table, ` +
@@ -210,12 +214,26 @@ const written = await agent(
 const problems = (written && written.problems) || ['the scribe returned no result']
 if (problems.length) log(`PLAN.md, PROGRESS.md or TICKET.md fails its checks: ${problems.join(' | ')}`)
 
-const planVerdict = await runExactly('', `python3 .claude/skills/ticket/scripts/check_plan.py ${ID}`,
+const checkPlan = () => runExactly('', `python3 .claude/skills/ticket/scripts/check_plan.py ${ID}`,
   { exit: 0, quiet: true }, { label: `check PLAN.md ${ID}` },
 )
+let planVerdict = await checkPlan()
 let planCheck = 'passed'
 if (!planVerdict || !planVerdict.passed) {
-  const planProblems = (planVerdict && planVerdict.problems) || ['the verifier returned no result']
+  // L-46: a failed plan check goes back to the scribe once, before the workflow ends.
+  const first = (planVerdict && planVerdict.problems) || ['the runner returned no result']
+  log(`PLAN.md fails check_plan.py, back to the scribe once: ${first.join(' | ')}`)
+  await agent(
+    `Fix docs/tickets/${ID}/PLAN.md so that python3 .claude/skills/ticket/scripts/check_plan.py ${ID} prints nothing. ` +
+    `Its problems: ${JSON.stringify(first)}. ${STATUS_RULE} A count of tasks or waves in the summary is the task graph's: ` +
+    `${graph.length} tasks in ${waves} waves. Never change the json block: a problem in the task graph itself is left for the person. ` +
+    `Then run python3 .claude/scripts/tickets/plan.py render --ticket ${ID}. Change nothing else.`,
+    { agentType: 'scribe', schema: WRITE_SCHEMA, label: `scribe plan fix ${ID}` },
+  )
+  planVerdict = await checkPlan()
+}
+if (!planVerdict || !planVerdict.passed) {
+  const planProblems = (planVerdict && planVerdict.problems) || ['the runner returned no result']
   planCheck = planProblems
   log(`PLAN.md fails check_plan.py: ${planProblems.join(' | ')}`)
   await agent(
@@ -234,5 +252,9 @@ return {
   planCheck,
   checks: problems.length ? problems : 'passed',
   assumptions: [...ticket.assumptions, ...plan.assumptions],
-  next: `Review docs/tickets/${ID}/PLAN.md, change its status to "**Plan:** 🟢 Approved", then run /ticket-run ${ID}: it gives the ticket its own worktree on feature/${ID}, so other tickets can run at the same time (TKT-16)`,
+  // L-47: every running ticket shares the main checkout on feature/tickets (TKT-16); a group is approved once (TKT-20).
+  next: planCheck === 'passed'
+    ? `Review docs/tickets/${ID}/PLAN.md, then approve it: change its status line to "**Plan:** 🟢 Approved", or, for a group, run python3 .claude/scripts/tickets/tickets.py approve <refs> once for all its plans (TKT-20). ` +
+      `Then run /ticket-run ${ID}, or /issue-run <refs> for the group: every running ticket works in the main checkout, on the shared branch feature/tickets, beside the others (TKT-16).`
+    : `PLAN.md fails check_plan.py (see planCheck): fix it, or run /ticket-plan ${ID} again, before it can be approved.`,
 }

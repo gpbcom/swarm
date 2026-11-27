@@ -6,7 +6,7 @@ import os
 import subprocess
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 GIT_ENV: Dict[str, str] = {
     "GIT_AUTHOR_NAME": "Test",
@@ -52,6 +52,17 @@ GITHUB_STATE: Dict[str, object] = {
 }
 AWAITING = "**Plan:** 🟡 Awaiting approval"
 APPROVED = "**Plan:** 🟢 Approved"
+TASK_ID_KEY = "id"
+TASK_FILES_KEY = "files"
+TICKET_KEY = "ticket"
+INTEGRATED_KEY = "integrated"
+PATHS_KEY = "paths"
+HOME_KEY = "home"
+TICKETS_KEY = "tickets"
+DEPS_KEY = "deps"
+EXTERNAL_KEY = "external"
+AREA_KEY = "area"
+SIZE_KEY = "size"
 
 
 def repo_root() -> Path:
@@ -83,11 +94,18 @@ def make_repo(base: Path) -> Path:
     return main
 
 
-def open_ticket(main: Path, ticket: str, paths: Optional[List[str]] = None) -> None:
-    """Record a running ticket in the shared checkout, as ticket_tree.py prepare does."""
+def open_ticket(
+    main: Path, ticket: str, paths: Optional[List[str]] = None, integrated: Optional[List[str]] = None
+) -> None:
+    """Record a running ticket in the shared checkout, as ticket_tree.py prepare does, with its integrated tasks."""
     state = main / ".git" / "swarm" / ticket
     state.mkdir(parents=True)
-    content = {"ticket": ticket, "integrated": [], "paths": paths or [f"docs/tickets/{ticket}/"], "home": str(main)}
+    content = {
+        TICKET_KEY: ticket,
+        INTEGRATED_KEY: integrated or [],
+        PATHS_KEY: paths or [f"docs/tickets/{ticket}/"],
+        HOME_KEY: str(main),
+    }
     (state / "state.json").write_text(json.dumps(content), encoding="utf-8")
 
 
@@ -108,6 +126,24 @@ def write_plan(main: Path, ticket: str, status: str) -> Path:
         encoding="utf-8",
     )
     return plan
+
+
+def write_plan_with_tasks(main: Path, ticket: str, status: str, tasks: List[Tuple[str, List[str]]]) -> Path:
+    """Write a plan whose json block holds ``tasks``, each an id with the files it owns."""
+    plan = write_plan(main, ticket, status)
+    graph = [{TASK_ID_KEY: task_id, TASK_FILES_KEY: files} for task_id, files in tasks]
+    plan.write_text(
+        f"{plan.read_text(encoding='utf-8')}\n```json\n{json.dumps(graph, indent=2)}\n```\n", encoding="utf-8"
+    )
+    return plan
+
+
+def add_ticket_to_graph(main: Path, ticket: str, area: str) -> None:
+    """Add a ticket without prerequisites to the ticket graph of the repository made by ``make_repo``."""
+    path = main.parent / "graph.json"
+    loaded = json.loads(path.read_text(encoding="utf-8"))
+    loaded[TICKETS_KEY][ticket] = {DEPS_KEY: [], EXTERNAL_KEY: [], AREA_KEY: area, SIZE_KEY: "S"}
+    path.write_text(json.dumps(loaded), encoding="utf-8")
 
 
 def run(main: Path, *args: str, check_plan: str = "true", closed: str = "") -> subprocess.CompletedProcess[str]:

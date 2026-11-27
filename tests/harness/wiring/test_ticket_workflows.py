@@ -229,3 +229,38 @@ class TestTicketWorkflows:
         assert 'a list "refused"' in text
         assert "Put every entry of it in blocked" in text
         assert "blocked or refused:" in text
+
+    def test_the_scribe_writes_the_status_line_alone_on_its_line(self) -> None:
+        text = read_text(self.PLAN)
+        assert "const STATUS_LINE = '**Plan:** 🟡 Awaiting approval'" in text
+        assert "alone on its own line, with nothing before or after it on that line" in text
+        assert text.count("${STATUS_RULE}") == 2
+        scribe = read_text(".claude/agents/scribe.md")
+        assert "exactly `**Plan:** 🟡 Awaiting approval`, alone on its own line" in scribe
+
+    def test_a_failed_plan_check_goes_back_to_the_scribe_once_before_the_workflow_ends(self) -> None:
+        text = read_text(self.PLAN)
+        step = text.split("let planVerdict = await checkPlan()", 1)[1].split("return {", 1)[0]
+        assert "agentType: 'scribe'" in step.split("planVerdict = await checkPlan()", 1)[0]
+        assert step.count("planVerdict = await checkPlan()") == 1
+        assert "label: `scribe plan fix ${ID}`" in step
+
+    def test_the_last_message_of_ticket_plan_follows_the_shared_checkout_and_the_group_approval(self) -> None:
+        text = read_text(self.PLAN)
+        message = text.split("  next: ", 1)[1].split("\n}", 1)[0]
+        assert "feature/${ID}" not in message
+        assert "own worktree" not in message
+        assert "feature/tickets" in message
+        assert "python3 .claude/scripts/tickets/tickets.py approve <refs>" in message
+        assert "/ticket-run ${ID}" in message
+        assert "/issue-run <refs>" in message
+
+    def test_the_verifier_runs_checks_py_in_the_foreground_with_the_ten_minute_timeout(self) -> None:
+        text = read_text(self.RUN)
+        verify = text.split("const VERIFY = ", 1)[1].split("\n\n", 1)[0]
+        assert "timeout set to 600000 ms" in verify
+        assert "never with run_in_background" in verify
+        assert text.count("agent(inHome(VERIFY), { agentType: 'verifier'") == 2
+        assert "checks.py --ticket ${ID} checks only its own files.`), { agentType: 'verifier'" not in text
+        verifier = read_text(".claude/agents/verifier.md")
+        assert "`timeout`\n   set to `600000` (10 minutes), never with `run_in_background`" in verifier
