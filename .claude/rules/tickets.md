@@ -574,12 +574,18 @@ board using it.
   `HEAD` (`roadmap_gantt.develop_ref()`);
 - the full history (CI's checkout is shallow): a date or a commit it cannot find falls back to `HEAD`;
 - GitHub (CI has no login, a dry run touches nothing): reading GitHub is optional and a missing answer means "nothing
-  known", never a stop.
+  known", never a stop;
+- Claude Code's configuration folder at `~/.claude`: a script that reads the transcripts (`progress.py`) reads them
+  under `CLAUDE_CONFIG_DIR` when it is set, as it is when the project runs on another Claude account, and under
+  `~/.claude` only without it.
 
-**Why:** #345 failed three times in CI on these three assumptions, which every local run met.
+**Why:** #345 failed three times in CI on these three assumptions, which every local run met. When the project moved
+to its own Claude account (`CLAUDE_CONFIG_DIR`), the progress reports and the timings would have read the other
+account's folder and found no run.
 
 **Check:** the tests of `tests/harness/board/test_board.py` (a dry run with a `gh` that always fails, `develop_ref`
-without `develop`) pass, and CI runs every harness test in its own shallow checkout.
+without `develop`) and of `tests/harness/progress/test_progress.py` (the transcripts of `CLAUDE_CONFIG_DIR`) pass, and CI
+runs every harness test in its own shallow checkout.
 
 ## <a id="tkt-25"></a>TKT-25: A branch lives as long as its work
 

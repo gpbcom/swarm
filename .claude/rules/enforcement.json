@@ -620,6 +620,11 @@
     "what": "the dry run never calls GitHub; develop is found in a CI checkout"
    },
    {
+    "kind": "test",
+    "path": "tests/harness/progress/test_progress.py",
+    "what": "progress.py reads the runs of CLAUDE_CONFIG_DIR when it is set, and of ~/.claude only without it"
+   },
+   {
     "kind": "ci",
     "path": ".github/workflows/python.yml",
     "what": "CI runs the harness tests in a shallow checkout without develop"

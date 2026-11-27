@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import subprocess
 import sys
@@ -31,7 +32,6 @@ Legend: 🏁 ended · ⏳ running · ❌ failed · ⚠️ stalled | phases ✅ d
 models 🟣 opus 🔵 sonnet 🟢 haiku 🟠 fable ⚪ other | 🪙 tokens (input + output, cache reads excluded).
 """
 
-PROJECTS = Path.home() / ".claude" / "projects"
 RUNNING_TYPES = {"launched", "started", "result"}
 STALL_S = 20 * 60
 QUIET_END_S = 90
@@ -68,8 +68,14 @@ def ticket_folder(ticket: str) -> Path:
     return main_checkout() / "docs" / "tickets" / ticket
 
 
+def claude_config_dir() -> Path:
+    """Return Claude Code's configuration folder: ``CLAUDE_CONFIG_DIR`` when set (one per account), else ``~/.claude``."""
+    configured = os.environ.get("CLAUDE_CONFIG_DIR", "").strip()
+    return Path(configured).expanduser() if configured else Path.home() / ".claude"
+
+
 def project_dir() -> Path:
-    return PROJECTS / re.sub(r"[^A-Za-z0-9]", "-", str(main_checkout()))
+    return claude_config_dir() / "projects" / re.sub(r"[^A-Za-z0-9]", "-", str(main_checkout()))
 
 
 def find_run(run_id: str | None) -> Path | None:
