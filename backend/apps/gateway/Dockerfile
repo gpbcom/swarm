@@ -43,6 +43,12 @@ ENV PATH="/opt/venv/bin:$PATH" \
     SWARM_APP=gateway \
     SWARM_APP_ROOT=/app
 
+# Security fixes the base image does not carry yet (CVE-2025-6020 in libpam, found by Trivy): the runtime
+# stage takes every Debian update, then drops the package lists.
+RUN apt-get update \
+    && apt-get upgrade -y --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
+
 RUN groupadd --system --gid 10001 swarm \
     && useradd --system --uid 10001 --gid swarm --home-dir /app --shell /usr/sbin/nologin swarm \
     && mkdir -p /app \

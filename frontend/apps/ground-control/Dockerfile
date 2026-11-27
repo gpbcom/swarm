@@ -11,7 +11,11 @@ RUN if [ ! -f frontend/apps/ground-control/dist/config.json ]; then \
       > frontend/apps/ground-control/dist/config.json; \
     fi
 
-FROM nginxinc/nginx-unprivileged:1.27-alpine3.21
+FROM nginxinc/nginx-unprivileged:1.31.7-alpine3.24
+# Security fixes the base image does not carry yet (OpenSSL, libxml2, libpng, expat, found by Trivy): the image
+# takes every Alpine update as root, then runs as the unprivileged nginx user again.
+USER root
+RUN apk upgrade --no-cache
 COPY frontend/apps/ground-control/nginx.conf /etc/nginx/nginx.conf
 COPY --from=build /repo/frontend/apps/ground-control/dist /usr/share/nginx/html
 USER 101
