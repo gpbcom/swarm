@@ -40,21 +40,14 @@ class TestRoadmapGanttAreas:
         assert self.evaluate(f"areas({text!r})") == expected
 
     @pytest.mark.parametrize(
-        ("text", "expected"),
-        [
-            ("services/gateway", {"backend/apps/gateway"}),
-            ("packages/python/swarm-models", {"backend/swarm-models"}),
-            ("packages/python (lifecycle, logging, catalog)", {"backend/libs"}),
-            ("frontends/ground-control", {"frontend/apps/ground-control"}),
-            ("packages/ts/live", {"frontend/packages/live"}),
-            ("packages/rust (safety)", {"rust"}),
-            ("deploy/charts", {"infra/charts"}),
-        ],
+        "old", ["services/", "frontends/", "packages/python", "packages/ts", "packages/rust", "deploy/", "compose.e2e"]
     )
-    def test_a_folder_the_ticket_graph_still_names_is_read_as_its_target_layout_folder(
-        self, text: str, expected: Set[str]
-    ) -> None:
-        assert self.evaluate(f"areas({text!r})") == expected
+    def test_the_ticket_graph_names_no_folder_of_the_old_layout(self, old: str) -> None:
+        graph = json.loads(
+            (ROOT / "docs" / "specs" / "roadmap" / "gantt" / "ticket-graph.json").read_text(encoding="utf-8")
+        )
+        offenders = [ticket for ticket, entry in graph["tickets"].items() if old in str(entry.get("area", ""))]
+        assert offenders == [], f"These tickets name {old!r} in their area: {offenders}."
 
     @pytest.mark.parametrize(
         ("text", "expected"),

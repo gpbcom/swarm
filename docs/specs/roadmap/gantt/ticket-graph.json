@@ -286,7 +286,7 @@
    "external": [
     "P-06"
    ],
-   "area": "repo root, deploy/terraform",
+   "area": "repo root, infra/terraform",
    "size": "L"
   },
   "T0.02": {
@@ -300,7 +300,7 @@
     "T0.01"
    ],
    "external": [],
-   "area": "tests/conventions, packages/rust, packages/ts",
+   "area": "tests/conventions, rust, frontend/packages",
    "size": "M"
   },
   "T0.04": {
@@ -316,7 +316,7 @@
     "T0.01"
    ],
    "external": [],
-   "area": "packages/python (lifecycle, logging, catalog)",
+   "area": "backend/libs (lifecycle, logging, catalog)",
    "size": "M"
   },
   "T0.06": {
@@ -324,7 +324,7 @@
     "T0.05"
    ],
    "external": [],
-   "area": "packages/python/swarm-models, packages/rust, packages/ts/live",
+   "area": "backend/swarm-models, rust, frontend/packages/live",
    "size": "M"
   },
   "T0.07": {
@@ -332,7 +332,7 @@
     "T0.01"
    ],
    "external": [],
-   "area": "packages/rust/swarm-core",
+   "area": "rust/swarm-core",
    "size": "S"
   },
   "T0.08": {
@@ -342,7 +342,7 @@
    "external": [
     "P-06"
    ],
-   "area": "deploy/terraform, deploy/charts, deploy/environments",
+   "area": "infra/terraform, infra/charts, infra/environments",
    "size": "L"
   },
   "T0.09": {
@@ -351,7 +351,7 @@
     "T0.08"
    ],
    "external": [],
-   "area": "deploy/charts, packages/python (NATS client)",
+   "area": "infra/charts, backend/libs/swarm-nats (NATS client)",
    "size": "M"
   },
   "T0.10": {
@@ -360,7 +360,7 @@
     "T0.08"
    ],
    "external": [],
-   "area": ".github/workflows, compose.e2e.yaml, Dockerfiles",
+   "area": ".github/workflows, infra/compose/e2e.yaml, Dockerfiles",
    "size": "M",
    "note": "Unsigned image refused by the dev cell needs T0.08."
   },
@@ -370,7 +370,7 @@
     "T0.12"
    ],
    "external": [],
-   "area": "Keycloak, services/gateway",
+   "area": "Keycloak, backend/apps/gateway",
    "size": "M",
    "note": "Gateway checks roles, so it extends the gateway skeleton of T0.12; sprint order only."
   },
@@ -380,7 +380,7 @@
     "T0.08"
    ],
    "external": [],
-   "area": "services/gateway, missions, fleet, packages/ts/api-client",
+   "area": "backend/apps/gateway, missions, fleet, frontend/packages/api-client",
    "size": "L",
    "note": "T0.06 brings T0.05."
   },
@@ -391,7 +391,7 @@
     "T0.09"
    ],
    "external": [],
-   "area": "services/simulator, packages/rust",
+   "area": "backend/apps/simulator, rust",
    "size": "L"
   },
   "T0.14": {
@@ -399,7 +399,7 @@
     "T0.01"
    ],
    "external": [],
-   "area": "packages/ts/tokens, ui, frontends/*, Tauri shell",
+   "area": "frontend/packages/tokens, ui, frontend/apps/*, Tauri shell",
    "size": "L",
    "note": "Could also need T0.03 ts settings (tooling only)."
   },
@@ -409,7 +409,7 @@
     "T0.14"
    ],
    "external": [],
-   "area": "packages/ts/i18n, packages/python, .github/workflows",
+   "area": "frontend/packages/i18n, backend/swarm-service (messages), .github/workflows",
    "size": "M",
    "note": "Language stored with the person needs T0.12."
   },
@@ -420,7 +420,7 @@
     "T0.15"
    ],
    "external": [],
-   "area": "frontends/back-office, services/gateway, Keycloak",
+   "area": "frontend/apps/back-office, backend/apps/gateway, Keycloak",
    "size": "L",
    "note": "T0.15 because BR-017 four languages; could drop."
   },
@@ -430,7 +430,7 @@
     "T0.19"
    ],
    "external": [],
-   "area": "packages/*, deploy/charts (observability)",
+   "area": "packages/*, infra/charts (observability)",
    "size": "L",
    "note": "SDKs and stack need only T0.09/T0.08; done-when trace to browser needs T0.19."
   },
@@ -440,7 +440,7 @@
     "T0.13"
    ],
    "external": [],
-   "area": "services/flight-engine, services/gateway, packages/rust",
+   "area": "backend/apps/flight-engine, backend/apps/gateway, rust",
    "size": "L",
    "note": "Brings T0.07, T0.09 through T0.13."
   },
@@ -450,7 +450,7 @@
     "T0.18"
    ],
    "external": [],
-   "area": "frontends/ground-control, packages/ts/live, packages/ts/maps",
+   "area": "frontend/apps/ground-control, frontend/packages/live, frontend/packages/maps",
    "size": "L"
   },
   "T0.20": {
@@ -459,7 +459,7 @@
     "T0.16"
    ],
    "external": [],
-   "area": "frontends/back-office, tests/, docs/specs/screens",
+   "area": "frontend/apps/back-office, tests/, docs/specs/screens",
    "size": "M"
   },
   "T1.01": {
@@ -467,7 +467,7 @@
     "T0.07"
    ],
    "external": [],
-   "area": "packages/rust (safety)",
+   "area": "rust (safety)",
    "size": "M"
   },
   "T1.02": {
@@ -475,7 +475,7 @@
     "T0.18"
    ],
    "external": [],
-   "area": "packages/rust (mavlink), services/flight-engine",
+   "area": "rust (mavlink), backend/apps/flight-engine",
    "size": "L",
    "note": "PX4 SITL from T0.13 comes through T0.18."
   },
@@ -484,7 +484,7 @@
     "T1.02"
    ],
    "external": [],
-   "area": "services/flight-engine",
+   "area": "backend/apps/flight-engine",
    "size": "L",
    "note": "Brings T0.18."
   },
@@ -493,7 +493,7 @@
     "T0.18"
    ],
    "external": [],
-   "area": "services/flight-engine (SQLCipher edge store)",
+   "area": "backend/apps/flight-engine (SQLCipher edge store)",
    "size": "M",
    "note": "Leaf node from T0.09 comes through T0.18. Done-when SITL flight; T1.03 not strictly needed."
   },
@@ -503,7 +503,7 @@
     "T0.12"
    ],
    "external": [],
-   "area": "services/fleet, swarm-models",
+   "area": "backend/apps/fleet, swarm-models",
    "size": "M"
   },
   "T1.06": {
@@ -514,7 +514,7 @@
    "external": [
     "H-01"
    ],
-   "area": "frontends/back-office",
+   "area": "frontend/apps/back-office",
    "size": "M",
    "note": "H-01 only for the real X500 in staging data."
   },
@@ -523,7 +523,7 @@
     "T0.16"
    ],
    "external": [],
-   "area": "services/missions, frontends/back-office",
+   "area": "backend/apps/missions, frontend/apps/back-office",
    "size": "M",
    "note": "Brings T0.12, T0.11."
   },
@@ -533,7 +533,7 @@
     "T0.19"
    ],
    "external": [],
-   "area": "frontends/mission-studio, services/missions, packages/ts/maps",
+   "area": "frontend/apps/mission-studio, backend/apps/missions, frontend/packages/maps",
    "size": "L",
    "note": "Maps package is created in T0.19."
   },
@@ -543,7 +543,7 @@
     "T0.09"
    ],
    "external": [],
-   "area": "packages/rust (planner), services/planner",
+   "area": "rust (planner), backend/apps/planner",
    "size": "M"
   },
   "T1.10": {
@@ -551,7 +551,7 @@
     "T0.19"
    ],
    "external": [],
-   "area": "frontends/ground-control, packages/ts/live",
+   "area": "frontend/apps/ground-control, frontend/packages/live",
    "size": "M",
    "note": "Edge health buffered messages would soft-depend on T1.04."
   },
@@ -563,7 +563,7 @@
     "T1.09"
    ],
    "external": [],
-   "area": "frontends/mission-studio, services/missions",
+   "area": "frontend/apps/mission-studio, backend/apps/missions",
    "size": "L"
   },
   "T1.12": {
@@ -572,7 +572,7 @@
     "T1.06"
    ],
    "external": [],
-   "area": "services/fleet, simulator, flight-engine, back-office",
+   "area": "backend/apps/fleet, simulator, flight-engine, back-office",
    "size": "L",
    "note": "Could also need T1.15 for the Geofence step."
   },
@@ -583,7 +583,7 @@
     "T1.11"
    ],
    "external": [],
-   "area": "services/flight-engine, services/missions, frontends/ground-control",
+   "area": "backend/apps/flight-engine, backend/apps/missions, frontend/apps/ground-control",
    "size": "L"
   },
   "T1.14": {
@@ -592,7 +592,7 @@
     "T1.13"
    ],
    "external": [],
-   "area": "services/flight-engine, frontends/ground-control, Keycloak",
+   "area": "backend/apps/flight-engine, frontend/apps/ground-control, Keycloak",
    "size": "L"
   },
   "T1.15": {
@@ -601,7 +601,7 @@
     "T1.03"
    ],
    "external": [],
-   "area": "services/flight-engine, packages/rust",
+   "area": "backend/apps/flight-engine, rust",
    "size": "M"
   },
   "T1.16": {
@@ -610,7 +610,7 @@
     "T1.15"
    ],
    "external": [],
-   "area": "services/flight-engine, frontends/ground-control",
+   "area": "backend/apps/flight-engine, frontend/apps/ground-control",
    "size": "M",
    "note": "Link timers from T1.01 via T1.15; Mission: Held needs flying Mission from T1.14."
   },
@@ -620,7 +620,7 @@
     "T1.16"
    ],
    "external": [],
-   "area": "services/flight-engine, packages/rust, frontends/ground-control",
+   "area": "backend/apps/flight-engine, rust, frontend/apps/ground-control",
    "size": "L"
   },
   "T1.18": {
@@ -628,7 +628,7 @@
     "T1.14"
    ],
    "external": [],
-   "area": "services/flight-engine, frontends/ground-control, frontends/desktop",
+   "area": "backend/apps/flight-engine, frontend/apps/ground-control, frontend/apps/desktop",
    "size": "M",
    "note": "Uncertain: Mission: Held state also comes from T1.16; resume part may need it."
   },
@@ -637,7 +637,7 @@
     "T1.17"
    ],
    "external": [],
-   "area": "frontends/ground-control, frontends/desktop (SDL2), services/flight-engine",
+   "area": "frontend/apps/ground-control, frontend/apps/desktop (SDL2), backend/apps/flight-engine",
    "size": "L",
    "note": "Re-plan proposal alt flow needs T1.17 (brings T1.14..T1.16); core manual control only needs T1.14."
   },
@@ -646,7 +646,7 @@
     "T1.14"
    ],
    "external": [],
-   "area": "frontends/ground-control",
+   "area": "frontend/apps/ground-control",
    "size": "M"
   },
   "T1.21": {
@@ -655,7 +655,7 @@
     "T1.15"
    ],
    "external": [],
-   "area": "frontends/ground-control, services/flight-engine",
+   "area": "frontend/apps/ground-control, backend/apps/flight-engine",
    "size": "M"
   },
   "T1.22": {
@@ -665,7 +665,7 @@
    "external": [
     "H-02"
    ],
-   "area": "services/video-relay, frontends/ground-control, packages/ts/live",
+   "area": "backend/apps/video-relay, frontend/apps/ground-control, frontend/packages/live",
    "size": "L",
    "note": "H-02 cameras for the latency done-when only."
   },
@@ -675,7 +675,7 @@
     "T1.22"
    ],
    "external": [],
-   "area": "frontends/ground-control",
+   "area": "frontend/apps/ground-control",
    "size": "M"
   },
   "T1.24": {
@@ -685,7 +685,7 @@
     "T1.21"
    ],
    "external": [],
-   "area": "frontends/ground-control, desktop, services/missions",
+   "area": "frontend/apps/ground-control, desktop, backend/apps/missions",
    "size": "M"
   },
   "T1.25": {
@@ -694,7 +694,7 @@
     "T1.11"
    ],
    "external": [],
-   "area": "frontends/mission-studio, services/simulator, services/planner",
+   "area": "frontend/apps/mission-studio, backend/apps/simulator, backend/apps/planner",
    "size": "M"
   },
   "T1.26": {
@@ -702,7 +702,7 @@
     "T1.14"
    ],
    "external": [],
-   "area": "frontends/ground-control, flight-engine, missions",
+   "area": "frontend/apps/ground-control, flight-engine, missions",
    "size": "M",
    "note": "Brings T1.13, T1.11."
   },
@@ -715,7 +715,7 @@
     "T1.22"
    ],
    "external": [],
-   "area": "frontends/desktop, deploy/, services/flight-engine",
+   "area": "frontend/apps/desktop, infra/, backend/apps/flight-engine",
    "size": "L"
   },
   "T1.28": {
@@ -729,7 +729,7 @@
     "H-01",
     "G-02"
    ],
-   "area": "services/fleet, flight-engine, frontends/back-office",
+   "area": "backend/apps/fleet, flight-engine, frontend/apps/back-office",
    "size": "M",
    "note": "Uncertain: real flight may need T1.27 field edge."
   },
@@ -742,7 +742,7 @@
    "external": [
     "P-06"
    ],
-   "area": "deploy/terraform, deploy/environments, tests/load",
+   "area": "infra/terraform, infra/environments, tests/load",
    "size": "L",
    "note": "T0.18 brings simulator for 20 Missions."
   },
@@ -753,7 +753,7 @@
     "T1.29"
    ],
    "external": [],
-   "area": "tests/chaos, services/flight-engine",
+   "area": "tests/chaos, backend/apps/flight-engine",
    "size": "M"
   },
   "T1.31": {
@@ -761,7 +761,7 @@
     "T1.14"
    ],
    "external": [],
-   "area": "services/simulator, frontends/ground-control",
+   "area": "backend/apps/simulator, frontend/apps/ground-control",
    "size": "M",
    "note": "Uncertain: failure injection may need T1.16 for Link loss effects."
   },
@@ -772,7 +772,7 @@
    "external": [
     "C-01"
    ],
-   "area": "services/missions, services/flight-engine",
+   "area": "backend/apps/missions, backend/apps/flight-engine",
    "size": "M",
    "note": "Real C-01 data in done-when; T0.12 and T0.09 come through T1.04."
   },
@@ -797,7 +797,7 @@
     "T1.24"
    ],
    "external": [],
-   "area": "frontends/ground-control",
+   "area": "frontend/apps/ground-control",
    "size": "M"
   },
   "T1.35": {
@@ -812,7 +812,7 @@
    "external": [
     "C-01"
    ],
-   "area": "packages/ts/i18n, every P1 app",
+   "area": "frontend/packages/i18n, every P1 app",
    "size": "M",
    "note": "Outdoors contrast check needs field days."
   },
@@ -827,7 +827,7 @@
     "H-01",
     "G-02"
    ],
-   "area": "tests/flight-procedures, services/flight-engine",
+   "area": "tests/flight-procedures, backend/apps/flight-engine",
    "size": "L"
   },
   "T1.37": {
@@ -838,7 +838,7 @@
     "C-01",
     "H-03"
    ],
-   "area": "deploy/ edge appliance",
+   "area": "infra/ edge appliance",
    "size": "M"
   },
   "T1.38": {
@@ -850,7 +850,7 @@
     "P-01",
     "P-06"
    ],
-   "area": "deploy/environments, services/simulator",
+   "area": "infra/environments, backend/apps/simulator",
    "size": "M"
   },
   "T1.39": {
@@ -875,7 +875,7 @@
     "T1.23"
    ],
    "external": [],
-   "area": "frontends/ground-control, mission-studio, tests/",
+   "area": "frontend/apps/ground-control, mission-studio, tests/",
    "size": "M"
   },
   "T1.41": {
@@ -905,7 +905,7 @@
     "T1.27"
    ],
    "external": [],
-   "area": "services/gateway, flight-engine, back-office, deploy/",
+   "area": "backend/apps/gateway, flight-engine, back-office, infra/",
    "size": "M"
   },
   "T1.44": {
@@ -925,7 +925,7 @@
     "T1.32"
    ],
    "external": [],
-   "area": "docs/, deploy/",
+   "area": "docs/, infra/",
    "size": "M"
   },
   "T2.01": {
@@ -933,7 +933,7 @@
     "T1.32"
    ],
    "external": [],
-   "area": "services/flight-engine, storage MinIO",
+   "area": "backend/apps/flight-engine, storage MinIO",
    "size": "M",
    "note": "Extends the Flight log upload of T1.32 with media and multipart."
   },
@@ -942,7 +942,7 @@
     "T2.01"
    ],
    "external": [],
-   "area": "services/flight-engine",
+   "area": "backend/apps/flight-engine",
    "size": "S"
   },
   "T2.03": {
@@ -951,7 +951,7 @@
     "T0.12"
    ],
    "external": [],
-   "area": "services/processing, deploy/charts (KEDA)",
+   "area": "backend/apps/processing, infra/charts (KEDA)",
    "size": "M",
    "note": "New service on skeleton and NATS; GPU node can be simulated."
   },
@@ -960,7 +960,7 @@
     "T0.12"
    ],
    "external": [],
-   "area": "services/evidence",
+   "area": "backend/apps/evidence",
    "size": "M",
    "note": "Needs vault transit; T0.11 not needed."
   },
@@ -970,7 +970,7 @@
     "T0.12"
    ],
    "external": [],
-   "area": "services/missions, packages/python/swarm-models",
+   "area": "backend/apps/missions, backend/swarm-models",
    "size": "S"
   },
   "T2.06": {
@@ -980,7 +980,7 @@
    "external": [
     "C-01"
    ],
-   "area": "services/processing workers",
+   "area": "backend/apps/processing workers",
    "size": "M",
    "note": "C-01 data set needed for done-when only; code can be tested on synthetic images."
   },
@@ -990,7 +990,7 @@
     "T2.03"
    ],
    "external": [],
-   "area": "services/processing",
+   "area": "backend/apps/processing",
    "size": "M"
   },
   "T2.08": {
@@ -1000,7 +1000,7 @@
     "T2.04"
    ],
    "external": [],
-   "area": "services/evidence, edge",
+   "area": "backend/apps/evidence, edge",
    "size": "M",
    "note": "Edge offline replay uses edge store."
   },
@@ -1011,7 +1011,7 @@
     "T0.15"
    ],
    "external": [],
-   "area": "frontends/client-portal",
+   "area": "frontend/apps/client-portal",
    "size": "L"
   },
   "T2.10": {
@@ -1020,7 +1020,7 @@
     "T2.05"
    ],
    "external": [],
-   "area": "frontends/back-office",
+   "area": "frontend/apps/back-office",
    "size": "M",
    "note": "T1.24 is only a weak guess for the back office frame; real dep is the back office shell T0.14."
   },
@@ -1029,7 +1029,7 @@
     "T2.06"
    ],
    "external": [],
-   "area": "services/processing, storage MinIO",
+   "area": "backend/apps/processing, storage MinIO",
    "size": "M"
   },
   "T2.12": {
@@ -1037,7 +1037,7 @@
     "T2.06"
    ],
    "external": [],
-   "area": "services/processing",
+   "area": "backend/apps/processing",
    "size": "M"
   },
   "T2.13": {
@@ -1045,7 +1045,7 @@
     "T2.04"
    ],
    "external": [],
-   "area": "services/evidence",
+   "area": "backend/apps/evidence",
    "size": "M",
    "note": "Test authority until P-07, so P-07 is not blocking."
   },
@@ -1055,7 +1055,7 @@
     "T0.14"
    ],
    "external": [],
-   "area": "frontends/back-office, Keycloak",
+   "area": "frontend/apps/back-office, Keycloak",
    "size": "M",
    "note": "Back office People screen; shell is T0.14 via T2.10 only loosely."
   },
@@ -1065,7 +1065,7 @@
     "T0.12"
    ],
    "external": [],
-   "area": "services/gateway, row-level security",
+   "area": "backend/apps/gateway, row-level security",
    "size": "M",
    "note": "Needs the Site/Client roles; tested with T2.14 flow but does not need its UI."
   },
@@ -1077,7 +1077,7 @@
     "P-01",
     "C-01"
    ],
-   "area": "services/processing (ML training), model registry",
+   "area": "backend/apps/processing (ML training), model registry",
    "size": "L",
    "note": "Needs design partner labelled data (P-01) in practice; GPU pool from T2.03."
   },
@@ -1088,7 +1088,7 @@
     "T2.16"
    ],
    "external": [],
-   "area": "services/processing workers",
+   "area": "backend/apps/processing workers",
    "size": "M",
    "note": "Places Defects on the orthomosaic: needs tiling/geo output."
   },
@@ -1098,7 +1098,7 @@
     "T2.17"
    ],
    "external": [],
-   "area": "frontends/back-office",
+   "area": "frontend/apps/back-office",
    "size": "M",
    "note": "Defect pictures side by side; map viewer not strictly needed, dropped."
   },
@@ -1107,7 +1107,7 @@
     "T2.18"
    ],
    "external": [],
-   "area": "frontends/back-office",
+   "area": "frontend/apps/back-office",
    "size": "S"
   },
   "T2.20": {
@@ -1117,7 +1117,7 @@
     "T2.15"
    ],
    "external": [],
-   "area": "frontends/client-portal, services/missions",
+   "area": "frontend/apps/client-portal, backend/apps/missions",
    "size": "M",
    "note": "Creates Requested Mission that appears in the studio."
   },
@@ -1127,7 +1127,7 @@
     "T2.19"
    ],
    "external": [],
-   "area": "services/missions, services/evidence",
+   "area": "backend/apps/missions, backend/apps/evidence",
    "size": "M"
   },
   "T2.22": {
@@ -1137,7 +1137,7 @@
     "T2.15"
    ],
    "external": [],
-   "area": "frontends/client-portal, services/gateway",
+   "area": "frontend/apps/client-portal, backend/apps/gateway",
    "size": "M",
    "note": "Live positions at 2 Hz from the live WebSocket."
   },
@@ -1149,7 +1149,7 @@
     "T2.21"
    ],
    "external": [],
-   "area": "frontends/client-portal",
+   "area": "frontend/apps/client-portal",
    "size": "M"
   },
   "T2.24": {
@@ -1159,7 +1159,7 @@
     "T2.11"
    ],
    "external": [],
-   "area": "packages/ts/maps",
+   "area": "frontend/packages/maps",
    "size": "M",
    "note": "Reuses the MapLibre setup of the studio."
   },
@@ -1169,7 +1169,7 @@
     "T2.10"
    ],
    "external": [],
-   "area": "services/evidence, frontends/back-office",
+   "area": "backend/apps/evidence, frontend/apps/back-office",
    "size": "M"
   },
   "T2.26": {
@@ -1178,7 +1178,7 @@
     "T2.25"
    ],
    "external": [],
-   "area": "frontends/client-portal",
+   "area": "frontend/apps/client-portal",
    "size": "M"
   },
   "T2.27": {
@@ -1188,7 +1188,7 @@
     "T2.25"
    ],
    "external": [],
-   "area": "frontends/ground-control",
+   "area": "frontend/apps/ground-control",
    "size": "L",
    "note": "Replay from full-rate table, checked against record on opening."
   },
@@ -1198,7 +1198,7 @@
     "T2.27"
    ],
    "external": [],
-   "area": "packages/rust (camera footprints), ground-control",
+   "area": "rust (camera footprints), ground-control",
    "size": "M"
   },
   "T2.29": {
@@ -1207,7 +1207,7 @@
     "T2.27"
    ],
    "external": [],
-   "area": "frontends/ground-control",
+   "area": "frontend/apps/ground-control",
    "size": "M"
   },
   "T2.30": {
@@ -1215,7 +1215,7 @@
     "T1.29"
    ],
    "external": [],
-   "area": "deploy/terraform, deploy/charts, deploy/environments",
+   "area": "infra/terraform, infra/charts, infra/environments",
    "size": "L",
    "note": "Reuses staging charts; C-02 runs on it but the cell is software."
   },
@@ -1225,7 +1225,7 @@
     "T2.28"
    ],
    "external": [],
-   "area": "services/missions",
+   "area": "backend/apps/missions",
    "size": "M"
   },
   "T2.32": {
@@ -1233,7 +1233,7 @@
     "T2.31"
    ],
    "external": [],
-   "area": "frontends/back-office (Mission studio)",
+   "area": "frontend/apps/back-office (Mission studio)",
    "size": "M"
   },
   "T2.33": {
@@ -1242,7 +1242,7 @@
     "T2.32"
    ],
    "external": [],
-   "area": "services/missions, studio",
+   "area": "backend/apps/missions, studio",
    "size": "M"
   },
   "T2.34": {
@@ -1252,7 +1252,7 @@
    "external": [
     "P-07"
    ],
-   "area": "services/evidence",
+   "area": "backend/apps/evidence",
    "size": "S"
   },
   "T2.35": {
@@ -1262,7 +1262,7 @@
     "T2.31"
    ],
    "external": [],
-   "area": "ground-control, services/missions",
+   "area": "ground-control, backend/apps/missions",
    "size": "S"
   },
   "T2.36": {
@@ -1272,7 +1272,7 @@
     "T2.32"
    ],
    "external": [],
-   "area": "frontends/client-portal",
+   "area": "frontend/apps/client-portal",
    "size": "M"
   },
   "T2.37": {
@@ -1281,7 +1281,7 @@
     "T2.31"
    ],
    "external": [],
-   "area": "services/processing or missions (PDF report), i18n",
+   "area": "backend/apps/processing or missions (PDF report), i18n",
    "size": "L",
    "note": "Report holds Scorecard and Confirmed Defects; Debrief not needed, dropped."
   },
@@ -1291,7 +1291,7 @@
     "T2.37"
    ],
    "external": [],
-   "area": "services/missions, back-office, client-portal",
+   "area": "backend/apps/missions, back-office, client-portal",
    "size": "M"
   },
   "T2.39": {
@@ -1301,7 +1301,7 @@
    "external": [
     "C-02"
    ],
-   "area": "services/processing",
+   "area": "backend/apps/processing",
    "size": "M",
    "note": "Needs C-02 data."
   },
@@ -1311,7 +1311,7 @@
     "T2.04"
    ],
    "external": [],
-   "area": "services/evidence, storage MinIO",
+   "area": "backend/apps/evidence, storage MinIO",
    "size": "M"
   },
   "T2.41": {
@@ -1322,7 +1322,7 @@
    "external": [
     "C-02"
    ],
-   "area": "services/flight-engine, edge box",
+   "area": "backend/apps/flight-engine, edge box",
    "size": "M"
   },
   "T2.42": {
@@ -1332,7 +1332,7 @@
     "T2.13"
    ],
    "external": [],
-   "area": "deploy/charts observability",
+   "area": "infra/charts observability",
    "size": "M"
   },
   "T2.43": {
@@ -1408,7 +1408,7 @@
     "C-02",
     "P-06"
    ],
-   "area": "deploy/terraform OVHcloud, deploy/environments",
+   "area": "infra/terraform OVHcloud, infra/environments",
    "size": "L",
    "note": "Cell is software; C-02 data and design partner needed to migrate."
   },
@@ -1446,7 +1446,7 @@
     "T0.12"
    ],
    "external": [],
-   "area": "services/notifier",
+   "area": "backend/apps/notifier",
    "size": "M"
   },
   "T3.02": {
@@ -1455,7 +1455,7 @@
     "T3.01"
    ],
    "external": [],
-   "area": "services/notifier, apps",
+   "area": "backend/apps/notifier, apps",
    "size": "M"
   },
   "T3.03": {
@@ -1464,7 +1464,7 @@
     "T0.12"
    ],
    "external": [],
-   "area": "services/missions or sites, gateway",
+   "area": "backend/apps/missions or sites, gateway",
    "size": "M"
   },
   "T3.04": {
@@ -1473,7 +1473,7 @@
     "T3.05"
    ],
    "external": [],
-   "area": "frontends/back-office (Mission studio)",
+   "area": "frontend/apps/back-office (Mission studio)",
    "size": "M",
    "note": "Needs Docks of the Site as take-off points: T3.05 for the model."
   },
@@ -1482,7 +1482,7 @@
     "T1.05"
    ],
    "external": [],
-   "area": "services/fleet, frontends/back-office",
+   "area": "backend/apps/fleet, frontend/apps/back-office",
    "size": "M",
    "note": "Dock state in Drone readiness feeds Pre-flight check logic."
   },
@@ -1492,7 +1492,7 @@
     "T0.18"
    ],
    "external": [],
-   "area": "services/flight-engine, simulator",
+   "area": "backend/apps/flight-engine, simulator",
    "size": "M"
   },
   "T3.07": {
@@ -1503,7 +1503,7 @@
    "external": [
     "H-04"
    ],
-   "area": "services/flight-engine adapters (Parrot sidecar)",
+   "area": "backend/apps/flight-engine adapters (Parrot sidecar)",
    "size": "L",
    "note": "Adapter contract and compat test live in P1 (T1.02/T1.12); bench with H-04."
   },
@@ -1526,7 +1526,7 @@
    "external": [
     "H-04"
    ],
-   "area": "services/video-relay, adapter Parrot",
+   "area": "backend/apps/video-relay, adapter Parrot",
    "size": "M"
   },
   "T3.10": {
@@ -1537,7 +1537,7 @@
     "T3.06"
    ],
    "external": [],
-   "area": "frontends/ground-control",
+   "area": "frontend/apps/ground-control",
    "size": "M"
   },
   "T3.11": {
@@ -1559,7 +1559,7 @@
     "H-05",
     "H-04"
    ],
-   "area": "services/flight-engine Dock driver, edge WireGuard",
+   "area": "backend/apps/flight-engine Dock driver, edge WireGuard",
    "size": "L"
   },
   "T3.13": {
@@ -1582,7 +1582,7 @@
     "T3.13"
    ],
    "external": [],
-   "area": "flight-engine, services/missions, ground-control",
+   "area": "flight-engine, backend/apps/missions, ground-control",
    "size": "M"
   },
   "T3.15": {
@@ -1592,7 +1592,7 @@
     "T3.13"
    ],
    "external": [],
-   "area": "ground-control, services/evidence",
+   "area": "ground-control, backend/apps/evidence",
    "size": "M"
   },
   "T3.16": {
@@ -1604,7 +1604,7 @@
     "H-04",
     "C-03"
    ],
-   "area": "services/fleet compatibility, adapter",
+   "area": "backend/apps/fleet compatibility, adapter",
    "size": "M"
   },
   "T3.17": {
@@ -1613,7 +1613,7 @@
     "T3.04"
    ],
    "external": [],
-   "area": "services/missions scheduler",
+   "area": "backend/apps/missions scheduler",
    "size": "M"
   },
   "T3.18": {
@@ -1623,7 +1623,7 @@
     "T3.03"
    ],
    "external": [],
-   "area": "frontends/client-portal",
+   "area": "frontend/apps/client-portal",
    "size": "M"
   },
   "T3.19": {
@@ -1634,7 +1634,7 @@
     "T3.04"
    ],
    "external": [],
-   "area": "client-portal, services/missions",
+   "area": "client-portal, backend/apps/missions",
    "size": "M"
   },
   "T3.20": {
@@ -1661,7 +1661,7 @@
     "T1.37"
    ],
    "external": [],
-   "area": "deploy/charts livekit, services/video-relay",
+   "area": "infra/charts livekit, backend/apps/video-relay",
    "size": "L"
   },
   "T3.23": {
@@ -1670,7 +1670,7 @@
     "T3.22"
    ],
    "external": [],
-   "area": "services/video-relay, evidence",
+   "area": "backend/apps/video-relay, evidence",
    "size": "M"
   },
   "T3.24": {
@@ -1678,7 +1678,7 @@
     "T3.03"
    ],
    "external": [],
-   "area": "services/gateway or alarms receiver",
+   "area": "backend/apps/gateway or alarms receiver",
    "size": "M"
   },
   "T3.25": {
@@ -1687,7 +1687,7 @@
     "T3.06"
    ],
    "external": [],
-   "area": "services/flight-engine edge, update system",
+   "area": "backend/apps/flight-engine edge, update system",
    "size": "L"
   },
   "T3.26": {
@@ -1696,7 +1696,7 @@
     "T3.22"
    ],
    "external": [],
-   "area": "services/video-relay, client-portal, CDN",
+   "area": "backend/apps/video-relay, client-portal, CDN",
    "size": "M"
   },
   "T3.27": {
@@ -1705,7 +1705,7 @@
     "T3.23"
    ],
    "external": [],
-   "area": "services/processing video worker",
+   "area": "backend/apps/processing video worker",
    "size": "M"
   },
   "T3.28": {
@@ -1715,7 +1715,7 @@
     "T3.15"
    ],
    "external": [],
-   "area": "services/notifier, back-office",
+   "area": "backend/apps/notifier, back-office",
    "size": "M"
   },
   "T3.29": {
@@ -1726,7 +1726,7 @@
     "T3.17"
    ],
    "external": [],
-   "area": "services/missions Scorecard, ground-control Debrief",
+   "area": "backend/apps/missions Scorecard, ground-control Debrief",
    "size": "M"
   },
   "T3.30": {
@@ -1734,7 +1734,7 @@
     "T3.16"
    ],
    "external": [],
-   "area": "services/fleet",
+   "area": "backend/apps/fleet",
    "size": "S"
   },
   "T3.31": {
@@ -1806,7 +1806,7 @@
     "T0.12"
    ],
    "external": [],
-   "area": "services/missions, packages/python/swarm-models",
+   "area": "backend/apps/missions, backend/swarm-models",
    "size": "M"
   },
   "T4.02": {
@@ -1817,7 +1817,7 @@
     "G-07",
     "P-04"
    ],
-   "area": "packages/rust/swarm-core planner, PyO3",
+   "area": "rust/swarm-core planner, PyO3",
    "size": "M",
    "note": "Needs partner farm sample files and agreed formats"
   },
@@ -1828,7 +1828,7 @@
    "external": [
     "G-07"
    ],
-   "area": "packages/rust/swarm-core planner",
+   "area": "rust/swarm-core planner",
    "size": "M"
   },
   "T4.04": {
@@ -1837,7 +1837,7 @@
     "T4.01"
    ],
    "external": [],
-   "area": "packages/rust planner, services/planner",
+   "area": "rust planner, backend/apps/planner",
    "size": "L",
    "note": "Swath comes from Payload kinds (T4.09) but tests can use fixed swaths; left out"
   },
@@ -1846,7 +1846,7 @@
     "T0.13"
    ],
    "external": [],
-   "area": "services/simulator, packages/rust synthetic drones",
+   "area": "backend/apps/simulator, rust synthetic drones",
    "size": "M"
   },
   "T4.06": {
@@ -1856,7 +1856,7 @@
     "T4.09"
    ],
    "external": [],
-   "area": "frontends/ground-control or studio, Mission studio",
+   "area": "frontend/apps/ground-control or studio, Mission studio",
    "size": "L",
    "note": "Needs routes (T4.04) and Payload choice (T4.09) to finish UC-001"
   },
@@ -1866,7 +1866,7 @@
     "T4.01"
    ],
    "external": [],
-   "area": "services/missions, Mission studio",
+   "area": "backend/apps/missions, Mission studio",
    "size": "S"
   },
   "T4.08": {
@@ -1874,7 +1874,7 @@
     "T4.04"
    ],
    "external": [],
-   "area": "packages/rust planner",
+   "area": "rust planner",
    "size": "M"
   },
   "T4.09": {
@@ -1882,7 +1882,7 @@
     "T1.05"
    ],
    "external": [],
-   "area": "services/fleet",
+   "area": "backend/apps/fleet",
    "size": "S"
   },
   "T4.10": {
@@ -1893,7 +1893,7 @@
    "external": [
     "H-06"
    ],
-   "area": "packages/rust mavlink, services/flight-engine",
+   "area": "rust mavlink, backend/apps/flight-engine",
    "size": "M",
    "note": "Real step is one rented Drone on the ground"
   },
@@ -1907,7 +1907,7 @@
     "H-06",
     "C-04"
    ],
-   "area": "packages/rust safety, flight-engine",
+   "area": "rust safety, flight-engine",
    "size": "M",
    "note": "In flight part needs C-04; simulation part is software"
   },
@@ -1920,7 +1920,7 @@
    "external": [
     "H-06"
    ],
-   "area": "services/fleet, simulator, real flight",
+   "area": "backend/apps/fleet, simulator, real flight",
    "size": "M"
   },
   "T4.13": {
@@ -1930,7 +1930,7 @@
     "T4.05"
    ],
    "external": [],
-   "area": "Back office, packages/rust safety, services/fleet",
+   "area": "Back office, rust safety, backend/apps/fleet",
    "size": "M",
    "note": "Back office frame assumed from T0.14; settings screen owner unclear"
   },
@@ -1941,7 +1941,7 @@
     "T4.13"
    ],
    "external": [],
-   "area": "packages/rust planner, flight-engine",
+   "area": "rust planner, flight-engine",
    "size": "L"
   },
   "T4.15": {
@@ -1950,7 +1950,7 @@
     "T1.13"
    ],
    "external": [],
-   "area": "Back office, services/fleet or missions",
+   "area": "Back office, backend/apps/fleet or missions",
    "size": "M",
    "note": "Pilot entity assumed to exist via fleet/Authorisations"
   },
@@ -1970,7 +1970,7 @@
     "T4.14"
    ],
    "external": [],
-   "area": "frontends/ground-control",
+   "area": "frontend/apps/ground-control",
    "size": "M"
   },
   "T4.18": {
@@ -1980,7 +1980,7 @@
     "T4.16"
    ],
    "external": [],
-   "area": "frontends/ground-control, web worker, deck.gl",
+   "area": "frontend/apps/ground-control, web worker, deck.gl",
    "size": "L",
    "note": "Front-end budgets of T1.40 are in the done-when but not a build prerequisite"
   },
@@ -2000,7 +2000,7 @@
     "T4.10"
    ],
    "external": [],
-   "area": "services/missions, TimescaleDB",
+   "area": "backend/apps/missions, TimescaleDB",
    "size": "M",
    "note": "Real-flight clause has no named campaign; treated as simulation-testable"
   },
@@ -2013,7 +2013,7 @@
     "T4.20"
    ],
    "external": [],
-   "area": "services/processing, evidence, Client portal",
+   "area": "backend/apps/processing, evidence, Client portal",
    "size": "L"
   },
   "T4.22": {
@@ -2024,7 +2024,7 @@
     "T4.20"
    ],
    "external": [],
-   "area": "services/missions, Ground control Debrief",
+   "area": "backend/apps/missions, Ground control Debrief",
    "size": "M"
   },
   "T4.23": {
@@ -2078,7 +2078,7 @@
     "T0.12"
    ],
    "external": [],
-   "area": "services/agents",
+   "area": "backend/apps/agents",
    "size": "M"
   },
   "T5.02": {
@@ -2088,7 +2088,7 @@
    "external": [
     "P-08"
    ],
-   "area": "services/agents, Back office settings",
+   "area": "backend/apps/agents, Back office settings",
    "size": "M"
   },
   "T5.03": {
@@ -2098,7 +2098,7 @@
     "T1.11"
    ],
    "external": [],
-   "area": "services/missions, packages/python/swarm-models",
+   "area": "backend/apps/missions, backend/swarm-models",
    "size": "M"
   },
   "T5.04": {
@@ -2108,7 +2108,7 @@
     "T5.03"
    ],
    "external": [],
-   "area": "services/agents",
+   "area": "backend/apps/agents",
    "size": "M"
   },
   "T5.05": {
@@ -2117,7 +2117,7 @@
     "T5.02"
    ],
    "external": [],
-   "area": "services/agents, CI, Grafana",
+   "area": "backend/apps/agents, CI, Grafana",
    "size": "M"
   },
   "T5.06": {
@@ -2127,7 +2127,7 @@
     "T5.04"
    ],
    "external": [],
-   "area": "services/agents",
+   "area": "backend/apps/agents",
    "size": "L"
   },
   "T5.07": {
@@ -2135,7 +2135,7 @@
     "T5.06"
    ],
    "external": [],
-   "area": "services/agents, services/missions",
+   "area": "backend/apps/agents, backend/apps/missions",
    "size": "M"
   },
   "T5.08": {
@@ -2153,7 +2153,7 @@
     "T5.07"
    ],
    "external": [],
-   "area": "services/agents eval sets",
+   "area": "backend/apps/agents eval sets",
    "size": "M",
    "note": "Needs Agriculture Payloads (T4.09) and Patrol routes (T3.04) in expected results, both already earlier; left out"
   },
@@ -2167,7 +2167,7 @@
    "external": [
     "P-06"
    ],
-   "area": "services/agents, deploy/charts KEDA",
+   "area": "backend/apps/agents, infra/charts KEDA",
    "size": "M"
   },
   "T5.11": {
@@ -2179,7 +2179,7 @@
     "T5.04"
    ],
    "external": [],
-   "area": "services/agents",
+   "area": "backend/apps/agents",
    "size": "L",
    "note": "Per Activity sections need Debrief/Scorecard data of P3 and P4"
   },
@@ -2197,7 +2197,7 @@
     "T5.12"
    ],
    "external": [],
-   "area": "services/missions, Back office, Client portal",
+   "area": "backend/apps/missions, Back office, Client portal",
    "size": "M"
   },
   "T5.14": {
@@ -2206,7 +2206,7 @@
     "T5.11"
    ],
    "external": [],
-   "area": "services/agents eval sets",
+   "area": "backend/apps/agents eval sets",
    "size": "S"
   },
   "T5.15": {
@@ -2217,7 +2217,7 @@
     "T5.04"
    ],
    "external": [],
-   "area": "services/agents",
+   "area": "backend/apps/agents",
    "size": "M"
   },
   "T5.16": {
@@ -2226,7 +2226,7 @@
     "T5.15"
    ],
    "external": [],
-   "area": "services/agents, planner",
+   "area": "backend/apps/agents, planner",
    "size": "M"
   },
   "T5.17": {
@@ -2234,7 +2234,7 @@
     "T5.16"
    ],
    "external": [],
-   "area": "frontends/ground-control Alerts area",
+   "area": "frontend/apps/ground-control Alerts area",
    "size": "M"
   },
   "T5.18": {
@@ -2243,7 +2243,7 @@
     "T1.21"
    ],
    "external": [],
-   "area": "frontends/ground-control",
+   "area": "frontend/apps/ground-control",
    "size": "M",
    "note": "Independent of any agent; core-out critical path runs at the edge"
   },
@@ -2259,7 +2259,7 @@
     "C-03",
     "C-04"
    ],
-   "area": "services/agents eval, Replays",
+   "area": "backend/apps/agents eval, Replays",
    "size": "M",
    "note": "Needs real Flight logs of C-01 to C-04"
   },
@@ -2270,7 +2270,7 @@
     "T5.03"
    ],
    "external": [],
-   "area": "services/agents (MCP), gateway",
+   "area": "backend/apps/agents (MCP), gateway",
    "size": "L"
   },
   "T5.21": {
@@ -2278,7 +2278,7 @@
     "T5.20"
    ],
    "external": [],
-   "area": "services/agents, Keycloak, gateway",
+   "area": "backend/apps/agents, Keycloak, gateway",
    "size": "M"
   },
   "T5.22": {
@@ -2289,7 +2289,7 @@
    "external": [
     "P-06"
    ],
-   "area": "deploy/charts, KEDA, gateway",
+   "area": "infra/charts, KEDA, gateway",
    "size": "M"
   },
   "T5.23": {
@@ -2299,7 +2299,7 @@
     "T5.21"
    ],
    "external": [],
-   "area": "gateway, services/missions",
+   "area": "gateway, backend/apps/missions",
    "size": "M"
   },
   "T5.24": {
@@ -2320,7 +2320,7 @@
     "T5.21"
    ],
    "external": [],
-   "area": "services/agents (A2A)",
+   "area": "backend/apps/agents (A2A)",
    "size": "L"
   },
   "T5.26": {
@@ -2330,7 +2330,7 @@
    "external": [
     "P-06"
    ],
-   "area": "deploy/charts, KEDA, gateway",
+   "area": "infra/charts, KEDA, gateway",
    "size": "M"
   },
   "T5.27": {
@@ -2348,7 +2348,7 @@
     "T5.25"
    ],
    "external": [],
-   "area": "services/agents, Back office",
+   "area": "backend/apps/agents, Back office",
    "size": "M"
   },
   "T5.29": {
@@ -2400,7 +2400,7 @@
     "T0.12"
    ],
    "external": [],
-   "area": "services/missions, services/planner, packages/python/swarm-models",
+   "area": "backend/apps/missions, backend/apps/planner, backend/swarm-models",
    "size": "M",
    "note": "Skybrush import plus object storage reference"
   },
@@ -2409,7 +2409,7 @@
     "T6.01"
    ],
    "external": [],
-   "area": "services/planner",
+   "area": "backend/apps/planner",
    "size": "S"
   },
   "T6.03": {
@@ -2417,7 +2417,7 @@
     "T0.07"
    ],
    "external": [],
-   "area": "packages/rust/swarm-core planner",
+   "area": "rust/swarm-core planner",
    "size": "M",
    "note": "Works on frames; the Choreography model (T6.01) only feeds it, so not a hard dep"
   },
@@ -2428,7 +2428,7 @@
     "T6.01"
    ],
    "external": [],
-   "area": "services/planner, services/missions",
+   "area": "backend/apps/planner, backend/apps/missions",
    "size": "M",
    "note": "Site, Geofence from T1.08, Drone model limits from T1.05"
   },
@@ -2438,7 +2438,7 @@
     "T6.01"
    ],
    "external": [],
-   "area": "services/planner",
+   "area": "backend/apps/planner",
    "size": "S"
   },
   "T6.06": {
@@ -2449,7 +2449,7 @@
     "T6.04"
    ],
    "external": [],
-   "area": "frontends/mission-studio, docs/specs/screens",
+   "area": "frontend/apps/mission-studio, docs/specs/screens",
    "size": "L",
    "note": "Refusal panel shows results of the checks"
   },
@@ -2460,7 +2460,7 @@
     "T6.05"
    ],
    "external": [],
-   "area": "packages/rust/swarm-core benches",
+   "area": "rust/swarm-core benches",
    "size": "S"
   },
   "T6.08": {
@@ -2472,7 +2472,7 @@
     "T6.05"
    ],
    "external": [],
-   "area": "frontends/mission-studio",
+   "area": "frontend/apps/mission-studio",
    "size": "L"
   },
   "T6.09": {
@@ -2482,7 +2482,7 @@
     "T6.03"
    ],
    "external": [],
-   "area": "frontends/mission-studio",
+   "area": "frontend/apps/mission-studio",
    "size": "M",
    "note": "deck.gl 3D preview highlights Drones at fault"
   },
@@ -2494,7 +2494,7 @@
     "T6.01"
    ],
    "external": [],
-   "area": "services/flight-engine",
+   "area": "backend/apps/flight-engine",
    "size": "L"
   },
   "T6.11": {
@@ -2503,7 +2503,7 @@
     "T6.10"
    ],
    "external": [],
-   "area": "services/flight-engine",
+   "area": "backend/apps/flight-engine",
    "size": "M",
    "note": "200-Drone Simulator run uses base synthetic Drones of T0.13, transitively available; T6.18 not required"
   },
@@ -2512,7 +2512,7 @@
     "T6.10"
    ],
    "external": [],
-   "area": "services/flight-engine, ground control",
+   "area": "backend/apps/flight-engine, ground control",
    "size": "M"
   },
   "T6.13": {
@@ -2522,7 +2522,7 @@
     "T6.11"
    ],
    "external": [],
-   "area": "frontends/ground-control, docs/specs/screens",
+   "area": "frontend/apps/ground-control, docs/specs/screens",
    "size": "L"
   },
   "T6.14": {
@@ -2530,7 +2530,7 @@
     "T6.01"
    ],
    "external": [],
-   "area": "services/planner",
+   "area": "backend/apps/planner",
    "size": "M"
   },
   "T6.15": {
@@ -2540,7 +2540,7 @@
     "T6.14"
    ],
    "external": [],
-   "area": "services/flight-engine",
+   "area": "backend/apps/flight-engine",
    "size": "L"
   },
   "T6.16": {
@@ -2549,7 +2549,7 @@
     "T6.15"
    ],
    "external": [],
-   "area": "services/flight-engine (edge)",
+   "area": "backend/apps/flight-engine (edge)",
    "size": "L",
    "note": "Several edges per cell come from P3 (T3.25), not required"
   },
@@ -2559,7 +2559,7 @@
     "T6.15"
    ],
    "external": [],
-   "area": "services/flight-engine, services/gateway, telemetry ingest",
+   "area": "backend/apps/flight-engine, backend/apps/gateway, telemetry ingest",
    "size": "M"
   },
   "T6.18": {
@@ -2569,7 +2569,7 @@
     "T6.10"
    ],
    "external": [],
-   "area": "services/simulator, packages/rust",
+   "area": "backend/apps/simulator, rust",
    "size": "L"
   },
   "T6.19": {
@@ -2602,7 +2602,7 @@
     "H-07",
     "G-08"
    ],
-   "area": "services/fleet, drone adapter",
+   "area": "backend/apps/fleet, drone adapter",
    "size": "M",
    "note": "Done-when needs one real flight of the show Drone"
   },
@@ -2612,7 +2612,7 @@
     "T6.01"
    ],
    "external": [],
-   "area": "services/missions, flight-engine pre-flight, frontends/ground-control",
+   "area": "backend/apps/missions, flight-engine pre-flight, frontend/apps/ground-control",
    "size": "M",
    "note": "Checklist and grid; may need Drones of T6.21 only for real use"
   },
@@ -2638,7 +2638,7 @@
     "G-08",
     "P-05"
    ],
-   "area": "services/flight-engine, evidence, ground control debrief",
+   "area": "backend/apps/flight-engine, evidence, ground control debrief",
    "size": "M",
    "note": "Rehearsal fixes need real rehearsals",
    "field": {
@@ -2684,7 +2684,7 @@
     "T2.48"
    ],
    "external": [],
-   "area": "tests/isolation, services/gateway",
+   "area": "tests/isolation, backend/apps/gateway",
    "size": "L",
    "note": "Across-cells probes may need T7.03/T7.05 later"
   },
@@ -2696,7 +2696,7 @@
    "external": [
     "P-06"
    ],
-   "area": "deploy/terraform, deploy/charts, deploy/environments",
+   "area": "infra/terraform, infra/charts, infra/environments",
    "size": "L",
    "note": "KEDA via umbrella chart comes with T5.10"
   },
@@ -2708,7 +2708,7 @@
    "external": [
     "P-06"
    ],
-   "area": "deploy/terraform, services/gateway, Keycloak",
+   "area": "infra/terraform, backend/apps/gateway, Keycloak",
    "size": "L"
   },
   "T7.05": {
@@ -2718,7 +2718,7 @@
    "external": [
     "P-06"
    ],
-   "area": "deploy/terraform, deploy/environments",
+   "area": "infra/terraform, infra/environments",
    "size": "M"
   },
   "T7.06": {
@@ -2728,7 +2728,7 @@
     "T7.05"
    ],
    "external": [],
-   "area": "deploy/environments, Argo CD, CI",
+   "area": "infra/environments, Argo CD, CI",
    "size": "M",
    "note": "SLO burn signal from T2.42"
   },
@@ -2739,7 +2739,7 @@
     "T7.05"
    ],
    "external": [],
-   "area": "services/gateway, storage, edge re-pointing, evidence",
+   "area": "backend/apps/gateway, storage, edge re-pointing, evidence",
    "size": "L"
   },
   "T7.08": {
@@ -2748,7 +2748,7 @@
     "T3.07"
    ],
    "external": [],
-   "area": "services/flight-engine sidecar (dji)",
+   "area": "backend/apps/flight-engine sidecar (dji)",
    "size": "M"
   },
   "T7.09": {
@@ -2757,7 +2757,7 @@
     "T3.07"
    ],
    "external": [],
-   "area": "services/flight-engine sidecar (skydio)",
+   "area": "backend/apps/flight-engine sidecar (skydio)",
    "size": "M"
   },
   "T7.10": {
@@ -2768,7 +2768,7 @@
     "T7.09"
    ],
    "external": [],
-   "area": "services/fleet, tests compatibility",
+   "area": "backend/apps/fleet, tests compatibility",
    "size": "M"
   },
   "T7.11": {
@@ -2778,7 +2778,7 @@
    "external": [
     "P-06"
    ],
-   "area": "deploy/terraform, deploy/environments",
+   "area": "infra/terraform, infra/environments",
    "size": "M",
    "note": "Servers need a hosting provider"
   },
@@ -2789,7 +2789,7 @@
     "T7.11"
    ],
    "external": [],
-   "area": "services/gateway, services/missions, evidence anchoring",
+   "area": "backend/apps/gateway, backend/apps/missions, evidence anchoring",
    "size": "M",
    "note": "Does not hard-need T7.13: Jurisdiction concept exists since P1"
   },
@@ -2801,7 +2801,7 @@
    "external": [
     "G-09"
    ],
-   "area": "services/missions, services/fleet, catalogs",
+   "area": "backend/apps/missions, backend/apps/fleet, catalogs",
    "size": "S"
   },
   "T7.14": {
@@ -2820,7 +2820,7 @@
     "T5.02"
    ],
    "external": [],
-   "area": "deploy/images, packaging scripts",
+   "area": "infra/images, packaging scripts",
    "size": "L"
   },
   "T7.16": {
@@ -2829,7 +2829,7 @@
     "T7.15"
    ],
    "external": [],
-   "area": "deploy/installer, docs",
+   "area": "infra/installer, docs",
    "size": "L"
   },
   "T7.17": {
@@ -2851,7 +2851,7 @@
    "external": [
     "P-09"
    ],
-   "area": "services/evidence",
+   "area": "backend/apps/evidence",
    "size": "M"
   },
   "T7.19": {
@@ -2862,7 +2862,7 @@
     "T7.18"
    ],
    "external": [],
-   "area": "frontends/back-office, services/evidence",
+   "area": "frontend/apps/back-office, backend/apps/evidence",
    "size": "M"
   },
   "T7.20": {
@@ -2890,7 +2890,7 @@
     "T3.01"
    ],
    "external": [],
-   "area": "all frontends, services/notifier, CI",
+   "area": "all frontends, backend/apps/notifier, CI",
    "size": "M",
    "note": "Audit really needs every screen of earlier phases"
   },
@@ -2983,7 +2983,7 @@
    "external": [
     "P-06"
    ],
-   "area": "deploy/environments",
+   "area": "infra/environments",
    "size": "M"
   },
   "T7.30": {
@@ -3005,7 +3005,7 @@
     "T5.15"
    ],
    "external": [],
-   "area": "services/agents router graph, Conversations",
+   "area": "backend/apps/agents router graph, Conversations",
    "size": "M",
    "note": "Front door of FS-023"
   },
@@ -3015,7 +3015,7 @@
     "T5.20"
    ],
    "external": [],
-   "area": "services/agents action catalogue, every service owning an action",
+   "area": "backend/apps/agents action catalogue, every service owning an action",
    "size": "L",
    "note": "Every action as a tool"
   },
@@ -3034,7 +3034,7 @@
     "T5.32"
    ],
    "external": [],
-   "area": "services/agents knowledge and memory",
+   "area": "backend/apps/agents knowledge and memory",
    "size": "M",
    "note": ""
   },
@@ -3044,7 +3044,7 @@
     "T5.33"
    ],
    "external": [],
-   "area": "services/gateway and owning services: Assistant permissions",
+   "area": "backend/apps/gateway and owning services: Assistant permissions",
    "size": "L",
    "note": "Replaces the fixed gate of T5.23"
   },
@@ -3055,7 +3055,7 @@
     "T2.14"
    ],
    "external": [],
-   "area": "frontends/back-office permission screens, Swarm administration",
+   "area": "frontend/apps/back-office permission screens, Swarm administration",
    "size": "M",
    "note": "UC-032"
   },
@@ -3066,7 +3066,7 @@
     "T5.18"
    ],
    "external": [],
-   "area": "frontends/ground-control, services/agents: Flight-critical acts",
+   "area": "frontend/apps/ground-control, backend/apps/agents: Flight-critical acts",
    "size": "L",
    "note": "UC-034, BR-029"
   },
@@ -3075,7 +3075,7 @@
     "T5.36"
    ],
    "external": [],
-   "area": "services/agents activity log, Undo, digest",
+   "area": "backend/apps/agents activity log, Undo, digest",
    "size": "M",
    "note": ""
   },
@@ -3085,7 +3085,7 @@
     "T5.05"
    ],
    "external": [],
-   "area": "services/agents budgets, back-office usage",
+   "area": "backend/apps/agents budgets, back-office usage",
    "size": "M",
    "note": "BR-030"
   },
@@ -3125,7 +3125,7 @@
     "T5.36"
    ],
    "external": [],
-   "area": "services/agents Triggers on agents-worker",
+   "area": "backend/apps/agents Triggers on agents-worker",
    "size": "M",
    "note": ""
   },
@@ -3135,7 +3135,7 @@
     "T5.34"
    ],
    "external": [],
-   "area": "frontends/ground-control offline model",
+   "area": "frontend/apps/ground-control offline model",
    "size": "L",
    "note": ""
   },
@@ -3146,7 +3146,7 @@
     "T5.36"
    ],
    "external": [],
-   "area": "services/agents connector registry, back-office, Vault",
+   "area": "backend/apps/agents connector registry, back-office, Vault",
    "size": "L",
    "note": ""
   },
@@ -3173,7 +3173,7 @@
     "T5.33"
    ],
    "external": [],
-   "area": "services/agents ERP port and stand-in",
+   "area": "backend/apps/agents ERP port and stand-in",
    "size": "M",
    "note": ""
   },
@@ -3184,7 +3184,7 @@
     "T5.32"
    ],
    "external": [],
-   "area": "services/planner, frontends/mission-studio Squad sizing",
+   "area": "backend/apps/planner, frontend/apps/mission-studio Squad sizing",
    "size": "M",
    "note": "UC-033 steps 1 and 2"
   },
@@ -3195,7 +3195,7 @@
    "external": [
     "P-10"
    ],
-   "area": "services/agents Simple-ERP adapter",
+   "area": "backend/apps/agents Simple-ERP adapter",
    "size": "L",
    "note": "Waits for the Simple-ERP API"
   },
@@ -3206,7 +3206,7 @@
     "T5.51"
    ],
    "external": [],
-   "area": "services/agents, frontends/mission-studio shortfall proposals",
+   "area": "backend/apps/agents, frontend/apps/mission-studio shortfall proposals",
    "size": "L",
    "note": "UC-033"
   },
