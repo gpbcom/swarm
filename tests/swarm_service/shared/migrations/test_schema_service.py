@@ -17,7 +17,10 @@ from swarm_storage.shared.postgres.ddl.row_level_security import RowLevelSecurit
 
 class TestSchemaService:
     MIGRATIONS: ClassVar[Path] = Path(__file__).resolve().parents[4] / "backend" / "apps" / "gateway" / "migrations"
-    REVISION: ClassVar[str] = "0001"
+    VERSIONS: ClassVar[str] = "versions"
+    VERSIONS_GLOB: ClassVar[str] = "[0-9]*_*.py"
+    REVISION_SEPARATOR: ClassVar[str] = "_"
+    REVISION: ClassVar[str] = max((MIGRATIONS / VERSIONS).glob(VERSIONS_GLOB)).name.split(REVISION_SEPARATOR)[0]
     TABLE_NAME: ClassVar[str] = "outbox"
     TABLE_QUERY: ClassVar[str] = (
         "SELECT c.relrowsecurity, c.relforcerowsecurity FROM pg_class c "
@@ -56,7 +59,7 @@ class TestSchemaService:
         assert rows[0][self.FORCE_ROW_SECURITY_COLUMN] is True
         assert await self.policies(postgres_dsn) == [RowLevelSecurity.POLICY_NAME]
 
-    async def test_current_is_the_first_revision_after_the_upgrade(self, service: SchemaService) -> None:
+    async def test_current_is_the_last_revision_after_the_upgrade(self, service: SchemaService) -> None:
         assert await service.current() is None
         await service.upgrade()
         assert await service.current() == self.REVISION

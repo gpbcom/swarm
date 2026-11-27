@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 
 import { MapPaletteError, readMapPalette } from "../../src/palette/map-palette";
+import type { ColourResolver } from "../../src/palette/map-palette";
 
 const VARIABLES: Record<string, string> = {
   "--color-background": "#102030",
@@ -11,6 +12,15 @@ const VARIABLES: Record<string, string> = {
   "--color-entity": "#00aaff",
   "--color-failure": "#ff0000",
 };
+
+/** What a browser's canvas writes back for a few CSS colours: opaque ones as #rrggbb, translucent ones as rgba. */
+const RESOLVED: Record<string, string> = {
+  red: "#ff0000",
+  "rgb(1, 2, 3)": "#010203",
+  "rgb(1 2 3 / 50%)": "rgba(1, 2, 3, 0.5)",
+};
+
+const resolve: ColourResolver = (value) => RESOLVED[value] ?? null;
 
 function paint(element: HTMLElement, skip?: string, override?: Record<string, string>): void {
   const values = { ...VARIABLES, ...override };
@@ -47,10 +57,22 @@ describe("readMapPalette", () => {
     expect(() => readMapPalette(element)).toThrow(MapPaletteError);
   });
 
-  it.each(["red", "#fff", "#12345", "rgb(1,2,3)", "#gggggg"])("refuses the malformed value %s", (value) => {
+  it.each([
+    ["#fff", [255, 255, 255, 255]],
+    ["#0Af", [0, 170, 255, 255]],
+    ["red", [255, 0, 0, 255]],
+    ["rgb(1, 2, 3)", [1, 2, 3, 255]],
+  ])("accepts %s, as the minified stylesheet of a build may write it", (value, expected) => {
     const element = document.createElement("div");
     document.body.appendChild(element);
     paint(element, undefined, { "--color-text": value });
-    expect(() => readMapPalette(element)).toThrow(MapPaletteError);
+    expect(readMapPalette(element, resolve).text).toEqual(expected);
+  });
+
+  it.each(["#12345", "#gggggg", "not-a-colour", "rgb(1 2 3 / 50%)"])("refuses the malformed or translucent value %s", (value) => {
+    const element = document.createElement("div");
+    document.body.appendChild(element);
+    paint(element, undefined, { "--color-text": value });
+    expect(() => readMapPalette(element, resolve)).toThrow(MapPaletteError);
   });
 });

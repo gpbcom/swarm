@@ -3,6 +3,8 @@ import * as maplibregl from "maplibre-gl";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore The stylesheet has no type declaration unless the host adds vite/client, and the bundler resolves it.
 import "maplibre-gl/dist/maplibre-gl.css";
+// The worker file as an asset of the build: MapLibre looks for it beside its own module, where no bundler puts it.
+import mapLibreWorkerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?url";
 import { useEffect, useRef, useState } from "react";
 import type { ReactElement } from "react";
 
@@ -54,6 +56,7 @@ const SCHEME_QUERY = "(prefers-color-scheme: dark)";
 
 /** The MapLibre map with the deck.gl overlay of the Drones, created over a container. */
 export function createMapLibreHandle(options: CreateMapOptions): MapHandle {
+  maplibregl.setWorkerUrl(mapLibreWorkerUrl);
   registerPmtilesProtocol(maplibregl);
   const map = new maplibregl.Map({
     container: options.container,
@@ -61,7 +64,8 @@ export function createMapLibreHandle(options: CreateMapOptions): MapHandle {
     center: START_CENTER,
     zoom: START_ZOOM,
   });
-  const overlay = new MapboxOverlay({ interleaved: true, layers: [] });
+  // Overlaid, not interleaved: deck.gl 9.4 interleaved reads the private map.transform, which MapLibre 6 removed.
+  const overlay = new MapboxOverlay({ interleaved: false, layers: [] });
   map.addControl(overlay);
   return {
     setLayers: (layers) => {

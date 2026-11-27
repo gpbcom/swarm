@@ -9,6 +9,7 @@ import { DEFAULT_APP_CONFIG } from '../../src/config/app-config';
 import type { AppConfig } from '../../src/config/app-config';
 import { FlightView } from '../../src/flight/FlightView';
 import { FakeLiveClient, FakeSquadMapModule, MAP_LABEL, MISSION_ID, aSnapshot } from './fakes';
+import type { FakeMapModule } from './fakes';
 
 interface AView {
   client: FakeLiveClient;
@@ -137,6 +138,39 @@ describe('flight view', () => {
     });
     await new Promise((done) => setTimeout(done, 1300));
     expect(posted).toEqual([]);
+  });
+
+  it('keeps the flight map section and its Drone count when the map fails', async () => {
+    const client = new FakeLiveClient();
+    const failingMap = (): Promise<FakeMapModule> =>
+      Promise.resolve({
+        SquadMap: (): ReactElement => {
+          throw new Error('The map could not be built.');
+        },
+      });
+    const realError = console.error;
+    console.error = (): void => undefined;
+    try {
+      const result = render(
+        <FlightView
+          config={{ ...DEFAULT_APP_CONFIG, missionId: MISSION_ID }}
+          createLiveClient={() => client}
+          loadMap={failingMap}
+        />,
+      );
+      await waitFor(() => {
+        expect(result.container.querySelector('section.flight-map')).not.toBeNull();
+      });
+      act(() => {
+        client.pushSnapshot(aSnapshot(10));
+      });
+      await waitFor(() => {
+        expect(result.container.querySelector('section.flight-map')?.getAttribute('data-drone-count')).toBe('10');
+      });
+      expect(screen.queryByRole('region', { name: MAP_LABEL })).toBeNull();
+    } finally {
+      console.error = realError;
+    }
   });
 
   it('closes the live client when it unmounts', async () => {

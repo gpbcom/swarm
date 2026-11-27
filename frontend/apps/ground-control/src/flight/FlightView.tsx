@@ -7,6 +7,7 @@ import type { SquadSnapshot } from '@swarm/live';
 import '@swarm/maps/styles.css';
 
 import type { AppConfig } from '../config/app-config';
+import { MapErrorBoundary } from './MapErrorBoundary';
 import { SquadFeed } from './squad-feed';
 import type { LiveClientLike } from './squad-feed';
 import './flight-view.css';
@@ -109,16 +110,18 @@ export function FlightView({
 
   return (
     <section className="flight-map" data-drone-count={droneCount}>
-      <Suspense fallback={null}>
-        <SquadMapView
-          tilesUrl={tilesUrl}
-          label={intl.formatMessage({ id: 'flight.map.label' })}
-          source={feed}
-          onDrawn={(data, drawnAtMs) => {
-            feed.drawn(data, drawnAtMs);
-          }}
-        />
-      </Suspense>
+      <MapErrorBoundary>
+        <Suspense fallback={null}>
+          <SquadMapView
+            tilesUrl={tilesUrl}
+            label={intl.formatMessage({ id: 'flight.map.label' })}
+            source={feed}
+            onDrawn={(data, drawnAtMs) => {
+              feed.drawn(data, drawnAtMs);
+            }}
+          />
+        </Suspense>
+      </MapErrorBoundary>
     </section>
   );
 }
